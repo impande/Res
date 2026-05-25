@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Resume Maker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 30px 16px;
+    }
+
+    .card {
+      background: #fff;
+      max-width: 680px;
+      margin: auto;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      padding: 32px 28px 24px;
+      text-align: center;
+    }
+
+    .card-header h1 { font-size: 2rem; letter-spacing: -0.5px; }
+    .card-header p  { opacity: 0.85; margin-top: 6px; font-size: 0.95rem; }
+
+    .card-body { padding: 28px; }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #374151;
+      margin-bottom: 5px;
+      margin-top: 16px;
+    }
+    label:first-child { margin-top: 0; }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #111;
+      background: #f9fafb;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #2563eb;
+      background: #fff;
+    }
+
+    .api-note {
+      font-size: 0.78rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin-top: 24px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+
+    button:hover { opacity: 0.92; }
+    button:active { transform: scale(0.99); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .output-section {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .output-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .output-label span {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    .copy-btn {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0;
+      width: auto;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: #e5e7eb; }
+
+    .output {
+      background: #f8faff;
+      border: 1.5px solid #dbeafe;
+      padding: 16px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #1e293b;
+      min-height: 80px;
+    }
+
+    .error {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <h1>AI Resume Builder</h1>
+    <p>Create an ATS-friendly resume in under 2 minutes</p>
+  </div>
+
+  <div class="card-body">
+
+    <label for="apiKey">OpenAI API Key <span class="badge">Required</span></label>
+    <input type="password" id="apiKey" placeholder="sk-proj-...">
+    <p class="api-note">Your key is used only in your browser and never stored or sent anywhere else.</p>
+
+    <label for="role">Job Role</label>
+    <input type="text" id="role" placeholder="e.g. Senior Software Engineer">
+
+    <label for="exp">Your Experience &amp; Skills</label>
+    <textarea id="exp" rows="6" placeholder="Describe your work experience, key skills, technologies, achievements…"></textarea>
+
+    <label for="format">Output Format</label>
+    <select id="format">
+      <option value="bullets">Bullet Points (ATS-friendly)</option>
+      <option value="full">Full Resume Sections</option>
+      <option value="summary">Professional Summary Only</option>
+    </select>
+
+    <button id="generateBtn" onclick="generateResume()">Generate Resume</button>
+
+    <div class="output-section" id="outputSection">
+      <div class="output-label">
+        <span>Generated Output</span>
+        <button class="copy-btn" onclick="copyOutput()">Copy</button>
+      </div>
+      <div class="output" id="result"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  async function generateResume() {
+    const apiKey = document.getElementById("apiKey").value.trim();
+    const role   = document.getElementById("role").value.trim();
+    const exp    = document.getElementById("exp").value.trim();
+    const format = document.getElementById("format").value;
+    const btn    = document.getElementById("generateBtn");
+    const result = document.getElementById("result");
+    const section = document.getElementById("outputSection");
+
+    if (!apiKey) { alert("Please enter your OpenAI API key."); return; }
+    if (!role)   { alert("Please enter a job role."); return; }
+    if (!exp)    { alert("Please describe your experience."); return; }
+
+    const prompts = {
+      bullets: `Create 6-8 strong, ATS-optimised resume bullet points for a ${role} role. Use action verbs and quantify wherever possible. Experience provided:\n\n${exp}`,
+      full:    `Write a complete ATS-friendly resume for a ${role} role including: Professional Summary, Key Skills, Work Experience bullet points, and suggested Education section. Experience provided:\n\n${exp}`,
+      summary: `Write a compelling 3-4 sentence professional summary for a ${role} candidate. Experience provided:\n\n${exp}`
+    };
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Generating…';
+    result.className = "output";
+    result.textContent = "";
+    section.style.display = "block";
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompts[format] }],
+          temperature: 0.7
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || `API error ${response.status}`);
+      }
+
+      result.textContent = data.choices[0].message.content;
+    } catch (err) {
+      result.className = "output error";
+      result.textContent = "Error: " + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = "Generate Resume";
+    }
+  }
+
+  function copyOutput() {
+    const text = document.getElementById("result").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector(".copy-btn");
+      btn.textContent = "Copied!";
+      setTimeout(() => btn.textContent = "Copy", 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
