@@ -265,14 +265,6 @@
     }
     .skill-remove:hover { color: #ef4444; }
 
-    /* API box */
-    .api-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px; margin-bottom: 20px;
-    }
-    .api-note { font-size: 0.78rem; color: var(--muted); margin-top: 7px; }
 
     /* Resume output bar */
     .resume-bar {
@@ -317,11 +309,10 @@
 
     /* Print */
     @media print {
-      #sidebar, .nav-buttons, .api-box { display: none !important; }
+      #sidebar, .nav-buttons { display: none !important; }
       .step-content { display: none !important; }
       #step5 { display: block !important; }
       #step5 .nav-buttons { display: none !important; }
-      #step5 .api-box { display: none !important; }
       .resume-bar { border: none; padding: 0; margin: 0; }
       .resume-bar-actions { display: none !important; }
       #main { padding: 0; max-width: 100%; }
@@ -487,12 +478,6 @@
   <div class="step-content" id="step5">
     <h1 class="step-title">Generate Resume</h1>
     <p class="step-subtitle">AI will craft your resume using the details you've provided</p>
-
-    <div class="api-box">
-      <label class="form-label">OpenAI API Key</label>
-      <input type="password" id="apiKey" placeholder="sk-proj-...">
-      <p class="api-note">Used only in your browser — never stored or sent anywhere else.</p>
-    </div>
 
     <div class="form-group">
       <label class="form-label">Output Format</label>
@@ -711,8 +696,6 @@
   }
 
   async function generateResume() {
-    const apiKey = document.getElementById('apiKey').value.trim();
-    if (!apiKey) { alert('Please enter your OpenAI API key.'); return; }
     const data   = collectData();
     const format = document.getElementById('outputFormat').value;
     const btn    = document.getElementById('generateBtn');
@@ -727,24 +710,20 @@
     output.innerHTML = '<div class="resume-placeholder">Building your resume…</div>';
 
     try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      const res = await fetch('/.netlify/functions/generate', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: buildPrompt(data, format) }],
-          temperature: 0.7
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: buildPrompt(data, format) })
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.message || `API error ${res.status}`);
+      if (!res.ok) throw new Error(json.error || `API error ${res.status}`);
       output.style.alignItems = 'flex-start';
       output.style.justifyContent = 'flex-start';
-      output.textContent = json.choices[0].message.content;
+      output.textContent = json.text;
       status.textContent = 'Resume ready ✓';
     } catch (err) {
       output.innerHTML = `<div style="color:#dc2626;font-family:sans-serif">Error: ${err.message}</div>`;
-      status.textContent = 'Error — check API key';
+      status.textContent = 'Error — try again';
     } finally {
       btn.disabled = false;
       btn.innerHTML = '✦ Generate with AI';
