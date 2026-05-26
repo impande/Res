@@ -19,19 +19,19 @@
     .logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; color: #000; flex-shrink: 0; }
     .logo-text h2 { font-size: 0.95rem; font-weight: 700; color: var(--white); }
     .steps-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
-    .step-item { display: flex; align-items: center; gap: 12px; padding: 10px 13px; border-radius: 10px; cursor: pointer; transition: background 0.15s; color: var(--muted); }
+    .step-item { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border-radius: 10px; cursor: pointer; transition: background 0.15s; color: var(--muted); }
     .step-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
     .step-item.active { background: rgba(245,158,11,0.12); color: var(--text); }
     .step-item.completed { color: var(--text); }
-    .step-num { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--input-border); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 600; flex-shrink: 0; transition: all 0.2s; }
+    .step-num { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--input-border); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 600; flex-shrink: 0; transition: all 0.2s; }
     .step-item.active .step-num { background: var(--accent); border-color: var(--accent); color: #000; }
     .step-item.completed .step-num { background: #166534; border-color: #166534; color: white; font-size: 0; }
-    .step-item.completed .step-num::after { content: '✓'; font-size: 0.78rem; }
-    .step-label { font-size: 0.88rem; font-weight: 500; }
-    .preview-section { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); }
-    .preview-label { font-size: 0.66rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .preview-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 0.76rem; color: var(--muted); min-height: 90px; line-height: 1.6; white-space: pre-wrap; }
-    .restart-tour-btn { margin-top: 14px; width: 100%; padding: 9px; background: transparent; border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; color: var(--accent); font-size: 0.78rem; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .step-item.completed .step-num::after { content: '✓'; font-size: 0.72rem; }
+    .step-label { font-size: 0.84rem; font-weight: 500; }
+    .preview-section { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+    .preview-label { font-size: 0.65rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .preview-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 0.75rem; color: var(--muted); min-height: 80px; line-height: 1.6; white-space: pre-wrap; }
+    .restart-tour-btn { margin-top: 12px; width: 100%; padding: 8px; background: transparent; border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; color: var(--accent); font-size: 0.76rem; font-family: inherit; cursor: pointer; transition: all 0.15s; }
     .restart-tour-btn:hover { background: rgba(245,158,11,0.08); }
 
     /* MAIN */
@@ -43,6 +43,7 @@
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 2px; }
     .form-group { margin-bottom: 14px; }
     .form-label { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
     input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea, select {
       width: 100%; padding: 11px 13px; background: var(--input-bg); border: 1.5px solid var(--input-border);
       border-radius: 8px; color: var(--text); font-size: 0.93rem; font-family: inherit; transition: border-color 0.2s;
@@ -59,14 +60,11 @@
       border-radius: 14px; padding: 18px 20px; width: 280px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.6);
     }
-    #tourTooltip::before {
-      content: ''; position: absolute; width: 0; height: 0;
-      border: 8px solid transparent;
-    }
-    #tourTooltip.arrow-left::before { border-right-color: rgba(245,158,11,0.35); left: -16px; top: 18px; }
-    #tourTooltip.arrow-right::before { border-left-color: rgba(245,158,11,0.35); right: -16px; top: 18px; }
-    #tourTooltip.arrow-top::before { border-bottom-color: rgba(245,158,11,0.35); top: -16px; left: 20px; }
-    #tourTooltip.arrow-bottom::before { border-top-color: rgba(245,158,11,0.35); bottom: -16px; left: 20px; }
+    #tourTooltip::before { content: ''; position: absolute; width: 0; height: 0; border: 8px solid transparent; }
+    #tourTooltip.arrow-left::before  { border-right-color:  rgba(245,158,11,0.4); left: -16px;  top: 18px; }
+    #tourTooltip.arrow-right::before { border-left-color:   rgba(245,158,11,0.4); right: -16px; top: 18px; }
+    #tourTooltip.arrow-top::before   { border-bottom-color: rgba(245,158,11,0.4); top: -16px;   left: 20px; }
+    #tourTooltip.arrow-bottom::before{ border-top-color:    rgba(245,158,11,0.4); bottom: -16px;left: 20px; }
     .tt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .tt-label { font-size: 0.8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
     .tt-progress { font-size: 0.7rem; color: var(--muted); background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 10px; }
@@ -76,7 +74,7 @@
     .tt-skip:hover { border-color: #555; color: var(--text); }
     .tt-next { flex: 2; padding: 9px; background: var(--accent); border: none; border-radius: 7px; color: #000; font-size: 0.82rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: opacity 0.15s; }
     .tt-next:hover { opacity: 0.88; }
-    .tour-highlight { position: relative; z-index: 201; border-radius: 9px; box-shadow: 0 0 0 3px var(--accent), 0 0 18px rgba(245,158,11,0.4) !important; animation: tourPulse 1.8s ease-in-out infinite; }
+    .tour-highlight { position: relative !important; z-index: 201 !important; border-radius: 9px; box-shadow: 0 0 0 3px var(--accent), 0 0 18px rgba(245,158,11,0.4) !important; animation: tourPulse 1.8s ease-in-out infinite; }
     @keyframes tourPulse {
       0%,100% { box-shadow: 0 0 0 3px var(--accent), 0 0 14px rgba(245,158,11,0.3) !important; }
       50%      { box-shadow: 0 0 0 4px var(--accent), 0 0 22px rgba(245,158,11,0.55) !important; }
@@ -91,11 +89,11 @@
     .phone-link:hover { text-decoration: underline; }
 
     /* BUTTONS */
-    .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--white); color: #000; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
+    .btn-primary   { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--white); color: #000; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
     .btn-primary:hover { opacity: 0.85; }
     .btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: transparent; color: var(--text); font-size: 0.9rem; font-weight: 600; border: 1.5px solid var(--input-border); border-radius: 8px; cursor: pointer; transition: all 0.15s; font-family: inherit; }
     .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-accent { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--accent); color: #000; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
+    .btn-accent    { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--accent); color: #000; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
     .btn-accent:hover { opacity: 0.88; }
     .btn-accent:disabled { opacity: 0.5; cursor: not-allowed; }
     .nav-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
@@ -125,21 +123,23 @@
     .tpl-name { font-size: 0.8rem; font-weight: 700; color: var(--text); }
     .tpl-desc { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
     .tb { border-radius: 2px; }
-    .tb-dark { background: #1a1a2e; height: 17px; }
-    .tb-accent { background: #f59e0b; height: 4px; width: 35%; }
-    .tb-line { background: #eee; height: 4px; }
+    .tb-dark  { background: #1a1a2e; height: 17px; }
+    .tb-accent{ background: #f59e0b; height: 4px; width: 35%; }
+    .tb-line  { background: #eee; height: 4px; }
     .tb-short { width: 60%; }
     .tb-title { background: #111; height: 7px; width: 45%; align-self: center; }
-    .tb-div { background: #ccc; height: 1px; }
-    .tb-thin { background: #eee; height: 3px; }
-    .tb-xshort { width: 40%; }
+    .tb-div   { background: #ccc; height: 1px; }
+    .tb-thin  { background: #eee; height: 3px; }
+    .tb-xshort{ width: 40%; }
 
     /* RESUME BAR */
     .resume-bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-top: 1px solid var(--border); margin-top: 28px; flex-wrap: wrap; gap: 12px; }
     .resume-bar-left h3 { font-size: 1.5rem; font-weight: 700; color: var(--white); }
-    .resume-bar-left p { font-size: 0.83rem; color: var(--muted); margin-top: 2px; }
+    .resume-bar-left p  { font-size: 0.83rem; color: var(--muted); margin-top: 2px; }
+    .edit-badge { display: none; font-size: 0.72rem; color: var(--accent); border: 1px solid rgba(245,158,11,0.3); border-radius: 6px; padding: 2px 8px; margin-top: 4px; }
     .resume-bar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .resume-output-card { background: var(--white); color: #111; border-radius: 12px; padding: 36px; min-height: 200px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; margin-top: 14px; margin-bottom: 36px; }
+    .resume-output-card [contenteditable]:focus { outline: 2px dashed rgba(245,158,11,0.35); outline-offset: 4px; border-radius: 4px; }
     .resume-placeholder { text-align: center; color: #aaa; font-family: 'Segoe UI', system-ui, sans-serif; }
     .resume-placeholder strong { color: #555; }
 
@@ -149,38 +149,30 @@
     /* MOBILE */
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      #sidebar {
-        width: 100%; height: auto; position: sticky; top: 0; z-index: 50;
-        padding: 12px 16px; flex-direction: row; align-items: center;
-        border-right: none; border-bottom: 1px solid var(--border);
-        overflow-x: auto; overflow-y: visible; gap: 12px;
-      }
+      #sidebar { width: 100%; height: auto; position: sticky; top: 0; z-index: 50; padding: 10px 14px; flex-direction: row; align-items: center; border-right: none; border-bottom: 1px solid var(--border); overflow-x: auto; overflow-y: visible; gap: 10px; }
       .logo { padding-bottom: 0; border-bottom: none; margin-bottom: 0; flex-shrink: 0; }
       .logo-text { display: none; }
-      .steps-list { flex-direction: row; flex-wrap: nowrap; gap: 4px; flex: 1; }
-      .step-item { padding: 8px 10px; border-radius: 8px; flex-shrink: 0; }
-      .step-label { font-size: 0.78rem; }
-      .preview-section { display: none; }
-      .restart-tour-btn { display: none; }
+      .steps-list { flex-direction: row; flex-wrap: nowrap; gap: 3px; flex: 1; }
+      .step-item { padding: 7px 9px; border-radius: 8px; flex-shrink: 0; }
+      .step-label { font-size: 0.75rem; }
+      .preview-section, .restart-tour-btn { display: none; }
       #main { padding: 20px 16px 28px; max-width: 100%; }
       .step-title { font-size: 1.5rem; }
       .step-subtitle { margin-bottom: 20px; }
       .form-grid-2 { grid-template-columns: 1fr; gap: 0; }
       .tpl-picker { gap: 8px; }
-      .tpl-card { padding: 9px; }
       .nav-buttons { flex-wrap: wrap; }
-      .nav-buttons button { flex: 1; min-width: 120px; justify-content: center; }
+      .nav-buttons button { flex: 1; min-width: 110px; justify-content: center; }
       .resume-bar { flex-direction: column; align-items: flex-start; }
       .resume-bar-actions { width: 100%; }
       .resume-bar-actions button { flex: 1; justify-content: center; }
-      .resume-output-card { padding: 20px; }
-      #tourTooltip { width: calc(100vw - 32px); left: 16px !important; right: 16px !important; }
+      .resume-output-card { padding: 18px; }
+      #tourTooltip { width: calc(100vw - 32px) !important; left: 16px !important; right: 16px !important; }
       #tourTooltip.arrow-left::before, #tourTooltip.arrow-right::before { display: none; }
     }
-
     @media (max-width: 480px) {
       .step-label { display: none; }
-      .btn-primary, .btn-secondary, .btn-accent { padding: 12px 16px; font-size: 0.86rem; }
+      .btn-primary, .btn-secondary, .btn-accent { padding: 12px 14px; font-size: 0.85rem; }
     }
   </style>
 
@@ -188,74 +180,91 @@
     /* MODERN */
     .tpl-modern { font-family: 'Segoe UI', system-ui, sans-serif; width: 100%; align-self: flex-start; }
     .tpl-modern .r-head { background: #1a1a2e; color: white; padding: 26px 30px; margin: -36px -36px 22px; border-radius: 8px 8px 0 0; }
-    .tpl-modern .r-name { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; }
+    .tpl-modern .r-name  { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; }
     .tpl-modern .r-title { color: #f59e0b; font-size: 0.95rem; font-weight: 500; margin-top: 3px; }
     .tpl-modern .r-contact { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.77rem; color: #9ca3af; margin-top: 10px; }
-    .tpl-modern .r-sec { margin-top: 18px; }
+    .tpl-modern .r-sec   { margin-top: 18px; }
     .tpl-modern .r-sec-t { font-size: 0.67rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f59e0b; margin-bottom: 9px; }
-    .tpl-modern .r-sum { font-size: 0.875rem; line-height: 1.75; color: #374151; }
-    .tpl-modern .r-exp { margin-bottom: 14px; }
+    .tpl-modern .r-sum   { font-size: 0.875rem; line-height: 1.75; color: #374151; }
+    .tpl-modern .r-exp   { margin-bottom: 14px; }
     .tpl-modern .r-exp-top { display: flex; justify-content: space-between; align-items: baseline; }
-    .tpl-modern .r-role { font-weight: 700; font-size: 0.92rem; color: #111; }
-    .tpl-modern .r-period { font-size: 0.77rem; color: #6b7280; }
-    .tpl-modern .r-co { font-size: 0.82rem; color: #f59e0b; font-weight: 600; margin: 2px 0 6px; }
-    .tpl-modern .r-ul { list-style: none; padding: 0; }
+    .tpl-modern .r-role  { font-weight: 700; font-size: 0.92rem; color: #111; }
+    .tpl-modern .r-period{ font-size: 0.77rem; color: #6b7280; }
+    .tpl-modern .r-co    { font-size: 0.82rem; color: #f59e0b; font-weight: 600; margin: 2px 0 6px; }
+    .tpl-modern .r-ul    { list-style: none; padding: 0; }
     .tpl-modern .r-ul li { padding: 2px 0 2px 16px; position: relative; font-size: 0.855rem; line-height: 1.65; color: #374151; }
     .tpl-modern .r-ul li::before { content: '▸'; position: absolute; left: 0; color: #f59e0b; font-size: 0.7rem; top: 5px; }
-    .tpl-modern .r-edu { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .tpl-modern .r-deg { font-weight: 600; font-size: 0.9rem; color: #111; }
-    .tpl-modern .r-sch { font-size: 0.82rem; color: #6b7280; }
-    .tpl-modern .r-yr { font-size: 0.77rem; color: #6b7280; text-align: right; }
-    .tpl-modern .r-skills { display: flex; flex-wrap: wrap; gap: 7px; }
-    .tpl-modern .r-sk { padding: 4px 11px; background: #eff6ff; border-radius: 4px; font-size: 0.77rem; color: #1e40af; font-weight: 500; }
+    .tpl-modern .r-award { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; }
+    .tpl-modern .r-award:last-child { border-bottom: none; }
+    .tpl-modern .r-award-name { font-weight: 700; font-size: 0.9rem; color: #111; }
+    .tpl-modern .r-award-org  { font-size: 0.8rem; color: #f59e0b; font-weight: 500; }
+    .tpl-modern .r-award-desc { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
+    .tpl-modern .r-award-year { font-size: 0.78rem; color: #6b7280; text-align: right; flex-shrink: 0; margin-left: 12px; }
+    .tpl-modern .r-edu   { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .tpl-modern .r-deg   { font-weight: 600; font-size: 0.9rem; color: #111; }
+    .tpl-modern .r-sch   { font-size: 0.82rem; color: #6b7280; }
+    .tpl-modern .r-yr    { font-size: 0.77rem; color: #6b7280; text-align: right; }
+    .tpl-modern .r-skills{ display: flex; flex-wrap: wrap; gap: 7px; }
+    .tpl-modern .r-sk    { padding: 4px 11px; background: #eff6ff; border-radius: 4px; font-size: 0.77rem; color: #1e40af; font-weight: 500; }
 
     /* CLASSIC */
     .tpl-classic { font-family: 'Georgia', 'Times New Roman', serif; width: 100%; align-self: flex-start; }
     .tpl-classic .r-head { text-align: center; padding-bottom: 13px; border-bottom: 2.5px solid #111; margin-bottom: 17px; }
-    .tpl-classic .r-name { font-size: 1.85rem; font-weight: 700; letter-spacing: 0.5px; color: #111; }
+    .tpl-classic .r-name  { font-size: 1.85rem; font-weight: 700; letter-spacing: 0.5px; color: #111; }
     .tpl-classic .r-title { font-size: 0.9rem; font-style: italic; color: #555; margin-top: 3px; }
     .tpl-classic .r-contact { font-size: 0.79rem; color: #444; margin-top: 7px; }
     .tpl-classic .r-contact span { margin: 0 5px; }
-    .tpl-classic .r-sec { margin-top: 14px; }
+    .tpl-classic .r-sec   { margin-top: 14px; }
     .tpl-classic .r-sec-t { font-size: 0.79rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 9px; color: #111; }
-    .tpl-classic .r-sum { font-size: 0.875rem; line-height: 1.8; color: #222; }
-    .tpl-classic .r-exp { margin-bottom: 12px; }
+    .tpl-classic .r-sum   { font-size: 0.875rem; line-height: 1.8; color: #222; }
+    .tpl-classic .r-exp   { margin-bottom: 12px; }
     .tpl-classic .r-exp-top { display: flex; justify-content: space-between; }
-    .tpl-classic .r-role { font-weight: 700; font-size: 0.9rem; }
-    .tpl-classic .r-period { font-size: 0.79rem; font-style: italic; color: #555; }
-    .tpl-classic .r-co { font-size: 0.84rem; font-style: italic; color: #333; margin: 2px 0 5px; }
-    .tpl-classic .r-ul { padding-left: 17px; }
+    .tpl-classic .r-role  { font-weight: 700; font-size: 0.9rem; }
+    .tpl-classic .r-period{ font-size: 0.79rem; font-style: italic; color: #555; }
+    .tpl-classic .r-co    { font-size: 0.84rem; font-style: italic; color: #333; margin: 2px 0 5px; }
+    .tpl-classic .r-ul    { padding-left: 17px; }
     .tpl-classic .r-ul li { font-size: 0.875rem; line-height: 1.7; margin-bottom: 2px; color: #222; }
-    .tpl-classic .r-edu { display: flex; justify-content: space-between; margin-bottom: 8px; }
-    .tpl-classic .r-deg { font-weight: 700; font-size: 0.9rem; }
-    .tpl-classic .r-sch { font-size: 0.83rem; font-style: italic; color: #444; }
-    .tpl-classic .r-yr { font-size: 0.81rem; color: #555; }
-    .tpl-classic .r-skills { font-size: 0.875rem; line-height: 1.9; color: #222; }
+    .tpl-classic .r-award { margin-bottom: 9px; }
+    .tpl-classic .r-award-top { display: flex; justify-content: space-between; }
+    .tpl-classic .r-award-name { font-weight: 700; font-size: 0.9rem; }
+    .tpl-classic .r-award-year { font-size: 0.8rem; font-style: italic; color: #555; }
+    .tpl-classic .r-award-org  { font-size: 0.84rem; font-style: italic; color: #333; }
+    .tpl-classic .r-award-desc { font-size: 0.84rem; color: #444; margin-top: 2px; }
+    .tpl-classic .r-edu   { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .tpl-classic .r-deg   { font-weight: 700; font-size: 0.9rem; }
+    .tpl-classic .r-sch   { font-size: 0.83rem; font-style: italic; color: #444; }
+    .tpl-classic .r-yr    { font-size: 0.81rem; color: #555; }
+    .tpl-classic .r-skills{ font-size: 0.875rem; line-height: 1.9; color: #222; }
 
     /* MINIMAL */
     .tpl-minimal { font-family: 'Segoe UI', system-ui, sans-serif; width: 100%; align-self: flex-start; }
-    .tpl-minimal .r-head { margin-bottom: 20px; }
-    .tpl-minimal .r-name { font-size: 1.95rem; font-weight: 300; letter-spacing: -1px; color: #000; }
+    .tpl-minimal .r-head  { margin-bottom: 20px; }
+    .tpl-minimal .r-name  { font-size: 1.95rem; font-weight: 300; letter-spacing: -1px; color: #000; }
     .tpl-minimal .r-title { font-size: 0.9rem; color: #777; margin-top: 2px; }
     .tpl-minimal .r-contact { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.77rem; color: #999; margin-top: 8px; }
-    .tpl-minimal .r-div { height: 1px; background: #ebebeb; margin: 13px 0; }
-    .tpl-minimal .r-sec { margin-top: 16px; }
+    .tpl-minimal .r-div   { height: 1px; background: #ebebeb; margin: 13px 0; }
+    .tpl-minimal .r-sec   { margin-top: 16px; }
     .tpl-minimal .r-sec-t { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; color: #bbb; margin-bottom: 11px; }
-    .tpl-minimal .r-sum { font-size: 0.875rem; line-height: 1.8; color: #444; }
-    .tpl-minimal .r-exp { margin-bottom: 15px; }
+    .tpl-minimal .r-sum   { font-size: 0.875rem; line-height: 1.8; color: #444; }
+    .tpl-minimal .r-exp   { margin-bottom: 15px; }
     .tpl-minimal .r-exp-top { display: flex; justify-content: space-between; align-items: baseline; }
-    .tpl-minimal .r-role { font-weight: 600; font-size: 0.9rem; color: #111; }
-    .tpl-minimal .r-period { font-size: 0.76rem; color: #aaa; }
-    .tpl-minimal .r-co { font-size: 0.81rem; color: #999; margin: 2px 0 7px; }
-    .tpl-minimal .r-ul { list-style: none; padding: 0; }
+    .tpl-minimal .r-role  { font-weight: 600; font-size: 0.9rem; color: #111; }
+    .tpl-minimal .r-period{ font-size: 0.76rem; color: #aaa; }
+    .tpl-minimal .r-co    { font-size: 0.81rem; color: #999; margin: 2px 0 7px; }
+    .tpl-minimal .r-ul    { list-style: none; padding: 0; }
     .tpl-minimal .r-ul li { padding: 2px 0 2px 13px; position: relative; font-size: 0.855rem; line-height: 1.65; color: #444; }
     .tpl-minimal .r-ul li::before { content: '—'; position: absolute; left: 0; color: #ccc; }
-    .tpl-minimal .r-edu { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .tpl-minimal .r-deg { font-weight: 500; font-size: 0.9rem; color: #111; }
-    .tpl-minimal .r-sch { font-size: 0.81rem; color: #777; }
-    .tpl-minimal .r-yr { font-size: 0.77rem; color: #aaa; text-align: right; }
-    .tpl-minimal .r-skills { display: flex; flex-wrap: wrap; gap: 7px; }
-    .tpl-minimal .r-sk { padding: 3px 10px; border: 1px solid #e0e0e0; border-radius: 2px; font-size: 0.77rem; color: #555; }
+    .tpl-minimal .r-award { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .tpl-minimal .r-award-left .r-award-name { font-weight: 600; font-size: 0.9rem; color: #111; }
+    .tpl-minimal .r-award-left .r-award-org  { font-size: 0.8rem; color: #999; }
+    .tpl-minimal .r-award-left .r-award-desc { font-size: 0.82rem; color: #666; margin-top: 2px; }
+    .tpl-minimal .r-award-year { font-size: 0.77rem; color: #aaa; flex-shrink: 0; margin-left: 12px; }
+    .tpl-minimal .r-edu   { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .tpl-minimal .r-deg   { font-weight: 500; font-size: 0.9rem; color: #111; }
+    .tpl-minimal .r-sch   { font-size: 0.81rem; color: #777; }
+    .tpl-minimal .r-yr    { font-size: 0.77rem; color: #aaa; text-align: right; }
+    .tpl-minimal .r-skills{ display: flex; flex-wrap: wrap; gap: 7px; }
+    .tpl-minimal .r-sk    { padding: 3px 10px; border: 1px solid #e0e0e0; border-radius: 2px; font-size: 0.77rem; color: #555; }
   </style>
 </head>
 <body>
@@ -268,9 +277,10 @@
   <ul class="steps-list">
     <li class="step-item active" data-step="1" onclick="goToStep(1)"><div class="step-num"><span>1</span></div><span class="step-label">Basic Info</span></li>
     <li class="step-item" data-step="2" onclick="goToStep(2)"><div class="step-num"><span>2</span></div><span class="step-label">Experience</span></li>
-    <li class="step-item" data-step="3" onclick="goToStep(3)"><div class="step-num"><span>3</span></div><span class="step-label">Education</span></li>
-    <li class="step-item" data-step="4" onclick="goToStep(4)"><div class="step-num"><span>4</span></div><span class="step-label">Skills</span></li>
-    <li class="step-item" data-step="5" onclick="goToStep(5)"><div class="step-num"><span>5</span></div><span class="step-label">Generate</span></li>
+    <li class="step-item" data-step="3" onclick="goToStep(3)"><div class="step-num"><span>3</span></div><span class="step-label">Awards</span></li>
+    <li class="step-item" data-step="4" onclick="goToStep(4)"><div class="step-num"><span>4</span></div><span class="step-label">Education</span></li>
+    <li class="step-item" data-step="5" onclick="goToStep(5)"><div class="step-num"><span>5</span></div><span class="step-label">Skills</span></li>
+    <li class="step-item" data-step="6" onclick="goToStep(6)"><div class="step-num"><span>6</span></div><span class="step-label">Generate</span></li>
   </ul>
   <div class="preview-section">
     <div class="preview-label">Live Preview</div>
@@ -281,23 +291,23 @@
 
 <main id="main">
 
-  <!-- Step 1 -->
+  <!-- Step 1: Basic Info -->
   <div class="step-content active" id="step1">
     <h1 class="step-title">Personal Information</h1>
     <p class="step-subtitle">Let's start with who you are</p>
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">First Name</label>
-        <input type="text" id="firstName" placeholder="Alexandra" oninput="updatePreview()">
+        <input type="text" id="firstName" placeholder="e.g. Alexandra" oninput="updatePreview()">
       </div>
       <div class="form-group">
         <label class="form-label">Last Name</label>
-        <input type="text" id="lastName" placeholder="Chen" oninput="updatePreview()">
+        <input type="text" id="lastName" placeholder="e.g. Chen" oninput="updatePreview()">
       </div>
     </div>
     <div class="form-group">
       <label class="form-label">Professional Title</label>
-      <input type="text" id="jobTitle" placeholder="Senior Product Designer" oninput="updatePreview()">
+      <input type="text" id="jobTitle" placeholder="e.g. Senior Software Engineer" oninput="updatePreview()">
       <div class="chips">
         <button class="chip" onclick="setTitle(this,'Software Engineer')">Software Engineer</button>
         <button class="chip" onclick="setTitle(this,'Product Manager')">Product Manager</button>
@@ -310,22 +320,22 @@
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="email" id="email" placeholder="alex@example.com" oninput="updatePreview()">
+        <input type="email" id="email" placeholder="e.g. alex@gmail.com" oninput="updatePreview()">
       </div>
       <div class="form-group">
         <label class="form-label">Phone</label>
-        <input type="tel" id="phone" placeholder="+91 98765 43210" oninput="updatePhoneLink()">
+        <input type="tel" id="phone" placeholder="e.g. +91 98765 43210" oninput="updatePhoneLink()">
         <a href="#" id="phoneLink" class="phone-link">📞 Tap to Call</a>
       </div>
     </div>
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Location</label>
-        <input type="text" id="location" placeholder="Mumbai, India" oninput="updatePreview()">
+        <input type="text" id="location" placeholder="e.g. Mumbai, India" oninput="updatePreview()">
       </div>
       <div class="form-group">
         <label class="form-label">LinkedIn / Portfolio URL</label>
-        <input type="url" id="linkedin" placeholder="linkedin.com/in/yourname" oninput="updatePreview()">
+        <input type="url" id="linkedin" placeholder="e.g. linkedin.com/in/yourname" oninput="updatePreview()">
       </div>
     </div>
     <div class="nav-buttons">
@@ -333,7 +343,7 @@
     </div>
   </div>
 
-  <!-- Step 2 -->
+  <!-- Step 2: Work Experience -->
   <div class="step-content" id="step2">
     <h1 class="step-title">Work Experience</h1>
     <p class="step-subtitle">Add your most recent roles first</p>
@@ -341,24 +351,36 @@
     <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
-      <button class="btn-primary" onclick="goToStep(3)">Next: Education →</button>
+      <button class="btn-primary" onclick="goToStep(3)">Next: Awards →</button>
     </div>
   </div>
 
-  <!-- Step 3 -->
+  <!-- Step 3: Awards & Achievements -->
   <div class="step-content" id="step3">
+    <h1 class="step-title">Awards &amp; Achievements</h1>
+    <p class="step-subtitle">Certifications, honours, recognitions — anything that sets you apart</p>
+    <div id="awardEntries"></div>
+    <button class="add-entry-btn" onclick="addAward()">+ Add Award / Achievement</button>
+    <div class="nav-buttons">
+      <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
+      <button class="btn-primary" onclick="goToStep(4)">Next: Education →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Education -->
+  <div class="step-content" id="step4">
     <h1 class="step-title">Education</h1>
     <p class="step-subtitle">Your academic background</p>
     <div id="educationEntries"></div>
     <button class="add-entry-btn" onclick="addEducation()">+ Add Education</button>
     <div class="nav-buttons">
-      <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
-      <button class="btn-primary" onclick="goToStep(4)">Next: Skills →</button>
+      <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
+      <button class="btn-primary" onclick="goToStep(5)">Next: Skills →</button>
     </div>
   </div>
 
-  <!-- Step 4 -->
-  <div class="step-content" id="step4">
+  <!-- Step 5: Skills -->
+  <div class="step-content" id="step5">
     <h1 class="step-title">Skills</h1>
     <p class="step-subtitle">Add your key technical and soft skills</p>
     <div class="skill-input-row">
@@ -368,13 +390,13 @@
     </div>
     <div class="skill-tags" id="skillTags"></div>
     <div class="nav-buttons">
-      <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
-      <button class="btn-primary" onclick="goToStep(5)">Next: Generate →</button>
+      <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
+      <button class="btn-primary" onclick="goToStep(6)">Next: Generate →</button>
     </div>
   </div>
 
-  <!-- Step 5 -->
-  <div class="step-content" id="step5">
+  <!-- Step 6: Generate -->
+  <div class="step-content" id="step6">
     <h1 class="step-title">Generate Resume</h1>
     <p class="step-subtitle">AI will craft your resume using the details you've provided</p>
 
@@ -430,7 +452,7 @@
     </div>
 
     <div class="nav-buttons">
-      <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
+      <button class="btn-secondary" onclick="goToStep(5)">← Back</button>
       <button class="btn-accent" id="generateBtn" onclick="generateResume()">✦ Generate with AI</button>
     </div>
 
@@ -438,6 +460,7 @@
       <div class="resume-bar-left">
         <h3>Your Resume</h3>
         <p id="resumeStatus">Ready to generate</p>
+        <span class="edit-badge" id="editBadge">✎ Click resume to edit directly</span>
       </div>
       <div class="resume-bar-actions">
         <button class="btn-secondary" id="copyBtn" onclick="copyResume()">☐ Copy</button>
@@ -452,14 +475,14 @@
 
 </main>
 
-<!-- TOUR OVERLAY (outside #main so it's not clipped) -->
+<!-- TOUR OVERLAY -->
 <div id="tourBackdrop" onclick="skipTour()"></div>
 <div id="tourTooltip">
   <div class="tt-header">
-    <span class="tt-label" id="ttLabel">Field Name</span>
-    <span class="tt-progress" id="ttProgress">1 of 17</span>
+    <span class="tt-label" id="ttLabel">Field</span>
+    <span class="tt-progress" id="ttProgress">1 of 21</span>
   </div>
-  <p class="tt-text" id="ttText">Tip text here.</p>
+  <p class="tt-text" id="ttText">Tip text.</p>
   <div class="tt-buttons">
     <button class="tt-skip" onclick="skipTour()">Skip Tour</button>
     <button class="tt-next" id="ttNextBtn" onclick="nextTourStep()">Next →</button>
@@ -468,32 +491,36 @@
 
 <script>
   let skills = [];
-  let expCount = 0;
-  let eduCount = 0;
+  let expCount = 0, awardCount = 0, eduCount = 0;
   let currentTemplate = 'modern';
   let lastResumeData = null;
-  let tourIdx = -1;
-  let tourSteps = [];
+  let manuallyEdited = false;
+  let tourIdx = -1, tourSteps = [];
 
+  /* ─── TOUR ─────────────────────────────────────────────── */
   function buildTourSteps() {
     return [
-      { uiStep: 1, selector: '#firstName',    label: 'First Name',          text: 'Enter your legal first name as it appears on official documents. Recruiters will use this to address you directly.' },
-      { uiStep: 1, selector: '#lastName',     label: 'Last Name',           text: 'Your family name or surname. Together with your first name, this forms the header of your resume.' },
-      { uiStep: 1, selector: '#jobTitle',     label: 'Professional Title',  text: 'Your current or target job title. Be specific — "Senior Product Manager" beats "Manager". This is the first thing recruiters read.' },
-      { uiStep: 1, selector: '#email',        label: 'Email Address',       text: 'Use a professional email. Best format: firstname.lastname@gmail.com. Avoid nicknames, numbers, or old college emails.' },
-      { uiStep: 1, selector: '#phone',        label: 'Phone Number',        text: 'Include country code for international roles. E.g. +91 98765 43210 for India. Add your WhatsApp number if applying globally.' },
-      { uiStep: 1, selector: '#location',     label: 'Location',            text: 'City and Country only — never include full street address on a resume for privacy. E.g. "Bangalore, India".' },
-      { uiStep: 1, selector: '#linkedin',     label: 'LinkedIn / Portfolio', text: 'Your LinkedIn URL or personal portfolio. Customise your LinkedIn URL at linkedin.com/in/yourname for a cleaner look.' },
-      { uiStep: 2, selector: '.exp-role',     label: 'Job Title',           text: 'Your official job title exactly as it appeared on your contract — used for ATS keyword matching. Don\'t abbreviate.' },
-      { uiStep: 2, selector: '.exp-company',  label: 'Company Name',        text: 'Full legal company name. If the company was acquired or rebranded, use the name from when you worked there.' },
-      { uiStep: 2, selector: '.exp-start',    label: 'Start Date',          text: 'Use Month + Year: e.g. "Jan 2022". Avoid year-only — it looks vague. Recruiters check for employment gaps.' },
-      { uiStep: 2, selector: '.exp-end',      label: 'End Date',            text: 'Type "Present" if this is your current role. Be accurate — background checks verify employment history.' },
-      { uiStep: 2, selector: '.exp-desc',     label: 'Key Achievements',    text: 'Most impactful field! Use the formula: Action Verb + What You Did + Result with Numbers. E.g. "Led 6-member team to launch payment feature, cutting checkout drop-off by 22%."' },
-      { uiStep: 3, selector: '.edu-degree',   label: 'Degree',              text: 'Your degree type and field. E.g. "B.Tech in Computer Science", "MBA in Finance". Include honours if applicable.' },
-      { uiStep: 3, selector: '.edu-school',   label: 'Institution',         text: 'Full official university name — write "Indian Institute of Technology, Bombay" not just "IIT". ATS systems match full names.' },
-      { uiStep: 3, selector: '.edu-year',     label: 'Graduation Year',     text: 'Year you graduated. For ongoing education write "Expected May 2025". This helps recruiters gauge your seniority.' },
-      { uiStep: 3, selector: '.edu-gpa',      label: 'GPA / Grades',        text: 'Optional but helpful if strong. Include the scale: "3.8/4.0" or "8.7/10 CGPA". Skip if below 3.0/4.0 or 7.0/10.' },
-      { uiStep: 4, selector: '#skillInput',   label: 'Skills',              text: 'Add 8–15 skills for the best ATS score. Mix technical skills (Python, React, SQL) with soft skills (Leadership, Agile). Press Enter to add each one.' },
+      { s:1, sel:'#firstName',   lab:'First Name',           txt:'Type your legal first name. Recruiters will address you by this — make sure it\'s what you prefer professionally.' },
+      { s:1, sel:'#lastName',    lab:'Last Name',            txt:'Your family / surname. Together with your first name, this becomes the header of your resume.' },
+      { s:1, sel:'#jobTitle',    lab:'Professional Title',   txt:'Your current or target job title. Be specific — "Senior Data Scientist" is better than "Data Scientist". Recruiters read this first.' },
+      { s:1, sel:'#email',       lab:'Email Address',        txt:'Use a professional email. Ideal format: firstname.lastname@gmail.com. Avoid nicknames, numbers, or old college IDs.' },
+      { s:1, sel:'#phone',       lab:'Phone Number',         txt:'Include country code. E.g. +91 98765 43210 (India). This is how recruiters call you — double-check it.' },
+      { s:1, sel:'#location',    lab:'Location',             txt:'City and Country only — never write full street address on a resume. E.g. "Pune, India".' },
+      { s:1, sel:'#linkedin',    lab:'LinkedIn / Portfolio', txt:'Your LinkedIn profile URL. Tip: customise your URL at linkedin.com/in/yourname — it looks much cleaner.' },
+      { s:2, sel:'.exp-role',    lab:'Job Title',            txt:'Your official job title exactly as it was on your contract — ATS systems keyword-match this.' },
+      { s:2, sel:'.exp-company', lab:'Company Name',         txt:'Full legal company name. If acquired or rebranded, use the name from your tenure, then add "(now XYZ)".' },
+      { s:2, sel:'.exp-start',   lab:'Start Date',           txt:'Use Month + Year: e.g. "Jan 2022". Avoid year-only — it looks vague and raises red flags for recruiters.' },
+      { s:2, sel:'.exp-end',     lab:'End Date',             txt:'Type "Present" for your current role. Be accurate — background checks verify employment history.' },
+      { s:2, sel:'.exp-desc',    lab:'Key Achievements',     txt:'This is the MOST impactful field. Formula: Action Verb + What + Result with Numbers. E.g. "Led 8-member team to launch payments feature, reducing drop-off by 22%."' },
+      { s:3, sel:'.award-name',  lab:'Award Name',           txt:'Name of the award, certification, or recognition. E.g. "Employee of the Year", "AWS Certified Solutions Architect", "Best Innovator".' },
+      { s:3, sel:'.award-org',   lab:'Issuing Organisation', txt:'The company, institution, or body that gave you this award. E.g. "Bajaj Finserv", "Coursera", "Forbes".' },
+      { s:3, sel:'.award-year',  lab:'Year',                 txt:'Year you received this award. If it\'s a certification, use the issue year or add expiry: "2023 (expires 2026)".' },
+      { s:3, sel:'.award-desc',  lab:'Brief Description',    txt:'1–2 lines on why you won it or what it represents. E.g. "Recognised for exceeding revenue targets by 40% in Q3 2023." Optional but powerful.' },
+      { s:4, sel:'.edu-degree',  lab:'Degree',               txt:'Your degree type and field. E.g. "B.Tech in Computer Science", "MBA in Finance", "B.Com (Honours)".' },
+      { s:4, sel:'.edu-school',  lab:'Institution',          txt:'Full official university name. Write "Indian Institute of Technology, Bombay" not just "IIT" — ATS matches full names.' },
+      { s:4, sel:'.edu-year',    lab:'Graduation Year',      txt:'Year you graduated. For ongoing education write "Expected May 2025".' },
+      { s:4, sel:'.edu-gpa',     lab:'GPA / Grades',         txt:'Optional but worth adding if strong. Include scale: "3.8/4.0" or "8.7/10 CGPA". Skip if below 3.0/4.0 or 7.0/10.' },
+      { s:5, sel:'#skillInput',  lab:'Skills',               txt:'Add 8–15 skills for best ATS score. Mix technical (Python, SQL, React) with soft skills (Leadership, Agile, Communication). Press Enter to add each.' },
     ];
   }
 
@@ -506,121 +533,85 @@
   function showTourStep() {
     clearTourHighlight();
     if (tourIdx >= tourSteps.length) { endTour(); return; }
-
     const t = tourSteps[tourIdx];
-    const currentUIStep = getCurrentUIStep();
-    if (t.uiStep !== currentUIStep) {
-      goToStep(t.uiStep);
-    }
-
-    // Small delay to let DOM settle after step change
+    const prevUIStep = getCurrentUIStep();
+    if (t.s !== prevUIStep) goToStep(t.s);
     setTimeout(() => {
-      const el = document.querySelector(t.selector);
+      const el = document.querySelector(t.sel);
       if (!el) { tourIdx++; showTourStep(); return; }
-
       el.classList.add('tour-highlight');
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
+      // Focus field so user can type immediately
+      setTimeout(() => { try { el.focus(); if (el.value) el.select(); } catch(e){} }, 120);
       document.getElementById('tourBackdrop').style.display = 'block';
-
-      document.getElementById('ttLabel').textContent = t.label;
-      document.getElementById('ttText').textContent = t.text;
+      document.getElementById('ttLabel').textContent    = t.lab;
+      document.getElementById('ttText').textContent     = t.txt;
       document.getElementById('ttProgress').textContent = `${tourIdx + 1} of ${tourSteps.length}`;
-      document.getElementById('ttNextBtn').textContent = tourIdx === tourSteps.length - 1 ? 'Finish ✓' : 'Next →';
-
+      document.getElementById('ttNextBtn').textContent  = tourIdx === tourSteps.length - 1 ? 'Finish ✓' : 'Next →';
       positionTooltip(el);
       document.getElementById('tourTooltip').style.display = 'block';
-    }, t.uiStep !== getCurrentUIStep() ? 150 : 60);
+    }, t.s !== prevUIStep ? 160 : 60);
   }
 
   function positionTooltip(el) {
     const tt = document.getElementById('tourTooltip');
     tt.className = '';
-
-    // Wait for layout
     requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect();
-      const ttW = 280;
-      const ttH = tt.offsetHeight || 180;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const gap = 14;
-
-      // On mobile (≤768px) always anchor to bottom of viewport
+      const ttW = 280, ttH = tt.offsetHeight || 190;
+      const vw = window.innerWidth, vh = window.innerHeight, gap = 14;
       if (vw <= 768) {
-        tt.style.left = '16px';
-        tt.style.right = '16px';
-        tt.style.width = 'auto';
-        tt.style.top = (vh - ttH - 20) + 'px';
+        tt.style.cssText = `left:16px;right:16px;width:auto;top:${vh - ttH - 20}px;`;
         return;
       }
-
-      tt.style.width = ttW + 'px';
-      tt.style.right = 'auto';
-
-      // Try right side
+      tt.style.width = ttW + 'px'; tt.style.right = 'auto';
       if (rect.right + gap + ttW <= vw - 10) {
-        tt.style.left  = (rect.right + gap) + 'px';
-        tt.style.top   = Math.max(10, Math.min(rect.top, vh - ttH - 10)) + 'px';
+        tt.style.left = (rect.right + gap) + 'px';
+        tt.style.top  = Math.max(10, Math.min(rect.top, vh - ttH - 10)) + 'px';
         tt.classList.add('arrow-left');
-      }
-      // Try left side
-      else if (rect.left - gap - ttW >= 10) {
-        tt.style.left  = (rect.left - gap - ttW) + 'px';
-        tt.style.top   = Math.max(10, Math.min(rect.top, vh - ttH - 10)) + 'px';
+      } else if (rect.left - gap - ttW >= 10) {
+        tt.style.left = (rect.left - gap - ttW) + 'px';
+        tt.style.top  = Math.max(10, Math.min(rect.top, vh - ttH - 10)) + 'px';
         tt.classList.add('arrow-right');
-      }
-      // Below
-      else if (rect.bottom + gap + ttH <= vh - 10) {
-        tt.style.left  = Math.max(10, Math.min(rect.left, vw - ttW - 10)) + 'px';
-        tt.style.top   = (rect.bottom + gap) + 'px';
+      } else if (rect.bottom + gap + ttH <= vh - 10) {
+        tt.style.left = Math.max(10, Math.min(rect.left, vw - ttW - 10)) + 'px';
+        tt.style.top  = (rect.bottom + gap) + 'px';
         tt.classList.add('arrow-top');
-      }
-      // Above
-      else {
-        tt.style.left  = Math.max(10, Math.min(rect.left, vw - ttW - 10)) + 'px';
-        tt.style.top   = Math.max(10, rect.top - gap - ttH) + 'px';
+      } else {
+        tt.style.left = Math.max(10, Math.min(rect.left, vw - ttW - 10)) + 'px';
+        tt.style.top  = Math.max(10, rect.top - gap - ttH) + 'px';
         tt.classList.add('arrow-bottom');
       }
     });
   }
 
-  function nextTourStep() {
-    tourIdx++;
-    showTourStep();
-  }
-
-  function skipTour() {
-    endTour();
-  }
-
+  function nextTourStep() { tourIdx++; showTourStep(); }
+  function skipTour()     { endTour(); }
   function endTour() {
     clearTourHighlight();
     document.getElementById('tourBackdrop').style.display = 'none';
-    document.getElementById('tourTooltip').style.display = 'none';
+    document.getElementById('tourTooltip').style.display  = 'none';
     tourIdx = -1;
   }
-
   function clearTourHighlight() {
     document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
   }
-
   function getCurrentUIStep() {
-    const active = document.querySelector('.step-content.active');
-    return active ? parseInt(active.id.replace('step', '')) : 1;
+    const a = document.querySelector('.step-content.active');
+    return a ? parseInt(a.id.replace('step','')) : 1;
   }
 
+  /* ─── NAVIGATION ────────────────────────────────────────── */
   function goToStep(step) {
     document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
     document.getElementById('step' + step).classList.add('active');
     document.querySelectorAll('.step-item').forEach(el => {
       const s = parseInt(el.dataset.step);
-      el.classList.remove('active', 'completed');
+      el.classList.remove('active','completed');
       if (s === step) el.classList.add('active');
       else if (s < step) el.classList.add('completed');
     });
     updatePreview();
-    // Scroll main to top on step change
     document.getElementById('main').scrollTop = 0;
   }
 
@@ -630,15 +621,13 @@
     btn.classList.add('selected');
     updatePreview();
   }
-
   function updatePhoneLink() {
     const phone = document.getElementById('phone').value.trim();
-    const link = document.getElementById('phoneLink');
-    if (phone) { link.href = 'tel:' + phone.replace(/[^\d+]/g, ''); link.style.display = 'inline-flex'; }
-    else { link.style.display = 'none'; }
+    const link  = document.getElementById('phoneLink');
+    if (phone) { link.href = 'tel:' + phone.replace(/[^\d+]/g,''); link.style.display = 'inline-flex'; }
+    else link.style.display = 'none';
     updatePreview();
   }
-
   function updatePreview() {
     const first = document.getElementById('firstName').value;
     const last  = document.getElementById('lastName').value;
@@ -647,78 +636,82 @@
     const phone = document.getElementById('phone').value;
     const loc   = document.getElementById('location').value;
     let p = '';
-    if (first || last) p += (first + ' ' + last).trim() + '\n';
-    if (title) p += title + '\n';
-    if (email || phone) p += [email, phone].filter(Boolean).join(' · ') + '\n';
-    if (loc)   p += loc + '\n';
-    if (skills.length) p += '\nSkills: ' + skills.join(', ');
+    if (first||last) p += (first+' '+last).trim()+'\n';
+    if (title)  p += title+'\n';
+    if (email||phone) p += [email,phone].filter(Boolean).join(' · ')+'\n';
+    if (loc)    p += loc+'\n';
+    if (skills.length) p += '\nSkills: '+skills.join(', ');
     document.getElementById('livePreview').textContent = p || 'Fill in your details to see a preview...';
   }
 
+  /* ─── ENTRY BUILDERS ────────────────────────────────────── */
   function addExperience() {
     expCount++;
-    const id = 'exp' + expCount;
+    const id = 'exp'+expCount;
     const div = document.createElement('div');
     div.className = 'entry-card'; div.id = id;
     div.innerHTML = `
       <button class="entry-remove" onclick="document.getElementById('${id}').remove()">✕</button>
       <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Job Title</label>
-          <input type="text" placeholder="Senior Engineer" class="exp-role">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Company</label>
-          <input type="text" placeholder="Acme Corp" class="exp-company">
-        </div>
+        <div class="form-group"><label class="form-label">Job Title</label>
+          <input type="text" placeholder="e.g. Senior Engineer" class="exp-role"></div>
+        <div class="form-group"><label class="form-label">Company</label>
+          <input type="text" placeholder="e.g. Bajaj Finserv" class="exp-company"></div>
       </div>
       <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Start Date</label>
-          <input type="text" placeholder="Jan 2022" class="exp-start">
-        </div>
-        <div class="form-group">
-          <label class="form-label">End Date</label>
-          <input type="text" placeholder="Present" class="exp-end">
-        </div>
+        <div class="form-group"><label class="form-label">Start Date</label>
+          <input type="text" placeholder="e.g. Jan 2022" class="exp-start"></div>
+        <div class="form-group"><label class="form-label">End Date</label>
+          <input type="text" placeholder="e.g. Present" class="exp-end"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Key Achievements</label>
-        <textarea rows="3" placeholder="Describe your responsibilities and achievements…" class="exp-desc"></textarea>
-      </div>`;
+      <div class="form-group"><label class="form-label">Key Achievements</label>
+        <textarea rows="3" placeholder="e.g. Led team of 8 to launch payments feature, reducing drop-off by 22%…" class="exp-desc"></textarea></div>`;
     document.getElementById('experienceEntries').appendChild(div);
+  }
+
+  function addAward() {
+    awardCount++;
+    const id = 'aw'+awardCount;
+    const div = document.createElement('div');
+    div.className = 'entry-card'; div.id = id;
+    div.innerHTML = `
+      <button class="entry-remove" onclick="document.getElementById('${id}').remove()">✕</button>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Award / Achievement Name</label>
+          <input type="text" placeholder="e.g. Employee of the Year" class="award-name"></div>
+        <div class="form-group"><label class="form-label">Issuing Organisation</label>
+          <input type="text" placeholder="e.g. Bajaj Finserv" class="award-org"></div>
+      </div>
+      <div class="form-group" style="max-width:200px"><label class="form-label">Year</label>
+        <input type="text" placeholder="e.g. 2023" class="award-year"></div>
+      <div class="form-group"><label class="form-label">Brief Description (optional)</label>
+        <textarea rows="2" placeholder="e.g. Recognised for exceeding revenue targets by 40% in Q3 2023…" class="award-desc"></textarea></div>`;
+    document.getElementById('awardEntries').appendChild(div);
   }
 
   function addEducation() {
     eduCount++;
-    const id = 'edu' + eduCount;
+    const id = 'edu'+eduCount;
     const div = document.createElement('div');
     div.className = 'entry-card'; div.id = id;
     div.innerHTML = `
       <button class="entry-remove" onclick="document.getElementById('${id}').remove()">✕</button>
       <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Degree</label>
-          <input type="text" placeholder="B.Tech Computer Science" class="edu-degree">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Institution</label>
-          <input type="text" placeholder="IIT Bombay" class="edu-school">
-        </div>
+        <div class="form-group"><label class="form-label">Degree</label>
+          <input type="text" placeholder="e.g. B.Tech Computer Science" class="edu-degree"></div>
+        <div class="form-group"><label class="form-label">Institution</label>
+          <input type="text" placeholder="e.g. IIT Bombay" class="edu-school"></div>
       </div>
       <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Graduation Year</label>
-          <input type="text" placeholder="2020" class="edu-year">
-        </div>
-        <div class="form-group">
-          <label class="form-label">GPA / Honors (optional)</label>
-          <input type="text" placeholder="8.5/10 CGPA" class="edu-gpa">
-        </div>
+        <div class="form-group"><label class="form-label">Graduation Year</label>
+          <input type="text" placeholder="e.g. 2020" class="edu-year"></div>
+        <div class="form-group"><label class="form-label">GPA / Honors (optional)</label>
+          <input type="text" placeholder="e.g. 8.5/10 CGPA" class="edu-gpa"></div>
       </div>`;
     document.getElementById('educationEntries').appendChild(div);
   }
 
+  /* ─── SKILLS ────────────────────────────────────────────── */
   function addSkill() {
     const input = document.getElementById('skillInput');
     const val = input.value.trim();
@@ -726,138 +719,194 @@
     skills.push(val); input.value = '';
     renderSkills(); updatePreview();
   }
-
-  function removeSkill(s) { skills = skills.filter(x => x !== s); renderSkills(); updatePreview(); }
-
+  function removeSkill(s) { skills = skills.filter(x=>x!==s); renderSkills(); updatePreview(); }
   function renderSkills() {
     document.getElementById('skillTags').innerHTML = skills.map(s =>
       `<div class="skill-tag">${s}<button class="skill-remove" onclick="removeSkill(${JSON.stringify(s)})">✕</button></div>`
     ).join('');
   }
 
+  /* ─── TEMPLATE ──────────────────────────────────────────── */
   function selectTemplate(tpl) {
+    if (manuallyEdited && lastResumeData) {
+      if (!confirm('Switching template will reset your manual edits. Continue?')) return;
+    }
+    manuallyEdited = false;
     currentTemplate = tpl;
     document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
     document.querySelector(`.tpl-card[data-tpl="${tpl}"]`).classList.add('selected');
-    if (lastResumeData) document.getElementById('resumeOutput').innerHTML = renderResumeHTML(lastResumeData);
+    if (lastResumeData) renderOutput(lastResumeData);
   }
-
   function onFormatChange() {
     document.getElementById('tplSection').style.display =
       document.getElementById('outputFormat').value === 'full' ? '' : 'none';
   }
 
+  /* ─── DATA ──────────────────────────────────────────────── */
   function collectData() {
     const experiences = [];
     document.querySelectorAll('#experienceEntries .entry-card').forEach(c => {
-      experiences.push({
-        role:    c.querySelector('.exp-role')?.value    || '',
-        company: c.querySelector('.exp-company')?.value || '',
-        start:   c.querySelector('.exp-start')?.value  || '',
-        end:     c.querySelector('.exp-end')?.value     || '',
-        desc:    c.querySelector('.exp-desc')?.value    || ''
-      });
+      experiences.push({ role: c.querySelector('.exp-role')?.value||'', company: c.querySelector('.exp-company')?.value||'', start: c.querySelector('.exp-start')?.value||'', end: c.querySelector('.exp-end')?.value||'', desc: c.querySelector('.exp-desc')?.value||'' });
+    });
+    const awards = [];
+    document.querySelectorAll('#awardEntries .entry-card').forEach(c => {
+      awards.push({ name: c.querySelector('.award-name')?.value||'', org: c.querySelector('.award-org')?.value||'', year: c.querySelector('.award-year')?.value||'', desc: c.querySelector('.award-desc')?.value||'' });
     });
     const education = [];
     document.querySelectorAll('#educationEntries .entry-card').forEach(c => {
-      education.push({
-        degree: c.querySelector('.edu-degree')?.value || '',
-        school: c.querySelector('.edu-school')?.value || '',
-        year:   c.querySelector('.edu-year')?.value   || '',
-        gpa:    c.querySelector('.edu-gpa')?.value    || ''
-      });
+      education.push({ degree: c.querySelector('.edu-degree')?.value||'', school: c.querySelector('.edu-school')?.value||'', year: c.querySelector('.edu-year')?.value||'', gpa: c.querySelector('.edu-gpa')?.value||'' });
     });
     return {
-      name:     (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim(),
-      title:    document.getElementById('jobTitle').value,
-      email:    document.getElementById('email').value,
-      phone:    document.getElementById('phone').value,
+      name: (document.getElementById('firstName').value+' '+document.getElementById('lastName').value).trim(),
+      title: document.getElementById('jobTitle').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
       location: document.getElementById('location').value,
       linkedin: document.getElementById('linkedin').value,
-      experiences, education, skills
+      experiences, awards, education, skills
     };
   }
 
   function buildPrompt(d, format) {
-    const expText = d.experiences.map(e => `${e.role} at ${e.company} (${e.start}–${e.end}): ${e.desc}`).join('\n');
-    const eduText = d.education.map(e => `${e.degree}, ${e.school}${e.year ? ', ' + e.year : ''}${e.gpa ? ', GPA: ' + e.gpa : ''}`).join('\n');
-    const base = `Name: ${d.name}\nTitle: ${d.title}\nEmail: ${d.email}\nPhone: ${d.phone}\nLocation: ${d.location}\nLinkedIn: ${d.linkedin}\nExperience:\n${expText}\nEducation:\n${eduText}\nSkills: ${d.skills.join(', ')}`;
-    if (format === 'full')
-      return `You are an expert resume writer. Create a professional ATS-optimised resume from the candidate data below.\n\nReturn ONLY valid JSON — no markdown fences, no explanation:\n{"summary":"3-4 sentence professional summary","experience":[{"role":"","company":"","period":"start – end","bullets":["strong action-verb achievement with metric"]}],"education":[{"degree":"","school":"","year":"","gpa":""}],"skills":["skill1","skill2"]}\n\nCandidate Data:\n${base}`;
-    if (format === 'bullets')
-      return `Create 8 strong ATS-optimised resume bullet points for a ${d.title}. Use action verbs, quantify results where possible. Plain text, one per line.\n\n${base}`;
-    return `Write a compelling 3-4 sentence professional summary for this candidate. Plain text only, no labels.\n\n${base}`;
+    const expText   = d.experiences.map(e=>`${e.role} at ${e.company} (${e.start}–${e.end}): ${e.desc}`).join('\n');
+    const awardText = d.awards.filter(a=>a.name).map(a=>`${a.name}${a.org?', '+a.org:''}${a.year?', '+a.year:''}${a.desc?' — '+a.desc:''}`).join('\n');
+    const eduText   = d.education.map(e=>`${e.degree}, ${e.school}${e.year?', '+e.year:''}${e.gpa?', GPA: '+e.gpa:''}`).join('\n');
+    const base = `Name: ${d.name}\nTitle: ${d.title}\nEmail: ${d.email}\nPhone: ${d.phone}\nLocation: ${d.location}\nLinkedIn: ${d.linkedin}\nExperience:\n${expText}\nAwards:\n${awardText||'None'}\nEducation:\n${eduText}\nSkills: ${d.skills.join(', ')}`;
+    if (format==='full')
+      return `You are an expert resume writer. Create a professional ATS-optimised resume.\n\nReturn ONLY valid JSON, no markdown:\n{"summary":"3-4 sentence summary","experience":[{"role":"","company":"","period":"","bullets":[]}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"degree":"","school":"","year":"","gpa":""}],"skills":[]}\n\nData:\n${base}`;
+    if (format==='bullets')
+      return `Create 8 strong ATS-optimised bullet points for a ${d.title}. Action verbs, quantified results. Plain text.\n\n${base}`;
+    return `Write a 3-4 sentence professional summary. Plain text only.\n\n${base}`;
   }
 
-  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  /* ─── RENDER ─────────────────────────────────────────────── */
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function renderResumeHTML(data) {
     const c = `tpl-${currentTemplate}`;
     const contact = [data.email, data.phone, data.location, data.linkedin].filter(Boolean);
-    const contactHTML = currentTemplate === 'classic'
-      ? `<div class="r-contact">${contact.map(x => `<span>${esc(x)}</span>`).join('')}</div>`
-      : `<div class="r-contact">${contact.map(x => `<span>${esc(x)}</span>`).join('')}</div>`;
-    const expHTML = (data.experience || []).map(e => `
+
+    const contactHTML = currentTemplate==='classic'
+      ? `<div class="r-contact">${contact.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`
+      : `<div class="r-contact">${contact.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;
+
+    const expHTML = (data.experience||[]).map(e=>`
       <div class="r-exp">
         <div class="r-exp-top"><span class="r-role">${esc(e.role)}</span><span class="r-period">${esc(e.period)}</span></div>
         <div class="r-co">${esc(e.company)}</div>
-        <ul class="r-ul">${(e.bullets || []).map(b => `<li>${esc(b)}</li>`).join('')}</ul>
+        <ul class="r-ul">${(e.bullets||[]).map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
       </div>`).join('');
-    const eduHTML = (data.education || []).map(e => `
+
+    const awardsData = (data.awards||[]).filter(a=>a.name);
+    let awardHTML = '';
+    if (awardsData.length) {
+      if (currentTemplate==='classic') {
+        awardHTML = awardsData.map(a=>`
+          <div class="r-award">
+            <div class="r-award-top"><span class="r-award-name">${esc(a.name)}</span><span class="r-award-year">${esc(a.year)}</span></div>
+            <div class="r-award-org">${esc(a.org)}</div>
+            ${a.desc?`<div class="r-award-desc">${esc(a.desc)}</div>`:''}
+          </div>`).join('');
+      } else if (currentTemplate==='minimal') {
+        awardHTML = awardsData.map(a=>`
+          <div class="r-award">
+            <div class="r-award-left">
+              <div class="r-award-name">${esc(a.name)}</div>
+              <div class="r-award-org">${esc(a.org)}</div>
+              ${a.desc?`<div class="r-award-desc">${esc(a.desc)}</div>`:''}
+            </div>
+            <div class="r-award-year">${esc(a.year)}</div>
+          </div>`).join('');
+      } else {
+        awardHTML = awardsData.map(a=>`
+          <div class="r-award">
+            <div>
+              <div class="r-award-name">${esc(a.name)}</div>
+              <div class="r-award-org">${esc(a.org)}</div>
+              ${a.desc?`<div class="r-award-desc">${esc(a.desc)}</div>`:''}
+            </div>
+            <div class="r-award-year">${esc(a.year)}</div>
+          </div>`).join('');
+      }
+    }
+
+    const eduHTML = (data.education||[]).map(e=>`
       <div class="r-edu">
         <div><div class="r-deg">${esc(e.degree)}</div><div class="r-sch">${esc(e.school)}</div></div>
-        <div class="r-yr">${esc([e.year, e.gpa].filter(Boolean).join(' · '))}</div>
+        <div class="r-yr">${esc([e.year,e.gpa].filter(Boolean).join(' · '))}</div>
       </div>`).join('');
-    const skillsHTML = currentTemplate === 'classic'
-      ? `<div class="r-skills">${(data.skills || []).map(s => esc(s)).join(' · ')}</div>`
-      : `<div class="r-skills">${(data.skills || []).map(s => `<span class="r-sk">${esc(s)}</span>`).join('')}</div>`;
-    return `<div class="${c}">
+
+    const skillsHTML = currentTemplate==='classic'
+      ? `<div class="r-skills">${(data.skills||[]).map(s=>esc(s)).join(' · ')}</div>`
+      : `<div class="r-skills">${(data.skills||[]).map(s=>`<span class="r-sk">${esc(s)}</span>`).join('')}</div>`;
+
+    return `<div class="${c}" contenteditable="true" spellcheck="false">
       <div class="r-head"><div class="r-name">${esc(data.name)}</div><div class="r-title">${esc(data.title)}</div>${contactHTML}</div>
-      ${data.summary ? `<div class="r-sec"><div class="r-sec-t">Professional Summary</div><div class="r-sum">${esc(data.summary)}</div></div>` : ''}
-      ${expHTML ? `<div class="r-sec"><div class="r-sec-t">Work Experience</div>${expHTML}</div>` : ''}
-      ${eduHTML ? `<div class="r-sec"><div class="r-sec-t">Education</div>${eduHTML}</div>` : ''}
-      ${skillsHTML ? `<div class="r-sec"><div class="r-sec-t">Skills</div>${skillsHTML}</div>` : ''}
+      ${data.summary?`<div class="r-sec"><div class="r-sec-t">Professional Summary</div><div class="r-sum">${esc(data.summary)}</div></div>`:''}
+      ${expHTML?`<div class="r-sec"><div class="r-sec-t">Work Experience</div>${expHTML}</div>`:''}
+      ${awardHTML?`<div class="r-sec"><div class="r-sec-t">Awards &amp; Achievements</div>${awardHTML}</div>`:''}
+      ${eduHTML?`<div class="r-sec"><div class="r-sec-t">Education</div>${eduHTML}</div>`:''}
+      ${skillsHTML?`<div class="r-sec"><div class="r-sec-t">Skills</div>${skillsHTML}</div>`:''}
     </div>`;
   }
 
+  function renderOutput(data) {
+    const output = document.getElementById('resumeOutput');
+    output.style.cssText = 'align-items:flex-start;justify-content:flex-start';
+    output.innerHTML = renderResumeHTML(data);
+    // Track manual edits
+    const ce = output.querySelector('[contenteditable]');
+    if (ce) ce.addEventListener('input', () => { manuallyEdited = true; });
+    document.getElementById('editBadge').style.display = 'inline-block';
+  }
+
+  /* ─── GENERATE ──────────────────────────────────────────── */
   async function generateResume() {
     const data = collectData(), format = document.getElementById('outputFormat').value;
     const btn = document.getElementById('generateBtn'), output = document.getElementById('resumeOutput'), status = document.getElementById('resumeStatus');
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Generating…';
-    status.textContent = 'Generating…';
+    status.textContent = 'Generating…'; manuallyEdited = false;
     output.style.cssText = 'align-items:center;justify-content:center';
     output.innerHTML = '<div class="resume-placeholder">Building your resume with AI…</div>';
+    document.getElementById('editBadge').style.display = 'none';
     try {
       const res = await fetch('/.netlify/functions/generate', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ prompt: buildPrompt(data, format) })
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || `API error ${res.status}`);
-      output.style.cssText = 'align-items:flex-start;justify-content:flex-start';
-      if (format === 'full') {
+      if (!res.ok) throw new Error(json.error||`API error ${res.status}`);
+      if (format==='full') {
         const parsed = JSON.parse(json.text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/i,'').trim());
-        Object.assign(parsed, { name: data.name, title: data.title, email: data.email, phone: data.phone, location: data.location, linkedin: data.linkedin });
+        Object.assign(parsed, { name:data.name, title:data.title, email:data.email, phone:data.phone, location:data.location, linkedin:data.linkedin });
+        if (!parsed.awards) parsed.awards = data.awards;
         lastResumeData = parsed;
-        output.innerHTML = renderResumeHTML(parsed);
+        renderOutput(parsed);
       } else {
         lastResumeData = null;
-        output.innerHTML = `<div style="white-space:pre-wrap;font-family:'Segoe UI',sans-serif;font-size:0.9rem;color:#111;width:100%;line-height:1.75">${esc(json.text)}</div>`;
+        output.style.cssText = 'align-items:flex-start;justify-content:flex-start';
+        output.innerHTML = `<div contenteditable="true" spellcheck="false" style="white-space:pre-wrap;font-family:'Segoe UI',sans-serif;font-size:0.9rem;color:#111;width:100%;line-height:1.75">${esc(json.text)}</div>`;
+        document.getElementById('editBadge').style.display = 'inline-block';
+        const ce = output.querySelector('[contenteditable]');
+        if (ce) ce.addEventListener('input', () => { manuallyEdited = true; });
       }
       status.textContent = 'Resume ready ✓';
     } catch(err) {
       output.innerHTML = `<div style="color:#dc2626;font-family:sans-serif;padding:8px">Error: ${esc(err.message)}</div>`;
       status.textContent = 'Error — try again';
-    } finally { btn.disabled = false; btn.innerHTML = '✦ Generate with AI'; }
+    } finally { btn.disabled=false; btn.innerHTML='✦ Generate with AI'; }
   }
 
+  /* ─── COPY / PDF ────────────────────────────────────────── */
   function copyResume() {
-    const text = document.getElementById('resumeOutput').innerText;
-    if (!text || text.includes('Generate with AI') || text.includes('Building your')) return;
+    const ce = document.querySelector('#resumeOutput [contenteditable]');
+    if (!ce) return;
+    const text = ce.innerText;
+    if (!text||text.includes('Generate with AI')||text.includes('Building')) return;
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.getElementById('copyBtn');
       btn.textContent = '✓ Copied!';
-      setTimeout(() => btn.textContent = '☐ Copy', 2000);
+      setTimeout(() => btn.textContent='☐ Copy', 2000);
     });
   }
 
@@ -865,7 +914,7 @@
     const card = document.getElementById('resumeOutput');
     if (card.querySelector('.resume-placeholder')) { alert('Generate your resume first.'); return; }
     const tplCSS = document.getElementById('tplStyles').textContent;
-    const w = window.open('', '_blank', 'width=860,height=1000');
+    const w = window.open('','_blank','width=860,height=1000');
     w.document.write(`<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><title>Resume</title>
 <style>
@@ -874,7 +923,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;padding:40px;background:white;m
 @page{margin:12mm;size:A4;}
 @media print{body{padding:20px;}}
 ${tplCSS}
-.tpl-modern .r-head{border-radius:0;margin:-40px -40px 24px;}
+.tpl-modern .r-head{border-radius:0;margin:-40px -40px 22px;}
+[contenteditable]{outline:none!important;}
 </style></head><body>
 ${card.innerHTML}
 <script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
@@ -882,14 +932,12 @@ ${card.innerHTML}
     w.document.close();
   }
 
-  // Init
+  /* ─── INIT ──────────────────────────────────────────────── */
   addExperience();
+  addAward();
   addEducation();
 
-  // Start guided tour on page load
-  window.addEventListener('load', () => {
-    setTimeout(startTour, 600);
-  });
+  window.addEventListener('load', () => { setTimeout(startTour, 700); });
 </script>
 </body>
 </html>
