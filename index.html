@@ -279,7 +279,7 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 20px 0;
       border-top: 1px solid var(--border);
-      margin-top: 40px;
+      margin-top: 32px;
     }
     .resume-bar-left h3 { font-size: 1.6rem; font-weight: 700; color: var(--white); }
     .resume-bar-left p  { font-size: 0.85rem; color: var(--muted); margin-top: 3px; }
@@ -298,6 +298,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-top: 16px;
       margin-bottom: 40px;
     }
     .resume-placeholder { text-align: center; color: #aaa; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -316,11 +317,17 @@
 
     /* Print */
     @media print {
-      #sidebar, .resume-bar, .nav-buttons, .api-box, .step-content { display: none !important; }
+      #sidebar, .nav-buttons, .api-box { display: none !important; }
+      .step-content { display: none !important; }
+      #step5 { display: block !important; }
+      #step5 .nav-buttons { display: none !important; }
+      #step5 .api-box { display: none !important; }
+      .resume-bar { border: none; padding: 0; margin: 0; }
+      .resume-bar-actions { display: none !important; }
       #main { padding: 0; max-width: 100%; }
       .resume-output-card {
         box-shadow: none; border: none; border-radius: 0;
-        padding: 0; display: block; min-height: unset;
+        padding: 0; display: block; min-height: unset; margin: 0;
       }
       body { background: white; }
     }
@@ -476,7 +483,7 @@
     </div>
   </div>
 
-  <!-- Step 5: Generate -->
+  <!-- Step 5: Generate + Resume Output -->
   <div class="step-content" id="step5">
     <h1 class="step-title">Generate Resume</h1>
     <p class="step-subtitle">AI will craft your resume using the details you've provided</p>
@@ -500,23 +507,23 @@
       <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
       <button class="btn-accent" id="generateBtn" onclick="generateResume()">✦ Generate with AI</button>
     </div>
-  </div>
 
-  <!-- Resume Output (always visible) -->
-  <div class="resume-bar">
-    <div class="resume-bar-left">
-      <h3>Your Resume</h3>
-      <p id="resumeStatus">Ready to generate</p>
+    <!-- Resume output — only visible on this tab -->
+    <div class="resume-bar">
+      <div class="resume-bar-left">
+        <h3>Your Resume</h3>
+        <p id="resumeStatus">Ready to generate</p>
+      </div>
+      <div class="resume-bar-actions">
+        <button class="btn-secondary" id="copyBtn" onclick="copyResume()">☐ Copy</button>
+        <button class="btn-secondary" id="pdfBtn" onclick="downloadPDF()">↓ Download PDF</button>
+      </div>
     </div>
-    <div class="resume-bar-actions">
-      <button class="btn-secondary" id="copyBtn" onclick="copyResume()">☐ Copy</button>
-      <button class="btn-secondary" id="pdfBtn" onclick="downloadPDF()">↓ Download PDF</button>
-    </div>
-  </div>
 
-  <div class="resume-output-card" id="resumeOutput">
-    <div class="resume-placeholder">
-      Click <strong>Generate with AI</strong> to create your resume
+    <div class="resume-output-card" id="resumeOutput">
+      <div class="resume-placeholder">
+        Click <strong>Generate with AI</strong> to create your resume
+      </div>
     </div>
   </div>
 
@@ -666,8 +673,8 @@
         role:    c.querySelector('.exp-role')?.value    || '',
         company: c.querySelector('.exp-company')?.value || '',
         start:   c.querySelector('.exp-start')?.value  || '',
-        end:     c.querySelector('.exp-end')?.value    || '',
-        desc:    c.querySelector('.exp-desc')?.value   || ''
+        end:     c.querySelector('.exp-end')?.value     || '',
+        desc:    c.querySelector('.exp-desc')?.value    || ''
       });
     });
     const education = [];
@@ -680,12 +687,12 @@
       });
     });
     return {
-      name:        (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim(),
-      title:       document.getElementById('jobTitle').value,
-      email:       document.getElementById('email').value,
-      phone:       document.getElementById('phone').value,
-      location:    document.getElementById('location').value,
-      linkedin:    document.getElementById('linkedin').value,
+      name:     (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim(),
+      title:    document.getElementById('jobTitle').value,
+      email:    document.getElementById('email').value,
+      phone:    document.getElementById('phone').value,
+      location: document.getElementById('location').value,
+      linkedin: document.getElementById('linkedin').value,
       experiences, education, skills
     };
   }
@@ -762,7 +769,6 @@
     window.print();
   }
 
-  // Initialise with one experience entry
   addExperience();
 </script>
 </body>
