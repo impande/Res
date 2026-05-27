@@ -1984,11 +1984,17 @@ function downloadDoc() {
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8">
 <title>Resume</title>
-<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
+<!--[if gte mso 9]><xml><w:WordDocument>
+  <w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/>
+  <w:DocumentKind>w:documentKindNotSpecified</w:DocumentKind>
+</w:WordDocument>
+<w:Ppr><w:PgSz w:w="11906" w:h="16838" w:code="9"/>
+<w:PgMar w:top="1021" w:right="816" w:bottom="1021" w:left="816" w:header="0" w:footer="0"/></w:Ppr>
+</xml><![endif]-->
 <style>
-  @page WordSection1{size:210mm 297mm;margin:18mm 16mm;}
-  div.WordSection1{page:WordSection1;}
-  body{font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;}
+  @page WordSection1{size:210mm 297mm portrait;margin:18mm 14.5mm;}
+  div.WordSection1{page:WordSection1;width:210mm;}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;margin:0;padding:0;}
   ${tplCSS}
 </style>
 </head>
@@ -2010,8 +2016,22 @@ function downloadPDF() {
   const resumeHTML = page ? page.innerHTML : document.getElementById('resumeOutput').innerHTML;
   const win = window.open('','_blank');
   if (!win) { alert('Please allow pop-ups to download PDF'); return; }
-  // @page margin:0 suppresses browser-injected URL/date/time headers in print
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title></title><style>*{box-sizing:border-box;margin:0;padding:0;}html,body{background:#fff;font-family:'Segoe UI',system-ui,Arial,sans-serif;}@page{size:A4;margin:0mm;}.pdf-page{width:210mm;min-height:297mm;padding:16mm 14mm;margin:0 auto;background:#fff;}@media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}${tplCSS}</style></head><body><div class="pdf-page">${resumeHTML}</div><script>window.onload=function(){window.print();};<\/script></body></html>`);
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title></title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+@page{size:210mm 297mm portrait;margin:0mm;}
+html{width:210mm;}
+body{width:210mm;min-height:297mm;margin:0 auto;padding:0;background:#fff;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+.pdf-page{width:210mm;min-height:297mm;padding:16mm 14mm;box-sizing:border-box;background:#fff;overflow:hidden;}
+@media print{
+  html,body{width:210mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pdf-page{page-break-after:avoid;}
+}
+${tplCSS}
+</style>
+</head><body><div class="pdf-page">${resumeHTML}</div>
+<script>window.onload=function(){window.print();};<\/script>
+</body></html>`);
   win.document.close();
 }
 
