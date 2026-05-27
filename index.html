@@ -1864,16 +1864,21 @@ async function generateBullets(id) {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.25);border-top-color:#fff;width:11px;height:11px;border-width:2px;"></span> Generating…';
   const skillsList = skills.length ? skills.join(', ') : 'relevant professional skills';
-  const prompt = `Write 4-5 strong, quantified resume bullet points for a "${title || jobTitle}" at "${co || 'a company'}".
+  const prompt = `You are an expert resume writer. Generate 4–5 powerful, ATS-optimised bullet points using ALL five inputs below:
 
-Skills: ${skillsList}
-Key achievements / context: ${desc || 'Standard responsibilities for this role'}
+1. Overall Job Title / Profile: "${jobTitle || title}"
+2. Specific Role Title: "${title || jobTitle}"
+3. Company: "${co || 'a leading company'}" — infer the industry and company standards from this name
+4. Key Skills: ${skillsList}
+5. Key Achievements / Notes: ${desc || 'Not provided — generate realistic high-impact bullets based on the role, company industry, and skills above'}
 
-Rules:
-- Begin every bullet with a powerful action verb (Led, Built, Drove, Reduced, etc.)
-- Include specific metrics, percentages, dollar values, or team sizes wherever possible
-- Align with industry and company standards for this role
-- Make each point ATS-optimised and impact-focused
+Bullet writing rules:
+- Begin every bullet with a strong action verb (Led, Built, Drove, Scaled, Reduced, Launched, Architected, etc.)
+- Every bullet must demonstrate direct application of at least one of the listed skills
+- Align language and expectations to the company's industry and size
+- Quantify every bullet with metrics, percentages, dollar values, time saved, or team sizes (estimate plausibly if not provided)
+- Each bullet must show measurable IMPACT, not just duties
+- ATS-optimised, no soft filler phrases
 - Output ONLY the bullet points, one per line, each starting with •
 - No intro text, no section headers, no explanations`;
   try {
@@ -2088,20 +2093,48 @@ function buildPrompt(data) {
   }
 
   if (format === 'bullets') {
-    const expStr = data.experience.map(e=>`${e.title} at ${e.co} (${e.start}–${e.end}): ${e.desc}`).join('\n');
-    return `Generate ATS-optimised bullet points for this work experience. For each role provide 3–5 bullets starting with strong action verbs and quantified results. Return JSON only: {"experience":[{"title":"","co":"","start":"","end":"","bullets":["..."]}]}\n\nExperience:\n${expStr}`;
+    const skillsStr = data.skills.length ? data.skills.join(', ') : 'None provided';
+    const expStr = data.experience.map(e => {
+      const period = [e.start, e.end].filter(Boolean).join(' – ');
+      return `  Role: ${e.title || 'N/A'} | Company: ${e.co || 'N/A'} | Period: ${period || 'N/A'} | Achievements/Notes: ${e.desc || 'Generate from role, company and skills'}`;
+    }).join('\n');
+    return `You are an expert resume writer. Generate ATS-optimised bullet points for each work experience entry below.
+
+Candidate Job Title / Profile: ${data.jobTitle}
+Candidate Skills: ${skillsStr}
+
+Experience entries:
+${expStr}
+
+Rules for every entry — use ALL five inputs together:
+1. Job Title ("${data.jobTitle}") — sets seniority and domain context
+2. Role Title — tailor bullets to the exact position held
+3. Company / Industry — align to standards expected at that type of company
+4. Skills ("${skillsStr}") — every bullet must demonstrate a skill in action
+5. Achievements/Notes — base bullets on notes; if blank, generate realistic high-impact bullets
+
+- Begin each bullet with a strong action verb (Led, Built, Drove, Scaled, etc.)
+- Quantify with metrics, percentages, dollar values, or team sizes
+- 4–5 bullets per role, ATS-friendly, impact-focused
+- Return ONLY valid JSON, no markdown: {"experience":[{"title":"","co":"","start":"","end":"","bullets":["..."]}]}`;
   }
 
-  const expStr = data.experience.length ? data.experience.map(e=>`- ${e.title} at ${e.co} (${e.start}–${e.end}): ${e.desc||'no notes'}`).join('\n') : 'None';
+  const skillsStr = data.skills.length ? data.skills.join(', ') : 'None provided';
+  const expStr = data.experience.length ? data.experience.map(e => {
+    const period = [e.start, e.end].filter(Boolean).join(' – ');
+    return `  Role Title: ${e.title || 'N/A'}
+  Company: ${e.co || 'N/A'}
+  Period: ${period || 'N/A'}
+  Key Achievements / Notes: ${e.desc || 'Not provided — generate bullets from role title, company industry, and skills below'}`;
+  }).join('\n\n') : 'None';
   const awardsStr = data.awards.length ? data.awards.map(a=>`- ${a.name} by ${a.org} (${a.year}): ${a.desc||''}`).join('\n') : 'None';
   const eduStr = data.education.length ? data.education.map(e=>`- ${e.deg} from ${e.sch} (${e.yr})${e.gpa?' GPA:'+e.gpa:''}`).join('\n') : 'None';
-  const skillsStr = data.skills.length ? data.skills.join(', ') : 'None';
 
-  return `You are a professional resume writer. Generate resume content for:
+  return `You are an expert resume writer. Generate a complete, interview-winning resume for:
+
 Name: ${data.firstName} ${data.lastName}
-Title: ${data.jobTitle}
-Email: ${data.email}
-Phone: ${data.phone||'N/A'}
+Overall Job Title / Profile: ${data.jobTitle}
+Skills: ${skillsStr}
 Location: ${data.location||'N/A'}
 LinkedIn: ${data.linkedin||'N/A'}
 GitHub: ${data.github||'N/A'}
@@ -2115,13 +2148,25 @@ ${awardsStr}
 Education:
 ${eduStr}
 
-Skills: ${skillsStr}
+=== BULLET POINT GENERATION RULES (apply to every experience entry) ===
+Generate 4–5 powerful, ATS-optimised bullet points per role using ALL of the following inputs together:
+1. JOB TITLE / PROFILE — "${data.jobTitle}" — use this to infer the candidate's seniority and domain
+2. ROLE TITLE — the specific title held in that company — tailor bullets to that exact position
+3. COMPANY & INDUSTRY STANDARDS — infer the company's industry/size from the company name and align bullets to what strong performers in that company type achieve
+4. SKILLS — "${skillsStr}" — every bullet must reflect direct application of at least one of these skills
+5. KEY ACHIEVEMENTS / NOTES — use any provided notes as the basis for bullets; if blank, generate realistic, high-impact bullets that a top performer in this role would have
 
-Instructions:
-1. Professional summary: between 50 and 200 words, punchy, ATS-optimised
-2. For each experience entry: 3–5 bullet points starting with strong action verbs, quantify achievements where possible
-3. Keep all provided awards, education and skills exactly as given — do not invent new ones
-4. Return ONLY valid JSON in this exact format with no markdown:
+Bullet writing rules:
+- Begin every bullet with a strong action verb (Led, Built, Drove, Scaled, Reduced, Increased, Architected, Launched, etc.)
+- Quantify every bullet with metrics, percentages, dollar values, time saved, or team sizes (estimate plausibly if not given)
+- Each bullet must show IMPACT, not just responsibility
+- Language must be ATS-friendly and industry-standard for this role and company type
+- No generic filler — every bullet must feel tailored to this specific role and company
+
+Other instructions:
+- Professional summary: 60–180 words, punchy, ATS-optimised, tailored to the job title and skills
+- Keep all provided awards, education and skills exactly as given — do not invent new ones
+- Return ONLY valid JSON in this exact format with no markdown:
 {"summary":"...","experience":[{"title":"","co":"","start":"","end":"","bullets":["..."]}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"deg":"","sch":"","yr":"","gpa":""}],"skills":["..."]}`;
 }
 
