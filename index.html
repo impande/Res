@@ -1344,7 +1344,24 @@
         <option value="full">Full Resume (all sections)</option>
         <option value="bullets">ATS Bullet Points Only</option>
         <option value="summary">Professional Summary Only</option>
+        <option value="cover-letter">✉ Cover Letter</option>
       </select>
+    </div>
+    <div id="coverLetterFields" style="display:none">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Role Applying For <span class="req-star">*</span></label>
+          <input type="text" id="coverJobTitle" placeholder="e.g. Senior Product Manager">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company Name <span class="req-star">*</span></label>
+          <input type="text" id="coverCompany" placeholder="e.g. Google">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hiring Manager Name <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input type="text" id="coverHiringMgr" placeholder="e.g. Sarah Johnson — leave blank for 'Hiring Manager'">
+      </div>
     </div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(5)">← Back</button>
@@ -1865,7 +1882,11 @@ Rules:
   }
 }
 
-function onFormatChange() {}
+function onFormatChange() {
+  const fmt = document.getElementById('outputFormat').value;
+  const fields = document.getElementById('coverLetterFields');
+  if (fields) fields.style.display = fmt === 'cover-letter' ? 'block' : 'none';
+}
 
 // ── Validation & data collection ──────────────────────────────────────
 function validateMandatory() {
@@ -1935,7 +1956,10 @@ function collectData() {
     location: document.getElementById('location').value.trim(),
     linkedin: document.getElementById('linkedin').value.trim(),
     experience, awards, education, skills,
-    format: document.getElementById('outputFormat').value
+    format: document.getElementById('outputFormat').value,
+    coverJobTitle: document.getElementById('coverJobTitle')?.value.trim()||'',
+    coverCompany: document.getElementById('coverCompany')?.value.trim()||'',
+    coverHiringMgr: document.getElementById('coverHiringMgr')?.value.trim()||''
   };
 }
 
@@ -2047,6 +2071,34 @@ function buildPrompt(data) {
     return `Generate ATS-optimised bullet points for this work experience. For each role provide 3–5 bullets starting with strong action verbs and quantified results. Return JSON only: {"experience":[{"title":"","co":"","start":"","end":"","bullets":["..."]}]}\n\nExperience:\n${expStr}`;
   }
 
+  if (format === 'cover-letter') {
+    const expStr = data.experience.length ? data.experience.map(e=>`- ${e.title} at ${e.co} (${e.start}–${e.end}): ${e.desc||'see achievements'}`).join('\n') : 'Not provided';
+    const skillsStr = data.skills.length ? data.skills.join(', ') : 'Not provided';
+    const hiringMgr = data.coverHiringMgr || 'Hiring Manager';
+    const targetRole = data.coverJobTitle || data.jobTitle;
+    const company = data.coverCompany || 'your company';
+    return `You are an expert cover letter writer. Write a compelling, personalised cover letter for a job application.
+
+Applicant: ${data.firstName} ${data.lastName}
+Current Title: ${data.jobTitle}
+Target Role: ${targetRole}
+Company: ${company}
+Key Skills: ${skillsStr}
+Work Experience:
+${expStr}
+
+Instructions:
+1. Write 3–4 focused paragraphs in professional business letter style
+2. Opening: express genuine enthusiasm for the specific role at ${company}
+3. Body: highlight 2–3 most relevant achievements and skills with concrete examples
+4. Closing: confident call-to-action inviting an interview
+5. Active voice, first person, warm yet professional tone
+6. Start with "Dear ${hiringMgr},"
+7. End with "Sincerely," followed by a blank line then "${data.firstName} ${data.lastName}"
+8. Do NOT include date, address headers, or subject lines — body text only
+9. Return ONLY valid JSON, no markdown: {"cover_letter":"<full letter with \\n for line breaks>"}`;
+  }
+
   const expStr = data.experience.length ? data.experience.map(e=>`- ${e.title} at ${e.co} (${e.start}–${e.end}): ${e.desc||'no notes'}`).join('\n') : 'None';
   const awardsStr = data.awards.length ? data.awards.map(a=>`- ${a.name} by ${a.org} (${a.year}): ${a.desc||''}`).join('\n') : 'None';
   const eduStr = data.education.length ? data.education.map(e=>`- ${e.deg} from ${e.sch} (${e.yr})${e.gpa?' GPA:'+e.gpa:''}`).join('\n') : 'None';
@@ -2087,7 +2139,7 @@ async function generateResume() {
   const statusEl = document.getElementById('resumeStatus');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Generating…';
-  statusEl.textContent = 'AI is crafting your resume…';
+  statusEl.textContent = data.format === 'cover-letter' ? 'AI is writing your cover letter…' : 'AI is crafting your resume…';
   document.getElementById('editBadge').style.display = 'none';
 
   try {
@@ -2117,13 +2169,18 @@ async function generateResume() {
       merged.summary = ''; merged.awards = data.awards; merged.education = data.education;
     } else if (data.format === 'summary') {
       merged.experience = data.experience; merged.awards = data.awards; merged.education = data.education;
+    } else if (data.format === 'cover-letter') {
+      merged.coverLetter = parsed.cover_letter || '';
+      merged.coverJobTitle = data.coverJobTitle;
+      merged.coverCompany = data.coverCompany;
+      merged.coverHiringMgr = data.coverHiringMgr;
     }
 
     lastResumeData = merged;
     manuallyEdited = false;
     clearNeedsRegen();
     renderOutput(merged);
-    statusEl.textContent = 'Generated · Click any text to edit directly';
+    statusEl.textContent = merged.coverLetter ? 'Cover Letter generated · Click to edit' : 'Generated · Click any text to edit directly';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
@@ -2136,11 +2193,35 @@ async function generateResume() {
   }
 }
 
+function renderCoverLetterHTML(data) {
+  const today = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+  const contactLine = [data.email, data.phone, data.location].filter(Boolean).join(' · ');
+  const lines = (data.coverLetter || '').split('\n');
+  const bodyHTML = lines.map(line =>
+    line.trim()
+      ? `<p style="margin:0 0 13px;line-height:1.78;">${esc(line)}</p>`
+      : '<div style="height:4px;"></div>'
+  ).join('');
+  return `<div style="font-family:'Georgia',serif;color:#1a1a1a;padding:52px 56px 44px;font-size:0.93rem;" contenteditable="true">
+    <div style="margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid #e5e7eb;">
+      <div style="font-size:1.18rem;font-weight:700;letter-spacing:0.3px;color:#111;">${esc(data.firstName)} ${esc(data.lastName)}</div>
+      <div style="font-size:0.83rem;color:#555;margin-top:4px;">${esc(data.jobTitle)}</div>
+      ${contactLine ? `<div style="font-size:0.8rem;color:#888;margin-top:3px;">${esc(contactLine)}</div>` : ''}
+    </div>
+    <div style="font-size:0.84rem;color:#666;margin-bottom:22px;">${today}</div>
+    ${data.coverCompany ? `<div style="font-size:0.88rem;font-weight:600;color:#333;margin-bottom:18px;">${esc(data.coverCompany)}</div>` : ''}
+    <div style="font-size:0.91rem;">${bodyHTML}</div>
+  </div>`;
+}
+
 function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
-  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
+  const inner = data.coverLetter
+    ? renderCoverLetterHTML(data)
+    : renderResumeHTML(data);
+  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${inner}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   // Block clipboard copy from resume output
