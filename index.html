@@ -155,6 +155,7 @@
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
     .resume-placeholder{text-align:center;color:#aaa;font-family:'Segoe UI',system-ui,sans-serif;}
+    .r-ci{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
     .resume-placeholder strong{color:#555;}
     .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
     @keyframes spin{to{transform:rotate(360deg);}}
@@ -1250,6 +1251,7 @@
       <div class="form-group"><label class="form-label">Location</label><input type="text" id="location" placeholder="e.g. Mumbai, India" oninput="updatePreview()"></div>
       <div class="form-group"><label class="form-label">LinkedIn / Portfolio URL</label><input type="url" id="linkedin" placeholder="e.g. linkedin.com/in/yourname" oninput="updatePreview()"></div>
     </div>
+    <div class="form-group"><label class="form-label">GitHub URL</label><input type="url" id="github" placeholder="e.g. github.com/yourname" oninput="updatePreview()"></div>
     <div class="nav-buttons"><button class="btn-primary" onclick="goToStep(2)">Next: Experience →</button></div>
   </div>
 
@@ -1344,24 +1346,7 @@
         <option value="full">Full Resume (all sections)</option>
         <option value="bullets">ATS Bullet Points Only</option>
         <option value="summary">Professional Summary Only</option>
-        <option value="cover-letter">✉ Cover Letter</option>
       </select>
-    </div>
-    <div id="coverLetterFields" style="display:none">
-      <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Role Applying For <span class="req-star">*</span></label>
-          <input type="text" id="coverJobTitle" placeholder="e.g. Senior Product Manager">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Company Name <span class="req-star">*</span></label>
-          <input type="text" id="coverCompany" placeholder="e.g. Google">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Hiring Manager Name <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input type="text" id="coverHiringMgr" placeholder="e.g. Sarah Johnson — leave blank for 'Hiring Manager'">
-      </div>
     </div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(5)">← Back</button>
@@ -1882,11 +1867,7 @@ Rules:
   }
 }
 
-function onFormatChange() {
-  const fmt = document.getElementById('outputFormat').value;
-  const fields = document.getElementById('coverLetterFields');
-  if (fields) fields.style.display = fmt === 'cover-letter' ? 'block' : 'none';
-}
+function onFormatChange() {}
 
 // ── Validation & data collection ──────────────────────────────────────
 function validateMandatory() {
@@ -1955,29 +1936,41 @@ function collectData() {
     phone: document.getElementById('phone').value.trim(),
     location: document.getElementById('location').value.trim(),
     linkedin: document.getElementById('linkedin').value.trim(),
+    github:   document.getElementById('github')?.value.trim()||'',
     experience, awards, education, skills,
-    format: document.getElementById('outputFormat').value,
-    coverJobTitle: document.getElementById('coverJobTitle')?.value.trim()||'',
-    coverCompany: document.getElementById('coverCompany')?.value.trim()||'',
-    coverHiringMgr: document.getElementById('coverHiringMgr')?.value.trim()||''
+    format: document.getElementById('outputFormat').value
   };
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────
+const ICONS = {
+  email:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>`,
+  phone:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.85 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+  location: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  linkedin: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>`,
+  github:   `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>`,
+  globe:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`
+};
+
 function contactLink(val) {
   if (!val) return '';
-  if (val.includes('@')) return `<a href="mailto:${esc(val)}">${esc(val)}</a>`;
-  if (val.match(/^[\+\d\s\-\(\)]{6,}$/)) return `<a href="tel:${val.replace(/\s/g,'')}">${esc(val)}</a>`;
-  // URLs: show a clean label (LinkedIn / Portfolio), never the raw https:// string
+  if (val.includes('@')) {
+    return `<span class="r-ci">${ICONS.email}<a href="mailto:${esc(val)}">${esc(val)}</a></span>`;
+  }
+  if (val.match(/^[\+\d\s\-\(\)]{6,}$/)) {
+    return `<span class="r-ci">${ICONS.phone}<a href="tel:${val.replace(/\s/g,'')}">${esc(val)}</a></span>`;
+  }
   if (val.match(/^https?:\/\//) || val.match(/\.[a-z]{2,}(\/|$)/i)) {
     const href = val.match(/^https?:\/\//) ? val : 'https://' + val;
-    const label = val.toLowerCase().includes('linkedin') ? 'LinkedIn'
-                : val.toLowerCase().includes('github')   ? 'GitHub'
-                : val.toLowerCase().includes('portfolio') ? 'Portfolio'
-                : 'Website';
-    return `<a href="${esc(href)}" target="_blank">${label}</a>`;
+    const v = val.toLowerCase();
+    const isLinkedIn = v.includes('linkedin');
+    const isGitHub   = v.includes('github');
+    const isPortfolio = v.includes('portfolio');
+    const icon  = isLinkedIn ? ICONS.linkedin : isGitHub ? ICONS.github : ICONS.globe;
+    const label = isLinkedIn ? 'LinkedIn' : isGitHub ? 'GitHub' : isPortfolio ? 'Portfolio' : 'Website';
+    return `<span class="r-ci">${icon}<a href="${esc(href)}" target="_blank">${label}</a></span>`;
   }
-  return esc(val);
+  return `<span class="r-ci">${ICONS.location}${esc(val)}</span>`;
 }
 
 function esc(str) {
@@ -1991,9 +1984,9 @@ function renderResumeHTML(data) {
   const useBar = ['classic','academic','simple'].includes(tpl);
   const sep = useBar ? ' <span class="r-sep">|</span> ' : ' <span class="r-sep">·</span> ';
 
-  const contactItems = [data.email,data.phone,data.location,data.linkedin].filter(Boolean);
+  const contactItems = [data.email, data.phone, data.location, data.linkedin, data.github].filter(Boolean);
   const contactHTML = contactItems.length
-    ? `<div class="r-contact">${contactItems.map(x=>`<span>${contactLink(x)}</span>`).join(sep)}</div>`
+    ? `<div class="r-contact">${contactItems.map(x => contactLink(x)).join(sep)}</div>`
     : '';
 
   const darkTpls = ['modern','corporate','executive','tech','sky','purple','warm','elegant','bold','slate','pink','indigo','forest','graphite','midnight','copper','noir','emerald','denim','ruby','stone','sunset','ocean'];
@@ -2071,34 +2064,6 @@ function buildPrompt(data) {
     return `Generate ATS-optimised bullet points for this work experience. For each role provide 3–5 bullets starting with strong action verbs and quantified results. Return JSON only: {"experience":[{"title":"","co":"","start":"","end":"","bullets":["..."]}]}\n\nExperience:\n${expStr}`;
   }
 
-  if (format === 'cover-letter') {
-    const expStr = data.experience.length ? data.experience.map(e=>`- ${e.title} at ${e.co} (${e.start}–${e.end}): ${e.desc||'see achievements'}`).join('\n') : 'Not provided';
-    const skillsStr = data.skills.length ? data.skills.join(', ') : 'Not provided';
-    const hiringMgr = data.coverHiringMgr || 'Hiring Manager';
-    const targetRole = data.coverJobTitle || data.jobTitle;
-    const company = data.coverCompany || 'your company';
-    return `You are an expert cover letter writer. Write a compelling, personalised cover letter for a job application.
-
-Applicant: ${data.firstName} ${data.lastName}
-Current Title: ${data.jobTitle}
-Target Role: ${targetRole}
-Company: ${company}
-Key Skills: ${skillsStr}
-Work Experience:
-${expStr}
-
-Instructions:
-1. Write 3–4 focused paragraphs in professional business letter style
-2. Opening: express genuine enthusiasm for the specific role at ${company}
-3. Body: highlight 2–3 most relevant achievements and skills with concrete examples
-4. Closing: confident call-to-action inviting an interview
-5. Active voice, first person, warm yet professional tone
-6. Start with "Dear ${hiringMgr},"
-7. End with "Sincerely," followed by a blank line then "${data.firstName} ${data.lastName}"
-8. Do NOT include date, address headers, or subject lines — body text only
-9. Return ONLY valid JSON, no markdown: {"cover_letter":"<full letter with \\n for line breaks>"}`;
-  }
-
   const expStr = data.experience.length ? data.experience.map(e=>`- ${e.title} at ${e.co} (${e.start}–${e.end}): ${e.desc||'no notes'}`).join('\n') : 'None';
   const awardsStr = data.awards.length ? data.awards.map(a=>`- ${a.name} by ${a.org} (${a.year}): ${a.desc||''}`).join('\n') : 'None';
   const eduStr = data.education.length ? data.education.map(e=>`- ${e.deg} from ${e.sch} (${e.yr})${e.gpa?' GPA:'+e.gpa:''}`).join('\n') : 'None';
@@ -2111,6 +2076,7 @@ Email: ${data.email}
 Phone: ${data.phone||'N/A'}
 Location: ${data.location||'N/A'}
 LinkedIn: ${data.linkedin||'N/A'}
+GitHub: ${data.github||'N/A'}
 
 Work Experience:
 ${expStr}
@@ -2139,7 +2105,7 @@ async function generateResume() {
   const statusEl = document.getElementById('resumeStatus');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Generating…';
-  statusEl.textContent = data.format === 'cover-letter' ? 'AI is writing your cover letter…' : 'AI is crafting your resume…';
+  statusEl.textContent = 'AI is crafting your resume…';
   document.getElementById('editBadge').style.display = 'none';
 
   try {
@@ -2157,7 +2123,7 @@ async function generateResume() {
 
     const merged = {
       firstName: data.firstName, lastName: data.lastName, jobTitle: data.jobTitle,
-      email: data.email, phone: data.phone, location: data.location, linkedin: data.linkedin,
+      email: data.email, phone: data.phone, location: data.location, linkedin: data.linkedin, github: data.github,
       summary: parsed.summary || '',
       experience: parsed.experience || data.experience,
       awards: parsed.awards || data.awards,
@@ -2169,18 +2135,13 @@ async function generateResume() {
       merged.summary = ''; merged.awards = data.awards; merged.education = data.education;
     } else if (data.format === 'summary') {
       merged.experience = data.experience; merged.awards = data.awards; merged.education = data.education;
-    } else if (data.format === 'cover-letter') {
-      merged.coverLetter = parsed.cover_letter || '';
-      merged.coverJobTitle = data.coverJobTitle;
-      merged.coverCompany = data.coverCompany;
-      merged.coverHiringMgr = data.coverHiringMgr;
     }
 
     lastResumeData = merged;
     manuallyEdited = false;
     clearNeedsRegen();
     renderOutput(merged);
-    statusEl.textContent = merged.coverLetter ? 'Cover Letter generated · Click to edit' : 'Generated · Click any text to edit directly';
+    statusEl.textContent = 'Generated · Click any text to edit directly';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
@@ -2193,35 +2154,11 @@ async function generateResume() {
   }
 }
 
-function renderCoverLetterHTML(data) {
-  const today = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
-  const contactLine = [data.email, data.phone, data.location].filter(Boolean).join(' · ');
-  const lines = (data.coverLetter || '').split('\n');
-  const bodyHTML = lines.map(line =>
-    line.trim()
-      ? `<p style="margin:0 0 13px;line-height:1.78;">${esc(line)}</p>`
-      : '<div style="height:4px;"></div>'
-  ).join('');
-  return `<div style="font-family:'Georgia',serif;color:#1a1a1a;padding:52px 56px 44px;font-size:0.93rem;" contenteditable="true">
-    <div style="margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid #e5e7eb;">
-      <div style="font-size:1.18rem;font-weight:700;letter-spacing:0.3px;color:#111;">${esc(data.firstName)} ${esc(data.lastName)}</div>
-      <div style="font-size:0.83rem;color:#555;margin-top:4px;">${esc(data.jobTitle)}</div>
-      ${contactLine ? `<div style="font-size:0.8rem;color:#888;margin-top:3px;">${esc(contactLine)}</div>` : ''}
-    </div>
-    <div style="font-size:0.84rem;color:#666;margin-bottom:22px;">${today}</div>
-    ${data.coverCompany ? `<div style="font-size:0.88rem;font-weight:600;color:#333;margin-bottom:18px;">${esc(data.coverCompany)}</div>` : ''}
-    <div style="font-size:0.91rem;">${bodyHTML}</div>
-  </div>`;
-}
-
 function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
-  const inner = data.coverLetter
-    ? renderCoverLetterHTML(data)
-    : renderResumeHTML(data);
-  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${inner}</div>`;
+  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   // Block clipboard copy from resume output
