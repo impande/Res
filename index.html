@@ -857,14 +857,18 @@ function startBuild() {
 function markNeedsRegen() {
   if (!lastResumeData) return;
   needsRegenerate = true;
-  document.getElementById('generateBtn').classList.add('regen-needed');
-  document.getElementById('regenBadge').style.display = 'inline';
+  const btn = document.getElementById('generateBtn');
+  if (btn) btn.classList.add('regen-needed');
+  const badge = document.getElementById('regenBadge');
+  if (badge) badge.style.display = 'inline';
 }
 
 function clearNeedsRegen() {
   needsRegenerate = false;
-  document.getElementById('generateBtn').classList.remove('regen-needed');
-  document.getElementById('regenBadge').style.display = 'none';
+  const btn = document.getElementById('generateBtn');
+  if (btn) btn.classList.remove('regen-needed');
+  const badge = document.getElementById('regenBadge');
+  if (badge) badge.style.display = 'none';
 }
 
 // ── Photo ─────────────────────────────────────────────────────────────
@@ -1340,7 +1344,8 @@ async function generateResume() {
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '✦ Generate with AI';
+    btn.innerHTML = '✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
+    btn.classList.remove('regen-needed');
   }
 }
 
