@@ -1094,7 +1094,8 @@
     /* ── Bold bullets ── */
     [class*="tpl-"] .r-ul li{font-weight:600!important;}
     /* ── Suppress browser print headers/footers (URL + date/time) ── */
-    @media print{@page{margin:0!important;}}
+    @page{margin:0;}
+    @media print{@page{margin:0;}}
 
     /* ══ PREMIUM TEMPLATE UPGRADES ══════════════════════════════════════ */
 
@@ -2242,13 +2243,11 @@ function downloadPDF() {
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title></title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-/* margin:0 removes browser-injected URL + date/time headers from print output */
-@page{size:210mm 297mm portrait;margin:0mm!important;}
+@page{size:210mm 297mm portrait;margin:0;}
 html{width:210mm;}
 body{width:210mm;min-height:297mm;margin:0 auto;padding:0;background:#fff;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
 .pdf-page{width:210mm;min-height:297mm;padding:16mm 14mm;box-sizing:border-box;background:#fff;overflow:hidden;}
 @media print{
-  @page{margin:0mm!important;}
   html,body{width:210mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .pdf-page{page-break-after:avoid;}
 }
