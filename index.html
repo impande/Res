@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Résumé AI</title>
+  <title>Resume For You – Powered by AI</title>
   <style>
     :root {
       --bg: #0f0f0f; --sidebar-bg: #141414; --card-bg: #1a1a1a;
@@ -11,13 +11,14 @@
       --accent: #f59e0b; --input-bg: #222; --input-border: #333; --white: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+    body { font-family: 'Segoe UI', system-ui, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; cursor: default; }
 
     /* SIDEBAR */
     #sidebar { width: 260px; min-width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 18px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
     .logo { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
     .logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; color: #000; flex-shrink: 0; }
-    .logo-text h2 { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+    .logo-text h2 { font-size: 0.95rem; font-weight: 700; color: var(--white); line-height: 1.2; }
+    .logo-text .tagline { font-size: 0.68rem; color: var(--accent); letter-spacing: 0.3px; margin-top: 2px; }
     .steps-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
     .step-item { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border-radius: 10px; cursor: pointer; transition: background 0.15s; color: var(--muted); }
     .step-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
@@ -28,6 +29,7 @@
     .step-item.completed .step-num { background: #166534; border-color: #166534; color: white; font-size: 0; }
     .step-item.completed .step-num::after { content: '✓'; font-size: 0.72rem; }
     .step-label { font-size: 0.84rem; font-weight: 500; }
+    .req-star { color: #ef4444; margin-left: 2px; }
     .preview-section { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
     .preview-label { font-size: 0.65rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
     .preview-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 0.75rem; color: var(--muted); min-height: 80px; line-height: 1.6; white-space: pre-wrap; }
@@ -46,14 +48,16 @@
 
     input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea, select {
       width: 100%; padding: 11px 13px; background: var(--input-bg); border: 1.5px solid var(--input-border);
-      border-radius: 8px; color: var(--text); font-size: 0.93rem; font-family: inherit; transition: border-color 0.2s;
+      border-radius: 8px; color: var(--text); font-size: 0.93rem; font-family: inherit; transition: border-color 0.2s; cursor: text;
     }
     input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+    input.field-error { border-color: #ef4444 !important; }
     input::placeholder, textarea::placeholder { color: #555; }
+    select { cursor: pointer; }
     select option { background: var(--card-bg); }
 
     /* TOUR */
-    #tourBackdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.62); z-index: 200; }
+    #tourBackdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.62); z-index: 200; cursor: default; }
     #tourTooltip {
       display: none; position: fixed; z-index: 202;
       background: #1c1c1c; border: 1px solid rgba(245,158,11,0.35);
@@ -115,22 +119,33 @@
 
     /* TEMPLATE PICKER */
     .tpl-section-label { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 11px; }
-    .tpl-picker { display: flex; gap: 11px; margin-bottom: 22px; }
-    .tpl-card { flex: 1; padding: 11px; border-radius: 10px; border: 2px solid var(--input-border); cursor: pointer; transition: all 0.15s; }
+    .tpl-picker { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+    .tpl-card { flex: 1; min-width: 120px; max-width: calc(20% - 8px); padding: 10px; border-radius: 10px; border: 2px solid var(--input-border); cursor: pointer; transition: all 0.15s; }
     .tpl-card:hover { border-color: var(--accent); }
     .tpl-card.selected { border-color: var(--accent); background: rgba(245,158,11,0.06); }
-    .tpl-thumb { width: 100%; height: 68px; border-radius: 5px; overflow: hidden; margin-bottom: 8px; background: white; padding: 7px; display: flex; flex-direction: column; gap: 4px; }
-    .tpl-name { font-size: 0.8rem; font-weight: 700; color: var(--text); }
-    .tpl-desc { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+    .tpl-thumb { width: 100%; height: 62px; border-radius: 5px; overflow: hidden; margin-bottom: 7px; background: white; padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+    .tpl-name { font-size: 0.76rem; font-weight: 700; color: var(--text); }
+    .tpl-desc { font-size: 0.63rem; color: var(--muted); margin-top: 1px; }
     .tb { border-radius: 2px; }
-    .tb-dark  { background: #1a1a2e; height: 17px; }
+    .tb-dark  { background: #1a1a2e; height: 16px; }
+    .tb-navy  { background: #0f2d5e; height: 16px; }
+    .tb-black { background: #111; height: 16px; }
+    .tb-green { background: #10b981; height: 4px; width: 30%; }
     .tb-accent{ background: #f59e0b; height: 4px; width: 35%; }
+    .tb-blue  { background: #3b82f6; height: 4px; width: 35%; }
     .tb-line  { background: #eee; height: 4px; }
     .tb-short { width: 60%; }
     .tb-title { background: #111; height: 7px; width: 45%; align-self: center; }
     .tb-div   { background: #ccc; height: 1px; }
     .tb-thin  { background: #eee; height: 3px; }
     .tb-xshort{ width: 40%; }
+
+    /* MOBILE PROGRESS BAR */
+    #mobileProgress { display: none; background: var(--sidebar-bg); border-bottom: 1px solid var(--border); padding: 6px 16px 8px; }
+    .mob-prog-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
+    .mob-prog-label span { color: var(--accent); font-weight: 600; }
+    .mob-prog-track { height: 3px; background: var(--border); border-radius: 2px; }
+    .mob-prog-fill { height: 3px; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
 
     /* RESUME BAR */
     .resume-bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-top: 1px solid var(--border); margin-top: 28px; flex-wrap: wrap; gap: 12px; }
@@ -146,21 +161,26 @@
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.25); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* VALIDATION BANNER */
+    .val-banner { display: none; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.83rem; color: #fca5a5; }
+
     /* MOBILE */
     @media (max-width: 768px) {
       body { flex-direction: column; }
       #sidebar { width: 100%; height: auto; position: sticky; top: 0; z-index: 50; padding: 10px 14px; flex-direction: row; align-items: center; border-right: none; border-bottom: 1px solid var(--border); overflow-x: auto; overflow-y: visible; gap: 10px; }
       .logo { padding-bottom: 0; border-bottom: none; margin-bottom: 0; flex-shrink: 0; }
-      .logo-text { display: none; }
+      .logo-text .tagline { display: none; }
       .steps-list { flex-direction: row; flex-wrap: nowrap; gap: 3px; flex: 1; }
-      .step-item { padding: 7px 9px; border-radius: 8px; flex-shrink: 0; }
-      .step-label { font-size: 0.75rem; }
+      .step-item { padding: 6px 8px; border-radius: 8px; flex-shrink: 0; flex-direction: column; align-items: center; gap: 3px; }
+      .step-label { font-size: 0.62rem; text-align: center; }
       .preview-section, .restart-tour-btn { display: none; }
+      #mobileProgress { display: block; }
       #main { padding: 20px 16px 28px; max-width: 100%; }
       .step-title { font-size: 1.5rem; }
       .step-subtitle { margin-bottom: 20px; }
       .form-grid-2 { grid-template-columns: 1fr; gap: 0; }
-      .tpl-picker { gap: 8px; }
+      .tpl-picker { gap: 7px; }
+      .tpl-card { min-width: 90px; max-width: calc(33% - 5px); padding: 8px; }
       .nav-buttons { flex-wrap: wrap; }
       .nav-buttons button { flex: 1; min-width: 110px; justify-content: center; }
       .resume-bar { flex-direction: column; align-items: flex-start; }
@@ -171,7 +191,7 @@
       #tourTooltip.arrow-left::before, #tourTooltip.arrow-right::before { display: none; }
     }
     @media (max-width: 480px) {
-      .step-label { display: none; }
+      .step-label { font-size: 0.56rem; }
       .btn-primary, .btn-secondary, .btn-accent { padding: 12px 14px; font-size: 0.85rem; }
     }
   </style>
@@ -183,6 +203,8 @@
     .tpl-modern .r-name  { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; }
     .tpl-modern .r-title { color: #f59e0b; font-size: 0.95rem; font-weight: 500; margin-top: 3px; }
     .tpl-modern .r-contact { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.77rem; color: #9ca3af; margin-top: 10px; }
+    .tpl-modern .r-contact a { color: #9ca3af; text-decoration: none; }
+    .tpl-modern .r-contact a:hover { color: #f59e0b; text-decoration: underline; }
     .tpl-modern .r-sec   { margin-top: 18px; }
     .tpl-modern .r-sec-t { font-size: 0.67rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f59e0b; margin-bottom: 9px; }
     .tpl-modern .r-sum   { font-size: 0.875rem; line-height: 1.75; color: #374151; }
@@ -214,6 +236,8 @@
     .tpl-classic .r-title { font-size: 0.9rem; font-style: italic; color: #555; margin-top: 3px; }
     .tpl-classic .r-contact { font-size: 0.79rem; color: #444; margin-top: 7px; }
     .tpl-classic .r-contact span { margin: 0 5px; }
+    .tpl-classic .r-contact a { color: #444; text-decoration: none; }
+    .tpl-classic .r-contact a:hover { text-decoration: underline; }
     .tpl-classic .r-sec   { margin-top: 14px; }
     .tpl-classic .r-sec-t { font-size: 0.79rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 9px; color: #111; }
     .tpl-classic .r-sum   { font-size: 0.875rem; line-height: 1.8; color: #222; }
@@ -242,6 +266,8 @@
     .tpl-minimal .r-name  { font-size: 1.95rem; font-weight: 300; letter-spacing: -1px; color: #000; }
     .tpl-minimal .r-title { font-size: 0.9rem; color: #777; margin-top: 2px; }
     .tpl-minimal .r-contact { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.77rem; color: #999; margin-top: 8px; }
+    .tpl-minimal .r-contact a { color: #999; text-decoration: none; }
+    .tpl-minimal .r-contact a:hover { color: #555; text-decoration: underline; }
     .tpl-minimal .r-div   { height: 1px; background: #ebebeb; margin: 13px 0; }
     .tpl-minimal .r-sec   { margin-top: 16px; }
     .tpl-minimal .r-sec-t { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; color: #bbb; margin-bottom: 11px; }
@@ -265,6 +291,102 @@
     .tpl-minimal .r-yr    { font-size: 0.77rem; color: #aaa; text-align: right; }
     .tpl-minimal .r-skills{ display: flex; flex-wrap: wrap; gap: 7px; }
     .tpl-minimal .r-sk    { padding: 3px 10px; border: 1px solid #e0e0e0; border-radius: 2px; font-size: 0.77rem; color: #555; }
+
+    /* CORPORATE */
+    .tpl-corporate { font-family: 'Segoe UI', system-ui, sans-serif; width: 100%; align-self: flex-start; }
+    .tpl-corporate .r-head { background: #0f2d5e; color: white; padding: 26px 30px; margin: -36px -36px 22px; border-radius: 8px 8px 0 0; }
+    .tpl-corporate .r-name  { font-size: 1.65rem; font-weight: 800; letter-spacing: 0.3px; }
+    .tpl-corporate .r-title { color: #93c5fd; font-size: 0.93rem; font-weight: 400; margin-top: 4px; letter-spacing: 0.5px; }
+    .tpl-corporate .r-contact { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.77rem; color: #bfdbfe; margin-top: 10px; }
+    .tpl-corporate .r-contact a { color: #bfdbfe; text-decoration: none; }
+    .tpl-corporate .r-contact a:hover { color: #fff; text-decoration: underline; }
+    .tpl-corporate .r-sec   { margin-top: 17px; }
+    .tpl-corporate .r-sec-t { font-size: 0.72rem; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: #0f2d5e; border-bottom: 2px solid #0f2d5e; padding-bottom: 4px; margin-bottom: 10px; }
+    .tpl-corporate .r-sum   { font-size: 0.875rem; line-height: 1.75; color: #374151; }
+    .tpl-corporate .r-exp   { margin-bottom: 13px; }
+    .tpl-corporate .r-exp-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .tpl-corporate .r-role  { font-weight: 700; font-size: 0.92rem; color: #111; }
+    .tpl-corporate .r-period{ font-size: 0.77rem; color: #6b7280; background: #eff6ff; padding: 1px 7px; border-radius: 3px; }
+    .tpl-corporate .r-co    { font-size: 0.82rem; color: #1d4ed8; font-weight: 600; margin: 3px 0 6px; }
+    .tpl-corporate .r-ul    { list-style: none; padding: 0; }
+    .tpl-corporate .r-ul li { padding: 2px 0 2px 16px; position: relative; font-size: 0.855rem; line-height: 1.65; color: #374151; }
+    .tpl-corporate .r-ul li::before { content: '◆'; position: absolute; left: 0; color: #3b82f6; font-size: 0.5rem; top: 6px; }
+    .tpl-corporate .r-award { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 9px; padding-bottom: 9px; border-bottom: 1px solid #e0eaff; }
+    .tpl-corporate .r-award:last-child { border-bottom: none; }
+    .tpl-corporate .r-award-name { font-weight: 700; font-size: 0.9rem; color: #111; }
+    .tpl-corporate .r-award-org  { font-size: 0.8rem; color: #1d4ed8; }
+    .tpl-corporate .r-award-desc { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
+    .tpl-corporate .r-award-year { font-size: 0.77rem; color: #6b7280; flex-shrink: 0; margin-left: 12px; }
+    .tpl-corporate .r-edu   { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .tpl-corporate .r-deg   { font-weight: 600; font-size: 0.9rem; color: #111; }
+    .tpl-corporate .r-sch   { font-size: 0.82rem; color: #6b7280; }
+    .tpl-corporate .r-yr    { font-size: 0.77rem; color: #6b7280; text-align: right; }
+    .tpl-corporate .r-skills{ display: flex; flex-wrap: wrap; gap: 7px; }
+    .tpl-corporate .r-sk    { padding: 4px 11px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 0.77rem; color: #1e40af; font-weight: 500; }
+
+    /* CREATIVE */
+    .tpl-creative { font-family: 'Segoe UI', system-ui, sans-serif; width: 100%; align-self: flex-start; }
+    .tpl-creative .r-head { border-left: 5px solid #10b981; padding: 16px 0 16px 20px; margin-bottom: 20px; }
+    .tpl-creative .r-name  { font-size: 2rem; font-weight: 800; letter-spacing: -1px; color: #111; }
+    .tpl-creative .r-title { font-size: 0.9rem; color: #10b981; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+    .tpl-creative .r-contact { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.77rem; color: #555; margin-top: 8px; }
+    .tpl-creative .r-contact a { color: #10b981; text-decoration: none; }
+    .tpl-creative .r-contact a:hover { text-decoration: underline; }
+    .tpl-creative .r-sec   { margin-top: 16px; }
+    .tpl-creative .r-sec-t { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #fff; background: #10b981; display: inline-block; padding: 2px 10px; border-radius: 3px; margin-bottom: 10px; }
+    .tpl-creative .r-sum   { font-size: 0.875rem; line-height: 1.8; color: #374151; }
+    .tpl-creative .r-exp   { margin-bottom: 14px; border-left: 2px solid #d1fae5; padding-left: 14px; }
+    .tpl-creative .r-exp-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .tpl-creative .r-role  { font-weight: 700; font-size: 0.92rem; color: #111; }
+    .tpl-creative .r-period{ font-size: 0.77rem; color: #6b7280; }
+    .tpl-creative .r-co    { font-size: 0.82rem; color: #059669; font-weight: 600; margin: 2px 0 6px; }
+    .tpl-creative .r-ul    { list-style: none; padding: 0; }
+    .tpl-creative .r-ul li { padding: 2px 0 2px 14px; position: relative; font-size: 0.855rem; line-height: 1.65; color: #374151; }
+    .tpl-creative .r-ul li::before { content: '●'; position: absolute; left: 0; color: #10b981; font-size: 0.5rem; top: 6px; }
+    .tpl-creative .r-award { margin-bottom: 10px; padding: 8px 12px; background: #f0fdf4; border-radius: 6px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .tpl-creative .r-award-name { font-weight: 700; font-size: 0.9rem; color: #111; }
+    .tpl-creative .r-award-org  { font-size: 0.8rem; color: #059669; }
+    .tpl-creative .r-award-desc { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
+    .tpl-creative .r-award-year { font-size: 0.78rem; color: #6b7280; flex-shrink: 0; margin-left: 12px; }
+    .tpl-creative .r-edu   { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .tpl-creative .r-deg   { font-weight: 600; font-size: 0.9rem; color: #111; }
+    .tpl-creative .r-sch   { font-size: 0.82rem; color: #6b7280; }
+    .tpl-creative .r-yr    { font-size: 0.77rem; color: #6b7280; text-align: right; }
+    .tpl-creative .r-skills{ display: flex; flex-wrap: wrap; gap: 7px; }
+    .tpl-creative .r-sk    { padding: 4px 12px; background: #10b981; border-radius: 999px; font-size: 0.77rem; color: white; font-weight: 600; }
+
+    /* EXECUTIVE */
+    .tpl-executive { font-family: 'Segoe UI', system-ui, sans-serif; width: 100%; align-self: flex-start; }
+    .tpl-executive .r-head { background: #111; color: white; padding: 28px 30px 20px; margin: -36px -36px 0; }
+    .tpl-executive .r-head-accent { height: 4px; background: linear-gradient(90deg,#f59e0b,#ef4444); margin: 0 -36px 22px; }
+    .tpl-executive .r-name  { font-size: 1.8rem; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; }
+    .tpl-executive .r-title { font-size: 0.82rem; color: #f59e0b; letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-top: 6px; }
+    .tpl-executive .r-contact { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.77rem; color: #9ca3af; margin-top: 10px; }
+    .tpl-executive .r-contact a { color: #9ca3af; text-decoration: none; }
+    .tpl-executive .r-contact a:hover { color: #f59e0b; text-decoration: underline; }
+    .tpl-executive .r-sec   { margin-top: 18px; }
+    .tpl-executive .r-sec-t { font-size: 0.65rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #111; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .tpl-executive .r-sec-t::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+    .tpl-executive .r-sum   { font-size: 0.875rem; line-height: 1.8; color: #374151; }
+    .tpl-executive .r-exp   { margin-bottom: 14px; }
+    .tpl-executive .r-exp-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .tpl-executive .r-role  { font-weight: 700; font-size: 0.9rem; color: #111; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tpl-executive .r-period{ font-size: 0.77rem; color: #6b7280; }
+    .tpl-executive .r-co    { font-size: 0.82rem; color: #9a3412; font-weight: 600; margin: 2px 0 6px; }
+    .tpl-executive .r-ul    { list-style: none; padding: 0; }
+    .tpl-executive .r-ul li { padding: 2px 0 2px 18px; position: relative; font-size: 0.855rem; line-height: 1.65; color: #374151; }
+    .tpl-executive .r-ul li::before { content: ''; position: absolute; left: 5px; top: 9px; width: 5px; height: 5px; background: #f59e0b; border-radius: 50%; }
+    .tpl-executive .r-award { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 9px; }
+    .tpl-executive .r-award-name { font-weight: 700; font-size: 0.9rem; color: #111; }
+    .tpl-executive .r-award-org  { font-size: 0.8rem; color: #9a3412; }
+    .tpl-executive .r-award-desc { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
+    .tpl-executive .r-award-year { font-size: 0.78rem; color: #6b7280; flex-shrink: 0; margin-left: 12px; }
+    .tpl-executive .r-edu   { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .tpl-executive .r-deg   { font-weight: 600; font-size: 0.85rem; color: #111; text-transform: uppercase; letter-spacing: 0.3px; }
+    .tpl-executive .r-sch   { font-size: 0.82rem; color: #6b7280; }
+    .tpl-executive .r-yr    { font-size: 0.77rem; color: #6b7280; text-align: right; }
+    .tpl-executive .r-skills{ display: flex; flex-wrap: wrap; gap: 6px; }
+    .tpl-executive .r-sk    { padding: 3px 11px; border: 1.5px solid #111; border-radius: 2px; font-size: 0.77rem; color: #111; font-weight: 600; letter-spacing: 0.3px; }
   </style>
 </head>
 <body>
@@ -272,7 +394,10 @@
 <aside id="sidebar">
   <div class="logo">
     <div class="logo-icon">R</div>
-    <div class="logo-text"><h2>Résumé AI</h2></div>
+    <div class="logo-text">
+      <h2>Resume For You</h2>
+      <div class="tagline">Powered by AI</div>
+    </div>
   </div>
   <ul class="steps-list">
     <li class="step-item active" data-step="1" onclick="goToStep(1)"><div class="step-num"><span>1</span></div><span class="step-label">Basic Info</span></li>
@@ -289,24 +414,31 @@
   <button class="restart-tour-btn" onclick="startTour()">▶ Restart Guided Tour</button>
 </aside>
 
+<!-- MOBILE PROGRESS BAR -->
+<div id="mobileProgress">
+  <div class="mob-prog-label">Step <span id="mobStepNum">1</span> of 6 &mdash; <span id="mobStepName">Basic Info</span></div>
+  <div class="mob-prog-track"><div class="mob-prog-fill" id="mobProgFill" style="width:16.67%"></div></div>
+</div>
+
 <main id="main">
 
   <!-- Step 1: Basic Info -->
   <div class="step-content active" id="step1">
     <h1 class="step-title">Personal Information</h1>
-    <p class="step-subtitle">Let's start with who you are</p>
+    <p class="step-subtitle">Fields marked <span style="color:#ef4444">*</span> are required to generate your resume</p>
+    <div id="valBanner1" class="val-banner"></div>
     <div class="form-grid-2">
       <div class="form-group">
-        <label class="form-label">First Name</label>
+        <label class="form-label">First Name <span class="req-star">*</span></label>
         <input type="text" id="firstName" placeholder="e.g. Alexandra" oninput="updatePreview()">
       </div>
       <div class="form-group">
-        <label class="form-label">Last Name</label>
+        <label class="form-label">Last Name <span class="req-star">*</span></label>
         <input type="text" id="lastName" placeholder="e.g. Chen" oninput="updatePreview()">
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Professional Title</label>
+      <label class="form-label">Professional Title <span class="req-star">*</span></label>
       <input type="text" id="jobTitle" placeholder="e.g. Senior Software Engineer" oninput="updatePreview()">
       <div class="chips">
         <button class="chip" onclick="setTitle(this,'Software Engineer')">Software Engineer</button>
@@ -319,7 +451,7 @@
     </div>
     <div class="form-grid-2">
       <div class="form-group">
-        <label class="form-label">Email</label>
+        <label class="form-label">Email <span class="req-star">*</span></label>
         <input type="email" id="email" placeholder="e.g. alex@gmail.com" oninput="updatePreview()">
       </div>
       <div class="form-group">
@@ -346,7 +478,7 @@
   <!-- Step 2: Work Experience -->
   <div class="step-content" id="step2">
     <h1 class="step-title">Work Experience</h1>
-    <p class="step-subtitle">Add your most recent roles first</p>
+    <p class="step-subtitle">Add your most recent roles first. Leave description blank — AI will generate optimised bullets for you.</p>
     <div id="experienceEntries"></div>
     <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
     <div class="nav-buttons">
@@ -409,11 +541,11 @@
             <div class="tb tb-accent"></div>
             <div class="tb tb-line" style="width:90%"></div>
             <div class="tb tb-line tb-short"></div>
-            <div class="tb tb-accent" style="margin-top:4px"></div>
+            <div class="tb tb-accent" style="margin-top:3px"></div>
             <div class="tb tb-line" style="width:80%"></div>
           </div>
           <div class="tpl-name">Modern</div>
-          <div class="tpl-desc">Dark header · Amber accents</div>
+          <div class="tpl-desc">Dark · Amber</div>
         </div>
         <div class="tpl-card" data-tpl="classic" onclick="selectTemplate('classic')">
           <div class="tpl-thumb">
@@ -425,19 +557,55 @@
             <div class="tb tb-line" style="width:80%"></div>
           </div>
           <div class="tpl-name">Classic</div>
-          <div class="tpl-desc">Serif · Traditional layout</div>
+          <div class="tpl-desc">Serif · Formal</div>
         </div>
         <div class="tpl-card" data-tpl="minimal" onclick="selectTemplate('minimal')">
           <div class="tpl-thumb">
-            <div class="tb" style="background:#333;height:9px;width:42%;border-radius:2px"></div>
+            <div class="tb" style="background:#333;height:8px;width:42%;border-radius:2px"></div>
             <div class="tb tb-thin" style="width:55%"></div>
             <div class="tb tb-thin" style="width:90%"></div>
             <div class="tb tb-thin tb-short"></div>
-            <div class="tb tb-thin tb-xshort" style="margin-top:4px"></div>
+            <div class="tb tb-thin tb-xshort" style="margin-top:3px"></div>
             <div class="tb tb-thin" style="width:85%"></div>
           </div>
           <div class="tpl-name">Minimal</div>
-          <div class="tpl-desc">Clean · Lots of whitespace</div>
+          <div class="tpl-desc">Clean · Airy</div>
+        </div>
+        <div class="tpl-card" data-tpl="corporate" onclick="selectTemplate('corporate')">
+          <div class="tpl-thumb">
+            <div class="tb tb-navy"></div>
+            <div class="tb tb-blue"></div>
+            <div class="tb tb-line" style="width:88%"></div>
+            <div class="tb tb-line tb-short"></div>
+            <div class="tb tb-blue" style="margin-top:3px;width:24%"></div>
+            <div class="tb tb-line" style="width:80%"></div>
+          </div>
+          <div class="tpl-name">Corporate</div>
+          <div class="tpl-desc">Navy · Blue</div>
+        </div>
+        <div class="tpl-card" data-tpl="creative" onclick="selectTemplate('creative')">
+          <div class="tpl-thumb" style="padding-left:9px;border-left:3px solid #10b981;">
+            <div class="tb" style="background:#111;height:8px;width:40%;border-radius:2px"></div>
+            <div class="tb tb-green"></div>
+            <div class="tb tb-thin" style="width:88%"></div>
+            <div class="tb tb-thin tb-short"></div>
+            <div class="tb" style="background:#10b981;height:3px;width:28%;border-radius:2px;margin-top:3px"></div>
+            <div class="tb tb-thin" style="width:82%"></div>
+          </div>
+          <div class="tpl-name">Creative</div>
+          <div class="tpl-desc">Green · Bold</div>
+        </div>
+        <div class="tpl-card" data-tpl="executive" onclick="selectTemplate('executive')">
+          <div class="tpl-thumb">
+            <div class="tb tb-black"></div>
+            <div style="height:3px;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:1px"></div>
+            <div class="tb tb-line" style="width:85%"></div>
+            <div class="tb tb-line tb-short"></div>
+            <div class="tb tb-accent" style="margin-top:3px;width:22%"></div>
+            <div class="tb tb-line" style="width:80%"></div>
+          </div>
+          <div class="tpl-name">Executive</div>
+          <div class="tpl-desc">Black · Gold</div>
         </div>
       </div>
     </div>
@@ -490,6 +658,7 @@
 </div>
 
 <script>
+  const STEP_NAMES = ['','Basic Info','Experience','Awards','Education','Skills','Generate'];
   let skills = [];
   let expCount = 0, awardCount = 0, eduCount = 0;
   let currentTemplate = 'modern';
@@ -502,25 +671,25 @@
     return [
       { s:1, sel:'#firstName',   lab:'First Name',           txt:'Type your legal first name. Recruiters will address you by this — make sure it\'s what you prefer professionally.' },
       { s:1, sel:'#lastName',    lab:'Last Name',            txt:'Your family / surname. Together with your first name, this becomes the header of your resume.' },
-      { s:1, sel:'#jobTitle',    lab:'Professional Title',   txt:'Your current or target job title. Be specific — "Senior Data Scientist" is better than "Data Scientist". Recruiters read this first.' },
-      { s:1, sel:'#email',       lab:'Email Address',        txt:'Use a professional email. Ideal format: firstname.lastname@gmail.com. Avoid nicknames, numbers, or old college IDs.' },
-      { s:1, sel:'#phone',       lab:'Phone Number',         txt:'Include country code. E.g. +91 98765 43210 (India). This is how recruiters call you — double-check it.' },
-      { s:1, sel:'#location',    lab:'Location',             txt:'City and Country only — never write full street address on a resume. E.g. "Pune, India".' },
-      { s:1, sel:'#linkedin',    lab:'LinkedIn / Portfolio', txt:'Your LinkedIn profile URL. Tip: customise your URL at linkedin.com/in/yourname — it looks much cleaner.' },
-      { s:2, sel:'.exp-role',    lab:'Job Title',            txt:'Your official job title exactly as it was on your contract — ATS systems keyword-match this.' },
-      { s:2, sel:'.exp-company', lab:'Company Name',         txt:'Full legal company name. If acquired or rebranded, use the name from your tenure, then add "(now XYZ)".' },
-      { s:2, sel:'.exp-start',   lab:'Start Date',           txt:'Use Month + Year: e.g. "Jan 2022". Avoid year-only — it looks vague and raises red flags for recruiters.' },
-      { s:2, sel:'.exp-end',     lab:'End Date',             txt:'Type "Present" for your current role. Be accurate — background checks verify employment history.' },
-      { s:2, sel:'.exp-desc',    lab:'Key Achievements',     txt:'This is the MOST impactful field. Formula: Action Verb + What + Result with Numbers. E.g. "Led 8-member team to launch payments feature, reducing drop-off by 22%."' },
-      { s:3, sel:'.award-name',  lab:'Award Name',           txt:'Name of the award, certification, or recognition. E.g. "Employee of the Year", "AWS Certified Solutions Architect", "Best Innovator".' },
-      { s:3, sel:'.award-org',   lab:'Issuing Organisation', txt:'The company, institution, or body that gave you this award. E.g. "Bajaj Finserv", "Coursera", "Forbes".' },
-      { s:3, sel:'.award-year',  lab:'Year',                 txt:'Year you received this award. If it\'s a certification, use the issue year or add expiry: "2023 (expires 2026)".' },
-      { s:3, sel:'.award-desc',  lab:'Brief Description',    txt:'1–2 lines on why you won it or what it represents. E.g. "Recognised for exceeding revenue targets by 40% in Q3 2023." Optional but powerful.' },
-      { s:4, sel:'.edu-degree',  lab:'Degree',               txt:'Your degree type and field. E.g. "B.Tech in Computer Science", "MBA in Finance", "B.Com (Honours)".' },
-      { s:4, sel:'.edu-school',  lab:'Institution',          txt:'Full official university name. Write "Indian Institute of Technology, Bombay" not just "IIT" — ATS matches full names.' },
+      { s:1, sel:'#jobTitle',    lab:'Professional Title',   txt:'Your current or target job title. Be specific — "Senior Data Scientist" beats "Data Scientist". Recruiters read this first.' },
+      { s:1, sel:'#email',       lab:'Email Address',        txt:'Use a professional email. Ideal: firstname.lastname@gmail.com. Avoid nicknames or old college IDs.' },
+      { s:1, sel:'#phone',       lab:'Phone Number',         txt:'Include country code. E.g. +91 98765 43210. This is how recruiters call you — double-check it.' },
+      { s:1, sel:'#location',    lab:'Location',             txt:'City and Country only — never write a full street address. E.g. "Pune, India".' },
+      { s:1, sel:'#linkedin',    lab:'LinkedIn / Portfolio', txt:'Your LinkedIn URL. Tip: customise it at linkedin.com/in/yourname — looks much cleaner on the resume.' },
+      { s:2, sel:'.exp-role',    lab:'Job Title',            txt:'Your official job title exactly as on your contract — ATS systems keyword-match this.' },
+      { s:2, sel:'.exp-company', lab:'Company Name',         txt:'Full legal company name. If rebranded, add "(now XYZ)" after your tenure name.' },
+      { s:2, sel:'.exp-start',   lab:'Start Date',           txt:'Use Month + Year: e.g. "Jan 2022". Avoid year-only — it looks vague to recruiters.' },
+      { s:2, sel:'.exp-end',     lab:'End Date',             txt:'Type "Present" for your current role. Background checks verify employment history.' },
+      { s:2, sel:'.exp-desc',    lab:'Key Achievements',     txt:'Optional — AI will auto-generate 4 industry-specific bullets if you leave this blank. Or provide context for more personalised results.' },
+      { s:3, sel:'.award-name',  lab:'Award Name',           txt:'E.g. "Employee of the Year", "AWS Certified Solutions Architect". Be precise.' },
+      { s:3, sel:'.award-org',   lab:'Issuing Organisation', txt:'The company or institution that gave you this award. E.g. "Bajaj Finserv", "Coursera".' },
+      { s:3, sel:'.award-year',  lab:'Year',                 txt:'Year you received this award or certification.' },
+      { s:3, sel:'.award-desc',  lab:'Brief Description',    txt:'1–2 lines on why you won it. E.g. "Recognised for exceeding revenue targets by 40% in Q3 2023." Optional but impactful.' },
+      { s:4, sel:'.edu-degree',  lab:'Degree',               txt:'E.g. "B.Tech in Computer Science", "MBA in Finance". Include honours if applicable.' },
+      { s:4, sel:'.edu-school',  lab:'Institution',          txt:'Full official university name. E.g. "Indian Institute of Technology, Bombay" — ATS matches full names.' },
       { s:4, sel:'.edu-year',    lab:'Graduation Year',      txt:'Year you graduated. For ongoing education write "Expected May 2025".' },
-      { s:4, sel:'.edu-gpa',     lab:'GPA / Grades',         txt:'Optional but worth adding if strong. Include scale: "3.8/4.0" or "8.7/10 CGPA". Skip if below 3.0/4.0 or 7.0/10.' },
-      { s:5, sel:'#skillInput',  lab:'Skills',               txt:'Add 8–15 skills for best ATS score. Mix technical (Python, SQL, React) with soft skills (Leadership, Agile, Communication). Press Enter to add each.' },
+      { s:4, sel:'.edu-gpa',     lab:'GPA / Grades',         txt:'Optional but worth adding if strong. Include scale: "3.8/4.0" or "8.7/10 CGPA". Skip if below 3.0/4.0.' },
+      { s:5, sel:'#skillInput',  lab:'Skills',               txt:'Add 8–15 skills for best ATS score. Mix technical (Python, SQL) with soft skills (Leadership, Agile). Press Enter to add each.' },
     ];
   }
 
@@ -541,7 +710,6 @@
       if (!el) { tourIdx++; showTourStep(); return; }
       el.classList.add('tour-highlight');
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Focus field so user can type immediately
       setTimeout(() => { try { el.focus(); if (el.value) el.select(); } catch(e){} }, 120);
       document.getElementById('tourBackdrop').style.display = 'block';
       document.getElementById('ttLabel').textContent    = t.lab;
@@ -611,6 +779,10 @@
       if (s === step) el.classList.add('active');
       else if (s < step) el.classList.add('completed');
     });
+    const pct = (step / 6 * 100).toFixed(2);
+    document.getElementById('mobProgFill').style.width = pct + '%';
+    document.getElementById('mobStepNum').textContent  = step;
+    document.getElementById('mobStepName').textContent = STEP_NAMES[step];
     updatePreview();
     document.getElementById('main').scrollTop = 0;
   }
@@ -664,8 +836,10 @@
         <div class="form-group"><label class="form-label">End Date</label>
           <input type="text" placeholder="e.g. Present" class="exp-end"></div>
       </div>
-      <div class="form-group"><label class="form-label">Key Achievements</label>
-        <textarea rows="3" placeholder="e.g. Led team of 8 to launch payments feature, reducing drop-off by 22%…" class="exp-desc"></textarea></div>`;
+      <div class="form-group">
+        <label class="form-label" style="text-transform:none;font-size:0.7rem;letter-spacing:0.5px">Key Achievements <span style="color:var(--muted);font-weight:400">(optional — AI generates bullets if blank)</span></label>
+        <textarea rows="3" placeholder="e.g. Led team of 8 to launch payments feature, reducing drop-off by 22%…" class="exp-desc"></textarea>
+      </div>`;
     document.getElementById('experienceEntries').appendChild(div);
   }
 
@@ -742,6 +916,30 @@
       document.getElementById('outputFormat').value === 'full' ? '' : 'none';
   }
 
+  /* ─── VALIDATION ────────────────────────────────────────── */
+  function validateMandatory() {
+    const fields = [
+      { id:'firstName', label:'First Name' },
+      { id:'lastName',  label:'Last Name' },
+      { id:'jobTitle',  label:'Professional Title' },
+      { id:'email',     label:'Email' },
+    ];
+    const missing = fields.filter(f => !document.getElementById(f.id).value.trim());
+    if (missing.length) {
+      fields.forEach(f => document.getElementById(f.id).classList.remove('field-error'));
+      missing.forEach(f => document.getElementById(f.id).classList.add('field-error'));
+      const banner = document.getElementById('valBanner1');
+      banner.textContent = 'Please fill in: ' + missing.map(f => f.label).join(', ');
+      banner.style.display = 'block';
+      goToStep(1);
+      document.getElementById(missing[0].id).focus();
+      return false;
+    }
+    document.getElementById('valBanner1').style.display = 'none';
+    fields.forEach(f => document.getElementById(f.id).classList.remove('field-error'));
+    return true;
+  }
+
   /* ─── DATA ──────────────────────────────────────────────── */
   function collectData() {
     const experiences = [];
@@ -768,15 +966,36 @@
   }
 
   function buildPrompt(d, format) {
-    const expText   = d.experiences.map(e=>`${e.role} at ${e.company} (${e.start}–${e.end}): ${e.desc}`).join('\n');
+    const expText   = d.experiences.map(e=>`${e.role} at ${e.company} (${e.start}–${e.end}): ${e.desc||'[NO DESCRIPTION — generate industry-standard bullets]'}`).join('\n');
     const awardText = d.awards.filter(a=>a.name).map(a=>`${a.name}${a.org?', '+a.org:''}${a.year?', '+a.year:''}${a.desc?' — '+a.desc:''}`).join('\n');
     const eduText   = d.education.map(e=>`${e.degree}, ${e.school}${e.year?', '+e.year:''}${e.gpa?', GPA: '+e.gpa:''}`).join('\n');
     const base = `Name: ${d.name}\nTitle: ${d.title}\nEmail: ${d.email}\nPhone: ${d.phone}\nLocation: ${d.location}\nLinkedIn: ${d.linkedin}\nExperience:\n${expText}\nAwards:\n${awardText||'None'}\nEducation:\n${eduText}\nSkills: ${d.skills.join(', ')}`;
     if (format==='full')
-      return `You are an expert resume writer. Create a professional ATS-optimised resume.\n\nReturn ONLY valid JSON, no markdown:\n{"summary":"3-4 sentence summary","experience":[{"role":"","company":"","period":"","bullets":[]}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"degree":"","school":"","year":"","gpa":""}],"skills":[]}\n\nData:\n${base}`;
+      return `You are an expert resume writer creating an ATS-optimised, industry-specific resume.
+
+STRICT RULES:
+1. Professional Summary: MAXIMUM 50 words. Punchy, role-specific, highlights top value proposition. No fluff.
+2. Work Experience: For EACH role write exactly 4 bullet points using strong past-tense action verbs with quantified results. Use terminology and metrics standard for the "${d.title}" role and industry. If a role says "[NO DESCRIPTION — generate industry-standard bullets]", GENERATE compelling, realistic bullets based on the job title and company context.
+3. Tailor ALL content for a ${d.title} professional. Use industry keywords and standards throughout.
+4. Every bullet must begin with a strong action verb (Led, Drove, Architected, Reduced, Grew, Delivered, Spearheaded, etc).
+
+Return ONLY valid JSON, no markdown:
+{"summary":"max 50 words","experience":[{"role":"","company":"","period":"","bullets":[]}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"degree":"","school":"","year":"","gpa":""}],"skills":[]}
+
+Data:
+${base}`;
     if (format==='bullets')
-      return `Create 8 strong ATS-optimised bullet points for a ${d.title}. Action verbs, quantified results. Plain text.\n\n${base}`;
-    return `Write a 3-4 sentence professional summary. Plain text only.\n\n${base}`;
+      return `Create 8 strong ATS-optimised bullet points for a ${d.title}. Use industry-specific action verbs and quantified results. Plain text.\n\n${base}`;
+    return `Write a professional summary in MAXIMUM 50 words for a ${d.title}. Crisp, punchy, ATS-friendly. Plain text only.\n\n${base}`;
+  }
+
+  /* ─── CONTACT LINKS ─────────────────────────────────────── */
+  function contactLink(val) {
+    if (!val) return esc(val);
+    if (val.includes('@')) return `<a href="mailto:${esc(val)}" target="_blank">${esc(val)}</a>`;
+    if (/^[\d\s+\-().]+$/.test(val.trim())) return `<a href="tel:${val.replace(/[^\d+]/g,'')}">${esc(val)}</a>`;
+    const href = /^https?:\/\//i.test(val) ? val : 'https://'+val;
+    return `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(val)}</a>`;
   }
 
   /* ─── RENDER ─────────────────────────────────────────────── */
@@ -784,11 +1003,11 @@
 
   function renderResumeHTML(data) {
     const c = `tpl-${currentTemplate}`;
-    const contact = [data.email, data.phone, data.location, data.linkedin].filter(Boolean);
+    const contactItems = [data.email, data.phone, data.location, data.linkedin].filter(Boolean);
 
-    const contactHTML = currentTemplate==='classic'
-      ? `<div class="r-contact">${contact.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`
-      : `<div class="r-contact">${contact.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;
+    const contactHTML = currentTemplate === 'classic'
+      ? `<div class="r-contact">${contactItems.map(x=>`<span>${contactLink(x)}</span>`).join('')}</div>`
+      : `<div class="r-contact">${contactItems.map(x=>`<span>${contactLink(x)}</span>`).join('')}</div>`;
 
     const expHTML = (data.experience||[]).map(e=>`
       <div class="r-exp">
@@ -840,8 +1059,10 @@
       ? `<div class="r-skills">${(data.skills||[]).map(s=>esc(s)).join(' · ')}</div>`
       : `<div class="r-skills">${(data.skills||[]).map(s=>`<span class="r-sk">${esc(s)}</span>`).join('')}</div>`;
 
+    const execAccent = currentTemplate==='executive' ? '<div class="r-head-accent"></div>' : '';
+
     return `<div class="${c}" contenteditable="true" spellcheck="false">
-      <div class="r-head"><div class="r-name">${esc(data.name)}</div><div class="r-title">${esc(data.title)}</div>${contactHTML}</div>
+      <div class="r-head"><div class="r-name">${esc(data.name)}</div><div class="r-title">${esc(data.title)}</div>${contactHTML}</div>${execAccent}
       ${data.summary?`<div class="r-sec"><div class="r-sec-t">Professional Summary</div><div class="r-sum">${esc(data.summary)}</div></div>`:''}
       ${expHTML?`<div class="r-sec"><div class="r-sec-t">Work Experience</div>${expHTML}</div>`:''}
       ${awardHTML?`<div class="r-sec"><div class="r-sec-t">Awards &amp; Achievements</div>${awardHTML}</div>`:''}
@@ -854,7 +1075,6 @@
     const output = document.getElementById('resumeOutput');
     output.style.cssText = 'align-items:flex-start;justify-content:flex-start';
     output.innerHTML = renderResumeHTML(data);
-    // Track manual edits
     const ce = output.querySelector('[contenteditable]');
     if (ce) ce.addEventListener('input', () => { manuallyEdited = true; });
     document.getElementById('editBadge').style.display = 'inline-block';
@@ -862,6 +1082,7 @@
 
   /* ─── GENERATE ──────────────────────────────────────────── */
   async function generateResume() {
+    if (!validateMandatory()) return;
     const data = collectData(), format = document.getElementById('outputFormat').value;
     const btn = document.getElementById('generateBtn'), output = document.getElementById('resumeOutput'), status = document.getElementById('resumeStatus');
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Generating…';
@@ -922,8 +1143,10 @@
 body{font-family:'Segoe UI',system-ui,sans-serif;padding:40px;background:white;max-width:800px;margin:0 auto;color:#111;}
 @page{margin:12mm;size:A4;}
 @media print{body{padding:20px;}}
+a{color:inherit;text-decoration:none;}
 ${tplCSS}
-.tpl-modern .r-head{border-radius:0;margin:-40px -40px 22px;}
+.tpl-modern .r-head,.tpl-corporate .r-head,.tpl-executive .r-head{border-radius:0;margin:-40px -40px 0;}
+.tpl-executive .r-head-accent{margin:0 -40px 22px;}
 [contenteditable]{outline:none!important;}
 </style></head><body>
 ${card.innerHTML}
