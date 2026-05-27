@@ -117,6 +117,11 @@
     .resume-bar-left p{font-size:0.83rem;color:var(--muted);margin-top:2px;}
     .edit-badge{display:none;font-size:0.72rem;color:var(--accent);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:2px 8px;margin-top:4px;}
     .resume-bar-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn-dl{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border:none;border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:700;font-family:inherit;transition:all .18s;letter-spacing:0.2px;text-decoration:none;}
+    .btn-dl-doc{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.25);}
+    .btn-dl-doc:hover{background:linear-gradient(135deg,#1d4ed8,#1e3a8a);transform:translateY(-1px);box-shadow:0 5px 16px rgba(37,99,235,0.38);}
+    .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
+    .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
     .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
@@ -1257,8 +1262,8 @@
         <span class="edit-badge" id="editBadge">✎ Click resume to edit directly</span>
       </div>
       <div class="resume-bar-actions">
-        <button class="btn-secondary" onclick="downloadDoc()">⬇ Download Doc</button>
-        <button class="btn-secondary" onclick="downloadPDF()">↓ Download PDF</button>
+        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download Doc</button>
+        <button class="btn-dl btn-dl-pdf" onclick="downloadPDF()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download PDF</button>
       </div>
     </div>
     <div class="resume-output-card" id="resumeOutput">
@@ -1868,7 +1873,8 @@ function downloadPDF() {
   const resumeHTML = page ? page.innerHTML : document.getElementById('resumeOutput').innerHTML;
   const win = window.open('','_blank');
   if (!win) { alert('Please allow pop-ups to download PDF'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Resume</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#fff;}@page{size:A4;margin:18mm 16mm;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}${tplCSS}</style></head><body>${resumeHTML}<script>window.onload=function(){window.print();};<\/script></body></html>`);
+  // @page margin:0 suppresses browser-injected URL/date/time headers in print
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title></title><style>*{box-sizing:border-box;margin:0;padding:0;}html,body{background:#fff;font-family:'Segoe UI',system-ui,Arial,sans-serif;}@page{size:A4;margin:0mm;}.pdf-page{width:210mm;min-height:297mm;padding:16mm 14mm;margin:0 auto;background:#fff;}@media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}${tplCSS}</style></head><body><div class="pdf-page">${resumeHTML}</div><script>window.onload=function(){window.print();};<\/script></body></html>`);
   win.document.close();
 }
 
