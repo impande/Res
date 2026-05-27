@@ -1063,6 +1063,10 @@
     [class*="tpl-"] .r-name{font-size:1.3rem!important;line-height:1.2!important;}
     [class*="tpl-"] .r-title{font-size:0.77rem!important;margin-top:2px!important;}
     [class*="tpl-"] .r-contact{font-size:0.69rem!important;margin-top:6px!important;}
+    /* ── Bold bullets ── */
+    [class*="tpl-"] .r-ul li{font-weight:600!important;}
+    /* ── Suppress browser print headers/footers (URL + date/time) ── */
+    @media print{@page{margin:0!important;}}
   </style>
 </head>
 <body>
@@ -1781,8 +1785,15 @@ function contactLink(val) {
   if (!val) return '';
   if (val.includes('@')) return `<a href="mailto:${esc(val)}">${esc(val)}</a>`;
   if (val.match(/^[\+\d\s\-\(\)]{6,}$/)) return `<a href="tel:${val.replace(/\s/g,'')}">${esc(val)}</a>`;
-  if (val.match(/^https?:\/\//)) return `<a href="${esc(val)}" target="_blank">${esc(val.replace(/^https?:\/\//,''))}</a>`;
-  if (val.includes('.')) return `<a href="https://${esc(val)}" target="_blank">${esc(val)}</a>`;
+  // URLs: show a clean label (LinkedIn / Portfolio), never the raw https:// string
+  if (val.match(/^https?:\/\//) || val.match(/\.[a-z]{2,}(\/|$)/i)) {
+    const href = val.match(/^https?:\/\//) ? val : 'https://' + val;
+    const label = val.toLowerCase().includes('linkedin') ? 'LinkedIn'
+                : val.toLowerCase().includes('github')   ? 'GitHub'
+                : val.toLowerCase().includes('portfolio') ? 'Portfolio'
+                : 'Website';
+    return `<a href="${esc(href)}" target="_blank">${label}</a>`;
+  }
   return esc(val);
 }
 
@@ -2019,11 +2030,13 @@ function downloadPDF() {
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title></title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-@page{size:210mm 297mm portrait;margin:0mm;}
+/* margin:0 removes browser-injected URL + date/time headers from print output */
+@page{size:210mm 297mm portrait;margin:0mm!important;}
 html{width:210mm;}
 body{width:210mm;min-height:297mm;margin:0 auto;padding:0;background:#fff;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
 .pdf-page{width:210mm;min-height:297mm;padding:16mm 14mm;box-sizing:border-box;background:#fff;overflow:hidden;}
 @media print{
+  @page{margin:0mm!important;}
   html,body{width:210mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .pdf-page{page-break-after:avoid;}
 }
