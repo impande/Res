@@ -117,8 +117,10 @@
     .resume-bar-left p{font-size:0.83rem;color:var(--muted);margin-top:2px;}
     .edit-badge{display:none;font-size:0.72rem;color:var(--accent);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:2px 8px;margin-top:4px;}
     .resume-bar-actions{display:flex;gap:10px;flex-wrap:wrap;}
-    .resume-output-card{background:var(--white);color:#111;border-radius:12px;padding:36px;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;}
+    .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;}
+    .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
+    .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
     .resume-placeholder{text-align:center;color:#aaa;font-family:'Segoe UI',system-ui,sans-serif;}
     .resume-placeholder strong{color:#555;}
     .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
@@ -143,7 +145,8 @@
       .resume-bar{flex-direction:column;align-items:flex-start;}
       .resume-bar-actions{width:100%;}
       .resume-bar-actions button{flex:1;justify-content:center;}
-      .resume-output-card{padding:18px;}
+      .resume-output-card{padding:0;}
+      .resume-a4-page{padding:12mm 8mm;}
       #step0{padding:36px 16px 28px;}
       .hero-title{font-size:2rem;}
       .hero-features{gap:16px;}
@@ -1254,7 +1257,7 @@
         <span class="edit-badge" id="editBadge">✎ Click resume to edit directly</span>
       </div>
       <div class="resume-bar-actions">
-        <button class="btn-secondary" id="copyBtn" onclick="copyResume()">☐ Copy</button>
+        <button class="btn-secondary" onclick="downloadDoc()">⬇ Download Doc</button>
         <button class="btn-secondary" onclick="downloadPDF()">↓ Download PDF</button>
       </div>
     </div>
@@ -1821,27 +1824,51 @@ function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
-  out.innerHTML = `<div style="width:100%" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
+  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
+  // Block clipboard copy from resume output
+  out.addEventListener('copy', e => e.preventDefault(), { once: false });
+  out.addEventListener('cut', e => e.preventDefault(), { once: false });
 }
 
-// ── Copy & PDF ────────────────────────────────────────────────────────
-function copyResume() {
-  const out = document.getElementById('resumeOutput');
-  const text = out.innerText || out.textContent || '';
-  const btn = document.getElementById('copyBtn');
-  const done = () => { btn.textContent='✓ Copied!'; setTimeout(()=>{ btn.textContent='☐ Copy'; },2000); };
-  if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done).catch(()=>{}); return; }
-  const ta = document.createElement('textarea');
-  ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-  done();
+// ── Download Doc (.doc) ───────────────────────────────────────────────
+function downloadDoc() {
+  const page = document.querySelector('#resumeOutput .resume-a4-page');
+  if (!page) { alert('Generate your resume first.'); return; }
+  const tplCSS = document.getElementById('tplStyles')?.innerHTML || '';
+  const innerHTML = page.innerHTML;
+  const docHtml = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<title>Resume</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
+<style>
+  @page WordSection1{size:210mm 297mm;margin:18mm 16mm;}
+  div.WordSection1{page:WordSection1;}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;}
+  ${tplCSS}
+</style>
+</head>
+<body><div class="WordSection1">${innerHTML}</div></body>
+</html>`;
+  const blob = new Blob(['﻿', docHtml], { type: 'application/msword;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'resume.doc';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// ── PDF ───────────────────────────────────────────────────────────────
 function downloadPDF() {
   const tplCSS = document.getElementById('tplStyles')?.innerHTML || '';
-  const resumeHTML = document.getElementById('resumeOutput').innerHTML;
+  const page = document.querySelector('#resumeOutput .resume-a4-page');
+  const resumeHTML = page ? page.innerHTML : document.getElementById('resumeOutput').innerHTML;
   const win = window.open('','_blank');
   if (!win) { alert('Please allow pop-ups to download PDF'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Resume</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#fff;}@page{size:A4;margin:18mm 16mm;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}.resume-output-card{background:#fff;color:#111;padding:36px;}${tplCSS}</style></head><body><div class="resume-output-card">${resumeHTML}</div><script>window.onload=function(){window.print();};<\/script></body></html>`);
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Resume</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#fff;}@page{size:A4;margin:18mm 16mm;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}${tplCSS}</style></head><body>${resumeHTML}<script>window.onload=function(){window.print();};<\/script></body></html>`);
   win.document.close();
 }
 
