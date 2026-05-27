@@ -82,9 +82,11 @@
     .suggestions-wrap{margin-top:18px;padding:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;}
     .suggestions-header{font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block;}
     .suggestion-chips{display:flex;flex-wrap:wrap;gap:7px;}
-    .sug-chip{padding:5px 12px;border-radius:999px;border:1.5px solid var(--input-border);font-size:0.79rem;color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:inherit;}
-    .sug-chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,0.07);}
-    .sug-chip.selected{border-color:var(--accent);background:rgba(245,158,11,0.15);color:var(--accent);font-weight:600;}
+    .sug-chip{padding:5px 12px;border-radius:999px;border:1.5px solid var(--input-border);font-size:0.79rem;color:var(--muted);cursor:pointer;transition:all .18s;background:transparent;font-family:inherit;user-select:none;}
+    .sug-chip:not(.selected):hover{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,0.07);transform:translateY(-1px);}
+    .sug-chip.selected{border-color:#16a34a;background:rgba(22,163,74,0.13);color:#4ade80;font-weight:600;cursor:default;pointer-events:none;}
+    @keyframes skillTagPop{from{transform:scale(0.6);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .skill-tag{animation:skillTagPop .15s cubic-bezier(.34,1.56,.64,1);}
     .photo-section{display:flex;align-items:center;gap:20px;margin-bottom:26px;padding:20px 22px;background:rgba(245,158,11,0.04);border:2.5px solid rgba(245,158,11,0.4);border-radius:14px;position:relative;}
     .photo-section.photo-error{border-color:#ef4444;background:rgba(239,68,68,0.05);}
     .photo-section-label{display:block;font-size:0.76rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
@@ -1422,19 +1424,16 @@ function renderSuggestions() {
   wrap.style.display = 'block';
   chips.innerHTML = suggestions.map(s => {
     const added = skills.includes(s);
-    return `<button class="sug-chip${added?' selected':''}" onclick="toggleSuggestedSkill(${JSON.stringify(s)})">${added?'✓ ':'+ '}${esc(s)}</button>`;
+    return `<button class="sug-chip${added?' selected':''}" onclick="toggleSuggestedSkill(${JSON.stringify(s)})">${added?'✓ ':''}${esc(s)}</button>`;
   }).join('');
 }
 
 function toggleSuggestedSkill(skill) {
-  if (skills.includes(skill)) {
-    skills = skills.filter(s => s !== skill);
-  } else {
-    skills.push(skill);
-    const history = JSON.parse(localStorage.getItem('skillHistory') || '[]');
-    if (!history.includes(skill)) { history.unshift(skill); localStorage.setItem('skillHistory', JSON.stringify(history.slice(0, 50))); }
-    markNeedsRegen();
-  }
+  if (skills.includes(skill)) return; // already added — chip is pointer-events:none but guard here too
+  skills.push(skill);
+  const history = JSON.parse(localStorage.getItem('skillHistory') || '[]');
+  if (!history.includes(skill)) { history.unshift(skill); localStorage.setItem('skillHistory', JSON.stringify(history.slice(0, 50))); }
+  markNeedsRegen();
   renderSkills();
   renderSuggestions();
 }
