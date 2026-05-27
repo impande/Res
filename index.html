@@ -65,11 +65,20 @@
     .add-entry-btn{width:100%;padding:11px;background:transparent;border:1.5px dashed var(--input-border);border-radius:8px;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all .15s;font-family:inherit;min-height:44px;}
     .add-entry-btn:hover{border-color:var(--accent);color:var(--accent);}
     .skill-input-row{display:flex;gap:10px;margin-bottom:10px;}
-    .skill-input-row input{flex:1;}
+    .skill-input-wrap{position:relative;flex:1;}
+    .skill-input-wrap input{width:100%;}
+    .skill-ac{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1c1c1c;border:1px solid var(--border);border-radius:10px;z-index:200;max-height:210px;overflow-y:auto;box-shadow:0 10px 32px rgba(0,0,0,0.55);display:none;}
+    .skill-ac.open{display:block;}
+    .skill-ac-item{padding:10px 15px;cursor:pointer;font-size:0.86rem;color:var(--text);transition:background .1s;display:flex;align-items:center;gap:8px;}
+    .skill-ac-item:hover,.skill-ac-item.ac-focus{background:rgba(245,158,11,0.1);color:var(--accent);}
+    .skill-ac-item::before{content:'+ ';color:var(--accent);font-weight:700;font-size:0.78rem;}
     .skill-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
     .skill-tag{display:flex;align-items:center;gap:6px;padding:6px 11px;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;font-size:0.84rem;color:var(--text);}
     .skill-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.84rem;padding:0;line-height:1;min-width:20px;min-height:20px;}
     .skill-remove:hover{color:#ef4444;}
+    .btn-gen-bullets{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;margin-top:8px;}
+    .btn-gen-bullets:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 14px rgba(124,58,237,0.35);}
+    .btn-gen-bullets:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
     .suggestions-wrap{margin-top:18px;padding:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;}
     .suggestions-header{font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block;}
     .suggestion-chips{display:flex;flex-wrap:wrap;gap:7px;}
@@ -1177,7 +1186,13 @@
     <h1 class="step-title">Skills</h1>
     <p class="step-subtitle">Add your key technical and soft skills</p>
     <div class="skill-input-row">
-      <input type="text" id="skillInput" placeholder="e.g. React, Python, Leadership…" onkeydown="if(event.key==='Enter'){event.preventDefault();addSkill();}">
+      <div class="skill-input-wrap">
+        <input type="text" id="skillInput" placeholder="e.g. React, Python, Leadership…" autocomplete="off"
+          oninput="filterSkillAC(this)"
+          onkeydown="handleSkillACKey(event)"
+          onblur="hideSkillAC()">
+        <div class="skill-ac" id="skillAC"></div>
+      </div>
       <button class="btn-secondary" onclick="addSkill()">Add</button>
     </div>
     <div class="skill-tags" id="skillTags"></div>
@@ -1507,7 +1522,8 @@ function addExperience() {
       <div class="form-group"><label class="form-label">Start Date</label><input type="text" placeholder="e.g. Jan 2020" id="exp-start-${id}"></div>
       <div class="form-group"><label class="form-label">End Date</label><input type="text" placeholder="e.g. Present" id="exp-end-${id}"></div>
     </div>
-    <div class="form-group"><label class="form-label">Key Achievements (optional — AI will enhance)</label><textarea rows="3" placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" id="exp-desc-${id}" oninput="markNeedsRegen()"></textarea><p class="field-tip">💡 Just type — add as per company standard and as per role. AI will enhance and format this automatically.</p></div>`;
+    <div class="form-group"><label class="form-label">Key Achievements (optional — AI will enhance)</label><textarea rows="3" placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" id="exp-desc-${id}" oninput="markNeedsRegen()"></textarea><p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
+    <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
   document.getElementById('experienceEntries').appendChild(div);
 }
 
@@ -1563,6 +1579,113 @@ function renderSkills() {
   document.getElementById('skillTags').innerHTML = skills.map(s =>
     `<div class="skill-tag">${esc(s)}<button class="skill-remove" onclick="removeSkill(${JSON.stringify(s)})">✕</button></div>`
   ).join('');
+}
+
+// ── Skill autocomplete ────────────────────────────────────────────────
+let acFocusIdx = -1;
+
+function getAllACSkills() {
+  const seen = new Set();
+  const result = [];
+  const history = JSON.parse(localStorage.getItem('skillHistory') || '[]');
+  for (const s of history) { if (!seen.has(s.toLowerCase())) { seen.add(s.toLowerCase()); result.push(s); } }
+  for (const arr of Object.values(SKILL_MAP)) {
+    for (const s of arr) { if (!seen.has(s.toLowerCase())) { seen.add(s.toLowerCase()); result.push(s); } }
+  }
+  return result;
+}
+
+function filterSkillAC(input) {
+  const q = input.value.trim().toLowerCase();
+  const ac = document.getElementById('skillAC');
+  acFocusIdx = -1;
+  if (!q) { ac.classList.remove('open'); return; }
+  const matches = getAllACSkills().filter(s => s.toLowerCase().includes(q) && !skills.includes(s)).slice(0, 12);
+  if (!matches.length) { ac.classList.remove('open'); return; }
+  ac.innerHTML = matches.map((s, i) =>
+    `<div class="skill-ac-item" data-idx="${i}" data-skill="${s.replace(/"/g,'&quot;')}" onmousedown="selectSkillFromAC('${s.replace(/'/g,"\\'")}')">${esc(s)}</div>`
+  ).join('');
+  ac.classList.add('open');
+}
+
+function handleSkillACKey(e) {
+  const ac = document.getElementById('skillAC');
+  const items = ac.querySelectorAll('.skill-ac-item');
+  if (!ac.classList.contains('open') || !items.length) {
+    if (e.key === 'Enter') { e.preventDefault(); addSkill(); }
+    return;
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acFocusIdx = Math.min(acFocusIdx + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acFocusIdx = Math.max(acFocusIdx - 1, -1);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (acFocusIdx >= 0 && items[acFocusIdx]) {
+      selectSkillFromAC(items[acFocusIdx].dataset.skill);
+    } else { addSkill(); }
+    return;
+  } else if (e.key === 'Escape') {
+    ac.classList.remove('open'); return;
+  }
+  items.forEach((el, i) => el.classList.toggle('ac-focus', i === acFocusIdx));
+  if (acFocusIdx >= 0) items[acFocusIdx].scrollIntoView({block:'nearest'});
+}
+
+function selectSkillFromAC(skill) {
+  document.getElementById('skillInput').value = skill;
+  document.getElementById('skillAC').classList.remove('open');
+  acFocusIdx = -1;
+  addSkill();
+}
+
+function hideSkillAC() {
+  setTimeout(() => { document.getElementById('skillAC').classList.remove('open'); acFocusIdx = -1; }, 160);
+}
+
+// ── Generate experience bullets ───────────────────────────────────────
+async function generateBullets(id) {
+  const title = document.getElementById('exp-title-'+id)?.value.trim() || '';
+  const co    = document.getElementById('exp-co-'+id)?.value.trim() || '';
+  const desc  = document.getElementById('exp-desc-'+id)?.value.trim() || '';
+  const jobTitle = document.getElementById('jobTitle')?.value.trim() || '';
+  if (!title && !co) { alert('Please fill in Job Title and Company before generating bullets.'); return; }
+  const btn = document.getElementById('gen-bullets-btn-'+id);
+  const textarea = document.getElementById('exp-desc-'+id);
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.25);border-top-color:#fff;width:11px;height:11px;border-width:2px;"></span> Generating…';
+  const skillsList = skills.length ? skills.join(', ') : 'relevant professional skills';
+  const prompt = `Write 4-5 strong, quantified resume bullet points for a "${title || jobTitle}" at "${co || 'a company'}".
+
+Skills: ${skillsList}
+Key achievements / context: ${desc || 'Standard responsibilities for this role'}
+
+Rules:
+- Begin every bullet with a powerful action verb (Led, Built, Drove, Reduced, etc.)
+- Include specific metrics, percentages, dollar values, or team sizes wherever possible
+- Align with industry and company standards for this role
+- Make each point ATS-optimised and impact-focused
+- Output ONLY the bullet points, one per line, each starting with •
+- No intro text, no section headers, no explanations`;
+  try {
+    const response = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({prompt})
+    });
+    if (!response.ok) throw new Error('Server error ' + response.status);
+    const result = await response.json();
+    const text = (result.content || result.text || '').trim();
+    if (text) { textarea.value = text; markNeedsRegen(); }
+    else throw new Error('Empty response');
+  } catch(err) {
+    alert('Could not generate bullets: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✦ Generate Bullets with AI';
+  }
 }
 
 function onFormatChange() {}
