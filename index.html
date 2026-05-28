@@ -301,10 +301,14 @@
     .upload-zone-sub{font-size:0.74rem;color:var(--muted);margin-bottom:11px;}
     .btn-browse{padding:7px 18px;background:transparent;border:1.5px solid rgba(245,158,11,0.45);border-radius:7px;color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
     .btn-browse:hover{background:rgba(245,158,11,0.1);}
-    .upload-status-bar{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:0.83rem;text-align:center;line-height:1.5;display:none;}
-    .upload-status-bar.parsing{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--accent);}
-    .upload-status-bar.ok{background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);color:#4ade80;}
-    .upload-status-bar.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;}
+    .upload-tabs{display:flex;gap:0;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:12px;}
+    .upload-tab{flex:1;padding:7px 10px;border:none;border-radius:7px;background:transparent;color:var(--muted);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;}
+    .upload-tab.active{background:var(--accent);color:#000;}
+    .upload-panel{display:none;}.upload-panel.active{display:block;}
+    .paste-area{width:100%;min-height:110px;padding:11px 13px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-size:0.84rem;font-family:inherit;resize:vertical;transition:border-color .2s;}
+    .paste-area:focus{outline:none;border-color:var(--accent);}
+    .btn-parse{width:100%;margin-top:8px;padding:10px;background:var(--accent);color:#000;font-size:0.88rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:opacity .15s;}
+    .btn-parse:hover{opacity:0.88;}.btn-parse:disabled{opacity:0.5;cursor:not-allowed;}
     /* ── Cover Letter Feature ── */
     .btn-dl-cl{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 8px rgba(124,58,237,0.25);}
     .btn-dl-cl:hover{background:linear-gradient(135deg,#6d28d9,#4338ca);transform:translateY(-1px);box-shadow:0 5px 16px rgba(124,58,237,0.38);}
@@ -1357,14 +1361,26 @@
     <p class="hero-note">No sign-up required · Free to use</p>
     <div class="hero-upload-wrap">
       <div class="hero-or">— or beautify your existing resume —</div>
-      <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
-        <input type="file" id="resumeUploadInput" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
-        <div class="upload-zone-icon">📄</div>
-        <div class="upload-zone-title">Drop your resume here</div>
-        <div class="upload-zone-sub">PDF · DOCX · TXT supported</div>
-        <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Browse Files</button>
+      <div class="upload-tabs">
+        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')">📄 Upload File</button>
+        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
       </div>
-      <div id="uploadStatusBar" class="upload-status-bar"></div>
+      <!-- Upload file panel -->
+      <div class="upload-panel active" id="panelUpload">
+        <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
+          <input type="file" id="resumeUploadInput" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
+          <div class="upload-zone-icon">📄</div>
+          <div class="upload-zone-title">Drop your resume here</div>
+          <div class="upload-zone-sub">PDF · DOCX · TXT supported</div>
+          <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Browse Files</button>
+        </div>
+      </div>
+      <!-- Paste text panel -->
+      <div class="upload-panel" id="panelPaste">
+        <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
+        <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
+      </div>
+      <div id="uploadStatusBar" class="upload-status-bar" style="display:none"></div>
     </div>
   </div>
 
@@ -2710,31 +2726,73 @@ function downloadPDF() {
   });
 })();
 
+function switchUploadTab(tab) {
+  document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
+  document.getElementById('tabPaste').classList.toggle('active', tab === 'paste');
+  document.getElementById('panelUpload').classList.toggle('active', tab === 'upload');
+  document.getElementById('panelPaste').classList.toggle('active', tab === 'paste');
+  // clear status bar when switching
+  const bar = document.getElementById('uploadStatusBar');
+  bar.style.display = 'none'; bar.className = 'upload-status-bar';
+}
+
+function showUploadStatus(cls, msg) {
+  const bar = document.getElementById('uploadStatusBar');
+  bar.className = 'upload-status-bar ' + cls;
+  bar.style.display = 'block';
+  bar.textContent = msg;
+}
+
+function onParseSuccess(data) {
+  populateFormFromParsed(data);
+  showUploadStatus('ok', '✓ Resume imported! Review your details below, then click Generate.');
+  setTimeout(() => {
+    goToStep(1);
+    setTimeout(() => document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}), 300);
+  }, 800);
+}
+
 async function handleResumeFile(file) {
   if (!file) return;
-  const bar = document.getElementById('uploadStatusBar');
-  bar.className = 'upload-status-bar parsing';
-  bar.style.display = 'block';
-  bar.textContent = '⏳ Reading file…';
+  showUploadStatus('parsing', '⏳ Reading file…');
   try {
     const text = await extractTextFromFile(file);
-    if (!text || text.replace(/\s/g,'').length < 40) throw new Error('Could not extract readable text. Please try a TXT version of your resume.');
-    bar.textContent = '🤖 AI is parsing your resume…';
+    const usableText = text && text.replace(/\s/g,'').length >= 60;
+    if (!usableText) {
+      switchUploadTab('paste');
+      showUploadStatus('err', '⚠ Could not read text from this PDF — paste your resume text in the box below instead.');
+      return;
+    }
+    showUploadStatus('parsing', '🤖 AI is parsing your resume…');
     const data = await parseResumeWithAI(text);
-    // Check that at least some meaningful data was returned
     const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
-    if (!hasData) throw new Error('Could not extract resume data. Please ensure the file contains selectable text, or try a TXT export.');
-    populateFormFromParsed(data);
-    bar.className = 'upload-status-bar ok';
-    bar.textContent = '✓ Resume imported! Review your details below, then click Generate.';
-    // Navigate to step 1 so user can see and verify filled fields
-    setTimeout(() => {
-      goToStep(1);
-      setTimeout(() => document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}), 300);
-    }, 800);
+    if (!hasData) {
+      switchUploadTab('paste');
+      showUploadStatus('err', '⚠ Couldn\'t auto-read this PDF (scanned or image-based). Switch to "Paste Text" and paste your resume text.');
+      return;
+    }
+    onParseSuccess(data);
   } catch(err) {
-    bar.className = 'upload-status-bar err';
-    bar.textContent = '✗ ' + err.message;
+    showUploadStatus('err', '✗ ' + err.message);
+  }
+}
+
+async function handleResumeText() {
+  const text = document.getElementById('resumePasteArea')?.value.trim();
+  if (!text || text.length < 50) { showUploadStatus('err', '⚠ Please paste your resume text first.'); return; }
+  const btn = document.getElementById('btnParseText');
+  btn.disabled = true; btn.textContent = '⏳ Parsing…';
+  showUploadStatus('parsing', '🤖 AI is parsing your resume…');
+  try {
+    const data = await parseResumeWithAI(text);
+    const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+    if (!hasData) throw new Error('Could not extract structured data. Please ensure the pasted text is a readable resume.');
+    onParseSuccess(data);
+    document.getElementById('resumePasteArea').value = '';
+  } catch(err) {
+    showUploadStatus('err', '✗ ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '🤖 Parse & Import Resume';
   }
 }
 
