@@ -1433,6 +1433,7 @@ let currentTemplate = 'modern';
 let lastResumeData = null;
 let manuallyEdited = false;
 let needsRegenerate = false;
+let heroClickCount = 0;
 
 const SKILL_MAP = {
   'software engineer':['JavaScript','TypeScript','React','Node.js','Python','Git','Docker','REST APIs','SQL','Agile'],
@@ -1459,11 +1460,9 @@ const SKILL_MAP = {
 };
 
 const EXP_TITLE_SUGGESTIONS = [
-  'Software Engineer','Senior Engineer','Staff Engineer','Product Manager',
-  'Data Scientist','Frontend Developer','Backend Developer','Full Stack Developer',
-  'DevOps Engineer','UX Designer','Marketing Manager','Business Analyst',
-  'Project Manager','Data Analyst','Sales Manager','HR Manager',
-  'Finance Manager','Technical Lead','Engineering Manager','Consultant',
+  'Software Engineer','Senior Engineer','Product Manager','Data Scientist',
+  'Full Stack Developer','DevOps Engineer','UX Designer','Marketing Manager',
+  'Business Analyst','Project Manager',
 ];
 
 const TPL_META = {
@@ -1568,10 +1567,18 @@ const TPL_COLORS = {
 
 // ── Hero ──────────────────────────────────────────────────────────────
 function startBuild() {
+  heroClickCount++;
   goToStep(1);
   setTimeout(() => {
-    const photoSection = document.getElementById('photoSection');
-    if (photoSection) photoSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (heroClickCount === 1) {
+      // First click: land on Quick Prefill so user can import from GitHub first
+      const prefill = document.querySelector('.prefill-section');
+      if (prefill) prefill.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Subsequent clicks: go straight to profile photo
+      const photoSection = document.getElementById('photoSection');
+      if (photoSection) photoSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, 150);
 }
 
