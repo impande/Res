@@ -2541,8 +2541,24 @@ function downloadDoc() {
 function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { alert('Generate your resume first.'); return; }
+
+  const ua = navigator.userAgent;
+  const needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
+  if (needsHint && !document.getElementById('pdf-print-hint')) {
+    const hint = document.createElement('div');
+    hint.id = 'pdf-print-hint';
+    hint.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 16px;background:#fef3c7;color:#78350f;font-size:13px;text-align:center;border-bottom:1.5px solid #fcd34d;font-family:system-ui,sans-serif;line-height:1.5;';
+    hint.innerHTML = '&#128203; <strong>Safari / Firefox:</strong> In the print dialog → uncheck <strong>"Headers and Footers"</strong> to remove URL &amp; date. <button onclick="this.parentNode.remove()" style="margin-left:12px;padding:2px 8px;cursor:pointer;border-radius:4px;border:1px solid #b45309;background:transparent;color:#78350f;font-size:12px;">&#10005;</button>';
+    document.body.appendChild(hint);
+    setTimeout(() => hint.remove(), 12000);
+  }
+
   document.body.classList.add('pdf-printing');
-  function cleanup() { document.body.classList.remove('pdf-printing'); }
+  function cleanup() {
+    document.body.classList.remove('pdf-printing');
+    const hint = document.getElementById('pdf-print-hint');
+    if (hint) hint.remove();
+  }
   window.addEventListener('afterprint', cleanup, { once: true });
   setTimeout(cleanup, 10000);
   setTimeout(() => window.print(), 150);
