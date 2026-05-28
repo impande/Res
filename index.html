@@ -210,6 +210,50 @@
       .step-label{font-size:0.56rem;}
       .btn-primary,.btn-secondary,.btn-accent{padding:12px 14px;font-size:0.85rem;}
     }
+    /* ── Print / PDF (body.pdf-printing) ── */
+    @media print {
+      @page { size: A4 portrait; margin: 0; }
+      html, body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: #fff !important;
+      }
+      body.pdf-printing #sidebar,
+      body.pdf-printing #mobileProgress,
+      body.pdf-printing .nav-buttons,
+      body.pdf-printing .resume-bar,
+      body.pdf-printing #tplSection { display: none !important; }
+      body.pdf-printing #main {
+        padding: 0 !important; max-width: 100% !important;
+        overflow: visible !important; margin: 0 !important;
+        width: 100% !important;
+      }
+      body.pdf-printing .step-content { display: none !important; }
+      body.pdf-printing #step6 {
+        display: block !important; padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.pdf-printing #step6 > :not(#resumeOutput),
+      body.pdf-printing .step-title,
+      body.pdf-printing .step-subtitle,
+      body.pdf-printing .form-group { display: none !important; }
+      body.pdf-printing #resumeOutput {
+        display: block !important; min-height: 0 !important;
+        padding: 0 !important; margin: 0 !important;
+        overflow: visible !important; box-shadow: none !important;
+        border-radius: 0 !important; background: transparent !important;
+      }
+      body.pdf-printing .resume-a4-page {
+        min-height: 0 !important; padding: 16mm 14mm !important;
+        box-shadow: none !important; margin: 0 auto !important;
+        width: 210mm !important; max-width: 100% !important;
+        page-break-after: avoid !important; break-after: avoid !important;
+      }
+      body.pdf-printing .r-2col { min-height: 0 !important; }
+      body.pdf-printing [class*="tpl-"] .r-exp { margin-bottom: 8px !important; }
+      body.pdf-printing [class*="tpl-"] .r-sec { margin-top: 10px !important; }
+      body.pdf-printing .r-main-col { padding-bottom: 0 !important; }
+    }
     /* ── Quick Prefill section ── */
     .prefill-section{background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.28);border-radius:12px;padding:14px 16px;margin-bottom:22px;}
     .prefill-title{font-size:0.75rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#60a5fa;margin-bottom:7px;}
@@ -2495,88 +2539,33 @@ function downloadDoc() {
 
 // ── PDF ───────────────────────────────────────────────────────────────
 function downloadPDF() {
-  const tplCSS = document.getElementById('tplStyles')?.innerHTML || '';
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { alert('Generate your resume first.'); return; }
-  const resumeHTML = page.innerHTML;
 
-  const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Resume</title>
-<style>
-/* @page margin:0 suppresses the URL/timestamp footer in Chrome/Edge.
-   Safari and Firefox require unchecking "Headers and Footers" in the print dialog. */
-@page { size: A4 portrait; margin: 0; }
-*, *::before, *::after { box-sizing: border-box; }
-html, body {
-  width: 210mm; margin: 0; padding: 0; background: #fff;
-  font-family: 'Segoe UI', system-ui, Arial, sans-serif;
-  overflow: visible;
-  -webkit-print-color-adjust: exact; print-color-adjust: exact;
-}
-/* Hint shown on-screen for Safari/Firefox — hidden when printing */
-.pdf-hint {
-  display: none; padding: 9px 16px; background: #fef3c7; color: #78350f;
-  font-size: 12.5px; text-align: center; border-bottom: 1px solid #fcd34d;
-  font-family: system-ui, sans-serif; line-height: 1.5;
-}
-.pdf-wrap {
-  width: 210mm; padding: 18mm 16mm; box-sizing: border-box; background: #fff;
-}
-@media print {
-  @page { size: A4 portrait; margin: 0; }
-  .pdf-hint { display: none !important; }
-  html, body {
-    width: 210mm; height: auto; overflow: visible;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  // Show Safari/Firefox hint if needed (header/footer removal instruction)
+  const ua = navigator.userAgent;
+  const needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
+  if (needsHint) {
+    const existing = document.getElementById('pdf-print-hint');
+    if (!existing) {
+      const hint = document.createElement('div');
+      hint.id = 'pdf-print-hint';
+      hint.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 16px;background:#fef3c7;color:#78350f;font-size:13px;text-align:center;border-bottom:1.5px solid #fcd34d;font-family:system-ui,sans-serif;line-height:1.5;';
+      hint.innerHTML = '&#128203; <strong>Safari / Firefox:</strong> In the print dialog → uncheck <strong>"Headers and Footers"</strong> to remove URL &amp; date. <button onclick="this.parentNode.remove()" style="margin-left:12px;padding:2px 8px;cursor:pointer;border-radius:4px;border:1px solid #b45309;background:transparent;color:#78350f;font-size:12px;">✕</button>';
+      document.body.appendChild(hint);
+      setTimeout(() => hint.remove(), 12000);
+    }
   }
-  /* ── Blank-page fixes ── */
-  /* Remove forced min-height so two-column flex height tracks real content */
-  .r-2col { min-height: 0 !important; }
-  /* Tighten per-entry spacing so content fits one A4 page */
-  [class*="tpl-"] .r-exp { margin-bottom: 10px !important; }
-  [class*="tpl-"] .r-sec { margin-top: 13px !important; }
-  .r-main-col { padding-bottom: 0 !important; }
-  .pdf-wrap { break-after: avoid; page-break-after: avoid; }
-}
-${tplCSS}
-</style>
-</head>
-<body>
-<div class="pdf-hint" id="pdfHint">
-  📋 <strong>Safari / Firefox:</strong> open the Print dialog → uncheck <strong>"Headers and Footers"</strong> to remove the URL &amp; date from the PDF
-</div>
-<div class="pdf-wrap">${resumeHTML}</div>
-<script>
-(function() {
-  var ua = navigator.userAgent;
-  var needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
-  if (needsHint) document.getElementById('pdfHint').style.display = 'block';
-  window.onload = function() {
-    setTimeout(function() { window.print(); }, 500);
-  };
-})();
-<\/script>
-</body>
-</html>`;
 
-  // Open via Blob URL so the window's document.URL is blob:... rather than
-  // resume4u.help — this prevents Safari from showing the site URL in the footer.
-  try {
-    const blob = new Blob([htmlContent], {type: 'text/html; charset=utf-8'});
-    const blobUrl = URL.createObjectURL(blob);
-    const win = window.open(blobUrl, '_blank');
-    if (!win) throw new Error('blocked');
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-  } catch(e) {
-    // Fallback for browsers that block blob popup
-    const win = window.open('', '_blank');
-    if (!win) { alert('Please allow pop-ups to download PDF'); return; }
-    win.document.write(htmlContent);
-    win.document.close();
+  document.body.classList.add('pdf-printing');
+  function cleanup() {
+    document.body.classList.remove('pdf-printing');
+    const hint = document.getElementById('pdf-print-hint');
+    if (hint) hint.remove();
   }
+  window.addEventListener('afterprint', cleanup, { once: true });
+  setTimeout(cleanup, 10000); // safety fallback
+  setTimeout(() => window.print(), 150);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
