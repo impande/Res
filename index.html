@@ -241,7 +241,7 @@
     .ad-modal-hdr{padding:20px 24px 16px;border-bottom:1px solid #242424;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);}
     .ad-modal-title{font-size:1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:9px;}
     .ad-modal-sub{font-size:0.78rem;color:#777;margin-top:4px;line-height:1.5;}
-    .ad-slot-wrap{background:#0d0d0d;border-bottom:1px solid #242424;display:flex;align-items:center;justify-content:center;min-height:140px;padding:16px;}
+    .ad-slot-wrap{background:#0d0d0d;border-bottom:1px solid #242424;display:block;min-height:140px;padding:12px 16px;}
     .ad-slot-placeholder{text-align:center;color:#3a3a3a;font-size:0.77rem;line-height:1.8;}
     .ad-slot-placeholder-icon{font-size:2rem;margin-bottom:6px;opacity:0.5;}
     .ad-modal-body{padding:20px 24px 22px;}
@@ -3234,20 +3234,16 @@ function _loadAdInSlot() {
   const slot = document.getElementById('adSlot');
   if (!slot) return;
 
-  // ── Google AdSense — 300×250 Medium Rectangle (highest-earning format) ──
-  // 1. Replace YOUR_PUB_ID in the <script> tag above in <head> with your ca-pub-XXXXXXXX
-  // 2. Replace YOUR_SLOT_ID below with your Ad Unit ID from AdSense dashboard
-  // 3. That's it — AdSense auto-selects the highest-paying career/job ads for your audience
   slot.innerHTML = `
     <ins class="adsbygoogle"
-      style="display:inline-block;width:300px;height:250px"
+      style="display:block"
+      data-ad-format="autorelaxed"
       data-ad-client="ca-pub-3849437696737510"
-      data-ad-slot="YOUR_SLOT_ID"></ins>`;
+      data-ad-slot="2032228003"></ins>`;
   try {
     (window.adsbygoogle = window.adsbygoogle || []).push({});
-    // Hide placeholder once AdSense iframe loads
     const ph = document.getElementById('adSlotPlaceholder');
-    if (ph) { const ins = slot.querySelector('ins'); if (ins) ins.addEventListener('load', () => ph.remove(), {once:true}); }
+    if (ph) ph.remove();
   } catch (e) {
     // AdSense not loaded (ad blocker) — placeholder stays visible
   }
