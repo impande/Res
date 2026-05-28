@@ -234,6 +234,21 @@
     /* ── Toast notifications ── */
     @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
+    /* ── ATS Score Card ── */
+    .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
+    @keyframes atsIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+    .ats-gauge-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;}
+    .ats-score-label{font-size:0.7rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;}
+    .ats-details{flex:1;min-width:0;}
+    .ats-details-title{font-size:0.97rem;font-weight:700;color:var(--white);margin-bottom:3px;}
+    .ats-details-sub{font-size:0.78rem;color:var(--muted);margin-bottom:13px;line-height:1.5;}
+    .ats-items{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;}
+    .ats-item{display:flex;align-items:center;gap:7px;font-size:0.79rem;color:var(--text);}
+    .ats-item-icon{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:900;flex-shrink:0;}
+    .ats-item-icon.pass{background:rgba(34,197,94,0.18);color:#4ade80;}
+    .ats-item-icon.fail{background:rgba(239,68,68,0.15);color:#fca5a5;}
+    .ats-item-icon.warn{background:rgba(245,158,11,0.15);color:#fbbf24;}
+    @media(max-width:600px){.ats-card{flex-direction:column;gap:14px;}.ats-items{grid-template-columns:1fr;}}
     /* ── Print / PDF (body.pdf-printing) ── */
     @media print {
       @page { size: A4 portrait; margin: 0; }
@@ -1717,9 +1732,14 @@ const TPL_META = {
 function renderTemplateGrid(filterCat) {
   const grid = document.getElementById('tplGrid');
   if (!grid) return;
-  const entries = Object.entries(TPL_META).filter(([,v]) => !filterCat || filterCat === 'all' || v.cat === filterCat);
+  const usage = JSON.parse(localStorage.getItem('tplUsage') || '{}');
+  let entries = Object.entries(TPL_META).filter(([,v]) => !filterCat || filterCat === 'all' || v.cat === filterCat);
+  // Sort most-used first; stable within same usage keeps original definition order
+  entries.sort(([ka], [kb]) => (usage[kb] || 0) - (usage[ka] || 0));
   grid.innerHTML = entries.map(([key, meta]) => {
     const color = TPL_COLORS[key] || '#888';
+    const useCount = usage[key] || 0;
+    const tagText = useCount >= 3 ? `🔥 ${meta.tag}` : useCount >= 1 ? `★ ${meta.tag}` : meta.tag;
     return `<div class="tpl-card${key === currentTemplate ? ' tpl-active' : ''}" onclick="selectTemplate('${key}')">
       <div class="tpl-card-check">✓</div>
       <div class="tpl-card-thumb">
@@ -1740,7 +1760,7 @@ function renderTemplateGrid(filterCat) {
       </div>
       <div class="tpl-card-meta">
         <div class="tpl-card-name">${meta.label}</div>
-        <div class="tpl-card-tag">${meta.tag}</div>
+        <div class="tpl-card-tag">${tagText}</div>
       </div>
     </div>`;
   }).join('');
@@ -1967,6 +1987,10 @@ function selectTemplate(tpl) {
   }
   manuallyEdited = false;
   currentTemplate = tpl;
+  // Track usage for sort-by-popularity
+  const usage = JSON.parse(localStorage.getItem('tplUsage') || '{}');
+  usage[tpl] = (usage[tpl] || 0) + 1;
+  localStorage.setItem('tplUsage', JSON.stringify(usage));
   // Update hidden select
   const sel = document.getElementById('tplSelect');
   if (sel) sel.value = tpl;
@@ -2578,6 +2602,7 @@ async function generateResume() {
     manuallyEdited = false;
     clearNeedsRegen();
     renderOutput(merged);
+    renderATSScore(merged);
     statusEl.textContent = 'Generated · Click any text to edit directly';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
@@ -3154,6 +3179,112 @@ ${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   const win = window.open(URL.createObjectURL(blob), '_blank');
   if (!win) showToast('Please allow pop-ups to download the cover letter PDF.', 'info');
+}
+
+// ── ATS Score ─────────────────────────────────────────────────────────
+function computeATSScore(data) {
+  const items = [];
+  let score = 0;
+
+  // Contact (20 pts)
+  const checks = [
+    {key:'email',   label:'Email address',    pts:5, status: data.email    ? 'pass' : 'fail'},
+    {key:'phone',   label:'Phone number',     pts:5, status: data.phone    ? 'pass' : 'warn'},
+    {key:'location',label:'Location / City',  pts:5, status: data.location ? 'pass' : 'warn'},
+    {key:'jobTitle',label:'Job title present',pts:5, status: data.jobTitle ? 'pass' : 'fail'},
+  ];
+  checks.forEach(c => { if (c.status === 'pass') score += c.pts; items.push({label:c.label, status:c.status}); });
+
+  // Summary (15 pts)
+  const sum = (data.summary || '').trim();
+  const hasSummary = sum.length >= 40;
+  const richSummary = sum.length >= 100;
+  score += hasSummary ? 10 : 0;
+  score += richSummary ? 5 : 0;
+  items.push({label:'Professional summary', status: richSummary ? 'pass' : hasSummary ? 'warn' : 'fail'});
+
+  // Experience (25 pts)
+  const exp = data.experience || [];
+  const hasExp = exp.length >= 1 && !!(exp[0].title || exp[0].co);
+  const hasDesc = exp.some(e => (e.desc || '').trim().length > 20);
+  const multiExp = exp.length >= 2;
+  if (hasExp)   { score += 10; items.push({label:'Work experience', status:'pass'}); }
+  else          { items.push({label:'Work experience', status:'fail'}); }
+  if (hasDesc)  { score += 8;  items.push({label:'Role descriptions', status:'pass'}); }
+  else if (hasExp) { items.push({label:'Role descriptions', status:'warn'}); }
+  else          { items.push({label:'Role descriptions', status:'fail'}); }
+  if (multiExp) { score += 7;  items.push({label:'Multiple roles', status:'pass'}); }
+  else          { items.push({label:'Multiple roles', status: hasExp ? 'warn' : 'fail'}); }
+
+  // Skills (20 pts)
+  const sk = (data.skills || []).length;
+  score += sk >= 3 ? 8 : 0;
+  score += sk >= 6 ? 7 : 0;
+  score += sk >= 10 ? 5 : 0;
+  items.push({label:`Skills (${sk} listed)`, status: sk >= 6 ? 'pass' : sk >= 3 ? 'warn' : 'fail'});
+
+  // Education (10 pts)
+  const edu = data.education || [];
+  const hasEdu = edu.length >= 1 && !!(edu[0].deg || edu[0].sch);
+  if (hasEdu) { score += 10; items.push({label:'Education section', status:'pass'}); }
+  else        { items.push({label:'Education section', status:'warn'}); }
+
+  // Awards (10 pts)
+  const aw = data.awards || [];
+  const hasAwards = aw.length >= 1 && !!(aw[0].name);
+  if (hasAwards) { score += 10; items.push({label:'Awards / Certifications', status:'pass'}); }
+  else           { items.push({label:'Awards / Certifications', status:'warn'}); }
+
+  return {score: Math.min(100, score), items};
+}
+
+function renderATSScore(data) {
+  const {score, items} = computeATSScore(data);
+  const color = score >= 90 ? '#22c55e' : score >= 75 ? '#84cc16' : score >= 60 ? '#f59e0b' : '#ef4444';
+  const label = score >= 90 ? 'Excellent' : score >= 75 ? 'Good' : score >= 60 ? 'Fair' : 'Needs Work';
+
+  const r = 46, C = +(2 * Math.PI * r).toFixed(2);
+  const dash = +((score / 100) * C).toFixed(2);
+  const gap  = +(C - dash).toFixed(2);
+
+  const itemsHTML = items.map(it => {
+    const icon = it.status === 'pass' ? '✓' : it.status === 'warn' ? '!' : '✗';
+    return `<div class="ats-item"><span class="ats-item-icon ${it.status}">${icon}</span><span>${esc(it.label)}</span></div>`;
+  }).join('');
+
+  let card = document.getElementById('atsScoreCard');
+  if (!card) {
+    card = document.createElement('div');
+    card.id = 'atsScoreCard';
+    card.className = 'ats-card';
+    const resumeBar = document.querySelector('#step6 .resume-bar');
+    if (resumeBar) resumeBar.insertAdjacentElement('afterend', card);
+  }
+
+  card.innerHTML = `
+    <div class="ats-gauge-wrap">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+        <circle id="atsArc" cx="55" cy="55" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+          stroke-dasharray="0 ${C}" stroke-linecap="round" transform="rotate(-90 55 55)"
+          style="transition:stroke-dasharray 0.9s cubic-bezier(.25,.46,.45,.94)"/>
+        <text x="55" y="52" text-anchor="middle" fill="${color}" font-size="26" font-weight="800"
+          font-family="'Segoe UI',system-ui,sans-serif">${score}</text>
+        <text x="55" y="67" text-anchor="middle" fill="#888" font-size="11"
+          font-family="'Segoe UI',system-ui,sans-serif">/100</text>
+      </svg>
+      <span class="ats-score-label" style="color:${color}">${label}</span>
+    </div>
+    <div class="ats-details">
+      <div class="ats-details-title">ATS Compatibility Score</div>
+      <div class="ats-details-sub">How well your resume will perform with Applicant Tracking Systems</div>
+      <div class="ats-items">${itemsHTML}</div>
+    </div>`;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const arc = document.getElementById('atsArc');
+    if (arc) arc.setAttribute('stroke-dasharray', `${dash} ${gap}`);
+  }));
 }
 
 // ── Toast notifications ───────────────────────────────────────────────
