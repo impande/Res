@@ -210,6 +210,24 @@
       .step-label{font-size:0.56rem;}
       .btn-primary,.btn-secondary,.btn-accent{padding:12px 14px;font-size:0.85rem;}
     }
+    /* ── Quick Prefill section ── */
+    .prefill-section{background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.28);border-radius:12px;padding:14px 16px;margin-bottom:22px;}
+    .prefill-title{font-size:0.75rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#60a5fa;margin-bottom:7px;}
+    .prefill-desc{font-size:0.83rem;color:var(--muted);margin-bottom:11px;line-height:1.5;}
+    .prefill-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .prefill-row input{flex:1;min-width:160px;}
+    .prefill-note{font-size:0.76rem;color:var(--muted);margin-top:9px;line-height:1.55;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:6px;border:1px solid var(--border);}
+    /* ── Exp title chips ── */
+    .exp-title-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+    .exp-title-chip{padding:4px 11px;border-radius:999px;border:1.5px solid var(--input-border);font-size:0.77rem;color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:inherit;user-select:none;}
+    .exp-title-chip:hover{border-color:var(--accent);color:var(--accent);}
+    /* ── Mobile-friendly template carousel ── */
+    @media(max-width:768px){
+      .tpl-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px!important;gap:8px!important;}
+      .tpl-grid::-webkit-scrollbar{display:none;}
+      .tpl-card{flex-shrink:0!important;width:82px!important;scroll-snap-align:start;}
+      .tpl-filter-btn{padding:5px 9px!important;font-size:0.68rem!important;}
+    }
   </style>
 
   <style id="tplStyles">
@@ -1235,6 +1253,15 @@
     <h1 class="step-title">Personal Information</h1>
     <p class="step-subtitle">Fields marked <span style="color:#ef4444">*</span> are required to generate your resume</p>
     <div id="valBanner1" class="val-banner"></div>
+    <div class="prefill-section">
+      <div class="prefill-title">⚡ Quick Prefill</div>
+      <p class="prefill-desc">Import your basic info automatically from GitHub</p>
+      <div class="prefill-row">
+        <input type="text" id="ghUsername" placeholder="GitHub username (e.g. torvalds)">
+        <button class="btn-accent" style="padding:9px 16px;font-size:0.85rem;flex-shrink:0;" onclick="prefillFromGithub()">Import from GitHub</button>
+      </div>
+      <p class="prefill-note">💡 <strong style="color:var(--text)">LinkedIn:</strong> LinkedIn's API doesn't allow automatic import — please copy your details from your LinkedIn profile manually and paste them below.</p>
+    </div>
     <span class="photo-section-label">Profile Photo <span class="req-star">*</span></span>
     <div class="photo-section" id="photoSection">
       <div class="photo-placeholder" id="photoPlaceholder">📷</div>
@@ -1430,6 +1457,14 @@ const SKILL_MAP = {
   'content writer':['SEO Writing','Copywriting','WordPress','Content Strategy','Social Media','Editing','Proofreading','CMS','Research','Analytics'],
   'cybersecurity analyst':['Network Security','SIEM','Penetration Testing','Vulnerability Assessment','Firewalls','Incident Response','Python','Linux','CISSP','SOC'],
 };
+
+const EXP_TITLE_SUGGESTIONS = [
+  'Software Engineer','Senior Engineer','Staff Engineer','Product Manager',
+  'Data Scientist','Frontend Developer','Backend Developer','Full Stack Developer',
+  'DevOps Engineer','UX Designer','Marketing Manager','Business Analyst',
+  'Project Manager','Data Analyst','Sales Manager','HR Manager',
+  'Finance Manager','Technical Lead','Engineering Manager','Consultant',
+];
 
 const TPL_META = {
   modern:   {label:'Modern',    tag:'Professional',    cat:'dark'},
@@ -1663,6 +1698,12 @@ function goToStep(step) {
       if (s === step) el.classList.add('active');
       else if (s < step) el.classList.add('completed');
     });
+    if (step === 2) {
+      setTimeout(() => {
+        const firstTitle = document.getElementById('exp-title-1');
+        if (firstTitle) { firstTitle.focus(); firstTitle.scrollIntoView({behavior:'smooth', block:'center'}); }
+      }, 200);
+    }
     if (step === 5) renderSuggestions();
     if (step === 6) {
       renderTemplateGrid('all');
@@ -1693,6 +1734,9 @@ function selectTemplate(tpl) {
   updateTplSelBar(tpl);
   if (lastResumeData) {
     renderOutput(lastResumeData);
+    setTimeout(() => {
+      document.getElementById('resumeOutput')?.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 200);
   } else {
     document.getElementById('tplGuide')?.classList.add('visible');
     document.getElementById('generateBtn')?.classList.add('btn-ready');
@@ -1709,6 +1753,51 @@ function setTitle(btn, title) {
   btn.classList.add('selected');
   updatePreview();
   renderSuggestions();
+}
+
+function setExpTitle(id, title) {
+  const input = document.getElementById('exp-title-'+id);
+  if (input) input.value = title;
+  const chips = document.getElementById('exp-title-chips-'+id);
+  if (chips) chips.style.display = 'none';
+}
+
+async function prefillFromGithub() {
+  const username = document.getElementById('ghUsername').value.trim();
+  if (!username) { alert('Please enter a GitHub username.'); return; }
+  const btn = document.querySelector('.prefill-section .btn-accent');
+  if (btn) { btn.disabled = true; btn.textContent = 'Importing…'; }
+  try {
+    const res = await fetch('https://api.github.com/users/' + encodeURIComponent(username));
+    if (!res.ok) throw new Error(res.status === 404 ? 'User not found on GitHub' : 'GitHub API error ' + res.status);
+    const d = await res.json();
+    if (d.name) {
+      const parts = d.name.trim().split(/\s+/);
+      if (!document.getElementById('firstName').value) document.getElementById('firstName').value = parts[0] || '';
+      if (!document.getElementById('lastName').value) document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
+    }
+    if (d.location && !document.getElementById('location').value) document.getElementById('location').value = d.location;
+    if (d.html_url && !document.getElementById('github').value) document.getElementById('github').value = d.html_url;
+    if (d.blog && !document.getElementById('linkedin').value) {
+      document.getElementById('linkedin').value = d.blog.match(/^https?:\/\//) ? d.blog : 'https://' + d.blog;
+    }
+    if (d.email && !document.getElementById('email').value) document.getElementById('email').value = d.email;
+    if (d.bio && !document.getElementById('jobTitle').value) {
+      const bio = d.bio.split('.')[0].trim();
+      if (bio.length < 80) document.getElementById('jobTitle').value = bio;
+    }
+    updatePreview();
+    renderSuggestions();
+    document.getElementById('ghUsername').style.borderColor = '#16a34a';
+    if (btn) btn.textContent = '✓ Imported!';
+    setTimeout(() => {
+      document.getElementById('ghUsername').style.borderColor = '';
+      if (btn) { btn.textContent = 'Import from GitHub'; btn.disabled = false; }
+    }, 2500);
+  } catch(err) {
+    alert('Import failed: ' + err.message);
+    if (btn) { btn.textContent = 'Import from GitHub'; btn.disabled = false; }
+  }
 }
 
 function updatePhoneLink() {
@@ -1741,7 +1830,13 @@ function addExperience() {
   div.className = 'entry-card'; div.id = 'exp-'+id;
   div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
     <div class="form-grid-2">
-      <div class="form-group"><label class="form-label">Job Title</label><input type="text" placeholder="e.g. Senior Engineer" id="exp-title-${id}"></div>
+      <div class="form-group">
+        <label class="form-label">Job Title</label>
+        <input type="text" placeholder="e.g. Senior Engineer" id="exp-title-${id}" oninput="document.getElementById('exp-title-chips-${id}').style.display='none'">
+        <div class="exp-title-chips" id="exp-title-chips-${id}">
+          ${EXP_TITLE_SUGGESTIONS.map(t=>`<button class="exp-title-chip" onclick="setExpTitle(${id},${JSON.stringify(t)})">${esc(t)}</button>`).join('')}
+        </div>
+      </div>
       <div class="form-group"><label class="form-label">Company</label><input type="text" placeholder="e.g. Infosys" id="exp-co-${id}"></div>
     </div>
     <div class="form-grid-2">
@@ -2261,35 +2356,98 @@ function renderOutput(data) {
   out.addEventListener('cut', e => e.preventDefault(), { once: false });
 }
 
-// ── Download Doc (.doc) ───────────────────────────────────────────────
+// ── Download Doc (.docx) ─────────────────────────────────────────────
 function downloadDoc() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { alert('Generate your resume first.'); return; }
+
+  // Deep-clone so we don't mutate the live DOM
+  const clone = page.cloneNode(true);
+
+  // Strip editing attributes
+  clone.removeAttribute('oninput');
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
+
+  // Remove SVG contact icons (Word renders SVG poorly; text remains)
+  clone.querySelectorAll('.r-ci svg').forEach(svg => svg.remove());
+  // Add a tiny gap after the remaining icon text
+  clone.querySelectorAll('.r-ci').forEach(ci => {
+    ci.style.display = 'inline';
+    ci.style.marginRight = '6px';
+  });
+
+  // Inject visible bullet chars — CSS ::before pseudo-elements are ignored by Word
+  clone.querySelectorAll('.r-ul li').forEach(li => {
+    li.insertBefore(document.createTextNode('• '), li.firstChild);
+    li.style.paddingLeft = '0';
+  });
+
+  // Convert .r-2col flex → table so Word renders side-by-side columns
+  clone.querySelectorAll('.r-2col').forEach(el => {
+    el.style.display = 'table';
+    el.style.width = '100%';
+    el.style.tableLayout = 'fixed';
+    el.style.margin = '0';
+  });
+  clone.querySelectorAll('.r-aside').forEach(el => {
+    el.style.display = 'table-cell';
+    el.style.verticalAlign = 'top';
+    el.style.width = '170px';
+  });
+  clone.querySelectorAll('.r-main-col').forEach(el => {
+    el.style.display = 'table-cell';
+    el.style.verticalAlign = 'top';
+    el.style.paddingLeft = '16px';
+  });
+
+  // Fix flex rows: r-exp-top, r-award, r-edu → table for right-aligned period/year
+  clone.querySelectorAll('.r-exp-top, .r-award, .r-edu').forEach(row => {
+    row.style.display = 'table';
+    row.style.width = '100%';
+    const cols = [...row.children];
+    cols.forEach((c, i) => {
+      c.style.display = 'table-cell';
+      c.style.verticalAlign = 'top';
+      if (i === cols.length - 1 && cols.length > 1) {
+        c.style.textAlign = 'right';
+        c.style.whiteSpace = 'nowrap';
+        c.style.width = '88px';
+      }
+    });
+  });
+
+  // Skills & contact: block layout for Word
+  clone.querySelectorAll('.r-contact').forEach(el => { el.style.display = 'block'; el.style.marginTop = '6px'; });
+  clone.querySelectorAll('.r-skills').forEach(el => { el.style.display = 'block'; });
+  clone.querySelectorAll('.r-sk').forEach(el => { el.style.display = 'inline-block'; el.style.margin = '2px'; });
+
   const tplCSS = document.getElementById('tplStyles')?.innerHTML || '';
-  const innerHTML = page.innerHTML;
-  const docHtml = `
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
+
+  const docHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
       xmlns:w="urn:schemas-microsoft-com:office:word"
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8">
 <title>Resume</title>
 <!--[if gte mso 9]><xml><w:WordDocument>
   <w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/>
-  <w:DocumentKind>w:documentKindNotSpecified</w:DocumentKind>
 </w:WordDocument>
 <w:Ppr><w:PgSz w:w="11906" w:h="16838" w:code="9"/>
 <w:PgMar w:top="1021" w:right="816" w:bottom="1021" w:left="816" w:header="0" w:footer="0"/></w:Ppr>
 </xml><![endif]-->
 <style>
   @page WordSection1{size:210mm 297mm portrait;margin:18mm 14.5mm;}
-  div.WordSection1{page:WordSection1;width:210mm;}
+  div.WordSection1{page:WordSection1;width:100%;}
   body{font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;margin:0;padding:0;}
   ${tplCSS}
+  svg{display:none!important;}
+  img{max-width:70px;max-height:70px;}
 </style>
 </head>
-<body><div class="WordSection1">${innerHTML}</div></body>
+<body><div class="WordSection1">${clone.innerHTML}</div></body>
 </html>`;
-  const blob = new Blob(['﻿', docHtml], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8' });
+
+  const blob = new Blob(['﻿', docHtml], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'resume.docx';
