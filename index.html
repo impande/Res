@@ -234,6 +234,45 @@
     /* ── Toast notifications ── */
     @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
+    /* ── UPI Payment Modal ── */
+    .upi-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
+    .upi-modal{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:22px;width:100%;max-width:390px;overflow:hidden;animation:upiIn .32s cubic-bezier(.34,1.3,.64,1);}
+    @keyframes upiIn{from{opacity:0;transform:scale(0.88) translateY(28px);}to{opacity:1;transform:none;}}
+    .upi-hdr{background:linear-gradient(135deg,#0c0c14 0%,#18182a 100%);padding:22px 22px 18px;text-align:center;border-bottom:1px solid #28283a;}
+    .upi-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.32);color:#f59e0b;font-size:0.68rem;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;padding:4px 11px;border-radius:99px;margin-bottom:12px;}
+    .upi-price-row{display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:5px;}
+    .upi-rupee{font-size:1.5rem;font-weight:700;color:#f59e0b;margin-top:7px;line-height:1;}
+    .upi-amount{font-size:4.2rem;font-weight:800;color:#fff;line-height:1;}
+    .upi-once{font-size:0.75rem;color:#555;}
+    .upi-body{padding:18px 20px 20px;}
+    .upi-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:16px;}
+    .upi-qr{width:152px;height:152px;border-radius:10px;background:#fff;padding:5px;display:block;}
+    .upi-qr-label{font-size:0.72rem;color:#555;}
+    .upi-id-row{display:flex;align-items:center;gap:8px;background:#111;border:1px solid #252525;border-radius:10px;padding:10px 13px;margin-bottom:16px;}
+    .upi-id-info{flex:1;min-width:0;}
+    .upi-id-label{font-size:0.6rem;color:#555;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;}
+    .upi-id-text{font-size:0.88rem;color:#d0d0d0;font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .btn-copy-upi{flex-shrink:0;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);color:#f59e0b;font-size:0.72rem;font-weight:700;padding:6px 11px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+    .btn-copy-upi:hover{background:rgba(245,158,11,0.2);}
+    .upi-apps{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+    .btn-upi-app{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 8px;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:700;font-family:inherit;transition:all .18s;letter-spacing:0.1px;}
+    .btn-upi-app:hover{transform:translateY(-1px);filter:brightness(1.12);}
+    .btn-upi-app:active{transform:none;}
+    .btn-gpay{background:#1a73e8;color:#fff;}
+    .btn-phonepe{background:#5f259f;color:#fff;}
+    .btn-paytm{background:#00baf2;color:#fff;}
+    .btn-upi-other{background:#242424;color:#ccc;border:1px solid #333!important;}
+    .upi-sep{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .upi-sep-line{flex:1;height:1px;background:#242424;}
+    .upi-sep-txt{font-size:0.68rem;color:#444;white-space:nowrap;}
+    .btn-paid{width:100%;padding:13px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.93rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-paid:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,0.38);}
+    @keyframes paidPulse{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,0.25);}50%{box-shadow:0 0 0 8px rgba(34,197,94,0.1),0 4px 20px rgba(34,197,94,0.35);}}
+    .btn-paid.pulse{animation:paidPulse 1.4s ease-in-out infinite;}
+    .upi-note{font-size:0.72rem;color:#444;text-align:center;margin-top:8px;line-height:1.5;}
+    .upi-cancel{display:block;text-align:center;font-size:0.76rem;color:#4a4a4a;cursor:pointer;margin-top:10px;padding:4px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
+    .upi-cancel:hover{color:#888;}
+    @media(max-width:420px){.upi-modal{border-radius:16px;}.upi-hdr{padding:18px 18px 14px;}.upi-body{padding:14px 16px 18px;}.upi-amount{font-size:3.4rem;}.upi-apps{grid-template-columns:1fr 1fr;}}
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
     @keyframes atsIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
@@ -2558,6 +2597,7 @@ Other instructions:
 
 // ── Generate ──────────────────────────────────────────────────────────
 async function generateResume() {
+  if (!hasUPIPaid()) { openUPIModal(); return; }
   if (!validateMandatory()) return;
   const data = collectData();
   const btn = document.getElementById('generateBtn');
@@ -3181,6 +3221,77 @@ ${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div
   if (!win) showToast('Please allow pop-ups to download the cover letter PDF.', 'info');
 }
 
+// ── UPI Payment ───────────────────────────────────────────────────────
+const UPI_SESSION_KEY = 'r4u_upi_paid';
+const UPI_ID   = '9739241381@hdfc';
+const UPI_AMT  = '2';
+const UPI_NAME = 'Resume4U';
+
+function hasUPIPaid() {
+  return sessionStorage.getItem(UPI_SESSION_KEY) === '1';
+}
+
+function markUPIPaid() {
+  sessionStorage.setItem(UPI_SESSION_KEY, '1');
+}
+
+function openUPIModal() {
+  // Generate QR code via Google Charts (UPI QR standard)
+  const upiStr = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
+  const qrImg = document.getElementById('upiQR');
+  if (qrImg) qrImg.src = `https://chart.googleapis.com/chart?chs=152x152&cht=qr&chl=${encodeURIComponent(upiStr)}&choe=UTF-8`;
+  document.getElementById('upiOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUPIModal() {
+  document.getElementById('upiOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function _upiDeepLink(scheme) {
+  return `${scheme}://upi/pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
+}
+
+function openGPay() {
+  window.location.href = _upiDeepLink('tez');
+  _highlightPaidBtn();
+}
+
+function openPhonePe() {
+  window.location.href = _upiDeepLink('phonepe');
+  _highlightPaidBtn();
+}
+
+function openPaytm() {
+  window.location.href = _upiDeepLink('paytmmp');
+  _highlightPaidBtn();
+}
+
+function openAnyUPI() {
+  window.location.href = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
+  _highlightPaidBtn();
+}
+
+function _highlightPaidBtn() {
+  const btn = document.getElementById('btnPaid');
+  if (btn) btn.classList.add('pulse');
+}
+
+function copyUPIId() {
+  navigator.clipboard.writeText(UPI_ID).then(() => {
+    const btn = document.getElementById('copyUPIBtn');
+    if (btn) { const t = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = t, 2000); }
+  }).catch(() => showToast('Copy failed — UPI ID: ' + UPI_ID));
+}
+
+async function confirmUPIPayment() {
+  markUPIPaid();
+  closeUPIModal();
+  showToast('Payment confirmed! Generating your resume…', 'success');
+  await generateResume();
+}
+
 // ── ATS Score ─────────────────────────────────────────────────────────
 function computeATSScore(data) {
   const items = [];
@@ -3324,5 +3435,72 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<!-- ── UPI Payment Modal ── -->
+<div class="upi-overlay" id="upiOverlay" style="display:none">
+  <div class="upi-modal" role="dialog" aria-modal="true">
+
+    <div class="upi-hdr">
+      <div class="upi-badge">💳 One-Time Payment</div>
+      <div class="upi-price-row">
+        <span class="upi-rupee">₹</span>
+        <span class="upi-amount">2</span>
+      </div>
+      <div class="upi-once">Pay once per session · instant resume generation</div>
+    </div>
+
+    <div class="upi-body">
+
+      <!-- QR Code -->
+      <div class="upi-qr-wrap">
+        <img id="upiQR" class="upi-qr" alt="UPI QR Code">
+        <div class="upi-qr-label">Scan with Google Pay, PhonePe, Paytm or BHIM</div>
+      </div>
+
+      <!-- UPI ID row -->
+      <div class="upi-id-row">
+        <div class="upi-id-info">
+          <div class="upi-id-label">UPI ID</div>
+          <div class="upi-id-text">9739241381@hdfc</div>
+        </div>
+        <button class="btn-copy-upi" id="copyUPIBtn" onclick="copyUPIId()">Copy</button>
+      </div>
+
+      <!-- Pay buttons -->
+      <div class="upi-apps">
+        <button class="btn-upi-app btn-gpay" onclick="openGPay()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google Pay
+        </button>
+        <button class="btn-upi-app btn-phonepe" onclick="openPhonePe()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M13.5 2C8.25 2 4 6.25 4 11.5S8.25 21 13.5 21c1.53 0 2.96-.39 4.22-1.07l2.07 1.57-.78-3.2A9.44 9.44 0 0 0 23 11.5C23 6.25 18.75 2 13.5 2zm.9 13.5v-4.5h-1.8v4.5h-2.7l3.6 3.6 3.6-3.6H14.4zM12.6 8.1V12h1.8V8.1h2.7L13.5 4.5 9.9 8.1h2.7z"/></svg>
+          PhonePe
+        </button>
+        <button class="btn-upi-app btn-paytm" onclick="openPaytm()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><rect width="24" height="24" rx="4" fill="none"/><text x="2" y="17" font-size="10" font-weight="800" fill="white" font-family="sans-serif">Pay</text></svg>
+          Paytm
+        </button>
+        <button class="btn-upi-app btn-upi-other" onclick="openAnyUPI()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Any UPI App
+        </button>
+      </div>
+
+      <div class="upi-sep">
+        <div class="upi-sep-line"></div>
+        <div class="upi-sep-txt">After paying, tap below</div>
+        <div class="upi-sep-line"></div>
+      </div>
+
+      <button class="btn-paid" id="btnPaid" onclick="confirmUPIPayment()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+        I've paid ₹2 — Generate Resume
+      </button>
+      <div class="upi-note">Come back to this page after payment and tap the button above</div>
+
+      <button class="upi-cancel" onclick="closeUPIModal()">← Cancel</button>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
