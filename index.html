@@ -2497,24 +2497,53 @@ function downloadDoc() {
 function downloadPDF() {
   const tplCSS = document.getElementById('tplStyles')?.innerHTML || '';
   const page = document.querySelector('#resumeOutput .resume-a4-page');
-  const resumeHTML = page ? page.innerHTML : document.getElementById('resumeOutput').innerHTML;
-  const win = window.open('','_blank');
+  if (!page) { alert('Generate your resume first.'); return; }
+  const resumeHTML = page.innerHTML;
+  const win = window.open('', '_blank');
   if (!win) { alert('Please allow pop-ups to download PDF'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title></title>
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>&#x200B;</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-@page{size:210mm 297mm portrait;margin:0;}
-html,body{width:210mm;height:auto;overflow:hidden;margin:0;padding:0;background:#fff;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
-.pdf-page{width:210mm;padding:16mm 14mm;box-sizing:border-box;background:#fff;height:auto;}
-@media print{
-  html,body{width:210mm;height:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .pdf-page{page-break-after:avoid;break-after:avoid;}
+/* margin:0 removes the browser URL / timestamp header+footer area */
+@page { size: A4 portrait; margin: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  width: 210mm; margin: 0; padding: 0; background: #fff;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+body {
+  width: 210mm; margin: 0; padding: 0; background: #fff;
+  font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+  overflow: visible;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.pdf-wrap {
+  width: 210mm; padding: 18mm 16mm; box-sizing: border-box; background: #fff;
+}
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  html, body {
+    width: 210mm; height: auto; overflow: visible;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .pdf-wrap { page-break-after: avoid; break-after: avoid; }
 }
 ${tplCSS}
 </style>
-</head><body><div class="pdf-page">${resumeHTML}</div>
-<script>window.onload=function(){window.print();};<\/script>
-</body></html>`);
+</head>
+<body>
+<div class="pdf-wrap">${resumeHTML}</div>
+<script>
+window.onload = function() {
+  // Delay lets fonts and colours finish loading before the print dialog opens
+  setTimeout(function() { window.print(); }, 400);
+};
+<\/script>
+</body>
+</html>`);
   win.document.close();
 }
 
