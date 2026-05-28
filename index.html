@@ -289,6 +289,46 @@
     .exp-title-chip{padding:4px 11px;border-radius:999px;border:1.5px solid var(--input-border);font-size:0.77rem;color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:inherit;user-select:none;}
     .exp-title-chip:hover{border-color:var(--accent);color:var(--accent);}
     .exp-title-chip.selected{border-color:var(--accent);background:rgba(245,158,11,0.15);color:var(--accent);font-weight:700;}
+    /* ── Upload Resume Feature ── */
+    .hero-upload-wrap{margin-top:22px;width:100%;max-width:450px;}
+    .hero-or{font-size:0.76rem;color:#444;text-align:center;margin-bottom:14px;position:relative;letter-spacing:0.3px;}
+    .hero-or::before,.hero-or::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border);}
+    .hero-or::before{left:0;}.hero-or::after{right:0;}
+    .upload-zone{border:2px dashed rgba(245,158,11,0.35);border-radius:14px;padding:20px 18px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,158,11,0.02);}
+    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(245,158,11,0.07);transform:translateY(-1px);}
+    .upload-zone-icon{font-size:1.6rem;margin-bottom:6px;}
+    .upload-zone-title{font-size:0.9rem;font-weight:600;color:var(--white);margin-bottom:3px;}
+    .upload-zone-sub{font-size:0.74rem;color:var(--muted);margin-bottom:11px;}
+    .btn-browse{padding:7px 18px;background:transparent;border:1.5px solid rgba(245,158,11,0.45);border-radius:7px;color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+    .btn-browse:hover{background:rgba(245,158,11,0.1);}
+    .upload-status-bar{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:0.83rem;text-align:center;line-height:1.5;display:none;}
+    .upload-status-bar.parsing{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--accent);}
+    .upload-status-bar.ok{background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);color:#4ade80;}
+    .upload-status-bar.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;}
+    /* ── Cover Letter Feature ── */
+    .btn-dl-cl{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 8px rgba(124,58,237,0.25);}
+    .btn-dl-cl:hover{background:linear-gradient(135deg,#6d28d9,#4338ca);transform:translateY(-1px);box-shadow:0 5px 16px rgba(124,58,237,0.38);}
+    .cl-section{background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;margin-top:28px;overflow:hidden;}
+    .cl-hdr{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;cursor:pointer;user-select:none;gap:10px;transition:background .15s;}
+    .cl-hdr:hover{background:rgba(255,255,255,0.03);}
+    .cl-hdr-left{display:flex;align-items:center;gap:10px;}
+    .cl-hdr-title{font-size:1rem;font-weight:700;color:var(--white);}
+    .cl-hdr-badge{font-size:0.65rem;background:rgba(124,58,237,0.18);color:#a78bfa;border-radius:5px;padding:2px 8px;font-weight:700;}
+    .cl-chevron{font-size:0.8rem;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+    .cl-chevron.open{transform:rotate(180deg);}
+    .cl-body{padding:0 20px 20px;border-top:1px solid var(--border);}
+    .cl-tone-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px;}
+    .cl-output{margin-top:20px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .cl-output-bar{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;}
+    .cl-output-label{font-size:0.72rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#a78bfa;}
+    .cl-output-actions{display:flex;gap:7px;flex-wrap:wrap;}
+    .btn-cl{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;transition:all .15s;border:none;}
+    .btn-cl-copy{background:rgba(255,255,255,0.07);color:var(--text);border:1px solid var(--border)!important;}
+    .btn-cl-copy:hover{background:rgba(255,255,255,0.13);}
+    .btn-cl-doc{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;}
+    .btn-cl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;}
+    .cl-text-wrap{padding:20px;background:#fff;min-height:220px;}
+    .cl-text{font-size:0.91rem;line-height:1.85;color:#111;white-space:pre-wrap;font-family:'Segoe UI',system-ui,sans-serif;outline:none;min-height:200px;cursor:text;}
     /* ── Mobile-friendly template carousel ── */
     @media(max-width:768px){
       .tpl-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px!important;gap:8px!important;}
@@ -1315,6 +1355,17 @@
     </div>
     <button class="btn-hero" onclick="startBuild()">Generate Resume →</button>
     <p class="hero-note">No sign-up required · Free to use</p>
+    <div class="hero-upload-wrap">
+      <div class="hero-or">— or beautify your existing resume —</div>
+      <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
+        <input type="file" id="resumeUploadInput" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
+        <div class="upload-zone-icon">📄</div>
+        <div class="upload-zone-title">Drop your resume here</div>
+        <div class="upload-zone-sub">PDF · DOCX · TXT supported</div>
+        <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Browse Files</button>
+      </div>
+      <div id="uploadStatusBar" class="upload-status-bar"></div>
+    </div>
   </div>
 
   <div class="step-content" id="step1">
@@ -1482,10 +1533,63 @@
       <div class="resume-bar-actions" id="dlActions" style="display:none">
         <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOC</button>
         <button class="btn-dl btn-dl-pdf" onclick="downloadPDF()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download PDF</button>
+        <button class="btn-dl btn-dl-cl" onclick="openCoverLetter()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Cover Letter</button>
       </div>
     </div>
     <div class="resume-output-card" id="resumeOutput">
       <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
+    </div>
+    <!-- Cover Letter Section -->
+    <div class="cl-section" id="clSection" style="display:none">
+      <div class="cl-hdr" onclick="toggleCLBody()">
+        <div class="cl-hdr-left">
+          <span style="font-size:1.15rem">✉</span>
+          <span class="cl-hdr-title">Cover Letter Generator</span>
+          <span class="cl-hdr-badge">AI-Powered</span>
+        </div>
+        <span class="cl-chevron open" id="clChevron">▲</span>
+      </div>
+      <div class="cl-body" id="clBody">
+        <div style="padding-top:18px">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Company Name <span class="req-star">*</span></label>
+              <input type="text" id="cl-company" placeholder="e.g. Google, Infosys, Microsoft">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role Applying For <span class="req-star">*</span></label>
+              <input type="text" id="cl-role" placeholder="e.g. Product Manager">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Job Description <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional — paste for a more tailored letter)</span></label>
+            <textarea id="cl-jd" rows="3" placeholder="Paste the job description here to get a perfectly tailored cover letter…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tone</label>
+            <div class="cl-tone-row" id="clToneChips">
+              <button class="chip selected" data-tone="professional">Professional</button>
+              <button class="chip" data-tone="enthusiastic">Enthusiastic</button>
+              <button class="chip" data-tone="creative">Creative</button>
+              <button class="chip" data-tone="concise">Concise &amp; Direct</button>
+            </div>
+          </div>
+          <button class="btn-accent" id="clGenBtn" onclick="generateCoverLetter()" style="margin-top:4px">✦ Generate Cover Letter</button>
+          <div class="cl-output" id="clOutput" style="display:none">
+            <div class="cl-output-bar">
+              <span class="cl-output-label">✉ Cover Letter</span>
+              <div class="cl-output-actions">
+                <button class="btn-cl btn-cl-copy" onclick="copyCoverLetter()">📋 Copy</button>
+                <button class="btn-cl btn-cl-doc" onclick="downloadCoverLetterDoc()">📄 DOC</button>
+                <button class="btn-cl btn-cl-pdf" onclick="downloadCoverLetterPDF()">📕 PDF</button>
+              </div>
+            </div>
+            <div class="cl-text-wrap">
+              <div id="clText" class="cl-text" contenteditable="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2455,7 +2559,13 @@ function renderOutput(data) {
   out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
-  // Block clipboard copy from resume output
+  // Show cover letter section and pre-fill role
+  const clSec = document.getElementById('clSection');
+  if (clSec) {
+    clSec.style.display = 'block';
+    const roleEl = document.getElementById('cl-role');
+    if (roleEl && !roleEl.value && data.jobTitle) roleEl.value = data.jobTitle;
+  }
   out.addEventListener('copy', e => e.preventDefault(), { once: false });
   out.addEventListener('cut', e => e.preventDefault(), { once: false });
 }
@@ -2585,6 +2695,311 @@ function downloadPDF() {
   window.addEventListener('afterprint', cleanup, { once: true });
   setTimeout(cleanup, 10000);
   setTimeout(() => window.print(), 150);
+}
+
+// ── Upload & Beautify Existing Resume ────────────────────────────────
+(function() {
+  const zone = document.getElementById('uploadDropZone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) handleResumeFile(f);
+  });
+})();
+
+async function handleResumeFile(file) {
+  if (!file) return;
+  const bar = document.getElementById('uploadStatusBar');
+  bar.className = 'upload-status-bar parsing';
+  bar.style.display = 'block';
+  bar.textContent = '⏳ Reading file…';
+  try {
+    const text = await extractTextFromFile(file);
+    if (!text || text.replace(/\s/g,'').length < 40) throw new Error('Could not extract text — try a TXT copy of your resume.');
+    bar.textContent = '🤖 AI is parsing your resume…';
+    const data = await parseResumeWithAI(text);
+    populateFormFromParsed(data);
+    bar.className = 'upload-status-bar ok';
+    bar.textContent = '✓ Resume imported! Review your details, choose a template, then Generate.';
+    setTimeout(() => { goToStep(6); setTimeout(() => document.getElementById('tplSection')?.scrollIntoView({behavior:'smooth',block:'start'}), 300); }, 1400);
+  } catch(err) {
+    bar.className = 'upload-status-bar err';
+    bar.textContent = '✗ ' + err.message;
+  }
+}
+
+function readAsText(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read failed')); r.readAsText(file,'utf-8'); });
+}
+function readAsArrayBuffer(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('Read failed')); r.readAsArrayBuffer(file); });
+}
+
+async function extractTextFromFile(file) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.txt')) return readAsText(file);
+  const buf = await readAsArrayBuffer(file);
+  if (name.endsWith('.pdf')) return extractPDFText(buf);
+  return extractDOCXText(buf); // .docx / .doc
+}
+
+function extractPDFText(buf) {
+  const bytes = new Uint8Array(buf);
+  let raw = '';
+  for (let i = 0; i < bytes.length; i++) {
+    const c = bytes[i];
+    if (c >= 32 && c < 127) raw += String.fromCharCode(c);
+    else if (c === 10 || c === 13) raw += ' ';
+  }
+  const texts = [];
+  // Extract text inside parentheses (PDF string objects)
+  const re = /\(([^()\\]|\\.){1,400}\)/g;
+  let m;
+  while ((m = re.exec(raw)) !== null) {
+    const t = m[0].slice(1,-1)
+      .replace(/\\n/g,' ').replace(/\\r/g,' ').replace(/\\t/g,' ')
+      .replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')')
+      .replace(/\\[0-7]{3}/g,'').trim();
+    if (t.length > 2 && /[a-zA-Z]{2,}/.test(t)) texts.push(t);
+  }
+  return texts.join(' ').replace(/\s+/g,' ').trim().slice(0, 8000);
+}
+
+function extractDOCXText(buf) {
+  const str = new TextDecoder('utf-8',{fatal:false}).decode(buf);
+  const texts = [];
+  const re = /<w:t[^>]*>([^<]+)<\/w:t>/g;
+  let m;
+  while ((m = re.exec(str)) !== null) { if (m[1].trim()) texts.push(m[1]); }
+  if (texts.length > 3) return texts.join(' ').replace(/\s+/g,' ').trim().slice(0, 8000);
+  // Fallback: strip XML tags
+  return str.replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim().slice(0, 8000);
+}
+
+async function parseResumeWithAI(text) {
+  const prompt = `You are a resume parser. Extract all information from this resume text and return structured JSON.
+
+Resume:
+${text.slice(0, 5500)}
+
+Return ONLY valid JSON (no markdown fences, no explanation):
+{"firstName":"","lastName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","github":"","summary":"","experience":[{"title":"","co":"","start":"","end":"","desc":""}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"deg":"","sch":"","yr":"","gpa":""}],"skills":[]}
+
+Rules:
+- Extract only values actually present in the text — never invent data
+- Put full name into firstName/lastName split correctly
+- For experience desc, combine all bullets/achievements into one string
+- For skills, return an array of individual skill strings
+- Empty string for any field not found`;
+
+  const resp = await fetch('/.netlify/functions/generate', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({prompt})
+  });
+  if (!resp.ok) throw new Error('AI parsing failed (server error)');
+  const result = await resp.json();
+  const raw = result.content || result.text || '';
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Could not parse resume structure from AI response');
+  return JSON.parse(match[0]);
+}
+
+function populateFormFromParsed(data) {
+  function sv(id, val) { const el = document.getElementById(id); if (el && val) el.value = val; }
+  sv('firstName', data.firstName); sv('lastName', data.lastName);
+  sv('jobTitle', data.jobTitle);   sv('email', data.email);
+  sv('phone', data.phone);         sv('location', data.location);
+  sv('linkedin', data.linkedin);   sv('github', data.github);
+  if (data.summary) sv('summary', data.summary);
+
+  // Experience
+  if (data.experience && data.experience.length) {
+    const cont = document.getElementById('experienceEntries');
+    if (cont) { cont.innerHTML = ''; expCount = 0; }
+    data.experience.slice(0,5).forEach(e => {
+      addExperience();
+      sv('exp-title-'+expCount, e.title); sv('exp-co-'+expCount, e.co);
+      sv('exp-start-'+expCount, e.start); sv('exp-end-'+expCount, e.end);
+      sv('exp-desc-'+expCount, e.desc);
+    });
+  }
+  // Awards
+  if (data.awards && data.awards.length) {
+    const cont = document.getElementById('awardEntries');
+    if (cont) { cont.innerHTML = ''; awardCount = 0; }
+    data.awards.slice(0,5).forEach(a => {
+      addAward();
+      sv('award-name-'+awardCount, a.name); sv('award-year-'+awardCount, a.year);
+      sv('award-org-'+awardCount, a.org);   sv('award-desc-'+awardCount, a.desc);
+    });
+  }
+  // Education
+  if (data.education && data.education.length) {
+    const cont = document.getElementById('educationEntries');
+    if (cont) { cont.innerHTML = ''; eduCount = 0; }
+    data.education.slice(0,4).forEach(e => {
+      addEducation();
+      sv('edu-deg-'+eduCount, e.deg); sv('edu-sch-'+eduCount, e.sch);
+      sv('edu-yr-'+eduCount, e.yr);   sv('edu-gpa-'+eduCount, e.gpa);
+    });
+  }
+  // Skills
+  if (data.skills && data.skills.length) {
+    skills = [];
+    data.skills.slice(0,20).filter(s=>s&&s.trim()).forEach(s => { const t=s.trim(); if(t && !skills.includes(t)) skills.push(t); });
+    renderSkills();
+    if (typeof renderSuggestions === 'function') renderSuggestions();
+  }
+  updatePreview();
+}
+
+// ── Cover Letter ──────────────────────────────────────────────────────
+let clTone = 'professional';
+
+function openCoverLetter() {
+  const sec = document.getElementById('clSection');
+  if (!sec) return;
+  sec.style.display = 'block';
+  sec.scrollIntoView({behavior:'smooth', block:'start'});
+  // ensure body is open
+  const body = document.getElementById('clBody');
+  const chev = document.getElementById('clChevron');
+  if (body) body.style.display = 'block';
+  if (chev) { chev.textContent = '▲'; chev.classList.add('open'); }
+}
+
+function toggleCLBody() {
+  const body = document.getElementById('clBody');
+  const chev = document.getElementById('clChevron');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (chev) { chev.textContent = open ? '▼' : '▲'; chev.classList.toggle('open', !open); }
+}
+
+// Tone chip selection
+document.getElementById('clToneChips')?.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip || !chip.dataset.tone) return;
+  clTone = chip.dataset.tone;
+  document.querySelectorAll('#clToneChips .chip').forEach(c => c.classList.toggle('selected', c === chip));
+});
+
+async function generateCoverLetter() {
+  const company = document.getElementById('cl-company')?.value.trim();
+  const role = document.getElementById('cl-role')?.value.trim();
+  if (!company || !role) { alert('Please enter Company Name and Role.'); return; }
+  const jd = document.getElementById('cl-jd')?.value.trim() || '';
+  const data = lastResumeData || collectData();
+
+  const btn = document.getElementById('clGenBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(0,0,0,0.25);border-top-color:#000"></span> Generating…';
+
+  const toneMap = {professional:'formal and professional', enthusiastic:'enthusiastic and passionate', creative:'creative and engaging', concise:'concise and direct'};
+  const toneDesc = toneMap[clTone] || 'professional';
+
+  const expStr = (data.experience||[]).map(e=>`${e.title||''} at ${e.co||''} (${[e.start,e.end].filter(Boolean).join('–')||''})`).join('; ');
+  const prompt = `Write a cover letter for the following candidate applying for the position below.
+
+Candidate: ${data.firstName||''} ${data.lastName||''}
+Current/Target Title: ${data.jobTitle||''}
+Skills: ${(data.skills||[]).join(', ')||'N/A'}
+Experience summary: ${expStr||'N/A'}
+${data.summary?'Professional summary: '+data.summary:''}
+
+Applying to: ${company}
+Role: ${role}
+${jd?'Job description:\n'+jd.slice(0,1500):''}
+
+Tone: ${toneDesc}
+Length: 3–4 paragraphs (250–380 words)
+
+Instructions:
+- Opening: express enthusiasm for the specific role and company
+- Middle: highlight 2–3 specific achievements/skills most relevant to this role
+- Closing: confident call to action, mention availability for interview
+- Do NOT use generic filler phrases like "I am writing to express my interest"
+- Write as plain text, no bullet points, no headers
+- Start directly with "Dear Hiring Manager," or "Dear [Company] Team,"
+- Sign off with the candidate's name
+
+Return ONLY the cover letter text, no JSON, no explanation.`;
+
+  try {
+    const resp = await fetch('/.netlify/functions/generate', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({prompt})
+    });
+    if (!resp.ok) throw new Error('Server error ' + resp.status);
+    const result = await resp.json();
+    const text = (result.content || result.text || '').trim();
+    if (!text) throw new Error('No content returned');
+    const out = document.getElementById('clOutput');
+    const textEl = document.getElementById('clText');
+    textEl.textContent = text;
+    out.style.display = 'block';
+    out.scrollIntoView({behavior:'smooth', block:'nearest'});
+  } catch(err) {
+    alert('Cover letter generation failed: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✦ Generate Cover Letter';
+  }
+}
+
+function copyCoverLetter() {
+  const text = document.getElementById('clText')?.textContent || '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target.closest('.btn-cl-copy');
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(()=>btn.textContent=orig, 2000); }
+  }).catch(() => alert('Copy failed — please select and copy the text manually.'));
+}
+
+function downloadCoverLetterDoc() {
+  const text = document.getElementById('clText')?.textContent || '';
+  if (!text) return;
+  const company = document.getElementById('cl-company')?.value.trim() || 'Company';
+  const role = document.getElementById('cl-role')?.value.trim() || 'Role';
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><title>Cover Letter</title>
+<style>@page WordSection1{size:210mm 297mm;margin:25mm 20mm;}div.WordSection1{page:WordSection1;}
+body{font-family:'Calibri',Arial,sans-serif;font-size:11pt;line-height:1.6;color:#111;}</style>
+</head><body><div class="WordSection1">${text.split('\n\n').map(p=>`<p style="margin:0 0 12pt">${p.replace(/\n/g,'<br>')}</p>`).join('')}</div></body></html>`;
+  const blob = new Blob(['﻿', html], {type:'application/msword;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `cover-letter-${company.replace(/\s+/g,'-')}.doc`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function downloadCoverLetterPDF() {
+  const text = document.getElementById('clText')?.textContent || '';
+  if (!text) return;
+  const company = document.getElementById('cl-company')?.value.trim() || '';
+  const role = document.getElementById('cl-role')?.value.trim() || '';
+  const name = lastResumeData ? `${lastResumeData.firstName||''} ${lastResumeData.lastName||''}`.trim() : '';
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cover Letter</title>
+<style>
+@page{size:A4 portrait;margin:25mm 20mm;}
+body{font-family:'Calibri',Arial,sans-serif;font-size:11pt;line-height:1.8;color:#111;margin:0;padding:0;-webkit-print-color-adjust:exact;}
+.cl-wrap{max-width:170mm;margin:0 auto;}
+.cl-meta{margin-bottom:24pt;font-size:10pt;color:#444;}
+.cl-body p{margin:0 0 12pt;}
+@media print{@page{margin:25mm 20mm;}html,body{background:#fff;}}
+</style></head>
+<body><div class="cl-wrap">
+${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div>`:''}
+<div class="cl-body">${text.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('')}</div>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();},400);};<\/script>
+</body></html>`;
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const win = window.open(URL.createObjectURL(blob), '_blank');
+  if (!win) alert('Please allow pop-ups to download the cover letter PDF.');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
