@@ -3249,27 +3249,42 @@ function closeUPIModal() {
   document.body.style.overflow = '';
 }
 
+function _upiTxRef() {
+  return 'R4U' + Date.now() + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
+function _openDeepLink(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => document.body.removeChild(a), 200);
+}
+
 function _upiDeepLink(scheme) {
-  return `${scheme}://upi/pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
+  const tr = _upiTxRef();
+  return `${scheme}://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation&tr=${tr}&tid=${tr}`;
 }
 
 function openGPay() {
-  window.location.href = _upiDeepLink('tez');
+  _openDeepLink(_upiDeepLink('tez'));
   _highlightPaidBtn();
 }
 
 function openPhonePe() {
-  window.location.href = _upiDeepLink('phonepe');
+  _openDeepLink(_upiDeepLink('phonepe'));
   _highlightPaidBtn();
 }
 
 function openPaytm() {
-  window.location.href = _upiDeepLink('paytmmp');
+  _openDeepLink(_upiDeepLink('paytmmp'));
   _highlightPaidBtn();
 }
 
 function openAnyUPI() {
-  window.location.href = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
+  const tr = _upiTxRef();
+  _openDeepLink(`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation&tr=${tr}&tid=${tr}`);
   _highlightPaidBtn();
 }
 
