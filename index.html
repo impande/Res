@@ -3239,7 +3239,7 @@ function openUPIModal() {
   // Generate QR code via Google Charts (UPI QR standard)
   const upiStr = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
   const qrImg = document.getElementById('upiQR');
-  if (qrImg) qrImg.src = `https://chart.googleapis.com/chart?chs=152x152&cht=qr&chl=${encodeURIComponent(upiStr)}&choe=UTF-8`;
+  if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=152x152&data=${encodeURIComponent(upiStr)}&margin=4&color=000000&bgcolor=ffffff`;
   document.getElementById('upiOverlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
