@@ -3071,14 +3071,26 @@ function downloadCoverLetterPDF() {
   const company = document.getElementById('cl-company')?.value.trim() || '';
   const role = document.getElementById('cl-role')?.value.trim() || '';
   const name = lastResumeData ? `${lastResumeData.firstName||''} ${lastResumeData.lastName||''}`.trim() : '';
+
+  const ua = navigator.userAgent;
+  const needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
+  if (needsHint && !document.getElementById('pdf-print-hint')) {
+    const hint = document.createElement('div');
+    hint.id = 'pdf-print-hint';
+    hint.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 16px;background:#fef3c7;color:#78350f;font-size:13px;text-align:center;border-bottom:1.5px solid #fcd34d;font-family:system-ui,sans-serif;line-height:1.5;';
+    hint.innerHTML = '&#128203; <strong>Safari / Firefox:</strong> In the print dialog → uncheck <strong>"Headers and Footers"</strong> to remove URL &amp; date. <button onclick="this.parentNode.remove()" style="margin-left:12px;padding:2px 8px;cursor:pointer;border-radius:4px;border:1px solid #b45309;background:transparent;color:#78350f;font-size:12px;">&#10005;</button>';
+    document.body.appendChild(hint);
+    setTimeout(() => hint.remove(), 12000);
+  }
+
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cover Letter</title>
 <style>
-@page{size:A4 portrait;margin:25mm 20mm;}
+@page{size:A4 portrait;margin:0;}
 body{font-family:'Calibri',Arial,sans-serif;font-size:11pt;line-height:1.8;color:#111;margin:0;padding:0;-webkit-print-color-adjust:exact;}
-.cl-wrap{max-width:170mm;margin:0 auto;}
+.cl-wrap{max-width:170mm;margin:0 auto;padding:25mm 20mm;}
 .cl-meta{margin-bottom:24pt;font-size:10pt;color:#444;}
 .cl-body p{margin:0 0 12pt;}
-@media print{@page{margin:25mm 20mm;}html,body{background:#fff;}}
+@media print{@page{size:A4 portrait;margin:0;}html,body{background:#fff;}.cl-wrap{padding:25mm 20mm;}}
 </style></head>
 <body><div class="cl-wrap">
 ${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div>`:''}
