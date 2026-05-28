@@ -1380,6 +1380,13 @@
     .tpl-corporate .r-aside .r-edu{flex-direction:column;}
     .tpl-corporate .r-aside .r-yr{text-align:left!important;color:#1d4ed8!important;margin-top:1px;}
   </style>
+  <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  GOOGLE ADSENSE — replace YOUR_PUB_ID with your ca-pub-XXXXXXX  ║
+    ║  Sign up / get your ID: https://adsense.google.com              ║
+    ╚══════════════════════════════════════════════════════════════════╝
+  -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUB_ID" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -3224,32 +3231,26 @@ function closeAdModal() {
 }
 
 function _loadAdInSlot() {
-  // ═══════════════════════════════════════════════════════════════════
-  // PASTE YOUR AD NETWORK CODE HERE
-  // ───────────────────────────────────────────────────────────────────
-  // Google AdSense (display ad — 300×250 medium rectangle):
-  //   const slot = document.getElementById('adSlot');
-  //   slot.innerHTML = `
-  //     <ins class="adsbygoogle"
-  //       style="display:inline-block;width:300px;height:250px"
-  //       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-  //       data-ad-slot="XXXXXXXXXX"></ins>`;
-  //   (adsbygoogle = window.adsbygoogle || []).push({});
-  //
-  // Propeller Ads (interstitial / smart link):
-  //   const s = document.createElement('script');
-  //   s.setAttribute('data-cfasync','false');
-  //   s.src = '//your-propellerads-script-url';
-  //   document.getElementById('adSlot').appendChild(s);
-  //
-  // Google Ad Manager:
-  //   googletag.cmd.push(() => {
-  //     googletag.defineSlot('/XXXXXX/resume4u-interstitial',[300,250],'adSlot').addService(googletag.pubads());
-  //     googletag.pubads().enableSingleRequest();
-  //     googletag.enableServices();
-  //     googletag.display('adSlot');
-  //   });
-  // ═══════════════════════════════════════════════════════════════════
+  const slot = document.getElementById('adSlot');
+  if (!slot) return;
+
+  // ── Google AdSense — 300×250 Medium Rectangle (highest-earning format) ──
+  // 1. Replace YOUR_PUB_ID in the <script> tag above in <head> with your ca-pub-XXXXXXXX
+  // 2. Replace YOUR_SLOT_ID below with your Ad Unit ID from AdSense dashboard
+  // 3. That's it — AdSense auto-selects the highest-paying career/job ads for your audience
+  slot.innerHTML = `
+    <ins class="adsbygoogle"
+      style="display:inline-block;width:300px;height:250px"
+      data-ad-client="ca-pub-YOUR_PUB_ID"
+      data-ad-slot="YOUR_SLOT_ID"></ins>`;
+  try {
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+    // Hide placeholder once AdSense iframe loads
+    const ph = document.getElementById('adSlotPlaceholder');
+    if (ph) { const ins = slot.querySelector('ins'); if (ins) ins.addEventListener('load', () => ph.remove(), {once:true}); }
+  } catch (e) {
+    // AdSense not loaded (ad blocker) — placeholder stays visible
+  }
 }
 
 function _startAdCountdown() {
@@ -3452,10 +3453,11 @@ window.addEventListener('load', function() {
     <!-- ══ AD SLOT — paste your ad network tag inside #adSlot ══ -->
     <div class="ad-slot-wrap">
       <div id="adSlot">
-        <div class="ad-slot-placeholder">
+        <!-- AdSense unit renders here — set YOUR_PUB_ID + YOUR_SLOT_ID in the code -->
+        <div class="ad-slot-placeholder" id="adSlotPlaceholder">
           <div class="ad-slot-placeholder-icon">📢</div>
-          <div>Your ad appears here</div>
-          <div style="font-size:0.68rem;color:#2a2a2a;margin-top:3px">Paste your ad network code in <code style="color:#444">_loadAdInSlot()</code></div>
+          <div style="color:#555">Loading ad…</div>
+          <div style="font-size:0.68rem;color:#2a2a2a;margin-top:4px">Powered by Google AdSense</div>
         </div>
       </div>
     </div>
