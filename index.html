@@ -209,7 +209,31 @@
     @media(max-width:480px){
       .step-label{font-size:0.56rem;}
       .btn-primary,.btn-secondary,.btn-accent{padding:12px 14px;font-size:0.85rem;}
+      .hero-title{font-size:1.7rem;letter-spacing:-0.5px;}
+      .hero-sub{font-size:0.92rem;}
+      .btn-hero{padding:14px 28px;font-size:0.95rem;}
+      .hero-features{flex-direction:column;align-items:center;gap:8px;}
+      .hero-upload-wrap{max-width:100%;}
+      .upload-tabs{gap:0;}
+      .upload-tab{font-size:0.76rem;padding:8px 6px;}
+      .upload-zone{padding:16px 12px;}
+      .btn-browse{width:100%;margin-top:2px;}
+      .paste-area{min-height:130px;font-size:0.88rem;}
+      .btn-parse{padding:12px;font-size:0.9rem;}
+      .upload-status-bar{font-size:0.8rem;}
+      .resume-bar-actions{flex-direction:column;}
+      .resume-bar-actions .btn-dl{width:100%;justify-content:center;}
+      .cl-section{margin-top:18px;}
+      .cl-output-bar{flex-direction:column;align-items:flex-start;}
+      .cl-output-actions{width:100%;justify-content:flex-start;}
+      .btn-cl{flex:1;justify-content:center;}
+      .form-grid-2{grid-template-columns:1fr;}
+      .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:7px;}
+      #step0{padding:24px 14px 20px;}
     }
+    /* ── Toast notifications ── */
+    @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
     /* ── Print / PDF (body.pdf-printing) ── */
     @media print {
       @page { size: A4 portrait; margin: 0; }
@@ -1362,17 +1386,17 @@
     <div class="hero-upload-wrap">
       <div class="hero-or">— or beautify your existing resume —</div>
       <div class="upload-tabs">
-        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')">📄 Upload File</button>
+        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')">📷 Upload Screenshot</button>
         <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
       </div>
-      <!-- Upload file panel -->
+      <!-- Upload screenshot panel -->
       <div class="upload-panel active" id="panelUpload">
         <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
-          <input type="file" id="resumeUploadInput" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
-          <div class="upload-zone-icon">📄</div>
-          <div class="upload-zone-title">Drop your resume here</div>
-          <div class="upload-zone-sub">PDF · DOCX · TXT supported</div>
-          <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Browse Files</button>
+          <input type="file" id="resumeUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
+          <div class="upload-zone-icon">📷</div>
+          <div class="upload-zone-title">Upload a screenshot of your resume</div>
+          <div class="upload-zone-sub">JPG · PNG · WEBP · GIF supported</div>
+          <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Choose Image</button>
         </div>
       </div>
       <!-- Paste text panel -->
@@ -1987,7 +2011,7 @@ function setExpTitle(id, title) {
 
 async function prefillFromGithub() {
   const username = document.getElementById('ghUsername').value.trim();
-  if (!username) { alert('Please enter a GitHub username.'); return; }
+  if (!username) { showToast('Please enter a GitHub username.'); return; }
   const btn = document.querySelector('.prefill-section .btn-accent');
   if (btn) { btn.disabled = true; btn.textContent = 'Importing…'; }
   try {
@@ -2018,7 +2042,7 @@ async function prefillFromGithub() {
       if (btn) { btn.textContent = 'Import from GitHub'; btn.disabled = false; }
     }, 2500);
   } catch(err) {
-    alert('Import failed: ' + err.message);
+    showToast('Import failed: ' + err.message);
     if (btn) { btn.textContent = 'Import from GitHub'; btn.disabled = false; }
   }
 }
@@ -2196,7 +2220,7 @@ async function generateBullets(id) {
   const co    = document.getElementById('exp-co-'+id)?.value.trim() || '';
   const desc  = document.getElementById('exp-desc-'+id)?.value.trim() || '';
   const jobTitle = document.getElementById('jobTitle')?.value.trim() || '';
-  if (!title && !co) { alert('Please fill in Job Title and Company before generating bullets.'); return; }
+  if (!title && !co) { showToast('Please fill in Job Title and Company before generating bullets.'); return; }
   const btn = document.getElementById('gen-bullets-btn-'+id);
   const textarea = document.getElementById('exp-desc-'+id);
   btn.disabled = true;
@@ -2231,7 +2255,7 @@ Bullet writing rules:
     if (text) { textarea.value = text; markNeedsRegen(); }
     else throw new Error('Empty response');
   } catch(err) {
-    alert('Could not generate bullets: ' + err.message);
+    showToast('Could not generate bullets: ' + err.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '✦ Generate Bullets with AI';
@@ -2588,7 +2612,7 @@ function renderOutput(data) {
 // ── Download Doc (.docx) ─────────────────────────────────────────────
 function downloadDoc() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
-  if (!page) { alert('Generate your resume first.'); return; }
+  if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
   // Deep-clone so we don't mutate the live DOM
   const clone = page.cloneNode(true);
@@ -2688,7 +2712,7 @@ function downloadDoc() {
 // ── PDF ───────────────────────────────────────────────────────────────
 function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
-  if (!page) { alert('Generate your resume first.'); return; }
+  if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
   const ua = navigator.userAgent;
   const needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
@@ -2754,27 +2778,56 @@ function onParseSuccess(data) {
 
 async function handleResumeFile(file) {
   if (!file) return;
-  showUploadStatus('parsing', '⏳ Reading file…');
+  const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name);
+  showUploadStatus('parsing', isImage ? '🤖 AI is reading your resume screenshot…' : '⏳ Reading file…');
   try {
-    const text = await extractTextFromFile(file);
-    const usableText = text && text.replace(/\s/g,'').length >= 60;
-    if (!usableText) {
-      switchUploadTab('paste');
-      showUploadStatus('err', '⚠ Could not read text from this PDF — paste your resume text in the box below instead.');
-      return;
+    if (isImage) {
+      const data = await parseResumeFromImage(file);
+      const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+      if (!hasData) throw new Error('Could not extract data from the screenshot. Please ensure the image is clear and contains a readable resume.');
+      onParseSuccess(data);
+    } else {
+      const text = await extractTextFromFile(file);
+      const usableText = text && text.replace(/\s/g,'').length >= 60;
+      if (!usableText) { switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read text — paste your resume text in the box below.'); return; }
+      showUploadStatus('parsing', '🤖 AI is parsing your resume…');
+      const data = await parseResumeWithAI(text);
+      const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+      if (!hasData) { switchUploadTab('paste'); showUploadStatus('err', '⚠ Couldn\'t parse this file — switch to "Paste Text" and paste your resume text.'); return; }
+      onParseSuccess(data);
     }
-    showUploadStatus('parsing', '🤖 AI is parsing your resume…');
-    const data = await parseResumeWithAI(text);
-    const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
-    if (!hasData) {
-      switchUploadTab('paste');
-      showUploadStatus('err', '⚠ Couldn\'t auto-read this PDF (scanned or image-based). Switch to "Paste Text" and paste your resume text.');
-      return;
-    }
-    onParseSuccess(data);
   } catch(err) {
     showUploadStatus('err', '✗ ' + err.message);
   }
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Failed to read image'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function parseResumeFromImage(file) {
+  const base64 = await fileToBase64(file);
+  const mimeType = file.type || 'image/jpeg';
+  const prompt = `TASK: Extract all resume data from this image. Return ONLY a JSON object starting with { — nothing else.
+
+{"firstName":"","lastName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","github":"","summary":"","experience":[{"title":"","co":"","start":"","end":"","desc":""}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"deg":"","sch":"","yr":"","gpa":""}],"skills":[]}
+
+RULES: Extract only what is visible. Split full name into firstName/lastName. skills must be an array. Start response with {`;
+  const resp = await fetch('/.netlify/functions/generate', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({prompt, imageBase64: base64, imageMimeType: mimeType})
+  });
+  if (!resp.ok) throw new Error('Vision API failed — please try the Paste Text option.');
+  const result = await resp.json();
+  const raw = result.text || result.content || '';
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Could not read resume from image. Try pasting text instead.');
+  return JSON.parse(match[0]);
 }
 
 async function handleResumeText() {
@@ -2981,7 +3034,7 @@ document.getElementById('clToneChips')?.addEventListener('click', e => {
 async function generateCoverLetter() {
   const company = document.getElementById('cl-company')?.value.trim();
   const role = document.getElementById('cl-role')?.value.trim();
-  if (!company || !role) { alert('Please enter Company Name and Role.'); return; }
+  if (!company || !role) { showToast('Please enter Company Name and Role.'); return; }
   const jd = document.getElementById('cl-jd')?.value.trim() || '';
   const data = lastResumeData || collectData();
 
@@ -3033,7 +3086,7 @@ Return ONLY the cover letter text, no JSON, no explanation.`;
     out.style.display = 'block';
     out.scrollIntoView({behavior:'smooth', block:'nearest'});
   } catch(err) {
-    alert('Cover letter generation failed: ' + err.message);
+    showToast('Cover letter generation failed: ' + err.message);
   } finally {
     btn.disabled = false; btn.innerHTML = '✦ Generate Cover Letter';
   }
@@ -3045,7 +3098,7 @@ function copyCoverLetter() {
   navigator.clipboard.writeText(text).then(() => {
     const btn = event.target.closest('.btn-cl-copy');
     if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(()=>btn.textContent=orig, 2000); }
-  }).catch(() => alert('Copy failed — please select and copy the text manually.'));
+  }).catch(() => showToast('Copy failed — please select and copy the text manually.'));
 }
 
 function downloadCoverLetterDoc() {
@@ -3100,7 +3153,25 @@ ${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div
 </body></html>`;
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   const win = window.open(URL.createObjectURL(blob), '_blank');
-  if (!win) alert('Please allow pop-ups to download the cover letter PDF.');
+  if (!win) showToast('Please allow pop-ups to download the cover letter PDF.', 'info');
+}
+
+// ── Toast notifications ───────────────────────────────────────────────
+function showToast(msg, type='error') {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;max-width:90vw;width:max-content;';
+    document.body.appendChild(container);
+  }
+  const c = {error:{bg:'#1a1a1a',border:'#ef4444',icon:'✗',color:'#fca5a5'},success:{bg:'#1a1a1a',border:'#22c55e',icon:'✓',color:'#4ade80'},info:{bg:'#1a1a1a',border:'#3b82f6',icon:'ℹ',color:'#93c5fd'}}[type]||{bg:'#1a1a1a',border:'#ef4444',icon:'✗',color:'#fca5a5'};
+  const toast = document.createElement('div');
+  toast.setAttribute('data-toast','');
+  toast.style.cssText = `background:${c.bg};border:1.5px solid ${c.border};border-radius:12px;padding:12px 18px;font-size:0.88rem;color:${c.color};display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.6);pointer-events:auto;max-width:380px;animation:toastIn .25s ease-out;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.4;`;
+  toast.innerHTML = `<span style="font-size:1rem;flex-shrink:0">${c.icon}</span><span style="flex:1">${msg}</span><button onclick="this.closest('[data-toast]').remove()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:0.95rem;padding:0;margin-left:6px;opacity:0.55;flex-shrink:0">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(()=>{toast.style.animation='toastOut .25s ease-in forwards';setTimeout(()=>toast.remove(),250);},4000);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
