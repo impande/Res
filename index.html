@@ -221,6 +221,7 @@
     .exp-title-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
     .exp-title-chip{padding:4px 11px;border-radius:999px;border:1.5px solid var(--input-border);font-size:0.77rem;color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:inherit;user-select:none;}
     .exp-title-chip:hover{border-color:var(--accent);color:var(--accent);}
+    .exp-title-chip.selected{border-color:var(--accent);background:rgba(245,158,11,0.15);color:var(--accent);font-weight:700;}
     /* ── Mobile-friendly template carousel ── */
     @media(max-width:768px){
       .tpl-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px!important;gap:8px!important;}
@@ -1764,9 +1765,13 @@ function setTitle(btn, title) {
 
 function setExpTitle(id, title) {
   const input = document.getElementById('exp-title-'+id);
-  if (input) input.value = title;
-  const chips = document.getElementById('exp-title-chips-'+id);
-  if (chips) chips.style.display = 'none';
+  if (input) { input.value = title; input.focus(); }
+  const chipsEl = document.getElementById('exp-title-chips-'+id);
+  if (chipsEl) {
+    chipsEl.querySelectorAll('.exp-title-chip').forEach(c => {
+      c.classList.toggle('selected', c.textContent.trim() === title);
+    });
+  }
 }
 
 async function prefillFromGithub() {
@@ -1839,9 +1844,9 @@ function addExperience() {
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Job Title</label>
-        <input type="text" placeholder="e.g. Senior Engineer" id="exp-title-${id}" oninput="document.getElementById('exp-title-chips-${id}').style.display='none'">
+        <input type="text" placeholder="e.g. Senior Engineer" id="exp-title-${id}" oninput="(function(el){document.getElementById('exp-title-chips-${id}').querySelectorAll('.exp-title-chip').forEach(c=>c.classList.remove('selected'));})(this)">
         <div class="exp-title-chips" id="exp-title-chips-${id}">
-          ${EXP_TITLE_SUGGESTIONS.map(t=>`<button class="exp-title-chip" onclick="setExpTitle(${id},${JSON.stringify(t)})">${esc(t)}</button>`).join('')}
+          ${EXP_TITLE_SUGGESTIONS.map(t=>`<button type="button" class="exp-title-chip" onclick="setExpTitle(${id},${JSON.stringify(t)})">${esc(t)}</button>`).join('')}
         </div>
       </div>
       <div class="form-group"><label class="form-label">Company</label><input type="text" placeholder="e.g. Infosys" id="exp-co-${id}"></div>
