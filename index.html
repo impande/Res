@@ -2499,52 +2499,84 @@ function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { alert('Generate your resume first.'); return; }
   const resumeHTML = page.innerHTML;
-  const win = window.open('', '_blank');
-  if (!win) { alert('Please allow pop-ups to download PDF'); return; }
-  win.document.write(`<!DOCTYPE html>
+
+  const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>&#x200B;</title>
+<title>Resume</title>
 <style>
-/* margin:0 removes the browser URL / timestamp header+footer area */
+/* @page margin:0 suppresses the URL/timestamp footer in Chrome/Edge.
+   Safari and Firefox require unchecking "Headers and Footers" in the print dialog. */
 @page { size: A4 portrait; margin: 0; }
 *, *::before, *::after { box-sizing: border-box; }
-html {
-  width: 210mm; margin: 0; padding: 0; background: #fff;
-  -webkit-print-color-adjust: exact; print-color-adjust: exact;
-}
-body {
+html, body {
   width: 210mm; margin: 0; padding: 0; background: #fff;
   font-family: 'Segoe UI', system-ui, Arial, sans-serif;
   overflow: visible;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+/* Hint shown on-screen for Safari/Firefox — hidden when printing */
+.pdf-hint {
+  display: none; padding: 9px 16px; background: #fef3c7; color: #78350f;
+  font-size: 12.5px; text-align: center; border-bottom: 1px solid #fcd34d;
+  font-family: system-ui, sans-serif; line-height: 1.5;
 }
 .pdf-wrap {
   width: 210mm; padding: 18mm 16mm; box-sizing: border-box; background: #fff;
 }
 @media print {
   @page { size: A4 portrait; margin: 0; }
+  .pdf-hint { display: none !important; }
   html, body {
     width: 210mm; height: auto; overflow: visible;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  .pdf-wrap { page-break-after: avoid; break-after: avoid; }
+  /* ── Blank-page fixes ── */
+  /* Remove forced min-height so two-column flex height tracks real content */
+  .r-2col { min-height: 0 !important; }
+  /* Tighten per-entry spacing so content fits one A4 page */
+  [class*="tpl-"] .r-exp { margin-bottom: 10px !important; }
+  [class*="tpl-"] .r-sec { margin-top: 13px !important; }
+  .r-main-col { padding-bottom: 0 !important; }
+  .pdf-wrap { break-after: avoid; page-break-after: avoid; }
 }
 ${tplCSS}
 </style>
 </head>
 <body>
+<div class="pdf-hint" id="pdfHint">
+  📋 <strong>Safari / Firefox:</strong> open the Print dialog → uncheck <strong>"Headers and Footers"</strong> to remove the URL &amp; date from the PDF
+</div>
 <div class="pdf-wrap">${resumeHTML}</div>
 <script>
-window.onload = function() {
-  // Delay lets fonts and colours finish loading before the print dialog opens
-  setTimeout(function() { window.print(); }, 400);
-};
+(function() {
+  var ua = navigator.userAgent;
+  var needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
+  if (needsHint) document.getElementById('pdfHint').style.display = 'block';
+  window.onload = function() {
+    setTimeout(function() { window.print(); }, 500);
+  };
+})();
 <\/script>
 </body>
-</html>`);
-  win.document.close();
+</html>`;
+
+  // Open via Blob URL so the window's document.URL is blob:... rather than
+  // resume4u.help — this prevents Safari from showing the site URL in the footer.
+  try {
+    const blob = new Blob([htmlContent], {type: 'text/html; charset=utf-8'});
+    const blobUrl = URL.createObjectURL(blob);
+    const win = window.open(blobUrl, '_blank');
+    if (!win) throw new Error('blocked');
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  } catch(e) {
+    // Fallback for browsers that block blob popup
+    const win = window.open('', '_blank');
+    if (!win) { alert('Please allow pop-ups to download PDF'); return; }
+    win.document.write(htmlContent);
+    win.document.close();
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
