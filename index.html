@@ -1676,16 +1676,41 @@ function addSuggestedSkill(skill) {
 
 // Wire tap/click on suggestion chips via event delegation (no inline onclick)
 document.addEventListener('DOMContentLoaded', function() {
+  // Skill suggestion chips
   const chipsContainer = document.getElementById('suggestionChips');
-  if (!chipsContainer) return;
-  function handleChipTap(e) {
-    const btn = e.target.closest('.sug-chip');
-    if (!btn || btn.classList.contains('selected')) return;
-    e.preventDefault();
-    addSuggestedSkill(btn.dataset.skill);
+  if (chipsContainer) {
+    function handleSkillChipTap(e) {
+      const btn = e.target.closest('.sug-chip');
+      if (!btn || btn.classList.contains('selected')) return;
+      e.preventDefault();
+      addSuggestedSkill(btn.dataset.skill);
+    }
+    chipsContainer.addEventListener('click', handleSkillChipTap);
+    chipsContainer.addEventListener('touchend', handleSkillChipTap, {passive:false});
   }
-  chipsContainer.addEventListener('click', handleChipTap);
-  chipsContainer.addEventListener('touchend', handleChipTap, {passive:false});
+
+  // Experience job-title chips — delegation on the entries container
+  const expEntries = document.getElementById('experienceEntries');
+  if (expEntries) {
+    function handleExpChipTap(e) {
+      const btn = e.target.closest('.exp-title-chip');
+      if (!btn) return;
+      e.preventDefault();
+      const id = btn.dataset.id;
+      const title = btn.dataset.title;
+      setExpTitle(id, title);
+    }
+    expEntries.addEventListener('click', handleExpChipTap);
+    expEntries.addEventListener('touchend', handleExpChipTap, {passive:false});
+
+    // Clear chip selection when user types manually
+    expEntries.addEventListener('input', function(e) {
+      if (!e.target.id || !e.target.id.startsWith('exp-title-')) return;
+      const id = e.target.id.replace('exp-title-', '');
+      const chipsEl = document.getElementById('exp-title-chips-' + id);
+      if (chipsEl) chipsEl.querySelectorAll('.exp-title-chip').forEach(c => c.classList.remove('selected'));
+    });
+  }
 });
 
 // ── Navigation ────────────────────────────────────────────────────────
@@ -1764,12 +1789,12 @@ function setTitle(btn, title) {
 }
 
 function setExpTitle(id, title) {
-  const input = document.getElementById('exp-title-'+id);
-  if (input) { input.value = title; input.focus(); }
-  const chipsEl = document.getElementById('exp-title-chips-'+id);
+  const input = document.getElementById('exp-title-' + id);
+  if (input) input.value = title;
+  const chipsEl = document.getElementById('exp-title-chips-' + id);
   if (chipsEl) {
     chipsEl.querySelectorAll('.exp-title-chip').forEach(c => {
-      c.classList.toggle('selected', c.textContent.trim() === title);
+      c.classList.toggle('selected', c.dataset.title === title);
     });
   }
 }
@@ -1844,9 +1869,9 @@ function addExperience() {
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Job Title</label>
-        <input type="text" placeholder="e.g. Senior Engineer" id="exp-title-${id}" oninput="(function(el){document.getElementById('exp-title-chips-${id}').querySelectorAll('.exp-title-chip').forEach(c=>c.classList.remove('selected'));})(this)">
+        <input type="text" placeholder="e.g. Senior Engineer" id="exp-title-${id}">
         <div class="exp-title-chips" id="exp-title-chips-${id}">
-          ${EXP_TITLE_SUGGESTIONS.map(t=>`<button type="button" class="exp-title-chip" onclick="setExpTitle(${id},${JSON.stringify(t)})">${esc(t)}</button>`).join('')}
+          ${EXP_TITLE_SUGGESTIONS.map(t=>`<button type="button" class="exp-title-chip" data-id="${id}" data-title="${esc(t)}">${esc(t)}</button>`).join('')}
         </div>
       </div>
       <div class="form-group"><label class="form-label">Company</label><input type="text" placeholder="e.g. Infosys" id="exp-co-${id}"></div>
