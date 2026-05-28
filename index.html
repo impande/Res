@@ -244,15 +244,38 @@
         border-radius: 0 !important; background: transparent !important;
       }
       body.pdf-printing .resume-a4-page {
-        min-height: 0 !important; padding: 16mm 14mm !important;
-        box-shadow: none !important; margin: 0 auto !important;
-        width: 210mm !important; max-width: 100% !important;
+        padding: 0 !important;
+        min-height: 0 !important; box-shadow: none !important;
+        margin: 0 auto !important; width: 210mm !important;
+        max-width: 100% !important;
         page-break-after: avoid !important; break-after: avoid !important;
       }
-      body.pdf-printing .r-2col { min-height: 0 !important; }
+      /* Remove negative margins — these cause the print engine to split across pages */
+      body.pdf-printing .r-head { margin: 0 !important; border-radius: 0 !important; }
+      body.pdf-printing .r-head-accent { margin: 0 !important; }
+      body.pdf-printing .r-2col { margin: 0 !important; min-height: 0 !important; }
+      /* Templates without full-bleed header: restore top/side padding */
+      body.pdf-printing .tpl-classic > .r-head, body.pdf-printing .tpl-minimal > .r-head,
+      body.pdf-printing .tpl-creative > .r-head, body.pdf-printing .tpl-fresh > .r-head,
+      body.pdf-printing .tpl-academic > .r-head, body.pdf-printing .tpl-simple > .r-head,
+      body.pdf-printing .tpl-coral > .r-head, body.pdf-printing .tpl-sage > .r-head,
+      body.pdf-printing .tpl-lime > .r-head, body.pdf-printing .tpl-mono > .r-head,
+      body.pdf-printing .tpl-retro > .r-head, body.pdf-printing .tpl-paper > .r-head {
+        padding: 13mm 14mm 0 !important;
+      }
+      /* Single-column: add page margins to content sections */
+      body.pdf-printing [class*="tpl-"] > .r-sec {
+        padding-left: 14mm !important; padding-right: 14mm !important;
+        margin-top: 8px !important;
+      }
+      body.pdf-printing [class*="tpl-"] > .r-div {
+        margin-left: 14mm !important; margin-right: 14mm !important;
+      }
+      body.pdf-printing [class*="tpl-"] { padding-bottom: 10mm !important; }
+      /* Two-column: outer page margins for columns */
+      body.pdf-printing .r-aside { padding-left: 18px !important; }
+      body.pdf-printing .r-main-col { padding-right: 18px !important; padding-bottom: 0 !important; }
       body.pdf-printing [class*="tpl-"] .r-exp { margin-bottom: 8px !important; }
-      body.pdf-printing [class*="tpl-"] .r-sec { margin-top: 10px !important; }
-      body.pdf-printing .r-main-col { padding-bottom: 0 !important; }
     }
     /* ── Quick Prefill section ── */
     .prefill-section{background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.28);border-radius:12px;padding:14px 16px;margin-bottom:22px;}
@@ -1457,7 +1480,7 @@
         <span class="edit-badge" id="editBadge">✎ Click resume to edit directly</span>
       </div>
       <div class="resume-bar-actions" id="dlActions" style="display:none">
-        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOCX</button>
+        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOC</button>
         <button class="btn-dl btn-dl-pdf" onclick="downloadPDF()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download PDF</button>
       </div>
     </div>
@@ -2528,10 +2551,10 @@ function downloadDoc() {
 <body><div class="WordSection1">${clone.innerHTML}</div></body>
 </html>`;
 
-  const blob = new Blob(['﻿', docHtml], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'});
+  const blob = new Blob(['﻿', docHtml], {type:'application/msword;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'resume.docx';
+  a.href = url; a.download = 'resume.doc';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
