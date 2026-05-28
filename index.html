@@ -234,32 +234,29 @@
     /* ── Toast notifications ── */
     @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
-    /* ── Payment Modal ── */
-    .pay-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
-    .pay-modal{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;width:100%;max-width:420px;overflow:hidden;animation:payIn .32s cubic-bezier(.34,1.3,.64,1);}
-    @keyframes payIn{from{opacity:0;transform:scale(0.9) translateY(24px);}to{opacity:1;transform:none;}}
-    .pay-header{background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 100%);padding:30px 28px 26px;text-align:center;position:relative;border-bottom:1px solid #232332;}
-    .pay-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.38);color:#f59e0b;font-size:0.7rem;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;padding:5px 13px;border-radius:99px;margin-bottom:18px;}
-    .pay-price-wrap{display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:8px;}
-    .pay-currency{font-size:1.5rem;font-weight:700;color:#f59e0b;margin-top:7px;}
-    .pay-amount{font-size:3.8rem;font-weight:800;color:#fff;line-height:1;}
-    .pay-price-note{font-size:0.79rem;color:#666;margin-bottom:0;}
-    .pay-body{padding:24px 26px 22px;}
-    .pay-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
-    .pay-feat{display:flex;align-items:center;gap:11px;font-size:0.87rem;color:#c8c8c8;line-height:1.4;}
-    .pay-feat-check{width:20px;height:20px;background:rgba(34,197,94,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:900;color:#4ade80;flex-shrink:0;}
-    .btn-pay{width:100%;padding:15px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:1rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.2px;}
-    .btn-pay:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,158,11,0.4);}
-    .btn-pay:active{transform:none;box-shadow:none;}
-    .btn-pay:disabled{opacity:0.65;cursor:not-allowed;transform:none;box-shadow:none;}
-    .pay-secure{display:flex;align-items:center;justify-content:center;gap:6px;font-size:0.72rem;color:#555;margin-top:11px;}
-    .pay-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid #242424;}
-    .pay-cancel{font-size:0.79rem;color:#555;cursor:pointer;padding:4px 0;transition:color .15s;background:none;border:none;font-family:inherit;}
-    .pay-cancel:hover{color:#aaa;}
-    .pay-restore{font-size:0.79rem;color:#555;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;transition:color .15s;}
-    .pay-restore:hover{color:var(--accent);}
-    .pay-spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(0,0,0,0.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-    @media(max-width:480px){.pay-header{padding:22px 20px 20px;}.pay-body{padding:18px 20px 18px;}.pay-amount{font-size:3rem;}}
+    /* ── Ad Gate Modal ── */
+    .ad-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
+    .ad-modal{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;width:100%;max-width:460px;overflow:hidden;animation:adIn .32s cubic-bezier(.34,1.3,.64,1);}
+    @keyframes adIn{from{opacity:0;transform:scale(0.9) translateY(24px);}to{opacity:1;transform:none;}}
+    .ad-modal-hdr{padding:20px 24px 16px;border-bottom:1px solid #242424;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);}
+    .ad-modal-title{font-size:1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:9px;}
+    .ad-modal-sub{font-size:0.78rem;color:#777;margin-top:4px;line-height:1.5;}
+    .ad-slot-wrap{background:#0d0d0d;border-bottom:1px solid #242424;display:flex;align-items:center;justify-content:center;min-height:140px;padding:16px;}
+    .ad-slot-placeholder{text-align:center;color:#3a3a3a;font-size:0.77rem;line-height:1.8;}
+    .ad-slot-placeholder-icon{font-size:2rem;margin-bottom:6px;opacity:0.5;}
+    .ad-modal-body{padding:20px 24px 22px;}
+    .ad-countdown-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px 16px;background:#111;border:1px solid #242424;border-radius:12px;}
+    .ad-countdown-ring{flex-shrink:0;}
+    .ad-countdown-text{flex:1;}
+    .ad-countdown-msg{font-size:0.87rem;font-weight:600;color:#d0d0d0;margin-bottom:2px;}
+    .ad-countdown-sub{font-size:0.75rem;color:#555;}
+    .btn-ad-gen{width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:0.96rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;}
+    .btn-ad-gen:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,158,11,0.4);}
+    .btn-ad-gen:disabled{background:#232323;color:#444;cursor:not-allowed;box-shadow:none;}
+    .btn-ad-gen.ready{animation:adBtnPop .6s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes adBtnPop{from{transform:scale(0.97);}to{transform:scale(1);}}
+    .ad-cancel{display:block;text-align:center;font-size:0.78rem;color:#555;cursor:pointer;margin-top:12px;padding:4px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
+    .ad-cancel:hover{color:#999;}
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
     @keyframes atsIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
@@ -2584,7 +2581,7 @@ Other instructions:
 
 // ── Generate ──────────────────────────────────────────────────────────
 async function generateResume() {
-  if (!hasPaid()) { openPayModal(); return; }
+  if (!adWatchedThisSession) { openAdModal(); return; }
   if (!validateMandatory()) return;
   const data = collectData();
   const btn = document.getElementById('generateBtn');
@@ -3208,84 +3205,94 @@ ${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div
   if (!win) showToast('Please allow pop-ups to download the cover letter PDF.', 'info');
 }
 
-// ── Payment ───────────────────────────────────────────────────────────
-const PAYMENT_KEY = 'r4u_paid';
+// ── Ad Gate ───────────────────────────────────────────────────────────
+let adWatchedThisSession = false;
+let _adTimer = null;
+const AD_SECONDS = 30;
 
-function hasPaid() {
-  return localStorage.getItem(PAYMENT_KEY) === '1';
-}
-
-function markPaid(orderId) {
-  localStorage.setItem(PAYMENT_KEY, '1');
-  if (orderId) localStorage.setItem('r4u_order', String(orderId));
-}
-
-function openPayModal() {
-  document.getElementById('payOverlay').style.display = 'flex';
+function openAdModal() {
+  document.getElementById('adOverlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  _startAdCountdown();
+  _loadAdInSlot();
 }
 
-function closePayModal() {
-  document.getElementById('payOverlay').style.display = 'none';
+function closeAdModal() {
+  clearInterval(_adTimer);
+  document.getElementById('adOverlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 
-function restoreAccess() {
-  const id = prompt('Enter your payment/order ID to restore access:');
-  if (!id || !id.trim()) return;
-  markPaid(id.trim());
-  closePayModal();
-  showToast('Access restored! Generating your resume…', 'success');
-  generateResume();
+function _loadAdInSlot() {
+  // ═══════════════════════════════════════════════════════════════════
+  // PASTE YOUR AD NETWORK CODE HERE
+  // ───────────────────────────────────────────────────────────────────
+  // Google AdSense (display ad — 300×250 medium rectangle):
+  //   const slot = document.getElementById('adSlot');
+  //   slot.innerHTML = `
+  //     <ins class="adsbygoogle"
+  //       style="display:inline-block;width:300px;height:250px"
+  //       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+  //       data-ad-slot="XXXXXXXXXX"></ins>`;
+  //   (adsbygoogle = window.adsbygoogle || []).push({});
+  //
+  // Propeller Ads (interstitial / smart link):
+  //   const s = document.createElement('script');
+  //   s.setAttribute('data-cfasync','false');
+  //   s.src = '//your-propellerads-script-url';
+  //   document.getElementById('adSlot').appendChild(s);
+  //
+  // Google Ad Manager:
+  //   googletag.cmd.push(() => {
+  //     googletag.defineSlot('/XXXXXX/resume4u-interstitial',[300,250],'adSlot').addService(googletag.pubads());
+  //     googletag.pubads().enableSingleRequest();
+  //     googletag.enableServices();
+  //     googletag.display('adSlot');
+  //   });
+  // ═══════════════════════════════════════════════════════════════════
 }
 
-async function handlePayment() {
-  const btn = document.getElementById('payBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="pay-spinner"></span> Processing…';
+function _startAdCountdown() {
+  let remaining = AD_SECONDS;
+  const arc     = document.getElementById('adArc');
+  const msgEl   = document.getElementById('adCountMsg');
+  const subEl   = document.getElementById('adCountSub');
+  const genBtn  = document.getElementById('adGenBtn');
+  const r = 28, C = +(2 * Math.PI * r).toFixed(2);
 
-  // ═══════════════════════════════════════════════════════════════════
-  // INTEGRATE YOUR PAYMENT GATEWAY HERE
-  // ───────────────────────────────────────────────────────────────────
-  // Razorpay (recommended for ₹ payments):
-  //
-  //   const options = {
-  //     key: 'YOUR_RAZORPAY_KEY_ID',
-  //     amount: 9900,                   // paise (₹99 = 9900)
-  //     currency: 'INR',
-  //     name: 'Resume For You',
-  //     description: 'AI Resume — One-time',
-  //     image: 'https://resume4u.help/favicon.png',
-  //     handler: function(response) {
-  //       markPaid(response.razorpay_payment_id);
-  //       closePayModal();
-  //       generateResume();
-  //     },
-  //     modal: { ondismiss: () => { btn.disabled=false; btn.innerHTML=PAY_BTN_HTML; } },
-  //     prefill: { email: document.getElementById('email')?.value || '' },
-  //     theme: { color: '#f59e0b' }
-  //   };
-  //   const rzp = new Razorpay(options);
-  //   rzp.open();
-  //   return;   // ← gateway callback calls markPaid + generateResume
-  //
-  // Stripe (global cards):
-  //   const stripe = Stripe('YOUR_PUBLISHABLE_KEY');
-  //   const session = await fetch('/.netlify/functions/create-checkout', {method:'POST',...}).then(r=>r.json());
-  //   stripe.redirectToCheckout({ sessionId: session.id });
-  //   return;
-  // ═══════════════════════════════════════════════════════════════════
+  genBtn.disabled = true;
+  genBtn.classList.remove('ready');
 
-  // ── Mock / demo payment (remove once real gateway is integrated) ───
-  await new Promise(r => setTimeout(r, 1400));
-  markPaid('demo_' + Date.now());
-  closePayModal();
-  showToast('Payment successful! Generating your resume…', 'success');
+  function tick() {
+    const elapsed = AD_SECONDS - remaining;
+    const filled  = +((elapsed / AD_SECONDS) * C).toFixed(2);
+    if (arc) arc.setAttribute('stroke-dasharray', `${filled} ${+(C - filled).toFixed(2)}`);
+
+    if (msgEl) msgEl.textContent = remaining > 0 ? `${remaining}s remaining` : 'Done! Thank you for watching';
+    if (subEl) subEl.textContent = remaining > 0 ? 'Please keep this window open' : 'Your resume is ready to generate';
+
+    // update inner timer text
+    const t = document.getElementById('adTimerTxt');
+    if (t) t.textContent = remaining > 0 ? `${remaining}` : '✓';
+
+    if (remaining <= 0) {
+      clearInterval(_adTimer);
+      if (arc) arc.setAttribute('stroke', '#22c55e');
+      if (genBtn) { genBtn.disabled = false; genBtn.classList.add('ready'); }
+      return;
+    }
+    remaining--;
+  }
+
+  tick();
+  _adTimer = setInterval(tick, 1000);
+}
+
+async function completeAdAndGenerate() {
+  adWatchedThisSession = true;
+  closeAdModal();
+  showToast('Thanks for watching! Generating your resume…', 'success');
   await generateResume();
-  const PAY_BTN_HTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ₹99 &amp; Generate Resume';
-  btn.disabled = false;
-  btn.innerHTML = PAY_BTN_HTML;
-  // ──────────────────────────────────────────────────────────────────
 }
 
 // ── ATS Score ─────────────────────────────────────────────────────────
@@ -3431,38 +3438,51 @@ window.addEventListener('load', function() {
 });
 </script>
 
-<!-- ── Payment Modal ── -->
-<div class="pay-overlay" id="payOverlay" style="display:none" onclick="if(event.target===this)closePayModal()">
-  <div class="pay-modal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
-    <div class="pay-header">
-      <div class="pay-badge">✦ One-Time Purchase</div>
-      <div class="pay-price-wrap">
-        <span class="pay-currency">₹</span>
-        <span class="pay-amount" id="payTitle">99</span>
+<!-- ── Ad Gate Modal ── -->
+<div class="ad-overlay" id="adOverlay" style="display:none">
+  <div class="ad-modal" role="dialog" aria-modal="true">
+    <div class="ad-modal-hdr">
+      <div class="ad-modal-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Watch a short ad to generate for free
       </div>
-      <p class="pay-price-note">Pay once · Download unlimited times</p>
+      <div class="ad-modal-sub">100% free · just watch a quick ad and your AI resume will be ready instantly</div>
     </div>
-    <div class="pay-body">
-      <ul class="pay-features">
-        <li class="pay-feat"><span class="pay-feat-check">✓</span>AI-generated professional resume</li>
-        <li class="pay-feat"><span class="pay-feat-check">✓</span>35 beautiful ATS-optimised templates</li>
-        <li class="pay-feat"><span class="pay-feat-check">✓</span>Download as PDF &amp; DOC</li>
-        <li class="pay-feat"><span class="pay-feat-check">✓</span>AI bullet points for every role</li>
-        <li class="pay-feat"><span class="pay-feat-check">✓</span>AI cover letter generator</li>
-        <li class="pay-feat"><span class="pay-feat-check">✓</span>Unlimited regenerations</li>
-      </ul>
-      <button class="btn-pay" id="payBtn" onclick="handlePayment()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Pay ₹99 &amp; Generate Resume
+
+    <!-- ══ AD SLOT — paste your ad network tag inside #adSlot ══ -->
+    <div class="ad-slot-wrap">
+      <div id="adSlot">
+        <div class="ad-slot-placeholder">
+          <div class="ad-slot-placeholder-icon">📢</div>
+          <div>Your ad appears here</div>
+          <div style="font-size:0.68rem;color:#2a2a2a;margin-top:3px">Paste your ad network code in <code style="color:#444">_loadAdInSlot()</code></div>
+        </div>
+      </div>
+    </div>
+    <!-- ════════════════════════════════════════════════════════ -->
+
+    <div class="ad-modal-body">
+      <div class="ad-countdown-row">
+        <div class="ad-countdown-ring">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/>
+            <circle id="adArc" cx="32" cy="32" r="28" fill="none" stroke="#f59e0b" stroke-width="6"
+              stroke-dasharray="0 176" stroke-linecap="round" transform="rotate(-90 32 32)"
+              style="transition:stroke-dasharray 0.85s linear"/>
+            <text id="adTimerTxt" x="32" y="37" text-anchor="middle" fill="#fff" font-size="14" font-weight="700"
+              font-family="'Segoe UI',system-ui,sans-serif">30</text>
+          </svg>
+        </div>
+        <div class="ad-countdown-text">
+          <div class="ad-countdown-msg" id="adCountMsg">30s remaining</div>
+          <div class="ad-countdown-sub" id="adCountSub">Please keep this window open</div>
+        </div>
+      </div>
+
+      <button class="btn-ad-gen" id="adGenBtn" onclick="completeAdAndGenerate()" disabled>
+        ✦ Generate Resume →
       </button>
-      <div class="pay-secure">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Secure payment &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; No hidden fees
-      </div>
-      <div class="pay-footer">
-        <button class="pay-cancel" onclick="closePayModal()">← Cancel</button>
-        <button class="pay-restore" onclick="restoreAccess()">Already paid? Restore access</button>
-      </div>
+      <button class="ad-cancel" onclick="closeAdModal()">← Cancel</button>
     </div>
   </div>
 </div>
