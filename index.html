@@ -2718,13 +2718,20 @@ async function handleResumeFile(file) {
   bar.textContent = '⏳ Reading file…';
   try {
     const text = await extractTextFromFile(file);
-    if (!text || text.replace(/\s/g,'').length < 40) throw new Error('Could not extract text — try a TXT copy of your resume.');
+    if (!text || text.replace(/\s/g,'').length < 40) throw new Error('Could not extract readable text. Please try a TXT version of your resume.');
     bar.textContent = '🤖 AI is parsing your resume…';
     const data = await parseResumeWithAI(text);
+    // Check that at least some meaningful data was returned
+    const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+    if (!hasData) throw new Error('Could not extract resume data. Please ensure the file contains selectable text, or try a TXT export.');
     populateFormFromParsed(data);
     bar.className = 'upload-status-bar ok';
-    bar.textContent = '✓ Resume imported! Review your details, choose a template, then Generate.';
-    setTimeout(() => { goToStep(6); setTimeout(() => document.getElementById('tplSection')?.scrollIntoView({behavior:'smooth',block:'start'}), 300); }, 1400);
+    bar.textContent = '✓ Resume imported! Review your details below, then click Generate.';
+    // Navigate to step 1 so user can see and verify filled fields
+    setTimeout(() => {
+      goToStep(1);
+      setTimeout(() => document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}), 300);
+    }, 800);
   } catch(err) {
     bar.className = 'upload-status-bar err';
     bar.textContent = '✗ ' + err.message;
@@ -2752,20 +2759,43 @@ function extractPDFText(buf) {
   for (let i = 0; i < bytes.length; i++) {
     const c = bytes[i];
     if (c >= 32 && c < 127) raw += String.fromCharCode(c);
-    else if (c === 10 || c === 13) raw += ' ';
+    else if (c === 10 || c === 13) raw += '\n';
   }
+
   const texts = [];
-  // Extract text inside parentheses (PDF string objects)
-  const re = /\(([^()\\]|\\.){1,400}\)/g;
+
+  // Method 1: extract text inside PDF string literals (parentheses)
+  const reStr = /\(([^()\\]|\\.){1,500}\)/g;
   let m;
-  while ((m = re.exec(raw)) !== null) {
-    const t = m[0].slice(1,-1)
-      .replace(/\\n/g,' ').replace(/\\r/g,' ').replace(/\\t/g,' ')
-      .replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')')
-      .replace(/\\[0-7]{3}/g,'').trim();
+  while ((m = reStr.exec(raw)) !== null) {
+    const t = m[0].slice(1, -1)
+      .replace(/\\n/g, ' ').replace(/\\r/g, ' ').replace(/\\t/g, ' ')
+      .replace(/\\\\/g, '\\').replace(/\\\(/g, '(').replace(/\\\)/g, ')')
+      .replace(/\\[0-7]{3}/g, '').trim();
     if (t.length > 2 && /[a-zA-Z]{2,}/.test(t)) texts.push(t);
   }
-  return texts.join(' ').replace(/\s+/g,' ').trim().slice(0, 8000);
+
+  // Method 2: extract hex-encoded strings <...> common in modern PDFs
+  const reHex = /<([0-9A-Fa-f]{4,})>/g;
+  while ((m = reHex.exec(raw)) !== null) {
+    const hex = m[1];
+    let decoded = '';
+    for (let i = 0; i < hex.length - 1; i += 4) {
+      const code = parseInt(hex.slice(i, i + 4), 16);
+      if (code > 31 && code < 127) decoded += String.fromCharCode(code);
+      else if (code > 127) decoded += ' ';
+    }
+    decoded = decoded.trim();
+    if (decoded.length > 2 && /[a-zA-Z]{2,}/.test(decoded)) texts.push(decoded);
+  }
+
+  // Method 3: if still sparse, fall back to consecutive printable runs from raw stream
+  if (texts.join('').replace(/\s/g, '').length < 100) {
+    const reRun = /[A-Za-z][A-Za-z0-9 @.,:()\-+\/]{10,}/g;
+    while ((m = reRun.exec(raw)) !== null) texts.push(m[0].trim());
+  }
+
+  return texts.join(' ').replace(/\s+/g, ' ').trim().slice(0, 8000);
 }
 
 function extractDOCXText(buf) {
@@ -2780,20 +2810,21 @@ function extractDOCXText(buf) {
 }
 
 async function parseResumeWithAI(text) {
-  const prompt = `You are a resume parser. Extract all information from this resume text and return structured JSON.
+  const prompt = `TASK: Parse resume text into JSON. OUTPUT FORMAT: JSON object only — your entire response must be a single JSON object starting with { and ending with }. No prose, no markdown, no code fences.
 
-Resume:
+RESUME TEXT:
 ${text.slice(0, 5500)}
 
-Return ONLY valid JSON (no markdown fences, no explanation):
-{"firstName":"","lastName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","github":"","summary":"","experience":[{"title":"","co":"","start":"","end":"","desc":""}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"deg":"","sch":"","yr":"","gpa":""}],"skills":[]}
+OUTPUT (JSON only, no other text):
+{"firstName":"John","lastName":"Doe","jobTitle":"Software Engineer","email":"john@example.com","phone":"+1 555 1234","location":"San Francisco, CA","linkedin":"https://linkedin.com/in/johndoe","github":"","summary":"Professional summary here","experience":[{"title":"Software Engineer","co":"Acme Corp","start":"Jan 2020","end":"Present","desc":"Led team of 5, delivered features"}],"awards":[{"name":"Best Employee","org":"Acme","year":"2022","desc":""}],"education":[{"deg":"B.Tech Computer Science","sch":"IIT Bombay","yr":"2018","gpa":"8.5"}],"skills":["JavaScript","Python","React"]}
 
-Rules:
-- Extract only values actually present in the text — never invent data
-- Put full name into firstName/lastName split correctly
-- For experience desc, combine all bullets/achievements into one string
-- For skills, return an array of individual skill strings
-- Empty string for any field not found`;
+RULES:
+1. Extract real values only — do not invent anything not in the resume
+2. Split full name into firstName and lastName
+3. Experience desc: one string with all bullet points combined
+4. skills: array of individual skill strings (not a single string)
+5. Use empty string "" for missing fields, empty array [] for missing lists
+6. Start your response with { — nothing before it`;
 
   const resp = await fetch('/.netlify/functions/generate', {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -2808,12 +2839,13 @@ Rules:
 }
 
 function populateFormFromParsed(data) {
-  function sv(id, val) { const el = document.getElementById(id); if (el && val) el.value = val; }
+  // Always set value (even empty) so old stale data doesn't persist
+  function sv(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
   sv('firstName', data.firstName); sv('lastName', data.lastName);
   sv('jobTitle', data.jobTitle);   sv('email', data.email);
   sv('phone', data.phone);         sv('location', data.location);
   sv('linkedin', data.linkedin);   sv('github', data.github);
-  if (data.summary) sv('summary', data.summary);
+  sv('summary', data.summary);
 
   // Experience
   if (data.experience && data.experience.length) {
