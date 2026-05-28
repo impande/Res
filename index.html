@@ -234,6 +234,32 @@
     /* ── Toast notifications ── */
     @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
+    /* ── Payment Modal ── */
+    .pay-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
+    .pay-modal{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;width:100%;max-width:420px;overflow:hidden;animation:payIn .32s cubic-bezier(.34,1.3,.64,1);}
+    @keyframes payIn{from{opacity:0;transform:scale(0.9) translateY(24px);}to{opacity:1;transform:none;}}
+    .pay-header{background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 100%);padding:30px 28px 26px;text-align:center;position:relative;border-bottom:1px solid #232332;}
+    .pay-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.38);color:#f59e0b;font-size:0.7rem;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;padding:5px 13px;border-radius:99px;margin-bottom:18px;}
+    .pay-price-wrap{display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:8px;}
+    .pay-currency{font-size:1.5rem;font-weight:700;color:#f59e0b;margin-top:7px;}
+    .pay-amount{font-size:3.8rem;font-weight:800;color:#fff;line-height:1;}
+    .pay-price-note{font-size:0.79rem;color:#666;margin-bottom:0;}
+    .pay-body{padding:24px 26px 22px;}
+    .pay-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+    .pay-feat{display:flex;align-items:center;gap:11px;font-size:0.87rem;color:#c8c8c8;line-height:1.4;}
+    .pay-feat-check{width:20px;height:20px;background:rgba(34,197,94,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:900;color:#4ade80;flex-shrink:0;}
+    .btn-pay{width:100%;padding:15px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:1rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.2px;}
+    .btn-pay:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,158,11,0.4);}
+    .btn-pay:active{transform:none;box-shadow:none;}
+    .btn-pay:disabled{opacity:0.65;cursor:not-allowed;transform:none;box-shadow:none;}
+    .pay-secure{display:flex;align-items:center;justify-content:center;gap:6px;font-size:0.72rem;color:#555;margin-top:11px;}
+    .pay-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid #242424;}
+    .pay-cancel{font-size:0.79rem;color:#555;cursor:pointer;padding:4px 0;transition:color .15s;background:none;border:none;font-family:inherit;}
+    .pay-cancel:hover{color:#aaa;}
+    .pay-restore{font-size:0.79rem;color:#555;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;transition:color .15s;}
+    .pay-restore:hover{color:var(--accent);}
+    .pay-spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(0,0,0,0.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+    @media(max-width:480px){.pay-header{padding:22px 20px 20px;}.pay-body{padding:18px 20px 18px;}.pay-amount{font-size:3rem;}}
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
     @keyframes atsIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
@@ -2558,6 +2584,7 @@ Other instructions:
 
 // ── Generate ──────────────────────────────────────────────────────────
 async function generateResume() {
+  if (!hasPaid()) { openPayModal(); return; }
   if (!validateMandatory()) return;
   const data = collectData();
   const btn = document.getElementById('generateBtn');
@@ -3181,6 +3208,86 @@ ${name?`<div class="cl-meta"><strong>${name}</strong>${role?' · '+role:''}</div
   if (!win) showToast('Please allow pop-ups to download the cover letter PDF.', 'info');
 }
 
+// ── Payment ───────────────────────────────────────────────────────────
+const PAYMENT_KEY = 'r4u_paid';
+
+function hasPaid() {
+  return localStorage.getItem(PAYMENT_KEY) === '1';
+}
+
+function markPaid(orderId) {
+  localStorage.setItem(PAYMENT_KEY, '1');
+  if (orderId) localStorage.setItem('r4u_order', String(orderId));
+}
+
+function openPayModal() {
+  document.getElementById('payOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePayModal() {
+  document.getElementById('payOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function restoreAccess() {
+  const id = prompt('Enter your payment/order ID to restore access:');
+  if (!id || !id.trim()) return;
+  markPaid(id.trim());
+  closePayModal();
+  showToast('Access restored! Generating your resume…', 'success');
+  generateResume();
+}
+
+async function handlePayment() {
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="pay-spinner"></span> Processing…';
+
+  // ═══════════════════════════════════════════════════════════════════
+  // INTEGRATE YOUR PAYMENT GATEWAY HERE
+  // ───────────────────────────────────────────────────────────────────
+  // Razorpay (recommended for ₹ payments):
+  //
+  //   const options = {
+  //     key: 'YOUR_RAZORPAY_KEY_ID',
+  //     amount: 9900,                   // paise (₹99 = 9900)
+  //     currency: 'INR',
+  //     name: 'Resume For You',
+  //     description: 'AI Resume — One-time',
+  //     image: 'https://resume4u.help/favicon.png',
+  //     handler: function(response) {
+  //       markPaid(response.razorpay_payment_id);
+  //       closePayModal();
+  //       generateResume();
+  //     },
+  //     modal: { ondismiss: () => { btn.disabled=false; btn.innerHTML=PAY_BTN_HTML; } },
+  //     prefill: { email: document.getElementById('email')?.value || '' },
+  //     theme: { color: '#f59e0b' }
+  //   };
+  //   const rzp = new Razorpay(options);
+  //   rzp.open();
+  //   return;   // ← gateway callback calls markPaid + generateResume
+  //
+  // Stripe (global cards):
+  //   const stripe = Stripe('YOUR_PUBLISHABLE_KEY');
+  //   const session = await fetch('/.netlify/functions/create-checkout', {method:'POST',...}).then(r=>r.json());
+  //   stripe.redirectToCheckout({ sessionId: session.id });
+  //   return;
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ── Mock / demo payment (remove once real gateway is integrated) ───
+  await new Promise(r => setTimeout(r, 1400));
+  markPaid('demo_' + Date.now());
+  closePayModal();
+  showToast('Payment successful! Generating your resume…', 'success');
+  await generateResume();
+  const PAY_BTN_HTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ₹99 &amp; Generate Resume';
+  btn.disabled = false;
+  btn.innerHTML = PAY_BTN_HTML;
+  // ──────────────────────────────────────────────────────────────────
+}
+
 // ── ATS Score ─────────────────────────────────────────────────────────
 function computeATSScore(data) {
   const items = [];
@@ -3323,5 +3430,41 @@ window.addEventListener('load', function() {
   });
 });
 </script>
+
+<!-- ── Payment Modal ── -->
+<div class="pay-overlay" id="payOverlay" style="display:none" onclick="if(event.target===this)closePayModal()">
+  <div class="pay-modal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <div class="pay-header">
+      <div class="pay-badge">✦ One-Time Purchase</div>
+      <div class="pay-price-wrap">
+        <span class="pay-currency">₹</span>
+        <span class="pay-amount" id="payTitle">99</span>
+      </div>
+      <p class="pay-price-note">Pay once · Download unlimited times</p>
+    </div>
+    <div class="pay-body">
+      <ul class="pay-features">
+        <li class="pay-feat"><span class="pay-feat-check">✓</span>AI-generated professional resume</li>
+        <li class="pay-feat"><span class="pay-feat-check">✓</span>35 beautiful ATS-optimised templates</li>
+        <li class="pay-feat"><span class="pay-feat-check">✓</span>Download as PDF &amp; DOC</li>
+        <li class="pay-feat"><span class="pay-feat-check">✓</span>AI bullet points for every role</li>
+        <li class="pay-feat"><span class="pay-feat-check">✓</span>AI cover letter generator</li>
+        <li class="pay-feat"><span class="pay-feat-check">✓</span>Unlimited regenerations</li>
+      </ul>
+      <button class="btn-pay" id="payBtn" onclick="handlePayment()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Pay ₹99 &amp; Generate Resume
+      </button>
+      <div class="pay-secure">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secure payment &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; No hidden fees
+      </div>
+      <div class="pay-footer">
+        <button class="pay-cancel" onclick="closePayModal()">← Cancel</button>
+        <button class="pay-restore" onclick="restoreAccess()">Already paid? Restore access</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
