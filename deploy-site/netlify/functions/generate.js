@@ -14,7 +14,7 @@ export async function handler(event) {
     // Text path:   use Haiku for speed and cost efficiency
     const model = imageBase64 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
 
-    const requestBody = { model, max_tokens: 2048 };
+    const requestBody = { model, max_tokens: 4096 };
 
     if (imageBase64) {
       requestBody.messages = [{

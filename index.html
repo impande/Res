@@ -2840,11 +2840,15 @@ function downloadPDF() {
   const A4_PX_W = 794; // A4 at 96 DPI
 
   // ── 1. Off-screen isolated host ───────────────────────────────────────
+  // IMPORTANT: left:0;top:0 so html2canvas resolves the element at a valid
+  // viewport origin (left:-9999px causes it to capture the app UI instead
+  // of the clone, producing 12 pages of wrong content).
+  // z-index:-9999 keeps it behind all app content so the user never sees it.
   const host = document.createElement('div');
   host.setAttribute('aria-hidden', 'true');
   host.style.cssText =
-    'position:fixed;left:-9999px;top:0;width:' + A4_PX_W + 'px;' +
-    'background:#fff;overflow:visible;z-index:-9999;';
+    'position:fixed;left:0;top:0;width:' + A4_PX_W + 'px;' +
+    'background:#fff;overflow:visible;z-index:-9999;pointer-events:none;';
 
   // ── 2. Inject all document CSS + layout fixes ─────────────────────────
   const styleEl = document.createElement('style');
@@ -2894,11 +2898,16 @@ function downloadPDF() {
   host.appendChild(clone);
   document.body.appendChild(host);
 
-  // Measure rendered height BEFORE html2canvas to calculate expected page count.
-  // A4 at 96 Dpi = 297mm × (96/25.4) ≈ 1122.5 px.
-  const A4_H_PX = 297 * 96 / 25.4;
-  const contentH  = clone.offsetHeight || 1;
-  const expectedPages = Math.max(1, Math.ceil(contentH / A4_H_PX));
+  // Measure rendered height to calculate expected pages.
+  // A4 at 96 DPI = 297mm × (96/25.4) ≈ 1122.5 px.
+  const A4_H_PX   = 297 * 96 / 25.4;
+  const contentH  = clone.offsetHeight || A4_H_PX;
+  const overflow  = contentH % A4_H_PX;
+  // If content overflows a page boundary by < 5% of A4 height (~56px / ~14mm),
+  // it's sub-pixel rounding or residual spacing — treat as a blank trailing page.
+  const expectedPages = (overflow > 0 && overflow < A4_H_PX * 0.05)
+    ? Math.floor(contentH / A4_H_PX)       // would be blank, drop it
+    : Math.max(1, Math.ceil(contentH / A4_H_PX));
 
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
