@@ -1951,6 +1951,15 @@ function addSuggestedSkill(skill) {
 
 // Wire tap/click on suggestion chips via event delegation (no inline onclick)
 document.addEventListener('DOMContentLoaded', function() {
+  // Skill remove buttons — event delegation (avoids onclick double-quote issue)
+  const skillTagsContainer = document.getElementById('skillTags');
+  if (skillTagsContainer) {
+    skillTagsContainer.addEventListener('click', function(e) {
+      const btn = e.target.closest('.skill-remove');
+      if (btn) removeSkill(btn.dataset.skill);
+    });
+  }
+
   // Skill suggestion chips
   const chipsContainer = document.getElementById('suggestionChips');
   if (chipsContainer) {
@@ -2214,8 +2223,10 @@ function removeSkill(skill) { skills = skills.filter(s=>s!==skill); renderSkills
 
 function renderSkills(newSkill) {
   const container = document.getElementById('skillTags');
+  // Use data-skill attribute (not onclick) — JSON.stringify wraps in double
+  // quotes which breaks onclick="..." HTML attribute parsing.
   container.innerHTML = skills.map(s =>
-    `<div class="skill-tag${s===newSkill?' skill-tag-new':''}">${esc(s)}<button class="skill-remove" onclick="removeSkill(${JSON.stringify(s)})">✕</button></div>`
+    `<div class="skill-tag${s===newSkill?' skill-tag-new':''}"><span>${esc(s)}</span><button class="skill-remove" data-skill="${esc(s)}" aria-label="Remove ${esc(s)}">✕</button></div>`
   ).join('');
 }
 
@@ -2602,8 +2613,13 @@ Other instructions:
 }
 
 // ── Generate ──────────────────────────────────────────────────────────
-async function generateResume() {
-  if (!hasUPIPaid()) { openUPIModal(); return; }
+// Payment gate: always prompt before generating.
+function generateResume() {
+  openUPIModal();
+}
+
+// Called by confirmUPIPayment() after the user confirms payment.
+async function _doGenerateResume() {
   if (!validateMandatory()) return;
   const data = collectData();
   const btn = document.getElementById('generateBtn');
@@ -2844,7 +2860,7 @@ function downloadPDF() {
   styleEl.textContent =
     [...document.querySelectorAll('style')].map(s => s.textContent).join('\n') +
     // Base overrides
-    '\nbody{background:#fff!important;color:#111!important;}' +
+    '\nbody{background:#fff!important;}' +
     '\n.resume-a4-page{box-shadow:none!important;margin:0!important;border-radius:0!important;min-height:0!important;}' +
     // Fix (a): reset negative header bleed — same as body.pdf-printing rules
     '\n.r-head{margin:0!important;border-radius:0!important;}' +
@@ -2864,12 +2880,10 @@ function downloadPDF() {
     '\n.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,' +
     '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,' +
     '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}' +
-    // Fix (c): force dark text — dark-bg templates use color:white which
-    // renders invisible when html2canvas composites onto a white canvas.
-    '\n.r-head{color:#111!important;}' +
-    '\n.r-name{color:#111!important;}' +
-    '\n.r-title{color:#555!important;}' +
-    '\n.r-contact,.r-contact a,.r-contact span{color:#444!important;}';
+    // html2canvas renders backgrounds faithfully, so template-native text
+    // colors (including white-on-dark) are preserved — no override needed here.
+    // (Color overrides for Word/DOC are applied separately in downloadDoc.)
+    '';
   host.appendChild(styleEl);
 
   // ── 3. Deep-clone the resume page, strip editing metadata ─────────────
@@ -3404,7 +3418,7 @@ async function confirmUPIPayment() {
   markUPIPaid();
   closeUPIModal();
   showToast('Payment confirmed! Generating your resume…', 'success');
-  await generateResume();
+  await _doGenerateResume();
 }
 
 // ── ATS Score ─────────────────────────────────────────────────────────
