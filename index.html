@@ -2837,56 +2837,42 @@ function downloadPDF() {
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:13px;height:13px;border-width:2px;display:inline-block;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Generating PDF…';
   }
 
-  // A4 at 96 DPI = 794 × 1123 px
-  const A4_PX_W = 794;
+  const A4_PX_W = 794; // A4 at 96 DPI
 
-  // ── 1. Isolated off-screen host ───────────────────────────────────────
+  // ── 1. Off-screen isolated host ───────────────────────────────────────
   const host = document.createElement('div');
   host.setAttribute('aria-hidden', 'true');
   host.style.cssText =
     'position:fixed;left:-9999px;top:0;width:' + A4_PX_W + 'px;' +
     'background:#fff;overflow:visible;z-index:-9999;';
 
-  // ── 2. Inject all document CSS + PDF-specific overrides ───────────────
-  //    Mirror the body.pdf-printing rules that already exist for @media print.
-  //    Key problems to fix:
-  //      a) .r-head has margin:-36px -36px 22px (dark full-bleed templates)
-  //         → html2canvas clips content that overflows the 794px host.
-  //      b) .r-2col has margin:-6px -36px 0 + min-height:160px
-  //         → creates blank space and overflow clipping.
-  //      c) Dark-header templates set color:white; Word/PDF ignores backgrounds
-  //         → text becomes invisible.
+  // ── 2. Inject all document CSS + layout fixes ─────────────────────────
   const styleEl = document.createElement('style');
   styleEl.textContent =
     [...document.querySelectorAll('style')].map(s => s.textContent).join('\n') +
-    // Base overrides
     '\nbody{background:#fff!important;}' +
+    // Strip decorative chrome from page wrapper
     '\n.resume-a4-page{box-shadow:none!important;margin:0!important;border-radius:0!important;min-height:0!important;}' +
-    // Fix (a): reset negative header bleed — same as body.pdf-printing rules
+    // Reset negative-margin header bleed (dark full-bleed templates)
     '\n.r-head{margin:0!important;border-radius:0!important;}' +
     '\n.r-head-accent{margin:0!important;}' +
-    // Fix (b): remove min-height and negative margins from two-column section
+    // Reset two-column overflow/min-height
     '\n.r-2col{margin:0!important;min-height:0!important;width:100%!important;}' +
-    // Fix two-column inner column padding (restore from bleed removal)
     '\n.r-aside{padding-left:18px!important;}' +
     '\n.r-main-col{padding-right:18px!important;padding-bottom:0!important;}' +
-    // Restore page-edge padding for non-full-bleed (single-col) sections
+    // Section margins for single-column templates
     '\n[class*="tpl-"]>.r-sec{padding-left:14mm!important;padding-right:14mm!important;margin-top:8px!important;}' +
     '\n[class*="tpl-"]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}' +
-    '\n[class*="tpl-"]{padding-bottom:10mm!important;}' +
+    // NO padding-bottom on template container — it pushes content past the A4
+    // boundary by ~38px and creates a blank second page on every resume.
     '\n[class*="tpl-"] .r-exp{margin-bottom:8px!important;}' +
-    // Light templates (no full-bleed header): restore top/side padding on header
-    // so it isn't flush against the page edge (mirrors body.pdf-printing rule).
+    // Light templates: restore header top/side spacing (no full-bleed background)
     '\n.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,' +
     '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,' +
-    '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}' +
-    // html2canvas renders backgrounds faithfully, so template-native text
-    // colors (including white-on-dark) are preserved — no override needed here.
-    // (Color overrides for Word/DOC are applied separately in downloadDoc.)
-    '';
+    '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}';
   host.appendChild(styleEl);
 
-  // ── 3. Deep-clone the resume page, strip editing metadata ─────────────
+  // ── 3. Deep-clone, strip editing attributes ───────────────────────────
   const clone = page.cloneNode(true);
   clone.removeAttribute('oninput');
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
@@ -2896,64 +2882,65 @@ function downloadPDF() {
     'background:#fff;box-sizing:border-box;box-shadow:none;' +
     'margin:0;border-radius:0;max-width:none;';
 
-  // Apply the negative-margin reset inline as well so inline styles win
-  clone.querySelectorAll('.r-head').forEach(el => {
-    el.style.margin = '0'; el.style.borderRadius = '0';
-  });
+  // Inline resets (override any !important in injected CSS that could win over inline)
+  clone.querySelectorAll('.r-head').forEach(el => { el.style.margin = '0'; el.style.borderRadius = '0'; });
   clone.querySelectorAll('.r-head-accent').forEach(el => { el.style.margin = '0'; });
-  clone.querySelectorAll('.r-2col').forEach(el => {
-    el.style.margin = '0'; el.style.minHeight = '0'; el.style.width = '100%';
-  });
+  clone.querySelectorAll('.r-2col').forEach(el => { el.style.margin = '0'; el.style.minHeight = '0'; el.style.width = '100%'; });
   clone.querySelectorAll('.r-aside').forEach(el => { el.style.paddingLeft = '18px'; });
-  clone.querySelectorAll('.r-main-col').forEach(el => {
-    el.style.paddingRight = '18px'; el.style.paddingBottom = '0';
-  });
+  clone.querySelectorAll('.r-main-col').forEach(el => { el.style.paddingRight = '18px'; el.style.paddingBottom = '0'; });
+  // Remove padding-bottom from template container — the main blank-page culprit
+  clone.querySelectorAll('[class*="tpl-"]').forEach(el => { el.style.paddingBottom = '0'; });
 
   host.appendChild(clone);
   document.body.appendChild(host);
+
+  // Measure rendered height BEFORE html2canvas to calculate expected page count.
+  // A4 at 96 Dpi = 297mm × (96/25.4) ≈ 1122.5 px.
+  const A4_H_PX = 297 * 96 / 25.4;
+  const contentH  = clone.offsetHeight || 1;
+  const expectedPages = Math.max(1, Math.ceil(contentH / A4_H_PX));
 
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName}-${lastName}`.replace(/[^a-z0-9\-]/gi, '').toLowerCase() || 'resume';
 
-  // ── 4. Render + paginate ──────────────────────────────────────────────
-  //    Do NOT use pagebreak:avoid-all — it tries to keep every block element
-  //    on one page and creates cascading blank pages when content exceeds
-  //    one A4 height, then stops rendering the remaining content entirely.
-  //    Instead, let html2pdf slice the canvas at natural A4 boundaries
-  //    (legacy mode = default when no pagebreak option is given).
+  // ── 4. Render → trim blank trailing pages → save ──────────────────────
   html2pdf().set({
     margin:    0,
     filename:  `${safeName}.pdf`,
-    image:     { type: 'png' },           // lossless, no JPEG artefacts
+    image:     { type: 'png' },
     html2canvas: {
-      scale:           3,                 // 3× → retina-sharp text
+      scale:           3,          // retina-sharp text
       useCORS:         true,
       allowTaint:      true,
       logging:         false,
       backgroundColor: '#ffffff',
       width:           A4_PX_W,
-      windowWidth:     A4_PX_W           // CSS layout computes at true A4 width
+      windowWidth:     A4_PX_W
     },
-    jsPDF: {
-      unit:        'mm',
-      format:      'a4',
-      orientation: 'portrait',
-      compress:    true
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
+  })
+  .from(clone)
+  .toPdf()
+  .get('pdf')
+  .then(function(pdfDoc) {
+    // html2pdf slices the canvas at A4 boundaries. Sub-pixel rounding can push
+    // the last slice onto a new page that is nearly all white. Delete it.
+    while (pdfDoc.internal.getNumberOfPages() > expectedPages) {
+      pdfDoc.deletePage(pdfDoc.internal.getNumberOfPages());
     }
-    // No pagebreak option → html2pdf default (legacy canvas-slice at A4 boundaries).
-    // All content renders; no blank pages; works for any resume length.
-  }).from(clone).save()
-    .then(() => {
-      if (document.body.contains(host)) document.body.removeChild(host);
-      if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
-      showToast('PDF downloaded!', 'success');
-    })
-    .catch(err => {
-      if (document.body.contains(host)) document.body.removeChild(host);
-      showToast('PDF failed: ' + err.message, 'error');
-      if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
-    });
+  })
+  .save()
+  .then(() => {
+    if (document.body.contains(host)) document.body.removeChild(host);
+    if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
+    showToast('PDF downloaded!', 'success');
+  })
+  .catch(err => {
+    if (document.body.contains(host)) document.body.removeChild(host);
+    if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
+    showToast('PDF failed: ' + err.message, 'error');
+  });
 }
 
 
