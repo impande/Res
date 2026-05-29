@@ -2863,10 +2863,25 @@ function downloadPDF() {
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:13px;height:13px;border-width:2px;display:inline-block;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Generating PDF…';
   }
 
-  // Capture at the element's actual rendered width so the PDF matches the preview.
-  // scrollHeight gives full content height even inside an overflow:auto container.
-  const A4_H_PX    = 297 * 96 / 25.4;
-  const pageW      = Math.round(page.getBoundingClientRect().width);
+  // Fix the LIVE DOM before html2pdf runs so html2canvas clones the already-correct
+  // state. Changing layout inside onclone shifts element positions after html2canvas
+  // has already calculated bounds from the live DOM → blank capture of wrong area.
+  const A4_H_PX = Math.round(297 * 96 / 25.4);
+  const main    = document.getElementById('main');
+  const out     = document.getElementById('resumeOutput');
+
+  const savedMain    = main ? { overflow: main.style.overflow, maxHeight: main.style.maxHeight } : null;
+  const savedOut     = out  ? { overflow: out.style.overflow, display: out.style.display }       : null;
+  const savedShadow  = page.style.boxShadow;
+  const savedBodyFilter = document.body.style.filter;
+
+  if (main) { main.style.overflow = 'visible'; main.style.maxHeight = 'none'; }
+  if (out)  { out.style.overflow  = 'visible'; out.style.display    = 'block'; }
+  page.style.boxShadow       = 'none';
+  document.body.style.filter = '';
+
+  // Measure AFTER layout is fixed so dimensions reflect the unconstrained element.
+  const pageW      = Math.round(page.getBoundingClientRect().width) || 794;
   const pageH      = page.scrollHeight || page.offsetHeight || A4_H_PX;
   const pgOverflow = pageH % A4_H_PX;
   const expectedPages = (pgOverflow > 0 && pgOverflow < A4_H_PX * 0.05)
@@ -2877,44 +2892,34 @@ function downloadPDF() {
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName}-${lastName}`.replace(/[^a-z0-9\-]/gi, '').toLowerCase() || 'resume';
 
+  function restore() {
+    if (main && savedMain) { main.style.overflow = savedMain.overflow; main.style.maxHeight = savedMain.maxHeight; }
+    if (out  && savedOut)  { out.style.overflow  = savedOut.overflow;  out.style.display    = savedOut.display; }
+    page.style.boxShadow       = savedShadow;
+    document.body.style.filter = savedBodyFilter;
+  }
+
   html2pdf().set({
-    margin:    0,
-    filename:  `${safeName}.pdf`,
-    image:     { type: 'png' },
+    margin:   0,
+    filename: safeName + '.pdf',
+    image:    { type: 'png' },
     html2canvas: {
       scale:           3,
       useCORS:         true,
       allowTaint:      true,
       logging:         false,
       backgroundColor: '#ffffff',
-      width:           pageW,              // actual preview width → PDF matches preview
-      height:          pageH,              // full content height (incl. below scroll)
-      windowWidth:     window.innerWidth,  // same viewport CSS as the live preview
+      width:           pageW,
+      height:          pageH,
+      windowWidth:     window.innerWidth,
       onclone: function(clonedDoc) {
-        // Safety: if a security script set filter:blur on body, clear it now —
-        // filter on <body> makes html2canvas produce a completely blank canvas.
+        // Live DOM is already fixed; only strip interactive/decorative attributes.
         clonedDoc.body.style.filter        = '';
         clonedDoc.body.style.pointerEvents = '';
-
-        // Remove overflow clipping so html2canvas renders the full element height
-        // rather than the visible slice within the #main scroll container.
-        const cMain = clonedDoc.getElementById('main');
-        if (cMain) { cMain.style.overflow = 'visible'; cMain.style.maxHeight = 'none'; }
-        const cOut = clonedDoc.getElementById('resumeOutput');
-        if (cOut)  { cOut.style.overflow = 'visible'; cOut.style.display = 'block'; }
-
+        clonedDoc.querySelectorAll('[contenteditable]').forEach(function(e) { e.removeAttribute('contenteditable'); });
+        clonedDoc.querySelectorAll('[oninput]').forEach(function(e) { e.removeAttribute('oninput'); });
         const cPage = clonedDoc.querySelector('#resumeOutput .resume-a4-page');
-        if (!cPage) return;
-
-        // Remove only the decorative box-shadow (cosmetic, not needed in PDF).
-        // No other layout/spacing changes — we want the PDF to look exactly
-        // like the "Your Resume" preview.
-        cPage.style.boxShadow = 'none';
-
-        // Strip interactive attributes — not needed in a static PDF.
-        cPage.removeAttribute('oninput');
-        clonedDoc.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
-        clonedDoc.querySelectorAll('[oninput]').forEach(e => e.removeAttribute('oninput'));
+        if (cPage) cPage.style.boxShadow = 'none';
       }
     },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
@@ -2923,16 +2928,18 @@ function downloadPDF() {
   .toPdf()
   .get('pdf')
   .then(function(pdfDoc) {
+    restore();
     while (pdfDoc.internal.getNumberOfPages() > expectedPages) {
       pdfDoc.deletePage(pdfDoc.internal.getNumberOfPages());
     }
   })
   .save()
-  .then(() => {
+  .then(function() {
     if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     showToast('PDF downloaded!', 'success');
   })
-  .catch(err => {
+  .catch(function(err) {
+    restore();
     if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     showToast('PDF failed: ' + err.message, 'error');
   });
