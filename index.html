@@ -2840,15 +2840,17 @@ function downloadPDF() {
   const A4_PX_W = 794; // A4 at 96 DPI
 
   // ── 1. Off-screen isolated host ───────────────────────────────────────
-  // IMPORTANT: left:0;top:0 so html2canvas resolves the element at a valid
-  // viewport origin (left:-9999px causes it to capture the app UI instead
-  // of the clone, producing 12 pages of wrong content).
-  // z-index:-9999 keeps it behind all app content so the user never sees it.
+  // Off-screen host: position:absolute placed BELOW the document's current
+  // scroll height so the user never sees it.
+  // Avoids position:fixed (which at z-index<0 is NOT painted by the browser,
+  // producing a blank canvas in html2canvas) and left:-9999px (which caused
+  // html2canvas to capture the app UI instead of the clone).
   const host = document.createElement('div');
   host.setAttribute('aria-hidden', 'true');
+  const _docH = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 0);
   host.style.cssText =
-    'position:fixed;left:0;top:0;width:' + A4_PX_W + 'px;' +
-    'background:#fff;overflow:visible;z-index:-9999;pointer-events:none;';
+    'position:absolute;left:0;top:' + (_docH + 200) + 'px;' +
+    'width:' + A4_PX_W + 'px;background:#fff;overflow:visible;';
 
   // ── 2. Inject all document CSS + layout fixes ─────────────────────────
   const styleEl = document.createElement('style');
