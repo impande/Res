@@ -145,20 +145,13 @@
     #top-sticky-bar{
       position:sticky;top:0;z-index:40;
       margin:-40px -48px 28px;
-      padding:12px 48px;
+      padding:14px 48px 16px;
       background:var(--bg);
       border-bottom:1px solid var(--border);
-      display:flex;flex-direction:column;align-items:center;gap:6px;
+      display:flex;flex-direction:column;align-items:center;gap:10px;
     }
-    #top-sticky-bar .btn-hero{margin-top:2px;}
-    #top-sticky-bar .hero-note{margin-top:2px;}
-    /* Import section collapsed by default; expanded via JS toggle */
-    #top-sticky-bar .hero-upload-wrap{display:none;margin-top:8px;}
-    #top-sticky-bar .hero-upload-wrap.open{display:block;}
-    .import-toggle{background:none;border:none;color:var(--muted);font-size:0.76rem;cursor:pointer;font-family:inherit;padding:2px 8px;border-radius:6px;transition:color .15s;}
-    .import-toggle:hover{color:var(--accent);}
-    .import-toggle .arrow{display:inline-block;transition:transform .2s;margin-left:3px;}
-    .import-toggle.open .arrow{transform:rotate(180deg);}
+    #top-sticky-bar .btn-hero{margin-top:4px;}
+    #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;}
     .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;position:relative;}
     .entry-remove{position:absolute;top:13px;right:13px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;min-width:32px;min-height:32px;}
@@ -291,7 +284,7 @@
       .preview-section{display:none;}
       #mobileProgress{display:block;}
       #main{padding:20px 16px 28px;max-width:100%;}
-      #top-sticky-bar{margin:-20px -16px 20px;padding:10px 16px;}
+      #top-sticky-bar{margin:-20px -16px 20px;padding:12px 16px 14px;}
       .step-title{font-size:1.5rem;}
       .step-subtitle{margin-bottom:20px;}
       .form-grid-2{grid-template-columns:1fr;gap:0;}
@@ -438,10 +431,7 @@
       }
       body.pdf-printing .resume-a4-page {
         padding: 0 !important;
-        min-height: 0 !important;
-        height: 297mm !important;
-        overflow: hidden !important;
-        box-shadow: none !important;
+        min-height: 0 !important; box-shadow: none !important;
         margin: 0 auto !important; width: 210mm !important;
         max-width: 100% !important;
         page-break-after: avoid !important; break-after: avoid !important;
@@ -449,21 +439,7 @@
       /* Remove negative margins — these cause the print engine to split across pages */
       body.pdf-printing .r-head { margin: 0 !important; border-radius: 0 !important; }
       body.pdf-printing .r-head-accent { margin: 0 !important; }
-      /* Prevent flex columns from stretching beyond A4 height */
-      body.pdf-printing .r-2col {
-        margin: 0 !important; min-height: 0 !important;
-        align-items: flex-start !important;
-        overflow: hidden !important;
-      }
-      body.pdf-printing .r-aside,
-      body.pdf-printing .r-main-col { overflow: hidden !important; }
-      /* Modern/Corporate/Executive: full-bleed header already spans edge; restore body padding */
-      body.pdf-printing .tpl-modern > .r-head,
-      body.pdf-printing .tpl-corporate > .r-head,
-      body.pdf-printing .tpl-executive > .r-head { margin: 0 !important; width: 100% !important; }
-      body.pdf-printing .tpl-modern > .r-2col,
-      body.pdf-printing .tpl-corporate > .r-2col,
-      body.pdf-printing .tpl-executive > .r-2col { width: 100% !important; }
+      body.pdf-printing .r-2col { margin: 0 !important; min-height: 0 !important; }
       /* Templates without full-bleed header: restore top/side padding */
       body.pdf-printing .tpl-classic > .r-head, body.pdf-printing .tpl-minimal > .r-head,
       body.pdf-printing .tpl-creative > .r-head, body.pdf-printing .tpl-fresh > .r-head,
@@ -1561,12 +1537,11 @@
   <div id="top-sticky-bar">
     <button class="btn-hero" onclick="startBuild()">Generate Resume →</button>
     <p class="hero-note">No sign-up required · Free to use</p>
-    <button class="import-toggle" id="importToggle" onclick="toggleImportSection()">— or import existing resume <span class="arrow">▾</span></button>
-    <div class="hero-upload-wrap" id="importSection">
+    <div class="hero-upload-wrap">
       <div class="hero-or">— or beautify your existing resume —</div>
       <div class="upload-tabs">
         <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')">📷 Upload Screenshot</button>
-        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-7px;right:4px;background:#ef4444;color:#fff;font-size:0.55rem;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:0.4px;line-height:1.4;">RECOMMENDED</span></button>
+        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
       </div>
       <!-- Upload screenshot panel -->
       <div class="upload-panel active" id="panelUpload">
@@ -2958,8 +2933,12 @@ function downloadDoc() {
 function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
-  // Show payment modal on every tap.
-  openUPIModal('pdf');
+  // Gate: show payment modal first; print runs after confirmation.
+  if (!hasUPIPaid()) {
+    openUPIModal('pdf');
+    return;
+  }
+  _doPrintPDF();
 }
 
 function _doPrintPDF() {
@@ -3012,14 +2991,6 @@ function _doPrintPDF() {
     if (f) handleResumeFile(f);
   });
 })();
-
-function toggleImportSection() {
-  const sec = document.getElementById('importSection');
-  const btn = document.getElementById('importToggle');
-  if (!sec || !btn) return;
-  const open = sec.classList.toggle('open');
-  btn.classList.toggle('open', open);
-}
 
 function switchUploadTab(tab) {
   document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
