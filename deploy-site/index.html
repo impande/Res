@@ -1558,7 +1558,7 @@
       <div class="hero-or">— or beautify your existing resume —</div>
       <div class="upload-tabs">
         <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')">📷 Upload Screenshot</button>
-        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
+        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-7px;right:4px;background:#ef4444;color:#fff;font-size:0.55rem;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:0.4px;line-height:1.4;">RECOMMENDED</span></button>
       </div>
       <!-- Upload screenshot panel -->
       <div class="upload-panel active" id="panelUpload">
@@ -2961,33 +2961,61 @@ function _doPrintPDF() {
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
-  const prevTitle = document.title;
-  document.title  = safeName + ' — Resume';
+
+  // Clone the page, strip interactive attributes so they don't appear in print.
+  const clone = page.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
+  clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
+
+  // Collect every <style> block from the app — this carries all template CSS.
+  const allCSS = Array.from(document.querySelectorAll('style'))
+    .map(s => s.textContent).join('\n');
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    showToast('Allow pop-ups in your browser to download the PDF.', 'error');
+    return;
+  }
+
+  win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset=”UTF-8”>
+<title>${safeName.replace(/</g,'&lt;')} — Resume</title>
+<style>
+${allCSS}
+@page { size: A4 portrait; margin: 0; }
+html, body {
+  margin: 0; padding: 0; background: #fff;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+.resume-a4-page {
+  width: 210mm !important;
+  min-height: 297mm !important;
+  max-height: 297mm !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+</style>
+</head>
+<body>${clone.outerHTML}</body>
+</html>`);
+  win.document.close();
+  win.focus();
+  // Give the browser a moment to lay out before triggering print.
+  setTimeout(function() {
+    win.print();
+    // Close the helper window after the dialog is dismissed.
+    win.addEventListener('afterprint', function() { win.close(); });
+    setTimeout(function() { try { win.close(); } catch(e){} }, 3000);
+  }, 600);
 
   if (!sessionStorage.getItem('pdfHintShown')) {
     showToast('Choose “Save as PDF” as the destination in the print dialog.', 'info');
     sessionStorage.setItem('pdfHintShown', '1');
   }
-
-  function cleanup() {
-    document.body.classList.remove('pdf-printing');
-    document.title = prevTitle;
-    window.removeEventListener('afterprint', cleanup);
-  }
-  window.addEventListener('afterprint', cleanup);
-  document.body.classList.add('pdf-printing');
-
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      try {
-        window.print();
-      } catch (err) {
-        cleanup();
-        showToast('Could not open the print dialog: ' + err.message, 'error');
-      }
-      setTimeout(cleanup, 1500);
-    });
-  });
 }
 
 
