@@ -2859,6 +2859,11 @@ function downloadPDF() {
     '\n[class*="tpl-"]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}' +
     '\n[class*="tpl-"]{padding-bottom:10mm!important;}' +
     '\n[class*="tpl-"] .r-exp{margin-bottom:8px!important;}' +
+    // Light templates (no full-bleed header): restore top/side padding on header
+    // so it isn't flush against the page edge (mirrors body.pdf-printing rule).
+    '\n.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,' +
+    '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,' +
+    '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}' +
     // Fix (c): force dark text — dark-bg templates use color:white which
     // renders invisible when html2canvas composites onto a white canvas.
     '\n.r-head{color:#111!important;}' +
@@ -2873,7 +2878,7 @@ function downloadPDF() {
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
   clone.style.cssText =
-    'width:' + A4_PX_W + 'px;min-height:auto;padding:18mm 16mm;' +
+    'width:' + A4_PX_W + 'px;min-height:auto;padding:0;' +
     'background:#fff;box-sizing:border-box;box-shadow:none;' +
     'margin:0;border-radius:0;max-width:none;';
 
