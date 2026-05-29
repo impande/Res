@@ -141,6 +141,17 @@
     .btn-accent{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:var(--accent);color:#000;font-size:0.9rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity .15s;font-family:inherit;}
     .btn-accent:hover{opacity:0.88;}
     .btn-accent:disabled{opacity:0.5;cursor:not-allowed;}
+    /* ── Always-visible top sticky bar (Generate CTA + import) ── */
+    #top-sticky-bar{
+      position:sticky;top:0;z-index:40;
+      margin:-40px -48px 28px;
+      padding:14px 48px 16px;
+      background:var(--bg);
+      border-bottom:1px solid var(--border);
+      display:flex;flex-direction:column;align-items:center;gap:10px;
+    }
+    #top-sticky-bar .btn-hero{margin-top:4px;}
+    #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;}
     .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;position:relative;}
     .entry-remove{position:absolute;top:13px;right:13px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;min-width:32px;min-height:32px;}
@@ -273,6 +284,7 @@
       .preview-section{display:none;}
       #mobileProgress{display:block;}
       #main{padding:20px 16px 28px;max-width:100%;}
+      #top-sticky-bar{margin:-20px -16px 20px;padding:12px 16px 14px;}
       .step-title{font-size:1.5rem;}
       .step-subtitle{margin-bottom:20px;}
       .form-grid-2{grid-template-columns:1fr;gap:0;}
@@ -396,6 +408,7 @@
       body.pdf-printing .nav-buttons,
       body.pdf-printing .resume-bar,
       body.pdf-printing #tplSection { display: none !important; }
+      body.pdf-printing #top-sticky-bar { display: none !important; }
       body.pdf-printing #main {
         padding: 0 !important; max-width: 100% !important;
         overflow: visible !important; margin: 0 !important;
@@ -1520,16 +1533,8 @@
 
 <main id="main">
 
-  <div class="step-content active" id="step0">
-    <div class="hero-icon">R</div>
-    <h1 class="hero-title">Build your <span>resume</span><br>with AI</h1>
-    <p class="hero-sub">Create a professional, ATS-optimised resume in minutes. Just fill in your details — our AI handles the rest.</p>
-    <div class="hero-features">
-      <div class="hero-feat"><div class="hero-feat-dot"></div>15 beautiful templates</div>
-      <div class="hero-feat"><div class="hero-feat-dot"></div>AI-powered content</div>
-      <div class="hero-feat"><div class="hero-feat-dot"></div>One-click PDF export</div>
-      <div class="hero-feat"><div class="hero-feat-dot"></div>ATS-optimised</div>
-    </div>
+  <!-- Always-visible sticky bar: Generate Resume CTA + import existing resume -->
+  <div id="top-sticky-bar">
     <button class="btn-hero" onclick="startBuild()">Generate Resume →</button>
     <p class="hero-note">No sign-up required · Free to use</p>
     <div class="hero-upload-wrap">
@@ -1554,6 +1559,18 @@
         <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
       </div>
       <div id="uploadStatusBar" class="upload-status-bar" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="step-content active" id="step0">
+    <div class="hero-icon">R</div>
+    <h1 class="hero-title">Build your <span>resume</span><br>with AI</h1>
+    <p class="hero-sub">Create a professional, ATS-optimised resume in minutes. Just fill in your details — our AI handles the rest.</p>
+    <div class="hero-features">
+      <div class="hero-feat"><div class="hero-feat-dot"></div>15 beautiful templates</div>
+      <div class="hero-feat"><div class="hero-feat-dot"></div>AI-powered content</div>
+      <div class="hero-feat"><div class="hero-feat-dot"></div>One-click PDF export</div>
+      <div class="hero-feat"><div class="hero-feat-dot"></div>ATS-optimised</div>
     </div>
   </div>
 
