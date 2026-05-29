@@ -2840,14 +2840,28 @@ function downloadPDF() {
   const A4_PX_W = 794;
   const A4_H_PX = 297 * 96 / 25.4;
 
-  // Measure the LIVE element before html2pdf touches anything.
-  // scrollHeight gives the full content height even when the element is inside
-  // an overflow:auto scroll container (#main) that clips its visible area.
-  const contentH     = page.scrollHeight || page.offsetHeight || A4_H_PX;
-  const pgOverflow   = contentH % A4_H_PX;
+  // ── STEP 1: Measure live element ──────────────────────────────────────
+  const rect       = page.getBoundingClientRect();
+  const contentH   = page.scrollHeight || page.offsetHeight || A4_H_PX;
+  const pgOverflow = contentH % A4_H_PX;
   const expectedPages = (pgOverflow > 0 && pgOverflow < A4_H_PX * 0.05)
     ? Math.floor(contentH / A4_H_PX)
     : Math.max(1, Math.ceil(contentH / A4_H_PX));
+
+  console.group('%c[PDF] Step 1 — Live element metrics', 'color:#f59e0b;font-weight:bold');
+  console.log('page.scrollHeight    :', page.scrollHeight);
+  console.log('page.offsetHeight    :', page.offsetHeight);
+  console.log('getBoundingClientRect:', JSON.stringify({top: Math.round(rect.top), left: Math.round(rect.left), width: Math.round(rect.width), height: Math.round(rect.height)}));
+  console.log('contentH (used)      :', contentH);
+  console.log('A4_H_PX              :', Math.round(A4_H_PX));
+  console.log('pgOverflow           :', Math.round(pgOverflow));
+  console.log('expectedPages        :', expectedPages);
+  const mainEl = document.getElementById('main');
+  const outEl  = document.getElementById('resumeOutput');
+  console.log('#main  scrollTop / scrollHeight / offsetHeight :', mainEl?.scrollTop, '/', mainEl?.scrollHeight, '/', mainEl?.offsetHeight);
+  console.log('#resumeOutput offsetHeight                      :', outEl?.offsetHeight);
+  console.log('body.scrollHeight / documentElement.scrollHeight:', document.body.scrollHeight, '/', document.documentElement.scrollHeight);
+  console.groupEnd();
 
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
@@ -2861,57 +2875,83 @@ function downloadPDF() {
       scale:           3,
       useCORS:         true,
       allowTaint:      true,
-      logging:         false,
+      logging:         true,
       backgroundColor: '#ffffff',
       width:           A4_PX_W,
       height:          contentH,
       windowWidth:     A4_PX_W,
-      // onclone runs inside html2canvas's internal document clone (an iframe).
-      // We only modify the CLONED document — the live app DOM is untouched.
-      // Key fixes:
-      //   1. Remove overflow clipping on #main and #resumeOutput so html2canvas
-      //      renders the full resume height instead of the visible slice.
-      //   2. Apply PDF layout resets (zero margins, no shadows, etc.).
       onclone: function(clonedDoc) {
-        // ── Un-clip scroll / overflow containers ──────────────────────
-        const clonedMain = clonedDoc.getElementById('main');
-        if (clonedMain) {
-          clonedMain.style.overflow   = 'visible';
-          clonedMain.style.maxHeight  = 'none';
+        // ── STEP 2: onclone — log container state before fixes ────────
+        const cMain = clonedDoc.getElementById('main');
+        const cOut  = clonedDoc.getElementById('resumeOutput');
+        const cPage = clonedDoc.querySelector('#resumeOutput .resume-a4-page');
+
+        console.group('%c[PDF] Step 2 — onclone: BEFORE fixes', 'color:#60a5fa;font-weight:bold');
+        console.log('#main found              :', !!cMain);
+        if (cMain) {
+          const cs = clonedDoc.defaultView.getComputedStyle(cMain);
+          console.log('#main computed overflow  :', cs.overflow, '/ overflowY:', cs.overflowY);
+          console.log('#main computed height    :', cs.height);
+          console.log('#main computed maxHeight :', cs.maxHeight);
+          console.log('#main scrollHeight       :', cMain.scrollHeight, '  offsetHeight:', cMain.offsetHeight);
         }
-        const clonedOutput = clonedDoc.getElementById('resumeOutput');
-        if (clonedOutput) {
-          clonedOutput.style.overflow = 'visible';
-          clonedOutput.style.display  = 'block';
+        console.log('#resumeOutput found      :', !!cOut);
+        if (cOut) {
+          const cs2 = clonedDoc.defaultView.getComputedStyle(cOut);
+          console.log('#resumeOutput computed overflow:', cs2.overflow);
+          console.log('#resumeOutput computed display :', cs2.display);
+          console.log('#resumeOutput offsetHeight     :', cOut.offsetHeight);
+        }
+        console.log('.resume-a4-page found    :', !!cPage);
+        if (cPage) {
+          const cs3 = clonedDoc.defaultView.getComputedStyle(cPage);
+          console.log('.resume-a4-page offsetHeight  :', cPage.offsetHeight, '  scrollHeight:', cPage.scrollHeight);
+          console.log('.resume-a4-page computed width:', cs3.width);
+          console.log('.resume-a4-page computed padding:', cs3.padding);
+          console.log('.resume-a4-page child count   :', cPage.children.length);
+          console.log('.resume-a4-page innerHTML snippet:', cPage.innerHTML.slice(0, 200));
+        }
+        console.groupEnd();
+
+        // ── Un-clip scroll / overflow containers ──────────────────────
+        if (cMain) {
+          cMain.style.overflow  = 'visible';
+          cMain.style.maxHeight = 'none';
+        }
+        if (cOut) {
+          cOut.style.overflow = 'visible';
+          cOut.style.display  = 'block';
         }
 
-        const cp = clonedDoc.querySelector('#resumeOutput .resume-a4-page');
-        if (!cp) return;
+        if (!cPage) {
+          console.error('[PDF] onclone: .resume-a4-page NOT FOUND in cloned doc — aborting style fixes');
+          return;
+        }
 
         // Strip interactive attributes
-        cp.removeAttribute('oninput');
+        cPage.removeAttribute('oninput');
         clonedDoc.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
         clonedDoc.querySelectorAll('[oninput]').forEach(e => e.removeAttribute('oninput'));
 
-        // ── Page-level PDF resets ──────────────────────────────────────
-        cp.style.width        = A4_PX_W + 'px';
-        cp.style.minHeight    = 'auto';
-        cp.style.padding      = '0';
-        cp.style.boxShadow    = 'none';
-        cp.style.margin       = '0';
-        cp.style.borderRadius = '0';
-        cp.style.maxWidth     = 'none';
-        cp.style.background   = '#fff';
+        // Page-level PDF resets
+        cPage.style.width        = A4_PX_W + 'px';
+        cPage.style.minHeight    = 'auto';
+        cPage.style.padding      = '0';
+        cPage.style.boxShadow    = 'none';
+        cPage.style.margin       = '0';
+        cPage.style.borderRadius = '0';
+        cPage.style.maxWidth     = 'none';
+        cPage.style.background   = '#fff';
 
-        // ── Child-element resets ───────────────────────────────────────
-        cp.querySelectorAll('.r-head').forEach(e => { e.style.margin = '0'; e.style.borderRadius = '0'; });
-        cp.querySelectorAll('.r-head-accent').forEach(e => { e.style.margin = '0'; });
-        cp.querySelectorAll('.r-2col').forEach(e => { e.style.margin = '0'; e.style.minHeight = '0'; e.style.width = '100%'; });
-        cp.querySelectorAll('.r-aside').forEach(e => { e.style.paddingLeft = '18px'; });
-        cp.querySelectorAll('.r-main-col').forEach(e => { e.style.paddingRight = '18px'; e.style.paddingBottom = '0'; });
-        cp.querySelectorAll('[class*="tpl-"]').forEach(e => { e.style.paddingBottom = '0'; });
+        // Child-element resets
+        cPage.querySelectorAll('.r-head').forEach(e => { e.style.margin = '0'; e.style.borderRadius = '0'; });
+        cPage.querySelectorAll('.r-head-accent').forEach(e => { e.style.margin = '0'; });
+        cPage.querySelectorAll('.r-2col').forEach(e => { e.style.margin = '0'; e.style.minHeight = '0'; e.style.width = '100%'; });
+        cPage.querySelectorAll('.r-aside').forEach(e => { e.style.paddingLeft = '18px'; });
+        cPage.querySelectorAll('.r-main-col').forEach(e => { e.style.paddingRight = '18px'; e.style.paddingBottom = '0'; });
+        cPage.querySelectorAll('[class*="tpl-"]').forEach(e => { e.style.paddingBottom = '0'; });
 
-        // ── Inject !important overrides (inline style can't use !important) ──
+        // Inject !important overrides
         const s = clonedDoc.createElement('style');
         s.textContent =
           '.resume-a4-page{box-shadow:none!important;margin:0!important;border-radius:0!important;min-height:0!important;}' +
@@ -2927,6 +2967,17 @@ function downloadPDF() {
           '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,' +
           '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}';
         clonedDoc.head.appendChild(s);
+
+        // ── STEP 3: log state AFTER fixes ─────────────────────────────
+        console.group('%c[PDF] Step 3 — onclone: AFTER fixes', 'color:#34d399;font-weight:bold');
+        console.log('#main  overflow after    :', cMain?.style.overflow);
+        console.log('#main  offsetHeight after:', cMain?.offsetHeight);
+        console.log('#out   overflow after     :', cOut?.style.overflow);
+        console.log('#out   display after      :', cOut?.style.display);
+        console.log('.resume-a4-page style.width   :', cPage.style.width);
+        console.log('.resume-a4-page style.padding :', cPage.style.padding);
+        console.log('.resume-a4-page offsetHeight  :', cPage.offsetHeight, '  scrollHeight:', cPage.scrollHeight);
+        console.groupEnd();
       }
     },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
@@ -2935,16 +2986,33 @@ function downloadPDF() {
   .toPdf()
   .get('pdf')
   .then(function(pdfDoc) {
+    const pagesGenerated = pdfDoc.internal.getNumberOfPages();
+    console.group('%c[PDF] Step 4 — jsPDF result', 'color:#f472b6;font-weight:bold');
+    console.log('pages generated (raw) :', pagesGenerated);
+    console.log('expectedPages         :', expectedPages);
+    console.log('pages to delete       :', Math.max(0, pagesGenerated - expectedPages));
+    // Log each page's content bounding box from jsPDF internal pages
+    try {
+      for (let i = 1; i <= pagesGenerated; i++) {
+        const pg = pdfDoc.internal.pages[i];
+        console.log(`  page ${i} raw length:`, pg ? pg.length : 'n/a');
+      }
+    } catch(e) { console.log('page detail error:', e.message); }
+    console.groupEnd();
+
     while (pdfDoc.internal.getNumberOfPages() > expectedPages) {
       pdfDoc.deletePage(pdfDoc.internal.getNumberOfPages());
     }
+    console.log('%c[PDF] Step 5 — after trim, saving ' + pdfDoc.internal.getNumberOfPages() + ' page(s)', 'color:#f59e0b;font-weight:bold');
   })
   .save()
   .then(() => {
+    console.log('%c[PDF] Step 6 — save() resolved — download triggered', 'color:#34d399;font-weight:bold');
     if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     showToast('PDF downloaded!', 'success');
   })
   .catch(err => {
+    console.error('[PDF] ERROR:', err);
     if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     showToast('PDF failed: ' + err.message, 'error');
   });
