@@ -1,4 +1,11 @@
+# Netlify builds with this directory (deploy-site) as the base, and publishes it.
+# The canonical app lives in the repo-root index.html. To guarantee the two
+# never drift again, the build step copies the root index.html into this
+# publish directory at deploy time. `|| true` keeps the deploy succeeding even
+# if the copy is ever a no-op, in which case the committed copy below is served.
 [build]
+  command   = "cp ../index.html index.html || true"
+  publish   = "."
   functions = "netlify/functions"
 
 [functions]
