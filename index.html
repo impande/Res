@@ -6,55 +6,29 @@
   <title>Resume For You – Powered by AI</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- Source-code deterrents: blocks common download / inspect shortcuts.
-       Note: server-side secrets (API keys) are protected via Netlify Functions
-       and are never embedded here — this script guards against casual copying. -->
+       API keys are protected server-side via Netlify Functions — never in this file.
+       NOTE: DevTools blur removed — it set filter:blur on document.body which
+       html2canvas clones as an inline style, producing a blank PDF canvas. -->
   <script>
   (function(){
-    // 1. Disable right-click context menu (Save As, View Source, Inspect)
+    // 1. Disable right-click context menu (Save As / View Source / Inspect)
     document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
     // 2. Block keyboard shortcuts used to reveal or save the source
     document.addEventListener('keydown', function(e){
-      var k   = e.key;
-      var ctrl = e.ctrlKey || e.metaKey;   // Ctrl on Windows, Cmd on Mac
-      // F12 → DevTools
+      var k    = e.key;
+      var ctrl = e.ctrlKey || e.metaKey;
       if (k === 'F12') { e.preventDefault(); return; }
       if (ctrl) {
-        // Ctrl+U = View Source  |  Ctrl+S = Save Page
         if (k==='u'||k==='U'||k==='s'||k==='S') { e.preventDefault(); return; }
-        // Ctrl+Shift+I = DevTools  |  +J = Console  |  +C = Inspector  |  +K = Console (FF)
         if (e.shiftKey && (k==='i'||k==='I'||k==='j'||k==='J'||k==='c'||k==='C'||k==='k'||k==='K')) {
           e.preventDefault(); return;
         }
       }
-    }, true); // capture phase → runs before any other handler
+    }, true);
 
-    // 3. Block drag-start so content can't be dragged into another window/tab to save
+    // 3. Block drag-to-save
     document.addEventListener('dragstart', function(e){ e.preventDefault(); });
-
-    // 4. DevTools detection: blur the page when DevTools is open docked
-    //    (size-difference heuristic; does not trigger for undocked DevTools)
-    var _dt = false;
-    setInterval(function(){
-      var W = window.outerWidth  - window.innerWidth  > 160;
-      var H = window.outerHeight - window.innerHeight > 160;
-      if (W || H) {
-        if (!_dt) {
-          _dt = true;
-          var el = document.body;
-          el.style.filter = 'blur(8px)';
-          el.style.pointerEvents = 'none';
-          el.setAttribute('data-secure', '1');
-        }
-      } else {
-        if (_dt) {
-          _dt = false;
-          document.body.style.filter = '';
-          document.body.style.pointerEvents = '';
-          document.body.removeAttribute('data-secure');
-        }
-      }
-    }, 800);
   })();
   </script>
   <style>
@@ -2933,6 +2907,13 @@ function downloadPDF() {
       height:          contentH,
       windowWidth:     A4_PX_W,
       onclone: function(clonedDoc) {
+        // Clear any inline filter/pointerEvents that security or other scripts
+        // may have set on body — filter:blur on the root makes html2canvas
+        // produce a completely blank white canvas.
+        clonedDoc.body.style.filter        = '';
+        clonedDoc.body.style.pointerEvents = '';
+        clonedDoc.body.style.userSelect    = '';
+
         // ── STEP 2: onclone — log container state before fixes ────────
         const cMain = clonedDoc.getElementById('main');
         const cOut  = clonedDoc.getElementById('resumeOutput');
