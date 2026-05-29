@@ -2837,118 +2837,114 @@ function downloadPDF() {
     btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:13px;height:13px;border-width:2px;display:inline-block;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Generating PDF…';
   }
 
-  const A4_PX_W = 794; // A4 at 96 DPI
+  const A4_PX_W = 794;
+  const A4_H_PX = 297 * 96 / 25.4;
 
-  // ── 1. Off-screen isolated host ───────────────────────────────────────
-  // Off-screen host: position:absolute placed BELOW the document's current
-  // scroll height so the user never sees it.
-  // Avoids position:fixed (which at z-index<0 is NOT painted by the browser,
-  // producing a blank canvas in html2canvas) and left:-9999px (which caused
-  // html2canvas to capture the app UI instead of the clone).
-  const host = document.createElement('div');
-  host.setAttribute('aria-hidden', 'true');
-  const _docH = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 0);
-  host.style.cssText =
-    'position:absolute;left:0;top:' + (_docH + 200) + 'px;' +
-    'width:' + A4_PX_W + 'px;background:#fff;overflow:visible;';
-
-  // ── 2. Inject all document CSS + layout fixes ─────────────────────────
-  const styleEl = document.createElement('style');
-  styleEl.textContent =
-    [...document.querySelectorAll('style')].map(s => s.textContent).join('\n') +
-    '\nbody{background:#fff!important;}' +
-    // Strip decorative chrome from page wrapper
-    '\n.resume-a4-page{box-shadow:none!important;margin:0!important;border-radius:0!important;min-height:0!important;}' +
-    // Reset negative-margin header bleed (dark full-bleed templates)
-    '\n.r-head{margin:0!important;border-radius:0!important;}' +
-    '\n.r-head-accent{margin:0!important;}' +
-    // Reset two-column overflow/min-height
-    '\n.r-2col{margin:0!important;min-height:0!important;width:100%!important;}' +
-    '\n.r-aside{padding-left:18px!important;}' +
-    '\n.r-main-col{padding-right:18px!important;padding-bottom:0!important;}' +
-    // Section margins for single-column templates
-    '\n[class*="tpl-"]>.r-sec{padding-left:14mm!important;padding-right:14mm!important;margin-top:8px!important;}' +
-    '\n[class*="tpl-"]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}' +
-    // NO padding-bottom on template container — it pushes content past the A4
-    // boundary by ~38px and creates a blank second page on every resume.
-    '\n[class*="tpl-"] .r-exp{margin-bottom:8px!important;}' +
-    // Light templates: restore header top/side spacing (no full-bleed background)
-    '\n.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,' +
-    '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,' +
-    '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}';
-  host.appendChild(styleEl);
-
-  // ── 3. Deep-clone, strip editing attributes ───────────────────────────
-  const clone = page.cloneNode(true);
-  clone.removeAttribute('oninput');
-  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
-  clone.style.cssText =
-    'width:' + A4_PX_W + 'px;min-height:auto;padding:0;' +
-    'background:#fff;box-sizing:border-box;box-shadow:none;' +
-    'margin:0;border-radius:0;max-width:none;';
-
-  // Inline resets (override any !important in injected CSS that could win over inline)
-  clone.querySelectorAll('.r-head').forEach(el => { el.style.margin = '0'; el.style.borderRadius = '0'; });
-  clone.querySelectorAll('.r-head-accent').forEach(el => { el.style.margin = '0'; });
-  clone.querySelectorAll('.r-2col').forEach(el => { el.style.margin = '0'; el.style.minHeight = '0'; el.style.width = '100%'; });
-  clone.querySelectorAll('.r-aside').forEach(el => { el.style.paddingLeft = '18px'; });
-  clone.querySelectorAll('.r-main-col').forEach(el => { el.style.paddingRight = '18px'; el.style.paddingBottom = '0'; });
-  // Remove padding-bottom from template container — the main blank-page culprit
-  clone.querySelectorAll('[class*="tpl-"]').forEach(el => { el.style.paddingBottom = '0'; });
-
-  host.appendChild(clone);
-  document.body.appendChild(host);
-
-  // Measure rendered height to calculate expected pages.
-  // A4 at 96 DPI = 297mm × (96/25.4) ≈ 1122.5 px.
-  const A4_H_PX   = 297 * 96 / 25.4;
-  const contentH  = clone.offsetHeight || A4_H_PX;
-  const overflow  = contentH % A4_H_PX;
-  // If content overflows a page boundary by < 5% of A4 height (~56px / ~14mm),
-  // it's sub-pixel rounding or residual spacing — treat as a blank trailing page.
-  const expectedPages = (overflow > 0 && overflow < A4_H_PX * 0.05)
-    ? Math.floor(contentH / A4_H_PX)       // would be blank, drop it
+  // Measure the LIVE element before html2pdf touches anything.
+  // scrollHeight gives the full content height even when the element is inside
+  // an overflow:auto scroll container (#main) that clips its visible area.
+  const contentH     = page.scrollHeight || page.offsetHeight || A4_H_PX;
+  const pgOverflow   = contentH % A4_H_PX;
+  const expectedPages = (pgOverflow > 0 && pgOverflow < A4_H_PX * 0.05)
+    ? Math.floor(contentH / A4_H_PX)
     : Math.max(1, Math.ceil(contentH / A4_H_PX));
 
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName}-${lastName}`.replace(/[^a-z0-9\-]/gi, '').toLowerCase() || 'resume';
 
-  // ── 4. Render → trim blank trailing pages → save ──────────────────────
   html2pdf().set({
     margin:    0,
     filename:  `${safeName}.pdf`,
     image:     { type: 'png' },
     html2canvas: {
-      scale:           3,          // retina-sharp text
+      scale:           3,
       useCORS:         true,
       allowTaint:      true,
       logging:         false,
       backgroundColor: '#ffffff',
       width:           A4_PX_W,
-      windowWidth:     A4_PX_W
+      height:          contentH,
+      windowWidth:     A4_PX_W,
+      // onclone runs inside html2canvas's internal document clone (an iframe).
+      // We only modify the CLONED document — the live app DOM is untouched.
+      // Key fixes:
+      //   1. Remove overflow clipping on #main and #resumeOutput so html2canvas
+      //      renders the full resume height instead of the visible slice.
+      //   2. Apply PDF layout resets (zero margins, no shadows, etc.).
+      onclone: function(clonedDoc) {
+        // ── Un-clip scroll / overflow containers ──────────────────────
+        const clonedMain = clonedDoc.getElementById('main');
+        if (clonedMain) {
+          clonedMain.style.overflow   = 'visible';
+          clonedMain.style.maxHeight  = 'none';
+        }
+        const clonedOutput = clonedDoc.getElementById('resumeOutput');
+        if (clonedOutput) {
+          clonedOutput.style.overflow = 'visible';
+          clonedOutput.style.display  = 'block';
+        }
+
+        const cp = clonedDoc.querySelector('#resumeOutput .resume-a4-page');
+        if (!cp) return;
+
+        // Strip interactive attributes
+        cp.removeAttribute('oninput');
+        clonedDoc.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+        clonedDoc.querySelectorAll('[oninput]').forEach(e => e.removeAttribute('oninput'));
+
+        // ── Page-level PDF resets ──────────────────────────────────────
+        cp.style.width        = A4_PX_W + 'px';
+        cp.style.minHeight    = 'auto';
+        cp.style.padding      = '0';
+        cp.style.boxShadow    = 'none';
+        cp.style.margin       = '0';
+        cp.style.borderRadius = '0';
+        cp.style.maxWidth     = 'none';
+        cp.style.background   = '#fff';
+
+        // ── Child-element resets ───────────────────────────────────────
+        cp.querySelectorAll('.r-head').forEach(e => { e.style.margin = '0'; e.style.borderRadius = '0'; });
+        cp.querySelectorAll('.r-head-accent').forEach(e => { e.style.margin = '0'; });
+        cp.querySelectorAll('.r-2col').forEach(e => { e.style.margin = '0'; e.style.minHeight = '0'; e.style.width = '100%'; });
+        cp.querySelectorAll('.r-aside').forEach(e => { e.style.paddingLeft = '18px'; });
+        cp.querySelectorAll('.r-main-col').forEach(e => { e.style.paddingRight = '18px'; e.style.paddingBottom = '0'; });
+        cp.querySelectorAll('[class*="tpl-"]').forEach(e => { e.style.paddingBottom = '0'; });
+
+        // ── Inject !important overrides (inline style can't use !important) ──
+        const s = clonedDoc.createElement('style');
+        s.textContent =
+          '.resume-a4-page{box-shadow:none!important;margin:0!important;border-radius:0!important;min-height:0!important;}' +
+          '.r-head{margin:0!important;border-radius:0!important;}' +
+          '.r-head-accent{margin:0!important;}' +
+          '.r-2col{margin:0!important;min-height:0!important;width:100%!important;}' +
+          '.r-aside{padding-left:18px!important;}' +
+          '.r-main-col{padding-right:18px!important;padding-bottom:0!important;}' +
+          '[class*="tpl-"]>.r-sec{padding-left:14mm!important;padding-right:14mm!important;margin-top:8px!important;}' +
+          '[class*="tpl-"]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}' +
+          '[class*="tpl-"] .r-exp{margin-bottom:8px!important;}' +
+          '.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,' +
+          '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,' +
+          '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}';
+        clonedDoc.head.appendChild(s);
+      }
     },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
   })
-  .from(clone)
+  .from(page)
   .toPdf()
   .get('pdf')
   .then(function(pdfDoc) {
-    // html2pdf slices the canvas at A4 boundaries. Sub-pixel rounding can push
-    // the last slice onto a new page that is nearly all white. Delete it.
     while (pdfDoc.internal.getNumberOfPages() > expectedPages) {
       pdfDoc.deletePage(pdfDoc.internal.getNumberOfPages());
     }
   })
   .save()
   .then(() => {
-    if (document.body.contains(host)) document.body.removeChild(host);
     if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     showToast('PDF downloaded!', 'success');
   })
   .catch(err => {
-    if (document.body.contains(host)) document.body.removeChild(host);
     if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     showToast('PDF failed: ' + err.message, 'error');
   });
