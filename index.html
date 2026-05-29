@@ -235,40 +235,54 @@
     @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
     /* ── UPI Payment Modal ── */
-    .upi-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
-    .upi-modal{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:22px;width:100%;max-width:390px;overflow:hidden;animation:upiIn .32s cubic-bezier(.34,1.3,.64,1);}
+    .upi-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px);}
+    .upi-modal{background:#12121e;border:1px solid #25253a;border-radius:24px;width:100%;max-width:640px;overflow:hidden;animation:upiIn .32s cubic-bezier(.34,1.3,.64,1);}
     @keyframes upiIn{from{opacity:0;transform:scale(0.88) translateY(28px);}to{opacity:1;transform:none;}}
-    .upi-hdr{background:linear-gradient(135deg,#0c0c14 0%,#18182a 100%);padding:22px 22px 18px;text-align:center;border-bottom:1px solid #28283a;}
-    .upi-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.32);color:#f59e0b;font-size:0.68rem;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;padding:4px 11px;border-radius:99px;margin-bottom:12px;}
-    .upi-price-row{display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:5px;}
-    .upi-rupee{font-size:1.5rem;font-weight:700;color:#f59e0b;margin-top:7px;line-height:1;}
-    .upi-amount{font-size:4.2rem;font-weight:800;color:#fff;line-height:1;}
-    .upi-once{font-size:0.75rem;color:#555;}
-    .upi-body{padding:18px 20px 20px;}
-    .upi-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:16px;}
-    .upi-qr{width:152px;height:152px;border-radius:10px;background:#fff;padding:5px;display:block;}
-    .upi-qr-label{font-size:0.72rem;color:#555;}
-    .upi-id-row{display:flex;align-items:center;gap:8px;background:#111;border:1px solid #252525;border-radius:10px;padding:10px 13px;margin-bottom:16px;}
+    .upi-hdr{background:linear-gradient(135deg,#0a0a16 0%,#16162e 100%);padding:24px 26px 18px;text-align:center;border-bottom:1px solid #222236;}
+    .upi-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:14px;}
+    .upi-price-row{display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:4px;}
+    .upi-rupee{font-size:1.5rem;font-weight:700;color:#f59e0b;margin-top:8px;line-height:1;}
+    .upi-amount{font-size:4rem;font-weight:800;color:#fff;line-height:1;}
+    .upi-once{font-size:0.74rem;color:#44445a;letter-spacing:0.3px;}
+    /* Two-column body on desktop */
+    .upi-body{padding:22px 24px 24px;display:grid;grid-template-columns:auto 1fr;gap:22px;}
+    .upi-qr-col{display:flex;flex-direction:column;align-items:center;gap:10px;}
+    .upi-steps-col{display:flex;flex-direction:column;}
+    .upi-qr{width:158px;height:158px;border-radius:14px;background:#fff;padding:6px;display:block;box-shadow:0 0 0 3px rgba(245,158,11,0.22),0 8px 24px rgba(0,0,0,0.4);}
+    .upi-qr-label{font-size:0.71rem;color:#66668a;text-align:center;max-width:158px;line-height:1.4;}
+    .upi-id-row{display:flex;align-items:center;gap:8px;background:#0c0c1a;border:1px solid #22223a;border-radius:10px;padding:9px 12px;width:100%;}
     .upi-id-info{flex:1;min-width:0;}
-    .upi-id-label{font-size:0.6rem;color:#555;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;}
-    .upi-id-text{font-size:0.88rem;color:#d0d0d0;font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .btn-copy-upi{flex-shrink:0;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);color:#f59e0b;font-size:0.72rem;font-weight:700;padding:6px 11px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
-    .btn-copy-upi:hover{background:rgba(245,158,11,0.2);}
-    .upi-steps{display:flex;flex-direction:column;gap:9px;margin-bottom:16px;padding:14px 16px;background:#111;border:1px solid #252525;border-radius:12px;}
-    .upi-step{display:flex;align-items:center;gap:10px;font-size:0.83rem;color:#bbb;line-height:1.4;}
-    .upi-step strong{color:#e0e0e0;}
-    .upi-step-num{width:20px;height:20px;border-radius:50%;background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .upi-sep{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-    .upi-sep-line{flex:1;height:1px;background:#242424;}
-    .upi-sep-txt{font-size:0.68rem;color:#444;white-space:nowrap;}
-    .btn-paid{width:100%;padding:13px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.93rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .btn-paid:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,0.38);}
-    @keyframes paidPulse{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,0.25);}50%{box-shadow:0 0 0 8px rgba(34,197,94,0.1),0 4px 20px rgba(34,197,94,0.35);}}
-    .btn-paid.pulse{animation:paidPulse 1.4s ease-in-out infinite;}
-    .upi-note{font-size:0.72rem;color:#444;text-align:center;margin-top:8px;line-height:1.5;}
-    .upi-cancel{display:block;text-align:center;font-size:0.76rem;color:#4a4a4a;cursor:pointer;margin-top:10px;padding:4px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
-    .upi-cancel:hover{color:#888;}
-    @media(max-width:420px){.upi-modal{border-radius:16px;}.upi-hdr{padding:18px 18px 14px;}.upi-body{padding:14px 16px 18px;}.upi-amount{font-size:3.4rem;}.upi-apps{grid-template-columns:1fr 1fr;}}
+    .upi-id-label{font-size:0.58rem;color:#44446a;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px;}
+    .upi-id-text{font-size:0.85rem;color:#c0c0e0;font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .btn-copy-upi{flex-shrink:0;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);color:#f59e0b;font-size:0.72rem;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+    .btn-copy-upi:hover{background:rgba(245,158,11,0.22);}
+    /* Step cards */
+    .upi-steps{display:flex;flex-direction:column;gap:8px;height:100%;justify-content:space-between;}
+    .upi-step-card{display:flex;align-items:center;gap:13px;padding:11px 14px;background:#0c0c1a;border:1px solid #1e1e32;border-radius:13px;transition:border-color .15s;}
+    .upi-step-card:hover{border-color:#333358;}
+    .upi-step-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.07));border:1px solid rgba(245,158,11,0.25);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .upi-step-text strong{display:block;font-size:0.83rem;font-weight:700;color:#e8e8ff;line-height:1.2;}
+    .upi-step-sub{font-size:0.72rem;color:#55557a;margin-top:2px;}
+    /* Bottom CTA — spans full grid width */
+    .upi-bottom{grid-column:1/-1;}
+    .upi-sep{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .upi-sep-line{flex:1;height:1px;background:#1a1a2e;}
+    .upi-sep-txt{font-size:0.67rem;color:#33334a;white-space:nowrap;letter-spacing:0.3px;}
+    .btn-paid{width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.95rem;font-weight:800;border:none;border-radius:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.2px;}
+    .btn-paid:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(34,197,94,0.42);}
+    @keyframes paidPulse{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,0.22);}50%{box-shadow:0 0 0 9px rgba(34,197,94,0.09),0 4px 20px rgba(34,197,94,0.35);}}
+    .btn-paid.pulse{animation:paidPulse 1.5s ease-in-out infinite;}
+    .upi-cancel{display:block;text-align:center;font-size:0.75rem;color:#33334a;cursor:pointer;margin-top:10px;padding:5px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
+    .upi-cancel:hover{color:#7070a0;}
+    /* Mobile: single column */
+    @media(max-width:520px){
+      .upi-modal{border-radius:18px;}
+      .upi-hdr{padding:18px 18px 14px;}
+      .upi-amount{font-size:3.4rem;}
+      .upi-body{grid-template-columns:1fr;gap:16px;padding:16px 16px 20px;}
+      .upi-qr-col{flex-direction:row;align-items:flex-start;gap:14px;flex-wrap:wrap;justify-content:center;}
+      .upi-qr{width:140px;height:140px;}
+    }
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
     @keyframes atsIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
@@ -292,6 +306,8 @@
         print-color-adjust: exact !important;
         background: #fff !important;
       }
+      /* Always hide the print-hint banner so it never bleeds onto the PDF */
+      #pdf-print-hint { display: none !important; }
       body.pdf-printing #sidebar,
       body.pdf-printing #mobileProgress,
       body.pdf-printing .nav-buttons,
@@ -1836,15 +1852,8 @@ function startBuild() {
   heroClickCount++;
   goToStep(1);
   setTimeout(() => {
-    if (heroClickCount === 1) {
-      // First click: land on Quick Prefill so user can import from GitHub first
-      const prefill = document.querySelector('.prefill-section');
-      if (prefill) prefill.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      // Subsequent clicks: go straight to profile photo
-      const photoSection = document.getElementById('photoSection');
-      if (photoSection) photoSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    const step1 = document.getElementById('step1');
+    if (step1) step1.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 150);
 }
 
@@ -2775,15 +2784,20 @@ function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
-  const ua = navigator.userAgent;
-  const needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
-  if (needsHint && !document.getElementById('pdf-print-hint')) {
+  if (!document.getElementById('pdf-print-hint')) {
+    const ua = navigator.userAgent;
+    const isFF = /Firefox/.test(ua);
+    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
     const hint = document.createElement('div');
     hint.id = 'pdf-print-hint';
-    hint.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 16px;background:#fef3c7;color:#78350f;font-size:13px;text-align:center;border-bottom:1.5px solid #fcd34d;font-family:system-ui,sans-serif;line-height:1.5;';
-    hint.innerHTML = '&#128203; <strong>Safari / Firefox:</strong> In the print dialog → uncheck <strong>"Headers and Footers"</strong> to remove URL &amp; date. <button onclick="this.parentNode.remove()" style="margin-left:12px;padding:2px 8px;cursor:pointer;border-radius:4px;border:1px solid #b45309;background:transparent;color:#78350f;font-size:12px;">&#10005;</button>';
+    hint.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:11px 20px;background:#1a2a1a;color:#86efac;font-size:13px;text-align:center;border-bottom:2px solid #22c55e;font-family:system-ui,sans-serif;line-height:1.6;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;';
+    const msg = isFF
+      ? '&#128203; <strong>Firefox:</strong> In the print dialog → <strong>Page Setup</strong> → set Headers &amp; Footers to <strong>"Blank"</strong> to remove URL &amp; date.'
+      : isSafari
+      ? '&#128203; <strong>Safari:</strong> In the print dialog → click <strong>"Show Details"</strong> → uncheck <strong>"Print headers and footers"</strong>.'
+      : '&#128203; <strong>Chrome/Edge:</strong> In the print dialog → <strong>"More settings"</strong> → uncheck <strong>"Headers and footers"</strong> to remove URL &amp; date.';
+    hint.innerHTML = msg + ' <button onclick="this.parentNode.remove()" style="padding:3px 10px;cursor:pointer;border-radius:5px;border:1px solid #22c55e;background:transparent;color:#86efac;font-size:12px;font-weight:600;white-space:nowrap;">Got it ✓</button>';
     document.body.appendChild(hint);
-    setTimeout(() => hint.remove(), 12000);
   }
 
   document.body.classList.add('pdf-printing');
@@ -3186,15 +3200,20 @@ function downloadCoverLetterPDF() {
   const role = document.getElementById('cl-role')?.value.trim() || '';
   const name = lastResumeData ? `${lastResumeData.firstName||''} ${lastResumeData.lastName||''}`.trim() : '';
 
-  const ua = navigator.userAgent;
-  const needsHint = (/Safari/.test(ua) && !/Chrome/.test(ua)) || /Firefox/.test(ua);
-  if (needsHint && !document.getElementById('pdf-print-hint')) {
-    const hint = document.createElement('div');
-    hint.id = 'pdf-print-hint';
-    hint.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 16px;background:#fef3c7;color:#78350f;font-size:13px;text-align:center;border-bottom:1.5px solid #fcd34d;font-family:system-ui,sans-serif;line-height:1.5;';
-    hint.innerHTML = '&#128203; <strong>Safari / Firefox:</strong> In the print dialog → uncheck <strong>"Headers and Footers"</strong> to remove URL &amp; date. <button onclick="this.parentNode.remove()" style="margin-left:12px;padding:2px 8px;cursor:pointer;border-radius:4px;border:1px solid #b45309;background:transparent;color:#78350f;font-size:12px;">&#10005;</button>';
-    document.body.appendChild(hint);
-    setTimeout(() => hint.remove(), 12000);
+  if (!document.getElementById('pdf-print-hint')) {
+    const ua2 = navigator.userAgent;
+    const isFF2 = /Firefox/.test(ua2);
+    const isSafari2 = /Safari/.test(ua2) && !/Chrome/.test(ua2);
+    const hint2 = document.createElement('div');
+    hint2.id = 'pdf-print-hint';
+    hint2.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:11px 20px;background:#1a2a1a;color:#86efac;font-size:13px;text-align:center;border-bottom:2px solid #22c55e;font-family:system-ui,sans-serif;line-height:1.6;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;';
+    const msg2 = isFF2
+      ? '&#128203; <strong>Firefox:</strong> In the print dialog → <strong>Page Setup</strong> → set Headers &amp; Footers to <strong>"Blank"</strong> to remove URL &amp; date.'
+      : isSafari2
+      ? '&#128203; <strong>Safari:</strong> In the print dialog → click <strong>"Show Details"</strong> → uncheck <strong>"Print headers and footers"</strong>.'
+      : '&#128203; <strong>Chrome/Edge:</strong> In the print dialog → <strong>"More settings"</strong> → uncheck <strong>"Headers and footers"</strong> to remove URL &amp; date.';
+    hint2.innerHTML = msg2 + ' <button onclick="this.parentNode.remove()" style="padding:3px 10px;cursor:pointer;border-radius:5px;border:1px solid #22c55e;background:transparent;color:#86efac;font-size:12px;font-weight:600;white-space:nowrap;">Got it ✓</button>';
+    document.body.appendChild(hint2);
   }
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cover Letter</title>
@@ -3418,43 +3437,68 @@ window.addEventListener('load', function() {
 
     <div class="upi-body">
 
-      <!-- QR Code -->
-      <div class="upi-qr-wrap">
+      <!-- Left column: QR + UPI ID -->
+      <div class="upi-qr-col">
         <img id="upiQR" class="upi-qr" alt="UPI QR Code">
-        <div class="upi-qr-label">Open any UPI app → Scan QR → Pay ₹5</div>
-      </div>
-
-      <!-- Step instructions -->
-      <div class="upi-steps">
-        <div class="upi-step"><span class="upi-step-num">1</span>Open Google Pay, PhonePe, Paytm or BHIM</div>
-        <div class="upi-step"><span class="upi-step-num">2</span>Tap <strong>Scan QR</strong> and point at the code above</div>
-        <div class="upi-step"><span class="upi-step-num">3</span>Confirm the ₹5 payment in your app</div>
-        <div class="upi-step"><span class="upi-step-num">4</span>Come back here and tap the button below</div>
-      </div>
-
-      <!-- UPI ID row (manual entry fallback) -->
-      <div class="upi-id-row">
-        <div class="upi-id-info">
-          <div class="upi-id-label">Or enter UPI ID manually</div>
-          <div class="upi-id-text">9739241381@hdfc</div>
+        <div class="upi-qr-label">Scan with any UPI app</div>
+        <div class="upi-id-row">
+          <div class="upi-id-info">
+            <div class="upi-id-label">Or enter UPI ID manually</div>
+            <div class="upi-id-text">9739241381@hdfc</div>
+          </div>
+          <button class="btn-copy-upi" id="copyUPIBtn" onclick="copyUPIId()">Copy</button>
         </div>
-        <button class="btn-copy-upi" id="copyUPIBtn" onclick="copyUPIId()">Copy</button>
       </div>
 
-      <div class="upi-sep">
-        <div class="upi-sep-line"></div>
-        <div class="upi-sep-txt">After paying ₹5, tap below</div>
-        <div class="upi-sep-line"></div>
+      <!-- Right column: Steps -->
+      <div class="upi-steps-col">
+        <div class="upi-steps">
+          <div class="upi-step-card">
+            <div class="upi-step-icon">📱</div>
+            <div class="upi-step-text">
+              <strong>Open your UPI app</strong>
+              <div class="upi-step-sub">Google Pay · PhonePe · Paytm · BHIM</div>
+            </div>
+          </div>
+          <div class="upi-step-card">
+            <div class="upi-step-icon">📷</div>
+            <div class="upi-step-text">
+              <strong>Scan the QR code</strong>
+              <div class="upi-step-sub">Tap "Scan" and point your camera at the code</div>
+            </div>
+          </div>
+          <div class="upi-step-card">
+            <div class="upi-step-icon">✅</div>
+            <div class="upi-step-text">
+              <strong>Confirm ₹5 payment</strong>
+              <div class="upi-step-sub">Approve the payment in your app</div>
+            </div>
+          </div>
+          <div class="upi-step-card">
+            <div class="upi-step-icon">🚀</div>
+            <div class="upi-step-text">
+              <strong>Tap the button below</strong>
+              <div class="upi-step-sub">Your resume generates instantly</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <button class="btn-paid pulse" id="btnPaid" onclick="confirmUPIPayment()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-        I've paid ₹5 — Generate Resume
-      </button>
+      <!-- Bottom CTA (spans both columns) -->
+      <div class="upi-bottom">
+        <div class="upi-sep">
+          <div class="upi-sep-line"></div>
+          <div class="upi-sep-txt">After paying ₹5, tap below</div>
+          <div class="upi-sep-line"></div>
+        </div>
+        <button class="btn-paid pulse" id="btnPaid" onclick="confirmUPIPayment()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          I've paid ₹5 — Generate Resume
+        </button>
+        <button class="upi-cancel" onclick="closeUPIModal()">← Cancel</button>
+      </div>
 
-      <button class="upi-cancel" onclick="closeUPIModal()">← Cancel</button>
     </div>
-
   </div>
 </div>
 </body>
