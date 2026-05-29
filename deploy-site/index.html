@@ -2962,13 +2962,26 @@ function _doPrintPDF() {
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
 
-  // Clone the page, strip interactive attributes so they don't appear in print.
   const clone = page.cloneNode(true);
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
   clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
 
-  // Collect every <style> block from the app — this carries all template CSS.
+  // Inline computed background/color on every element so Chrome prints them
+  // even when print-color-adjust is not honoured by the browser profile.
+  clone.querySelectorAll('*').forEach(function(el) {
+    const cs = window.getComputedStyle(el);
+    const bg = cs.backgroundColor;
+    const col = cs.color;
+    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+      el.style.backgroundColor = bg;
+    }
+    if (col) el.style.color = col;
+    // Also preserve background-image (gradients, patterns)
+    const bgi = cs.backgroundImage;
+    if (bgi && bgi !== 'none') el.style.backgroundImage = bgi;
+  });
+
   const allCSS = Array.from(document.querySelectorAll('style'))
     .map(s => s.textContent).join('\n');
 
@@ -2985,32 +2998,36 @@ function _doPrintPDF() {
 <style>
 ${allCSS}
 @page { size: A4 portrait; margin: 0; }
-html, body {
-  margin: 0; padding: 0; background: #fff;
+*, *::before, *::after {
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
+  color-adjust: exact !important;
+  forced-color-adjust: none !important;
 }
+html, body { margin: 0; padding: 0; background: #fff; }
 .resume-a4-page {
   width: 210mm !important;
   min-height: 297mm !important;
-  max-height: 297mm !important;
-  overflow: hidden !important;
   box-shadow: none !important;
   margin: 0 !important;
+  border-radius: 0 !important;
 }
 </style>
 </head>
 <body>${clone.outerHTML}</body>
 </html>`);
-  win.document.close();
-  win.focus();
-  // Give the browser a moment to lay out before triggering print.
-  setTimeout(function() {
+
+  function doPrint() {
+    win.focus();
     win.print();
-    // Close the helper window after the dialog is dismissed.
     win.addEventListener('afterprint', function() { win.close(); });
     setTimeout(function() { try { win.close(); } catch(e){} }, 3000);
-  }, 600);
+  }
+
+  win.addEventListener('load', function() { setTimeout(doPrint, 200); });
+  win.document.close();
+  // Fallback if load event already fired or is suppressed
+  setTimeout(function() { try { if (!win.closed) doPrint(); } catch(e){} }, 1200);
 
   if (!sessionStorage.getItem('pdfHintShown')) {
     showToast('Choose “Save as PDF” as the destination in the print dialog.', 'info');
