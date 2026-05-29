@@ -141,6 +141,7 @@
     .btn-accent{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:var(--accent);color:#000;font-size:0.9rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity .15s;font-family:inherit;}
     .btn-accent:hover{opacity:0.88;}
     .btn-accent:disabled{opacity:0.5;cursor:not-allowed;}
+    .btn-generate-compact{padding:8px 14px!important;font-size:0.8rem!important;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;}
     .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;position:relative;}
     .entry-remove{position:absolute;top:13px;right:13px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;min-width:32px;min-height:32px;}
@@ -2083,6 +2084,12 @@ document.addEventListener('DOMContentLoaded', function() {
 function goToStep(step) {
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
+  // Once the user reaches Experience or beyond, permanently hide the landing
+  // hero so it never reappears when navigating between form steps.
+  if (step >= 2) {
+    const s0 = document.getElementById('step0');
+    if (s0) s0.style.display = 'none';
+  }
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
@@ -2697,10 +2704,9 @@ Other instructions:
 // ── Generate ──────────────────────────────────────────────────────────
 // Payment gate: always prompt before generating.
 function generateResume() {
-  openUPIModal();
+  _doGenerateResume();
 }
 
-// Called by confirmUPIPayment() after the user confirms payment.
 async function _doGenerateResume() {
   if (!validateMandatory()) return;
   const data = collectData();
@@ -2749,13 +2755,17 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.textContent = 'Generated · Click any text to edit directly';
     document.getElementById('editBadge').style.display = 'block';
+    // Hide template chooser and compact the button now that the resume exists.
+    const tplSec = document.getElementById('tplSection');
+    if (tplSec) tplSec.style.display = 'none';
+    btn.classList.add('btn-generate-compact');
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
+    btn.innerHTML = '↺ Regenerate <span class="regen-badge" id="regenBadge" style="display:none">UPDATED</span>';
     btn.classList.remove('regen-needed');
   }
 }
@@ -2911,23 +2921,24 @@ function downloadDoc() {
 function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
+  // Gate: show payment modal first; print runs after confirmation.
+  if (!hasUPIPaid()) {
+    openUPIModal('pdf');
+    return;
+  }
+  _doPrintPDF();
+}
 
-  // Use the browser's native print engine (Save as PDF) instead of html2canvas.
-  // html2canvas rasterises the whole resume into a single <canvas>; that canvas
-  // came back blank across multiple devices (canvas size limits, cloned inline
-  // styles, tainted state). The browser's own print renderer is bullet-proof:
-  // it never produces a blank page, matches the on-screen layout exactly, and
-  // keeps the text selectable/searchable in the resulting PDF. The full print
-  // layout lives in the `@media print` + `body.pdf-printing` stylesheet above.
+function _doPrintPDF() {
+  const page = document.querySelector('#resumeOutput .resume-a4-page');
+  if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
-  // Name the document so the print dialog pre-fills a sensible filename.
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
   const prevTitle = document.title;
   document.title  = safeName + ' — Resume';
 
-  // Show a one-time hint so users know to pick "Save as PDF" as the destination.
   if (!sessionStorage.getItem('pdfHintShown')) {
     showToast('Choose “Save as PDF” as the destination in the print dialog.', 'info');
     sessionStorage.setItem('pdfHintShown', '1');
@@ -2939,10 +2950,8 @@ function downloadPDF() {
     window.removeEventListener('afterprint', cleanup);
   }
   window.addEventListener('afterprint', cleanup);
-
   document.body.classList.add('pdf-printing');
 
-  // Defer to next frame so the print styles are applied before the dialog opens.
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
       try {
@@ -2951,7 +2960,6 @@ function downloadPDF() {
         cleanup();
         showToast('Could not open the print dialog: ' + err.message, 'error');
       }
-      // Safety net: some browsers don't fire `afterprint` reliably.
       setTimeout(cleanup, 1500);
     });
   });
@@ -3393,9 +3401,14 @@ function markUPIPaid() {
   sessionStorage.setItem(UPI_SESSION_KEY, '1');
 }
 
-function openUPIModal() {
+// Stores what should happen after the user confirms UPI payment.
+// 'pdf' = trigger the PDF print; null = no pending action.
+let _pendingUPIAction = null;
+
+function openUPIModal(action) {
+  _pendingUPIAction = action || null;
   // Generate QR code via Google Charts (UPI QR standard)
-  const upiStr = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Generation`;
+  const upiStr = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Download`;
   const qrImg = document.getElementById('upiQR');
   if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=152x152&data=${encodeURIComponent(upiStr)}&margin=4&color=000000&bgcolor=ffffff`;
   document.getElementById('upiOverlay').style.display = 'flex';
@@ -3418,8 +3431,14 @@ function copyUPIId() {
 async function confirmUPIPayment() {
   markUPIPaid();
   closeUPIModal();
-  showToast('Payment confirmed! Generating your resume…', 'success');
-  await _doGenerateResume();
+  if (_pendingUPIAction === 'pdf') {
+    _pendingUPIAction = null;
+    showToast('Payment confirmed! Opening PDF…', 'success');
+    _doPrintPDF();
+  } else {
+    _pendingUPIAction = null;
+    showToast('Payment confirmed!', 'success');
+  }
 }
 
 // ── ATS Score ─────────────────────────────────────────────────────────
