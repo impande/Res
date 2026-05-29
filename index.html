@@ -2816,22 +2816,83 @@ function downloadPDF() {
 
   const btn = document.querySelector('.btn-dl-pdf');
   const origHTML = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:13px;height:13px;border-width:2px;"></span> Generating…'; }
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:13px;height:13px;border-width:2px;display:inline-block;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;"></span>Generating PDF…';
+  }
+
+  // A4 at 96 DPI = 794 × 1123 px. We render at 3× for retina sharpness.
+  const A4_PX_W = 794;
+
+  // ── 1. Build an isolated off-screen host ──────────────────────────────
+  //    Rendering the live element risks scroll-offset artefacts, overflow
+  //    clipping from the dark app shell, and box-shadow bleeding.
+  //    A clean clone inside its own host avoids all of that.
+  const host = document.createElement('div');
+  host.setAttribute('aria-hidden', 'true');
+  host.style.cssText =
+    'position:fixed;left:-9999px;top:0;width:' + A4_PX_W + 'px;' +
+    'background:#fff;overflow:visible;z-index:-9999;';
+
+  // ── 2. Inject all document CSS so template classes resolve correctly ──
+  const styleEl = document.createElement('style');
+  styleEl.textContent =
+    // Collect every <style> block except the dark-UI body/variable rules
+    // (they don't affect template elements but we strip :root vars to be safe)
+    [...document.querySelectorAll('style')]
+      .map(s => s.textContent)
+      .join('\n') +
+    // Hard override: ensure white background + no UI artefacts in render
+    '\nbody{background:#fff!important;color:#111!important;}' +
+    '\n.resume-a4-page{box-shadow:none!important;margin:0!important;border-radius:0!important;}';
+  host.appendChild(styleEl);
+
+  // ── 3. Deep-clone the resume page and strip editing metadata ──────────
+  const clone = page.cloneNode(true);
+  clone.removeAttribute('oninput');
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
+  // Force exact A4 dimensions and remove shadow / rounded corners
+  clone.style.cssText =
+    'width:' + A4_PX_W + 'px;min-height:auto;padding:18mm 16mm;' +
+    'background:#fff;box-sizing:border-box;box-shadow:none;' +
+    'margin:0;border-radius:0;max-width:none;';
+  host.appendChild(clone);
+  document.body.appendChild(host);
 
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName}-${lastName}`.replace(/[^a-z0-9\-]/gi, '').toLowerCase() || 'resume';
 
+  // ── 4. Render at 3× scale for sharp, print-quality output ────────────
   html2pdf().set({
-    margin: 0,
-    filename: `${safeName}.pdf`,
-    image:     { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
-    jsPDF:     { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  }).from(page).save()
-    .then(() => { if (btn) { btn.disabled = false; btn.innerHTML = origHTML; } })
+    margin:    0,
+    filename:  `${safeName}.pdf`,
+    image:     { type: 'png' },           // lossless — no JPEG artefacts
+    html2canvas: {
+      scale:       3,                     // 3× retina-quality pixels
+      useCORS:     true,
+      allowTaint:  true,
+      logging:     false,
+      width:       A4_PX_W,
+      windowWidth: A4_PX_W               // forces CSS layout to compute at A4 width
+    },
+    jsPDF: {
+      unit:        'mm',
+      format:      'a4',
+      orientation: 'portrait',
+      compress:    true
+    },
+    pagebreak: { mode: 'avoid-all' }     // never split an element across pages
+  }).from(clone).save()
+    .then(() => {
+      if (document.body.contains(host)) document.body.removeChild(host);
+      if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
+      showToast('PDF downloaded!', 'success');
+    })
     .catch(err => {
-      showToast('PDF generation failed: ' + err.message, 'error');
+      if (document.body.contains(host)) document.body.removeChild(host);
+      showToast('PDF failed: ' + err.message, 'error');
       if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
     });
 }
