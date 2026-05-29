@@ -438,7 +438,10 @@
       }
       body.pdf-printing .resume-a4-page {
         padding: 0 !important;
-        min-height: 0 !important; box-shadow: none !important;
+        min-height: 0 !important;
+        height: 297mm !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
         margin: 0 auto !important; width: 210mm !important;
         max-width: 100% !important;
         page-break-after: avoid !important; break-after: avoid !important;
@@ -446,7 +449,21 @@
       /* Remove negative margins — these cause the print engine to split across pages */
       body.pdf-printing .r-head { margin: 0 !important; border-radius: 0 !important; }
       body.pdf-printing .r-head-accent { margin: 0 !important; }
-      body.pdf-printing .r-2col { margin: 0 !important; min-height: 0 !important; }
+      /* Prevent flex columns from stretching beyond A4 height */
+      body.pdf-printing .r-2col {
+        margin: 0 !important; min-height: 0 !important;
+        align-items: flex-start !important;
+        overflow: hidden !important;
+      }
+      body.pdf-printing .r-aside,
+      body.pdf-printing .r-main-col { overflow: hidden !important; }
+      /* Modern/Corporate/Executive: full-bleed header already spans edge; restore body padding */
+      body.pdf-printing .tpl-modern > .r-head,
+      body.pdf-printing .tpl-corporate > .r-head,
+      body.pdf-printing .tpl-executive > .r-head { margin: 0 !important; width: 100% !important; }
+      body.pdf-printing .tpl-modern > .r-2col,
+      body.pdf-printing .tpl-corporate > .r-2col,
+      body.pdf-printing .tpl-executive > .r-2col { width: 100% !important; }
       /* Templates without full-bleed header: restore top/side padding */
       body.pdf-printing .tpl-classic > .r-head, body.pdf-printing .tpl-minimal > .r-head,
       body.pdf-printing .tpl-creative > .r-head, body.pdf-printing .tpl-fresh > .r-head,
@@ -2941,12 +2958,8 @@ function downloadDoc() {
 function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
-  // Gate: show payment modal first; print runs after confirmation.
-  if (!hasUPIPaid()) {
-    openUPIModal('pdf');
-    return;
-  }
-  _doPrintPDF();
+  // Show payment modal on every tap.
+  openUPIModal('pdf');
 }
 
 function _doPrintPDF() {
