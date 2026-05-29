@@ -1523,9 +1523,9 @@
     </div>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Location</label><input type="text" id="location" placeholder="e.g. Mumbai, India" oninput="updatePreview()"></div>
-      <div class="form-group"><label class="form-label">LinkedIn / Portfolio URL</label><input type="url" id="linkedin" placeholder="e.g. linkedin.com/in/yourname" oninput="updatePreview()"></div>
+      <div class="form-group"><label class="form-label">LinkedIn / Portfolio URL</label><input type="text" id="linkedin" placeholder="e.g. linkedin.com/in/yourname" oninput="updatePreview()" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
     </div>
-    <div class="form-group"><label class="form-label">GitHub URL</label><input type="url" id="github" placeholder="e.g. github.com/yourname" oninput="updatePreview()"></div>
+    <div class="form-group"><label class="form-label">GitHub URL</label><input type="text" id="github" placeholder="e.g. github.com/yourname" oninput="updatePreview()" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
     <div class="nav-buttons"><button class="btn-primary" onclick="goToStep(2)">Next: Experience →</button></div>
   </div>
 
@@ -2746,6 +2746,23 @@ function downloadDoc() {
   clone.querySelectorAll('.r-skills').forEach(el => { el.style.display = 'block'; });
   clone.querySelectorAll('.r-sk').forEach(el => { el.style.display = 'inline-block'; el.style.margin = '2px'; });
 
+  // Reset negative margins on header — Word cannot handle negative margins
+  clone.querySelectorAll('.r-head').forEach(el => {
+    el.style.marginTop = '0';
+    el.style.marginLeft = '0';
+    el.style.marginRight = '0';
+    el.style.borderRadius = '0';
+    el.style.paddingTop = '18px';
+    el.style.paddingLeft = '0';
+    el.style.paddingRight = '0';
+  });
+  clone.querySelectorAll('.r-head-accent').forEach(el => {
+    el.style.marginLeft = '0';
+    el.style.marginRight = '0';
+  });
+  // Remove the outer page padding that caused the negative-margin bleed
+  clone.style.padding = '0';
+
   const tplCSS = document.getElementById('tplStyles')?.innerHTML || '';
 
   const docHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -2766,6 +2783,18 @@ function downloadDoc() {
   ${tplCSS}
   svg{display:none!important;}
   img{max-width:70px;max-height:70px;}
+  /* Word visibility: dark-background templates use color:white which becomes
+     invisible when Word ignores background-color. Override to dark text. */
+  .r-head { color:#111 !important; }
+  .r-name { color:#111 !important; }
+  .r-title { color:#555 !important; }
+  .r-contact, .r-contact a, .r-contact span { color:#444 !important; }
+  .r-sep { color:#bbb !important; }
+  .r-sum { color:#222 !important; }
+  .r-role { color:#111 !important; }
+  .r-co  { color:#666 !important; }
+  .r-ul li { color:#222 !important; }
+  .r-period { color:#666 !important; background:transparent !important; }
 </style>
 </head>
 <body><div class="WordSection1">${clone.innerHTML}</div></body>
