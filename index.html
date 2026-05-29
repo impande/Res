@@ -141,7 +141,6 @@
     .btn-accent{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:var(--accent);color:#000;font-size:0.9rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity .15s;font-family:inherit;}
     .btn-accent:hover{opacity:0.88;}
     .btn-accent:disabled{opacity:0.5;cursor:not-allowed;}
-    .btn-generate-compact{padding:8px 14px!important;font-size:0.8rem!important;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;}
     .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;position:relative;}
     .entry-remove{position:absolute;top:13px;right:13px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;min-width:32px;min-height:32px;}
@@ -2755,17 +2754,13 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.textContent = 'Generated · Click any text to edit directly';
     document.getElementById('editBadge').style.display = 'block';
-    // Hide template chooser and compact the button now that the resume exists.
-    const tplSec = document.getElementById('tplSection');
-    if (tplSec) tplSec.style.display = 'none';
-    btn.classList.add('btn-generate-compact');
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '↺ Regenerate <span class="regen-badge" id="regenBadge" style="display:none">UPDATED</span>';
+    btn.innerHTML = '✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
     btn.classList.remove('regen-needed');
   }
 }
