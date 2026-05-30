@@ -2241,9 +2241,6 @@ function _scrollToPhotoLabel() {
 }
 
 function goToStep(step) {
-  // Capture which step is currently active before switching
-  const prevStepEl = document.querySelector('.step-content.active');
-  const prevStep   = prevStepEl ? parseInt(prevStepEl.id.replace('step', '')) || 0 : 0;
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2271,10 +2268,6 @@ function goToStep(step) {
       if (s === step) el.classList.add('active');
       else if (s < step) el.classList.add('completed');
     });
-    // Returning to Basic Info from a later step → scroll to Profile Photo label
-    if (step === 1 && prevStep >= 2) {
-      _scrollToPhotoLabel();
-    }
     if (step >= 2 && step <= 5) {
       setTimeout(function() {
         const stepEl = document.getElementById('step' + step);
