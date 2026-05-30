@@ -2078,13 +2078,14 @@ function startBuild() {
   heroClickCount++;
   goToStep(1);
   setTimeout(function() {
-    const target = document.getElementById('photoSection');
+    // Scroll to the "Profile Photo" label so both the label and upload section are visible
+    const target = document.querySelector('.photo-section-label') || document.getElementById('photoSection');
     const topBar = document.getElementById('top-sticky-bar');
     const main = document.getElementById('main');
     if (target && main) {
       const barH = topBar ? topBar.offsetHeight : 0;
       const targetTop = target.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop;
-      main.scrollTo({ top: targetTop - barH - 16, behavior: 'smooth' });
+      main.scrollTo({ top: targetTop - barH - 20, behavior: 'smooth' });
     }
   }, 300);
 }
