@@ -2077,21 +2077,7 @@ const TPL_COLORS = {
 function startBuild() {
   heroClickCount++;
   goToStep(1);
-  setTimeout(function() {
-    const target = document.querySelector('.photo-section-label') || document.getElementById('photoSection');
-    const topBar = document.getElementById('top-sticky-bar');
-    const main  = document.getElementById('main');
-    if (!target) return;
-    const barH    = topBar ? topBar.offsetHeight : 0;
-    const rect    = target.getBoundingClientRect();
-    const mainTop = main ? main.getBoundingClientRect().top : 0;
-    // How many pixels to move so the target sits 20px below the sticky bar
-    const delta = rect.top - mainTop - barH - 20;
-    // On desktop #main is the scroll container; on mobile the window scrolls.
-    // Calling both is safe — only whichever is actually scrollable responds.
-    if (main) main.scrollTo({ top: main.scrollTop + delta, behavior: 'smooth' });
-    window.scrollTo({ top: window.pageYOffset + delta, behavior: 'smooth' });
-  }, 350);
+  _scrollToPhotoLabel();
 }
 
 function markNeedsRegen() {
@@ -2239,7 +2225,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ── Navigation ────────────────────────────────────────────────────────
+function _scrollToPhotoLabel() {
+  setTimeout(function() {
+    const target = document.querySelector('.photo-section-label') || document.getElementById('photoSection');
+    const topBar = document.getElementById('top-sticky-bar');
+    const main   = document.getElementById('main');
+    if (!target) return;
+    const barH    = topBar ? topBar.offsetHeight : 0;
+    const rect    = target.getBoundingClientRect();
+    const mainTop = main ? main.getBoundingClientRect().top : 0;
+    const delta   = rect.top - mainTop - barH - 20;
+    if (main) main.scrollTo({ top: main.scrollTop + delta, behavior: 'smooth' });
+    window.scrollTo({ top: window.pageYOffset + delta, behavior: 'smooth' });
+  }, 350);
+}
+
 function goToStep(step) {
+  // Capture which step is currently active before switching
+  const prevStepEl = document.querySelector('.step-content.active');
+  const prevStep   = prevStepEl ? parseInt(prevStepEl.id.replace('step', '')) || 0 : 0;
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2267,6 +2271,10 @@ function goToStep(step) {
       if (s === step) el.classList.add('active');
       else if (s < step) el.classList.add('completed');
     });
+    // Returning to Basic Info from a later step → scroll to Profile Photo label
+    if (step === 1 && prevStep >= 2) {
+      _scrollToPhotoLabel();
+    }
     if (step >= 2 && step <= 5) {
       setTimeout(function() {
         const stepEl = document.getElementById('step' + step);
