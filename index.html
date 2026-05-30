@@ -395,6 +395,42 @@
     .ats-item-icon.fail{background:rgba(239,68,68,0.15);color:#fca5a5;}
     .ats-item-icon.warn{background:rgba(245,158,11,0.15);color:#fbbf24;}
     @media(max-width:600px){.ats-card{flex-direction:column;gap:14px;}.ats-items{grid-template-columns:1fr;}}
+    /* ── iOS PDF overlay (fullscreen, same-tab, no popup needed) ── */
+    #_ios_overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99999; background: #fff; overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #_ios_overlay_toolbar {
+      position: sticky; top: 0; z-index: 2;
+      background: #111; border-bottom: 2px solid #f59e0b;
+      padding: 12px 16px; display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+    }
+    #_ios_overlay_hint {
+      background: #f59e0b; color: #000; text-align: center;
+      padding: 10px 16px; font-size: 13px; font-weight: 600;
+      font-family: system-ui, sans-serif; line-height: 1.4;
+    }
+    #_ios_overlay .resume-a4-page {
+      margin: 0 auto; width: 100% !important; max-width: 100%;
+    }
+    @media print {
+      /* When the iOS overlay is open: print ONLY the resume, nothing else */
+      body.ios-print-overlay > :not(#_ios_overlay) { display: none !important; }
+      #_ios_overlay { position: static !important; overflow: visible !important; }
+      #_ios_overlay_toolbar, #_ios_overlay_hint { display: none !important; }
+      #_ios_overlay .resume-a4-page {
+        width: 210mm !important; min-height: 297mm !important;
+        margin: 0 !important; box-shadow: none !important; border-radius: 0 !important;
+      }
+      #_ios_overlay * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        forced-color-adjust: none !important;
+      }
+    }
     /* ── Print / PDF (body.pdf-printing) ── */
     @media print {
       @page { size: A4 portrait; margin: 0; }
@@ -1614,7 +1650,7 @@
       </div>
       <p class="prefill-note">💡 <strong style="color:var(--text)">LinkedIn:</strong> LinkedIn's API doesn't allow automatic import — please copy your details from your LinkedIn profile manually and paste them below.</p>
     </div>
-    <span class="photo-section-label">Profile Photo <span class="req-star">*</span></span>
+    <span class="photo-section-label">Profile Photo <span style="font-size:0.7rem;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">(optional)</span></span>
     <div class="photo-section" id="photoSection">
       <div class="photo-placeholder" id="photoPlaceholder">📷</div>
       <img id="photoPreview" class="photo-circle" style="display:none" alt="Profile Photo">
@@ -1624,7 +1660,7 @@
         <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="removePhotoBtn" onclick="removePhoto()">Remove</button>
         <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
         <p class="photo-hint">Appears in the resume header alongside your name</p>
-        <p class="photo-error-msg">⚠ Please upload a profile photo to continue</p>
+        <p class="photo-hint" style="margin-top:4px;color:var(--muted);">Optional — skip if not needed</p>
       </div>
     </div>
     <div class="form-grid-2">
@@ -2488,13 +2524,7 @@ function validateMandatory() {
       errors.push(el.closest('.form-group')?.querySelector('.form-label')?.textContent?.replace('*','').trim()||id);
     } else { el.classList.remove('field-error'); }
   });
-  const photoSection = document.getElementById('photoSection');
-  if (!userPhoto) {
-    photoSection.classList.add('photo-error');
-    errors.push('Profile Photo');
-  } else {
-    photoSection.classList.remove('photo-error');
-  }
+  document.getElementById('photoSection').classList.remove('photo-error');
   const banner = document.getElementById('valBanner1');
   if (errors.length) { banner.style.display='block'; banner.textContent='Required: '+errors.join(', '); goToStep(1); return false; }
   banner.style.display = 'none';
@@ -3046,13 +3076,10 @@ html, body { margin: 0; padding: 0; background: #fff; }
 }
 
 function _doPrintPDF_iOS() {
-  // iOS WebKit bug: (1) requestAnimationFrame fires before paint, so body.pdf-printing
-  // class effects aren't captured → whole app prints. (2) overflow:hidden is ignored
-  // in print mode → resume content flows across 20+ pages.
-  //
-  // Fix: build the same clean resume-only HTML as desktop but open it in a new
-  // tab WITHOUT calling win.print(). The new tab has zero app chrome so the user
-  // gets exactly one page when they Save to Files / Print from the Share sheet.
+  // iOS: window.open() is blocked by popup blockers and the user won't know
+  // which tab to use Share on. Fix: show a fullscreen overlay ON THE CURRENT
+  // PAGE with the resume clone. User taps browser Share ⬆ → Print → 1 page.
+  // @media print CSS hides everything except the overlay so nothing else prints.
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
@@ -3060,7 +3087,7 @@ function _doPrintPDF_iOS() {
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
 
-  // Read live computed styles before cloning (detached elements return UA defaults)
+  // Read live computed styles BEFORE cloning — detached elements return UA defaults
   const liveEls = Array.from(page.querySelectorAll('*'));
   const liveStyles = liveEls.map(function(el) {
     const cs = window.getComputedStyle(el);
@@ -3070,7 +3097,7 @@ function _doPrintPDF_iOS() {
   const clone = page.cloneNode(true);
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
-  clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
+  clone.style.cssText = 'box-shadow:none;margin:0 auto;border-radius:0;width:100%;max-width:100%;';
 
   Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
     const s = liveStyles[i];
@@ -3080,87 +3107,35 @@ function _doPrintPDF_iOS() {
     if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
   });
 
-  const allCSS = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
-  const safeTitle = safeName.replace(/</g, '&lt;');
+  // Remove any existing overlay
+  const existing = document.getElementById('_ios_overlay');
+  if (existing) { existing.remove(); document.body.classList.remove('ios-print-overlay'); }
 
-  // Build resume-only HTML — identical to desktop path.
-  // Adds a sticky bottom banner (hidden in print) so the user knows what to tap.
-  const html = `<!DOCTYPE html>
-<html><head>
-<meta charset=”UTF-8”>
-<meta name=”viewport” content=”width=device-width,initial-scale=1”>
-<title>${safeTitle} — Resume</title>
-<style>
-${allCSS}
-@page { size: A4 portrait; margin: 0; }
-*, *::before, *::after {
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
-  color-adjust: exact !important;
-  forced-color-adjust: none !important;
-}
-html, body { margin: 0; padding: 0; background: #fff; font-family: system-ui, sans-serif; }
-.resume-a4-page {
-  width: 210mm !important; min-height: 297mm !important;
-  box-shadow: none !important; margin: 0 !important; border-radius: 0 !important;
-}
-#_ios_hint {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: #111; color: #f0f0f0; text-align: center;
-  padding: 14px 16px; font-size: 14px; line-height: 1.5;
-  border-top: 2px solid #f59e0b; z-index: 9999;
-}
-#_ios_hint strong { color: #fbbf24; }
-@media print { #_ios_hint { display: none !important; } }
-</style>
-</head>
-<body>
-${clone.outerHTML}
-<div id=”_ios_hint”>
-  Tap the <strong>Share ⬆</strong> button in your browser &rarr; choose <strong>”Print”</strong> or <strong>”Save to Files”</strong> to download your PDF
-</div>
-</body></html>`;
+  const overlay = document.createElement('div');
+  overlay.id = '_ios_overlay';
 
-  const win = window.open('', '_blank');
-  if (!win) {
-    // Pop-up blocked — fall back to same-page print with a proper repaint delay.
-    showToast('Allow pop-ups for one-page PDF, or use Share ⬆ to save.', 'info');
-    _doPrintPDF_iOS_fallback();
-    return;
-  }
+  const toolbar = document.createElement('div');
+  toolbar.id = '_ios_overlay_toolbar';
+  toolbar.innerHTML = `
+    <span style=”color:#fbbf24;font-size:14px;font-weight:600;font-family:system-ui,sans-serif;”>📄 ${safeName} — Resume</span>
+    <button onclick=”document.getElementById('_ios_overlay').remove();document.body.classList.remove('ios-print-overlay');”
+      style=”background:#333;border:none;color:#fff;padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:system-ui,sans-serif;”>✕ Close</button>`;
 
-  win.document.write(html);
-  win.document.close();
-  win.focus();
+  const hint = document.createElement('div');
+  hint.id = '_ios_overlay_hint';
+  hint.innerHTML = `Tap the <strong>Share&nbsp;⬆</strong> button → <strong>”Print”</strong> or <strong>”Save to Files”</strong> to save your PDF`;
+
+  overlay.appendChild(toolbar);
+  overlay.appendChild(hint);
+  overlay.appendChild(clone);
+
+  document.body.classList.add('ios-print-overlay');
+  document.body.appendChild(overlay);
 
   if (!sessionStorage.getItem('pdfHintShown')) {
-    showToast('Resume ready — tap Share ⬆ → Save to Files to get your PDF.', 'info');
+    showToast('Tap Share ⬆ → Save to Files or Print to download your PDF.', 'info');
     sessionStorage.setItem('pdfHintShown', '1');
   }
-}
-
-function _doPrintPDF_iOS_fallback() {
-  // Used only when window.open() is blocked. Adds body.pdf-printing and waits
-  // 150 ms (two full render cycles) so iOS paints the new state before printing.
-  const prevTitle = document.title;
-  const safeName = ((lastResumeData?.firstName || '') + ' ' + (lastResumeData?.lastName || '')).trim() || 'resume';
-  document.title = safeName + ' — Resume';
-
-  function cleanup() {
-    document.body.classList.remove('pdf-printing');
-    document.title = prevTitle;
-    window.removeEventListener('afterprint', cleanup);
-  }
-
-  window.addEventListener('afterprint', cleanup);
-  document.body.classList.add('pdf-printing');
-
-  // 150 ms ensures at least two paint frames on a 60 Hz screen before print
-  // sheet opens — so the pdf-printing CSS is fully rendered.
-  setTimeout(function() {
-    try { window.print(); } catch(err) { cleanup(); return; }
-    setTimeout(cleanup, 3000);
-  }, 150);
 }
 
 
