@@ -441,6 +441,22 @@
         color-adjust: exact !important;
         forced-color-adjust: none !important;
       }
+      /* White bars cover Safari's URL header and date footer.
+         position:fixed in @media print anchors to the page box, not viewport. */
+      body.ios-print-mode::before,
+      body.ios-print-mode::after {
+        content: '' !important;
+        display: block !important;
+        position: fixed !important;
+        left: 0 !important; right: 0 !important;
+        height: 14mm !important;
+        background: #ffffff !important;
+        z-index: 2147483647 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body.ios-print-mode::before { top: 0 !important; }
+      body.ios-print-mode::after  { bottom: 0 !important; }
     }
     /* ── Print / PDF (body.pdf-printing) ── */
     @media print {
@@ -3086,57 +3102,7 @@ function _doPrintPDF_iOS() {
   if (!document.querySelector('#resumeOutput .resume-a4-page')) {
     showToast('Generate your resume first.', 'info'); return;
   }
-  const existing = document.getElementById('_iosInstructSheet');
-  if (existing) existing.remove();
-
-  // Build sheet with createElement + addEventListener to avoid iOS touch
-  // event issues with innerHTML-created buttons inside position:fixed containers
-  const sheet = document.createElement('div');
-  sheet.id = '_iosInstructSheet';
-  sheet.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:flex-end;font-family:system-ui,sans-serif;';
-
-  const panel = document.createElement('div');
-  panel.style.cssText = 'background:#1a1a2e;border-radius:20px 20px 0 0;padding:22px 20px 32px;width:100%;box-sizing:border-box;border-top:2px solid rgba(245,158,11,0.4);';
-
-  const handle = document.createElement('div');
-  handle.style.cssText = 'width:36px;height:4px;background:#444;border-radius:2px;margin:0 auto 18px;';
-
-  const title = document.createElement('div');
-  title.style.cssText = 'color:#fbbf24;font-size:17px;font-weight:700;margin-bottom:4px;text-align:center;';
-  title.textContent = 'Save Clean PDF — 3 Steps';
-
-  const sub = document.createElement('div');
-  sub.style.cssText = 'color:#9ca3af;font-size:12px;text-align:center;margin-bottom:16px;';
-  sub.textContent = 'Remove the URL & date from your PDF';
-
-  const steps = document.createElement('div');
-  steps.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;margin-bottom:18px;color:#e5e7eb;font-size:14px;line-height:2;';
-  steps.innerHTML = '<b style=”color:#fbbf24”>1.</b> Tap <b style=”color:#fff”>Options</b> at the top of the print sheet<br>'
-    + '<b style=”color:#fbbf24”>2.</b> Toggle <b style=”color:#fff”>OFF</b> &ldquo;Headers &amp; Footers&rdquo;<br>'
-    + '<b style=”color:#fbbf24”>3.</b> Tap <b style=”color:#fff”>Save</b> to download as PDF';
-
-  const btnPrint = document.createElement('button');
-  btnPrint.textContent = 'Open Print Dialog →';
-  btnPrint.style.cssText = 'display:block;width:100%;padding:15px;background:#f59e0b;color:#000;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.3px;touch-action:manipulation;';
-
-  const btnCancel = document.createElement('button');
-  btnCancel.textContent = 'Cancel';
-  btnCancel.style.cssText = 'display:block;width:100%;padding:10px;background:none;color:#6b7280;border:none;font-size:14px;cursor:pointer;font-family:inherit;margin-top:4px;touch-action:manipulation;';
-
-  panel.appendChild(handle);
-  panel.appendChild(title);
-  panel.appendChild(sub);
-  panel.appendChild(steps);
-  panel.appendChild(btnPrint);
-  panel.appendChild(btnCancel);
-  sheet.appendChild(panel);
-  document.body.appendChild(sheet);
-
-  btnCancel.addEventListener('click', function() { sheet.remove(); });
-  btnPrint.addEventListener('click', function() {
-    sheet.remove();
-    _startIOSPrint();
-  });
+  _startIOSPrint();
 }
 
 function _startIOSPrint() {
