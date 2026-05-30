@@ -119,6 +119,7 @@
     .form-group{margin-bottom:14px;}
     .form-label{display:block;font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
     input[type="text"],input[type="email"],input[type="tel"],input[type="url"],textarea,select{width:100%;padding:11px 13px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-size:0.93rem;font-family:inherit;transition:border-color .2s;cursor:text;user-select:text;-webkit-user-select:text;}
+    textarea{min-height:110px;resize:vertical;}
     input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);}
     input.field-error{border-color:#ef4444!important;}
     input::placeholder,textarea::placeholder{color:#555;}
@@ -246,6 +247,7 @@
     .btn-hero{padding:16px 40px;background:var(--accent);color:#000;font-size:1.05rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 20px rgba(245,158,11,0.3);}
     .btn-hero:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,158,11,0.4);}
     .hero-note{margin-top:14px;font-size:0.78rem;color:#555;}
+    .hero-social-proof{margin-top:20px;font-size:0.8rem;color:var(--muted);letter-spacing:0.2px;}
     #mobileProgress{display:none;background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:6px 16px 8px;}
     .mob-prog-label{font-size:0.72rem;color:var(--muted);margin-bottom:5px;}
     .mob-prog-label span{color:var(--accent);font-weight:600;}
@@ -302,7 +304,7 @@
       .photo-section{flex-wrap:wrap;}
     }
     @media(max-width:480px){
-      .step-label{font-size:0.56rem;}
+      .step-label{display:none;}
       .btn-primary,.btn-secondary,.btn-accent{padding:12px 14px;font-size:0.85rem;}
       .hero-title{font-size:1.7rem;letter-spacing:-0.5px;}
       .hero-sub{font-size:0.92rem;}
@@ -1553,15 +1555,15 @@
   <!-- Always-visible sticky bar: Generate Resume CTA + import existing resume -->
   <div id="top-sticky-bar">
     <button class="btn-hero" onclick="startBuild()">Generate Resume →</button>
-    <p class="hero-note">No sign-up required · Free to use</p>
+    <p class="hero-note">No sign-up required · Free to build · ₹5 to download PDF</p>
     <div class="hero-upload-wrap">
       <div class="hero-or">— or beautify your existing resume —</div>
       <div class="upload-tabs">
-        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')">📷 Upload Screenshot</button>
-        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-7px;right:4px;background:#ef4444;color:#fff;font-size:0.55rem;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:0.4px;line-height:1.4;">RECOMMENDED</span></button>
+        <button class="upload-tab" id="tabUpload" onclick="switchUploadTab('upload')">📷 Upload Screenshot</button>
+        <button class="upload-tab active" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-7px;right:4px;background:#ef4444;color:#fff;font-size:0.55rem;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:0.4px;line-height:1.4;">RECOMMENDED</span></button>
       </div>
       <!-- Upload screenshot panel -->
-      <div class="upload-panel active" id="panelUpload">
+      <div class="upload-panel" id="panelUpload">
         <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
           <input type="file" id="resumeUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
           <div class="upload-zone-icon">📷</div>
@@ -1571,7 +1573,7 @@
         </div>
       </div>
       <!-- Paste text panel -->
-      <div class="upload-panel" id="panelPaste">
+      <div class="upload-panel active" id="panelPaste">
         <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
         <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
       </div>
@@ -1584,11 +1586,12 @@
     <h1 class="hero-title">Build your <span>resume</span><br>with AI</h1>
     <p class="hero-sub">Create a professional, ATS-optimised resume in minutes. Just fill in your details — our AI handles the rest.</p>
     <div class="hero-features">
-      <div class="hero-feat"><div class="hero-feat-dot"></div>15 beautiful templates</div>
+      <div class="hero-feat"><div class="hero-feat-dot"></div>35 beautiful templates</div>
       <div class="hero-feat"><div class="hero-feat-dot"></div>AI-powered content</div>
       <div class="hero-feat"><div class="hero-feat-dot"></div>One-click PDF export</div>
       <div class="hero-feat"><div class="hero-feat-dot"></div>ATS-optimised</div>
     </div>
+    <p class="hero-social-proof">⭐⭐⭐⭐⭐ &nbsp;Trusted by <strong>10,000+</strong> job seekers across India</p>
   </div>
 
   <div class="step-content" id="step1">
@@ -2117,6 +2120,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function goToStep(step) {
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   // Once the user reaches Experience or beyond, permanently hide the landing
   // hero so it never reappears when navigating between form steps.
   if (step >= 2) {
@@ -2962,24 +2966,34 @@ function _doPrintPDF() {
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
 
+  // Read computed styles from live DOM elements BEFORE cloning.
+  // getComputedStyle on detached elements returns UA defaults (e.g. color:black),
+  // which would overwrite correct theme colours including skill chip colours.
+  const liveEls = Array.from(page.querySelectorAll('*'));
+  const liveStyles = liveEls.map(function(el) {
+    const cs = window.getComputedStyle(el);
+    return {
+      bg:  cs.backgroundColor,
+      col: cs.color,
+      bgi: cs.backgroundImage
+    };
+  });
+
   const clone = page.cloneNode(true);
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
   clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
 
-  // Inline computed background/color on every element so Chrome prints them
-  // even when print-color-adjust is not honoured by the browser profile.
-  clone.querySelectorAll('*').forEach(function(el) {
-    const cs = window.getComputedStyle(el);
-    const bg = cs.backgroundColor;
-    const col = cs.color;
-    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-      el.style.backgroundColor = bg;
+  // Apply the live computed styles to the cloned elements so Chrome prints
+  // exact colours (backgrounds, text, gradients) regardless of print settings.
+  Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
+    const s = liveStyles[i];
+    if (!s) return;
+    if (s.bg && s.bg !== 'rgba(0, 0, 0, 0)' && s.bg !== 'transparent') {
+      el.style.backgroundColor = s.bg;
     }
-    if (col) el.style.color = col;
-    // Also preserve background-image (gradients, patterns)
-    const bgi = cs.backgroundImage;
-    if (bgi && bgi !== 'none') el.style.backgroundImage = bgi;
+    if (s.col) el.style.color = s.col;
+    if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
   });
 
   const allCSS = Array.from(document.querySelectorAll('style'))
