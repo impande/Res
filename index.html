@@ -3132,15 +3132,45 @@ function _doPrintPDF_iOS() {
       return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'jspdf');
     })
     .then(function() {
-      const page = document.querySelector('#resumeOutput .resume-a4-page');
-      return html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        logging: false,
-        imageTimeout: 20000,
-        removeContainer: true
+      // On mobile, .resume-a4-page is capped at ~358px by max-width:100%.
+      // html2canvas captures at that narrow width → only top-left corner appears
+      // in the PDF. Fix: clone the page into an off-screen 794px container so
+      // html2canvas sees the full A4 layout before capturing.
+      const sourcePage = document.querySelector('#resumeOutput .resume-a4-page');
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;overflow:visible;z-index:-1;pointer-events:none;background:#fff;';
+      const pageClone = sourcePage.cloneNode(true);
+      pageClone.style.setProperty('width', '794px', 'important');
+      pageClone.style.setProperty('max-width', 'none', 'important');
+      pageClone.style.setProperty('min-height', '0', 'important');
+      pageClone.style.setProperty('height', 'auto', 'important');
+      pageClone.style.setProperty('transform', 'none', 'important');
+      pageClone.style.setProperty('margin', '0', 'important');
+      pageClone.style.setProperty('box-shadow', 'none', 'important');
+      pageClone.style.setProperty('border-radius', '0', 'important');
+      wrap.appendChild(pageClone);
+      document.body.appendChild(wrap);
+
+      return new Promise(function(resolve, reject) {
+        // Wait for the clone to reflow at 794px before capturing
+        setTimeout(function() {
+          html2canvas(pageClone, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#ffffff',
+            logging: false,
+            imageTimeout: 20000,
+            width: 794,
+            windowWidth: 794
+          }).then(function(canvas) {
+            wrap.remove();
+            resolve(canvas);
+          }).catch(function(err) {
+            wrap.remove();
+            reject(err);
+          });
+        }, 350);
       });
     })
     .then(function(canvas) {
