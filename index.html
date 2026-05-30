@@ -2248,11 +2248,12 @@ function goToStep(step) {
       if (s === step) el.classList.add('active');
       else if (s < step) el.classList.add('completed');
     });
-    if (step === 2) {
-      setTimeout(() => {
-        const firstTitle = document.getElementById('exp-title-1');
-        if (firstTitle) { firstTitle.focus(); firstTitle.scrollIntoView({behavior:'smooth', block:'center'}); }
-      }, 200);
+    if (step >= 2 && step <= 5) {
+      setTimeout(function() {
+        const stepEl = document.getElementById('step' + step);
+        const firstField = stepEl && stepEl.querySelector('input[type="text"], input[type="email"], input[type="tel"], textarea');
+        if (firstField) { firstField.focus(); firstField.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      }, 250);
     }
     if (step === 5) renderSuggestions();
     if (step === 6) {
@@ -2262,6 +2263,10 @@ function goToStep(step) {
         document.getElementById('tplGuide')?.classList.add('visible');
         document.getElementById('generateBtn')?.classList.add('btn-ready');
       }
+      setTimeout(function() {
+        const tplSec = document.getElementById('tplSection');
+        if (tplSec) tplSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
     }
     updatePreview();
   }
