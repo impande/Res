@@ -3141,10 +3141,10 @@ function _doPrintPDF_iOS() {
     + resumeEl.outerHTML
     + '</body></html>';
 
-  fetch('/.netlify/functions/generate-pdf', {
+  fetch('/.netlify/functions/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ html: html, filename: safeName + ' Resume' })
+    body: JSON.stringify({ action: 'generate-pdf', html: html, filename: safeName + ' Resume' })
   })
   .then(function(res) {
     if (!res.ok) {

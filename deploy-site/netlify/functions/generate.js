@@ -3,7 +3,57 @@ export async function handler(event) {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
   try {
-    const { prompt, imageBase64, imageMimeType } = JSON.parse(event.body || '{}');
+    const body = JSON.parse(event.body || '{}');
+
+    // ── PDF generation ────────────────────────────────────────────────────────
+    if (body.action === 'generate-pdf') {
+      const { html, filename } = body;
+      if (!html) return { statusCode: 400, body: JSON.stringify({ error: 'Missing html' }) };
+
+      const apiKey = process.env.PDFSHIFT_API_KEY;
+      if (!apiKey) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: 'Add PDFSHIFT_API_KEY to your Netlify environment variables, then redeploy' }),
+        };
+      }
+
+      const pdfRes = await fetch('https://api.pdfshift.io/v3/convert/html', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from('api:' + apiKey).toString('base64'),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source: html,
+          format: 'A4',
+          margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
+          use_print: false,
+          sandbox: false,
+        }),
+      });
+
+      if (!pdfRes.ok) {
+        const errText = await pdfRes.text();
+        throw new Error('PDFShift ' + pdfRes.status + ': ' + errText);
+      }
+
+      const pdfBuffer = await pdfRes.arrayBuffer();
+      const safe = (filename || 'resume').replace(/[^\w\s\-]/g, '').trim() || 'resume';
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'attachment; filename="' + safe + '.pdf"',
+        },
+        body: Buffer.from(pdfBuffer).toString('base64'),
+        isBase64Encoded: true,
+      };
+    }
+
+    // ── Claude AI (resume generation / image extraction) ──────────────────────
+    const { prompt, imageBase64, imageMimeType } = body;
     if (!prompt && !imageBase64) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing prompt' }) };
     }
@@ -35,7 +85,6 @@ export async function handler(event) {
         ]
       }];
     } else {
-      // Claude API takes system as a top-level field, not inside messages
       requestBody.system = 'You are an expert resume writer who creates ATS-optimised, professional resumes. Write in clear, action-oriented language with quantified achievements where possible. Output plain text without markdown formatting.';
       requestBody.messages = [{ role: 'user', content: prompt }];
     }
