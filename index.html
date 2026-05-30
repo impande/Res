@@ -395,31 +395,18 @@
     .ats-item-icon.fail{background:rgba(239,68,68,0.15);color:#fca5a5;}
     .ats-item-icon.warn{background:rgba(245,158,11,0.15);color:#fbbf24;}
     @media(max-width:600px){.ats-card{flex-direction:column;gap:14px;}.ats-items{grid-template-columns:1fr;}}
-    /* ── iOS PDF overlay (fullscreen, same-tab, no popup needed) ── */
+    /* ── iOS PDF overlay (hidden off-screen, print-only) ── */
     #_ios_overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 99999; background: #fff; overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    #_ios_overlay_toolbar {
-      position: sticky; top: 0; z-index: 2;
-      background: #111; border-bottom: 2px solid #f59e0b;
-      padding: 12px 16px; display: flex; align-items: center;
-      justify-content: space-between; gap: 12px;
-    }
-    #_ios_overlay_hint {
-      background: #f59e0b; color: #000; text-align: center;
-      padding: 10px 16px; font-size: 13px; font-weight: 600;
-      font-family: system-ui, sans-serif; line-height: 1.4;
-    }
-    #_ios_overlay .resume-a4-page {
-      margin: 0 auto; width: 100% !important; max-width: 100%;
+      position: absolute; top: -9999px; left: -9999px;
+      pointer-events: none; width: 210mm;
     }
     @media print {
-      /* When the iOS overlay is open: print ONLY the resume, nothing else */
       body.ios-print-overlay > :not(#_ios_overlay) { display: none !important; }
-      #_ios_overlay { position: static !important; overflow: visible !important; }
-      #_ios_overlay_toolbar, #_ios_overlay_hint { display: none !important; }
+      #_ios_overlay {
+        position: static !important; top: 0 !important; left: 0 !important;
+        width: auto !important; pointer-events: auto !important;
+        overflow: visible !important;
+      }
       #_ios_overlay .resume-a4-page {
         width: 210mm !important; min-height: 297mm !important;
         margin: 0 !important; box-shadow: none !important; border-radius: 0 !important;
@@ -3076,16 +3063,18 @@ html, body { margin: 0; padding: 0; background: #fff; }
 }
 
 function _doPrintPDF_iOS() {
-  // iOS: window.open() is blocked by popup blockers and the user won't know
-  // which tab to use Share on. Fix: show a fullscreen overlay ON THE CURRENT
-  // PAGE with the resume clone. User taps browser Share ⬆ → Print → 1 page.
-  // @media print CSS hides everything except the overlay so nothing else prints.
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
+
+  // Temporarily render at A4 width so captured styles match the A4 layout exactly
+  const prevPageStyle = page.style.cssText;
+  page.style.setProperty('width', '210mm', 'important');
+  page.style.setProperty('max-width', 'none', 'important');
+  void page.offsetWidth; // force reflow
 
   // Read live computed styles BEFORE cloning — detached elements return UA defaults
   const liveEls = Array.from(page.querySelectorAll('*'));
@@ -3095,9 +3084,11 @@ function _doPrintPDF_iOS() {
   });
 
   const clone = page.cloneNode(true);
+  page.style.cssText = prevPageStyle; // restore mobile layout immediately
+
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
-  clone.style.cssText = 'box-shadow:none;margin:0 auto;border-radius:0;width:100%;max-width:100%;';
+  clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
 
   Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
     const s = liveStyles[i];
@@ -3107,33 +3098,32 @@ function _doPrintPDF_iOS() {
     if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
   });
 
-  // Remove any existing overlay
   const existing = document.getElementById('_ios_overlay');
   if (existing) { existing.remove(); document.body.classList.remove('ios-print-overlay'); }
 
   const overlay = document.createElement('div');
   overlay.id = '_ios_overlay';
-
-  const toolbar = document.createElement('div');
-  toolbar.id = '_ios_overlay_toolbar';
-  toolbar.innerHTML = `
-    <span style=”color:#fbbf24;font-size:14px;font-weight:600;font-family:system-ui,sans-serif;”>📄 ${safeName} — Resume</span>
-    <button onclick=”document.getElementById('_ios_overlay').remove();document.body.classList.remove('ios-print-overlay');”
-      style=”background:#333;border:none;color:#fff;padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:system-ui,sans-serif;”>✕ Close</button>`;
-
-  const hint = document.createElement('div');
-  hint.id = '_ios_overlay_hint';
-  hint.innerHTML = `Tap the <strong>Share&nbsp;⬆</strong> button → <strong>”Print”</strong> or <strong>”Save to Files”</strong> to save your PDF`;
-
-  overlay.appendChild(toolbar);
-  overlay.appendChild(hint);
   overlay.appendChild(clone);
+
+  const prevTitle = document.title;
+  document.title = safeName + ' — Resume';
+
+  function cleanup() {
+    const ov = document.getElementById('_ios_overlay');
+    if (ov) ov.remove();
+    document.body.classList.remove('ios-print-overlay');
+    document.title = prevTitle;
+    window.removeEventListener('afterprint', cleanup);
+  }
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(cleanup, 4000);
 
   document.body.classList.add('ios-print-overlay');
   document.body.appendChild(overlay);
+  window.print();
 
   if (!sessionStorage.getItem('pdfHintShown')) {
-    showToast('Tap Share ⬆ → Save to Files or Print to download your PDF.', 'info');
+    showToast('Choose “Save as PDF” in the print dialog.', 'info');
     sessionStorage.setItem('pdfHintShown', '1');
   }
 }
