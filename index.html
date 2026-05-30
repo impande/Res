@@ -397,28 +397,37 @@
     @media(max-width:600px){.ats-card{flex-direction:column;gap:14px;}.ats-items{grid-template-columns:1fr;}}
     /* A4 page layout for all print paths — top-level so Safari respects it */
     @page { size: A4 portrait; margin: 0; }
-    /* ── iOS PDF overlay: position:fixed in viewport so WebKit computes styles
-       correctly; clip-path hides it on screen; print CSS removes the clip ── */
-    #_ios_overlay {
-      position: fixed; top: 0; left: 0;
-      width: 210mm; overflow: hidden;
-      clip-path: inset(100%); /* invisible on screen, in-viewport for style computation */
-      pointer-events: none;
-    }
+    /* ── iOS PDF: print the LIVE resume — no clone, no overlay.
+       iOS WebKit skips elements with zero visible area (top:-9999px, clip-path:inset)
+       in its print pipeline, so hidden overlays never render. Printing the visible
+       on-screen resume is the only reliable approach. ── */
     @media print {
-      body.ios-print-overlay > :not(#_ios_overlay) { display: none !important; }
-      #_ios_overlay {
-        clip-path: none !important;
-        position: static !important;
-        overflow: visible !important;
-        width: auto !important;
-        pointer-events: auto !important;
+      /* Hide entire body flex layout; only #main survives */
+      body.ios-print-mode { display: block !important; }
+      body.ios-print-mode > :not(#main) { display: none !important; }
+      body.ios-print-mode #main {
+        display: block !important; padding: 0 !important;
+        margin: 0 !important; max-width: none !important;
+        width: 100% !important; overflow: visible !important;
       }
-      #_ios_overlay .resume-a4-page {
-        width: 210mm !important; min-height: 297mm !important;
-        margin: 0 !important; box-shadow: none !important; border-radius: 0 !important;
+      body.ios-print-mode #top-sticky-bar { display: none !important; }
+      body.ios-print-mode .step-content { display: none !important; }
+      body.ios-print-mode #step6 {
+        display: block !important; padding: 0 !important; margin: 0 !important;
       }
-      #_ios_overlay * {
+      body.ios-print-mode #step6 > :not(#resumeOutput) { display: none !important; }
+      body.ios-print-mode #resumeOutput {
+        display: block !important; padding: 0 !important;
+        margin: 0 !important; overflow: visible !important;
+        box-shadow: none !important; background: transparent !important;
+        border-radius: 0 !important;
+      }
+      body.ios-print-mode .resume-a4-page {
+        width: 210mm !important; max-width: none !important;
+        box-shadow: none !important; border-radius: 0 !important;
+        margin: 0 !important;
+      }
+      body.ios-print-mode * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
@@ -3066,62 +3075,32 @@ html, body { margin: 0; padding: 0; background: #fff; }
 }
 
 function _doPrintPDF_iOS() {
-  const page = document.querySelector('#resumeOutput .resume-a4-page');
-  if (!page) { showToast('Generate your resume first.', 'info'); return; }
-
+  if (!document.querySelector('#resumeOutput .resume-a4-page')) {
+    showToast('Generate your resume first.', 'info'); return;
+  }
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
-
-  const existing = document.getElementById('_ios_overlay');
-  if (existing) { existing.remove(); document.body.classList.remove('ios-print-overlay'); }
-
-  const clone = page.cloneNode(true);
-  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
-  clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
-
-  const overlay = document.createElement('div');
-  overlay.id = '_ios_overlay';
-  overlay.appendChild(clone);
-
-  // Add to DOM BEFORE style capture — overlay is position:fixed in viewport
-  // (clip-path hides it from user) so WebKit computes all styles correctly
-  document.body.classList.add('ios-print-overlay');
-  document.body.appendChild(overlay);
-  void overlay.offsetWidth; // force full layout at 210mm
-
-  // Bake colours inline with !important so they survive iOS print rendering
-  Array.from(clone.querySelectorAll('*')).forEach(function(el) {
-    const cs  = window.getComputedStyle(el);
-    const bg  = cs.backgroundColor;
-    const bgi = cs.backgroundImage;
-    const col = cs.color;
-    if (bg  && bg  !== 'rgba(0, 0, 0, 0)' && bg  !== 'transparent')
-      el.style.setProperty('background-color', bg,  'important');
-    if (bgi && bgi !== 'none')
-      el.style.setProperty('background-image', bgi, 'important');
-    if (col)
-      el.style.setProperty('color', col, 'important');
-  });
-
   const prevTitle = document.title;
   document.title = safeName + ' — Resume';
 
   function cleanup() {
-    const ov = document.getElementById('_ios_overlay');
-    if (ov) ov.remove();
-    document.body.classList.remove('ios-print-overlay');
+    document.body.classList.remove('ios-print-mode');
     document.title = prevTitle;
     window.removeEventListener('afterprint', cleanup);
   }
   window.addEventListener('afterprint', cleanup);
   setTimeout(cleanup, 6000);
 
-  // Show hint before the print sheet opens so user sees it
-  showToast('Tip: In print dialog → Options → turn off “Headers & Footers” for clean PDF.', 'info');
+  // Print the LIVE, visible resume — no clone, no hidden overlay.
+  // iOS WebKit skips non-visible elements in its print pipeline;
+  // the on-screen resume is already rendered correctly with all styles.
+  document.body.classList.add('ios-print-mode');
 
-  // Double rAF: ensures iOS has painted the DOM before taking the print snapshot
+  // Hint appears before the print sheet slides up so user can see it
+  showToast('In print dialog: Options → turn off “Headers & Footers” for clean PDF.', 'info');
+
+  // Double rAF: iOS must paint the class change before the print snapshot is taken
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
       window.print();
