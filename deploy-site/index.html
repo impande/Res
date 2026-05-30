@@ -2077,10 +2077,6 @@ const TPL_COLORS = {
 function startBuild() {
   heroClickCount++;
   goToStep(1);
-  setTimeout(() => {
-    const step1 = document.getElementById('step1');
-    if (step1) step1.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 150);
 }
 
 function markNeedsRegen() {
