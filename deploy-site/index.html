@@ -2100,6 +2100,11 @@ function clearNeedsRegen() {
 function handlePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
+  if (file.size > 8 * 1024 * 1024) {
+    showToast('Photo must be smaller than 8 MB. Please choose a smaller image.', 'error');
+    event.target.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = function(e) {
     userPhoto = e.target.result;
