@@ -373,14 +373,18 @@
     .btn-paid.pulse{animation:paidPulse 1.5s ease-in-out infinite;}
     .upi-cancel{display:block;text-align:center;font-size:0.75rem;color:#33334a;cursor:pointer;margin-top:10px;padding:5px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
     .upi-cancel:hover{color:#7070a0;}
-    /* Mobile: single column */
+    /* Mobile: single column, scrollable overlay so nothing is clipped */
     @media(max-width:520px){
+      .upi-overlay{align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;}
       .upi-modal{border-radius:18px;}
-      .upi-hdr{padding:18px 18px 14px;}
-      .upi-amount{font-size:3.4rem;}
-      .upi-body{grid-template-columns:1fr;gap:16px;padding:16px 16px 20px;}
-      .upi-qr-col{flex-direction:row;align-items:flex-start;gap:14px;flex-wrap:wrap;justify-content:center;}
-      .upi-qr{width:140px;height:140px;}
+      .upi-hdr{padding:13px 18px 11px;}
+      .upi-amount{font-size:3rem;}
+      .upi-once{margin-top:2px;}
+      .upi-body{grid-template-columns:1fr;gap:10px;padding:13px 13px 15px;}
+      .upi-qr-col{flex-direction:row;align-items:flex-start;gap:12px;flex-wrap:wrap;justify-content:center;}
+      .upi-qr{width:118px;height:118px;}
+      .upi-steps{gap:6px;}
+      .upi-step-card{padding:8px 11px;}
     }
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
