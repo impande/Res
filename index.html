@@ -3087,118 +3087,88 @@ function _doPrintPDF_iOS() {
     showToast('Generate your resume first.', 'info'); return;
   }
 
-  // Show loading overlay
-  const overlay = document.createElement('div');
-  overlay.id = '_iosPdfOverlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:system-ui,sans-serif;';
-
+  // Loading overlay
   if (!document.getElementById('_pdfSpinKf')) {
     const st = document.createElement('style');
     st.id = '_pdfSpinKf';
     st.textContent = '@keyframes _pdfSpin{to{transform:rotate(360deg)}}';
     document.head.appendChild(st);
   }
+  const overlay = document.createElement('div');
+  overlay.id = '_iosPdfOverlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:system-ui,sans-serif;';
   const spinner = document.createElement('div');
   spinner.style.cssText = 'width:46px;height:46px;border:4px solid rgba(245,158,11,0.25);border-top:4px solid #f59e0b;border-radius:50%;animation:_pdfSpin 0.8s linear infinite;margin-bottom:22px;';
-
   const msg = document.createElement('div');
   msg.style.cssText = 'color:#fbbf24;font-size:17px;font-weight:700;';
   msg.textContent = 'Creating your PDF…';
-
   const sub = document.createElement('div');
   sub.style.cssText = 'color:#9ca3af;font-size:13px;margin-top:8px;';
-  sub.textContent = 'This takes a few seconds';
-
+  sub.textContent = 'This may take up to 20 seconds';
   overlay.appendChild(spinner); overlay.appendChild(msg); overlay.appendChild(sub);
   document.body.appendChild(overlay);
 
   function removeOverlay() { document.getElementById('_iosPdfOverlay')?.remove(); }
 
-  function loadScript(src, globalKey) {
-    return new Promise(function(resolve, reject) {
-      if (window[globalKey]) { resolve(); return; }
-      const s = document.createElement('script');
-      s.src = src; s.onload = resolve; s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = (firstName + ' ' + lastName).trim() || 'Resume';
 
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'html2canvas')
-    .then(function() {
-      return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'jspdf');
-    })
-    .then(function() {
-      // On mobile, .resume-a4-page is capped at ~358px by max-width:100%.
-      // html2canvas captures at that narrow width → only top-left corner appears
-      // in the PDF. Fix: clone the page into an off-screen 794px container so
-      // html2canvas sees the full A4 layout before capturing.
-      const sourcePage = document.querySelector('#resumeOutput .resume-a4-page');
-      const wrap = document.createElement('div');
-      // position:absolute (not fixed) off-screen — safer on iOS for off-viewport rendering
-      wrap.style.cssText = 'position:absolute;left:-9999px;top:0;width:794px;overflow:visible;pointer-events:none;background:#fff;';
-      const pageClone = sourcePage.cloneNode(true);
-      pageClone.style.setProperty('width', '794px', 'important');
-      pageClone.style.setProperty('max-width', 'none', 'important');
-      pageClone.style.setProperty('min-height', '0', 'important');
-      pageClone.style.setProperty('height', 'auto', 'important');
-      pageClone.style.setProperty('transform', 'none', 'important');
-      pageClone.style.setProperty('margin', '0', 'important');
-      pageClone.style.setProperty('box-shadow', 'none', 'important');
-      pageClone.style.setProperty('border-radius', '0', 'important');
-      wrap.appendChild(pageClone);
-      document.body.appendChild(wrap);
+  // Build a self-contained HTML document for the server-side Puppeteer renderer.
+  // Collect all <style> blocks and <link rel=stylesheet> from this page so the
+  // full template CSS is available, then wrap the live resume element.
+  const inlineStyles = Array.from(document.querySelectorAll('style'))
+    .map(function(s) { return s.textContent; }).join('\n');
+  const fontLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+    .map(function(l) { return '<link rel="stylesheet" href="' + l.href + '">'; }).join('\n');
+  const resumeEl = document.querySelector('#resumeOutput .resume-a4-page');
 
-      return new Promise(function(resolve, reject) {
-        // Wait for the clone to reflow at 794px before capturing
-        setTimeout(function() {
-          html2canvas(pageClone, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: '#ffffff',
-            logging: false,
-            imageTimeout: 20000,
-            width: 794,
-            height: pageClone.scrollHeight,
-            windowWidth: 794
-          }).then(function(canvas) {
-            wrap.remove();
-            resolve(canvas);
-          }).catch(function(err) {
-            wrap.remove();
-            reject(err);
-          });
-        }, 500);
-      });
-    })
-    .then(function(canvas) {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdfW = 210; // A4 width mm
-      const pdfH = (canvas.height * pdfW) / canvas.width; // proportional height mm
-      const pageH = 297; // A4 height mm
-      // Multi-page: if resume is taller than one A4 page, split across pages
-      // by shifting the image up by pageH on each successive page
-      const totalPages = Math.max(1, Math.ceil(pdfH / pageH));
-      for (let i = 0; i < totalPages; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -(i * pageH), pdfW, pdfH);
-      }
-      pdf.save(safeName + ' — Resume.pdf');
-      removeOverlay();
-      showToast('PDF saved!', 'success');
-    })
-    .catch(function(err) {
-      console.error('iOS PDF error:', err);
-      removeOverlay();
-      showToast('Opening print mode…', 'info');
-      setTimeout(_startIOSPrint, 400);
-    });
+  const html = '<!DOCTYPE html><html><head>'
+    + '<meta charset="utf-8">'
+    + '<meta name="viewport" content="width=794px">'
+    + fontLinks
+    + '<style>'
+    + '*,*::before,*::after{box-sizing:border-box;}'
+    + 'html,body{margin:0;padding:0;background:#fff;}'
+    + inlineStyles
+    + '.resume-a4-page{'
+    + 'width:210mm!important;max-width:none!important;'
+    + 'min-height:0!important;height:auto!important;'
+    + 'box-shadow:none!important;margin:0!important;border-radius:0!important;'
+    + '}'
+    + '</style>'
+    + '</head><body>'
+    + resumeEl.outerHTML
+    + '</body></html>';
+
+  fetch('/.netlify/functions/generate-pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ html: html, filename: safeName + ' Resume' })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    return res.blob();
+  })
+  .then(function(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = safeName + ' Resume.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+    removeOverlay();
+    showToast('PDF saved!', 'success');
+  })
+  .catch(function(err) {
+    console.error('[iOS PDF]', err);
+    removeOverlay();
+    // Fallback: open Safari print dialog (user can tap Options → Headers & Footers off)
+    showToast('Opening print dialog as fallback…', 'info');
+    setTimeout(_startIOSPrint, 500);
+  });
 }
 
 function _startIOSPrint() {
