@@ -1614,7 +1614,7 @@
       </div>
       <p class="prefill-note">💡 <strong style="color:var(--text)">LinkedIn:</strong> LinkedIn's API doesn't allow automatic import — please copy your details from your LinkedIn profile manually and paste them below.</p>
     </div>
-    <span class="photo-section-label">Profile Photo <span class="req-star">*</span></span>
+    <span class="photo-section-label">Profile Photo <span style="font-size:0.7rem;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">(optional)</span></span>
     <div class="photo-section" id="photoSection">
       <div class="photo-placeholder" id="photoPlaceholder">📷</div>
       <img id="photoPreview" class="photo-circle" style="display:none" alt="Profile Photo">
@@ -1624,7 +1624,7 @@
         <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="removePhotoBtn" onclick="removePhoto()">Remove</button>
         <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
         <p class="photo-hint">Appears in the resume header alongside your name</p>
-        <p class="photo-error-msg">⚠ Please upload a profile photo to continue</p>
+        <p class="photo-hint" style="margin-top:4px;color:var(--muted);">Optional — skip if not needed</p>
       </div>
     </div>
     <div class="form-grid-2">
@@ -2488,13 +2488,7 @@ function validateMandatory() {
       errors.push(el.closest('.form-group')?.querySelector('.form-label')?.textContent?.replace('*','').trim()||id);
     } else { el.classList.remove('field-error'); }
   });
-  const photoSection = document.getElementById('photoSection');
-  if (!userPhoto) {
-    photoSection.classList.add('photo-error');
-    errors.push('Profile Photo');
-  } else {
-    photoSection.classList.remove('photo-error');
-  }
+  document.getElementById('photoSection').classList.remove('photo-error');
   const banner = document.getElementById('valBanner1');
   if (errors.length) { banner.style.display='block'; banner.textContent='Required: '+errors.join(', '); goToStep(1); return false; }
   banner.style.display = 'none';
