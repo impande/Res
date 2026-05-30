@@ -403,12 +403,16 @@
        on-screen resume is the only reliable approach. ── */
     @media print {
       /* Hide entire body flex layout; only #main survives */
-      body.ios-print-mode { display: block !important; }
+      body.ios-print-mode {
+        display: block !important;
+        min-height: 0 !important; /* remove 100vh — prevents body extending beyond print area */
+      }
       body.ios-print-mode > :not(#main) { display: none !important; }
       body.ios-print-mode #main {
         display: block !important; padding: 0 !important;
         margin: 0 !important; max-width: none !important;
         width: 100% !important; overflow: visible !important;
+        min-height: 0 !important;
       }
       body.ios-print-mode #top-sticky-bar { display: none !important; }
       body.ios-print-mode .step-content { display: none !important; }
@@ -420,12 +424,16 @@
         display: block !important; padding: 0 !important;
         margin: 0 !important; overflow: visible !important;
         box-shadow: none !important; background: transparent !important;
-        border-radius: 0 !important;
+        border-radius: 0 !important; min-height: 0 !important;
       }
       body.ios-print-mode .resume-a4-page {
         width: 210mm !important; max-width: none !important;
+        min-height: 0 !important; /* remove 297mm — prevents overflow beyond Safari's printable area */
+        height: auto !important;
         box-shadow: none !important; border-radius: 0 !important;
         margin: 0 !important;
+        page-break-after: avoid !important; break-after: avoid !important;
+        page-break-inside: avoid !important; break-inside: avoid !important;
       }
       body.ios-print-mode * {
         -webkit-print-color-adjust: exact !important;
@@ -3078,6 +3086,35 @@ function _doPrintPDF_iOS() {
   if (!document.querySelector('#resumeOutput .resume-a4-page')) {
     showToast('Generate your resume first.', 'info'); return;
   }
+  // Show instruction sheet first — the URL/date in iOS print is a Safari UI
+  // setting that cannot be suppressed by CSS; user must disable it manually.
+  const existing = document.getElementById('_iosInstructSheet');
+  if (existing) existing.remove();
+
+  const sheet = document.createElement('div');
+  sheet.id = '_iosInstructSheet';
+  sheet.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:flex-end;font-family:system-ui,sans-serif;';
+  sheet.innerHTML = `
+    <div style=”background:#1a1a2e;border-radius:20px 20px 0 0;padding:22px 20px 32px;width:100%;box-sizing:border-box;border-top:2px solid rgba(245,158,11,0.4);”>
+      <div style=”width:36px;height:4px;background:#444;border-radius:2px;margin:0 auto 18px;”></div>
+      <div style=”color:#fbbf24;font-size:17px;font-weight:700;margin-bottom:4px;text-align:center;”>Save Clean PDF — 3 Steps</div>
+      <div style=”color:#9ca3af;font-size:12px;text-align:center;margin-bottom:16px;”>Remove the URL &amp; date from your PDF</div>
+      <div style=”background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;margin-bottom:18px;”>
+        <div style=”color:#e5e7eb;font-size:14px;line-height:2;”><span style=”color:#fbbf24;font-weight:700;”>1.</span> Tap <strong style=”color:#fff;”>Options</strong> at the top of the print sheet<br><span style=”color:#fbbf24;font-weight:700;”>2.</span> Toggle <strong style=”color:#fff;”>OFF</strong> &ldquo;Headers &amp; Footers&rdquo;<br><span style=”color:#fbbf24;font-weight:700;”>3.</span> Tap <strong style=”color:#fff;”>Save</strong> to save as PDF</div>
+      </div>
+      <button id=”_iosPrintNow” style=”width:100%;padding:15px;background:#f59e0b;color:#000;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.3px;”>Open Print Dialog →</button>
+      <button id=”_iosPrintCancel” style=”width:100%;padding:10px;background:none;color:#6b7280;border:none;font-size:14px;cursor:pointer;font-family:inherit;margin-top:4px;”>Cancel</button>
+    </div>`;
+  document.body.appendChild(sheet);
+
+  document.getElementById('_iosPrintCancel').onclick = function() { sheet.remove(); };
+  document.getElementById('_iosPrintNow').onclick = function() {
+    sheet.remove();
+    _startIOSPrint();
+  };
+}
+
+function _startIOSPrint() {
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
@@ -3092,15 +3129,8 @@ function _doPrintPDF_iOS() {
   window.addEventListener('afterprint', cleanup);
   setTimeout(cleanup, 6000);
 
-  // Print the LIVE, visible resume — no clone, no hidden overlay.
-  // iOS WebKit skips non-visible elements in its print pipeline;
-  // the on-screen resume is already rendered correctly with all styles.
   document.body.classList.add('ios-print-mode');
-
-  // Hint appears before the print sheet slides up so user can see it
-  showToast('In print dialog: Options → turn off “Headers & Footers” for clean PDF.', 'info');
-
-  // Double rAF: iOS must paint the class change before the print snapshot is taken
+  // Double rAF: iOS must paint the class change before taking the print snapshot
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
       window.print();
