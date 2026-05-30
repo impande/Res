@@ -21,7 +21,7 @@ export async function handler(event) {
       const pdfRes = await fetch('https://api.pdfshift.io/v3/convert/html', {
         method: 'POST',
         headers: {
-          'Authorization': 'Basic ' + Buffer.from('api:' + apiKey).toString('base64'),
+          'Authorization': 'Basic ' + btoa('api:' + apiKey),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -41,13 +41,17 @@ export async function handler(event) {
       const pdfBuffer = await pdfRes.arrayBuffer();
       const safe = (filename || 'resume').replace(/[^\w\s\-]/g, '').trim() || 'resume';
 
+      const uint8 = new Uint8Array(pdfBuffer);
+      let binary = '';
+      for (let i = 0; i < uint8.length; i++) { binary += String.fromCharCode(uint8[i]); }
+
       return {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': 'attachment; filename="' + safe + '.pdf"',
         },
-        body: Buffer.from(pdfBuffer).toString('base64'),
+        body: btoa(binary),
         isBase64Encoded: true,
       };
     }
