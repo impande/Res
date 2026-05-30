@@ -1614,7 +1614,7 @@
       </div>
       <p class="prefill-note">💡 <strong style="color:var(--text)">LinkedIn:</strong> LinkedIn's API doesn't allow automatic import — please copy your details from your LinkedIn profile manually and paste them below.</p>
     </div>
-    <span class="photo-section-label">Profile Photo <span style="font-size:0.7rem;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">(optional)</span></span>
+    <span class="photo-section-label">Profile Photo <span class="req-star">*</span></span>
     <div class="photo-section" id="photoSection">
       <div class="photo-placeholder" id="photoPlaceholder">📷</div>
       <img id="photoPreview" class="photo-circle" style="display:none" alt="Profile Photo">
@@ -1624,7 +1624,7 @@
         <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="removePhotoBtn" onclick="removePhoto()">Remove</button>
         <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
         <p class="photo-hint">Appears in the resume header alongside your name</p>
-        <p class="photo-hint" style="margin-top:4px;color:var(--muted);">Optional — skip if not needed</p>
+        <p class="photo-error-msg">⚠ Please upload a profile photo to continue</p>
       </div>
     </div>
     <div class="form-grid-2">
@@ -2488,7 +2488,13 @@ function validateMandatory() {
       errors.push(el.closest('.form-group')?.querySelector('.form-label')?.textContent?.replace('*','').trim()||id);
     } else { el.classList.remove('field-error'); }
   });
-  document.getElementById('photoSection').classList.remove('photo-error');
+  const photoSection = document.getElementById('photoSection');
+  if (!userPhoto) {
+    photoSection.classList.add('photo-error');
+    errors.push('Profile Photo');
+  } else {
+    photoSection.classList.remove('photo-error');
+  }
   const banner = document.getElementById('valBanner1');
   if (errors.length) { banner.style.display='block'; banner.textContent='Required: '+errors.join(', '); goToStep(1); return false; }
   banner.style.display = 'none';
@@ -3040,13 +3046,104 @@ html, body { margin: 0; padding: 0; background: #fff; }
 }
 
 function _doPrintPDF_iOS() {
-  // On iOS, window.print() prints the current page via the native share/print
-  // sheet. We temporarily add body.pdf-printing to hide all app chrome so only
-  // the resume renders in the PDF.
+  // iOS WebKit bug: (1) requestAnimationFrame fires before paint, so body.pdf-printing
+  // class effects aren't captured → whole app prints. (2) overflow:hidden is ignored
+  // in print mode → resume content flows across 20+ pages.
+  //
+  // Fix: build the same clean resume-only HTML as desktop but open it in a new
+  // tab WITHOUT calling win.print(). The new tab has zero app chrome so the user
+  // gets exactly one page when they Save to Files / Print from the Share sheet.
+  const page = document.querySelector('#resumeOutput .resume-a4-page');
+  if (!page) { showToast('Generate your resume first.', 'info'); return; }
+
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
+
+  // Read live computed styles before cloning (detached elements return UA defaults)
+  const liveEls = Array.from(page.querySelectorAll('*'));
+  const liveStyles = liveEls.map(function(el) {
+    const cs = window.getComputedStyle(el);
+    return { bg: cs.backgroundColor, col: cs.color, bgi: cs.backgroundImage };
+  });
+
+  const clone = page.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
+  clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
+
+  Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
+    const s = liveStyles[i];
+    if (!s) return;
+    if (s.bg && s.bg !== 'rgba(0, 0, 0, 0)' && s.bg !== 'transparent') el.style.backgroundColor = s.bg;
+    if (s.col) el.style.color = s.col;
+    if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
+  });
+
+  const allCSS = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
+  const safeTitle = safeName.replace(/</g, '&lt;');
+
+  // Build resume-only HTML — identical to desktop path.
+  // Adds a sticky bottom banner (hidden in print) so the user knows what to tap.
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width,initial-scale=1”>
+<title>${safeTitle} — Resume</title>
+<style>
+${allCSS}
+@page { size: A4 portrait; margin: 0; }
+*, *::before, *::after {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+  forced-color-adjust: none !important;
+}
+html, body { margin: 0; padding: 0; background: #fff; font-family: system-ui, sans-serif; }
+.resume-a4-page {
+  width: 210mm !important; min-height: 297mm !important;
+  box-shadow: none !important; margin: 0 !important; border-radius: 0 !important;
+}
+#_ios_hint {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #111; color: #f0f0f0; text-align: center;
+  padding: 14px 16px; font-size: 14px; line-height: 1.5;
+  border-top: 2px solid #f59e0b; z-index: 9999;
+}
+#_ios_hint strong { color: #fbbf24; }
+@media print { #_ios_hint { display: none !important; } }
+</style>
+</head>
+<body>
+${clone.outerHTML}
+<div id=”_ios_hint”>
+  Tap the <strong>Share ⬆</strong> button in your browser &rarr; choose <strong>”Print”</strong> or <strong>”Save to Files”</strong> to download your PDF
+</div>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    // Pop-up blocked — fall back to same-page print with a proper repaint delay.
+    showToast('Allow pop-ups for one-page PDF, or use Share ⬆ to save.', 'info');
+    _doPrintPDF_iOS_fallback();
+    return;
+  }
+
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+
+  if (!sessionStorage.getItem('pdfHintShown')) {
+    showToast('Resume ready — tap Share ⬆ → Save to Files to get your PDF.', 'info');
+    sessionStorage.setItem('pdfHintShown', '1');
+  }
+}
+
+function _doPrintPDF_iOS_fallback() {
+  // Used only when window.open() is blocked. Adds body.pdf-printing and waits
+  // 150 ms (two full render cycles) so iOS paints the new state before printing.
   const prevTitle = document.title;
+  const safeName = ((lastResumeData?.firstName || '') + ' ' + (lastResumeData?.lastName || '')).trim() || 'resume';
   document.title = safeName + ' — Resume';
 
   function cleanup() {
@@ -3058,26 +3155,12 @@ function _doPrintPDF_iOS() {
   window.addEventListener('afterprint', cleanup);
   document.body.classList.add('pdf-printing');
 
-  // Double rAF ensures the class is applied and the browser has re-laid out
-  // before the print sheet opens, so the PDF captures the correct state.
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      try {
-        window.print();
-      } catch(err) {
-        cleanup();
-        showToast('Could not open print dialog: ' + err.message, 'error');
-        return;
-      }
-      // iOS doesn't always fire afterprint — clean up after 3 s as fallback.
-      setTimeout(cleanup, 3000);
-    });
-  });
-
-  if (!sessionStorage.getItem('pdfHintShown')) {
-    showToast('Tap “Save to Files” in the share sheet to save as PDF.', 'info');
-    sessionStorage.setItem('pdfHintShown', '1');
-  }
+  // 150 ms ensures at least two paint frames on a 60 Hz screen before print
+  // sheet opens — so the pdf-printing CSS is fully rendered.
+  setTimeout(function() {
+    try { window.print(); } catch(err) { cleanup(); return; }
+    setTimeout(cleanup, 3000);
+  }, 150);
 }
 
 
