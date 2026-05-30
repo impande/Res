@@ -3006,87 +3006,12 @@ function _doPrintPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
-  // iOS (Safari + Chrome both run WebKit): window.open()...win.print() prints
-  // the PARENT window (the whole app — hence 20+ page PDFs), not the child.
-  // Must use same-page printing with body.pdf-printing class instead.
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) { _doPrintPDF_iOS(); return; }
-
-  // ── Desktop / Android Chrome: dedicated print window ──────────────────
-  const firstName = lastResumeData?.firstName || '';
-  const lastName  = lastResumeData?.lastName  || '';
-  const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
-
-  // Read computed styles from live DOM elements BEFORE cloning so we capture
-  // correct theme colours (detached clones return UA defaults = black).
-  const liveEls = Array.from(page.querySelectorAll('*'));
-  const liveStyles = liveEls.map(function(el) {
-    const cs = window.getComputedStyle(el);
-    return { bg: cs.backgroundColor, col: cs.color, bgi: cs.backgroundImage };
-  });
-
-  const clone = page.cloneNode(true);
-  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-  clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
-  clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
-
-  Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
-    const s = liveStyles[i];
-    if (!s) return;
-    if (s.bg && s.bg !== 'rgba(0, 0, 0, 0)' && s.bg !== 'transparent') el.style.backgroundColor = s.bg;
-    if (s.col) el.style.color = s.col;
-    if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
-  });
-
-  const allCSS = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
-
-  const win = window.open('', '_blank');
-  if (!win) { showToast('Allow pop-ups in your browser to download the PDF.', 'error'); return; }
-
-  win.document.write(`<!DOCTYPE html>
-<html><head>
-<meta charset=”UTF-8”>
-<title>${safeName.replace(/</g,'&lt;')} — Resume</title>
-<style>
-${allCSS}
-@page { size: A4 portrait; margin: 0; }
-*, *::before, *::after {
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
-  color-adjust: exact !important;
-  forced-color-adjust: none !important;
-}
-html, body { margin: 0; padding: 0; background: #fff; }
-.resume-a4-page {
-  width: 210mm !important; min-height: 297mm !important;
-  box-shadow: none !important; margin: 0 !important; border-radius: 0 !important;
-}
-</style>
-</head>
-<body>${clone.outerHTML}</body>
-</html>`);
-
-  function doPrint() {
-    win.focus(); win.print();
-    win.addEventListener('afterprint', function() { win.close(); });
-    setTimeout(function() { try { win.close(); } catch(e){} }, 3000);
-  }
-  win.addEventListener('load', function() { setTimeout(doPrint, 200); });
-  win.document.close();
-  setTimeout(function() { try { if (!win.closed) doPrint(); } catch(e){} }, 1200);
-
-  if (!sessionStorage.getItem('pdfHintShown')) {
-    showToast('Choose “Save as PDF” as the destination in the print dialog.', 'info');
-    sessionStorage.setItem('pdfHintShown', '1');
-  }
+  _doPrintPDF_server(isIOS);
 }
 
-function _doPrintPDF_iOS() {
-  if (!document.querySelector('#resumeOutput .resume-a4-page')) {
-    showToast('Generate your resume first.', 'info'); return;
-  }
-
+function _doPrintPDF_server(isIOS) {
   // Loading overlay
   if (!document.getElementById('_pdfSpinKf')) {
     const st = document.createElement('style');
@@ -3114,28 +3039,54 @@ function _doPrintPDF_iOS() {
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = (firstName + ' ' + lastName).trim() || 'Resume';
 
-  // Build a self-contained HTML document for the server-side Puppeteer renderer.
-  // Collect all <style> blocks and <link rel=stylesheet> from this page so the
-  // full template CSS is available, then wrap the live resume element.
   const inlineStyles = Array.from(document.querySelectorAll('style'))
     .map(function(s) { return s.textContent; }).join('\n');
-  const fontLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-    .map(function(l) { return '<link rel="stylesheet" href="' + l.href + '">'; }).join('\n');
+  const fontLinks = Array.from(document.querySelectorAll('link[rel=”stylesheet”]'))
+    .map(function(l) { return '<link rel=”stylesheet” href=”' + l.href + '”>'; }).join('\n');
   const resumeEl = document.querySelector('#resumeOutput .resume-a4-page');
 
+  // Overrides applied AFTER inlineStyles so they win with !important.
+  // Mirror the body.pdf-printing rules: reset body flex/min-height that causes
+  // the blank first page, remove negative margins that split pages, restore
+  // per-template padding so layouts look correct.
+  const pdfOverrides = ''
+    + 'html,body{'
+    +   'display:block!important;min-height:0!important;height:auto!important;'
+    +   'margin:0!important;padding:0!important;background:#fff!important;'
+    + '}'
+    + '.resume-a4-page{'
+    +   'width:210mm!important;max-width:none!important;'
+    +   'min-height:0!important;height:auto!important;'
+    +   'box-shadow:none!important;margin:0!important;border-radius:0!important;'
+    +   'padding:0!important;'
+    + '}'
+    + '.r-head{margin:0!important;border-radius:0!important;}'
+    + '.r-head-accent{margin:0!important;}'
+    + '.r-2col{margin:0!important;min-height:0!important;align-items:flex-start!important;}'
+    + '.tpl-modern>.r-head,.tpl-corporate>.r-head,.tpl-executive>.r-head{width:100%!important;}'
+    + '.tpl-modern>.r-2col,.tpl-corporate>.r-2col,.tpl-executive>.r-2col{width:100%!important;}'
+    + '.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,'
+    +   '.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,'
+    +   '.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{'
+    +   'padding:13mm 14mm 0!important;}'
+    + '[class*=”tpl-”]>.r-sec{padding-left:14mm!important;padding-right:14mm!important;margin-top:8px!important;}'
+    + '[class*=”tpl-”]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}'
+    + '[class*=”tpl-”]{padding-bottom:10mm!important;}'
+    + '.r-aside{padding-left:18px!important;}'
+    + '.r-main-col{padding-right:18px!important;padding-bottom:0!important;}'
+    + '[class*=”tpl-”] .r-exp{margin-bottom:8px!important;}'
+    + '*,*::before,*::after{'
+    +   '-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;'
+    +   'color-adjust:exact!important;forced-color-adjust:none!important;'
+    + '}';
+
   const html = '<!DOCTYPE html><html><head>'
-    + '<meta charset="utf-8">'
-    + '<meta name="viewport" content="width=794px">'
+    + '<meta charset=”utf-8”>'
+    + '<meta name=”viewport” content=”width=794px”>'
     + fontLinks
     + '<style>'
-    + '*,*::before,*::after{box-sizing:border-box;}'
-    + 'html,body{margin:0;padding:0;background:#fff;}'
     + inlineStyles
-    + '.resume-a4-page{'
-    + 'width:210mm!important;max-width:none!important;'
-    + 'min-height:0!important;height:auto!important;'
-    + 'box-shadow:none!important;margin:0!important;border-radius:0!important;'
-    + '}'
+    + pdfOverrides
     + '</style>'
     + '</head><body>'
     + resumeEl.outerHTML
@@ -3148,11 +3099,9 @@ function _doPrintPDF_iOS() {
   })
   .then(function(res) {
     if (!res.ok) {
-      // Try to get the error detail from the response body
       return res.text().then(function(body) {
         var detail = '';
         try { detail = JSON.parse(body).error || body; } catch(e) { detail = body; }
-        if (res.status === 404) throw new Error('Function not found (404) — make sure generate-pdf.js is in netlify/functions/ and the site is redeployed');
         if (detail && detail.includes('API_KEY')) throw new Error('Add PDFSHIFT_API_KEY to your Netlify environment variables, then redeploy');
         throw new Error(detail || ('Server error ' + res.status));
       });
@@ -3162,15 +3111,23 @@ function _doPrintPDF_iOS() {
   .then(function(blob) {
     const url = URL.createObjectURL(blob);
     removeOverlay();
-    // window.location.href is the only method that reliably opens files
-    // from an async callback on iOS Safari (a.click() and window.open()
-    // are blocked once the original user-gesture window has expired)
-    window.location.href = url;
-    showToast('PDF open — tap ⬆ Share → Save to Files', 'success');
+    if (isIOS) {
+      // On iOS Safari, a.click() is blocked after an async call; navigate instead
+      window.location.href = url;
+      showToast('PDF ready — tap ⬆ Share → Save to Files', 'success');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName + ' Resume.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('PDF downloaded!', 'success');
+    }
     setTimeout(function() { URL.revokeObjectURL(url); }, 120000);
   })
   .catch(function(err) {
-    console.error('[iOS PDF]', err);
+    console.error('[PDF]', err);
     removeOverlay();
     showToast(err.message || 'PDF generation failed', 'error');
   });
