@@ -1648,11 +1648,11 @@
     <div class="hero-upload-wrap">
       <div class="hero-or">— or import your existing resume —</div>
       <div class="upload-tabs">
-        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')" style="position:relative;">📄 Upload PDF/Doc <span style="position:absolute;top:-7px;right:4px;background:#22c55e;color:#fff;font-size:0.55rem;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:0.4px;line-height:1.4;">NEW</span></button>
-        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
+        <button class="upload-tab" id="tabUpload" onclick="switchUploadTab('upload')">📄 Upload PDF/Doc</button>
+        <button class="upload-tab active" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#000;font-size:0.5rem;font-weight:800;padding:1px 6px;border-radius:4px;letter-spacing:0.3px;line-height:1.6;white-space:nowrap;">RECOMMENDED</span></button>
       </div>
       <!-- Upload PDF/Doc panel -->
-      <div class="upload-panel active" id="panelUpload">
+      <div class="upload-panel" id="panelUpload">
         <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
           <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
           <div class="upload-zone-icon">📄</div>
@@ -1662,7 +1662,7 @@
         </div>
       </div>
       <!-- Paste text panel -->
-      <div class="upload-panel" id="panelPaste">
+      <div class="upload-panel active" id="panelPaste">
         <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
         <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
       </div>
@@ -2235,7 +2235,7 @@ function goToStep(step) {
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   const topBar = document.getElementById('top-sticky-bar');
-  if (topBar) topBar.style.display = step === 0 ? '' : 'none';
+  if (topBar) topBar.style.display = (step === 0 || step === 1) ? '' : 'none';
   // Once the user reaches Experience or beyond, permanently hide the landing
   // hero so it never reappears when navigating between form steps.
   if (step >= 2) {
