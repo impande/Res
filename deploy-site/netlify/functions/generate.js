@@ -18,7 +18,7 @@ export async function handler(event) {
         };
       }
 
-      const pdfRes = await fetch('https://api.pdfshift.io/v3/convert/html', {
+      const pdfRes = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
         method: 'POST',
         headers: {
           'Authorization': 'Basic ' + btoa('api:' + apiKey),
