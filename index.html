@@ -397,17 +397,22 @@
     @media(max-width:600px){.ats-card{flex-direction:column;gap:14px;}.ats-items{grid-template-columns:1fr;}}
     /* A4 page layout for all print paths — top-level so Safari respects it */
     @page { size: A4 portrait; margin: 0; }
-    /* ── iOS PDF overlay (hidden off-screen, print-only) ── */
+    /* ── iOS PDF overlay: position:fixed in viewport so WebKit computes styles
+       correctly; clip-path hides it on screen; print CSS removes the clip ── */
     #_ios_overlay {
-      position: absolute; top: -9999px; left: -9999px;
-      pointer-events: none; width: 210mm;
+      position: fixed; top: 0; left: 0;
+      width: 210mm; overflow: hidden;
+      clip-path: inset(100%); /* invisible on screen, in-viewport for style computation */
+      pointer-events: none;
     }
     @media print {
       body.ios-print-overlay > :not(#_ios_overlay) { display: none !important; }
       #_ios_overlay {
-        position: static !important; top: 0 !important; left: 0 !important;
-        width: auto !important; pointer-events: auto !important;
+        clip-path: none !important;
+        position: static !important;
         overflow: visible !important;
+        width: auto !important;
+        pointer-events: auto !important;
       }
       #_ios_overlay .resume-a4-page {
         width: 210mm !important; min-height: 297mm !important;
@@ -3071,30 +3076,33 @@ function _doPrintPDF_iOS() {
   const existing = document.getElementById('_ios_overlay');
   if (existing) { existing.remove(); document.body.classList.remove('ios-print-overlay'); }
 
-  // Clone and strip editor attributes
   const clone = page.cloneNode(true);
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
   clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
 
-  // Insert clone into the 210mm off-screen overlay and force full layout
   const overlay = document.createElement('div');
   overlay.id = '_ios_overlay';
   overlay.appendChild(clone);
+
+  // Add to DOM BEFORE style capture — overlay is position:fixed in viewport
+  // (clip-path hides it from user) so WebKit computes all styles correctly
   document.body.classList.add('ios-print-overlay');
   document.body.appendChild(overlay);
-  void overlay.offsetWidth; // force reflow so clone lays out at 210mm
+  void overlay.offsetWidth; // force full layout at 210mm
 
-  // Capture computed styles from clone (now at correct A4 width) and bake inline
-  // so iOS WebKit preserves background colours, gradients, and text colours in print
+  // Bake colours inline with !important so they survive iOS print rendering
   Array.from(clone.querySelectorAll('*')).forEach(function(el) {
-    const cs = window.getComputedStyle(el);
-    const bg = cs.backgroundColor;
-    const col = cs.color;
+    const cs  = window.getComputedStyle(el);
+    const bg  = cs.backgroundColor;
     const bgi = cs.backgroundImage;
-    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') el.style.backgroundColor = bg;
-    if (col) el.style.color = col;
-    if (bgi && bgi !== 'none') el.style.backgroundImage = bgi;
+    const col = cs.color;
+    if (bg  && bg  !== 'rgba(0, 0, 0, 0)' && bg  !== 'transparent')
+      el.style.setProperty('background-color', bg,  'important');
+    if (bgi && bgi !== 'none')
+      el.style.setProperty('background-image', bgi, 'important');
+    if (col)
+      el.style.setProperty('color', col, 'important');
   });
 
   const prevTitle = document.title;
@@ -3108,12 +3116,17 @@ function _doPrintPDF_iOS() {
     window.removeEventListener('afterprint', cleanup);
   }
   window.addEventListener('afterprint', cleanup);
-  setTimeout(cleanup, 4000);
+  setTimeout(cleanup, 6000);
 
-  window.print();
+  // Show hint before the print sheet opens so user sees it
+  showToast('Tip: In print dialog → Options → turn off “Headers & Footers” for clean PDF.', 'info');
 
-  // Always remind user to turn off Safari's URL/date header+footer
-  showToast('Tip: In print dialog → Options → turn off “Headers & Footers” for a clean PDF.', 'info');
+  // Double rAF: ensures iOS has painted the DOM before taking the print snapshot
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      window.print();
+    });
+  });
 }
 
 
