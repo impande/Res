@@ -2228,6 +2228,10 @@ function goToStep(step) {
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Top sticky bar is a landing-page element; hide it on all form steps so it
+  // doesn't overlap the step title on any device or viewport size.
+  const topBar = document.getElementById('top-sticky-bar');
+  if (topBar) topBar.style.display = step === 0 ? '' : 'none';
   // Once the user reaches Experience or beyond, permanently hide the landing
   // hero so it never reappears when navigating between form steps.
   if (step >= 2) {
@@ -2252,7 +2256,9 @@ function goToStep(step) {
       setTimeout(function() {
         const stepEl = document.getElementById('step' + step);
         const firstField = stepEl && stepEl.querySelector('input[type="text"], input[type="email"], input[type="tel"], textarea');
-        if (firstField) { firstField.focus(); firstField.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        // Focus the first field without scrolling — scrollTop is already 0 so
+        // the step title is visible at the top; scrollIntoView would hide it.
+        if (firstField) firstField.focus({ preventScroll: true });
       }, 250);
     }
     if (step === 5) renderSuggestions();
@@ -2263,10 +2269,6 @@ function goToStep(step) {
         document.getElementById('tplGuide')?.classList.add('visible');
         document.getElementById('generateBtn')?.classList.add('btn-ready');
       }
-      setTimeout(function() {
-        const tplSec = document.getElementById('tplSection');
-        if (tplSec) tplSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 150);
     }
     updatePreview();
   }
