@@ -3138,7 +3138,8 @@ function _doPrintPDF_iOS() {
       // html2canvas sees the full A4 layout before capturing.
       const sourcePage = document.querySelector('#resumeOutput .resume-a4-page');
       const wrap = document.createElement('div');
-      wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;overflow:visible;z-index:-1;pointer-events:none;background:#fff;';
+      // position:absolute (not fixed) off-screen — safer on iOS for off-viewport rendering
+      wrap.style.cssText = 'position:absolute;left:-9999px;top:0;width:794px;overflow:visible;pointer-events:none;background:#fff;';
       const pageClone = sourcePage.cloneNode(true);
       pageClone.style.setProperty('width', '794px', 'important');
       pageClone.style.setProperty('max-width', 'none', 'important');
@@ -3162,6 +3163,7 @@ function _doPrintPDF_iOS() {
             logging: false,
             imageTimeout: 20000,
             width: 794,
+            height: pageClone.scrollHeight,
             windowWidth: 794
           }).then(function(canvas) {
             wrap.remove();
@@ -3170,16 +3172,23 @@ function _doPrintPDF_iOS() {
             wrap.remove();
             reject(err);
           });
-        }, 350);
+        }, 500);
       });
     })
     .then(function(canvas) {
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdfW = 210;
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      const pdfW = 210; // A4 width mm
+      const pdfH = (canvas.height * pdfW) / canvas.width; // proportional height mm
+      const pageH = 297; // A4 height mm
+      // Multi-page: if resume is taller than one A4 page, split across pages
+      // by shifting the image up by pageH on each successive page
+      const totalPages = Math.max(1, Math.ceil(pdfH / pageH));
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -(i * pageH), pdfW, pdfH);
+      }
       pdf.save(safeName + ' — Resume.pdf');
       removeOverlay();
       showToast('PDF saved!', 'success');
