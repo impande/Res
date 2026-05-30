@@ -3045,6 +3045,26 @@ function _doPrintPDF_server(isIOS) {
     .map(function(l) { return '<link rel=”stylesheet” href=”' + l.href + '”>'; }).join('\n');
   const resumeEl = document.querySelector('#resumeOutput .resume-a4-page');
 
+  // Clone so we can modify without touching the live preview.
+  // Compress any profile photos (data: URIs can be 3-4 MB) to keep
+  // total HTML under PDFShift's 2 MB source limit.
+  const clone = resumeEl.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(function(el) { el.removeAttribute('contenteditable'); });
+  clone.querySelectorAll('[oninput]').forEach(function(el) { el.removeAttribute('oninput'); });
+  const livePhotos = Array.from(resumeEl.querySelectorAll('img[src^="data:"]'));
+  if (livePhotos.length) {
+    const clonePhotos = Array.from(clone.querySelectorAll('img[src^="data:"]'));
+    livePhotos.forEach(function(live, i) {
+      const W = live.naturalWidth, H = live.naturalHeight;
+      if (!W || !H || !clonePhotos[i]) return;
+      const scale = Math.min(160 / W, 160 / H, 1);
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
+      cv.getContext('2d').drawImage(live, 0, 0, cv.width, cv.height);
+      clonePhotos[i].src = cv.toDataURL('image/jpeg', 0.75);
+    });
+  }
+
   // Overrides applied AFTER inlineStyles so they win with !important.
   // Mirror the body.pdf-printing rules: reset body flex/min-height that causes
   // the blank first page, remove negative margins that split pages, restore
@@ -3089,7 +3109,7 @@ function _doPrintPDF_server(isIOS) {
     + pdfOverrides
     + '</style>'
     + '</head><body>'
-    + resumeEl.outerHTML
+    + clone.outerHTML
     + '</body></html>';
 
   fetch('/.netlify/functions/generate', {
