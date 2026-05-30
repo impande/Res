@@ -2078,16 +2078,20 @@ function startBuild() {
   heroClickCount++;
   goToStep(1);
   setTimeout(function() {
-    // Scroll to the "Profile Photo" label so both the label and upload section are visible
     const target = document.querySelector('.photo-section-label') || document.getElementById('photoSection');
     const topBar = document.getElementById('top-sticky-bar');
-    const main = document.getElementById('main');
-    if (target && main) {
-      const barH = topBar ? topBar.offsetHeight : 0;
-      const targetTop = target.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop;
-      main.scrollTo({ top: targetTop - barH - 20, behavior: 'smooth' });
-    }
-  }, 300);
+    const main  = document.getElementById('main');
+    if (!target) return;
+    const barH    = topBar ? topBar.offsetHeight : 0;
+    const rect    = target.getBoundingClientRect();
+    const mainTop = main ? main.getBoundingClientRect().top : 0;
+    // How many pixels to move so the target sits 20px below the sticky bar
+    const delta = rect.top - mainTop - barH - 20;
+    // On desktop #main is the scroll container; on mobile the window scrolls.
+    // Calling both is safe — only whichever is actually scrollable responds.
+    if (main) main.scrollTo({ top: main.scrollTop + delta, behavior: 'smooth' });
+    window.scrollTo({ top: window.pageYOffset + delta, behavior: 'smooth' });
+  }, 350);
 }
 
 function markNeedsRegen() {
