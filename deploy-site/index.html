@@ -395,6 +395,8 @@
     .ats-item-icon.fail{background:rgba(239,68,68,0.15);color:#fca5a5;}
     .ats-item-icon.warn{background:rgba(245,158,11,0.15);color:#fbbf24;}
     @media(max-width:600px){.ats-card{flex-direction:column;gap:14px;}.ats-items{grid-template-columns:1fr;}}
+    /* A4 page layout for all print paths — top-level so Safari respects it */
+    @page { size: A4 portrait; margin: 0; }
     /* ── iOS PDF overlay (hidden off-screen, print-only) ── */
     #_ios_overlay {
       position: absolute; top: -9999px; left: -9999px;
@@ -420,7 +422,6 @@
     }
     /* ── Print / PDF (body.pdf-printing) ── */
     @media print {
-      @page { size: A4 portrait; margin: 0; }
       html, body {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -1468,9 +1469,6 @@
     [class*="tpl-"] .r-contact .r-sep{display:inline-flex;align-items:center;line-height:1;}
     /* ── Bold bullets ── */
     [class*="tpl-"] .r-ul li{font-weight:600!important;}
-    /* ── Suppress browser print headers/footers (URL + date/time) ── */
-    @page{margin:0;}
-    @media print{@page{margin:0;}}
 
     /* ══ PREMIUM TEMPLATE UPGRADES ══════════════════════════════════════ */
 
@@ -3070,40 +3068,34 @@ function _doPrintPDF_iOS() {
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
 
-  // Temporarily render at A4 width so captured styles match the A4 layout exactly
-  const prevPageStyle = page.style.cssText;
-  page.style.setProperty('width', '210mm', 'important');
-  page.style.setProperty('max-width', 'none', 'important');
-  void page.offsetWidth; // force reflow
+  const existing = document.getElementById('_ios_overlay');
+  if (existing) { existing.remove(); document.body.classList.remove('ios-print-overlay'); }
 
-  // Read live computed styles BEFORE cloning — detached elements return UA defaults
-  const liveEls = Array.from(page.querySelectorAll('*'));
-  const liveStyles = liveEls.map(function(el) {
-    const cs = window.getComputedStyle(el);
-    return { bg: cs.backgroundColor, col: cs.color, bgi: cs.backgroundImage };
-  });
-
+  // Clone and strip editor attributes
   const clone = page.cloneNode(true);
-  page.style.cssText = prevPageStyle; // restore mobile layout immediately
-
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
   clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
 
-  Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
-    const s = liveStyles[i];
-    if (!s) return;
-    if (s.bg && s.bg !== 'rgba(0, 0, 0, 0)' && s.bg !== 'transparent') el.style.backgroundColor = s.bg;
-    if (s.col) el.style.color = s.col;
-    if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
-  });
-
-  const existing = document.getElementById('_ios_overlay');
-  if (existing) { existing.remove(); document.body.classList.remove('ios-print-overlay'); }
-
+  // Insert clone into the 210mm off-screen overlay and force full layout
   const overlay = document.createElement('div');
   overlay.id = '_ios_overlay';
   overlay.appendChild(clone);
+  document.body.classList.add('ios-print-overlay');
+  document.body.appendChild(overlay);
+  void overlay.offsetWidth; // force reflow so clone lays out at 210mm
+
+  // Capture computed styles from clone (now at correct A4 width) and bake inline
+  // so iOS WebKit preserves background colours, gradients, and text colours in print
+  Array.from(clone.querySelectorAll('*')).forEach(function(el) {
+    const cs = window.getComputedStyle(el);
+    const bg = cs.backgroundColor;
+    const col = cs.color;
+    const bgi = cs.backgroundImage;
+    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') el.style.backgroundColor = bg;
+    if (col) el.style.color = col;
+    if (bgi && bgi !== 'none') el.style.backgroundImage = bgi;
+  });
 
   const prevTitle = document.title;
   document.title = safeName + ' — Resume';
@@ -3118,14 +3110,10 @@ function _doPrintPDF_iOS() {
   window.addEventListener('afterprint', cleanup);
   setTimeout(cleanup, 4000);
 
-  document.body.classList.add('ios-print-overlay');
-  document.body.appendChild(overlay);
   window.print();
 
-  if (!sessionStorage.getItem('pdfHintShown')) {
-    showToast('Choose “Save as PDF” in the print dialog.', 'info');
-    sessionStorage.setItem('pdfHintShown', '1');
-  }
+  // Always remind user to turn off Safari's URL/date header+footer
+  showToast('Tip: In print dialog → Options → turn off “Headers & Footers” for a clean PDF.', 'info');
 }
 
 
