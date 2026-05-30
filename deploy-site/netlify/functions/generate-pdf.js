@@ -25,7 +25,7 @@ export async function handler(event) {
     if (!apiKey) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'PDF service not configured — add PDFSHIFT_API_KEY to Netlify environment variables' }),
+        body: JSON.stringify({ error: 'Add PDFSHIFT_API_KEY to your Netlify environment variables, then redeploy' }),
       };
     }
 

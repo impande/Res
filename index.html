@@ -3147,27 +3147,32 @@ function _doPrintPDF_iOS() {
     body: JSON.stringify({ html: html, filename: safeName + ' Resume' })
   })
   .then(function(res) {
-    if (!res.ok) throw new Error('Server error ' + res.status);
+    if (!res.ok) {
+      // Try to get the error detail from the response body
+      return res.text().then(function(body) {
+        var detail = '';
+        try { detail = JSON.parse(body).error || body; } catch(e) { detail = body; }
+        if (res.status === 404) throw new Error('Function not found (404) — make sure generate-pdf.js is in netlify/functions/ and the site is redeployed');
+        if (detail && detail.includes('API_KEY')) throw new Error('Add PDFSHIFT_API_KEY to your Netlify environment variables, then redeploy');
+        throw new Error(detail || ('Server error ' + res.status));
+      });
+    }
     return res.blob();
   })
   .then(function(blob) {
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = safeName + ' Resume.pdf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
     removeOverlay();
-    showToast('PDF saved!', 'success');
+    // window.location.href is the only method that reliably opens files
+    // from an async callback on iOS Safari (a.click() and window.open()
+    // are blocked once the original user-gesture window has expired)
+    window.location.href = url;
+    showToast('PDF open — tap ⬆ Share → Save to Files', 'success');
+    setTimeout(function() { URL.revokeObjectURL(url); }, 120000);
   })
   .catch(function(err) {
     console.error('[iOS PDF]', err);
     removeOverlay();
-    // Fallback: open Safari print dialog (user can tap Options → Headers & Footers off)
-    showToast('Opening print dialog as fallback…', 'info');
-    setTimeout(_startIOSPrint, 500);
+    showToast(err.message || 'PDF generation failed', 'error');
   });
 }
 
