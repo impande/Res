@@ -403,6 +403,13 @@
         print-color-adjust: exact !important;
         background: #fff !important;
       }
+      /* Force every element to print its background — critical on iOS Safari/Chrome */
+      body.pdf-printing * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        forced-color-adjust: none !important;
+      }
       /* Always hide the print-hint banner so it never bleeds onto the PDF */
       #pdf-print-hint { display: none !important; }
       body.pdf-printing #sidebar,
@@ -2962,21 +2969,24 @@ function _doPrintPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
 
+  // iOS (Safari + Chrome both run WebKit): window.open()...win.print() prints
+  // the PARENT window (the whole app — hence 20+ page PDFs), not the child.
+  // Must use same-page printing with body.pdf-printing class instead.
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) { _doPrintPDF_iOS(); return; }
+
+  // ── Desktop / Android Chrome: dedicated print window ──────────────────
   const firstName = lastResumeData?.firstName || '';
   const lastName  = lastResumeData?.lastName  || '';
   const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
 
-  // Read computed styles from live DOM elements BEFORE cloning.
-  // getComputedStyle on detached elements returns UA defaults (e.g. color:black),
-  // which would overwrite correct theme colours including skill chip colours.
+  // Read computed styles from live DOM elements BEFORE cloning so we capture
+  // correct theme colours (detached clones return UA defaults = black).
   const liveEls = Array.from(page.querySelectorAll('*'));
   const liveStyles = liveEls.map(function(el) {
     const cs = window.getComputedStyle(el);
-    return {
-      bg:  cs.backgroundColor,
-      col: cs.color,
-      bgi: cs.backgroundImage
-    };
+    return { bg: cs.backgroundColor, col: cs.color, bgi: cs.backgroundImage };
   });
 
   const clone = page.cloneNode(true);
@@ -2984,26 +2994,18 @@ function _doPrintPDF() {
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
   clone.style.cssText = 'box-shadow:none;margin:0;border-radius:0;';
 
-  // Apply the live computed styles to the cloned elements so Chrome prints
-  // exact colours (backgrounds, text, gradients) regardless of print settings.
   Array.from(clone.querySelectorAll('*')).forEach(function(el, i) {
     const s = liveStyles[i];
     if (!s) return;
-    if (s.bg && s.bg !== 'rgba(0, 0, 0, 0)' && s.bg !== 'transparent') {
-      el.style.backgroundColor = s.bg;
-    }
+    if (s.bg && s.bg !== 'rgba(0, 0, 0, 0)' && s.bg !== 'transparent') el.style.backgroundColor = s.bg;
     if (s.col) el.style.color = s.col;
     if (s.bgi && s.bgi !== 'none') el.style.backgroundImage = s.bgi;
   });
 
-  const allCSS = Array.from(document.querySelectorAll('style'))
-    .map(s => s.textContent).join('\n');
+  const allCSS = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
 
   const win = window.open('', '_blank');
-  if (!win) {
-    showToast('Allow pop-ups in your browser to download the PDF.', 'error');
-    return;
-  }
+  if (!win) { showToast('Allow pop-ups in your browser to download the PDF.', 'error'); return; }
 
   win.document.write(`<!DOCTYPE html>
 <html><head>
@@ -3020,11 +3022,8 @@ ${allCSS}
 }
 html, body { margin: 0; padding: 0; background: #fff; }
 .resume-a4-page {
-  width: 210mm !important;
-  min-height: 297mm !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
+  width: 210mm !important; min-height: 297mm !important;
+  box-shadow: none !important; margin: 0 !important; border-radius: 0 !important;
 }
 </style>
 </head>
@@ -3032,19 +3031,57 @@ html, body { margin: 0; padding: 0; background: #fff; }
 </html>`);
 
   function doPrint() {
-    win.focus();
-    win.print();
+    win.focus(); win.print();
     win.addEventListener('afterprint', function() { win.close(); });
     setTimeout(function() { try { win.close(); } catch(e){} }, 3000);
   }
-
   win.addEventListener('load', function() { setTimeout(doPrint, 200); });
   win.document.close();
-  // Fallback if load event already fired or is suppressed
   setTimeout(function() { try { if (!win.closed) doPrint(); } catch(e){} }, 1200);
 
   if (!sessionStorage.getItem('pdfHintShown')) {
     showToast('Choose “Save as PDF” as the destination in the print dialog.', 'info');
+    sessionStorage.setItem('pdfHintShown', '1');
+  }
+}
+
+function _doPrintPDF_iOS() {
+  // On iOS, window.print() prints the current page via the native share/print
+  // sheet. We temporarily add body.pdf-printing to hide all app chrome so only
+  // the resume renders in the PDF.
+  const firstName = lastResumeData?.firstName || '';
+  const lastName  = lastResumeData?.lastName  || '';
+  const safeName  = `${firstName} ${lastName}`.trim() || 'resume';
+  const prevTitle = document.title;
+  document.title = safeName + ' — Resume';
+
+  function cleanup() {
+    document.body.classList.remove('pdf-printing');
+    document.title = prevTitle;
+    window.removeEventListener('afterprint', cleanup);
+  }
+
+  window.addEventListener('afterprint', cleanup);
+  document.body.classList.add('pdf-printing');
+
+  // Double rAF ensures the class is applied and the browser has re-laid out
+  // before the print sheet opens, so the PDF captures the correct state.
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      try {
+        window.print();
+      } catch(err) {
+        cleanup();
+        showToast('Could not open print dialog: ' + err.message, 'error');
+        return;
+      }
+      // iOS doesn't always fire afterprint — clean up after 3 s as fallback.
+      setTimeout(cleanup, 3000);
+    });
+  });
+
+  if (!sessionStorage.getItem('pdfHintShown')) {
+    showToast('Tap “Save to Files” in the share sheet to save as PDF.', 'info');
     sessionStorage.setItem('pdfHintShown', '1');
   }
 }
