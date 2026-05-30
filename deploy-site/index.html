@@ -2077,6 +2077,17 @@ const TPL_COLORS = {
 function startBuild() {
   heroClickCount++;
   goToStep(1);
+  setTimeout(function() {
+    const input = document.getElementById('firstName');
+    const topBar = document.getElementById('top-sticky-bar');
+    const main = document.getElementById('main');
+    if (input && main) {
+      const barH = topBar ? topBar.offsetHeight : 0;
+      const inputTop = input.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop;
+      main.scrollTo({ top: inputTop - barH - 16, behavior: 'smooth' });
+      input.focus({ preventScroll: true });
+    }
+  }, 300);
 }
 
 function markNeedsRegen() {
