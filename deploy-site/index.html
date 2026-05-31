@@ -362,8 +362,14 @@
     .upi-step-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.07));border:1px solid rgba(245,158,11,0.25);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
     .upi-step-text strong{display:block;font-size:0.83rem;font-weight:700;color:#e8e8ff;line-height:1.2;}
     .upi-step-sub{font-size:0.72rem;color:#55557a;margin-top:2px;}
-    /* Bottom CTA — spans full grid width */
-    .upi-bottom{grid-column:1/-1;}
+    /* Bottom CTA — spans full grid width on desktop */
+    .upi-bottom{grid-column:1/-1;padding:0 24px 24px;}
+    /* Step number badge — hidden on desktop */
+    .upi-step-num{display:none;}
+    /* Drag handle — hidden on desktop */
+    .upi-drawer-handle{display:none;}
+    /* Scroll wrapper transparent on desktop */
+    .upi-drawer-scroll{display:contents;}
     .upi-sep{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
     .upi-sep-line{flex:1;height:1px;background:#1a1a2e;}
     .upi-sep-txt{font-size:0.67rem;color:#33334a;white-space:nowrap;letter-spacing:0.3px;}
@@ -373,18 +379,35 @@
     .btn-paid.pulse{animation:paidPulse 1.5s ease-in-out infinite;}
     .upi-cancel{display:block;text-align:center;font-size:0.75rem;color:#33334a;cursor:pointer;margin-top:10px;padding:5px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
     .upi-cancel:hover{color:#7070a0;}
-    /* Mobile: single column, scrollable overlay so nothing is clipped */
+    /* Mobile: bottom drawer */
     @media(max-width:520px){
-      .upi-overlay{align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-      .upi-modal{border-radius:18px;}
-      .upi-hdr{padding:13px 18px 11px;}
+      .upi-overlay{align-items:flex-end;padding:0;}
+      @keyframes upiIn{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
+      .upi-modal{border-radius:24px 24px 0 0;max-width:100%;width:100%;display:flex;flex-direction:column;max-height:90vh;}
+      .upi-drawer-handle{display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;}
+      .upi-drawer-pill{width:40px;height:4px;background:#2e2e48;border-radius:99px;}
+      .upi-drawer-scroll{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;}
+      .upi-drawer-scroll::-webkit-scrollbar{display:none;}
+      .upi-hdr{padding:10px 18px 13px;}
+      .upi-rupee{font-size:3rem;}
       .upi-amount{font-size:3rem;}
       .upi-once{margin-top:2px;}
-      .upi-body{grid-template-columns:1fr;gap:10px;padding:13px 13px 15px;}
-      .upi-qr-col{flex-direction:row;align-items:flex-start;gap:12px;flex-wrap:wrap;justify-content:center;}
-      .upi-qr{width:118px;height:118px;}
-      .upi-steps{gap:6px;}
-      .upi-step-card{padding:8px 11px;}
+      .upi-body{grid-template-columns:1fr;gap:10px;padding:10px 14px 14px;}
+      .upi-qr-col{flex-direction:column;align-items:center;}
+      .upi-qr{width:130px;height:130px;}
+      /* Compact horizontal steps */
+      .upi-steps-col{display:block;}
+      .upi-steps{flex-direction:row;align-items:flex-start;gap:0;height:auto;justify-content:space-between;}
+      .upi-step-card{flex:1;flex-direction:column;align-items:center;gap:5px;padding:0;background:none;border:none;border-radius:0;position:relative;}
+      .upi-step-card:not(:last-child)::after{content:'›';position:absolute;right:-4px;top:10px;color:#33334a;font-size:1.1rem;line-height:1;}
+      .upi-step-card:hover{border-color:transparent;}
+      .upi-step-icon{width:36px;height:36px;border-radius:50%;background:#0e0e1e;border:1.5px solid #2a2a44;position:relative;}
+      .upi-step-num{position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:#f59e0b;color:#000;font-size:0.48rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid #12121e;}
+      .upi-step-text{text-align:center;padding:0 2px;}
+      .upi-step-text strong{font-size:0.58rem;font-weight:600;color:#9898b8;line-height:1.3;}
+      .upi-step-sub{display:none;}
+      /* Pinned CTA */
+      .upi-bottom{grid-column:1/-1;background:#12121e;border-top:1px solid #1e1e36;padding:12px 14px 24px;flex-shrink:0;}
     }
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
@@ -3862,78 +3885,82 @@ window.addEventListener('load', function() {
 <div class="upi-overlay" id="upiOverlay" style="display:none">
   <div class="upi-modal" role="dialog" aria-modal="true">
 
-    <div class="upi-hdr">
-      <div class="upi-badge">💳 Pay Per Download</div>
-      <div class="upi-price-row">
-        <span class="upi-rupee">₹</span>
-        <span class="upi-amount">5</span>
+    <!-- Drag handle (mobile only) -->
+    <div class="upi-drawer-handle"><div class="upi-drawer-pill"></div></div>
+
+    <!-- Scrollable content -->
+    <div class="upi-drawer-scroll">
+
+      <div class="upi-hdr">
+        <div class="upi-badge">💳 Pay Per Download</div>
+        <div class="upi-price-row">
+          <span class="upi-rupee">₹</span>
+          <span class="upi-amount">5</span>
+        </div>
+        <div class="upi-once">Pay ₹5 per download · instant resume generation</div>
       </div>
-      <div class="upi-once">Pay ₹5 per download · instant resume generation</div>
+
+      <div class="upi-body">
+
+        <!-- Left column: QR + UPI ID -->
+        <div class="upi-qr-col">
+          <img id="upiQR" class="upi-qr" alt="UPI QR Code">
+          <div class="upi-qr-label">Scan with any UPI app</div>
+          <div class="upi-id-row">
+            <div class="upi-id-info">
+              <div class="upi-id-label">Or enter UPI ID manually</div>
+              <div class="upi-id-text">9739241381@hdfc</div>
+            </div>
+            <button class="btn-copy-upi" id="copyUPIBtn" onclick="copyUPIId()">Copy</button>
+          </div>
+        </div>
+
+        <!-- Right column (desktop) / compact row (mobile): Steps -->
+        <div class="upi-steps-col">
+          <div class="upi-steps">
+            <div class="upi-step-card">
+              <div class="upi-step-icon">📱<span class="upi-step-num">1</span></div>
+              <div class="upi-step-text">
+                <strong>Open UPI app</strong>
+                <div class="upi-step-sub">Google Pay · PhonePe · Paytm · BHIM</div>
+              </div>
+            </div>
+            <div class="upi-step-card">
+              <div class="upi-step-icon">📷<span class="upi-step-num">2</span></div>
+              <div class="upi-step-text">
+                <strong>Scan QR code</strong>
+                <div class="upi-step-sub">Tap "Scan" and point your camera at the code</div>
+              </div>
+            </div>
+            <div class="upi-step-card">
+              <div class="upi-step-icon">✅<span class="upi-step-num">3</span></div>
+              <div class="upi-step-text">
+                <strong>Pay ₹5</strong>
+                <div class="upi-step-sub">Approve the payment in your app</div>
+              </div>
+            </div>
+            <div class="upi-step-card">
+              <div class="upi-step-icon">🚀<span class="upi-step-num">4</span></div>
+              <div class="upi-step-text">
+                <strong>Tap below</strong>
+                <div class="upi-step-sub">Your resume generates instantly</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /upi-drawer-scroll -->
+
+    <!-- CTA — pinned at bottom on mobile, in grid on desktop -->
+    <div class="upi-bottom">
+      <button class="btn-paid pulse" id="btnPaid" onclick="confirmUPIPayment()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+        I've paid ₹5 — Generate Resume
+      </button>
+      <button class="upi-cancel" onclick="closeUPIModal()">← Cancel</button>
     </div>
 
-    <div class="upi-body">
-
-      <!-- Left column: QR + UPI ID -->
-      <div class="upi-qr-col">
-        <img id="upiQR" class="upi-qr" alt="UPI QR Code">
-        <div class="upi-qr-label">Scan with any UPI app</div>
-        <div class="upi-id-row">
-          <div class="upi-id-info">
-            <div class="upi-id-label">Or enter UPI ID manually</div>
-            <div class="upi-id-text">9739241381@hdfc</div>
-          </div>
-          <button class="btn-copy-upi" id="copyUPIBtn" onclick="copyUPIId()">Copy</button>
-        </div>
-      </div>
-
-      <!-- Right column: Steps -->
-      <div class="upi-steps-col">
-        <div class="upi-steps">
-          <div class="upi-step-card">
-            <div class="upi-step-icon">📱</div>
-            <div class="upi-step-text">
-              <strong>Open your UPI app</strong>
-              <div class="upi-step-sub">Google Pay · PhonePe · Paytm · BHIM</div>
-            </div>
-          </div>
-          <div class="upi-step-card">
-            <div class="upi-step-icon">📷</div>
-            <div class="upi-step-text">
-              <strong>Scan the QR code</strong>
-              <div class="upi-step-sub">Tap "Scan" and point your camera at the code</div>
-            </div>
-          </div>
-          <div class="upi-step-card">
-            <div class="upi-step-icon">✅</div>
-            <div class="upi-step-text">
-              <strong>Confirm ₹5 payment</strong>
-              <div class="upi-step-sub">Approve the payment in your app</div>
-            </div>
-          </div>
-          <div class="upi-step-card">
-            <div class="upi-step-icon">🚀</div>
-            <div class="upi-step-text">
-              <strong>Tap the button below</strong>
-              <div class="upi-step-sub">Your resume generates instantly</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom CTA (spans both columns) -->
-      <div class="upi-bottom">
-        <div class="upi-sep">
-          <div class="upi-sep-line"></div>
-          <div class="upi-sep-line"></div>
-        </div>
-        <button class="btn-paid pulse" id="btnPaid" onclick="confirmUPIPayment()">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-          I've paid ₹5 — Generate Resume
-        </button>
-        <button class="upi-cancel" onclick="closeUPIModal()">← Cancel</button>
-      </div>
-
-    </div>
   </div>
 </div>
 </body>
