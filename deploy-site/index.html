@@ -4025,18 +4025,26 @@ window.addEventListener('load', function() {
 <script>
 (function() {
   const IDLE_MS = 30 * 60 * 1000; // 30 minutes
-  let hiddenAt = null;
+  let lastActivity = Date.now();
 
+  function resetTimer() { lastActivity = Date.now(); }
+  ['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(function(evt) {
+    window.addEventListener(evt, resetTimer, {passive: true});
+  });
+
+  // Reload when user returns to the tab after being idle 30+ mins
   document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'hidden') {
-      hiddenAt = Date.now();
-    } else if (document.visibilityState === 'visible') {
-      if (hiddenAt && Date.now() - hiddenAt >= IDLE_MS) {
-        location.reload();
-      }
-      hiddenAt = null;
+    if (document.visibilityState === 'visible' && Date.now() - lastActivity >= IDLE_MS) {
+      location.reload();
     }
   });
+
+  // Also check every minute in case the tab stays open
+  setInterval(function() {
+    if (Date.now() - lastActivity >= IDLE_MS) {
+      location.reload();
+    }
+  }, 60 * 1000);
 })();
 </script>
 </body>
