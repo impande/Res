@@ -2266,7 +2266,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── Navigation ────────────────────────────────────────────────────────
 
-function goToStep(step) {
+function goToStep(step, skipScroll) {
   const prevStep = currentStep;
   currentStep = step;
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
@@ -2318,7 +2318,7 @@ function goToStep(step) {
   }
   document.getElementById('main').scrollTop = 0;
   // When returning to step 1 from steps 2-6, scroll to First Name with Quick Prefill visible above
-  if (step === 1 && prevStep >= 2) {
+  if (step === 1 && prevStep >= 2 && !skipScroll) {
     setTimeout(function() {
       const firstName = document.getElementById('firstName');
       const prefill = document.querySelector('#step1 .prefill-section');
@@ -2660,7 +2660,24 @@ function validateMandatory() {
   });
   document.getElementById('photoSection').classList.remove('photo-error');
   const banner = document.getElementById('valBanner1');
-  if (errors.length) { banner.style.display='block'; banner.textContent='Required: '+errors.join(', '); goToStep(1); return false; }
+  if (errors.length) {
+    banner.style.display = 'block';
+    banner.textContent = 'Required: ' + errors.join(', ');
+    goToStep(1, true);
+    // Scroll so the step title + validation banner are visible below the sticky bar
+    setTimeout(function() {
+      const topBar = document.getElementById('top-sticky-bar');
+      const barH = topBar ? topBar.offsetHeight : 0;
+      const main = document.getElementById('main');
+      const mainRect = main ? main.getBoundingClientRect() : {top: 0};
+      const title = document.querySelector('#step1 .step-title');
+      const rect = (title || banner).getBoundingClientRect();
+      const delta = rect.top - mainRect.top - barH - 12;
+      if (main) main.scrollTo({top: Math.max(0, main.scrollTop + delta), behavior: 'smooth'});
+      window.scrollTo({top: Math.max(0, window.pageYOffset + delta), behavior: 'smooth'});
+    }, 100);
+    return false;
+  }
   banner.style.display = 'none';
   return true;
 }
