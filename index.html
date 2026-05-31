@@ -594,8 +594,8 @@
     .hero-stars{color:#f59e0b;font-size:0.82rem;letter-spacing:2px;}
     .hero-social-txt{font-size:0.76rem;color:var(--muted);}
     /* ── Upload section redesign ── */
-    .hero-or{font-size:0.7rem;color:#3a3a3a;text-align:center;margin-bottom:12px;position:relative;letter-spacing:0.3px;}
-    .hero-or::before,.hero-or::after{content:'';position:absolute;top:50%;width:36%;height:1px;background:rgba(255,255,255,0.07);}
+    .hero-or{font-size:0.7rem;color:#55557a;text-align:center;margin-bottom:12px;position:relative;letter-spacing:0.3px;}
+    .hero-or::before,.hero-or::after{content:'';position:absolute;top:50%;width:30%;height:1px;background:rgba(255,255,255,0.12);}
     .hero-or::before{left:0;}.hero-or::after{right:0;}
     /* ── Quick Prefill section ── */
     .prefill-section{background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.28);border-radius:12px;padding:14px 16px;margin-bottom:22px;}
@@ -4032,17 +4032,23 @@ window.addEventListener('load', function() {
     window.addEventListener(evt, resetTimer, {passive: true});
   });
 
+  function freshReload() {
+    localStorage.clear();
+    sessionStorage.clear();
+    location.href = location.pathname;
+  }
+
   // Reload when user returns to the tab after being idle 30+ mins
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible' && Date.now() - lastActivity >= IDLE_MS) {
-      location.reload();
+      freshReload();
     }
   });
 
   // Also check every minute in case the tab stays open
   setInterval(function() {
     if (Date.now() - lastActivity >= IDLE_MS) {
-      location.reload();
+      freshReload();
     }
   }, 60 * 1000);
 })();
