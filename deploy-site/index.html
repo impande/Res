@@ -2664,17 +2664,19 @@ function validateMandatory() {
     banner.style.display = 'block';
     banner.textContent = 'Required: ' + errors.join(', ');
     goToStep(1, true);
-    // Scroll so the step title + validation banner are visible below the sticky bar
+    // Scroll to the first field with an error so user lands directly on it
     setTimeout(function() {
+      const firstError = document.querySelector('#step1 .field-error');
+      if (!firstError) return;
       const topBar = document.getElementById('top-sticky-bar');
       const barH = topBar ? topBar.offsetHeight : 0;
       const main = document.getElementById('main');
       const mainRect = main ? main.getBoundingClientRect() : {top: 0};
-      const title = document.querySelector('#step1 .step-title');
-      const rect = (title || banner).getBoundingClientRect();
-      const delta = rect.top - mainRect.top - barH - 12;
+      const rect = firstError.getBoundingClientRect();
+      const delta = rect.top - mainRect.top - barH - 24;
       if (main) main.scrollTo({top: Math.max(0, main.scrollTop + delta), behavior: 'smooth'});
       window.scrollTo({top: Math.max(0, window.pageYOffset + delta), behavior: 'smooth'});
+      firstError.focus({preventScroll: true});
     }, 100);
     return false;
   }
