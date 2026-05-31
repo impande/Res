@@ -2317,17 +2317,19 @@ function goToStep(step) {
     updatePreview();
   }
   document.getElementById('main').scrollTop = 0;
-  // When returning to step 1 from steps 2-6, scroll to Personal Information heading
+  // When returning to step 1 from steps 2-6, scroll to First Name with Quick Prefill visible above
   if (step === 1 && prevStep >= 2) {
     setTimeout(function() {
-      const heading = document.querySelector('#step1 .step-title');
+      const firstName = document.getElementById('firstName');
+      const prefill = document.querySelector('#step1 .prefill-section');
       const topBar = document.getElementById('top-sticky-bar');
-      if (!heading) return;
+      if (!firstName) return;
       const barH = topBar ? topBar.offsetHeight : 0;
       const main = document.getElementById('main');
       const mainRect = main ? main.getBoundingClientRect() : {top: 0};
-      const headingRect = heading.getBoundingClientRect();
-      const delta = headingRect.top - mainRect.top - barH - 16;
+      const firstNameRect = firstName.getBoundingClientRect();
+      const pullback = prefill ? prefill.offsetHeight + 16 : 0;
+      const delta = firstNameRect.top - mainRect.top - barH - pullback - 16;
       if (delta > 0) {
         if (main) main.scrollTo({top: main.scrollTop + delta, behavior: 'smooth'});
         window.scrollTo({top: window.pageYOffset + delta, behavior: 'smooth'});
