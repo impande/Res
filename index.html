@@ -2100,6 +2100,20 @@ const TPL_COLORS = {
 function startBuild() {
   heroClickCount++;
   goToStep(1);
+  setTimeout(function() {
+    const photoSection = document.getElementById('photoSection');
+    const topBar = document.getElementById('top-sticky-bar');
+    if (!photoSection) return;
+    const barH = topBar ? topBar.offsetHeight : 0;
+    const main = document.getElementById('main');
+    const mainRect = main ? main.getBoundingClientRect() : {top: 0};
+    const photoRect = photoSection.getBoundingClientRect();
+    const delta = photoRect.top - mainRect.top - barH - 16;
+    if (delta > 0) {
+      if (main) main.scrollTo({top: main.scrollTop + delta, behavior: 'smooth'});
+      window.scrollTo({top: window.pageYOffset + delta, behavior: 'smooth'});
+    }
+  }, 200);
 }
 
 function markNeedsRegen() {
