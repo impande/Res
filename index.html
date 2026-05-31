@@ -2101,13 +2101,13 @@ function startBuild() {
   heroClickCount++;
   goToStep(1);
   setTimeout(function() {
-    const photoSection = document.getElementById('photoSection');
+    const target = document.getElementById('firstName');
     const topBar = document.getElementById('top-sticky-bar');
-    if (!photoSection) return;
+    if (!target) return;
     const barH = topBar ? topBar.offsetHeight : 0;
     const main = document.getElementById('main');
     const mainRect = main ? main.getBoundingClientRect() : {top: 0};
-    const photoRect = photoSection.getBoundingClientRect();
+    const photoRect = target.getBoundingClientRect();
     const delta = photoRect.top - mainRect.top - barH - 16;
     if (delta > 0) {
       if (main) main.scrollTo({top: main.scrollTop + delta, behavior: 'smooth'});
