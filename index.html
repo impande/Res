@@ -1960,6 +1960,7 @@ let lastResumeData = null;
 let manuallyEdited = false;
 let needsRegenerate = false;
 let heroClickCount = 0;
+let currentStep = 0;
 
 const SKILL_MAP = {
   'software engineer':['JavaScript','TypeScript','React','Node.js','Python','Git','Docker','REST APIs','SQL','Agile'],
@@ -2263,6 +2264,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Navigation ────────────────────────────────────────────────────────
 
 function goToStep(step) {
+  const prevStep = currentStep;
+  currentStep = step;
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2311,6 +2314,23 @@ function goToStep(step) {
     updatePreview();
   }
   document.getElementById('main').scrollTop = 0;
+  // When returning to step 1 from steps 2-6, scroll to Personal Information heading
+  if (step === 1 && prevStep >= 2) {
+    setTimeout(function() {
+      const heading = document.querySelector('#step1 .step-title');
+      const topBar = document.getElementById('top-sticky-bar');
+      if (!heading) return;
+      const barH = topBar ? topBar.offsetHeight : 0;
+      const main = document.getElementById('main');
+      const mainRect = main ? main.getBoundingClientRect() : {top: 0};
+      const headingRect = heading.getBoundingClientRect();
+      const delta = headingRect.top - mainRect.top - barH - 16;
+      if (delta > 0) {
+        if (main) main.scrollTo({top: main.scrollTop + delta, behavior: 'smooth'});
+        window.scrollTo({top: window.pageYOffset + delta, behavior: 'smooth'});
+      }
+    }, 200);
+  }
 }
 
 function selectTemplate(tpl) {
