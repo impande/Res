@@ -2102,7 +2102,8 @@ function startBuild() {
   heroClickCount++;
   goToStep(1);
   setTimeout(function() {
-    const target = document.getElementById('firstName');
+    // Scroll to prefill section so both it and the first name field are visible
+    const target = document.querySelector('#step1 .prefill-section') || document.getElementById('firstName');
     const topBar = document.getElementById('top-sticky-bar');
     if (!target) return;
     const barH = topBar ? topBar.offsetHeight : 0;
