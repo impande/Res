@@ -4038,17 +4038,26 @@ window.addEventListener('load', function() {
   function freshReload() {
     localStorage.clear();
     sessionStorage.clear();
-    location.href = location.pathname;
+    // Force bypass cache and land on landing page (step 0)
+    location.href = location.pathname + '?v=' + Date.now();
   }
 
-  // Reload when user returns to the tab after being idle 30+ mins
+  // Point 1: Kill + reopen on iOS/Android restores page from bfcache (frozen state).
+  // pageshow fires with persisted=true in that case — always force a fresh reload.
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+      freshReload();
+    }
+  });
+
+  // Point 2: Idle 30+ mins → reload to latest landing page
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible' && Date.now() - lastActivity >= IDLE_MS) {
       freshReload();
     }
   });
 
-  // Also check every minute in case the tab stays open
+  // Background check every minute
   setInterval(function() {
     if (Date.now() - lastActivity >= IDLE_MS) {
       freshReload();
