@@ -5,18 +5,15 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <!-- Session-start cache buster: runs before anything else.
-       On iOS Safari kill+reopen, sessionStorage is empty (new session).
-       If URL has no _r param, add one — forces Safari to fetch from network, not disk cache. -->
+  <!-- Cache buster: if URL has no _r param, redirect to one with timestamp.
+       This forces Chrome/Safari to fetch from network instead of disk cache
+       on kill+reopen. The _r URL is always unique so it can never be cached. -->
   <script>
     (function() {
-      if (!sessionStorage.getItem('_live')) {
-        sessionStorage.setItem('_live', '1');
-        var u = new URL(location.href);
-        if (!u.searchParams.has('_r')) {
-          u.searchParams.set('_r', Date.now());
-          location.replace(u.toString());
-        }
+      var u = new URL(location.href);
+      if (!u.searchParams.has('_r')) {
+        u.searchParams.set('_r', Date.now());
+        location.replace(u.toString());
       }
     })();
   </script>
