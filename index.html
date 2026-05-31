@@ -5,6 +5,21 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <!-- Session-start cache buster: runs before anything else.
+       On iOS Safari kill+reopen, sessionStorage is empty (new session).
+       If URL has no _r param, add one — forces Safari to fetch from network, not disk cache. -->
+  <script>
+    (function() {
+      if (!sessionStorage.getItem('_live')) {
+        sessionStorage.setItem('_live', '1');
+        var u = new URL(location.href);
+        if (!u.searchParams.has('_r')) {
+          u.searchParams.set('_r', Date.now());
+          location.replace(u.toString());
+        }
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resume For You – Free AI Resume Builder | resume4u.help</title>
 
@@ -4038,8 +4053,8 @@ window.addEventListener('load', function() {
   function freshReload() {
     localStorage.clear();
     sessionStorage.clear();
-    // Force bypass cache and land on landing page (step 0)
-    location.href = location.pathname + '?v=' + Date.now();
+    // _r param makes every reload a unique URL — bypasses iOS Safari disk cache
+    location.replace(location.pathname + '?_r=' + Date.now());
   }
 
   // Point 1: Kill + reopen on iOS/Android restores page from bfcache (frozen state).
