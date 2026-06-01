@@ -1695,12 +1695,10 @@
     /* scaler wrapper — overflow:visible so scaled content scrolls fully */
     .preview-scale-wrap{width:100%;overflow:visible;}
     .preview-scale-inner{transform-origin:top left;display:block;}
-    /* Resume tips — overlay on desktop, below-resume banner on mobile */
-    #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.82);backdrop-filter:blur(3px);z-index:10;border-radius:4px;align-items:center;justify-content:center;padding:20px;}
-    @media(max-width:520px){
-      #resumeTips{position:static;inset:auto;background:linear-gradient(135deg,#1a1a2e,#12122a);backdrop-filter:none;border-radius:14px;border:1px solid rgba(245,158,11,0.22);padding:14px 14px 10px;margin-top:12px;display:block!important;}
-      #resumeTips.tips-hidden{display:none!important;}
-    }
+    /* Resume tips — overlay on all screen sizes */
+    #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.88);backdrop-filter:blur(3px);z-index:10;border-radius:4px;align-items:center;justify-content:center;padding:20px;}
+    #resumeTips.tips-hidden{display:none!important;}
+    @media(max-width:520px){#resumeTips{padding:14px;}}
     @media(min-width:521px){
       .preview-modal-overlay{align-items:center;}
       .preview-modal{border-radius:24px;max-height:88vh;}
@@ -3155,7 +3153,7 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.innerHTML = 'Generated ✓ &nbsp;·&nbsp; <strong>Click resume to edit directly</strong>';
     document.getElementById('editBadge').style.display = 'block';
-    const tips = document.getElementById('resumeTips'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = window.innerWidth <= 520 ? 'block' : 'flex'; }
+    const tips = document.getElementById('resumeTips'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; }
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
