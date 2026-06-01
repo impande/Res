@@ -1995,7 +1995,7 @@
         </div>
       </div>
     </div>
-    <span class="edit-badge" id="editBadge" style="display:none">✎ Click resume to edit directly</span>
+    <span id="editBadge" style="display:none"></span>
     <!-- Cover Letter Section -->
     <div class="cl-section" id="clSection" style="display:none">
       <div class="cl-hdr" onclick="toggleCLBody()">
@@ -3147,7 +3147,7 @@ async function _doGenerateResume() {
     clearNeedsRegen();
     renderOutput(merged);
     renderATSScore(merged);
-    statusEl.innerHTML = 'Generated ✓ &nbsp;·&nbsp; <strong>Click any text to edit directly</strong>';
+    statusEl.textContent = 'Generated ✓';
     document.getElementById('editBadge').style.display = 'block';
     const tips = document.getElementById('resumeTips'); if (tips) tips.style.display = 'flex';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
