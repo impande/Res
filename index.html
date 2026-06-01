@@ -1958,41 +1958,44 @@
         <button class="btn-dl btn-dl-cl" onclick="openCoverLetter()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Cover Letter</button>
       </div>
     </div>
-    <div class="resume-output-card" id="resumeOutput">
-      <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
+    <div style="position:relative;">
+      <div class="resume-output-card" id="resumeOutput">
+        <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
+      </div>
+      <!-- Tips overlay — shown on top of resume after each generation -->
+      <div id="resumeTips" style="display:none;position:absolute;inset:0;background:rgba(10,10,20,0.82);backdrop-filter:blur(3px);z-index:10;border-radius:4px;display:none;align-items:center;justify-content:center;padding:20px;">
+        <div style="width:100%;max-width:600px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="font-size:0.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;">💡 Quick Tips</div>
+            <button onclick="document.getElementById('resumeTips').style.display='none'" style="background:rgba(255,255,255,0.1);border:1px solid #44445a;color:#e8e8ff;font-size:0.8rem;font-weight:700;cursor:pointer;padding:6px 16px;border-radius:20px;line-height:1;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕ Dismiss</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">✎</span>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#e8e8ff;margin-bottom:3px;">Click to edit</div>
+                <div style="font-size:0.73rem;color:#6666aa;line-height:1.5;">Tap any text on the resume to edit it inline — no re-generating needed.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">🎨</span>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#e8e8ff;margin-bottom:3px;">Try templates</div>
+                <div style="font-size:0.73rem;color:#6666aa;line-height:1.5;">Use <strong style="color:#f59e0b;">Preview Resume</strong> to switch templates instantly.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
+              <span style="font-size:1.2rem;flex-shrink:0;">📥</span>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#e8e8ff;margin-bottom:3px;">Download PDF</div>
+                <div style="font-size:0.73rem;color:#6666aa;line-height:1.5;">Just ₹5 for a clean, ATS-optimised PDF download.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <span class="edit-badge" id="editBadge" style="display:none">✎ Click resume to edit directly</span>
-
-    <!-- Tips shown after resume is generated -->
-    <div id="resumeTips" style="display:none;margin-top:16px;display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:0.65rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#55557a;">💡 Tips</div>
-        <button onclick="document.getElementById('resumeTips').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid #33334a;color:#aaaacc;font-size:0.74rem;font-weight:600;cursor:pointer;padding:4px 12px;border-radius:20px;line-height:1;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'" title="Dismiss tips">✕ Dismiss</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:7px;">
-        <div style="display:flex;align-items:flex-start;gap:10px;background:#1a1a2a;border:1px solid #25253a;border-radius:10px;padding:10px 13px;">
-          <span style="font-size:1rem;flex-shrink:0;">✎</span>
-          <div>
-            <div style="font-size:0.8rem;font-weight:700;color:#e8e8ff;margin-bottom:2px;">Click any text to edit</div>
-            <div style="font-size:0.74rem;color:#55557a;line-height:1.5;">Tap directly on your name, job title, bullet points or any section to edit inline — no re-generating needed.</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;background:#1a1a2a;border:1px solid #25253a;border-radius:10px;padding:10px 13px;">
-          <span style="font-size:1rem;flex-shrink:0;">🎨</span>
-          <div>
-            <div style="font-size:0.8rem;font-weight:700;color:#e8e8ff;margin-bottom:2px;">Try different templates</div>
-            <div style="font-size:0.74rem;color:#55557a;line-height:1.5;">Use the <strong style="color:#f59e0b;">Preview Resume</strong> button to instantly switch templates and see how your resume looks.</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;background:#1a1a2a;border:1px solid #25253a;border-radius:10px;padding:10px 13px;">
-          <span style="font-size:1rem;flex-shrink:0;">📥</span>
-          <div>
-            <div style="font-size:0.8rem;font-weight:700;color:#e8e8ff;margin-bottom:2px;">Download when ready</div>
-            <div style="font-size:0.74rem;color:#55557a;line-height:1.5;">Happy with your resume? Hit <strong style="color:#f59e0b;">Download PDF</strong> below — just ₹5 for a clean, ATS-optimised PDF.</div>
-          </div>
-        </div>
-      </div>
-    </div>
     <!-- Cover Letter Section -->
     <div class="cl-section" id="clSection" style="display:none">
       <div class="cl-hdr" onclick="toggleCLBody()">
@@ -3146,7 +3149,7 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.textContent = 'Generated ✓';
     document.getElementById('editBadge').style.display = 'block';
-    const tips = document.getElementById('resumeTips'); if (tips) tips.style.display = 'block';
+    const tips = document.getElementById('resumeTips'); if (tips) tips.style.display = 'flex';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
