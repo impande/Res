@@ -271,7 +271,7 @@
     .resume-bar{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-top:1px solid var(--border);margin-top:28px;flex-wrap:wrap;gap:12px;}
     .resume-bar-left h3{font-size:1.5rem;font-weight:700;color:var(--white);}
     .resume-bar-left p{font-size:0.83rem;color:var(--muted);margin-top:2px;}
-    .edit-badge{display:none;font-size:0.72rem;color:var(--accent);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:2px 8px;margin-top:4px;}
+    .edit-badge{font-size:0.72rem;color:var(--accent);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 12px;margin-top:8px;display:block;text-align:center;width:fit-content;margin-left:auto;margin-right:auto;}
     .resume-bar-actions{display:flex;gap:10px;flex-wrap:wrap;}
     .btn-dl{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border:none;border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:700;font-family:inherit;transition:all .18s;letter-spacing:0.2px;text-decoration:none;}
     .btn-dl-doc{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.25);}
@@ -460,10 +460,10 @@
       }
       body.ios-print-mode #top-sticky-bar { display: none !important; }
       body.ios-print-mode .step-content { display: none !important; }
-      body.ios-print-mode #step6 {
+      body.ios-print-mode #step7 {
         display: block !important; padding: 0 !important; margin: 0 !important;
       }
-      body.ios-print-mode #step6 > :not(#resumeOutput) { display: none !important; }
+      body.ios-print-mode #step7 > :not(#resumeOutput) { display: none !important; }
       body.ios-print-mode #resumeOutput {
         display: block !important; padding: 0 !important;
         margin: 0 !important; overflow: visible !important;
@@ -514,11 +514,11 @@
         width: 100% !important;
       }
       body.pdf-printing .step-content { display: none !important; }
-      body.pdf-printing #step6 {
+      body.pdf-printing #step7 {
         display: block !important; padding: 0 !important;
         margin: 0 !important;
       }
-      body.pdf-printing #step6 > :not(#resumeOutput),
+      body.pdf-printing #step7 > :not(#resumeOutput),
       body.pdf-printing .step-title,
       body.pdf-printing .step-subtitle,
       body.pdf-printing .form-group { display: none !important; }
@@ -1678,6 +1678,33 @@
       .wa-fab { bottom: 16px; right: 14px; padding: 10px 14px 10px 11px; font-size: 0.73rem; }
     }
   </style>
+  <style>
+    /* Preview Resume floating button (steps 2-6) */
+    .preview-fab{position:fixed;bottom:22px;left:18px;z-index:7000;display:none;align-items:center;gap:7px;background:#1e1e36;color:#e8e8ff;font-size:0.78rem;font-weight:700;padding:10px 16px 10px 12px;border-radius:99px;border:1px solid #2e2e50;box-shadow:0 4px 18px rgba(0,0,0,0.4);cursor:pointer;transition:transform .18s,box-shadow .18s;}
+    .preview-fab:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+    @media(max-width:520px){.preview-fab{bottom:16px;left:14px;font-size:0.73rem;}}
+    /* Preview modal */
+    .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+    .preview-modal-overlay.open{display:flex;}
+    .preview-modal{background:#12121e;border-radius:24px 24px 0 0;border:1px solid #25253a;border-bottom:none;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.6);animation:slideUpModal .3s cubic-bezier(.34,1.1,.64,1);}
+    @keyframes slideUpModal{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    .preview-modal-handle{display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;}
+    .preview-modal-pill{width:40px;height:4px;background:#2e2e48;border-radius:99px;}
+    .preview-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px 12px;flex-shrink:0;}
+    .preview-modal-title{font-size:0.95rem;font-weight:700;color:#e8e8ff;}
+    .preview-modal-close{background:none;border:none;color:#55557a;font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;}
+    .preview-modal-close:hover{color:#e8e8ff;}
+    .preview-modal-body{overflow-y:auto;flex:1;padding:0 16px 24px;-webkit-overflow-scrolling:touch;}
+    .preview-modal-body::-webkit-scrollbar{display:none;}
+    /* prevent copy/screenshot on preview modal */
+    .preview-modal-body{user-select:none;-webkit-user-select:none;pointer-events:none;}
+    .preview-modal-body .resume-output-card{pointer-events:none;user-select:none;-webkit-user-select:none;}
+    @media(min-width:521px){
+      .preview-modal-overlay{align-items:center;}
+      .preview-modal{border-radius:24px;max-height:88vh;}
+      .preview-modal-handle{display:none;}
+    }
+  </style>
 </head>
 <body>
 
@@ -1692,7 +1719,8 @@
     <li class="step-item" data-step="3" onclick="goToStep(3)"><div class="step-num"><span>3</span></div><span class="step-label">Awards</span></li>
     <li class="step-item" data-step="4" onclick="goToStep(4)"><div class="step-num"><span>4</span></div><span class="step-label">Education</span></li>
     <li class="step-item" data-step="5" onclick="goToStep(5)"><div class="step-num"><span>5</span></div><span class="step-label">Skills</span></li>
-    <li class="step-item" data-step="6" onclick="goToStep(6)"><div class="step-num"><span>6</span></div><span class="step-label">Generate</span></li>
+    <li class="step-item" data-step="6" onclick="goToStep(6)"><div class="step-num"><span>6</span></div><span class="step-label">Extras</span></li>
+    <li class="step-item" data-step="7" onclick="goToStep(7)"><div class="step-num"><span>7</span></div><span class="step-label">Generate</span></li>
   </ul>
   <div class="preview-section">
     <div class="preview-label">Live Preview</div>
@@ -1701,7 +1729,7 @@
 </aside>
 
 <div id="mobileProgress">
-  <div class="mob-prog-label">Step <span id="mobStepNum">1</span> of 6 &mdash; <span id="mobStepName">Basic Info</span></div>
+  <div class="mob-prog-label">Step <span id="mobStepNum">1</span> of 7 &mdash; <span id="mobStepName">Basic Info</span></div>
   <div class="mob-prog-track"><div class="mob-prog-fill" id="mobProgFill" style="width:16.67%"></div></div>
 </div>
 
@@ -1709,7 +1737,7 @@
 
   <!-- Always-visible sticky bar: Generate Resume CTA + import existing resume -->
   <div id="top-sticky-bar">
-    <button class="btn-hero" onclick="startBuild()">Generate Resume →</button>
+    <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
     <p class="hero-note">No sign-up required · Free to build · ₹5 to download PDF</p>
     <div class="hero-upload-wrap">
       <div class="hero-or">— or import your existing resume —</div>
@@ -1873,11 +1901,24 @@
     </div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
-      <button class="btn-primary" onclick="goToStep(6)">Next: Generate →</button>
+      <button class="btn-primary" onclick="goToStep(6)">Next: Extras →</button>
     </div>
   </div>
 
+  <!-- Step 6: Custom Sections -->
   <div class="step-content" id="step6">
+    <h1 class="step-title">Custom Sections</h1>
+    <p class="step-subtitle">Add projects, certifications, hobbies, references or any other section</p>
+    <div id="valBanner6" class="val-banner"></div>
+    <div id="customSectionEntries"></div>
+    <button class="btn-secondary" onclick="addCustomSection()" style="margin-bottom:20px;width:100%;border-style:dashed;">+ Add Section</button>
+    <div class="nav-buttons">
+      <button class="btn-secondary" onclick="goToStep(5)">← Back</button>
+      <button class="btn-primary" onclick="goToStep(7)">Next: Generate →</button>
+    </div>
+  </div>
+
+  <div class="step-content" id="step7">
     <h1 class="step-title">Generate Resume</h1>
     <p class="step-subtitle">AI will craft your resume using the details you've provided</p>
     <div id="tplSection" class="tpl-section-card">
@@ -1919,14 +1960,13 @@
       </select>
     </div>
     <div class="nav-buttons">
-      <button class="btn-secondary" onclick="goToStep(5)">← Back</button>
+      <button class="btn-secondary" onclick="goToStep(6)">← Back</button>
       <button class="btn-accent" id="generateBtn" onclick="generateResume()">✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span></button>
     </div>
     <div class="resume-bar">
       <div class="resume-bar-left">
         <h3>Your Resume</h3>
         <p id="resumeStatus">Ready to generate</p>
-        <span class="edit-badge" id="editBadge">✎ Click resume to edit directly</span>
       </div>
       <div class="resume-bar-actions" id="dlActions" style="display:none">
         <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOC</button>
@@ -1937,6 +1977,7 @@
     <div class="resume-output-card" id="resumeOutput">
       <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
     </div>
+    <span class="edit-badge" id="editBadge" style="display:none">✎ Click resume to edit directly</span>
     <!-- Cover Letter Section -->
     <div class="cl-section" id="clSection" style="display:none">
       <div class="cl-hdr" onclick="toggleCLBody()">
@@ -1994,7 +2035,7 @@
 
 <script>
 // ── State ─────────────────────────────────────────────────────────────
-const STEP_NAMES = ['','Basic Info','Experience','Awards','Education','Skills','Generate'];
+const STEP_NAMES = ['','Basic Info','Experience','Awards','Education','Skills','Extras','Generate'];
 let skills = [];
 let userPhoto = null;
 let expCount = 0, awardCount = 0, eduCount = 0;
@@ -2327,6 +2368,8 @@ function goToStep(step, skipScroll) {
   }
   const waFab = document.getElementById('waFab');
   if (waFab) waFab.style.display = step === 0 ? '' : 'none';
+  const previewFab = document.getElementById('previewFab');
+  if (previewFab) previewFab.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
@@ -2334,7 +2377,7 @@ function goToStep(step, skipScroll) {
     document.getElementById('mobileProgress').style.display = '';
     document.getElementById('mobStepNum').textContent = step;
     document.getElementById('mobStepName').textContent = STEP_NAMES[step] || '';
-    document.getElementById('mobProgFill').style.width = ((step / 6) * 100) + '%';
+    document.getElementById('mobProgFill').style.width = ((step / 7) * 100) + '%';
     document.querySelectorAll('.step-item').forEach(el => {
       const s = parseInt(el.dataset.step);
       el.classList.remove('active','completed');
@@ -2351,7 +2394,7 @@ function goToStep(step, skipScroll) {
       }, 250);
     }
     if (step === 5) renderSuggestions();
-    if (step === 6) {
+    if (step === 7) {
       renderTemplateGrid('all');
       document.querySelectorAll('.tpl-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
       if (!lastResumeData) {
@@ -2551,6 +2594,42 @@ function addEducation() {
       <div class="form-group"><label class="form-label">GPA / Grade (optional)</label><input type="text" placeholder="e.g. 8.4/10" id="edu-gpa-${id}"></div>
     </div>`;
   document.getElementById('educationEntries').appendChild(div);
+}
+
+// ── Custom Sections ───────────────────────────────────────────────────
+let customSectionCount = 0;
+const CUSTOM_SECTION_PRESETS = ['Projects','Certifications','Hobbies','References','Languages','Volunteer Work'];
+
+function addCustomSection(title='', content='') {
+  const id = ++customSectionCount;
+  const presetOptions = CUSTOM_SECTION_PRESETS.map(p => `<option value="${p}">${p}</option>`).join('');
+  const div = document.createElement('div');
+  div.className = 'entry-card'; div.id = 'custom-'+id;
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Section Title</label>
+        <input type="text" id="custom-title-${id}" placeholder="e.g. Projects, Hobbies…" value="${title}" list="custom-presets-${id}" oninput="updatePreview()">
+        <datalist id="custom-presets-${id}">${presetOptions}</datalist>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Content</label>
+      <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
+    </div>`;
+  document.getElementById('customSectionEntries').appendChild(div);
+  updatePreview();
+}
+
+function collectCustomSections() {
+  const sections = [];
+  document.querySelectorAll('#customSectionEntries .entry-card').forEach(card => {
+    const id = card.id.replace('custom-','');
+    const title = document.getElementById('custom-title-'+id)?.value.trim()||'';
+    const content = document.getElementById('custom-content-'+id)?.value.trim()||'';
+    if (title||content) sections.push({title, content});
+  });
+  return sections;
 }
 
 // ── Skills ────────────────────────────────────────────────────────────
@@ -2774,6 +2853,7 @@ function collectData() {
     linkedin: document.getElementById('linkedin').value.trim(),
     github:   document.getElementById('github')?.value.trim()||'',
     experience, awards, education, skills,
+    customSections: collectCustomSections(),
     format: document.getElementById('outputFormat').value
   };
 }
@@ -2880,11 +2960,19 @@ function renderResumeHTML(data) {
     skillsHTML = `<div class="r-sec"><div class="r-sec-t">Skills</div>${inner}</div>`;
   }
 
+  // Custom sections
+  let customHTML = '';
+  if (data.customSections && data.customSections.length) {
+    customHTML = data.customSections.filter(s=>s.title||s.content).map(s =>
+      `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}</div><div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`
+    ).join(div);
+  }
+
   const twoColTpls = ['modern', 'executive', 'corporate'];
   if (twoColTpls.includes(tpl)) {
-    return `${open}<div class="r-2col"><aside class="r-aside">${skillsHTML}${div}${eduHTML}</aside><div class="r-main-col">${summaryHTML}${div}${expHTML}${div}${awardsHTML}</div></div></div>`;
+    return `${open}<div class="r-2col"><aside class="r-aside">${skillsHTML}${div}${eduHTML}</aside><div class="r-main-col">${summaryHTML}${div}${expHTML}${div}${awardsHTML}${customHTML ? div+customHTML : ''}</div></div></div>`;
   }
-  return `${open}${summaryHTML}${div}${expHTML}${div}${awardsHTML}${div}${eduHTML}${div}${skillsHTML}</div>`;
+  return `${open}${summaryHTML}${div}${expHTML}${div}${awardsHTML}${div}${eduHTML}${div}${skillsHTML}${customHTML ? div+customHTML : ''}</div>`;
 }
 
 // ── Build prompt ──────────────────────────────────────────────────────
@@ -3917,7 +4005,7 @@ function renderATSScore(data) {
     card = document.createElement('div');
     card.id = 'atsScoreCard';
     card.className = 'ats-card';
-    const resumeBar = document.querySelector('#step6 .resume-bar');
+    const resumeBar = document.querySelector('#step7 .resume-bar');
     if (resumeBar) resumeBar.insertAdjacentElement('afterend', card);
   }
 
@@ -4067,11 +4155,55 @@ window.addEventListener('load', function() {
   </div>
 </div>
 
+<!-- Preview Resume floating button (steps 2-7) -->
+<button class="preview-fab" id="previewFab" onclick="openPreviewModal()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  Preview Resume
+</button>
+
+<!-- Preview Modal -->
+<div class="preview-modal-overlay" id="previewModalOverlay" onclick="closePreviewModal(event)">
+  <div class="preview-modal">
+    <div class="preview-modal-handle"><div class="preview-modal-pill"></div></div>
+    <div class="preview-modal-hdr">
+      <span class="preview-modal-title">Resume Preview</span>
+      <button class="preview-modal-close" onclick="closePreviewModal()">✕</button>
+    </div>
+    <div class="preview-modal-body" id="previewModalBody"></div>
+  </div>
+</div>
+
 <!-- WhatsApp Contact Us — landing page (step 0) only -->
 <a class="wa-fab" id="waFab" href="https://wa.me/919309014196?text=Hi%2C%20I%20want%20to%20use%20Resume4U" target="_blank" rel="noopener" aria-label="Contact us on WhatsApp">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   Contact Us
 </a>
+
+<script>
+function openPreviewModal() {
+  const overlay = document.getElementById('previewModalOverlay');
+  const body = document.getElementById('previewModalBody');
+  const resumeOut = document.getElementById('resumeOutput');
+  if (!overlay || !body) return;
+  // Clone the current resume output into the modal
+  const clone = resumeOut ? resumeOut.cloneNode(true) : null;
+  body.innerHTML = '';
+  if (clone && resumeOut && resumeOut.innerHTML.trim() && !resumeOut.querySelector('.resume-placeholder')) {
+    // Scale to fit the modal width
+    clone.style.cssText = 'width:100%;transform-origin:top left;border-radius:8px;overflow:hidden;user-select:none;-webkit-user-select:none;pointer-events:none;';
+    body.appendChild(clone);
+  } else {
+    body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Generate your resume first to preview it here.</div>';
+  }
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePreviewModal(e) {
+  if (e && e.target !== document.getElementById('previewModalOverlay')) return;
+  document.getElementById('previewModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
 
 <script>
 (function() {
