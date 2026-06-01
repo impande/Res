@@ -1695,11 +1695,13 @@
     /* scaler wrapper — overflow:visible so scaled content scrolls fully */
     .preview-scale-wrap{width:100%;overflow:visible;}
     .preview-scale-inner{transform-origin:top left;display:block;}
-    /* Resume tips — overlay on resume card (desktop), full-page fixed (mobile) */
+    /* Resume tips — overlay on resume card (desktop), bottom drawer (mobile) */
+    #tipsBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:8499;}
     #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.88);backdrop-filter:blur(3px);z-index:10;border-radius:4px;align-items:center;justify-content:center;padding:20px;}
     #resumeTips.tips-hidden{display:none!important;}
     @media(max-width:520px){
-      #resumeTips{position:fixed;inset:0;border-radius:0;z-index:8500;padding:24px 16px;align-items:flex-start;overflow-y:auto;}
+      #resumeTips{position:fixed;left:0;right:0;bottom:0;top:auto;inset:unset;border-radius:24px 24px 0 0;z-index:8500;padding:0 16px 36px;align-items:flex-start;justify-content:flex-start;flex-direction:column;overflow-y:auto;max-height:85vh;animation:drawerUp .35s cubic-bezier(.34,1.3,.64,1);}
+      @keyframes drawerUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
     }
     @media(min-width:521px){
       .preview-modal-overlay{align-items:center;}
@@ -1968,12 +1970,15 @@
       <div class="resume-output-card" id="resumeOutput">
         <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
       </div>
-      <!-- Tips — overlay on desktop, banner below resume on mobile -->
+      <!-- Tips — overlay on desktop, bottom drawer on mobile -->
+      <div id="tipsBackdrop" onclick="dismissTips()"></div>
       <div id="resumeTips" style="display:none;">
+        <!-- drag handle pill (visible on mobile only via CSS) -->
+        <div style="display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;width:100%;"><div style="width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div></div>
         <div style="width:100%;max-width:640px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div style="font-size:0.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;">💡 Quick Tips</div>
-            <button onclick="var t=document.getElementById('resumeTips');t.style.display='none';t.classList.add('tips-hidden');" style="background:rgba(255,255,255,0.1);border:1px solid #44445a;color:#e8e8ff;font-size:0.8rem;font-weight:700;cursor:pointer;padding:6px 16px;border-radius:20px;line-height:1;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕ Dismiss</button>
+            <button onclick="dismissTips()" style="background:rgba(255,255,255,0.1);border:1px solid #44445a;color:#e8e8ff;font-size:0.8rem;font-weight:700;cursor:pointer;padding:6px 16px;border-radius:20px;line-height:1;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕ Dismiss</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
             <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
@@ -2846,6 +2851,13 @@ function validateMandatory() {
   return true;
 }
 
+function dismissTips() {
+  const t = document.getElementById('resumeTips');
+  const b = document.getElementById('tipsBackdrop');
+  if (t) { t.style.display = 'none'; t.classList.add('tips-hidden'); }
+  if (b) b.style.display = 'none';
+}
+
 function collectData() {
   const experience = [];
   document.querySelectorAll('#experienceEntries .entry-card').forEach(card => {
@@ -3117,7 +3129,7 @@ async function _doGenerateResume() {
   document.getElementById('tplGuide')?.classList.remove('visible');
   statusEl.textContent = 'AI is crafting your resume…';
   document.getElementById('editBadge').style.display = 'none';
-  const tipsEl = document.getElementById('resumeTips'); if (tipsEl) { tipsEl.style.display = 'none'; tipsEl.classList.remove('tips-hidden'); }
+  const tipsEl = document.getElementById('resumeTips'); const tipsBackdropEl = document.getElementById('tipsBackdrop'); if (tipsEl) { tipsEl.style.display = 'none'; tipsEl.classList.remove('tips-hidden'); } if (tipsBackdropEl) tipsBackdropEl.style.display = 'none';
 
   try {
     const response = await fetch('/.netlify/functions/generate', {
@@ -3139,7 +3151,8 @@ async function _doGenerateResume() {
       experience: parsed.experience || data.experience,
       awards: parsed.awards || data.awards,
       education: parsed.education || data.education,
-      skills: data.skills.length ? data.skills : (parsed.skills || [])
+      skills: data.skills.length ? data.skills : (parsed.skills || []),
+      customSections: data.customSections || []
     };
 
     if (data.format === 'bullets') {
@@ -3155,8 +3168,8 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.innerHTML = 'Generated ✓ &nbsp;·&nbsp; <strong>Click resume to edit directly</strong>';
     document.getElementById('editBadge').style.display = 'block';
-    const tips = document.getElementById('resumeTips'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; }
-    setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
+    const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; }
+    if (window.innerWidth > 520) { setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'nearest'}), 250); }
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
