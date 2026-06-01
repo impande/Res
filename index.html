@@ -2240,6 +2240,9 @@ function startBuild() {
 function markNeedsRegen() {
   if (!lastResumeData) return;
   needsRegenerate = true;
+  // Keep lastResumeData.customSections in sync so preview always reflects
+  // the latest user edits without requiring a full regeneration.
+  lastResumeData.customSections = collectCustomSections();
   const btn = document.getElementById('generateBtn');
   if (btn) btn.classList.add('regen-needed');
   const badge = document.getElementById('regenBadge');
@@ -4272,7 +4275,13 @@ function scalePreview() {
 function renderPreviewWithTemplate(tpl) {
   const body = document.getElementById('previewModalBody');
   if (!body) return;
-  const data = lastResumeData || collectData();
+  // Always pick up latest custom sections from the DOM (markNeedsRegen keeps
+  // lastResumeData.customSections synced, but collectCustomSections() is the
+  // ground truth if the user is previewing before their first generation).
+  const freshCustom = collectCustomSections();
+  const data = lastResumeData
+    ? { ...lastResumeData, customSections: freshCustom }
+    : collectData();
   if (!data.firstName && !data.lastName) {
     body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
     return;
