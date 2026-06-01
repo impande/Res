@@ -2400,7 +2400,7 @@ function goToStep(step, skipScroll) {
   const previewFab = document.getElementById('previewFab');
   if (previewFab) previewFab.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
   const mobPreviewBtn = document.getElementById('mobPreviewBtn');
-  if (mobPreviewBtn) mobPreviewBtn.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
+  if (mobPreviewBtn) mobPreviewBtn.style.display = (step >= 1 && step <= 7) ? 'flex' : 'none';
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
