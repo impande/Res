@@ -1688,11 +1688,12 @@
     .preview-modal-close:hover{color:#e8e8ff;}
     .preview-modal-body{overflow-y:auto;flex:1;padding:0;-webkit-overflow-scrolling:touch;}
     .preview-modal-body::-webkit-scrollbar{display:none;}
-    /* prevent copy/screenshot on preview modal */
-    .preview-modal-body{user-select:none;-webkit-user-select:none;pointer-events:none;}
+    /* prevent copy/screenshot — keep pointer-events on body so touch-scroll works */
+    .preview-modal-body{user-select:none;-webkit-user-select:none;}
+    .preview-scale-inner{pointer-events:none;user-select:none;-webkit-user-select:none;}
     .preview-modal-body .resume-output-card{pointer-events:none;user-select:none;-webkit-user-select:none;}
-    /* scaler wrapper so resume fits modal width */
-    .preview-scale-wrap{width:100%;overflow:hidden;}
+    /* scaler wrapper — overflow:visible so scaled content scrolls fully */
+    .preview-scale-wrap{width:100%;overflow:visible;}
     .preview-scale-inner{transform-origin:top left;display:block;}
     @media(min-width:521px){
       .preview-modal-overlay{align-items:center;}
@@ -4235,8 +4236,12 @@ function scalePreview() {
   inner.style.width = naturalW + 'px';
   inner.style.transform = 'scale(' + scale + ')';
   inner.style.transformOrigin = 'top left';
-  // After transform the element still occupies naturalH in DOM; shrink wrapper
-  wrap.style.height = Math.ceil(inner.offsetHeight * scale) + 'px';
+  // CSS transform doesn't affect layout — element still occupies naturalH.
+  // Use negative margin-bottom to collapse the invisible overflow so the
+  // modal body scroll height = visualH = naturalH * scale (fully scrollable).
+  const naturalH = inner.offsetHeight;
+  inner.style.marginBottom = '-' + Math.floor(naturalH * (1 - scale)) + 'px';
+  wrap.style.height = '';
 }
 function renderPreviewWithTemplate(tpl) {
   const body = document.getElementById('previewModalBody');
