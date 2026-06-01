@@ -4204,19 +4204,18 @@ function renderPreviewWithTemplate(tpl) {
   }
   const savedTpl = currentTemplate;
   currentTemplate = tpl;
-  const html = buildResumeHTML(data);
+  const html = renderResumeHTML(data);
   currentTemplate = savedTpl;
   body.innerHTML = `<div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin-top:12px;">${html}</div>`;
 }
 function openPreviewModal() {
   const overlay = document.getElementById('previewModalOverlay');
   if (!overlay) return;
-  // Sync template selector to current template
   const sel = document.getElementById('previewTplSelect');
   if (sel) sel.value = currentTemplate;
-  renderPreviewWithTemplate(currentTemplate);
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  try { renderPreviewWithTemplate(currentTemplate); } catch(e) { console.error('Preview render error:', e); }
 }
 function refreshPreviewTemplate(tpl) {
   renderPreviewWithTemplate(tpl);
