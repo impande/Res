@@ -436,15 +436,15 @@
     .ats-item-icon.pass{background:rgba(34,197,94,0.18);color:#4ade80;}
     .ats-item-icon.fail{background:rgba(239,68,68,0.15);color:#fca5a5;}
     .ats-item-icon.warn{background:rgba(245,158,11,0.15);color:#fbbf24;}
-    /* ATS collapsible header row (mobile) */
-    .ats-header{display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+    /* ATS collapsible (mobile) — hidden by default, shown via media query */
+    .ats-header{display:none;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;width:100%;}
     .ats-mini-gauge{flex-shrink:0;}
     .ats-header-info{flex:1;min-width:0;}
     .ats-header-title{font-size:0.8rem;font-weight:700;color:var(--white);line-height:1.2;}
     .ats-header-meta{font-size:0.7rem;color:var(--muted);margin-top:1px;}
-    .ats-chevron{font-size:0.8rem;color:var(--muted);transition:transform .25s;flex-shrink:0;padding:2px 4px;}
+    .ats-chevron{font-size:0.8rem;color:var(--muted);transition:transform .25s;flex-shrink:0;padding:2px 6px;}
     .ats-chevron.open{transform:rotate(180deg);}
-    .ats-body{overflow:hidden;max-height:0;transition:max-height .3s ease;}
+    .ats-body{display:none;overflow:hidden;max-height:0;transition:max-height .35s ease;}
     .ats-body.open{max-height:600px;}
     @media(max-width:520px){
       .ats-card{flex-direction:column;padding:12px 14px;gap:0;margin-top:14px;}
@@ -455,10 +455,6 @@
       .ats-items{grid-template-columns:1fr 1fr;gap:5px 12px;}
       .ats-item{font-size:0.72rem;gap:5px;}
       .ats-item-icon{width:15px;height:15px;font-size:0.52rem;}
-    }
-    @media(min-width:521px){
-      .ats-header{display:none;}
-      .ats-body{max-height:none;overflow:visible;}
     }
     /* A4 page layout for all print paths — top-level so Safari respects it */
     @page { size: A4 portrait; margin: 0; }
@@ -4115,6 +4111,9 @@ function renderATSScore(data) {
       </div>
       <span class="ats-chevron" id="atsChevron">▼</span>
     </div>
+    <div class="ats-body" id="atsBody">
+      <div class="ats-items" style="padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);margin-top:12px;">${itemsHTML}</div>
+    </div>
     <div class="ats-gauge-wrap">
       <svg width="110" height="110" viewBox="0 0 110 110">
         <circle cx="55" cy="55" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
@@ -4131,9 +4130,7 @@ function renderATSScore(data) {
     <div class="ats-details">
       <div class="ats-details-title">ATS Compatibility Score</div>
       <div class="ats-details-sub">How well your resume will perform with Applicant Tracking Systems</div>
-      <div class="ats-body" id="atsBody">
-        <div class="ats-items">${itemsHTML}</div>
-      </div>
+      <div class="ats-items">${itemsHTML}</div>
     </div>`;
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
