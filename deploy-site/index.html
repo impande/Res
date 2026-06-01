@@ -4334,7 +4334,7 @@ function renderPreviewWithTemplate(tpl) {
   const freshCustom = collectCustomSections();
   const data = lastResumeData
     ? { ...lastResumeData, customSections: freshCustom }
-    : collectData();
+    : { ...collectData(), summary: '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
   if (!data.firstName && !data.lastName) {
     body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
     return;
