@@ -3147,7 +3147,7 @@ async function _doGenerateResume() {
     clearNeedsRegen();
     renderOutput(merged);
     renderATSScore(merged);
-    statusEl.textContent = 'Generated ✓';
+    statusEl.innerHTML = 'Generated ✓ &nbsp;·&nbsp; <strong>Click any text to edit directly</strong>';
     document.getElementById('editBadge').style.display = 'block';
     const tips = document.getElementById('resumeTips'); if (tips) tips.style.display = 'flex';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
