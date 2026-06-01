@@ -261,8 +261,10 @@
     .hero-note{margin-top:14px;font-size:0.78rem;color:#555;}
     .hero-social-proof{margin-top:20px;font-size:0.8rem;color:var(--muted);letter-spacing:0.2px;}
     #mobileProgress{display:none;background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:6px 16px 8px;}
-    .mob-prog-label{font-size:0.72rem;color:var(--muted);margin-bottom:5px;}
+    #mobileProgress .mob-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+    .mob-prog-label{font-size:0.72rem;color:var(--muted);}
     .mob-prog-label span{color:var(--accent);font-weight:600;}
+    .mob-preview-btn{display:none;align-items:center;gap:5px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:0.7rem;font-weight:800;padding:5px 11px 5px 9px;border-radius:99px;border:none;cursor:pointer;letter-spacing:0.2px;white-space:nowrap;flex-shrink:0;}
     .mob-prog-track{height:3px;background:var(--border);border-radius:2px;}
     .mob-prog-fill{height:3px;background:var(--accent);border-radius:2px;transition:width .3s;}
     .resume-bar{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-top:1px solid var(--border);margin-top:28px;flex-wrap:wrap;gap:12px;}
@@ -1680,7 +1682,7 @@
     .preview-fab:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,158,11,0.65);}
     @keyframes fabPulse{0%,100%{box-shadow:0 4px 20px rgba(245,158,11,0.5);}50%{box-shadow:0 4px 28px rgba(245,158,11,0.8),0 0 0 6px rgba(245,158,11,0.15);}}
     .preview-fab{animation:fabPulse 2s ease-in-out infinite;}
-    @media(max-width:520px){.preview-fab{bottom:16px;left:14px;font-size:0.76rem;padding:10px 14px 10px 11px;}}
+    @media(max-width:520px){.preview-fab{display:none!important;}.mob-preview-btn{display:flex;}}
     /* Preview modal */
     .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
     .preview-modal-overlay.open{display:flex;}
@@ -1726,7 +1728,13 @@
 </aside>
 
 <div id="mobileProgress">
-  <div class="mob-prog-label">Step <span id="mobStepNum">1</span> of 7 &mdash; <span id="mobStepName">Basic Info</span></div>
+  <div class="mob-prog-top">
+    <div class="mob-prog-label">Step <span id="mobStepNum">1</span> of 7 &mdash; <span id="mobStepName">Basic Info</span></div>
+    <button class="mob-preview-btn" id="mobPreviewBtn" onclick="openPreviewModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Preview
+    </button>
+  </div>
   <div class="mob-prog-track"><div class="mob-prog-fill" id="mobProgFill" style="width:16.67%"></div></div>
 </div>
 
@@ -2367,6 +2375,8 @@ function goToStep(step, skipScroll) {
   if (waFab) waFab.style.display = step === 0 ? '' : 'none';
   const previewFab = document.getElementById('previewFab');
   if (previewFab) previewFab.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
+  const mobPreviewBtn = document.getElementById('mobPreviewBtn');
+  if (mobPreviewBtn) mobPreviewBtn.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
