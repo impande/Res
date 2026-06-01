@@ -4203,16 +4203,16 @@ function scalePreview() {
   const inner = body.querySelector('.preview-scale-inner');
   const wrap  = body.querySelector('.preview-scale-wrap');
   if (!inner || !wrap) return;
-  // reset scale to measure natural width
-  inner.style.transform = 'scale(1)';
-  wrap.style.height = '';
   const availW = body.clientWidth;
-  const naturalW = inner.scrollWidth;
-  if (!availW || !naturalW) return;
+  if (!availW) return;
+  // resume-a4-page is 210mm wide = 794px at 96dpi; use that as reference
+  const naturalW = 794;
   const scale = Math.min(1, availW / naturalW);
-  inner.style.transform = `scale(${scale})`;
-  // collapse the extra space that transform leaves behind
-  wrap.style.height = Math.ceil(inner.scrollHeight * scale) + 'px';
+  inner.style.width = naturalW + 'px';
+  inner.style.transform = 'scale(' + scale + ')';
+  inner.style.transformOrigin = 'top left';
+  // After transform the element still occupies naturalH in DOM; shrink wrapper
+  wrap.style.height = Math.ceil(inner.offsetHeight * scale) + 'px';
 }
 function renderPreviewWithTemplate(tpl) {
   const body = document.getElementById('previewModalBody');
@@ -4226,8 +4226,8 @@ function renderPreviewWithTemplate(tpl) {
   currentTemplate = tpl;
   const html = renderResumeHTML(data);
   currentTemplate = savedTpl;
-  body.innerHTML = `<div class="preview-scale-wrap"><div class="preview-scale-inner"><div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin:0;">${html}</div></div></div>`;
-  // let the DOM paint, then scale
+  // Wrap in resume-a4-page so template negative-margin tricks (r-head, r-2col) work correctly
+  body.innerHTML = `<div class="preview-scale-wrap"><div class="preview-scale-inner"><div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin:0;overflow:visible;"><div class="resume-a4-page" style="min-height:unset;width:794px;max-width:none;">${html}</div></div></div></div>`;
   requestAnimationFrame(function(){ requestAnimationFrame(scalePreview); });
 }
 function openPreviewModal() {
