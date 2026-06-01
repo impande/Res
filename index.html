@@ -1680,9 +1680,11 @@
   </style>
   <style>
     /* Preview Resume floating button (steps 2-6) */
-    .preview-fab{position:fixed;bottom:22px;left:18px;z-index:7000;display:none;align-items:center;gap:7px;background:#1e1e36;color:#e8e8ff;font-size:0.78rem;font-weight:700;padding:10px 16px 10px 12px;border-radius:99px;border:1px solid #2e2e50;box-shadow:0 4px 18px rgba(0,0,0,0.4);cursor:pointer;transition:transform .18s,box-shadow .18s;}
-    .preview-fab:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.5);}
-    @media(max-width:520px){.preview-fab{bottom:16px;left:14px;font-size:0.73rem;}}
+    .preview-fab{position:fixed;bottom:22px;left:18px;z-index:7000;display:none;align-items:center;gap:7px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:0.82rem;font-weight:800;padding:11px 18px 11px 13px;border-radius:99px;border:none;box-shadow:0 4px 20px rgba(245,158,11,0.5);cursor:pointer;transition:transform .18s,box-shadow .18s;letter-spacing:0.2px;}
+    .preview-fab:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,158,11,0.65);}
+    @keyframes fabPulse{0%,100%{box-shadow:0 4px 20px rgba(245,158,11,0.5);}50%{box-shadow:0 4px 28px rgba(245,158,11,0.8),0 0 0 6px rgba(245,158,11,0.15);}}
+    .preview-fab{animation:fabPulse 2s ease-in-out infinite;}
+    @media(max-width:520px){.preview-fab{bottom:16px;left:14px;font-size:0.76rem;padding:10px 14px 10px 11px;}}
     /* Preview modal */
     .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
     .preview-modal-overlay.open{display:flex;}
@@ -2613,6 +2615,16 @@ function addCustomSection(title='', content='') {
         <datalist id="custom-presets-${id}">${presetOptions}</datalist>
       </div>
     </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Start Date</label>
+        <input type="text" id="custom-start-${id}" placeholder="e.g. Jan 2023" oninput="updatePreview()">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">End Date</label>
+        <input type="text" id="custom-end-${id}" placeholder="e.g. Dec 2023 or Present" oninput="updatePreview()">
+      </div>
+    </div>
     <div class="form-group">
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
@@ -2627,7 +2639,9 @@ function collectCustomSections() {
     const id = card.id.replace('custom-','');
     const title = document.getElementById('custom-title-'+id)?.value.trim()||'';
     const content = document.getElementById('custom-content-'+id)?.value.trim()||'';
-    if (title||content) sections.push({title, content});
+    const start = document.getElementById('custom-start-'+id)?.value.trim()||'';
+    const end = document.getElementById('custom-end-'+id)?.value.trim()||'';
+    if (title||content) sections.push({title, content, start, end});
   });
   return sections;
 }
@@ -2963,9 +2977,10 @@ function renderResumeHTML(data) {
   // Custom sections
   let customHTML = '';
   if (data.customSections && data.customSections.length) {
-    customHTML = data.customSections.filter(s=>s.title||s.content).map(s =>
-      `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}</div><div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`
-    ).join(div);
+    customHTML = data.customSections.filter(s=>s.title||s.content).map(s => {
+      const dateRange = [s.start, s.end].filter(Boolean).join(' – ');
+      return `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}${dateRange ? `<span class="r-yr" style="float:right;font-weight:400;font-size:0.8em" contenteditable="true">${esc(dateRange)}</span>` : ''}</div><div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`;
+    }).join(div);
   }
 
   const twoColTpls = ['modern', 'executive', 'corporate'];
@@ -4166,8 +4181,15 @@ window.addEventListener('load', function() {
   <div class="preview-modal">
     <div class="preview-modal-handle"><div class="preview-modal-pill"></div></div>
     <div class="preview-modal-hdr">
-      <span class="preview-modal-title">Resume Preview</span>
+      <span class="preview-modal-title">👁 Resume Preview</span>
       <button class="preview-modal-close" onclick="closePreviewModal()">✕</button>
+    </div>
+    <!-- Template selector inside preview -->
+    <div style="padding:0 16px 12px;flex-shrink:0;border-bottom:1px solid #1e1e36;">
+      <label style="font-size:0.65rem;color:#55557a;text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:6px;">Choose Template</label>
+      <select id="previewTplSelect" onchange="refreshPreviewTemplate(this.value)" style="width:100%;background:#0c0c1a;border:1px solid #25253a;color:#e8e8ff;border-radius:8px;padding:8px 10px;font-size:0.82rem;font-family:inherit;">
+        <option value="modern">Modern</option><option value="classic">Classic</option><option value="minimal">Minimal</option><option value="corporate">Corporate</option><option value="creative">Creative</option><option value="executive">Executive</option><option value="fresh">Fresh</option><option value="elegant">Elegant</option><option value="bold">Bold</option><option value="tech">Tech</option><option value="academic">Academic</option><option value="simple">Simple</option><option value="sky">Sky</option><option value="purple">Purple</option><option value="warm">Warm</option><option value="slate">Slate</option><option value="pink">Pink</option><option value="indigo">Indigo</option><option value="forest">Forest</option><option value="graphite">Graphite</option><option value="midnight">Midnight</option><option value="copper">Copper</option><option value="noir">Noir</option><option value="emerald">Emerald</option><option value="denim">Denim</option><option value="ruby">Ruby</option><option value="stone">Stone</option><option value="sunset">Sunset</option><option value="ocean">Ocean</option><option value="coral">Coral</option><option value="sage">Sage</option><option value="lime">Lime</option><option value="mono">Mono</option><option value="retro">Retro</option><option value="paper">Paper</option>
+      </select>
     </div>
     <div class="preview-modal-body" id="previewModalBody"></div>
   </div>
@@ -4180,23 +4202,32 @@ window.addEventListener('load', function() {
 </a>
 
 <script>
+function renderPreviewWithTemplate(tpl) {
+  const body = document.getElementById('previewModalBody');
+  if (!body) return;
+  const data = lastResumeData || collectData();
+  if (!data.firstName && !data.lastName) {
+    body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
+    return;
+  }
+  const savedTpl = currentTemplate;
+  currentTemplate = tpl;
+  const html = buildResumeHTML(data);
+  currentTemplate = savedTpl;
+  body.innerHTML = `<div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin-top:12px;">${html}</div>`;
+}
 function openPreviewModal() {
   const overlay = document.getElementById('previewModalOverlay');
-  const body = document.getElementById('previewModalBody');
-  const resumeOut = document.getElementById('resumeOutput');
-  if (!overlay || !body) return;
-  // Clone the current resume output into the modal
-  const clone = resumeOut ? resumeOut.cloneNode(true) : null;
-  body.innerHTML = '';
-  if (clone && resumeOut && resumeOut.innerHTML.trim() && !resumeOut.querySelector('.resume-placeholder')) {
-    // Scale to fit the modal width
-    clone.style.cssText = 'width:100%;transform-origin:top left;border-radius:8px;overflow:hidden;user-select:none;-webkit-user-select:none;pointer-events:none;';
-    body.appendChild(clone);
-  } else {
-    body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Generate your resume first to preview it here.</div>';
-  }
+  if (!overlay) return;
+  // Sync template selector to current template
+  const sel = document.getElementById('previewTplSelect');
+  if (sel) sel.value = currentTemplate;
+  renderPreviewWithTemplate(currentTemplate);
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+function refreshPreviewTemplate(tpl) {
+  renderPreviewWithTemplate(tpl);
 }
 function closePreviewModal(e) {
   if (e && e.target !== document.getElementById('previewModalOverlay')) return;
