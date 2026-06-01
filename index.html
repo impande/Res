@@ -1692,11 +1692,14 @@
     .preview-modal-title{font-size:0.95rem;font-weight:700;color:#e8e8ff;}
     .preview-modal-close{background:none;border:none;color:#55557a;font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;}
     .preview-modal-close:hover{color:#e8e8ff;}
-    .preview-modal-body{overflow-y:auto;flex:1;padding:0 16px 24px;-webkit-overflow-scrolling:touch;}
+    .preview-modal-body{overflow-y:auto;flex:1;padding:0;-webkit-overflow-scrolling:touch;}
     .preview-modal-body::-webkit-scrollbar{display:none;}
     /* prevent copy/screenshot on preview modal */
     .preview-modal-body{user-select:none;-webkit-user-select:none;pointer-events:none;}
     .preview-modal-body .resume-output-card{pointer-events:none;user-select:none;-webkit-user-select:none;}
+    /* scaler wrapper so resume fits modal width */
+    .preview-scale-wrap{width:100%;overflow:hidden;}
+    .preview-scale-inner{transform-origin:top left;display:block;}
     @media(min-width:521px){
       .preview-modal-overlay{align-items:center;}
       .preview-modal{border-radius:24px;max-height:88vh;}
@@ -4194,6 +4197,23 @@ window.addEventListener('load', function() {
 </a>
 
 <script>
+function scalePreview() {
+  const body = document.getElementById('previewModalBody');
+  if (!body) return;
+  const inner = body.querySelector('.preview-scale-inner');
+  const wrap  = body.querySelector('.preview-scale-wrap');
+  if (!inner || !wrap) return;
+  // reset scale to measure natural width
+  inner.style.transform = 'scale(1)';
+  wrap.style.height = '';
+  const availW = body.clientWidth;
+  const naturalW = inner.scrollWidth;
+  if (!availW || !naturalW) return;
+  const scale = Math.min(1, availW / naturalW);
+  inner.style.transform = `scale(${scale})`;
+  // collapse the extra space that transform leaves behind
+  wrap.style.height = Math.ceil(inner.scrollHeight * scale) + 'px';
+}
 function renderPreviewWithTemplate(tpl) {
   const body = document.getElementById('previewModalBody');
   if (!body) return;
@@ -4206,7 +4226,9 @@ function renderPreviewWithTemplate(tpl) {
   currentTemplate = tpl;
   const html = renderResumeHTML(data);
   currentTemplate = savedTpl;
-  body.innerHTML = `<div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin-top:12px;">${html}</div>`;
+  body.innerHTML = `<div class="preview-scale-wrap"><div class="preview-scale-inner"><div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin:0;">${html}</div></div></div>`;
+  // let the DOM paint, then scale
+  requestAnimationFrame(function(){ requestAnimationFrame(scalePreview); });
 }
 function openPreviewModal() {
   const overlay = document.getElementById('previewModalOverlay');
@@ -4220,6 +4242,9 @@ function openPreviewModal() {
 function refreshPreviewTemplate(tpl) {
   renderPreviewWithTemplate(tpl);
 }
+window.addEventListener('resize', function() {
+  if (document.getElementById('previewModalOverlay').classList.contains('open')) scalePreview();
+});
 function closePreviewModal(e) {
   if (e && e.target !== document.getElementById('previewModalOverlay')) return;
   document.getElementById('previewModalOverlay').classList.remove('open');
