@@ -1701,7 +1701,9 @@
     #tipsBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:8499;}
     #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.88);backdrop-filter:blur(3px);z-index:10;border-radius:4px;align-items:center;justify-content:center;padding:20px;}
     #resumeTips.tips-hidden{display:none!important;}
+    .tips-drag-handle{display:none;}
     @media(max-width:520px){
+      .tips-drag-handle{display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;width:100%;}
       #resumeTips{position:fixed;left:0;right:0;bottom:0;top:auto;inset:unset;border-radius:24px 24px 0 0;z-index:8500;padding:0 16px 36px;align-items:flex-start;justify-content:flex-start;flex-direction:column;overflow-y:auto;max-height:85vh;animation:drawerUp .35s cubic-bezier(.34,1.3,.64,1);}
       @keyframes drawerUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
     }
@@ -1975,8 +1977,8 @@
       <!-- Tips — overlay on desktop, bottom drawer on mobile -->
       <div id="tipsBackdrop" onclick="dismissTips()"></div>
       <div id="resumeTips" style="display:none;">
-        <!-- drag handle pill (visible on mobile only via CSS) -->
-        <div style="display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;width:100%;"><div style="width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div></div>
+        <!-- drag handle pill (mobile only) -->
+        <div class="tips-drag-handle"><div style="width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div></div>
         <div style="width:100%;max-width:640px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div style="font-size:0.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;">💡 Quick Tips</div>
@@ -3170,8 +3172,8 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.innerHTML = 'Generated ✓ &nbsp;·&nbsp; <strong>Click resume to edit directly</strong>';
     document.getElementById('editBadge').style.display = 'block';
-    const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; }
-    if (window.innerWidth > 520) { setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'nearest'}), 250); }
+    setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
+    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
