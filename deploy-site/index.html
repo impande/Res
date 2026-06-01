@@ -1695,12 +1695,9 @@
     /* scaler wrapper — overflow:visible so scaled content scrolls fully */
     .preview-scale-wrap{width:100%;overflow:visible;}
     .preview-scale-inner{transform-origin:top left;display:block;}
-    /* Resume tips — full-page fixed overlay on mobile, resume-card overlay on desktop */
-    #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.88);backdrop-filter:blur(3px);z-index:10;border-radius:4px;align-items:center;justify-content:center;padding:20px;}
+    /* Resume tips — full-page fixed overlay on all screen sizes */
+    #resumeTips{position:fixed;inset:0;background:rgba(10,10,20,0.92);backdrop-filter:blur(4px);z-index:8500;border-radius:0;align-items:flex-start;justify-content:center;padding:40px 24px 24px;overflow-y:auto;}
     #resumeTips.tips-hidden{display:none!important;}
-    @media(max-width:520px){
-      #resumeTips{position:fixed;inset:0;border-radius:0;z-index:8500;padding:24px 16px;align-items:flex-start;overflow-y:auto;}
-    }
     @media(min-width:521px){
       .preview-modal-overlay{align-items:center;}
       .preview-modal{border-radius:24px;max-height:88vh;}
