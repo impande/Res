@@ -1961,6 +1961,34 @@
       <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
     </div>
     <span class="edit-badge" id="editBadge" style="display:none">✎ Click resume to edit directly</span>
+
+    <!-- Tips shown after resume is generated -->
+    <div id="resumeTips" style="display:none;margin-top:16px;display:none;">
+      <div style="font-size:0.65rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#55557a;margin-bottom:8px;">💡 Tips</div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#1a1a2a;border:1px solid #25253a;border-radius:10px;padding:10px 13px;">
+          <span style="font-size:1rem;flex-shrink:0;">✎</span>
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:#e8e8ff;margin-bottom:2px;">Click any text to edit</div>
+            <div style="font-size:0.74rem;color:#55557a;line-height:1.5;">Tap directly on your name, job title, bullet points or any section to edit inline — no re-generating needed.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#1a1a2a;border:1px solid #25253a;border-radius:10px;padding:10px 13px;">
+          <span style="font-size:1rem;flex-shrink:0;">🎨</span>
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:#e8e8ff;margin-bottom:2px;">Try different templates</div>
+            <div style="font-size:0.74rem;color:#55557a;line-height:1.5;">Use the <strong style="color:#f59e0b;">Preview Resume</strong> button to instantly switch templates and see how your resume looks.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#1a1a2a;border:1px solid #25253a;border-radius:10px;padding:10px 13px;">
+          <span style="font-size:1rem;flex-shrink:0;">📥</span>
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:#e8e8ff;margin-bottom:2px;">Download when ready</div>
+            <div style="font-size:0.74rem;color:#55557a;line-height:1.5;">Happy with your resume? Hit <strong style="color:#f59e0b;">Download PDF</strong> below — just ₹5 for a clean, ATS-optimised PDF.</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Cover Letter Section -->
     <div class="cl-section" id="clSection" style="display:none">
       <div class="cl-hdr" onclick="toggleCLBody()">
@@ -3076,6 +3104,7 @@ async function _doGenerateResume() {
   document.getElementById('tplGuide')?.classList.remove('visible');
   statusEl.textContent = 'AI is crafting your resume…';
   document.getElementById('editBadge').style.display = 'none';
+  const tipsEl = document.getElementById('resumeTips'); if (tipsEl) tipsEl.style.display = 'none';
 
   try {
     const response = await fetch('/.netlify/functions/generate', {
@@ -3113,6 +3142,7 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.textContent = 'Generated · Click any text to edit directly';
     document.getElementById('editBadge').style.display = 'block';
+    const tips = document.getElementById('resumeTips'); if (tips) tips.style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
