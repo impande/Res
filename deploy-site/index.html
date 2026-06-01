@@ -1945,14 +1945,7 @@
         <option value="modern">Modern</option><option value="classic">Classic</option><option value="minimal">Minimal</option><option value="corporate">Corporate</option><option value="creative">Creative</option><option value="executive">Executive</option><option value="fresh">Fresh</option><option value="elegant">Elegant</option><option value="bold">Bold</option><option value="tech">Tech</option><option value="academic">Academic</option><option value="simple">Simple</option><option value="sky">Sky</option><option value="purple">Purple</option><option value="warm">Warm</option><option value="slate">Slate</option><option value="pink">Pink</option><option value="indigo">Indigo</option><option value="forest">Forest</option><option value="graphite">Graphite</option><option value="midnight">Midnight</option><option value="copper">Copper</option><option value="noir">Noir</option><option value="emerald">Emerald</option><option value="denim">Denim</option><option value="ruby">Ruby</option><option value="stone">Stone</option><option value="sunset">Sunset</option><option value="ocean">Ocean</option><option value="coral">Coral</option><option value="sage">Sage</option><option value="lime">Lime</option><option value="mono">Mono</option><option value="retro">Retro</option><option value="paper">Paper</option>
       </select>
     </div>
-    <div class="form-group">
-      <label class="form-label">Output Format</label>
-      <select id="outputFormat" onchange="onFormatChange()">
-        <option value="full">Full Resume (all sections)</option>
-        <option value="bullets">ATS Bullet Points Only</option>
-        <option value="summary">Professional Summary Only</option>
-      </select>
-    </div>
+    <input type="hidden" id="outputFormat" value="full">
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(6)">← Back</button>
       <button class="btn-accent" id="generateBtn" onclick="generateResume()">✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span></button>
