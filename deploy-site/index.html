@@ -4190,9 +4190,12 @@ window.addEventListener('load', function() {
       <button class="preview-modal-close" onclick="closePreviewModal()">✕</button>
     </div>
     <!-- Template selector inside preview -->
-    <div style="padding:0 16px 12px;flex-shrink:0;border-bottom:1px solid #1e1e36;">
-      <label style="font-size:0.65rem;color:#55557a;text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:6px;">Choose Template</label>
-      <select id="previewTplSelect" onchange="refreshPreviewTemplate(this.value)" style="width:100%;background:#0c0c1a;border:1px solid #25253a;color:#e8e8ff;border-radius:8px;padding:8px 10px;font-size:0.82rem;font-family:inherit;">
+    <div style="padding:10px 14px 12px;flex-shrink:0;border-bottom:1px solid #1e1e36;background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03));border-radius:0;">
+      <label style="font-size:0.65rem;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:1.2px;display:flex;align-items:center;gap:5px;margin-bottom:7px;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Choose Template
+      </label>
+      <select id="previewTplSelect" onchange="refreshPreviewTemplate(this.value)" style="width:100%;background:#0c0c1a;border:1.5px solid rgba(245,158,11,0.35);color:#e8e8ff;border-radius:10px;padding:9px 12px;font-size:0.85rem;font-family:inherit;font-weight:600;box-shadow:0 0 0 3px rgba(245,158,11,0.06);outline:none;">
         <option value="modern">Modern</option><option value="classic">Classic</option><option value="minimal">Minimal</option><option value="corporate">Corporate</option><option value="creative">Creative</option><option value="executive">Executive</option><option value="fresh">Fresh</option><option value="elegant">Elegant</option><option value="bold">Bold</option><option value="tech">Tech</option><option value="academic">Academic</option><option value="simple">Simple</option><option value="sky">Sky</option><option value="purple">Purple</option><option value="warm">Warm</option><option value="slate">Slate</option><option value="pink">Pink</option><option value="indigo">Indigo</option><option value="forest">Forest</option><option value="graphite">Graphite</option><option value="midnight">Midnight</option><option value="copper">Copper</option><option value="noir">Noir</option><option value="emerald">Emerald</option><option value="denim">Denim</option><option value="ruby">Ruby</option><option value="stone">Stone</option><option value="sunset">Sunset</option><option value="ocean">Ocean</option><option value="coral">Coral</option><option value="sage">Sage</option><option value="lime">Lime</option><option value="mono">Mono</option><option value="retro">Retro</option><option value="paper">Paper</option>
       </select>
     </div>
