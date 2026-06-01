@@ -436,16 +436,29 @@
     .ats-item-icon.pass{background:rgba(34,197,94,0.18);color:#4ade80;}
     .ats-item-icon.fail{background:rgba(239,68,68,0.15);color:#fca5a5;}
     .ats-item-icon.warn{background:rgba(245,158,11,0.15);color:#fbbf24;}
+    /* ATS collapsible header row (mobile) */
+    .ats-header{display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+    .ats-mini-gauge{flex-shrink:0;}
+    .ats-header-info{flex:1;min-width:0;}
+    .ats-header-title{font-size:0.8rem;font-weight:700;color:var(--white);line-height:1.2;}
+    .ats-header-meta{font-size:0.7rem;color:var(--muted);margin-top:1px;}
+    .ats-chevron{font-size:0.8rem;color:var(--muted);transition:transform .25s;flex-shrink:0;padding:2px 4px;}
+    .ats-chevron.open{transform:rotate(180deg);}
+    .ats-body{overflow:hidden;max-height:0;transition:max-height .3s ease;}
+    .ats-body.open{max-height:600px;}
     @media(max-width:520px){
-      .ats-card{flex-direction:row;padding:12px 14px;gap:12px;align-items:center;margin-top:14px;}
-      .ats-gauge-wrap svg{width:72px;height:72px;}
-      .ats-gauge-wrap{gap:3px;}
-      .ats-score-label{font-size:0.58rem;}
-      .ats-details-title{font-size:0.82rem;margin-bottom:6px;}
-      .ats-details-sub{display:none;}
-      .ats-items{grid-template-columns:1fr 1fr;gap:4px 10px;}
-      .ats-item{font-size:0.68rem;gap:5px;}
-      .ats-item-icon{width:14px;height:14px;font-size:0.5rem;}
+      .ats-card{flex-direction:column;padding:12px 14px;gap:0;margin-top:14px;}
+      .ats-gauge-wrap,.ats-details{display:none;}
+      .ats-header{display:flex;}
+      .ats-body{display:block;}
+      .ats-body.open .ats-items{padding-top:12px;border-top:1px solid var(--border);margin-top:12px;}
+      .ats-items{grid-template-columns:1fr 1fr;gap:5px 12px;}
+      .ats-item{font-size:0.72rem;gap:5px;}
+      .ats-item-icon{width:15px;height:15px;font-size:0.52rem;}
+    }
+    @media(min-width:521px){
+      .ats-header{display:none;}
+      .ats-body{max-height:none;overflow:visible;}
     }
     /* A4 page layout for all print paths — top-level so Safari respects it */
     @page { size: A4 portrait; margin: 0; }
@@ -4082,7 +4095,26 @@ function renderATSScore(data) {
     if (resumeBar) resumeBar.insertAdjacentElement('afterend', card);
   }
 
+  // Mini arc for compact header (mobile)
+  const rm = 18, Cm = +(2 * Math.PI * rm).toFixed(2);
+  const dashm = +((score / 100) * Cm).toFixed(2), gapm = +(Cm - dashm).toFixed(2);
   card.innerHTML = `
+    <div class="ats-header" onclick="toggleATSCard()">
+      <div class="ats-mini-gauge">
+        <svg width="46" height="46" viewBox="0 0 46 46">
+          <circle cx="23" cy="23" r="${rm}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <circle cx="23" cy="23" r="${rm}" fill="none" stroke="${color}" stroke-width="5"
+            stroke-dasharray="${dashm} ${gapm}" stroke-linecap="round" transform="rotate(-90 23 23)"/>
+          <text x="23" y="27" text-anchor="middle" fill="${color}" font-size="11" font-weight="800"
+            font-family="'Segoe UI',system-ui,sans-serif">${score}</text>
+        </svg>
+      </div>
+      <div class="ats-header-info">
+        <div class="ats-header-title">ATS Compatibility Score</div>
+        <div class="ats-header-meta"><span style="color:${color};font-weight:700">${label}</span> &nbsp;·&nbsp; ${score}/100</div>
+      </div>
+      <span class="ats-chevron" id="atsChevron">▼</span>
+    </div>
     <div class="ats-gauge-wrap">
       <svg width="110" height="110" viewBox="0 0 110 110">
         <circle cx="55" cy="55" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
@@ -4099,13 +4131,23 @@ function renderATSScore(data) {
     <div class="ats-details">
       <div class="ats-details-title">ATS Compatibility Score</div>
       <div class="ats-details-sub">How well your resume will perform with Applicant Tracking Systems</div>
-      <div class="ats-items">${itemsHTML}</div>
+      <div class="ats-body" id="atsBody">
+        <div class="ats-items">${itemsHTML}</div>
+      </div>
     </div>`;
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const arc = document.getElementById('atsArc');
     if (arc) arc.setAttribute('stroke-dasharray', `${dash} ${gap}`);
   }));
+}
+
+function toggleATSCard() {
+  const body = document.getElementById('atsBody');
+  const chevron = document.getElementById('atsChevron');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open', open);
 }
 
 // ── Toast notifications ───────────────────────────────────────────────
