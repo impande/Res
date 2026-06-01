@@ -265,7 +265,9 @@
     .mob-prog-fill{height:3px;background:var(--accent);border-radius:2px;transition:width .3s;}
     .resume-bar{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-top:1px solid var(--border);margin-top:28px;flex-wrap:wrap;gap:12px;}
     .resume-bar-left h3{font-size:1.5rem;font-weight:700;color:var(--white);}
-    .resume-bar-left p{font-size:0.83rem;color:var(--muted);margin-top:2px;}
+    .resume-bar-left p{font-size:0.83rem;color:var(--muted);margin-top:4px;}
+    .edit-hint{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(239,68,68,0.1));color:#f59e0b;font-weight:700;font-size:0.73rem;padding:3px 10px 3px 8px;border-radius:99px;border:1px solid rgba(245,158,11,0.35);margin-left:6px;vertical-align:middle;letter-spacing:0.2px;animation:editGlow 2.5s ease-in-out infinite;}
+    @keyframes editGlow{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}60%{box-shadow:0 0 0 5px rgba(245,158,11,0.12);}}
     .edit-badge{font-size:0.72rem;color:var(--accent);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 12px;margin-top:8px;display:block;text-align:center;width:fit-content;margin-left:auto;margin-right:auto;}
     .resume-bar-actions{display:flex;gap:10px;flex-wrap:wrap;}
     .btn-dl{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border:none;border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:700;font-family:inherit;transition:all .18s;letter-spacing:0.2px;text-decoration:none;}
@@ -3173,7 +3175,7 @@ async function _doGenerateResume() {
     clearNeedsRegen();
     renderOutput(merged);
     renderATSScore(merged);
-    statusEl.innerHTML = 'Generated ✓ &nbsp;·&nbsp; <strong>Click resume to edit directly</strong>';
+    statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
     setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
