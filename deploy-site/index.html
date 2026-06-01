@@ -285,9 +285,11 @@
     .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
     @keyframes spin{to{transform:rotate(360deg);}}
     .val-banner{display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.83rem;color:#fca5a5;}
+    #mobileHeader{display:contents;}
     @media(max-width:768px){
       body{flex-direction:column;}
-      #sidebar{width:100%;height:auto;position:sticky;top:0;z-index:50;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:visible;gap:10px;}
+      #mobileHeader{display:block;position:sticky;top:0;z-index:50;}
+      #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow-x:auto;overflow-y:visible;gap:10px;}
       .logo{padding-bottom:0;border-bottom:none;margin-bottom:0;flex-shrink:0;}
       .logo-text .tagline{display:none;}
       .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;}
@@ -1712,7 +1714,7 @@
 </head>
 <body>
 
-<aside id="sidebar">
+<div id="mobileHeader"><aside id="sidebar">
   <div class="logo" onclick="goToStep(1)" style="cursor:pointer;" title="Go to Basic Info">
     <div class="logo-icon">R</div>
     <div class="logo-text"><h2>Resume For You</h2><div class="tagline">Powered by AI</div></div>
@@ -1737,7 +1739,7 @@
     </button>
   </div>
   <div class="mob-prog-track"><div class="mob-prog-fill" id="mobProgFill" style="width:16.67%"></div></div>
-</div>
+</div></div>
 
 <main id="main">
 
