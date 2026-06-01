@@ -1678,6 +1678,35 @@
       .wa-fab { bottom: 16px; right: 14px; padding: 10px 14px 10px 11px; font-size: 0.73rem; }
     }
   </style>
+  <style>
+    /* Preview Resume floating button (steps 2-6) */
+    .preview-fab{position:fixed;bottom:22px;left:18px;z-index:7000;display:none;align-items:center;gap:7px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:0.82rem;font-weight:800;padding:11px 18px 11px 13px;border-radius:99px;border:none;box-shadow:0 4px 20px rgba(245,158,11,0.5);cursor:pointer;transition:transform .18s,box-shadow .18s;letter-spacing:0.2px;}
+    .preview-fab:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,158,11,0.65);}
+    @keyframes fabPulse{0%,100%{box-shadow:0 4px 20px rgba(245,158,11,0.5);}50%{box-shadow:0 4px 28px rgba(245,158,11,0.8),0 0 0 6px rgba(245,158,11,0.15);}}
+    .preview-fab{animation:fabPulse 2s ease-in-out infinite;}
+    @media(max-width:520px){.preview-fab{bottom:16px;left:14px;font-size:0.76rem;padding:10px 14px 10px 11px;}}
+    /* Preview modal */
+    .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+    .preview-modal-overlay.open{display:flex;}
+    .preview-modal{background:#12121e;border-radius:24px 24px 0 0;border:1px solid #25253a;border-bottom:none;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.6);animation:slideUpModal .3s cubic-bezier(.34,1.1,.64,1);}
+    @keyframes slideUpModal{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    .preview-modal-handle{display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;}
+    .preview-modal-pill{width:40px;height:4px;background:#2e2e48;border-radius:99px;}
+    .preview-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px 12px;flex-shrink:0;}
+    .preview-modal-title{font-size:0.95rem;font-weight:700;color:#e8e8ff;}
+    .preview-modal-close{background:none;border:none;color:#55557a;font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;}
+    .preview-modal-close:hover{color:#e8e8ff;}
+    .preview-modal-body{overflow-y:auto;flex:1;padding:0 16px 24px;-webkit-overflow-scrolling:touch;}
+    .preview-modal-body::-webkit-scrollbar{display:none;}
+    /* prevent copy/screenshot on preview modal */
+    .preview-modal-body{user-select:none;-webkit-user-select:none;pointer-events:none;}
+    .preview-modal-body .resume-output-card{pointer-events:none;user-select:none;-webkit-user-select:none;}
+    @media(min-width:521px){
+      .preview-modal-overlay{align-items:center;}
+      .preview-modal{border-radius:24px;max-height:88vh;}
+      .preview-modal-handle{display:none;}
+    }
+  </style>
 </head>
 <body>
 
@@ -2341,6 +2370,8 @@ function goToStep(step, skipScroll) {
   }
   const waFab = document.getElementById('waFab');
   if (waFab) waFab.style.display = step === 0 ? '' : 'none';
+  const previewFab = document.getElementById('previewFab');
+  if (previewFab) previewFab.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
@@ -4139,6 +4170,30 @@ window.addEventListener('load', function() {
   </div>
 </div>
 
+<!-- Preview Resume floating button (steps 2-7) -->
+<button class="preview-fab" id="previewFab" onclick="openPreviewModal()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  Preview Resume
+</button>
+
+<!-- Preview Modal -->
+<div class="preview-modal-overlay" id="previewModalOverlay" onclick="closePreviewModal(event)">
+  <div class="preview-modal">
+    <div class="preview-modal-handle"><div class="preview-modal-pill"></div></div>
+    <div class="preview-modal-hdr">
+      <span class="preview-modal-title">👁 Resume Preview</span>
+      <button class="preview-modal-close" onclick="closePreviewModal()">✕</button>
+    </div>
+    <!-- Template selector inside preview -->
+    <div style="padding:0 16px 12px;flex-shrink:0;border-bottom:1px solid #1e1e36;">
+      <label style="font-size:0.65rem;color:#55557a;text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:6px;">Choose Template</label>
+      <select id="previewTplSelect" onchange="refreshPreviewTemplate(this.value)" style="width:100%;background:#0c0c1a;border:1px solid #25253a;color:#e8e8ff;border-radius:8px;padding:8px 10px;font-size:0.82rem;font-family:inherit;">
+        <option value="modern">Modern</option><option value="classic">Classic</option><option value="minimal">Minimal</option><option value="corporate">Corporate</option><option value="creative">Creative</option><option value="executive">Executive</option><option value="fresh">Fresh</option><option value="elegant">Elegant</option><option value="bold">Bold</option><option value="tech">Tech</option><option value="academic">Academic</option><option value="simple">Simple</option><option value="sky">Sky</option><option value="purple">Purple</option><option value="warm">Warm</option><option value="slate">Slate</option><option value="pink">Pink</option><option value="indigo">Indigo</option><option value="forest">Forest</option><option value="graphite">Graphite</option><option value="midnight">Midnight</option><option value="copper">Copper</option><option value="noir">Noir</option><option value="emerald">Emerald</option><option value="denim">Denim</option><option value="ruby">Ruby</option><option value="stone">Stone</option><option value="sunset">Sunset</option><option value="ocean">Ocean</option><option value="coral">Coral</option><option value="sage">Sage</option><option value="lime">Lime</option><option value="mono">Mono</option><option value="retro">Retro</option><option value="paper">Paper</option>
+      </select>
+    </div>
+    <div class="preview-modal-body" id="previewModalBody"></div>
+  </div>
+</div>
 
 <!-- WhatsApp Contact Us — landing page (step 0) only -->
 <a class="wa-fab" id="waFab" href="https://wa.me/919309014196?text=Hi%2C%20I%20want%20to%20use%20Resume4U" target="_blank" rel="noopener" aria-label="Contact us on WhatsApp">
@@ -4146,6 +4201,40 @@ window.addEventListener('load', function() {
   Contact Us
 </a>
 
+<script>
+function renderPreviewWithTemplate(tpl) {
+  const body = document.getElementById('previewModalBody');
+  if (!body) return;
+  const data = lastResumeData || collectData();
+  if (!data.firstName && !data.lastName) {
+    body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
+    return;
+  }
+  const savedTpl = currentTemplate;
+  currentTemplate = tpl;
+  const html = buildResumeHTML(data);
+  currentTemplate = savedTpl;
+  body.innerHTML = `<div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin-top:12px;">${html}</div>`;
+}
+function openPreviewModal() {
+  const overlay = document.getElementById('previewModalOverlay');
+  if (!overlay) return;
+  // Sync template selector to current template
+  const sel = document.getElementById('previewTplSelect');
+  if (sel) sel.value = currentTemplate;
+  renderPreviewWithTemplate(currentTemplate);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function refreshPreviewTemplate(tpl) {
+  renderPreviewWithTemplate(tpl);
+}
+function closePreviewModal(e) {
+  if (e && e.target !== document.getElementById('previewModalOverlay')) return;
+  document.getElementById('previewModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
 
 <script>
 (function() {
