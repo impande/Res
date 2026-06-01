@@ -442,8 +442,10 @@
     .ats-header-info{flex:1;min-width:0;}
     .ats-header-title{font-size:0.8rem;font-weight:700;color:var(--white);line-height:1.2;}
     .ats-header-meta{font-size:0.7rem;color:var(--muted);margin-top:1px;}
-    .ats-chevron{font-size:0.8rem;color:var(--muted);transition:transform .25s;flex-shrink:0;padding:2px 6px;}
-    .ats-chevron.open{transform:rotate(180deg);}
+    .ats-chevron{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);transition:transform .3s,background .2s;color:var(--text);}
+    .ats-chevron svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none;transition:transform .3s;}
+    .ats-chevron.open{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:#f59e0b;}
+    .ats-chevron.open svg{transform:rotate(180deg);}
     .ats-body{display:none;overflow:hidden;max-height:0;transition:max-height .35s ease;}
     .ats-body.open{max-height:600px;}
     @media(max-width:520px){
@@ -4109,7 +4111,7 @@ function renderATSScore(data) {
         <div class="ats-header-title">ATS Compatibility Score</div>
         <div class="ats-header-meta"><span style="color:${color};font-weight:700">${label}</span> &nbsp;·&nbsp; ${score}/100</div>
       </div>
-      <span class="ats-chevron" id="atsChevron">▼</span>
+      <span class="ats-chevron" id="atsChevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
     </div>
     <div class="ats-body" id="atsBody">
       <div class="ats-items" style="padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);margin-top:12px;">${itemsHTML}</div>
