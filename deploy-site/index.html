@@ -3675,6 +3675,7 @@ async function extractPDFText(buf) {
       const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
       const pages = [];
       const linkURLs = new Set();
+      let photoExtracted = false;
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         // Extract visible text
@@ -3689,6 +3690,37 @@ async function extractPDFText(buf) {
             else if (ann.unsafeUrl) linkURLs.add(ann.unsafeUrl);
           });
         } catch(e) {}
+        // Extract embedded photo from first page
+        if (i === 1 && !photoExtracted) {
+          try {
+            const opList = await page.getOperatorList();
+            const imgIds = [];
+            for (let j = 0; j < opList.fnArray.length; j++) {
+              if (opList.fnArray[j] === pdfjsLib.OPS.paintImageXObject) imgIds.push(opList.argsArray[j][0]);
+            }
+            for (const imgId of imgIds) {
+              const img = await new Promise(resolve => page.objs.get(imgId, resolve));
+              if (!img || !img.data || img.width < 40 || img.height < 40) continue;
+              // Only use roughly square images (likely a profile photo, not a banner)
+              const ratio = img.width / img.height;
+              if (ratio < 0.5 || ratio > 2) continue;
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width; canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx.putImageData(new ImageData(new Uint8ClampedArray(img.data), img.width, img.height), 0, 0);
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+              userPhoto = dataUrl;
+              const prev = document.getElementById('photoPreview');
+              const placeholder = document.getElementById('photoPlaceholder');
+              const removeBtn = document.getElementById('removePhotoBtn');
+              if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
+              if (placeholder) placeholder.style.display = 'none';
+              if (removeBtn) removeBtn.style.display = 'inline-flex';
+              photoExtracted = true;
+              break;
+            }
+          } catch(e) {}
+        }
       }
       let text = pages.join('\n').replace(/\s+/g, ' ').trim();
       // Append any hyperlinks found so AI can pick up LinkedIn/GitHub URLs
@@ -3771,7 +3803,7 @@ function populateFormFromParsed(data) {
   if (data.experience && data.experience.length) {
     const cont = document.getElementById('experienceEntries');
     if (cont) { cont.innerHTML = ''; expCount = 0; }
-    data.experience.slice(0,5).forEach(e => {
+    data.experience.slice(0,40).forEach(e => {
       addExperience();
       sv('exp-title-'+expCount, e.title); sv('exp-co-'+expCount, e.co);
       sv('exp-start-'+expCount, e.start); sv('exp-end-'+expCount, e.end);
@@ -3802,7 +3834,7 @@ function populateFormFromParsed(data) {
   // Skills
   if (data.skills && data.skills.length) {
     skills = [];
-    data.skills.slice(0,20).filter(s=>s&&s.trim()).forEach(s => { const t=s.trim(); if(t && !skills.includes(t)) skills.push(t); });
+    data.skills.slice(0,60).filter(s=>s&&s.trim()).forEach(s => { const t=s.trim(); if(t && !skills.includes(t)) skills.push(t); });
     renderSkills();
     if (typeof renderSuggestions === 'function') renderSuggestions();
   }
