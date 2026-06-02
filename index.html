@@ -3708,10 +3708,18 @@ async function extractPDFText(buf) {
       let photoExtracted = false;
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        // Extract visible text
+        // Extract visible text — group by y-coordinate to preserve line structure
         const content = await page.getTextContent();
-        const pageText = content.items.map(item => item.str).join(' ');
-        pages.push(pageText);
+        const lineMap = {};
+        for (const item of content.items) {
+          if (!item.str) continue;
+          const y = Math.round(item.transform[5]);
+          if (!lineMap[y]) lineMap[y] = [];
+          lineMap[y].push({ x: item.transform[4], str: item.str });
+        }
+        const sortedYs = Object.keys(lineMap).map(Number).sort((a, b) => b - a);
+        const pageLines = sortedYs.map(y => lineMap[y].sort((a, b) => a.x - b.x).map(i => i.str).join(' '));
+        pages.push(pageLines.join('\n'));
         // Extract hyperlink URLs (LinkedIn, GitHub etc embedded as annotations)
         try {
           const annotations = await page.getAnnotations();
@@ -3770,7 +3778,7 @@ async function extractPDFText(buf) {
           } catch(e) {}
         }
       }
-      let text = pages.join('\n').replace(/\s+/g, ' ').trim();
+      let text = pages.join('\n').trim();
       // Append any hyperlinks found so AI can pick up LinkedIn/GitHub URLs
       if (linkURLs.size) text += '\n\nLINKS: ' + [...linkURLs].join(' ');
       if (text.replace(/\s/g,'').length > 60) return text;
