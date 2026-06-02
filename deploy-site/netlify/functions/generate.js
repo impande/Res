@@ -1,10 +1,12 @@
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
 export async function handler(event) {
+  // Allow file:// pages (Origin: null) as well as regular origins
+  const reqOrigin = event.headers.origin || event.headers.Origin || '';
+  const CORS = {
+    'Access-Control-Allow-Origin': reqOrigin || '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS, body: '' };
   }
