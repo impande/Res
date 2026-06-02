@@ -3657,9 +3657,9 @@ RULES:
   if (!resp.ok) throw new Error('AI vision failed');
   const result = await resp.json();
   const raw = result.content || result.text || '';
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('Could not parse AI response');
-  return JSON.parse(match[0]);
+  const jsonStr = _extractJSON(raw);
+  if (!jsonStr) throw new Error('Could not parse AI response');
+  return JSON.parse(jsonStr);
 }
 
 
@@ -3817,6 +3817,22 @@ function extractDOCXText(buf) {
   return str.replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim();
 }
 
+function _extractJSON(raw) {
+  const start = raw.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < raw.length; i++) {
+    const c = raw[i];
+    if (esc) { esc = false; continue; }
+    if (c === '\\' && inStr) { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) return raw.slice(start, i + 1); }
+  }
+  return null;
+}
+
 async function parseResumeWithAI(text) {
   const prompt = `TASK: Extract every detail from this resume into a JSON object. Output ONLY a JSON object — no prose, no markdown, no code fences. Your entire response must start with { and end with }.
 
@@ -3843,9 +3859,9 @@ RULES:
   if (!resp.ok) throw new Error('AI parsing failed (server error)');
   const result = await resp.json();
   const raw = result.content || result.text || '';
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('Could not parse resume structure from AI response');
-  return JSON.parse(match[0]);
+  const jsonStr = _extractJSON(raw);
+  if (!jsonStr) throw new Error('Could not parse resume structure from AI response');
+  return JSON.parse(jsonStr);
 }
 
 async function parseResumeFromImage(file) {
@@ -3886,9 +3902,9 @@ RULES:
   if (!resp.ok) throw new Error('AI image parsing failed');
   const result = await resp.json();
   const raw = result.content || result.text || '';
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('Could not extract data from resume image');
-  return JSON.parse(match[0]);
+  const jsonStr = _extractJSON(raw);
+  if (!jsonStr) throw new Error('Could not extract data from resume image');
+  return JSON.parse(jsonStr);
 }
 
 function populateFormFromParsed(data) {
