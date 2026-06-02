@@ -70,8 +70,11 @@ export async function handler(event) {
     }
 
     // ── Claude AI (resume generation / parsing) ───────────────────────────────
-    const { prompt, imageBase64, imageMimeType } = body;
-    if (!prompt && !imageBase64) {
+    const { prompt, imageBase64, imageBase64Array, imageMimeType } = body;
+    // imageBase64Array: array of pages (multi-page scanned PDF)
+    // imageBase64: single image (backward compat)
+    const images = imageBase64Array || (imageBase64 ? [imageBase64] : []);
+    if (!prompt && !images.length) {
       return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Missing prompt' }) };
     }
 
@@ -79,22 +82,20 @@ export async function handler(event) {
 
     // Vision path: use Sonnet for better image reading accuracy
     // Text path:   use Haiku for speed and cost efficiency
-    const model = imageBase64 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
+    const model = images.length ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
 
     const requestBody = { model, max_tokens: 8192 };
 
-    if (imageBase64) {
+    if (images.length) {
+      const mimeType = imageMimeType || 'image/jpeg';
       requestBody.messages = [{
         role: 'user',
         content: [
-          {
+          // All pages as separate image blocks
+          ...images.map(b64 => ({
             type: 'image',
-            source: {
-              type: 'base64',
-              media_type: imageMimeType || 'image/jpeg',
-              data: imageBase64
-            }
-          },
+            source: { type: 'base64', media_type: mimeType, data: b64 }
+          })),
           {
             type: 'text',
             text: prompt || 'Extract all resume data from this image as JSON.'

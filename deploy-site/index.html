@@ -3596,11 +3596,11 @@ async function handleResumeFile(file) {
     const text = await extractTextFromFile(file);
     const usableText = text && text.replace(/\s/g,'').length >= 200;
     if (!usableText && file.name.toLowerCase().endsWith('.pdf')) {
-      // Image-based PDF (scanned / no text layer) — render page as image and use Claude Vision
-      showUploadStatus('parsing', '🔍 Scanned PDF detected — using AI vision…');
-      const b64 = await renderPDFPageAsBase64(file);
-      if (b64) {
-        const data = await parseResumeFromBase64(b64, 'image/jpeg');
+      // Image-based PDF (scanned / no text layer) — render ALL pages and send to Claude Vision
+      showUploadStatus('parsing', '🔍 Scanned PDF — reading with AI vision…');
+      const pages = await renderPDFPagesAsBase64(file);
+      if (pages.length) {
+        const data = await parseResumeFromBase64Array(pages, 'image/jpeg');
         const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
         if (hasData) { onParseSuccess(data); return; }
       }
@@ -3617,30 +3617,42 @@ async function handleResumeFile(file) {
   }
 }
 
-async function renderPDFPageAsBase64(file) {
-  if (typeof pdfjsLib === 'undefined') return null;
+async function renderPDFPagesAsBase64(file) {
+  if (typeof pdfjsLib === 'undefined') return [];
   try {
     const buf = await readAsArrayBuffer(file);
     pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob(['importScripts("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")'],{type:'application/javascript'}));
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
-    const page = await pdf.getPage(1);
-    const viewport = page.getViewport({ scale: 2.0 });
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width; canvas.height = viewport.height;
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-    return canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
-  } catch(e) { return null; }
+    const pages = [];
+    // Render up to 10 pages (covers even lengthy resumes)
+    for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1.8 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      pages.push(canvas.toDataURL('image/jpeg', 0.88).split(',')[1]);
+    }
+    return pages;
+  } catch(e) { return []; }
 }
 
-async function parseResumeFromBase64(b64, mimeType) {
-  const prompt = `Extract EVERY detail from this resume image into a JSON object. Output ONLY a JSON object — no prose, no markdown, no code fences. Start with { and end with }.
+async function parseResumeFromBase64Array(pages, mimeType) {
+  const pageCount = pages.length;
+  const prompt = `Extract EVERY detail from this ${pageCount > 1 ? pageCount + '-page ' : ''}resume into a JSON object. Read ALL pages completely. Output ONLY a JSON object — no prose, no markdown, no code fences. Start with { and end with }.
 
 {"firstName":"","lastName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","github":"","summary":"","experience":[{"title":"","co":"","start":"","end":"","desc":""}],"awards":[{"name":"","org":"","year":"","desc":""}],"education":[{"deg":"","sch":"","yr":"","gpa":""}],"skills":[]}
 
-RULES: Read ALL text. experience.desc: join ALL bullets with \\n verbatim. skills: flat array. "" for missing, [] for missing lists. Start with {`;
+RULES:
+1. Read every word on every page — do not skip anything
+2. experience.desc: ALL bullet points joined with \\n, verbatim, never summarise
+3. awards: includes Certifications, Achievements, Honours, Recognition, Publications
+4. skills: flat array of individual strings
+5. "" for missing scalars, [] for missing arrays
+6. Start response with {`;
   const resp = await fetch('/.netlify/functions/generate', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, imageBase64: b64, imageMimeType: mimeType })
+    body: JSON.stringify({ prompt, imageBase64Array: pages, imageMimeType: mimeType })
   });
   if (!resp.ok) throw new Error('AI vision failed');
   const result = await resp.json();
