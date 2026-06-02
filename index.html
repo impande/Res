@@ -1736,6 +1736,7 @@
       .preview-modal-handle{display:none;}
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -3666,7 +3667,24 @@ async function extractTextFromFile(file) {
   return extractDOCXText(buf); // .docx / .doc
 }
 
-function extractPDFText(buf) {
+async function extractPDFText(buf) {
+  // Use PDF.js for proper text extraction from modern compressed PDFs
+  if (typeof pdfjsLib !== 'undefined') {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+      const pages = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        pages.push(pageText);
+      }
+      const text = pages.join('\n').replace(/\s+/g, ' ').trim();
+      if (text.replace(/\s/g,'').length > 60) return text.slice(0, 12000);
+    } catch(e) { /* fall through to raw extraction */ }
+  }
+  // Fallback: raw byte extraction for simple/uncompressed PDFs
   const bytes = new Uint8Array(buf);
   let raw = '';
   for (let i = 0; i < bytes.length; i++) {
@@ -3674,41 +3692,18 @@ function extractPDFText(buf) {
     if (c >= 32 && c < 127) raw += String.fromCharCode(c);
     else if (c === 10 || c === 13) raw += '\n';
   }
-
   const texts = [];
-
-  // Method 1: extract text inside PDF string literals (parentheses)
   const reStr = /\(([^()\\]|\\.){1,500}\)/g;
   let m;
   while ((m = reStr.exec(raw)) !== null) {
-    const t = m[0].slice(1, -1)
-      .replace(/\\n/g, ' ').replace(/\\r/g, ' ').replace(/\\t/g, ' ')
-      .replace(/\\\\/g, '\\').replace(/\\\(/g, '(').replace(/\\\)/g, ')')
-      .replace(/\\[0-7]{3}/g, '').trim();
+    const t = m[0].slice(1,-1).replace(/\\n/g,' ').replace(/\\r/g,' ').replace(/\\t/g,' ').replace(/\\\\/g,'\\').replace(/\\\(/g,'(').replace(/\\\)/g,')').replace(/\\[0-7]{3}/g,'').trim();
     if (t.length > 2 && /[a-zA-Z]{2,}/.test(t)) texts.push(t);
   }
-
-  // Method 2: extract hex-encoded strings <...> common in modern PDFs
-  const reHex = /<([0-9A-Fa-f]{4,})>/g;
-  while ((m = reHex.exec(raw)) !== null) {
-    const hex = m[1];
-    let decoded = '';
-    for (let i = 0; i < hex.length - 1; i += 4) {
-      const code = parseInt(hex.slice(i, i + 4), 16);
-      if (code > 31 && code < 127) decoded += String.fromCharCode(code);
-      else if (code > 127) decoded += ' ';
-    }
-    decoded = decoded.trim();
-    if (decoded.length > 2 && /[a-zA-Z]{2,}/.test(decoded)) texts.push(decoded);
-  }
-
-  // Method 3: if still sparse, fall back to consecutive printable runs from raw stream
-  if (texts.join('').replace(/\s/g, '').length < 100) {
+  if (texts.join('').replace(/\s/g,'').length < 100) {
     const reRun = /[A-Za-z][A-Za-z0-9 @.,:()\-+\/]{10,}/g;
     while ((m = reRun.exec(raw)) !== null) texts.push(m[0].trim());
   }
-
-  return texts.join(' ').replace(/\s+/g, ' ').trim().slice(0, 8000);
+  return texts.join(' ').replace(/\s+/g,' ').trim().slice(0, 12000);
 }
 
 function extractDOCXText(buf) {
@@ -3726,7 +3721,7 @@ async function parseResumeWithAI(text) {
   const prompt = `TASK: Parse resume text into JSON. OUTPUT FORMAT: JSON object only — your entire response must be a single JSON object starting with { and ending with }. No prose, no markdown, no code fences.
 
 RESUME TEXT:
-${text.slice(0, 5500)}
+${text.slice(0, 10000)}
 
 OUTPUT (JSON only, no other text):
 {"firstName":"John","lastName":"Doe","jobTitle":"Software Engineer","email":"john@example.com","phone":"+1 555 1234","location":"San Francisco, CA","linkedin":"https://linkedin.com/in/johndoe","github":"","summary":"Professional summary here","experience":[{"title":"Software Engineer","co":"Acme Corp","start":"Jan 2020","end":"Present","desc":"Led team of 5, delivered features"}],"awards":[{"name":"Best Employee","org":"Acme","year":"2022","desc":""}],"education":[{"deg":"B.Tech Computer Science","sch":"IIT Bombay","yr":"2018","gpa":"8.5"}],"skills":["JavaScript","Python","React"]}
@@ -3768,7 +3763,8 @@ function populateFormFromParsed(data) {
       addExperience();
       sv('exp-title-'+expCount, e.title); sv('exp-co-'+expCount, e.co);
       sv('exp-start-'+expCount, e.start); sv('exp-end-'+expCount, e.end);
-      sv('exp-desc-'+expCount, e.desc);
+      const descText = Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.desc || '');
+      sv('exp-desc-'+expCount, descText);
     });
   }
   // Awards
