@@ -1,4 +1,4 @@
-export async function handler(event) {
+exports.handler = async function(event) {
   // file:// pages send Origin: null — use * so browsers allow the response
   const reqOrigin = event.headers.origin || event.headers.Origin || '';
   const CORS = {
