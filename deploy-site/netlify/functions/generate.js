@@ -1,8 +1,8 @@
 export async function handler(event) {
-  // Allow file:// pages (Origin: null) as well as regular origins
+  // file:// pages send Origin: null — use * so browsers allow the response
   const reqOrigin = event.headers.origin || event.headers.Origin || '';
   const CORS = {
-    'Access-Control-Allow-Origin': reqOrigin || '*',
+    'Access-Control-Allow-Origin': (reqOrigin && reqOrigin !== 'null') ? reqOrigin : '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
