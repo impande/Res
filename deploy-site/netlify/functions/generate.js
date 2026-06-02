@@ -1,6 +1,15 @@
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 export async function handler(event) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS, body: '' };
+  }
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+    return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
   try {
     const body = JSON.parse(event.body || '{}');
@@ -8,12 +17,13 @@ export async function handler(event) {
     // ── PDF generation ────────────────────────────────────────────────────────
     if (body.action === 'generate-pdf') {
       const { html, filename } = body;
-      if (!html) return { statusCode: 400, body: JSON.stringify({ error: 'Missing html' }) };
+      if (!html) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Missing html' }) };
 
       const apiKey = process.env.PDFSHIFT_API_KEY;
       if (!apiKey) {
         return {
           statusCode: 500,
+          headers: CORS,
           body: JSON.stringify({ error: 'Add PDFSHIFT_API_KEY to your Netlify environment variables, then redeploy' }),
         };
       }
@@ -48,6 +58,7 @@ export async function handler(event) {
       return {
         statusCode: 200,
         headers: {
+          ...CORS,
           'Content-Type': 'application/pdf',
           'Content-Disposition': 'attachment; filename="' + safe + '.pdf"',
         },
@@ -56,10 +67,10 @@ export async function handler(event) {
       };
     }
 
-    // ── Claude AI (resume generation / image extraction) ──────────────────────
+    // ── Claude AI (resume generation / parsing) ───────────────────────────────
     const { prompt, imageBase64, imageMimeType } = body;
     if (!prompt && !imageBase64) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Missing prompt' }) };
+      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Missing prompt' }) };
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -105,12 +116,12 @@ export async function handler(event) {
 
     const data = await response.json();
     if (!response.ok) {
-      return { statusCode: response.status, body: JSON.stringify({ error: data.error?.message || 'API error' }) };
+      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ error: data.error?.message || 'API error' }) };
     }
 
     const text = data.content?.[0]?.text;
-    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
   }
 }
