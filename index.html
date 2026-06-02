@@ -3700,14 +3700,32 @@ async function extractPDFText(buf) {
             }
             for (const imgId of imgIds) {
               const img = await new Promise(resolve => page.objs.get(imgId, resolve));
-              if (!img || !img.data || img.width < 40 || img.height < 40) continue;
-              // Only use roughly square images (likely a profile photo, not a banner)
+              if (!img || !img.data) continue;
+              // Reject tiny icons and large banner/background images — profile photos are typically 60–800px
+              if (img.width < 60 || img.height < 60 || img.width > 1200 || img.height > 1200) continue;
+              // Only use roughly square images (aspect ratio 0.5–2)
               const ratio = img.width / img.height;
               if (ratio < 0.5 || ratio > 2) continue;
+              // Convert to RGBA (PDF images can be RGB kind=2 or RGBA kind=3 or greyscale kind=1)
+              let rgba;
+              if (img.kind === 3) {
+                rgba = new Uint8ClampedArray(img.data);
+              } else if (img.kind === 2) {
+                // RGB → RGBA
+                rgba = new Uint8ClampedArray(img.width * img.height * 4);
+                for (let p = 0, q = 0; p < img.data.length; p += 3, q += 4) {
+                  rgba[q] = img.data[p]; rgba[q+1] = img.data[p+1]; rgba[q+2] = img.data[p+2]; rgba[q+3] = 255;
+                }
+              } else {
+                // Greyscale → RGBA
+                rgba = new Uint8ClampedArray(img.width * img.height * 4);
+                for (let p = 0, q = 0; p < img.data.length; p++, q += 4) {
+                  rgba[q] = rgba[q+1] = rgba[q+2] = img.data[p]; rgba[q+3] = 255;
+                }
+              }
               const canvas = document.createElement('canvas');
               canvas.width = img.width; canvas.height = img.height;
-              const ctx = canvas.getContext('2d');
-              ctx.putImageData(new ImageData(new Uint8ClampedArray(img.data), img.width, img.height), 0, 0);
+              canvas.getContext('2d').putImageData(new ImageData(rgba, img.width, img.height), 0, 0);
               const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
               userPhoto = dataUrl;
               const prev = document.getElementById('photoPreview');
@@ -3774,9 +3792,10 @@ RULES:
 1. Extract real values only — do not invent anything not in the resume
 2. Split full name into firstName and lastName
 3. Experience desc: ALL bullet points joined with newline (\n) — do not summarise or shorten, preserve every bullet verbatim
-4. skills: array of individual skill strings (not a single string)
-5. Use empty string "" for missing fields, empty array [] for missing lists
-6. Start your response with { — nothing before it`;
+4. awards: extract from any section named Awards, Achievements, Certifications, Honors, Recognition, or similar — use name=award/cert name, org=issuing body, year=year, desc=description
+5. skills: array of individual skill strings (not a single string)
+6. Use empty string "" for missing fields, empty array [] for missing lists
+7. Start your response with { — nothing before it`;
 
   const resp = await fetch('/.netlify/functions/generate', {
     method:'POST', headers:{'Content-Type':'application/json'},
