@@ -3729,7 +3729,7 @@ OUTPUT (JSON only, no other text):
 RULES:
 1. Extract real values only — do not invent anything not in the resume
 2. Split full name into firstName and lastName
-3. Experience desc: one string with all bullet points combined
+3. Experience desc: ALL bullet points joined with newline (\n) — do not summarise or shorten, preserve every bullet verbatim
 4. skills: array of individual skill strings (not a single string)
 5. Use empty string "" for missing fields, empty array [] for missing lists
 6. Start your response with { — nothing before it`;
