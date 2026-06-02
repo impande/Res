@@ -1776,7 +1776,8 @@
     <div class="hero-upload-wrap">
       <div class="hero-or">— or import your existing resume —</div>
       <div class="upload-tabs">
-        <button class="upload-tab" id="tabUpload" onclick="switchUploadTab('upload')">📄 Upload PDF/Doc</button>
+        <button class="upload-tab" id="tabUpload" onclick="switchUploadTab('upload')">📄 PDF / Doc</button>
+        <button class="upload-tab" id="tabScreenshots" onclick="switchUploadTab('screenshots')">📷 Screenshots</button>
         <button class="upload-tab active" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.5rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;line-height:1.6;white-space:nowrap;box-shadow:0 2px 8px rgba(34,197,94,0.55);">✓ RECOMMENDED</span></button>
       </div>
       <!-- Upload PDF/Doc panel -->
@@ -1788,6 +1789,17 @@
           <div class="upload-zone-sub">PDF · DOCX · DOC · TXT &nbsp;·&nbsp; Drag &amp; drop</div>
           <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Choose File</button>
         </div>
+      </div>
+      <!-- Screenshots panel -->
+      <div class="upload-panel" id="panelScreenshots">
+        <div class="upload-zone" id="screenshotDropZone" onclick="document.getElementById('screenshotInput').click()">
+          <input type="file" id="screenshotInput" accept="image/*" multiple style="display:none" onchange="handleScreenshots(this.files);this.value='';">
+          <div class="upload-zone-icon">📷</div>
+          <div class="upload-zone-title">Upload resume screenshots</div>
+          <div class="upload-zone-sub">Select multiple images — one per page &nbsp;·&nbsp; JPG · PNG · WEBP</div>
+          <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('screenshotInput').click()">Choose Images</button>
+        </div>
+        <div id="screenshotPreviews" style="display:none;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
       </div>
       <!-- Paste text panel -->
       <div class="upload-panel active" id="panelPaste">
@@ -3551,16 +3563,104 @@ function _startIOSPrint() {
     const f = e.dataTransfer.files[0];
     if (f) handleResumeFile(f);
   });
+  // Screenshots drag-drop
+  const szone = document.getElementById('screenshotDropZone');
+  if (szone) {
+    szone.addEventListener('dragover', e => { e.preventDefault(); szone.classList.add('drag-over'); });
+    szone.addEventListener('dragleave', () => szone.classList.remove('drag-over'));
+    szone.addEventListener('drop', e => {
+      e.preventDefault(); szone.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (files && files.length) handleScreenshots(files);
+    });
+  }
 })();
 
 function switchUploadTab(tab) {
-  document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
-  document.getElementById('tabPaste').classList.toggle('active', tab === 'paste');
-  document.getElementById('panelUpload').classList.toggle('active', tab === 'upload');
-  document.getElementById('panelPaste').classList.toggle('active', tab === 'paste');
-  // clear status bar when switching
+  ['upload','screenshots','paste'].forEach(t => {
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('active', t === tab);
+    document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('active', t === tab);
+  });
   const bar = document.getElementById('uploadStatusBar');
   bar.style.display = 'none'; bar.className = 'upload-status-bar';
+}
+
+async function handleScreenshots(files) {
+  if (!files || !files.length) return;
+  const fileArr = Array.from(files);
+  // Show thumbnails
+  const prev = document.getElementById('screenshotPreviews');
+  if (prev) {
+    prev.style.display = 'flex';
+    prev.innerHTML = fileArr.map((_,i) => `<div id="sthumb_${i}" style="width:60px;height:80px;border-radius:6px;background:#1a1a2e;border:1px solid #2e2e4a;display:flex;align-items:center;justify-content:center;font-size:1.4rem;position:relative;">🖼️<span style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:0.45rem;color:#6666aa;">Page ${i+1}</span></div>`).join('');
+  }
+  showUploadStatus('parsing', `🤖 AI is reading ${fileArr.length} screenshot${fileArr.length>1?'s':''}… (0/${fileArr.length})`);
+  const results = [];
+  for (let i = 0; i < fileArr.length; i++) {
+    showUploadStatus('parsing', `🤖 Reading page ${i+1} of ${fileArr.length}…`);
+    try {
+      const data = await parseResumeFromImage(fileArr[i]);
+      results.push(data);
+      // Show green check on thumbnail
+      const thumb = document.getElementById('sthumb_'+i);
+      if (thumb) { thumb.innerHTML = '✅'; thumb.style.fontSize = '1.6rem'; }
+    } catch(e) {
+      const thumb = document.getElementById('sthumb_'+i);
+      if (thumb) { thumb.innerHTML = '❌'; thumb.style.fontSize = '1.6rem'; }
+    }
+  }
+  if (!results.length) { showUploadStatus('err', '✗ Could not read any of the screenshots.'); return; }
+  // Merge all pages into one data object
+  const merged = mergeResumePages(results);
+  const hasData = merged.firstName || merged.lastName || merged.jobTitle || merged.email || (merged.experience && merged.experience.length);
+  if (!hasData) { showUploadStatus('err', '✗ Could not extract resume data from screenshots.'); return; }
+  onParseSuccess(merged);
+}
+
+function mergeResumePages(pages) {
+  // Personal info from first page that has it
+  const base = pages.find(p => p.firstName || p.lastName || p.email) || pages[0];
+  const merged = {
+    firstName: base.firstName || '', lastName: base.lastName || '',
+    jobTitle: base.jobTitle || '', email: base.email || '',
+    phone: base.phone || '', location: base.location || '',
+    linkedin: base.linkedin || '', github: base.github || '',
+    summary: base.summary || '',
+    experience: [], awards: [], education: [], skills: []
+  };
+  // Fill any missing personal fields from other pages
+  pages.forEach(p => {
+    if (!merged.jobTitle && p.jobTitle) merged.jobTitle = p.jobTitle;
+    if (!merged.email && p.email) merged.email = p.email;
+    if (!merged.phone && p.phone) merged.phone = p.phone;
+    if (!merged.location && p.location) merged.location = p.location;
+    if (!merged.linkedin && p.linkedin) merged.linkedin = p.linkedin;
+    if (!merged.github && p.github) merged.github = p.github;
+    if (!merged.summary && p.summary) merged.summary = p.summary;
+  });
+  // Combine experience — deduplicate by title+company
+  const expSeen = new Set();
+  pages.forEach(p => (p.experience||[]).forEach(e => {
+    const key = (e.title||'')+'|'+(e.co||'');
+    if (!expSeen.has(key)) { expSeen.add(key); merged.experience.push(e); }
+  }));
+  // Combine awards — deduplicate by name
+  const awardSeen = new Set();
+  pages.forEach(p => (p.awards||[]).forEach(a => {
+    const key = a.name||'';
+    if (key && !awardSeen.has(key)) { awardSeen.add(key); merged.awards.push(a); }
+  }));
+  // Combine education — deduplicate by degree+school
+  const eduSeen = new Set();
+  pages.forEach(p => (p.education||[]).forEach(e => {
+    const key = (e.deg||'')+'|'+(e.sch||'');
+    if (!eduSeen.has(key)) { eduSeen.add(key); merged.education.push(e); }
+  }));
+  // Union of all skills
+  const skillSet = new Set();
+  pages.forEach(p => (p.skills||[]).forEach(s => { if (s && s.trim()) skillSet.add(s.trim()); }));
+  merged.skills = [...skillSet];
+  return merged;
 }
 
 function showUploadStatus(cls, msg) {
