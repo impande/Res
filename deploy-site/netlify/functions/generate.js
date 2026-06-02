@@ -79,7 +79,7 @@ export async function handler(event) {
     // Text path:   use Haiku for speed and cost efficiency
     const model = imageBase64 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
 
-    const requestBody = { model, max_tokens: 4096 };
+    const requestBody = { model, max_tokens: 8192 };
 
     if (imageBase64) {
       requestBody.messages = [{
@@ -100,7 +100,10 @@ export async function handler(event) {
         ]
       }];
     } else {
-      requestBody.system = 'You are an expert resume writer who creates ATS-optimised, professional resumes. Write in clear, action-oriented language with quantified achievements where possible. Output plain text without markdown formatting.';
+      const isParseTask = prompt && (prompt.includes('Parse resume') || prompt.includes('Extract') || prompt.includes('JSON object'));
+      requestBody.system = isParseTask
+        ? 'You are a precise data extraction assistant. When given a resume, extract all information faithfully into the requested JSON structure. Never invent or omit data. Output valid JSON only.'
+        : 'You are an expert resume writer who creates ATS-optimised, professional resumes. Write in clear, action-oriented language with quantified achievements where possible. Output plain text without markdown formatting.';
       requestBody.messages = [{ role: 'user', content: prompt }];
     }
 
