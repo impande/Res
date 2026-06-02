@@ -644,7 +644,7 @@
     /* ── Upload Resume Feature ── */
     .hero-upload-wrap{margin-top:22px;width:100%;max-width:450px;}
     .hero-or{font-size:0.76rem;color:#444;text-align:center;margin-bottom:14px;letter-spacing:0.3px;}
-    .upload-zone{border:2px dashed rgba(245,158,11,0.35);border-radius:14px;padding:20px 18px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,158,11,0.02);}
+    .upload-zone{display:block;border:2px dashed rgba(245,158,11,0.35);border-radius:14px;padding:20px 18px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,158,11,0.02);}
     .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(245,158,11,0.07);transform:translateY(-1px);}
     .upload-zone-icon{font-size:1.6rem;margin-bottom:6px;}
     .upload-zone-title{font-size:0.9rem;font-weight:600;color:var(--white);margin-bottom:3px;}
@@ -1783,7 +1783,7 @@
       <!-- Upload PDF/Doc panel -->
       <div class="upload-panel" id="panelUpload">
         <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
-          <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
+          <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleResumeFile(this.files[0]);this.value='';">
           <div class="upload-zone-icon">📄</div>
           <div class="upload-zone-title">Upload your resume</div>
           <div class="upload-zone-sub">PDF · DOCX · DOC · TXT &nbsp;·&nbsp; Drag &amp; drop</div>
@@ -1793,7 +1793,7 @@
       <!-- Screenshots panel -->
       <div class="upload-panel" id="panelScreenshots">
         <label class="upload-zone" id="screenshotDropZone" for="screenshotInput">
-          <input type="file" id="screenshotInput" accept="image/*" multiple style="display:none" onchange="handleScreenshots(this.files);this.value='';">
+          <input type="file" id="screenshotInput" accept="image/*" multiple style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleScreenshots(this.files);this.value='';">
           <div class="upload-zone-icon">📷</div>
           <div class="upload-zone-title">Upload resume screenshots</div>
           <div class="upload-zone-sub">Select multiple images — one per page &nbsp;·&nbsp; JPG · PNG · WEBP</div>
