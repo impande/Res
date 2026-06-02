@@ -1782,24 +1782,24 @@
       </div>
       <!-- Upload PDF/Doc panel -->
       <div class="upload-panel" id="panelUpload">
-        <div class="upload-zone" id="uploadDropZone" onclick="document.getElementById('resumeUploadInput').click()">
+        <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
           <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="display:none" onchange="handleResumeFile(this.files[0]);this.value='';">
           <div class="upload-zone-icon">📄</div>
           <div class="upload-zone-title">Upload your resume</div>
           <div class="upload-zone-sub">PDF · DOCX · DOC · TXT &nbsp;·&nbsp; Drag &amp; drop</div>
-          <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('resumeUploadInput').click()">Choose File</button>
-        </div>
+          <span class="btn-browse">Choose File</span>
+        </label>
       </div>
       <!-- Screenshots panel -->
       <div class="upload-panel" id="panelScreenshots">
-        <div class="upload-zone" id="screenshotDropZone" onclick="document.getElementById('screenshotInput').click()">
+        <label class="upload-zone" id="screenshotDropZone" for="screenshotInput">
           <input type="file" id="screenshotInput" accept="image/*" multiple style="display:none" onchange="handleScreenshots(this.files);this.value='';">
           <div class="upload-zone-icon">📷</div>
           <div class="upload-zone-title">Upload resume screenshots</div>
           <div class="upload-zone-sub">Select multiple images — one per page &nbsp;·&nbsp; JPG · PNG · WEBP</div>
-          <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('screenshotInput').click()">Choose Images</button>
-        </div>
-        <div id="screenshotPreviews" style="display:none;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+          <span class="btn-browse">Choose Images</span>
+        </label>
+        <div id="screenshotPreviews" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;"></div>
       </div>
       <!-- Paste text panel -->
       <div class="upload-panel active" id="panelPaste">
