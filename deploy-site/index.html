@@ -3583,9 +3583,25 @@ function onParseSuccess(data) {
 
 async function handleResumeFile(file) {
   if (!file) return;
+  // 20 MB hard limit — larger files are unlikely to be resumes and would time out
+  if (file.size > 20 * 1024 * 1024) {
+    showUploadStatus('err', '⚠ File is too large (max 20 MB). Please compress the PDF or paste your resume text instead.'); return;
+  }
   showUploadStatus('parsing', '⏳ Reading file…');
+  const name = file.name.toLowerCase();
+  // Old binary .doc format — XML extractor won't work, direct to Vision or paste
+  if (name.endsWith('.doc') && !name.endsWith('.docx')) {
+    showUploadStatus('parsing', '🔍 Reading .doc file with AI vision…');
+    try {
+      const b64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result.split(',')[1]); r.onerror = () => rej(new Error('Read failed')); r.readAsDataURL(file); });
+      const data = await parseResumeFromBase64Array([b64], 'application/msword');
+      const hasData = data.firstName || data.lastName || data.email || (data.experience && data.experience.length);
+      if (hasData) { onParseSuccess(data); return; }
+    } catch(e) {}
+    switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read .doc file — please save it as PDF or DOCX, or paste your resume text.'); return;
+  }
   try {
-    const isImage = /^image\//i.test(file.type) || /\.(jpe?g|png|webp|bmp|gif)$/i.test(file.name);
+    const isImage = /^image\//i.test(file.type) || /\.(jpe?g|png|webp|bmp|gif)$/i.test(name);
     if (isImage) {
       showUploadStatus('parsing', '🤖 AI is reading your resume image…');
       const data = await parseResumeFromImage(file);
@@ -3595,18 +3611,20 @@ async function handleResumeFile(file) {
     }
     const text = await extractTextFromFile(file);
     const usableText = text && text.replace(/\s/g,'').length >= 200;
-    if (!usableText && file.name.toLowerCase().endsWith('.pdf')) {
-      // Image-based PDF (scanned / no text layer) — render ALL pages and send to Claude Vision
+    if (!usableText && name.endsWith('.pdf')) {
+      // Scanned / image-only PDF — render pages and send to Claude Vision
       showUploadStatus('parsing', '🔍 Scanned PDF — reading with AI vision…');
       const pages = await renderPDFPagesAsBase64(file);
-      if (pages.length) {
-        const data = await parseResumeFromBase64Array(pages, 'image/jpeg');
-        const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
-        if (hasData) { onParseSuccess(data); return; }
+      if (!pages.length) {
+        // Likely password-protected or fully corrupted
+        switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not open this PDF — it may be password-protected. Please remove the password, or paste your resume text.'); return;
       }
+      const data = await parseResumeFromBase64Array(pages, 'image/jpeg');
+      const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+      if (hasData) { onParseSuccess(data); return; }
       switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read this PDF — paste your resume text instead.'); return;
     }
-    if (!usableText) { switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read text — paste your resume text in the box below.'); return; }
+    if (!usableText) { switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read text from this file — paste your resume text in the box below.'); return; }
     showUploadStatus('parsing', '🤖 AI is parsing your resume…');
     const data = await parseResumeWithAI(text);
     const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
