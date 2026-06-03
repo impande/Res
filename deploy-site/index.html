@@ -3158,13 +3158,20 @@ async function _doGenerateResume() {
     if (!jsonMatch) throw new Error('No JSON in AI response');
     const parsed = JSON.parse(jsonMatch[0]);
 
+    // Always use form values for structured fields (name, company, dates, etc.)
+    // so user edits are never silently overwritten by the AI.
+    // Only pull AI-generated narrative content (summary, bullets).
     const merged = {
       firstName: data.firstName, lastName: data.lastName, jobTitle: data.jobTitle,
       email: data.email, phone: data.phone, location: data.location, linkedin: data.linkedin, github: data.github,
       summary: parsed.summary || '',
-      experience: parsed.experience || data.experience,
-      awards: parsed.awards || data.awards,
-      education: parsed.education || data.education,
+      experience: data.experience.map((e, i) => {
+        const aiE = parsed.experience && parsed.experience[i];
+        return { title: e.title, co: e.co, start: e.start, end: e.end,
+                 bullets: (aiE && aiE.bullets && aiE.bullets.length) ? aiE.bullets : (e.desc ? [e.desc] : []) };
+      }),
+      awards: data.awards,
+      education: data.education,
       skills: data.skills.length ? data.skills : (parsed.skills || []),
       customSections: data.customSections || []
     };
