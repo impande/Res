@@ -3013,8 +3013,8 @@ function renderResumeHTML(data) {
   if (data.experience && data.experience.length) {
     const items = data.experience.map(e => {
       const bullets = Array.isArray(e.bullets)
-        ? `<ul class="r-ul">${e.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`
-        : (e.desc ? `<ul class="r-ul"><li>${esc(e.desc)}</li></ul>` : '');
+        ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${esc(b)}</li>`).join('')}</ul>`
+        : (e.desc ? `<ul class="r-ul"><li contenteditable="true">${esc(e.desc)}</li></ul>` : '');
       const period = [e.start, e.end].filter(Boolean).join(' – ');
       return `<div class="r-exp"><div class="r-exp-top"><span class="r-role" contenteditable="true">${esc(e.title||e.role||'')}</span><span class="r-period">${esc(period)}</span></div><div class="r-co" contenteditable="true">${esc(e.co||e.company||'')}</div>${bullets}</div>`;
     }).join('');
