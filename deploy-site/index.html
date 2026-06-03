@@ -3201,7 +3201,7 @@ async function _doGenerateResume() {
     statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
-    setTimeout(() => { if (window.innerWidth > 520) return; const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop) tipsBackdrop.style.display = 'block'; } }, 500);
+    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; setTimeout(() => tips.scrollIntoView({behavior:'smooth', block:'start'}), 150); } }, 500);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
