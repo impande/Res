@@ -2521,6 +2521,7 @@ function setExpTitle(id, title) {
       c.classList.toggle('selected', c.dataset.title === title);
     });
   }
+  markNeedsRegen();
 }
 
 async function prefillFromGithub() {
@@ -2566,6 +2567,7 @@ function updatePhoneLink() {
   const link = document.getElementById('phoneLink');
   if (val) { link.href='tel:'+val.replace(/\s/g,''); link.style.display='flex'; }
   else { link.style.display='none'; }
+  updatePreview();
 }
 
 function updatePreview() {
