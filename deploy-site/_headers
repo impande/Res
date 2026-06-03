@@ -1,0 +1,25 @@
+# HTML pages — never cache (always serve latest)
+/*.html
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
+
+/
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
+
+# Static assets — cache 7 days (images, fonts, etc.)
+/og-image.png
+  Cache-Control: public, max-age=604800, immutable
+
+/*.png
+  Cache-Control: public, max-age=604800, immutable
+
+/*.jpg
+  Cache-Control: public, max-age=604800, immutable
+
+/*.svg
+  Cache-Control: public, max-age=604800, immutable
