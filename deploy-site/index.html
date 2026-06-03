@@ -2589,7 +2589,7 @@ function addExperience() {
   const id = ++expCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'exp-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="removeEntry(this)" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Job Title</label>
@@ -2607,13 +2607,14 @@ function addExperience() {
     <div class="form-group"><label class="form-label">Key Achievements (optional — AI will enhance)</label><textarea rows="3" placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" id="exp-desc-${id}" oninput="markNeedsRegen()"></textarea><p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
     <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
   document.getElementById('experienceEntries').appendChild(div);
+  markNeedsRegen();
 }
 
 function addAward() {
   const id = ++awardCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'award-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="removeEntry(this)" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Award / Certification</label><input type="text" placeholder="e.g. AWS Certified Solutions Architect" id="award-name-${id}"></div>
       <div class="form-group"><label class="form-label">Year</label><input type="text" placeholder="e.g. 2023" id="award-year-${id}"></div>
@@ -2623,13 +2624,14 @@ function addAward() {
       <div class="form-group"><label class="form-label">Description (optional)</label><input type="text" placeholder="Brief description" id="award-desc-${id}"></div>
     </div>`;
   document.getElementById('awardEntries').appendChild(div);
+  markNeedsRegen();
 }
 
 function addEducation() {
   const id = ++eduCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'edu-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="removeEntry(this)" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Degree / Qualification</label><input type="text" placeholder="e.g. B.Tech Computer Science" id="edu-deg-${id}"></div>
       <div class="form-group"><label class="form-label">Institution</label><input type="text" placeholder="e.g. IIT Bombay" id="edu-sch-${id}"></div>
@@ -2639,6 +2641,7 @@ function addEducation() {
       <div class="form-group"><label class="form-label">GPA / Grade (optional)</label><input type="text" placeholder="e.g. 8.4/10" id="edu-gpa-${id}"></div>
     </div>`;
   document.getElementById('educationEntries').appendChild(div);
+  markNeedsRegen();
 }
 
 // ── Custom Sections ───────────────────────────────────────────────────
@@ -2650,7 +2653,7 @@ function addCustomSection(title='', content='') {
   const presetOptions = CUSTOM_SECTION_PRESETS.map(p => `<option value="${p}">${p}</option>`).join('');
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'custom-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="removeEntry(this)" title="Remove">✕</button>
     <div class="form-row">
       <div class="form-group" style="flex:1">
         <label class="form-label">Section Title</label>
@@ -2704,6 +2707,7 @@ function addSkill() {
 }
 
 function removeSkill(skill) { skills = skills.filter(s=>s!==skill); renderSkills(); renderSuggestions(); markNeedsRegen(); }
+function removeEntry(btn) { btn.closest('.entry-card').remove(); markNeedsRegen(); }
 
 function renderSkills(newSkill) {
   const container = document.getElementById('skillTags');
