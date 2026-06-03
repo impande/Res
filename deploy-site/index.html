@@ -3201,7 +3201,7 @@ async function _doGenerateResume() {
     statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
-    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
+    setTimeout(() => { if (window.innerWidth > 520) return; const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop) tipsBackdrop.style.display = 'block'; } }, 500);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
@@ -3761,7 +3761,10 @@ async function extractPDFText(buf) {
               if (opList.fnArray[j] === pdfjsLib.OPS.paintImageXObject) imgIds.push(opList.argsArray[j][0]);
             }
             for (const imgId of imgIds) {
-              const img = await new Promise(resolve => page.objs.get(imgId, resolve));
+              const img = await Promise.race([
+                new Promise(resolve => page.objs.get(imgId, resolve)),
+                new Promise(resolve => setTimeout(() => resolve(null), 1500))
+              ]);
               if (!img || !img.data) continue;
               // Reject tiny icons and large banner/background images — profile photos are typically 60–800px
               if (img.width < 60 || img.height < 60 || img.width > 1200 || img.height > 1200) continue;
@@ -3885,7 +3888,16 @@ RULES:
   const raw = result.content || result.text || '';
   const jsonStr = _extractJSON(raw);
   if (!jsonStr) throw new Error('Could not parse resume structure from AI response');
-  return JSON.parse(jsonStr);
+  const data = JSON.parse(jsonStr);
+  if (!data.linkedin) {
+    const lm = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[^\s,<>"'\\]+/i);
+    if (lm) data.linkedin = lm[0].startsWith('http') ? lm[0] : 'https://' + lm[0];
+  }
+  if (!data.github) {
+    const gm = text.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/[^\s,<>"'\\]+/i);
+    if (gm) data.github = gm[0].startsWith('http') ? gm[0] : 'https://' + gm[0];
+  }
+  return data;
 }
 
 async function parseResumeFromImage(file) {
