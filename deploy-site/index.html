@@ -3976,7 +3976,6 @@ function populateFormFromParsed(data) {
   // Mark any prior generated output as stale so preview + cover letter
   // pick up the freshly-parsed form data instead of the old AI output.
   needsRegenerate = true;
-  lastResumeData = null;
   updatePreview();
 }
 
@@ -4513,7 +4512,7 @@ function renderPreviewWithTemplate(tpl) {
   const freshCustom = collectCustomSections();
   const data = (lastResumeData && !needsRegenerate)
     ? { ...lastResumeData, customSections: freshCustom }
-    : { ...collectData(), summary: (lastResumeData && !needsRegenerate ? lastResumeData.summary : null) || '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
+    : { ...collectData(), summary: '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
   if (!data.firstName && !data.lastName) {
     body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
     return;
