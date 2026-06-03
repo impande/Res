@@ -3196,7 +3196,7 @@ async function _doGenerateResume() {
     statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
     document.getElementById('editBadge').style.display = 'block';
     setTimeout(() => { const out=document.getElementById('resumeOutput');if(out){if(window.innerWidth>768){requestAnimationFrame(()=>out.scrollIntoView({behavior:'smooth',block:'start'}));}else{const r=out.getBoundingClientRect();window.scrollTo({top:Math.max(0,window.pageYOffset+r.top-60),behavior:'smooth'});}}}, 300);
-    setTimeout(() => { const tips=document.getElementById('resumeTips');const tipsBackdrop=document.getElementById('tipsBackdrop');if(tips){tips.classList.remove('tips-hidden');tips.style.display='flex';if(tipsBackdrop&&window.innerWidth<=520)tipsBackdrop.style.display='block';if(window.innerWidth>768){setTimeout(()=>{const tc=document.getElementById('tipsContent');if(tc)tc.scrollIntoView({behavior:'smooth',block:'start'});},350);}}}, 600);
+    setTimeout(() => { const tips=document.getElementById('resumeTips');const tipsBackdrop=document.getElementById('tipsBackdrop');if(tips){tips.classList.remove('tips-hidden');tips.style.display='flex';if(tipsBackdrop&&window.innerWidth<=520)tipsBackdrop.style.display='block';if(window.innerWidth>768){setTimeout(()=>{const tc=document.getElementById('tipsContent');if(tc)tc.scrollIntoView({behavior:'smooth',block:'start'});},500);}}}, 1000);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
