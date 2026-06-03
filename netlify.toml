@@ -2,7 +2,7 @@
 # Without this file at the repo root, Netlify defaults to the repo root
 # and misses sitemap.xml, og-image.png, functions, examples/, etc.
 [build]
-  command   = "true"
+  command   = "npm install && node build.js"
   publish   = "deploy-site"
   functions = "deploy-site/netlify/functions"
 
