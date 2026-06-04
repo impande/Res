@@ -1710,8 +1710,8 @@
     .preview-modal-pill{width:40px;height:4px;background:#2e2e48;border-radius:99px;}
     .preview-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px 12px;flex-shrink:0;}
     .preview-modal-title{font-size:0.95rem;font-weight:700;color:#e8e8ff;}
-    .preview-modal-close{background:none;border:none;color:#55557a;font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;}
-    .preview-modal-close:hover{color:#e8e8ff;}
+    .preview-modal-close{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#c8c8e8;font-size:1rem;cursor:pointer;padding:0;width:34px;height:34px;border-radius:50%;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .preview-modal-close:hover{background:rgba(255,255,255,0.15);color:#e8e8ff;}
     .preview-modal-body{overflow-y:auto;flex:1;padding:0;-webkit-overflow-scrolling:touch;}
     .preview-modal-body::-webkit-scrollbar{display:none;}
     /* prevent copy/screenshot — keep pointer-events on body so touch-scroll works */
@@ -2415,9 +2415,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function goToStep(step, skipScroll) {
   const prevStep = currentStep;
   currentStep = step;
+  // Reset scroll BEFORE DOM changes so browser scroll-anchoring cannot fire
+  // when the sticky bar appears/disappears (desktop: #main is the scroll container).
+  const mainEl = document.getElementById('main');
+  if (mainEl) mainEl.scrollTop = 0;
+  window.scrollTo({ top: 0 });
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   const topBar = document.getElementById('top-sticky-bar');
@@ -2468,7 +2472,8 @@ function goToStep(step, skipScroll) {
     }
     updatePreview();
   }
-  document.getElementById('main').scrollTop = 0;
+  // rAF backup: catches any post-layout scroll-anchor adjustments the browser applies
+  requestAnimationFrame(() => { document.getElementById('main').scrollTop = 0; });
 }
 
 function selectTemplate(tpl) {
