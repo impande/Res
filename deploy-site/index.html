@@ -3235,11 +3235,42 @@ function showPageCount() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   const strip = document.getElementById('pageCountStrip');
   if (!page || !strip) return;
-  const A4_W = 210 * 96 / 25.4;
   const A4_H = 297 * 96 / 25.4;
-  const actualW = page.getBoundingClientRect().width;
-  const scale = actualW > 0 ? actualW / A4_W : 1;
-  const pages = Math.max(1, Math.ceil(page.scrollHeight * scale / A4_H));
+  // Hidden 794px-wide measurer replicates PDFShift's rendering environment exactly.
+  // Scoped CSS mirrors pdfOverrides so layout matches the downloaded PDF on all devices.
+  if (!document.getElementById('_pcMeasureStyle')) {
+    const s = document.createElement('style');
+    s.id = '_pcMeasureStyle';
+    s.textContent =
+      '#_pcMeasure .resume-a4-page{width:210mm!important;max-width:none!important;min-height:0!important;height:auto!important;box-shadow:none!important;margin:0!important;border-radius:0!important;padding:0!important;}' +
+      '#_pcMeasure .r-head{margin:0!important;border-radius:0!important;}' +
+      '#_pcMeasure .r-head-accent{margin:0!important;}' +
+      '#_pcMeasure .r-2col{margin:0!important;min-height:0!important;align-items:flex-start!important;}' +
+      '#_pcMeasure .tpl-modern>.r-head,#_pcMeasure .tpl-corporate>.r-head,#_pcMeasure .tpl-executive>.r-head{width:100%!important;}' +
+      '#_pcMeasure .tpl-modern>.r-2col,#_pcMeasure .tpl-corporate>.r-2col,#_pcMeasure .tpl-executive>.r-2col{width:100%!important;}' +
+      '#_pcMeasure .tpl-classic>.r-head,#_pcMeasure .tpl-minimal>.r-head,#_pcMeasure .tpl-creative>.r-head,#_pcMeasure .tpl-fresh>.r-head,' +
+      '#_pcMeasure .tpl-academic>.r-head,#_pcMeasure .tpl-simple>.r-head,#_pcMeasure .tpl-coral>.r-head,#_pcMeasure .tpl-sage>.r-head,' +
+      '#_pcMeasure .tpl-lime>.r-head,#_pcMeasure .tpl-mono>.r-head,#_pcMeasure .tpl-retro>.r-head,#_pcMeasure .tpl-paper>.r-head{padding:13mm 14mm 0!important;}' +
+      '#_pcMeasure [class*="tpl-"]>.r-sec{padding-left:14mm!important;padding-right:14mm!important;margin-top:8px!important;}' +
+      '#_pcMeasure [class*="tpl-"]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}' +
+      '#_pcMeasure [class*="tpl-"]{padding-bottom:10mm!important;}' +
+      '#_pcMeasure .r-aside{padding-left:18px!important;}' +
+      '#_pcMeasure .r-main-col{padding-right:18px!important;padding-bottom:0!important;}' +
+      '#_pcMeasure [class*="tpl-"] .r-exp{margin-bottom:8px!important;}';
+    document.head.appendChild(s);
+  }
+  let wrap = document.getElementById('_pcMeasure');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = '_pcMeasure';
+    wrap.style.cssText = 'position:fixed;top:-99999px;left:0;width:794px;visibility:hidden;pointer-events:none;overflow:visible;';
+    document.body.appendChild(wrap);
+  }
+  const clone = page.cloneNode(true);
+  wrap.innerHTML = '';
+  wrap.appendChild(clone);
+  const pages = Math.max(1, Math.ceil(clone.scrollHeight / A4_H));
+  wrap.innerHTML = '';
   strip.style.display = 'flex';
   strip.innerHTML = `<span class="pcs-label">Resume length</span><span class="pcs-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${pages} page${pages > 1 ? 's' : ''}</span>`;
 }
