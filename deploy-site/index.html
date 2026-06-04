@@ -277,6 +277,8 @@
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
     .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;}
     #tipsContent{scroll-margin-top:20px;}
+    .page-break-indicator{position:absolute;left:0;right:0;pointer-events:none;z-index:6;}
+    .page-num-badge{position:absolute;right:0;pointer-events:none;z-index:6;}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
@@ -3207,11 +3209,52 @@ async function _doGenerateResume() {
   }
 }
 
+function showPageBreakIndicators() {
+  const page = document.querySelector('#resumeOutput .resume-a4-page');
+  if (!page) return;
+  page.querySelectorAll('.page-break-indicator,.page-num-badge').forEach(el => el.remove());
+  const pageHeightPx = 297 * 96 / 25.4;
+  const totalHeight = page.scrollHeight;
+  if (totalHeight <= pageHeightPx) {
+    // single page — show "1" badge only
+    const b = document.createElement('div');
+    b.className = 'page-num-badge';
+    b.style.top = '10px';
+    b.innerHTML = '<div style="font-size:0.55rem;font-weight:800;color:#bbb;background:rgba(0,0,0,0.05);border:1px solid #ddd;border-radius:3px;padding:2px 5px;">1</div>';
+    page.appendChild(b);
+    return;
+  }
+  const numBreaks = Math.floor(totalHeight / pageHeightPx);
+  // Page 1 badge
+  const b1 = document.createElement('div');
+  b1.className = 'page-num-badge';
+  b1.style.top = '10px';
+  b1.innerHTML = '<div style="font-size:0.55rem;font-weight:800;color:#bbb;background:rgba(0,0,0,0.05);border:1px solid #ddd;border-radius:3px;padding:2px 5px;">1</div>';
+  page.appendChild(b1);
+  for (let i = 1; i <= numBreaks; i++) {
+    const top = i * pageHeightPx;
+    if (top >= totalHeight) break;
+    // dashed break line + PAGE N label
+    const line = document.createElement('div');
+    line.className = 'page-break-indicator';
+    line.style.top = top + 'px';
+    line.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;border-top:1.5px dashed rgba(245,158,11,0.55);"></div><div style="font-size:0.58rem;font-weight:800;color:#f59e0b;background:rgba(255,253,245,0.97);border:1.5px dashed rgba(245,158,11,0.55);border-radius:20px;padding:2px 10px;white-space:nowrap;letter-spacing:0.4px;">PAGE ${i + 1}</div><div style="flex:1;border-top:1.5px dashed rgba(245,158,11,0.55);"></div></div>`;
+    page.appendChild(line);
+    // page N badge
+    const bN = document.createElement('div');
+    bN.className = 'page-num-badge';
+    bN.style.top = (top + 10) + 'px';
+    bN.innerHTML = `<div style="font-size:0.55rem;font-weight:800;color:#bbb;background:rgba(0,0,0,0.05);border:1px solid #ddd;border-radius:3px;padding:2px 5px;">${i + 1}</div>`;
+    page.appendChild(bN);
+  }
+}
+
 function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
   out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
+  requestAnimationFrame(() => showPageBreakIndicators());
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   // Show cover letter section and pre-fill role
@@ -3233,10 +3276,11 @@ function downloadDoc() {
   // Deep-clone so we don't mutate the live DOM
   const clone = page.cloneNode(true);
 
-  // Strip editing attributes
+  // Strip editing attributes and page-break indicators
   clone.removeAttribute('oninput');
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[oninput]').forEach(el => el.removeAttribute('oninput'));
+  clone.querySelectorAll('.page-break-indicator,.page-num-badge').forEach(el => el.remove());
 
   // Remove SVG contact icons (Word renders SVG poorly; text remains)
   clone.querySelectorAll('.r-ci svg').forEach(svg => svg.remove());
@@ -3411,6 +3455,7 @@ function _doPrintPDF_server(isIOS) {
   const clone = resumeEl.cloneNode(true);
   clone.querySelectorAll('[contenteditable]').forEach(function(el) { el.removeAttribute('contenteditable'); });
   clone.querySelectorAll('[oninput]').forEach(function(el) { el.removeAttribute('oninput'); });
+  clone.querySelectorAll('.page-break-indicator,.page-num-badge').forEach(function(el) { el.remove(); });
   const livePhotos = Array.from(resumeEl.querySelectorAll('img[src^="data:"]'));
   if (livePhotos.length) {
     const clonePhotos = Array.from(clone.querySelectorAll('img[src^="data:"]'));
