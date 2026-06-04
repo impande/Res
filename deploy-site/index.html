@@ -2480,11 +2480,15 @@ function goToStep(step, skipScroll) {
     updatePreview();
   }
   if (!skipScroll) {
-    requestAnimationFrame(function() {
-      const mainEl = document.getElementById('main');
-      if (mainEl && mainEl.scrollTop > 0) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
-      if (window.pageYOffset > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    if (step === 1) {
+      scrollToStep1Start();
+    } else {
+      requestAnimationFrame(function() {
+        const mainEl = document.getElementById('main');
+        if (mainEl && mainEl.scrollTop > 0) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.pageYOffset > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
   }
 }
 
