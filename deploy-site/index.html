@@ -3251,7 +3251,18 @@ function renderOutput(data) {
   out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;clearTimeout(window._pcT);window._pcT=setTimeout(showPageCount,500)">${renderResumeHTML(data)}</div>`;
   const statusEl = document.getElementById('resumeStatus');
   if (statusEl) statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
+  // Initial count — double-rAF gives browser time to finish layout
   requestAnimationFrame(() => requestAnimationFrame(() => showPageCount()));
+  // ResizeObserver updates count whenever page height changes (generate, edit, template switch)
+  if (window._pageCountObserver) window._pageCountObserver.disconnect();
+  const page = out.querySelector('.resume-a4-page');
+  if (page && window.ResizeObserver) {
+    window._pageCountObserver = new ResizeObserver(function() {
+      clearTimeout(window._pcT);
+      window._pcT = setTimeout(showPageCount, 50);
+    });
+    window._pageCountObserver.observe(page);
+  }
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   // Show cover letter section and pre-fill role
