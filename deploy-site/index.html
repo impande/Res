@@ -169,7 +169,7 @@
     .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;position:relative;}
     .entry-remove{position:absolute;top:13px;right:13px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;min-width:32px;min-height:32px;}
     .entry-remove:hover{color:#ef4444;}
-    .add-entry-btn{width:100%;padding:11px;background:transparent;border:1.5px dashed var(--input-border);border-radius:8px;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all .15s;font-family:inherit;min-height:44px;}
+    .add-entry-btn{width:100%;padding:11px;background:transparent;border:1.5px dashed var(--input-border);border-radius:8px;color:var(--muted);font-size:0.88rem;cursor:pointer;transition:all .15s;font-family:inherit;min-height:44px;margin-bottom:12px;}
     .add-entry-btn:hover{border-color:var(--accent);color:var(--accent);}
     .skill-input-row{display:flex;gap:10px;margin-bottom:10px;}
     .skill-input-wrap{position:relative;flex:1;}
@@ -2247,9 +2247,10 @@ const TPL_COLORS = {
 };
 
 // ── Hero ──────────────────────────────────────────────────────────────
-function startBuild() {
-  heroClickCount++;
-  goToStep(1);
+function scrollToStep1Start() {
+  const mainEl = document.getElementById('main');
+  if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'instant' });
+  window.scrollTo({ top: 0, behavior: 'instant' });
   setTimeout(function() {
     const firstName = document.getElementById('firstName');
     const prefill = document.querySelector('#step1 .prefill-section');
@@ -2259,14 +2260,19 @@ function startBuild() {
     const main = document.getElementById('main');
     const mainRect = main ? main.getBoundingClientRect() : {top: 0};
     const firstNameRect = firstName.getBoundingClientRect();
-    // Pull back by prefill section height so prefill stays in view above first name
     const pullback = prefill ? prefill.offsetHeight + 16 : 0;
     const delta = firstNameRect.top - mainRect.top - barH - pullback - 16;
     if (delta > 0) {
-      if (main) main.scrollTo({top: main.scrollTop + delta, behavior: 'smooth'});
-      window.scrollTo({top: window.pageYOffset + delta, behavior: 'smooth'});
+      if (main) main.scrollTo({top: delta, behavior: 'smooth'});
+      window.scrollTo({top: delta, behavior: 'smooth'});
     }
   }, 200);
+}
+
+function startBuild() {
+  heroClickCount++;
+  goToStep(1, true);
+  scrollToStep1Start();
 }
 
 function markNeedsRegen() {
@@ -2423,12 +2429,6 @@ function goToStep(step, skipScroll) {
   currentStep = step;
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
-  // Smooth-scroll both #main (scroll container when content fits viewport) and
-  // window (scroll container when content is taller than viewport). overflow-anchor:none
-  // on #main prevents scroll-anchoring from cancelling the animation.
-  const mainEl = document.getElementById('main');
-  if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   const topBar = document.getElementById('top-sticky-bar');
@@ -2478,6 +2478,13 @@ function goToStep(step, skipScroll) {
       }
     }
     updatePreview();
+  }
+  if (!skipScroll) {
+    requestAnimationFrame(function() {
+      const mainEl = document.getElementById('main');
+      if (mainEl && mainEl.scrollTop > 0) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      if (window.pageYOffset > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 }
 
@@ -3208,7 +3215,7 @@ async function _doGenerateResume() {
     renderATSScore(merged);
     statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
     document.getElementById('editBadge').style.display = 'block';
-    setTimeout(() => { const out=document.getElementById('resumeOutput');if(out){if(window.innerWidth>768){requestAnimationFrame(()=>out.scrollIntoView({behavior:'smooth',block:'start'}));}else{const r=out.getBoundingClientRect();window.scrollTo({top:Math.max(0,window.pageYOffset+r.top-60),behavior:'smooth'});}}}, 300);
+    setTimeout(() => { const out=document.getElementById('resumeOutput');if(out){if(window.innerWidth>768){requestAnimationFrame(()=>out.scrollIntoView({behavior:'smooth',block:'start'}));}else{const target=document.getElementById('atsScoreCard')||document.getElementById('pageCountStrip')||out;const r=target.getBoundingClientRect();window.scrollTo({top:Math.max(0,window.pageYOffset+r.top-60),behavior:'smooth'});}}}, 300);
     setTimeout(() => { const tips=document.getElementById('resumeTips');const tipsBackdrop=document.getElementById('tipsBackdrop');if(tips){tips.classList.remove('tips-hidden');tips.style.display='flex';if(tipsBackdrop&&window.innerWidth<=520)tipsBackdrop.style.display='block';if(window.innerWidth>768){setTimeout(()=>{const tc=document.getElementById('tipsContent');if(tc)tc.scrollIntoView({behavior:'smooth',block:'start'});},500);}}}, 1000);
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
@@ -3236,7 +3243,7 @@ function renderOutput(data) {
   out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;clearTimeout(window._pcT);window._pcT=setTimeout(showPageCount,500)">${renderResumeHTML(data)}</div>`;
   const statusEl = document.getElementById('resumeStatus');
   if (statusEl) statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
-  requestAnimationFrame(() => showPageCount());
+  requestAnimationFrame(() => requestAnimationFrame(() => showPageCount()));
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   // Show cover letter section and pre-fill role
@@ -3595,7 +3602,8 @@ function onParseSuccess(data) {
   populateFormFromParsed(data);
   showUploadStatus('ok', '✓ Resume imported! Review your details below, then click Generate.');
   setTimeout(() => {
-    goToStep(1);
+    goToStep(1, true);
+    scrollToStep1Start();
   }, 800);
 }
 
