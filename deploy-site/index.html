@@ -1887,8 +1887,8 @@
   <div class="step-content" id="step2">
     <h1 class="step-title">Work Experience</h1>
     <p class="step-subtitle">Add your most recent roles first. Leave description blank — AI will generate optimised bullets for you.</p>
+    <button class="add-entry-btn" onclick="addExperience(true)">+ Add Work Experience</button>
     <div id="experienceEntries"></div>
-    <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
       <button class="btn-primary" onclick="goToStep(3)">Next: Awards →</button>
@@ -1898,8 +1898,8 @@
   <div class="step-content" id="step3">
     <h1 class="step-title">Awards &amp; Achievements</h1>
     <p class="step-subtitle">Certifications, honours, recognitions — anything that sets you apart</p>
+    <button class="add-entry-btn" onclick="addAward(true)">+ Add Award / Achievement</button>
     <div id="awardEntries"></div>
-    <button class="add-entry-btn" onclick="addAward()">+ Add Award / Achievement</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
       <button class="btn-primary" onclick="goToStep(4)">Next: Education →</button>
@@ -1909,8 +1909,8 @@
   <div class="step-content" id="step4">
     <h1 class="step-title">Education</h1>
     <p class="step-subtitle">Your academic background</p>
+    <button class="add-entry-btn" onclick="addEducation(true)">+ Add Education</button>
     <div id="educationEntries"></div>
-    <button class="add-entry-btn" onclick="addEducation()">+ Add Education</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
       <button class="btn-primary" onclick="goToStep(5)">Next: Skills →</button>
@@ -1946,8 +1946,8 @@
     <h1 class="step-title">Custom Sections</h1>
     <p class="step-subtitle">Add projects, certifications, hobbies, references or any other section</p>
     <div id="valBanner6" class="val-banner"></div>
+    <button class="btn-secondary" onclick="addCustomSection()" style="margin-bottom:12px;width:100%;border-style:dashed;">+ Add Section</button>
     <div id="customSectionEntries"></div>
-    <button class="btn-secondary" onclick="addCustomSection()" style="margin-bottom:20px;width:100%;border-style:dashed;">+ Add Section</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(5)">← Back</button>
       <button class="btn-primary" onclick="goToStep(7)">Next: Generate →</button>
@@ -2587,7 +2587,7 @@ function updatePreview() {
 }
 
 // ── Entry adders ──────────────────────────────────────────────────────
-function addExperience() {
+function addExperience(atTop = false) {
   const id = ++expCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'exp-'+id;
@@ -2608,11 +2608,12 @@ function addExperience() {
     </div>
     <div class="form-group"><label class="form-label">Key Achievements (optional — AI will enhance)</label><textarea rows="3" placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" id="exp-desc-${id}" oninput="markNeedsRegen()"></textarea><p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
     <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
-  document.getElementById('experienceEntries').appendChild(div);
+  const ec = document.getElementById('experienceEntries');
+  atTop ? ec.prepend(div) : ec.appendChild(div);
   markNeedsRegen();
 }
 
-function addAward() {
+function addAward(atTop = false) {
   const id = ++awardCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'award-'+id;
@@ -2625,11 +2626,12 @@ function addAward() {
       <div class="form-group"><label class="form-label">Organisation</label><input type="text" placeholder="e.g. Amazon Web Services" id="award-org-${id}"></div>
       <div class="form-group"><label class="form-label">Description (optional)</label><input type="text" placeholder="Brief description" id="award-desc-${id}"></div>
     </div>`;
-  document.getElementById('awardEntries').appendChild(div);
+  const ac = document.getElementById('awardEntries');
+  atTop ? ac.prepend(div) : ac.appendChild(div);
   markNeedsRegen();
 }
 
-function addEducation() {
+function addEducation(atTop = false) {
   const id = ++eduCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'edu-'+id;
@@ -2642,7 +2644,8 @@ function addEducation() {
       <div class="form-group"><label class="form-label">Graduation Year</label><input type="text" placeholder="e.g. 2018" id="edu-yr-${id}"></div>
       <div class="form-group"><label class="form-label">GPA / Grade (optional)</label><input type="text" placeholder="e.g. 8.4/10" id="edu-gpa-${id}"></div>
     </div>`;
-  document.getElementById('educationEntries').appendChild(div);
+  const ec2 = document.getElementById('educationEntries');
+  atTop ? ec2.prepend(div) : ec2.appendChild(div);
   markNeedsRegen();
 }
 
@@ -2677,7 +2680,7 @@ function addCustomSection(title='', content='') {
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
     </div>`;
-  document.getElementById('customSectionEntries').appendChild(div);
+  document.getElementById('customSectionEntries').prepend(div);
   updatePreview();
 }
 
