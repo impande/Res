@@ -2480,7 +2480,7 @@ function goToStep(step, skipScroll) {
     updatePreview();
   }
   if (!skipScroll) {
-    if (step === 1) {
+    if (step === 1 && prevStep !== 0) {
       scrollToStep1Start();
     } else {
       requestAnimationFrame(function() {
