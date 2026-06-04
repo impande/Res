@@ -5,7 +5,7 @@
 # publish directory at deploy time. `|| true` keeps the deploy succeeding even
 # if the copy is ever a no-op, in which case the committed copy below is served.
 [build]
-  command   = "cp ../index.html index.html || true"
+  command   = "npm install && (cp ../index.html index.html || true)"
   publish   = "."
   functions = "netlify/functions"
 
@@ -14,6 +14,14 @@
 
 [functions."generate"]
   timeout = 26
+
+# Pretty URLs for shareable resumes: /r/jane-smith → r.html?u=jane-smith
+# status = 200 means rewrite, so the URL bar stays /r/jane-smith.
+[[redirects]]
+  from = "/r/:username"
+  to   = "/r.html?u=:username"
+  status = 200
+  force  = true
 
 # Never cache the HTML — always serve the latest version to all users
 [[headers]]

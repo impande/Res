@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Resume</title>
+<meta name="description" content="Free shareable resume page. Get a permanent link you can share with recruiters.">
+<style>
+  :root { --fg:#1a1a1a; --muted:#666; --line:#e5e5e5; --bg:#fff; --accent:#0a66c2; --danger:#c0382b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--fg); background: #fafafa; line-height: 1.55; }
+  a { color: var(--accent); }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 24px; background: var(--bg); }
+  @media (min-width: 760px) { .wrap { margin-top: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-radius: 8px; } }
+  code { background: #f3f3f3; padding: 1px 5px; border-radius: 3px; font-size: 90%; }
+
+  /* Viewer */
+  h1 { margin: 0 0 4px; font-size: 32px; letter-spacing: -.02em; }
+  .headline { color: var(--muted); font-size: 18px; margin-bottom: 14px; }
+  .meta { color: var(--muted); font-size: 14px; display:flex; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 16px; }
+  .meta a { text-decoration: none; }
+  .meta a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+  .body h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 26px 0 10px; }
+  .body h3 { font-size: 16px; margin: 16px 0 2px; }
+  .body p { margin: 0 0 10px; }
+  .body ul { margin: 6px 0 12px 20px; padding: 0; }
+  .body li { margin: 3px 0; }
+
+  /* Editor */
+  .editor { display: none; }
+  .editor.active { display: block; }
+  label { display:block; font-size: 13px; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
+  input, textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { min-height: 200px; resize: vertical; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row .col { min-width: 0; }
+  .btn { display:inline-block; padding: 10px 18px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer; margin-top: 20px; text-decoration: none; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .help { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .err { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+  /* Modal */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
+  .modal.active { display: flex; }
+  .modal-card { background: #fff; max-width: 520px; width: 100%; padding: 24px; border-radius: 8px; }
+  .modal-card h2 { margin: 0 0 10px; }
+  .copybox { display: flex; gap: 6px; margin: 6px 0; }
+  .copybox input { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+  .copybox button { padding: 0 14px; background: #f0f0f0; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font: inherit; }
+  .warn { background: #fff8e1; border: 1px solid #f7c948; padding: 10px 12px; border-radius: 6px; font-size: 13px; margin: 14px 0; }
+
+  .state { display:none; text-align:center; padding: 60px 0; color: var(--muted); }
+  .state.active { display: block; }
+
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: 100%; box-shadow: none; padding: 0; margin: 0; }
+    .no-print { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Editor -->
+  <div id="editor" class="editor">
+    <h1 style="margin-bottom:6px;">Create your shareable resume</h1>
+    <p class="help" style="margin-bottom: 18px;">Fill in your details. You'll get a permanent URL like <code id="url-preview">/r/your-name</code> to share with recruiters — works on any device.</p>
+
+    <label>Your URL handle <span style="color:var(--danger)">*</span></label>
+    <input id="f-username" placeholder="jane-smith" autocomplete="off" required>
+    <div class="help">Lowercase letters, numbers, hyphens. 3-32 chars.</div>
+
+    <div class="row">
+      <div class="col">
+        <label>Full name *</label>
+        <input id="f-name" required>
+      </div>
+      <div class="col">
+        <label>Headline</label>
+        <input id="f-headline" placeholder="Senior Software Engineer">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Email</label>
+        <input id="f-email" type="email">
+      </div>
+      <div class="col">
+        <label>Phone</label>
+        <input id="f-phone">
+      </div>
+    </div>
+
+    <label>Location</label>
+    <input id="f-location" placeholder="Bengaluru, India">
+
+    <label>Links (one per line, format: <code>Label: URL</code>)</label>
+    <textarea id="f-links" style="min-height: 70px;" placeholder="LinkedIn: https://linkedin.com/in/jane
+GitHub: https://github.com/jane
+Portfolio: https://jane.dev"></textarea>
+
+    <label>Resume body (Markdown supported)</label>
+    <textarea id="f-body" placeholder="## Summary
+Brief 2-3 line summary of who you are and what you do.
+
+## Experience
+### Senior Engineer — Acme Corp
+*Jan 2022 - Present · Bengaluru*
+- Led the migration of monolith to microservices, reducing p99 latency by 40%.
+- Mentored 4 engineers; ran the weekly architecture review.
+
+### Engineer — Beta Inc
+*Jun 2019 - Dec 2021 · Remote*
+- Shipped the payments SDK used by 200+ merchants.
+
+## Education
+### B.Tech, Computer Science — IIT Bombay
+*2014 - 2018*
+
+## Skills
+Python, Go, Kubernetes, PostgreSQL, AWS"></textarea>
+
+    <label>Edit token <span class="help" style="display:inline; margin:0;">(only if updating an existing resume)</span></label>
+    <input id="f-token" placeholder="Leave blank for new resumes" autocomplete="off">
+
+    <button id="save-btn" class="btn">Save & get share link</button>
+    <div id="err" class="err"></div>
+  </div>
+
+  <!-- Viewer -->
+  <div id="viewer" style="display:none;">
+    <h1 id="v-name"></h1>
+    <div id="v-headline" class="headline"></div>
+    <div id="v-meta" class="meta"></div>
+    <hr>
+    <div id="v-body" class="body"></div>
+    <hr class="no-print">
+    <p class="no-print" style="font-size:13px; color:var(--muted); text-align:center; margin:0;">
+      <a href="/r">Create your own shareable resume →</a>
+    </p>
+  </div>
+
+  <div id="loading" class="state">Loading…</div>
+  <div id="notfound" class="state">
+    <h2 style="color:var(--fg)">No resume here yet</h2>
+    <p>Nobody has claimed <code id="nf-name"></code>.</p>
+    <a class="btn" href="/r">Create a resume</a>
+  </div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-card">
+    <h2>Your resume is live</h2>
+    <label>Share this URL</label>
+    <div class="copybox">
+      <input id="m-url" readonly>
+      <button type="button" data-copy="m-url">Copy</button>
+    </div>
+
+    <div id="token-box" style="display:none;">
+      <label>Edit token — save this somewhere safe</label>
+      <div class="copybox">
+        <input id="m-token" readonly>
+        <button type="button" data-copy="m-token">Copy</button>
+      </div>
+      <div class="warn">You'll need this token to edit your resume from another device or browser. We can't recover it for you.</div>
+    </div>
+
+    <button class="btn" id="m-open">Open my page</button>
+  </div>
+</div>
+
+<script>
+// ─── Minimal markdown renderer ────────────────────────────────────────
+function mdRender(s) {
+  if (!s) return '';
+  s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  s = s.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  s = s.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  s = s.replace(/^# (.+)$/gm,  '<h2>$1</h2>');
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Bullet lists (consecutive "- " lines)
+  s = s.replace(/(?:^- .+(?:\n|$))+/gm, function(block) {
+    const items = block.trim().split(/\n/).map(l => '<li>' + l.replace(/^- /, '') + '</li>').join('');
+    return '<ul>' + items + '</ul>';
+  });
+  // Paragraphs
+  s = s.split(/\n{2,}/).map(p => {
+    p = p.trim();
+    if (!p) return '';
+    if (/^<(h2|h3|ul|ol)/.test(p)) return p;
+    return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+  }).join('\n');
+  return s;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const SLUG = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
+
+function copyFrom(id) {
+  const el = $(id);
+  el.select();
+  el.setSelectionRange(0, 99999);
+  try { document.execCommand('copy'); }
+  catch (_) { navigator.clipboard && navigator.clipboard.writeText(el.value); }
+}
+
+document.querySelectorAll('[data-copy]').forEach(btn => {
+  btn.addEventListener('click', () => copyFrom(btn.dataset.copy));
+});
+$('m-open').addEventListener('click', () => {
+  window.location.href = $('m-url').value;
+});
+
+// ─── Routing ─────────────────────────────────────────────────────────
+const path = location.pathname;
+const qs = new URLSearchParams(location.search);
+const match = path.match(/^\/r\/([a-z0-9][a-z0-9-]{1,30}[a-z0-9])\/?$/);
+const username = match ? match[1] : qs.get('u');
+
+if (username) loadView(username);
+else showEditor();
+
+// ─── Editor ──────────────────────────────────────────────────────────
+function showEditor() {
+  $('editor').classList.add('active');
+  document.title = 'Create your shareable resume';
+
+  const uIn = $('f-username');
+  const preview = $('url-preview');
+  uIn.addEventListener('input', () => {
+    const v = uIn.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (v !== uIn.value) uIn.value = v;
+    preview.textContent = '/r/' + (v || 'your-name');
+  });
+  uIn.addEventListener('blur', () => {
+    const saved = localStorage.getItem('resume-token:' + uIn.value);
+    if (saved && !$('f-token').value) $('f-token').value = saved;
+  });
+
+  $('save-btn').addEventListener('click', save);
+}
+
+async function save() {
+  const btn = $('save-btn');
+  const err = $('err');
+  err.textContent = '';
+
+  const username = $('f-username').value.trim().toLowerCase();
+  const fullName = $('f-name').value.trim();
+  if (!SLUG.test(username)) {
+    err.textContent = 'URL handle must be 3-32 chars: lowercase letters, numbers, hyphens (and must start/end with a letter or number).';
+    return;
+  }
+  if (!fullName) {
+    err.textContent = 'Full name is required.';
+    return;
+  }
+
+  const links = $('f-links').value.split('\n')
+    .map(l => l.trim()).filter(Boolean)
+    .map(l => {
+      const m = l.match(/^([^:]+):\s*(.+)$/);
+      return m ? { label: m[1].trim(), url: m[2].trim() } : { label: l, url: l };
+    });
+
+  const data = {
+    name: fullName,
+    headline: $('f-headline').value.trim(),
+    email: $('f-email').value.trim(),
+    phone: $('f-phone').value.trim(),
+    location: $('f-location').value.trim(),
+    links,
+    body: $('f-body').value
+  };
+
+  const editToken = $('f-token').value.trim() || undefined;
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const res = await fetch('/.netlify/functions/resume-store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, data, editToken })
+    });
+    const json = await res.json();
+    if (!res.ok) { err.textContent = json.error || 'Save failed.'; return; }
+
+    $('m-url').value = location.origin + json.url;
+    if (json.editToken) {
+      $('m-token').value = json.editToken;
+      $('token-box').style.display = '';
+      localStorage.setItem('resume-token:' + username, json.editToken);
+    } else {
+      $('token-box').style.display = 'none';
+    }
+    $('modal').classList.add('active');
+  } catch (e) {
+    err.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save & get share link';
+  }
+}
+
+// ─── Viewer ──────────────────────────────────────────────────────────
+async function loadView(u) {
+  $('loading').classList.add('active');
+  try {
+    const res = await fetch('/.netlify/functions/resume-store?u=' + encodeURIComponent(u));
+    if (res.status === 404) {
+      $('loading').classList.remove('active');
+      $('nf-name').textContent = '/r/' + u;
+      $('notfound').classList.add('active');
+      return;
+    }
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      throw new Error(j.error || ('HTTP ' + res.status));
+    }
+    const { data } = await res.json();
+    render(data);
+  } catch (e) {
+    $('loading').classList.remove('active');
+    $('viewer').style.display = '';
+    $('v-name').textContent = 'Failed to load';
+    $('v-body').innerHTML = '<p>' + e.message + '</p>';
+  }
+}
+
+function render(d) {
+  $('loading').classList.remove('active');
+  $('viewer').style.display = '';
+  document.title = (d.name || 'Resume') + ' — Resume';
+
+  $('v-name').textContent = d.name || '';
+  $('v-headline').textContent = d.headline || '';
+
+  const meta = $('v-meta');
+  meta.innerHTML = '';
+  const add = (text, href) => {
+    if (!text) return;
+    const el = href ? document.createElement('a') : document.createElement('span');
+    el.textContent = text;
+    if (href) el.href = href;
+    meta.appendChild(el);
+  };
+  add(d.location);
+  if (d.email) add(d.email, 'mailto:' + d.email);
+  if (d.phone) add(d.phone, 'tel:' + d.phone);
+  (d.links || []).forEach(l => add(l.label, l.url));
+
+  $('v-body').innerHTML = mdRender(d.body || '');
+}
+</script>
+</body>
+</html>

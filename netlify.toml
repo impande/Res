@@ -11,3 +11,10 @@
 
 [functions."generate"]
   timeout = 26
+
+# Pretty URLs for shareable resumes: /r/jane-smith → r.html?u=jane-smith
+[[redirects]]
+  from = "/r/:username"
+  to   = "/r.html?u=:username"
+  status = 200
+  force  = true
