@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Truth or Dare</title>
+<style>
+  :root {
+    --bg-1: #1a0033;
+    --bg-2: #ff006e;
+    --bg-3: #3a0ca3;
+    --truth: #00d4ff;
+    --dare: #ff006e;
+    --card: rgba(255,255,255,0.08);
+    --card-border: rgba(255,255,255,0.18);
+    --text: #fff;
+    --muted: rgba(255,255,255,0.7);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; min-height: 100vh; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-3) 50%, var(--bg-2));
+    background-size: 200% 200%;
+    animation: bgshift 18s ease infinite;
+    overflow-x: hidden;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  @keyframes bgshift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .app {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #00d4ff, #ff006e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  .screen { display: none; flex: 1; flex-direction: column; gap: 16px; animation: fadein .35s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .card h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; }
+
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: rgba(0,0,0,0.25);
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--truth); }
+
+  .players { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .player {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.2); padding: 10px 12px; border-radius: 12px;
+  }
+  .player .name { flex: 1; font-weight: 600; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-size: 14px;
+  }
+  .remove {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 20px; line-height: 1; padding: 4px 8px;
+  }
+  .remove:hover { color: #fff; }
+
+  .add-row { display: flex; gap: 8px; margin-top: 12px; }
+  .add-row input { flex: 1; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 0; }
+
+  button.primary, button.btn {
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .2s ease, opacity .2s;
+    color: #fff;
+  }
+  button.primary {
+    background: linear-gradient(90deg, var(--truth), var(--dare));
+    box-shadow: 0 10px 30px rgba(255,0,110,0.35);
+    width: 100%;
+  }
+  button.primary:active { transform: translateY(1px) scale(0.99); }
+  button.primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+  button.ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--card-border);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  button.ghost:hover { background: rgba(255,255,255,0.15); }
+
+  .modes { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .mode-pill {
+    flex: 1; min-width: 90px;
+    padding: 10px; text-align: center; border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: rgba(0,0,0,0.2); cursor: pointer; font-weight: 600;
+    transition: all .2s;
+    font-size: 14px;
+  }
+  .mode-pill.active {
+    background: linear-gradient(90deg, var(--truth), var(--dare));
+    border-color: transparent;
+  }
+
+  /* Game screen */
+  .turn-card {
+    text-align: center;
+    padding: 28px 20px;
+  }
+  .turn-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+  .turn-name {
+    font-size: 32px; font-weight: 800; margin-top: 6px;
+    background: linear-gradient(90deg, #fff, #ffd1e8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .choose {
+    display: flex; gap: 14px; margin-top: 8px;
+  }
+  .choose button {
+    flex: 1;
+    padding: 26px 10px;
+    border-radius: 18px;
+    border: none;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: transform .15s ease, box-shadow .2s ease;
+    text-transform: uppercase;
+  }
+  .choose .truth-btn {
+    background: linear-gradient(135deg, #00d4ff, #0077ff);
+    box-shadow: 0 12px 28px rgba(0,119,255,0.4);
+  }
+  .choose .dare-btn {
+    background: linear-gradient(135deg, #ff006e, #b5179e);
+    box-shadow: 0 12px 28px rgba(255,0,110,0.4);
+  }
+  .choose button:active { transform: translateY(2px) scale(0.98); }
+
+  .prompt-card {
+    text-align: center;
+    padding: 28px 22px;
+    min-height: 200px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin: 0 auto;
+  }
+  .badge.truth { background: rgba(0, 212, 255, 0.2); color: #00d4ff; border: 1px solid rgba(0,212,255,0.4); }
+  .badge.dare { background: rgba(255, 0, 110, 0.2); color: #ff006e; border: 1px solid rgba(255,0,110,0.4); }
+  .prompt-text { font-size: 22px; font-weight: 600; line-height: 1.4; }
+
+  .action-row { display: flex; gap: 10px; }
+  .action-row > * { flex: 1; }
+
+  .scoreboard {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    font-size: 13px; color: var(--muted);
+  }
+  .score-chip {
+    background: rgba(0,0,0,0.25);
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--card-border);
+  }
+
+  footer {
+    text-align: center; color: var(--muted); font-size: 12px; margin-top: 20px;
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.8); color: #fff; padding: 10px 18px;
+    border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 380px) {
+    h1 { font-size: 30px; }
+    .turn-name { font-size: 26px; }
+    .choose button { font-size: 18px; padding: 22px 8px; }
+    .prompt-text { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Truth or Dare</h1>
+    <div class="sub">The classic party game — reimagined</div>
+  </header>
+
+  <!-- SETUP SCREEN -->
+  <section id="setup" class="screen active">
+    <div class="card">
+      <h2>Players</h2>
+      <div id="playerList" class="players"></div>
+      <div class="add-row">
+        <input id="playerInput" type="text" placeholder="Add a player" maxlength="20" autocomplete="off" />
+        <button class="ghost" id="addBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Mode</h2>
+      <div class="modes" id="modes">
+        <div class="mode-pill active" data-mode="classic">Classic</div>
+        <div class="mode-pill" data-mode="friends">Friends</div>
+        <div class="mode-pill" data-mode="party">Party</div>
+        <div class="mode-pill" data-mode="kids">Kids</div>
+      </div>
+      <label style="margin-top:14px;">Choose intensity — Kids is safe for everyone.</label>
+    </div>
+
+    <button class="primary" id="startBtn" disabled>Start Game</button>
+  </section>
+
+  <!-- GAME SCREEN -->
+  <section id="game" class="screen">
+    <div class="card turn-card">
+      <div class="turn-label">Your turn</div>
+      <div class="turn-name" id="currentPlayer">—</div>
+    </div>
+
+    <div id="chooseStep">
+      <div class="choose">
+        <button class="truth-btn" id="truthBtn">Truth</button>
+        <button class="dare-btn" id="dareBtn">Dare</button>
+      </div>
+    </div>
+
+    <div id="promptStep" style="display:none;">
+      <div class="card prompt-card">
+        <span class="badge" id="promptBadge">TRUTH</span>
+        <div class="prompt-text" id="promptText">—</div>
+      </div>
+      <div class="action-row" style="margin-top:12px;">
+        <button class="ghost" id="skipBtn">Skip</button>
+        <button class="primary" id="doneBtn">Done ✓</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Score</h2>
+      <div class="scoreboard" id="scoreboard"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="ghost" id="endBtn">End game</button>
+      <button class="ghost" id="shuffleBtn">Shuffle order</button>
+    </div>
+  </section>
+
+  <footer>Play responsibly. Respect each other.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const PROMPTS = {
+    classic: {
+      truth: [
+        "What's the most embarrassing thing you've done in the last year?",
+        "Who in this room would you trust with your biggest secret?",
+        "What's the last lie you told?",
+        "What's your biggest fear?",
+        "What's the worst gift you've ever received?",
+        "What's something you've never told anyone here?",
+        "What's your most irrational fear?",
+        "Have you ever cheated on a test?",
+        "What's the most childish thing you still do?",
+        "What's your guilty pleasure song?",
+        "What's the longest you've gone without a shower?",
+        "If you had to date someone in this room, who would it be?",
+        "What's a habit you wish you could break?",
+        "What's the weirdest dream you've ever had?",
+        "What's something you've Googled but would never admit?"
+      ],
+      dare: [
+        "Do your best impression of another player.",
+        "Speak in a British accent for the next 3 rounds.",
+        "Let the player on your left post a status on your social media.",
+        "Sing the chorus of the last song you listened to.",
+        "Do 10 pushups right now.",
+        "Show the last 5 photos in your camera roll.",
+        "Call a random contact and sing them happy birthday.",
+        "Eat a spoonful of a condiment of the group's choice.",
+        "Do a 30-second interpretive dance.",
+        "Speak only in questions for the next 2 minutes.",
+        "Let another player style your hair.",
+        "Send a 'thinking of you' text to the 7th contact in your phone.",
+        "Wear your shirt backwards for the rest of the game.",
+        "Read the last text you sent out loud.",
+        "Do an exaggerated runway walk across the room."
+      ]
+    },
+    friends: {
+      truth: [
+        "Who in this room have you secretly judged the most?",
+        "What's a rumor you've heard about someone here?",
+        "What's the meanest thing you've ever said behind someone's back?",
+        "Who here would you call first in a crisis?",
+        "What's the most annoying habit of someone here?",
+        "Have you ever lied to someone in this room?",
+        "Who in this room would make the best partner?",
+        "What's the most embarrassing thing you know about another player?",
+        "Who do you think will be most successful in 10 years — and who least?",
+        "Have you ever had a crush on anyone here?",
+        "What's something you wish you could tell someone here but can't?",
+        "Which player annoys you the most, honestly?",
+        "Rank everyone here from most to least trustworthy.",
+        "What's your honest first impression of the player on your right?",
+        "What's a secret you've kept from your best friend?"
+      ],
+      dare: [
+        "Let another player look through your DMs for 30 seconds.",
+        "Send a screenshot of this game to your group chat.",
+        "Do your best impression of every player one by one.",
+        "Reveal your most-used emoji.",
+        "Swap shirts with the player to your left.",
+        "Show your screen time stats from this week.",
+        "Let the group choose a new contact name for your crush.",
+        "Read your last 3 sent texts out loud.",
+        "Let the group pick your next profile picture.",
+        "Do your best stand-up joke about another player.",
+        "Compliment every player — but make it brutally specific.",
+        "Speak only with your eyes closed for the next round.",
+        "Let another player choose a song to dance to for 30 seconds.",
+        "Reveal your search history from today.",
+        "Text 'I miss you' to the 3rd person in your recent chats."
+      ]
+    },
+    party: {
+      truth: [
+        "What's the wildest thing you've done at a party?",
+        "What's your most embarrassing drunk story?",
+        "Who's the worst kisser you've been with?",
+        "What's the strangest place you've fallen asleep?",
+        "What's a secret about you that would shock the group?",
+        "What's the most rebellious thing you've ever done?",
+        "Have you ever been kicked out of somewhere — what happened?",
+        "What's your most ridiculous regret?",
+        "What's the worst date you've ever been on?",
+        "Tell us about the last time you cried.",
+        "What's your most savage breakup story?",
+        "What's something you've done that your parents still don't know about?",
+        "What's your biggest red flag?",
+        "Who was your most embarrassing celebrity crush?",
+        "Confess to a lie you've been telling for years."
+      ],
+      dare: [
+        "Down a full glass of water in 5 seconds.",
+        "Let someone else write a tweet on your account.",
+        "Do the worm — or attempt to.",
+        "Trade an item of clothing with the player across from you.",
+        "Do a dramatic reading of a random text from your phone.",
+        "Belt out a power ballad for 30 seconds.",
+        "Let the group give you a new nickname for the night.",
+        "Do 20 jumping jacks while shouting your favorite movie quote.",
+        "Wear a makeshift cape and act like a superhero for 1 minute.",
+        "Eat a bite of food blindfolded — chosen by the group.",
+        "Let another player draw something on your face with a pen.",
+        "Do an in-character monologue as a villain.",
+        "Speak only in song lyrics for 2 minutes.",
+        "Show your worst dance move on repeat for 30 seconds.",
+        "Call your mom and tell her a wild fake story for 30 seconds."
+      ]
+    },
+    kids: {
+      truth: [
+        "What's your favorite cartoon and why?",
+        "If you could have any superpower, what would it be?",
+        "What's the silliest thing you've ever done?",
+        "What's your favorite food in the whole world?",
+        "What's your dream job when you grow up?",
+        "What's the funniest joke you know?",
+        "Who's your best friend and why?",
+        "What's your favorite memory ever?",
+        "If you could be any animal, what would you be?",
+        "What's your favorite holiday and why?",
+        "What's a food you pretend to like but secretly don't?",
+        "Who's your favorite teacher?",
+        "What's your favorite game to play?",
+        "What's the coolest thing you've ever learned?",
+        "If you had a million dollars, what would you buy first?"
+      ],
+      dare: [
+        "Do your best animal impression.",
+        "Hop on one foot for 30 seconds.",
+        "Sing 'Twinkle Twinkle' as an opera star.",
+        "Do a silly walk across the room.",
+        "Tell a joke that makes everyone laugh.",
+        "Make the funniest face you can for 10 seconds.",
+        "Dance like a robot for 20 seconds.",
+        "Pretend to be a chicken until your next turn.",
+        "Talk in a baby voice for the next round.",
+        "Balance a book on your head for 30 seconds.",
+        "Do 10 jumping jacks while singing.",
+        "Pretend to be a tree for 30 seconds.",
+        "Make up a 4-line poem about your favorite snack.",
+        "Walk backwards to the door and back.",
+        "Tell everyone a fun fact about yourself."
+      ]
+    }
+  };
+
+  const COLORS = ["#ff006e","#00d4ff","#ffbe0b","#8338ec","#fb5607","#06d6a0","#ef476f","#118ab2"];
+
+  const state = {
+    players: [],
+    mode: "classic",
+    currentIdx: 0,
+    scores: {},
+    used: { truth: new Set(), dare: new Set() },
+    currentType: null,
+    currentPrompt: null,
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function showToast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._h);
+    t._h = setTimeout(() => t.classList.remove("show"), 1600);
+  }
+
+  function colorFor(name) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    return COLORS[h % COLORS.length];
+  }
+
+  function renderPlayers() {
+    const list = $("playerList");
+    list.innerHTML = "";
+    if (state.players.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:8px 0;">Add at least 2 players to start</div>';
+    }
+    state.players.forEach((p, i) => {
+      const row = document.createElement("div");
+      row.className = "player";
+      const initial = p.trim()[0]?.toUpperCase() || "?";
+      row.innerHTML = `
+        <div class="avatar" style="background:${colorFor(p)}">${initial}</div>
+        <div class="name"></div>
+        <button class="remove" data-i="${i}" aria-label="Remove">×</button>
+      `;
+      row.querySelector(".name").textContent = p;
+      list.appendChild(row);
+    });
+    list.querySelectorAll(".remove").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = +btn.dataset.i;
+        state.players.splice(i, 1);
+        renderPlayers();
+        updateStartBtn();
+      });
+    });
+  }
+
+  function updateStartBtn() {
+    $("startBtn").disabled = state.players.length < 2;
+  }
+
+  function addPlayer(name) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (state.players.some(p => p.toLowerCase() === trimmed.toLowerCase())) {
+      showToast("That name is already added");
+      return;
+    }
+    if (state.players.length >= 12) {
+      showToast("Max 12 players");
+      return;
+    }
+    state.players.push(trimmed);
+    renderPlayers();
+    updateStartBtn();
+  }
+
+  function pickPrompt(type) {
+    const pool = PROMPTS[state.mode][type];
+    const usedSet = state.used[type];
+    if (usedSet.size >= pool.length) usedSet.clear();
+    let idx;
+    do { idx = Math.floor(Math.random() * pool.length); } while (usedSet.has(idx));
+    usedSet.add(idx);
+    return pool[idx];
+  }
+
+  function renderTurn() {
+    const player = state.players[state.currentIdx];
+    $("currentPlayer").textContent = player;
+    $("chooseStep").style.display = "";
+    $("promptStep").style.display = "none";
+    state.currentType = null;
+    state.currentPrompt = null;
+    renderScoreboard();
+  }
+
+  function renderScoreboard() {
+    const sb = $("scoreboard");
+    sb.innerHTML = "";
+    state.players.forEach(p => {
+      const s = state.scores[p] || 0;
+      const chip = document.createElement("div");
+      chip.className = "score-chip";
+      chip.innerHTML = `<strong style="color:#fff">${escapeHtml(p)}</strong> · ${s}`;
+      sb.appendChild(chip);
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function choose(type) {
+    state.currentType = type;
+    state.currentPrompt = pickPrompt(type);
+    const badge = $("promptBadge");
+    badge.textContent = type.toUpperCase();
+    badge.className = "badge " + type;
+    $("promptText").textContent = state.currentPrompt;
+    $("chooseStep").style.display = "none";
+    $("promptStep").style.display = "";
+  }
+
+  function nextTurn() {
+    state.currentIdx = (state.currentIdx + 1) % state.players.length;
+    renderTurn();
+  }
+
+  function startGame() {
+    if (state.players.length < 2) return;
+    state.players.forEach(p => { if (!(p in state.scores)) state.scores[p] = 0; });
+    state.currentIdx = Math.floor(Math.random() * state.players.length);
+    $("setup").classList.remove("active");
+    $("game").classList.add("active");
+    renderTurn();
+  }
+
+  function endGame() {
+    $("game").classList.remove("active");
+    $("setup").classList.add("active");
+    state.scores = {};
+    state.used = { truth: new Set(), dare: new Set() };
+  }
+
+  // events
+  $("addBtn").addEventListener("click", () => {
+    const i = $("playerInput");
+    addPlayer(i.value);
+    i.value = "";
+    i.focus();
+  });
+  $("playerInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); $("addBtn").click(); }
+  });
+  $("modes").addEventListener("click", e => {
+    const pill = e.target.closest(".mode-pill");
+    if (!pill) return;
+    document.querySelectorAll(".mode-pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    state.mode = pill.dataset.mode;
+    state.used = { truth: new Set(), dare: new Set() };
+  });
+  $("startBtn").addEventListener("click", startGame);
+  $("truthBtn").addEventListener("click", () => choose("truth"));
+  $("dareBtn").addEventListener("click", () => choose("dare"));
+  $("doneBtn").addEventListener("click", () => {
+    const p = state.players[state.currentIdx];
+    state.scores[p] = (state.scores[p] || 0) + 1;
+    showToast(`+1 point for ${p}`);
+    nextTurn();
+  });
+  $("skipBtn").addEventListener("click", () => {
+    showToast("Skipped — no points");
+    nextTurn();
+  });
+  $("endBtn").addEventListener("click", () => {
+    if (confirm("End the game and return to setup?")) endGame();
+  });
+  $("shuffleBtn").addEventListener("click", () => {
+    for (let i = state.players.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [state.players[i], state.players[j]] = [state.players[j], state.players[i]];
+    }
+    state.currentIdx = 0;
+    showToast("Order shuffled");
+    renderTurn();
+  });
+
+  renderPlayers();
+  updateStartBtn();
+})();
+</script>
+</body>
+</html>
