@@ -9,32 +9,36 @@ exports.handler = async function(event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
 
-  // ── POST: save portfolio HTML, return shareable URL ──────────────────
+  // ── POST: save portfolio HTML, return clean shareable URL ─────────────
   if (event.httpMethod === 'POST') {
     try {
       const { html, name } = JSON.parse(event.body || '{}');
-      if (!html) return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Missing html' }) };
+      if (!html || !name) return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Missing html or name' }) };
 
-      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      // Build slug: firstname-lastname.com
+      const slug = name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .substring(0, 60) + '.com';
+
       const store = getStore('portfolios');
-      await store.set(id, html, { metadata: { name: name || 'portfolio', created: Date.now() } });
+      await store.set(slug, html, { metadata: { name, created: Date.now() } });
 
       const siteUrl = (process.env.URL || 'https://resume4u.help').replace(/\/$/, '');
-      const url = `${siteUrl}/.netlify/functions/share-portfolio?id=${id}`;
-      return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) };
+      return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: siteUrl + '/' + slug }) };
     } catch(e) {
       return { statusCode: 500, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: e.message }) };
     }
   }
 
-  // ── GET: serve stored portfolio HTML ─────────────────────────────────
+  // ── GET: serve stored portfolio HTML (called via Netlify redirect) ────
   if (event.httpMethod === 'GET') {
     try {
       const id = (event.queryStringParameters || {}).id;
       if (!id) return { statusCode: 400, headers: { 'Content-Type': 'text/html' }, body: '<h1>Missing portfolio ID</h1>' };
       const store = getStore('portfolios');
       const html = await store.get(id);
-      if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body: '<html><body style="font-family:sans-serif;text-align:center;padding:80px 20px;"><h2>Portfolio not found</h2><p>This link may have expired. Ask the owner to generate a new one at <a href="https://resume4u.help">resume4u.help</a>.</p></body></html>' };
+      if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body: '<html><body style="font-family:sans-serif;text-align:center;padding:80px 20px;"><h2>Portfolio not found</h2><p>This link may have expired. Please ask the owner to generate a new one at <a href="https://resume4u.help">resume4u.help</a>.</p></body></html>' };
       return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }, body: html };
     } catch(e) {
       return { statusCode: 500, headers: { 'Content-Type': 'text/html' }, body: '<h1>Error: ' + e.message + '</h1>' };
