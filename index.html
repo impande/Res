@@ -2791,7 +2791,8 @@ function addCustomSection(title='', content='') {
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
     </div>`;
-  document.getElementById('customSectionEntries').appendChild(div);
+  document.getElementById('customSectionEntries').prepend(div);
+  setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
   updatePreview();
 }
 
