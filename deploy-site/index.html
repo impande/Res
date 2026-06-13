@@ -2380,21 +2380,7 @@ function _syncLastResumeData() {
     return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
   });
   // Refresh page count chip to reflect latest form data
-  const _pcStrip = document.getElementById('pageCountStrip');
-  if (_pcStrip && _pcStrip.style.display !== 'none') {
-    clearTimeout(_pageCountTimer);
-    _pageCountTimer = setTimeout(function() {
-      try {
-        const _tmp = document.createElement('div');
-        _tmp.className = 'resume-a4-page';
-        _tmp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;max-width:none;visibility:hidden;pointer-events:none;z-index:-1;';
-        _tmp.innerHTML = renderResumeHTML(lastResumeData);
-        document.body.appendChild(_tmp);
-        _updatePageChip(Math.max(1, Math.ceil(_tmp.scrollHeight / (297 * 3.7795))));
-        document.body.removeChild(_tmp);
-      } catch(e) {}
-    }, 300);
-  }
+  _triggerOffscreenPageCount();
 }
 
 function clearNeedsRegen() {
@@ -2652,7 +2638,8 @@ function selectTemplate(tpl) {
     renderOutput(lastResumeData);
     setTimeout(() => {
       document.getElementById('resumeOutput')?.scrollIntoView({behavior:'smooth', block:'start'});
-    }, 200);
+      _triggerPageCount(true);
+    }, 300);
   } else {
     document.getElementById('tplGuide')?.classList.add('visible');
     document.getElementById('generateBtn')?.classList.add('btn-ready');
@@ -3399,27 +3386,42 @@ function _updatePageChip(pages) {
   chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
   chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
 }
-let _pageCountTimer;
-function _debouncedPageCount(page) {
-  clearTimeout(_pageCountTimer);
-  _pageCountTimer = setTimeout(() => _updatePageChip(_measurePages(page)), 600);
+let _pcTimer;
+function _triggerPageCount(fast) {
+  clearTimeout(_pcTimer);
+  _pcTimer = setTimeout(function() {
+    const strip = document.getElementById('pageCountStrip');
+    if (!strip || strip.style.display === 'none') return;
+    const page = document.querySelector('#resumeOutput .resume-a4-page');
+    if (page) _updatePageChip(_measurePages(page));
+  }, fast ? 80 : 120);
+}
+function _triggerOffscreenPageCount() {
+  clearTimeout(_pcTimer);
+  _pcTimer = setTimeout(function() {
+    const strip = document.getElementById('pageCountStrip');
+    if (!strip || strip.style.display === 'none') return;
+    if (!lastResumeData) return;
+    const tmp = document.createElement('div');
+    tmp.className = 'resume-a4-page';
+    tmp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;max-width:none;visibility:hidden;pointer-events:none;z-index:-1;';
+    tmp.innerHTML = renderResumeHTML(lastResumeData);
+    document.body.appendChild(tmp);
+    _updatePageChip(Math.max(1, Math.ceil(tmp.scrollHeight / (297 * 3.7795))));
+    document.body.removeChild(tmp);
+  }, 300);
 }
 function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
-  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_debouncedPageCount(this)">${renderResumeHTML(data)}</div>`;
+  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_triggerPageCount()">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
-  setTimeout(() => {
-    const page = out.querySelector('.resume-a4-page');
-    const strip = document.getElementById('pageCountStrip');
-    const chip = document.getElementById('pageCountChip');
-    if (page && strip && chip) {
-      _updatePageChip(_measurePages(page));
-      strip.style.display = 'flex';
-    }
-  }, 100);
+  const strip = document.getElementById('pageCountStrip');
+  if (strip) strip.style.display = 'flex';
+  _triggerPageCount(true);
+  setTimeout(function() { _triggerPageCount(true); }, 500);
   // Show cover letter section and pre-fill role
   const clSec = document.getElementById('clSection');
   if (clSec) {
