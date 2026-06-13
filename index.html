@@ -1949,7 +1949,7 @@
   <div class="step-content" id="step2">
     <h1 class="step-title">Work Experience</h1>
     <p class="step-subtitle">Add your most recent roles first. Leave description blank — AI will generate optimised bullets for you.</p>
-    <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
+    <button class="add-entry-btn" onclick="addExperience(true)">+ Add Work Experience</button>
     <div id="experienceEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
@@ -1960,7 +1960,7 @@
   <div class="step-content" id="step3">
     <h1 class="step-title">Awards &amp; Achievements</h1>
     <p class="step-subtitle">Certifications, honours, recognitions — anything that sets you apart</p>
-    <button class="add-entry-btn" onclick="addAward()">+ Add Award / Achievement</button>
+    <button class="add-entry-btn" onclick="addAward(true)">+ Add Award / Achievement</button>
     <div id="awardEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
@@ -1971,7 +1971,7 @@
   <div class="step-content" id="step4">
     <h1 class="step-title">Education</h1>
     <p class="step-subtitle">Your academic background</p>
-    <button class="add-entry-btn" onclick="addEducation()">+ Add Education</button>
+    <button class="add-entry-btn" onclick="addEducation(true)">+ Add Education</button>
     <div id="educationEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
@@ -2698,7 +2698,7 @@ function updatePreview() {
 }
 
 // ── Entry adders ──────────────────────────────────────────────────────
-function addExperience() {
+function addExperience(prependNew = false) {
   const id = ++expCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'exp-'+id;
@@ -2719,11 +2719,12 @@ function addExperience() {
     </div>
     <div class="form-group"><label class="form-label">Key Achievements (optional — AI will enhance)</label><textarea rows="3" placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" id="exp-desc-${id}" oninput="markNeedsRegen()"></textarea><p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
     <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
-  document.getElementById('experienceEntries').appendChild(div);
+  const container = document.getElementById('experienceEntries');
+  if (prependNew) container.prepend(div); else container.appendChild(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
 }
 
-function addAward() {
+function addAward(prependNew = false) {
   const id = ++awardCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'award-'+id;
@@ -2736,11 +2737,12 @@ function addAward() {
       <div class="form-group"><label class="form-label">Organisation</label><input type="text" placeholder="e.g. Amazon Web Services" id="award-org-${id}"></div>
       <div class="form-group"><label class="form-label">Description (optional)</label><input type="text" placeholder="Brief description" id="award-desc-${id}"></div>
     </div>`;
-  document.getElementById('awardEntries').appendChild(div);
+  const awardContainer = document.getElementById('awardEntries');
+  if (prependNew) awardContainer.prepend(div); else awardContainer.appendChild(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
 }
 
-function addEducation() {
+function addEducation(prependNew = false) {
   const id = ++eduCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'edu-'+id;
@@ -2753,7 +2755,8 @@ function addEducation() {
       <div class="form-group"><label class="form-label">Graduation Year</label><input type="text" placeholder="e.g. 2018" id="edu-yr-${id}"></div>
       <div class="form-group"><label class="form-label">GPA / Grade (optional)</label><input type="text" placeholder="e.g. 8.4/10" id="edu-gpa-${id}"></div>
     </div>`;
-  document.getElementById('educationEntries').appendChild(div);
+  const eduContainer = document.getElementById('educationEntries');
+  if (prependNew) eduContainer.prepend(div); else eduContainer.appendChild(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
 }
 
@@ -3305,7 +3308,7 @@ async function _doGenerateResume() {
     const pfBanner = document.getElementById('portfolioBanner');
     if (pfBanner) pfBanner.style.display = 'flex';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
-    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
+    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } const noteEl = document.getElementById('tipsPriceNote'); if (noteEl) noteEl.textContent = _getPayRegion() === 'INR' ? '₹9' : '$0.99'; }, 500);
     setTimeout(() => { const tc = document.getElementById('tipsContent'); if (tc) tc.scrollIntoView({behavior:'smooth', block:'center'}); }, 750);
   } catch (err) {
     clearInterval(_tlTimer);
@@ -4055,6 +4058,9 @@ RULES:
 }
 
 function populateFormFromParsed(data) {
+  // Reset so preview shows fresh parsed data, not old AI-generated data
+  lastResumeData = null;
+  manuallyEdited = false;
   // Always set value (even empty) so old stale data doesn't persist
   function sv(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
   sv('firstName', data.firstName); sv('lastName', data.lastName);
