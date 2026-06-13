@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0e0d;--surface:#1a1917;--surface2:#242220;--border:#333;
+  --accent:#e8d5a3;--accent2:#c4a96b;--text:#f0ece4;--muted:#888;
+}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;font-size:14px;
+  display:flex;flex-direction:column;
+}
+
+/* top bar */
+.topbar{padding:20px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#0f0e0d;font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+.brand-text{font-family:'Playfair Display',serif;font-size:18px;color:var(--text)}
+.brand-sub{font-size:11px;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase}
+.topbar a{color:var(--muted);font-size:12px;text-decoration:none;text-transform:uppercase;letter-spacing:0.06em}
+.topbar a:hover{color:var(--accent)}
+
+/* hero */
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 32px;text-align:center}
+.eyebrow{font-size:11px;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px}
+.hero h1{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;line-height:1.15;margin-bottom:14px;max-width:720px}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p.sub{font-size:15px;color:var(--muted);max-width:560px;line-height:1.6;margin-bottom:48px}
+
+/* product cards */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(260px,340px));gap:20px;width:100%;max-width:760px}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;
+  text-align:left;cursor:pointer;transition:all 0.2s;
+  display:flex;flex-direction:column;gap:14px;text-decoration:none;color:inherit;
+  position:relative;overflow:hidden;
+}
+.card:hover{border-color:rgba(232,213,163,0.5);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;font-weight:600}
+.card-icon.resume{background:linear-gradient(135deg,#e8d5a3,#c4a96b);color:#0f0e0d}
+.card-icon.portfolio{background:linear-gradient(135deg,#a3c4e8,#6b8fc4);color:#0f0e0d}
+.card h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:2px}
+.card .card-tag{font-size:10px;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px}
+.card p{font-size:13px;color:var(--muted);line-height:1.6}
+.card-cta{display:flex;align-items:center;gap:6px;color:var(--accent);font-size:13px;font-weight:500;margin-top:auto;padding-top:8px}
+.card:hover .card-cta{color:var(--text)}
+.card .new-pill{position:absolute;top:18px;right:18px;font-size:9px;background:rgba(232,213,163,0.18);color:var(--accent);padding:3px 8px;border-radius:10px;letter-spacing:0.06em;text-transform:uppercase}
+
+/* footer */
+.footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px}
+.footer a{color:var(--muted);text-decoration:none}
+.footer a:hover{color:var(--accent)}
+
+@media(max-width:680px){
+  .hero h1{font-size:32px}
+  .cards{grid-template-columns:1fr}
+}
