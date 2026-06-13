@@ -2531,10 +2531,11 @@ function goToStep(step, skipScroll) {
   }
   const waFab = document.getElementById('waFab');
   if (waFab) waFab.style.display = step === 0 ? '' : 'none';
+  const _smallMobile = window.innerWidth <= 520;
   const previewFab = document.getElementById('previewFab');
-  if (previewFab) previewFab.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
+  if (previewFab) previewFab.style.display = (!_smallMobile && step >= 2 && step <= 7) ? 'flex' : 'none';
   const mobPreviewBtn = document.getElementById('mobPreviewBtn');
-  if (mobPreviewBtn) mobPreviewBtn.style.display = (step >= 1 && step <= 7) ? 'flex' : 'none';
+  if (mobPreviewBtn) mobPreviewBtn.style.display = (_smallMobile && step >= 1 && step <= 7) ? 'flex' : 'none';
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
@@ -4710,6 +4711,8 @@ function refreshPreviewTemplate(tpl) {
 }
 window.addEventListener('resize', function() {
   if (document.getElementById('previewModalOverlay').classList.contains('open')) scalePreview();
+  // Re-evaluate which preview button to show when viewport changes (orientation, resize)
+  if (typeof currentStep !== 'undefined') goToStep(currentStep, true);
 });
 function closePreviewModal(e) {
   if (e && e.target !== document.getElementById('previewModalOverlay')) return;
