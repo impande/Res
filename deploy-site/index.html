@@ -3306,6 +3306,7 @@ async function _doGenerateResume() {
     if (pfBanner) pfBanner.style.display = 'flex';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
     setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
+    setTimeout(() => { const tc = document.getElementById('tipsContent'); if (tc) tc.scrollIntoView({behavior:'smooth', block:'center'}); }, 750);
   } catch (err) {
     clearInterval(_tlTimer);
     statusEl.textContent = 'Error: ' + err.message;
@@ -3330,7 +3331,10 @@ function renderOutput(data) {
     const chip = document.getElementById('pageCountChip');
     if (page && strip && chip) {
       const pageH = 297 * 3.7795; // 297mm in px at 96dpi
-      const pages = Math.max(1, Math.ceil(page.scrollHeight / pageH));
+      const natW  = 210 * 3.7795; // 794px — natural A4 width at 96dpi
+      const rendW = page.getBoundingClientRect().width;
+      const widthScale = rendW > 0 ? rendW / natW : 1; // <1 on mobile (narrower = more lines)
+      const pages = Math.max(1, Math.ceil(page.scrollHeight * widthScale / pageH));
       chip.textContent = pages === 1 ? '1 page ✓' : `${pages} pages`;
       chip.style.color = pages > 1 ? '#b45309' : '#166534';
       chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
@@ -4607,13 +4611,20 @@ function scalePreview() {
 function renderPreviewWithTemplate(tpl) {
   const body = document.getElementById('previewModalBody');
   if (!body) return;
-  // Always pick up latest custom sections from the DOM (markNeedsRegen keeps
-  // lastResumeData.customSections synced, but collectCustomSections() is the
-  // ground truth if the user is previewing before their first generation).
-  const freshCustom = collectCustomSections();
-  const data = lastResumeData
-    ? { ...lastResumeData, customSections: freshCustom }
-    : { ...collectData(), summary: '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
+  // Always use current form state (collectData) so additions/removals are reflected
+  // immediately. When AI has generated bullets, carry them over by matching on
+  // title+company so bullets aren't lost after a minor edit.
+  const current = collectData();
+  let data;
+  if (lastResumeData) {
+    const mergedExp = current.experience.map(e => {
+      const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
+      return prev && Array.isArray(prev.bullets) ? { ...e, bullets: prev.bullets } : e;
+    });
+    data = { ...current, summary: lastResumeData.summary || '', experience: mergedExp };
+  } else {
+    data = { ...current, summary: '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
+  }
   if (!data.firstName && !data.lastName) {
     body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
     return;
