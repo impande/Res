@@ -507,6 +507,7 @@
       body.pdf-printing .resume-bar,
       body.pdf-printing #tplSection { display: none !important; }
       body.pdf-printing #top-sticky-bar { display: none !important; }
+      body.pdf-printing #pageCountStrip { display: none !important; }
       body.pdf-printing #main {
         padding: 0 !important; max-width: 100% !important;
         overflow: visible !important; margin: 0 !important;
@@ -4856,7 +4857,7 @@ function getPfData() {
     linkedin: cd.linkedin || '',
     github: cd.github || '',
     photo: userPhoto || '',
-    summary: document.getElementById('summary')?.value || '',
+    summary: (lastResumeData && lastResumeData.summary) || '',
     experience: (cd.experience || []).map(function(e) {
       return {title: e.title, company: e.co, dates: [e.start, e.end].filter(Boolean).join(' – '), desc: e.desc};
     }),
