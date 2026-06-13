@@ -1,0 +1,45 @@
+const { getStore } = require('@netlify/blobs');
+
+exports.handler = async function(event) {
+  const CORS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  };
+
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
+
+  // ── POST: save portfolio HTML, return shareable URL ──────────────────
+  if (event.httpMethod === 'POST') {
+    try {
+      const { html, name } = JSON.parse(event.body || '{}');
+      if (!html) return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Missing html' }) };
+
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      const store = getStore('portfolios');
+      await store.set(id, html, { metadata: { name: name || 'portfolio', created: Date.now() } });
+
+      const siteUrl = (process.env.URL || 'https://resume4u.help').replace(/\/$/, '');
+      const url = `${siteUrl}/.netlify/functions/share-portfolio?id=${id}`;
+      return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) };
+    } catch(e) {
+      return { statusCode: 500, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: e.message }) };
+    }
+  }
+
+  // ── GET: serve stored portfolio HTML ─────────────────────────────────
+  if (event.httpMethod === 'GET') {
+    try {
+      const id = (event.queryStringParameters || {}).id;
+      if (!id) return { statusCode: 400, headers: { 'Content-Type': 'text/html' }, body: '<h1>Missing portfolio ID</h1>' };
+      const store = getStore('portfolios');
+      const html = await store.get(id);
+      if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body: '<html><body style="font-family:sans-serif;text-align:center;padding:80px 20px;"><h2>Portfolio not found</h2><p>This link may have expired. Ask the owner to generate a new one at <a href="https://resume4u.help">resume4u.help</a>.</p></body></html>' };
+      return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }, body: html };
+    } catch(e) {
+      return { statusCode: 500, headers: { 'Content-Type': 'text/html' }, body: '<h1>Error: ' + e.message + '</h1>' };
+    }
+  }
+
+  return { statusCode: 405, headers: CORS, body: 'Method not allowed' };
+};

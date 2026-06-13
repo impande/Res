@@ -711,6 +711,7 @@
     /* Template picker */
     .pf-tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
     @media(min-width:500px){.pf-tpl-grid{grid-template-columns:repeat(5,1fr);}}
+    .pf-tpl-desc{padding:0 8px 10px;font-size:0.67rem;color:var(--muted);line-height:1.4;}
     .pf-mini-tpl{padding:5px 12px;font-size:0.77rem;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
     .pf-mini-tpl:hover{border-color:rgba(217,119,6,0.4);color:var(--accent);}
     .pf-mini-tpl.active{border-color:var(--accent);background:rgba(217,119,6,0.07);color:var(--accent);}
@@ -4905,6 +4906,7 @@ function closePreviewModal(e) {
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Professional <span class="pf-tpl-tag">· Corporate</span></div>
+          <div class="pf-tpl-desc">Dark header with blue accents and a clean timeline. Ideal for finance, consulting &amp; enterprise roles.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplCreative" onclick="selectPfTemplate('creative')">
           <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#d97706,#b45309);flex-direction:column;align-items:center;justify-content:center;gap:5px;">
@@ -4918,6 +4920,7 @@ function closePreviewModal(e) {
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Creative <span class="pf-tpl-tag">· Bold</span></div>
+          <div class="pf-tpl-desc">Purple-to-blue gradient hero with vibrant skill chips. Great for designers, marketers &amp; creatives.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplMinimal" onclick="selectPfTemplate('minimal')">
           <div class="pf-tpl-preview" style="background:#ffffff;border-bottom:1px solid #e2e8f0;flex-direction:column;padding:10px;">
@@ -4929,6 +4932,7 @@ function closePreviewModal(e) {
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Minimal <span class="pf-tpl-tag">· Clean</span></div>
+          <div class="pf-tpl-desc">Pure white with dark typography and generous whitespace. Timeless — works for any field.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplTech" onclick="selectPfTemplate('tech')">
           <div class="pf-tpl-preview" style="background:#0d1117;flex-direction:column;padding:8px;">
@@ -4941,6 +4945,7 @@ function closePreviewModal(e) {
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Tech <span class="pf-tpl-tag">· Dark</span></div>
+          <div class="pf-tpl-desc">Dark mode with terminal-green accents. Built for engineers, developers &amp; data scientists.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplWarm" onclick="selectPfTemplate('warm')">
           <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);flex-direction:column;align-items:center;justify-content:center;gap:5px;">
@@ -4950,6 +4955,7 @@ function closePreviewModal(e) {
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Warm <span class="pf-tpl-tag">· Vibrant</span></div>
+          <div class="pf-tpl-desc">Warm orange gradient with an inviting feel. Perfect for educators, coaches &amp; people-facing roles.</div>
         </div>
       </div>
       <div class="pf-footer">
@@ -5020,10 +5026,14 @@ function closePreviewModal(e) {
       </div>
       <div class="pf-footer">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
-        <div class="pf-footer-right">
-          <button class="btn-accent" onclick="downloadPortfolio()" style="gap:8px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download HTML
+        <div class="pf-footer-right" style="gap:8px;display:flex;flex-wrap:wrap;">
+          <button onclick="downloadPortfolio()" style="padding:9px 14px;font-size:0.83rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+          <button class="btn-accent" id="pfShareBtn" onclick="generatePortfolioLink()" style="gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Generate Link
           </button>
         </div>
       </div>
@@ -5322,7 +5332,108 @@ function downloadPortfolio() {
   a.download = name + '.com.html';
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('Portfolio downloaded! Open the HTML file in your browser.', 'success');
+  showToast('Portfolio downloaded!', 'success');
+}
+
+async function generatePortfolioLink() {
+  var btn = document.getElementById('pfShareBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
+  try {
+    var d = getPfData();
+    var html = generatePortfolioHTML(d, pfTemplate, pfSections);
+    var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
+    var resp = await fetch('/.netlify/functions/share-portfolio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: html, name: name })
+    });
+    var result = await resp.json();
+    if (result.url) {
+      showPfShareModal(result.url, name);
+    } else {
+      showToast('Could not generate link: ' + (result.error || 'Server error'), 'error');
+    }
+  } catch(ex) {
+    showToast('Error: ' + ex.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Generate Link';
+    }
+  }
+}
+
+function showPfShareModal(url, name) {
+  // Remove any existing share modal
+  var prev = document.getElementById('pfShareModal');
+  if (prev) prev.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'pfShareModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:18px;padding:28px 24px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.25);position:relative;';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:4px;';
+  title.textContent = '🎉 Your portfolio link is ready!';
+
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:0.82rem;color:#64748b;margin-bottom:18px;line-height:1.5;';
+  sub.textContent = 'Share this link — anyone with it can view your portfolio. Link is active for 30 days.';
+
+  var urlWrap = document.createElement('div');
+  urlWrap.style.cssText = 'background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;';
+
+  var urlText = document.createElement('div');
+  urlText.style.cssText = 'flex:1;font-size:0.8rem;color:#1e293b;word-break:break-all;line-height:1.5;';
+  urlText.textContent = url;
+
+  urlWrap.appendChild(urlText);
+
+  var btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+
+  var copyBtn = document.createElement('button');
+  copyBtn.style.cssText = 'flex:1;min-width:120px;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.87rem;transition:opacity .15s;';
+  copyBtn.textContent = '📋 Copy Link';
+  copyBtn.onclick = function() {
+    navigator.clipboard.writeText(url).then(function() {
+      copyBtn.textContent = '✓ Copied!';
+      copyBtn.style.background = '#16a34a';
+      setTimeout(function() { copyBtn.textContent = '📋 Copy Link'; copyBtn.style.background = '#7c3aed'; }, 2500);
+    }, function() {
+      // Fallback: select text
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      copyBtn.textContent = '✓ Copied!';
+    });
+  };
+
+  var openBtn = document.createElement('button');
+  openBtn.style.cssText = 'flex:1;min-width:100px;padding:10px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.87rem;color:#1e293b;';
+  openBtn.textContent = '↗ Preview';
+  openBtn.onclick = function() { window.open(url, '_blank'); };
+
+  var closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;line-height:1;';
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = function() { overlay.remove(); };
+
+  btns.appendChild(copyBtn);
+  btns.appendChild(openBtn);
+
+  box.appendChild(closeBtn);
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(urlWrap);
+  box.appendChild(btns);
+  overlay.appendChild(box);
+  overlay.onclick = function(ev) { if (ev.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
 }
 
 function generatePortfolioHTML(d, tpl, sections) {
