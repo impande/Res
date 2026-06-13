@@ -2961,7 +2961,20 @@ Bullet writing rules:
     if (!response.ok) throw new Error('Server error ' + response.status);
     const result = await response.json();
     const text = (result.content || result.text || '').trim();
-    if (text) { textarea.value = text; markNeedsRegen(); }
+    if (text) {
+      textarea.value = text;
+      // Parse bullet lines and sync directly into lastResumeData so preview
+      // shows structured bullets immediately without waiting for full regenerate.
+      const bulletArr = text.split('\n').map(l => l.replace(/^[•\-\*]\s*/,'').trim()).filter(Boolean);
+      if (lastResumeData && bulletArr.length) {
+        const expEntry = (lastResumeData.experience || []).find(e =>
+          e.title === (document.getElementById('exp-title-'+id)?.value.trim()||'') &&
+          e.co    === (document.getElementById('exp-co-'+id)?.value.trim()||'')
+        );
+        if (expEntry) expEntry.bullets = bulletArr;
+      }
+      markNeedsRegen();
+    }
     else throw new Error('Empty response');
   } catch(err) {
     showToast('Could not generate bullets: ' + err.message);
