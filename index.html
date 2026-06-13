@@ -240,15 +240,8 @@
     .tpl-card:hover{border-color:rgba(217,119,6,0.5);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
     .tpl-card.tpl-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.18);}
     /* mock resume preview inside card */
-    .tpl-card-thumb{height:80px;overflow:hidden;position:relative;}
-    .tpl-card-hdr{height:30px;width:100%;display:flex;align-items:center;gap:5px;padding:0 7px;box-sizing:border-box;}
-    .tpl-card-avatar{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.35);flex-shrink:0;}
-    .tpl-card-hdr-lines{display:flex;flex-direction:column;gap:2px;flex:1;}
-    .tpl-card-hdr-name{height:3px;border-radius:2px;background:rgba(255,255,255,0.8);width:65%;}
-    .tpl-card-hdr-title{height:2px;border-radius:1px;background:rgba(255,255,255,0.45);width:45%;}
-    .tpl-card-body{padding:5px 7px;display:flex;flex-direction:column;gap:3px;background:#fff;height:50px;}
-    .tpl-card-line{height:2.5px;border-radius:2px;background:rgba(0,0,0,0.1);}
-    .tpl-card-line.lw80{width:80%;}.tpl-card-line.lw60{width:60%;}.tpl-card-line.lw70{width:70%;}.tpl-card-line.lw45{width:45%;}.tpl-card-line.lw55{width:55%;}
+    .tpl-card-thumb{height:96px;overflow:hidden;position:relative;}
+    .tpl-mini-inner{width:794px;padding:36px;box-sizing:border-box;transform:scale(0.14);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
     .tpl-card-meta{padding:6px 8px 7px;border-top:1px solid var(--border);}
     .tpl-card-name{font-size:0.72rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .tpl-card-tag{font-size:0.6rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2255,6 +2248,26 @@ const TPL_META = {
   paper:    {label:'Paper',     tag:'Parchment · Warm',cat:'minimal'},
 };
 
+function _tplHeadHTML(key) {
+  var h = '<div class="r-name">Alex Johnson</div><div class="r-title">Senior Product Manager</div><div class="r-contact">alex@example.com</div>';
+  if (key === 'executive') return '<div class="r-head">' + h + '</div><div class="r-head-accent"></div>';
+  if (key === 'academic') return '<div class="r-head"><div class="r-head-line"></div>' + h + '<div class="r-head-line"></div></div>';
+  return '<div class="r-head">' + h + '</div>';
+}
+var _tplBodyHTML = '<div class="r-sec"><div class="r-sec-t">Experience</div><div class="r-exp"><div class="r-exp-top"><span class="r-role">Product Manager</span><span class="r-period">2022–Present</span></div><div class="r-co">Google</div><ul class="r-ul"><li>Led product roadmap and cross-team strategy</li><li>Grew user base by 40% in 12 months</li></ul></div></div><div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">BS Computer Science</div><div class="r-sch">MIT</div></div><div class="r-yr">2018</div></div></div><div class="r-sec"><div class="r-sec-t">Skills</div><div class="r-skills"><span class="r-sk">Strategy</span><span class="r-sk">Agile</span><span class="r-sk">Analytics</span><span class="r-sk">Leadership</span></div></div>';
+
+function calibrateTplPreviews() {
+  document.querySelectorAll('.tpl-card-thumb').forEach(function(th) {
+    var inn = th.querySelector('.tpl-mini-inner');
+    if (!inn) return;
+    var s = th.offsetWidth / 794;
+    inn.style.transform = 'scale(' + s.toFixed(4) + ')';
+    inn.style.height = Math.ceil(th.offsetHeight / s) + 'px';
+  });
+}
+var _tplRszT;
+window.addEventListener('resize', function() { clearTimeout(_tplRszT); _tplRszT = setTimeout(calibrateTplPreviews, 150); });
+
 function renderTemplateGrid(filterCat) {
   const grid = document.getElementById('tplGrid');
   if (!grid) return;
@@ -2263,26 +2276,12 @@ function renderTemplateGrid(filterCat) {
   // Sort most-used first; stable within same usage keeps original definition order
   entries.sort(([ka], [kb]) => (usage[kb] || 0) - (usage[ka] || 0));
   grid.innerHTML = entries.map(([key, meta]) => {
-    const color = TPL_COLORS[key] || '#888';
     const useCount = usage[key] || 0;
     const tagText = useCount >= 3 ? `🔥 ${meta.tag}` : useCount >= 1 ? `★ ${meta.tag}` : meta.tag;
     return `<div class="tpl-card${key === currentTemplate ? ' tpl-active' : ''}" onclick="selectTemplate('${key}')">
       <div class="tpl-card-check">✓</div>
       <div class="tpl-card-thumb">
-        <div class="tpl-card-hdr" style="background:${color}">
-          <div class="tpl-card-avatar"></div>
-          <div class="tpl-card-hdr-lines">
-            <div class="tpl-card-hdr-name"></div>
-            <div class="tpl-card-hdr-title"></div>
-          </div>
-        </div>
-        <div class="tpl-card-body">
-          <div class="tpl-card-line lw80"></div>
-          <div class="tpl-card-line lw60"></div>
-          <div class="tpl-card-line lw70"></div>
-          <div class="tpl-card-line lw55"></div>
-          <div class="tpl-card-line lw45"></div>
-        </div>
+        <div class="tpl-mini-inner tpl-${key}">${_tplHeadHTML(key)}${_tplBodyHTML}</div>
       </div>
       <div class="tpl-card-meta">
         <div class="tpl-card-name">${meta.label}</div>
@@ -2290,6 +2289,7 @@ function renderTemplateGrid(filterCat) {
       </div>
     </div>`;
   }).join('');
+  requestAnimationFrame(calibrateTplPreviews);
 }
 
 function filterTpls(btn, cat) {
