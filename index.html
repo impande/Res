@@ -710,6 +710,10 @@
     .pf-section-sub{font-size:0.83rem;color:var(--muted);margin-bottom:18px;line-height:1.5;}
     /* Template picker */
     .pf-tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+    @media(min-width:500px){.pf-tpl-grid{grid-template-columns:repeat(5,1fr);}}
+    .pf-mini-tpl{padding:5px 12px;font-size:0.77rem;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
+    .pf-mini-tpl:hover{border-color:rgba(217,119,6,0.4);color:var(--accent);}
+    .pf-mini-tpl.active{border-color:var(--accent);background:rgba(217,119,6,0.07);color:var(--accent);}
     .pf-tpl-card{border:2px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
     .pf-tpl-card:hover{border-color:rgba(217,119,6,0.4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
     .pf-tpl-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.15);}
@@ -2374,6 +2378,22 @@ function _syncLastResumeData() {
     const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
     return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
   });
+  // Refresh page count chip to reflect latest form data
+  const _pcStrip = document.getElementById('pageCountStrip');
+  if (_pcStrip && _pcStrip.style.display !== 'none') {
+    clearTimeout(_pageCountTimer);
+    _pageCountTimer = setTimeout(function() {
+      try {
+        const _tmp = document.createElement('div');
+        _tmp.className = 'resume-a4-page';
+        _tmp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;max-width:none;visibility:hidden;pointer-events:none;z-index:-1;';
+        _tmp.innerHTML = renderResumeHTML(lastResumeData);
+        document.body.appendChild(_tmp);
+        _updatePageChip(Math.max(1, Math.ceil(_tmp.scrollHeight / (297 * 3.7795))));
+        document.body.removeChild(_tmp);
+      } catch(e) {}
+    }, 300);
+  }
 }
 
 function clearNeedsRegen() {
@@ -3769,9 +3789,21 @@ async function handleResumeFile(file) {
   }
   showUploadStatus('parsing', '⏳ Reading file…');
   const name = file.name.toLowerCase();
-  // Old binary .doc format — XML extractor won't work, direct to Vision or paste
   if (name.endsWith('.doc') && !name.endsWith('.docx')) {
-    showUploadStatus('parsing', '🔍 Reading .doc file with AI vision…');
+    showUploadStatus('parsing', '📄 Reading .doc file…');
+    try {
+      // Many modern .doc files saved by Word are OOXML-compatible — try text extraction first
+      const text = await extractTextFromFile(file);
+      const usableText = text && text.replace(/\s/g,'').length >= 200;
+      if (usableText) {
+        showUploadStatus('parsing', '🤖 AI is parsing your resume…');
+        const data = await parseResumeWithAI(text);
+        const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+        if (hasData) { onParseSuccess(data); return; }
+      }
+    } catch(e) {}
+    // Fallback: Vision API for older binary .doc format
+    showUploadStatus('parsing', '🔍 Reading .doc with AI vision…');
     try {
       const b64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result.split(',')[1]); r.onerror = () => rej(new Error('Read failed')); r.readAsDataURL(file); });
       const data = await parseResumeFromBase64Array([b64], 'application/msword');
@@ -4826,6 +4858,27 @@ function closePreviewModal(e) {
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Minimal <span class="pf-tpl-tag">· Clean</span></div>
         </div>
+        <div class="pf-tpl-card" id="pfTplTech" onclick="selectPfTemplate('tech')">
+          <div class="pf-tpl-preview" style="background:#0d1117;flex-direction:column;padding:8px;">
+            <div style="height:4px;background:#22c55e;border-radius:2px;width:45%;margin-bottom:5px;"></div>
+            <div style="height:2.5px;background:rgba(255,255,255,0.25);border-radius:2px;width:65%;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:4px;">
+              <div style="height:14px;width:28px;border-radius:4px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);"></div>
+              <div style="height:14px;width:28px;border-radius:4px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);"></div>
+            </div>
+          </div>
+          <div class="pf-tpl-check">✓</div>
+          <div class="pf-tpl-name">Tech <span class="pf-tpl-tag">· Dark</span></div>
+        </div>
+        <div class="pf-tpl-card" id="pfTplWarm" onclick="selectPfTemplate('warm')">
+          <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);flex-direction:column;align-items:center;justify-content:center;gap:5px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.3);"></div>
+            <div style="height:4px;background:rgba(255,255,255,0.9);border-radius:2px;width:55%;"></div>
+            <div style="height:2.5px;background:rgba(255,255,255,0.55);border-radius:2px;width:38%;"></div>
+          </div>
+          <div class="pf-tpl-check">✓</div>
+          <div class="pf-tpl-name">Warm <span class="pf-tpl-tag">· Vibrant</span></div>
+        </div>
       </div>
       <div class="pf-footer">
         <div style="font-size:0.8rem;color:var(--muted)">You can always change this later</div>
@@ -4838,6 +4891,10 @@ function closePreviewModal(e) {
     <div class="pf-body" id="pfStep2" style="display:none">
       <div class="pf-section-title">Choose what to include</div>
       <div class="pf-section-sub">Toggle sections on or off. All data is pulled from your resume automatically.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:0.8rem;color:var(--muted)">Tap a section to toggle it</span>
+        <button id="pfSelectAllBtn" onclick="pfToggleAll()" style="padding:5px 13px;font-size:0.8rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;">Deselect All</button>
+      </div>
       <div class="pf-toggle-grid" id="pfToggleGrid">
         <div class="pf-toggle on" data-section="about" onclick="togglePfSection(this)"><span class="pf-toggle-ico">👤</span><span class="pf-toggle-lbl">About Me</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="experience" onclick="togglePfSection(this)"><span class="pf-toggle-ico">💼</span><span class="pf-toggle-lbl">Experience</span><div class="pf-toggle-switch"></div></div>
@@ -4846,7 +4903,16 @@ function closePreviewModal(e) {
         <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
       </div>
-      <div class="pf-footer">
+      <!-- About Me editor -->
+      <div id="pfAboutEditor" style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+        <div style="font-size:0.83rem;font-weight:600;color:var(--text);margin-bottom:8px;">✏️ About Me text (editable)</div>
+        <textarea id="pfAboutText" rows="4" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:0.87rem;color:var(--text);resize:vertical;background:var(--bg);font-family:inherit;line-height:1.6;" placeholder="Write a brief introduction about yourself…"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;">✨ Generate with AI</button>
+          <span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span>
+        </div>
+      </div>
+      <div class="pf-footer" style="margin-top:16px;">
         <button class="btn-secondary" onclick="pfGoStep(1)">← Back</button>
         <div class="pf-footer-right">
           <button class="btn-primary" onclick="pfGoStep(3)">Preview &amp; Download →</button>
@@ -4857,6 +4923,17 @@ function closePreviewModal(e) {
     <div class="pf-body" id="pfStep3" style="display:none">
       <div class="pf-section-title">Your portfolio is ready!</div>
       <div class="pf-section-sub">Preview below — download the HTML file and host it anywhere (GitHub Pages, Netlify Drop, or your own server).</div>
+      <!-- Template mini-switcher -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <span style="font-size:0.8rem;font-weight:600;color:var(--muted);white-space:nowrap;">Switch template:</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="pfMiniRow">
+          <button class="pf-mini-tpl active" id="pfMiniProfessional" onclick="switchPfTemplate('professional')">Professional</button>
+          <button class="pf-mini-tpl" id="pfMiniCreative" onclick="switchPfTemplate('creative')">Creative</button>
+          <button class="pf-mini-tpl" id="pfMiniMinimal" onclick="switchPfTemplate('minimal')">Minimal</button>
+          <button class="pf-mini-tpl" id="pfMiniTech" onclick="switchPfTemplate('tech')">Tech</button>
+          <button class="pf-mini-tpl" id="pfMiniWarm" onclick="switchPfTemplate('warm')">Warm</button>
+        </div>
+      </div>
       <div class="pf-preview-wrap">
         <div class="pf-preview-bar">
           <div class="pf-preview-dot" style="background:#ef4444;"></div>
@@ -4896,14 +4973,92 @@ function closePfModal() {
 
 function selectPfTemplate(tpl) {
   pfTemplate = tpl;
-  ['professional','creative','minimal'].forEach(function(t) {
-    document.getElementById('pfTpl' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('selected', t === tpl);
+  ['professional','creative','minimal','tech','warm'].forEach(function(t) {
+    var el = document.getElementById('pfTpl' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('selected', t === tpl);
   });
+  if (pfCurrentStep === 3) { buildPfPreview(); updatePfMiniSwitcher(); }
+}
+
+function switchPfTemplate(tpl) {
+  pfTemplate = tpl;
+  updatePfMiniSwitcher();
+  buildPfPreview();
+  // Also sync the Step 1 cards
+  ['professional','creative','minimal','tech','warm'].forEach(function(t) {
+    var el = document.getElementById('pfTpl' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('selected', t === tpl);
+  });
+}
+
+function updatePfMiniSwitcher() {
+  ['professional','creative','minimal','tech','warm'].forEach(function(t) {
+    var btn = document.getElementById('pfMini' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) btn.classList.toggle('active', t === pfTemplate);
+  });
+}
+
+function pfToggleAll() {
+  var allOn = Object.values(pfSections).every(Boolean);
+  var nextState = !allOn;
+  document.querySelectorAll('#pfToggleGrid .pf-toggle').forEach(function(el) {
+    if (nextState) el.classList.add('on'); else el.classList.remove('on');
+    pfSections[el.dataset.section] = nextState;
+  });
+  var btn = document.getElementById('pfSelectAllBtn');
+  if (btn) btn.textContent = nextState ? 'Deselect All' : 'Select All';
+  var editor = document.getElementById('pfAboutEditor');
+  if (editor) editor.style.display = (nextState && pfSections.about) ? '' : (pfSections.about ? '' : 'none');
 }
 
 function togglePfSection(el) {
   el.classList.toggle('on');
   pfSections[el.dataset.section] = el.classList.contains('on');
+  // Show/hide About Me editor
+  if (el.dataset.section === 'about') {
+    var editor = document.getElementById('pfAboutEditor');
+    if (editor) editor.style.display = pfSections.about ? '' : 'none';
+  }
+  // Update Select All button label
+  var allOn = Object.values(pfSections).every(Boolean);
+  var btn = document.getElementById('pfSelectAllBtn');
+  if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
+}
+
+async function pfGenerateAbout() {
+  var btn = document.getElementById('pfGenAboutBtn');
+  var status = document.getElementById('pfGenAboutStatus');
+  var ta = document.getElementById('pfAboutText');
+  if (!btn || !ta) return;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Generating…';
+  if (status) status.textContent = '';
+  try {
+    var cd = (typeof collectData === 'function') ? collectData() : {};
+    var fullName = ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim();
+    var expStr = (cd.experience||[]).slice(0,3).map(function(e){return e.title + (e.co?' at '+e.co:'');}).join(', ');
+    var skillStr = (cd.skills||[]).slice(0,8).join(', ');
+    var existing = (lastResumeData && lastResumeData.summary) || '';
+    var prompt = 'Write a 2-3 sentence professional "About Me" for a portfolio website. Person: ' + (fullName||'professional') + (cd.jobTitle ? ', ' + cd.jobTitle : '') + (expStr ? '. Experience: ' + expStr : '') + (skillStr ? '. Skills: ' + skillStr : '') + '. Make it engaging, first-person, warm. Output only the paragraph, no quotes.' + (existing ? ' Base it on: ' + existing : '');
+    var resp = await fetch('/.netlify/functions/generate', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({prompt: prompt})
+    });
+    if (!resp.ok) throw new Error('Server error');
+    var result = await resp.json();
+    var text = (result.content || result.text || '').trim();
+    if (text) {
+      ta.value = text;
+      if (status) status.textContent = '✓ Done';
+    } else {
+      if (status) status.textContent = 'No response — try again';
+    }
+  } catch(e) {
+    if (status) status.textContent = '⚠ ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generate with AI';
+  }
 }
 
 function pfGoStep(n) {
@@ -4919,11 +5074,27 @@ function pfGoStep(n) {
     if (i + 1 < n) el.textContent = '✓';
     else el.textContent = String(i + 1);
   });
-  if (n === 3) buildPfPreview();
+  if (n === 2) {
+    // Pre-fill About Me textarea with existing summary
+    var ta = document.getElementById('pfAboutText');
+    if (ta && !ta.value) {
+      ta.value = (lastResumeData && lastResumeData.summary) || '';
+    }
+    // Sync Select All button label
+    var allOn = Object.values(pfSections).every(Boolean);
+    var btn = document.getElementById('pfSelectAllBtn');
+    if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
+  }
+  if (n === 3) {
+    updatePfMiniSwitcher();
+    buildPfPreview();
+  }
 }
 
 function getPfData() {
   var cd = (typeof collectData === 'function') ? collectData() : {};
+  // Use editable About Me textarea if filled, fallback to AI summary
+  var aboutText = (document.getElementById('pfAboutText') || {}).value || '';
   return {
     name: ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim(),
     title: cd.jobTitle || '',
@@ -4933,7 +5104,7 @@ function getPfData() {
     linkedin: cd.linkedin || '',
     github: cd.github || '',
     photo: userPhoto || '',
-    summary: (lastResumeData && lastResumeData.summary) || '',
+    summary: aboutText || (lastResumeData && lastResumeData.summary) || '',
     experience: (cd.experience || []).map(function(e) {
       return {title: e.title, company: e.co, dates: [e.start, e.end].filter(Boolean).join(' – '), desc: e.desc};
     }),
@@ -5033,6 +5204,10 @@ function generatePortfolioHTML(d, tpl, sections) {
     ? ':root{--pf-accent:#7c3aed;--pf-accent2:#2563eb;--pf-hero-bg:linear-gradient(135deg,#7c3aed 0%,#2563eb 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.8);--pf-sec-bg:#fff;--pf-alt-bg:#f8f9ff;--pf-text:#1e293b;--pf-muted:#64748b;--pf-border:#e2e8f0;--pf-chip-bg:rgba(124,58,237,0.08);--pf-chip-color:#7c3aed;}'
     : tpl === 'minimal'
     ? ':root{--pf-accent:#111827;--pf-accent2:#374151;--pf-hero-bg:#111827;--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.7);--pf-sec-bg:#fff;--pf-alt-bg:#f9fafb;--pf-text:#111827;--pf-muted:#6b7280;--pf-border:#e5e7eb;--pf-chip-bg:#f3f4f6;--pf-chip-color:#374151;}'
+    : tpl === 'tech'
+    ? ':root{--pf-accent:#22c55e;--pf-accent2:#16a34a;--pf-hero-bg:#0d1117;--pf-hero-text:#e6edf3;--pf-hero-sub:rgba(230,237,243,0.6);--pf-sec-bg:#0d1117;--pf-alt-bg:#161b22;--pf-text:#e6edf3;--pf-muted:#8b949e;--pf-border:#30363d;--pf-chip-bg:rgba(34,197,94,0.1);--pf-chip-color:#22c55e;}'
+    : tpl === 'warm'
+    ? ':root{--pf-accent:#ea580c;--pf-accent2:#c2410c;--pf-hero-bg:linear-gradient(135deg,#7c2d12 0%,#ea580c 60%,#f97316 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.8);--pf-sec-bg:#fff;--pf-alt-bg:#fff7ed;--pf-text:#1c0a00;--pf-muted:#78350f;--pf-border:#fed7aa;--pf-chip-bg:rgba(234,88,12,0.08);--pf-chip-color:#ea580c;}'
     : ':root{--pf-accent:#2563eb;--pf-accent2:#1d4ed8;--pf-hero-bg:linear-gradient(135deg,#1e293b 0%,#2563eb 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.75);--pf-sec-bg:#fff;--pf-alt-bg:#f8fafc;--pf-text:#1e293b;--pf-muted:#64748b;--pf-border:#e2e8f0;--pf-chip-bg:rgba(37,99,235,0.08);--pf-chip-color:#2563eb;}';
 
   var navLinks = '';
