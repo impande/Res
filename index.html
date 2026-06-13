@@ -5011,7 +5011,7 @@ function closePreviewModal(e) {
           <div class="pf-preview-dot" style="background:#ef4444;"></div>
           <div class="pf-preview-dot" style="background:#f59e0b;"></div>
           <div class="pf-preview-dot" style="background:#22c55e;"></div>
-          <div class="pf-preview-url" id="pfPreviewUrl">yourname.portfolio.html</div>
+          <div class="pf-preview-url" id="pfPreviewUrl">yourname.com</div>
         </div>
         <iframe class="pf-preview-frame" id="pfPreviewFrame" title="Portfolio Preview"></iframe>
       </div>
@@ -5195,7 +5195,7 @@ function buildPfPreview() {
   var html = generatePortfolioHTML(d, pfTemplate, pfSections);
   var frame = document.getElementById('pfPreviewFrame');
   var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
-  document.getElementById('pfPreviewUrl').textContent = name + '.html';
+  document.getElementById('pfPreviewUrl').textContent = name + '.com';
   frame.srcdoc = html;
 }
 
@@ -5206,7 +5206,7 @@ function downloadPortfolio() {
   var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = name + '-portfolio.html';
+  a.download = name + '.com.html';
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('Portfolio downloaded! Open the HTML file in your browser.', 'success');
