@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio AI — Build your personal site with AI</title>
+<script>
+  // Decide which CSS to load based on the requested mode.
+  // Done inline to avoid a flash of landing styles before the wizard kicks in.
+  (function(){
+    const mode = new URLSearchParams(location.search).get('mode');
+    const href = (mode === 'wizard' || mode === 'chat') ? '/css/portfolio.css' : '/css/landing.css';
+    document.write('<link rel="stylesheet" href="' + href + '">');
+  })();
+</script>
+</head>
+<body>
+
+<div id="picker">
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">R</div>
+    <div>
+      <div class="brand-text">Résumé AI</div>
+      <div class="brand-sub">Portfolio Builder</div>
+    </div>
+  </div>
+  <a href="/">← Back</a>
+</header>
+
+<main class="hero">
+  <div class="eyebrow">Choose how you'd like to build</div>
+  <h1>How do you want to <em>tell your story?</em></h1>
+  <p class="sub">Both paths produce the same result: a polished portfolio site you can publish or download. Pick whichever feels more natural.</p>
+
+  <div class="cards" id="picker-cards">
+    <a class="card" href="/portfolio.html?mode=wizard" data-mode="wizard">
+      <div class="card-icon resume">W</div>
+      <div>
+        <div class="card-tag">Step-by-step forms</div>
+        <h2>Guided Wizard</h2>
+      </div>
+      <p>Move through clear sections — basics, about, projects, skills, style. AI helps polish each piece as you go. Best if you know what you want.</p>
+      <div class="card-cta">Start the wizard →</div>
+    </a>
+
+    <a class="card" href="/portfolio.html?mode=chat" data-mode="chat">
+      <span class="new-pill">AI-led</span>
+      <div class="card-icon portfolio">C</div>
+      <div>
+        <div class="card-tag">Conversational</div>
+        <h2>Chat Interview</h2>
+      </div>
+      <p>Have a conversation with AI. It asks the right questions, you answer naturally, and your portfolio fills in on the side. Best if you'd rather talk than fill forms.</p>
+      <div class="card-cta">Start the chat →</div>
+    </a>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>© Résumé AI</span>
+  <span><a href="/">Home</a></span>
+</footer>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/cross-fill.js"></script>
+<script src="/js/portfolio/state.js"></script>
+<script src="/js/portfolio/templates/registry.js"></script>
+<script src="/js/portfolio/templates/minimal.js"></script>
+<script src="/js/portfolio/templates/bold.js"></script>
+<script src="/js/portfolio/templates/developer.js"></script>
+<script src="/js/portfolio/templates/designer.js"></script>
+<script src="/js/portfolio/templates/executive.js"></script>
+<script src="/js/portfolio/preview.js"></script>
+<script src="/js/portfolio/upload.js"></script>
+<script src="/js/portfolio/publish.js"></script>
+<script src="/js/portfolio/export-zip.js"></script>
+<script src="/js/portfolio/edit.js"></script>
+<script src="/js/portfolio/wizard.js"></script>
+<script src="/js/portfolio/chat.js"></script>
+<script>
+  (function(){
+    const params = new URLSearchParams(location.search);
+    const mode = params.get('mode');
+    const from = params.get('from');
+
+    // Handoff from /resume: hydrate portfolio state before the journey starts.
+    if (from === 'resume' && window.CrossFill && window.CrossFill.hasResume()){
+      const r = window.CrossFill.readResume();
+      const p = window.CrossFill.resumeToPortfolio(r);
+      if (p) window.PortfolioState.replace(p);
+      window.CrossFill.clearResume();
+    }
+
+    if (mode === 'wizard') {
+      document.getElementById('picker').remove();
+      window.PortfolioWizard.init();
+      if (from === 'resume') showCrossFillBanner('Pre-filled from your résumé. Edit anything before publishing.');
+      return;
+    }
+    if (mode === 'chat') {
+      document.getElementById('picker').remove();
+      window.PortfolioChat.init();
+      return;
+    }
+
+    // Picker view: if we have résumé data, offer a third "Import from résumé" card.
+    if (window.CrossFill && window.CrossFill.hasResume()){
+      const cards = document.getElementById('picker-cards');
+      if (cards){
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = '/portfolio.html?mode=wizard&from=resume';
+        a.innerHTML = `
+          <span class="new-pill">From your résumé</span>
+          <div class="card-icon resume">R</div>
+          <div>
+            <div class="card-tag">One-click import</div>
+            <h2>Use My Résumé</h2>
+          </div>
+          <p>We saw you've already filled in a résumé. Carry that data over — name, experience, education, skills — and start the wizard prefilled.</p>
+          <div class="card-cta">Import and start →</div>
+        `;
+        cards.prepend(a);
+      }
+    }
+  })();
+
+  function showCrossFillBanner(msg){
+    const b = document.createElement('div');
+    b.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(34,134,58,0.95);color:#fff;font:13px/1.4 system-ui,sans-serif;padding:10px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.18);z-index:9999';
+    b.textContent = msg;
+    document.body.appendChild(b);
+    setTimeout(() => { b.style.transition='opacity .4s'; b.style.opacity='0'; setTimeout(() => b.remove(), 420); }, 3200);
+  }
+</script>
+
+</body>
+</html>

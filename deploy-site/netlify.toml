@@ -29,3 +29,45 @@
     Cache-Control = "no-cache, no-store, must-revalidate"
     Pragma = "no-cache"
     Expires = "0"
+
+# ---- Portfolio backend (ported from resume-ai) ----
+[[redirects]]
+  from = "/api/claude"
+  to = "/.netlify/functions/claude"
+  status = 200
+
+[[redirects]]
+  from = "/api/portfolio-chat"
+  to = "/.netlify/functions/portfolio-chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/upload"
+  to = "/.netlify/functions/upload"
+  status = 200
+
+[[redirects]]
+  from = "/api/publish"
+  to = "/.netlify/functions/publish"
+  status = 200
+
+[[redirects]]
+  from = "/api/check-slug"
+  to = "/.netlify/functions/check-slug"
+  status = 200
+
+[[redirects]]
+  from = "/api/portfolio"
+  to = "/.netlify/functions/portfolio"
+  status = 200
+
+# ---- Public-facing portfolio routes ----
+[[redirects]]
+  from = "/s/*"
+  to = "/.netlify/functions/site"
+  status = 200
+
+[[redirects]]
+  from = "/i/*"
+  to = "/.netlify/functions/image"
+  status = 200
