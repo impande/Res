@@ -277,7 +277,7 @@
     .btn-dl-doc:hover{background:linear-gradient(135deg,#b45309,#92400e);transform:translateY(-1px);box-shadow:0 5px 16px rgba(217,119,6,0.38);}
     .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
-    .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;}
+    .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
@@ -348,81 +348,34 @@
     /* ── Toast notifications ── */
     @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(14px);}}
-    /* ── UPI Payment Modal ── */
-    .upi-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
-    .upi-modal{background:#fff;border:1px solid var(--border);border-radius:24px;width:100%;max-width:640px;overflow:hidden;animation:upiIn .32s cubic-bezier(.34,1.3,.64,1);box-shadow:0 24px 64px rgba(0,0,0,0.14);}
-    @keyframes upiIn{from{opacity:0;transform:scale(0.88) translateY(28px);}to{opacity:1;transform:none;}}
-    .upi-hdr{background:linear-gradient(135deg,#b45309 0%,#d97706 100%);padding:24px 26px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);}
-    .upi-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:14px;}
-    .upi-price-row{display:flex;align-items:flex-start;justify-content:center;gap:2px;margin-bottom:4px;}
-    .upi-rupee{font-size:1.5rem;font-weight:700;color:#fff;margin-top:8px;line-height:1;}
-    .upi-amount{font-size:4rem;font-weight:800;color:#fff;line-height:1;}
-    .upi-once{font-size:0.74rem;color:rgba(255,255,255,0.65);letter-spacing:0.3px;}
-    /* Two-column body on desktop */
-    .upi-body{padding:22px 24px 24px;display:grid;grid-template-columns:auto 1fr;gap:22px;}
-    .upi-qr-col{display:flex;flex-direction:column;align-items:center;gap:10px;}
-    .upi-steps-col{display:flex;flex-direction:column;}
-    .upi-qr{width:158px;height:158px;border-radius:14px;background:#fff;padding:6px;display:block;box-shadow:0 0 0 3px rgba(217,119,6,0.15),0 8px 24px rgba(0,0,0,0.1);}
-    .upi-qr-label{font-size:0.71rem;color:var(--muted);text-align:center;max-width:158px;line-height:1.4;}
-    .upi-id-row{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:9px 12px;width:100%;}
-    .upi-id-info{flex:1;min-width:0;}
-    .upi-id-label{font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px;}
-    .upi-id-text{font-size:0.85rem;color:var(--text);font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .btn-copy-upi{flex-shrink:0;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);color:var(--accent);font-size:0.72rem;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
-    .btn-copy-upi:hover{background:rgba(217,119,6,0.14);}
-    /* Step cards */
-    .upi-steps{display:flex;flex-direction:column;gap:8px;height:100%;justify-content:space-between;}
-    .upi-step-card{display:flex;align-items:center;gap:13px;padding:11px 14px;background:var(--card-bg);border:1px solid var(--border);border-radius:13px;transition:border-color .15s;}
-    .upi-step-card:hover{border-color:rgba(217,119,6,0.3);}
-    .upi-step-icon{width:36px;height:36px;border-radius:10px;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-    .upi-step-text strong{display:block;font-size:0.83rem;font-weight:700;color:var(--text);line-height:1.2;}
-    .upi-step-sub{font-size:0.72rem;color:var(--muted);margin-top:2px;}
-    /* Bottom CTA — spans full grid width on desktop */
-    .upi-bottom{grid-column:1/-1;padding:0 24px 24px;}
-    /* Step number badge — hidden on desktop */
-    .upi-step-num{display:none;}
-    /* Drag handle — hidden on desktop */
-    .upi-drawer-handle{display:none;}
-    /* Scroll wrapper transparent on desktop */
-    .upi-drawer-scroll{display:contents;}
-    .upi-sep{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-    .upi-sep-line{flex:1;height:1px;background:var(--border);}
-    .upi-sep-txt{font-size:0.67rem;color:var(--muted);white-space:nowrap;letter-spacing:0.3px;}
-    .btn-paid{width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.95rem;font-weight:800;border:none;border-radius:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.2px;}
-    .btn-paid:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(34,197,94,0.42);}
-    @keyframes paidPulse{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,0.22);}50%{box-shadow:0 0 0 9px rgba(34,197,94,0.09),0 4px 20px rgba(34,197,94,0.35);}}
-    .btn-paid.pulse{animation:paidPulse 1.5s ease-in-out infinite;}
-    .upi-cancel{display:block;text-align:center;font-size:0.75rem;color:var(--muted);cursor:pointer;margin-top:10px;padding:5px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
-    .upi-cancel:hover{color:var(--text);}
-    /* Mobile: bottom drawer */
+    /* ── Razorpay Payment Modal ── */
+    #payOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px);}
+    #payModal{background:#12121e;border:1px solid #25253a;border-radius:24px;width:100%;max-width:420px;overflow:hidden;animation:payIn .32s cubic-bezier(.34,1.3,.64,1);}
+    @keyframes payIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:none;}}
+    .pay-drawer-handle{display:none;justify-content:center;padding:12px 0 6px;}
+    .pay-drawer-pill{width:40px;height:4px;background:#2e2e48;border-radius:99px;}
+    .pay-hdr{background:linear-gradient(135deg,#0a0a16 0%,#16162e 100%);padding:26px 28px 20px;text-align:center;border-bottom:1px solid #222236;}
+    .pay-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:16px;}
+    #payDisplayPrice{font-size:3.5rem;font-weight:800;color:#fff;line-height:1;display:block;margin-bottom:6px;}
+    .pay-once{font-size:0.74rem;color:#55557a;letter-spacing:0.3px;}
+    .pay-feats{padding:18px 24px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .pay-feat{display:flex;align-items:center;gap:8px;font-size:0.8rem;color:#9898c8;background:#0c0c1a;border:1px solid #1e1e32;border-radius:10px;padding:10px 12px;}
+    .pay-feat span{color:#22c55e;font-weight:800;flex-shrink:0;}
+    .pay-cta{padding:4px 24px 24px;}
+    #payNowBtn{width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-size:0.95rem;font-weight:800;border:none;border-radius:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.2px;}
+    #payNowBtn:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(245,158,11,0.42);}
+    #payNowBtn:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+    .pay-cancel{display:block;text-align:center;font-size:0.75rem;color:#33334a;cursor:pointer;margin-top:10px;padding:5px 0;border:none;background:none;font-family:inherit;transition:color .15s;width:100%;}
+    .pay-cancel:hover{color:#7070a0;}
     @media(max-width:520px){
-      .upi-overlay{align-items:flex-end;padding:0;}
-      @keyframes upiIn{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
-      .upi-modal{border-radius:24px 24px 0 0;max-width:100%;width:100%;display:flex;flex-direction:column;max-height:90vh;}
-      .upi-drawer-handle{display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;}
-      .upi-drawer-pill{width:40px;height:4px;background:var(--border);border-radius:99px;}
-      .upi-drawer-scroll{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;}
-      .upi-drawer-scroll::-webkit-scrollbar{display:none;}
-      .upi-hdr{padding:10px 18px 13px;}
-      .upi-rupee{font-size:3rem;}
-      .upi-amount{font-size:3rem;}
-      .upi-once{margin-top:2px;}
-      .upi-body{grid-template-columns:1fr;gap:10px;padding:10px 14px 14px;}
-      .upi-qr-col{flex-direction:column;align-items:center;}
-      .upi-qr{width:130px;height:130px;}
-      /* Compact horizontal steps */
-      .upi-steps-col{display:block;}
-      .upi-steps{flex-direction:row;align-items:flex-start;gap:0;height:auto;justify-content:space-between;}
-      .upi-step-card{flex:1;flex-direction:column;align-items:center;gap:5px;padding:0;background:none;border:none;border-radius:0;position:relative;}
-      .upi-step-card:not(:last-child)::after{content:'›';position:absolute;right:-4px;top:10px;color:var(--muted);font-size:1.1rem;line-height:1;}
-      .upi-step-card:hover{border-color:transparent;}
-      .upi-step-icon{width:36px;height:36px;border-radius:50%;background:var(--card-bg);border:1.5px solid var(--border);position:relative;}
-      .upi-step-num{position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:var(--accent);color:#fff;font-size:0.48rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;}
-      .upi-step-text{text-align:center;padding:0 2px;}
-      .upi-step-text strong{font-size:0.58rem;font-weight:600;color:var(--muted);line-height:1.3;}
-      .upi-step-sub{display:none;}
-      /* Pinned CTA */
-      .upi-bottom{grid-column:1/-1;background:#fff;border-top:1px solid var(--border);padding:12px 14px 24px;flex-shrink:0;}
+      #payOverlay{align-items:flex-end;padding:0;}
+      @keyframes payIn{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
+      #payModal{border-radius:24px 24px 0 0;max-width:100%;width:100%;}
+      .pay-drawer-handle{display:flex;}
+      .pay-hdr{padding:12px 18px 14px;}
+      #payDisplayPrice{font-size:2.8rem;}
+      .pay-feats{grid-template-columns:1fr;gap:6px;padding:12px 16px 10px;}
+      .pay-cta{padding:4px 16px 28px;}
     }
     /* ── ATS Score Card ── */
     .ats-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;gap:22px;animation:atsIn .35s ease-out;}
@@ -460,6 +413,10 @@
       .ats-item{font-size:0.72rem;gap:5px;}
       .ats-item-icon{width:15px;height:15px;font-size:0.52rem;}
     }
+    /* ── Page Count Strip ── */
+    #pageCountStrip{display:none;align-items:center;justify-content:space-between;padding:9px 12px;margin-top:12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(245,158,11,.03);}
+    .pcs-label{font-size:0.65rem;color:var(--muted);}
+    .pcs-chip{display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:800;color:#b45309;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:20px;padding:3px 10px;letter-spacing:0.2px;}
     /* A4 page layout for all print paths — top-level so Safari respects it */
     @page { size: A4 portrait; margin: 0; }
     /* ── iOS PDF: print the LIVE resume — no clone, no overlay.
@@ -1796,7 +1753,7 @@
     .preview-scale-inner{transform-origin:top left;display:block;}
     /* Resume tips — overlay on resume card (desktop), bottom drawer (mobile) */
     #tipsBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:8499;}
-    #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.88);backdrop-filter:blur(3px);z-index:10;border-radius:4px;align-items:center;justify-content:center;padding:20px;}
+    #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.92);backdrop-filter:blur(3px);z-index:10;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
     #resumeTips.tips-hidden{display:none!important;}
     .tips-drag-handle{display:none;}
     @media(max-width:520px){
@@ -1968,10 +1925,10 @@
   </div>
 
   <div class="step-content" id="step2">
+    <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
     <h1 class="step-title">Work Experience</h1>
     <p class="step-subtitle">Add your most recent roles first. Leave description blank — AI will generate optimised bullets for you.</p>
     <div id="experienceEntries"></div>
-    <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
       <button class="btn-primary" onclick="goToStep(3)">Next: Awards →</button>
@@ -1979,10 +1936,10 @@
   </div>
 
   <div class="step-content" id="step3">
+    <button class="add-entry-btn" onclick="addAward()">+ Add Award / Achievement</button>
     <h1 class="step-title">Awards &amp; Achievements</h1>
     <p class="step-subtitle">Certifications, honours, recognitions — anything that sets you apart</p>
     <div id="awardEntries"></div>
-    <button class="add-entry-btn" onclick="addAward()">+ Add Award / Achievement</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
       <button class="btn-primary" onclick="goToStep(4)">Next: Education →</button>
@@ -1990,10 +1947,10 @@
   </div>
 
   <div class="step-content" id="step4">
+    <button class="add-entry-btn" onclick="addEducation()">+ Add Education</button>
     <h1 class="step-title">Education</h1>
     <p class="step-subtitle">Your academic background</p>
     <div id="educationEntries"></div>
-    <button class="add-entry-btn" onclick="addEducation()">+ Add Education</button>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
       <button class="btn-primary" onclick="goToStep(5)">Next: Skills →</button>
@@ -2088,7 +2045,7 @@
       <div id="resumeTips" style="display:none;">
         <!-- drag handle pill (mobile only) -->
         <div class="tips-drag-handle"><div style="width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div></div>
-        <div style="width:100%;max-width:640px;">
+        <div id="tipsContent" style="width:100%;max-width:640px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div style="font-size:0.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;">💡 Quick Tips</div>
             <button onclick="dismissTips()" style="background:rgba(255,255,255,0.1);border:1px solid #44445a;color:#e8e8ff;font-size:0.8rem;font-weight:700;cursor:pointer;padding:6px 16px;border-radius:20px;line-height:1;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕ Dismiss</button>
@@ -2112,7 +2069,7 @@
               <span style="font-size:1.3rem;flex-shrink:0;margin-top:1px;">📥</span>
               <div>
                 <div style="font-size:0.83rem;font-weight:700;color:#e8e8ff;margin-bottom:4px;">Download when ready</div>
-                <div style="font-size:0.73rem;color:#6666aa;line-height:1.55;">Once you're satisfied with your resume, tap <strong style="color:#f59e0b;">Download PDF</strong> below. For just ₹5, get a clean, ATS-optimised PDF ready to send to recruiters.</div>
+                <div style="font-size:0.73rem;color:#6666aa;line-height:1.55;">Once you're satisfied with your resume, tap <strong style="color:#f59e0b;">Download PDF</strong> below. Pay once (<span id="tipsPriceNote">₹9 / $0.99</span>) and get a clean, ATS-optimised PDF ready to send to recruiters.</div>
               </div>
             </div>
           </div>
@@ -3272,6 +3229,9 @@ async function _doGenerateResume() {
   btn.innerHTML = '<span class="spinner"></span> Generating…';
   document.getElementById('tplGuide')?.classList.remove('visible');
   statusEl.textContent = 'AI is crafting your resume…';
+  const _timelapse = ['Analyzing your profile…','Writing experience bullets…','Optimizing for ATS…','Adding finishing touches…'];
+  let _tlIdx = 0;
+  const _tlTimer = setInterval(() => { _tlIdx = (_tlIdx + 1) % _timelapse.length; statusEl.textContent = _timelapse[_tlIdx]; }, 1800);
   document.getElementById('editBadge').style.display = 'none';
   const tipsEl = document.getElementById('resumeTips'); const tipsBackdropEl = document.getElementById('tipsBackdrop'); if (tipsEl) { tipsEl.style.display = 'none'; tipsEl.classList.remove('tips-hidden'); } if (tipsBackdropEl) tipsBackdropEl.style.display = 'none';
 
@@ -3310,6 +3270,7 @@ async function _doGenerateResume() {
     clearNeedsRegen();
     renderOutput(merged);
     renderATSScore(merged);
+    clearInterval(_tlTimer);
     statusEl.innerHTML = '<span style="color:#22c55e;font-weight:700;">✓ Generated</span><span class="edit-hint">✎ Click to edit directly</span>';
     document.getElementById('editBadge').style.display = 'block';
     const pfBanner = document.getElementById('portfolioBanner');
@@ -3317,6 +3278,7 @@ async function _doGenerateResume() {
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
     setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
   } catch (err) {
+    clearInterval(_tlTimer);
     statusEl.textContent = 'Error: ' + err.message;
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
   } finally {
@@ -3478,7 +3440,7 @@ function downloadPDF() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) { showToast('Generate your resume first.', 'info'); return; }
   // Show payment modal on every tap.
-  openUPIModal('pdf');
+  openPayModal('pdf');
 }
 
 function _doPrintPDF() {
@@ -4254,58 +4216,95 @@ function downloadCoverLetterPDF() {
   }, 250);
 }
 
-// ── UPI Payment ───────────────────────────────────────────────────────
-const UPI_SESSION_KEY = 'r4u_upi_paid';
-const UPI_ID   = '9739241381@hdfc';
-const UPI_AMT  = '5';
-const UPI_NAME = 'Resume4U';
+// ── Razorpay Payment ──────────────────────────────────────────────────
+const PAY_SESSION_KEY = 'r4u_paid';
+const RZP_KEY = 'rzp_live_ENTER_YOUR_KEY_HERE'; // Replace with your Razorpay Key ID
 
-function hasUPIPaid() {
-  return sessionStorage.getItem(UPI_SESSION_KEY) === '1';
+// Region detection: India timezone → INR ₹9, else USD $0.99
+function _getPayRegion() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    return tz.startsWith('Asia/Kolkata') || tz.startsWith('Asia/Calcutta') ? 'INR' : 'USD';
+  } catch(e) { return 'INR'; }
 }
 
-function markUPIPaid() {
-  sessionStorage.setItem(UPI_SESSION_KEY, '1');
+function _getPayAmount() {
+  return _getPayRegion() === 'INR' ? { amount: 900, currency: 'INR', display: '₹9' }
+                                    : { amount: 99,  currency: 'USD', display: '$0.99' };
 }
 
-// Stores what should happen after the user confirms UPI payment.
-// 'pdf' = trigger the PDF print; null = no pending action.
-let _pendingUPIAction = null;
+function hasPaid() {
+  return sessionStorage.getItem(PAY_SESSION_KEY) === '1';
+}
 
-function openUPIModal(action) {
-  _pendingUPIAction = action || null;
-  // Generate QR code via Google Charts (UPI QR standard)
-  const upiStr = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${UPI_AMT}&cu=INR&tn=Resume+Download`;
-  const qrImg = document.getElementById('upiQR');
-  if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=152x152&data=${encodeURIComponent(upiStr)}&margin=4&color=000000&bgcolor=ffffff`;
-  document.getElementById('upiOverlay').style.display = 'flex';
+function markPaid() {
+  sessionStorage.setItem(PAY_SESSION_KEY, '1');
+}
+
+let _pendingPayAction = null;
+
+function openPayModal(action) {
+  _pendingPayAction = action || null;
+  const { display } = _getPayAmount();
+  const priceEl = document.getElementById('payDisplayPrice');
+  if (priceEl) priceEl.textContent = display;
+  const noteEl = document.getElementById('tipsPriceNote');
+  if (noteEl) noteEl.textContent = _getPayRegion() === 'INR' ? '₹9' : '$0.99';
+  document.getElementById('payOverlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
 
-function closeUPIModal() {
-  document.getElementById('upiOverlay').style.display = 'none';
+function closePayModal() {
+  document.getElementById('payOverlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 
+function startRazorpayPayment() {
+  const { amount, currency, display } = _getPayAmount();
+  const btn = document.getElementById('payNowBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening payment…'; }
 
-function copyUPIId() {
-  navigator.clipboard.writeText(UPI_ID).then(() => {
-    const btn = document.getElementById('copyUPIBtn');
-    if (btn) { const t = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = t, 2000); }
-  }).catch(() => showToast('Copy failed — UPI ID: ' + UPI_ID));
+  if (typeof Razorpay === 'undefined') {
+    // Load Razorpay SDK on demand
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload = () => _launchRazorpay(amount, currency, display);
+    s.onerror = () => {
+      showToast('Payment gateway failed to load. Please try again.', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pay &amp; Download PDF'; }
+    };
+    document.head.appendChild(s);
+  } else {
+    _launchRazorpay(amount, currency, display);
+  }
 }
 
-async function confirmUPIPayment() {
-  markUPIPaid();
-  closeUPIModal();
-  if (_pendingUPIAction === 'pdf') {
-    _pendingUPIAction = null;
-    showToast('Payment confirmed! Opening PDF…', 'success');
-    _doPrintPDF();
-  } else {
-    _pendingUPIAction = null;
-    showToast('Payment confirmed!', 'success');
-  }
+function _launchRazorpay(amount, currency, display) {
+  const btn = document.getElementById('payNowBtn');
+  const options = {
+    key: RZP_KEY,
+    amount: amount,
+    currency: currency,
+    name: 'Resume For You',
+    description: 'PDF Resume Download',
+    theme: { color: '#d97706' },
+    handler: function(response) {
+      markPaid();
+      closePayModal();
+      showToast('Payment successful! Generating PDF…', 'success');
+      if (_pendingPayAction === 'pdf') {
+        _pendingPayAction = null;
+        _doPrintPDF();
+      }
+    },
+    modal: {
+      ondismiss: function() {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pay &amp; Download PDF'; }
+      }
+    }
+  };
+  const rzp = new Razorpay(options);
+  rzp.open();
 }
 
 // ── ATS Score ─────────────────────────────────────────────────────────
@@ -4481,86 +4480,28 @@ window.addEventListener('load', function() {
 });
 </script>
 
-<!-- ── UPI Payment Modal ── -->
-<div class="upi-overlay" id="upiOverlay" style="display:none">
-  <div class="upi-modal" role="dialog" aria-modal="true">
-
-    <!-- Drag handle (mobile only) -->
-    <div class="upi-drawer-handle"><div class="upi-drawer-pill"></div></div>
-
-    <!-- Scrollable content -->
-    <div class="upi-drawer-scroll">
-
-      <div class="upi-hdr">
-        <div class="upi-badge">💳 Pay Per Download</div>
-        <div class="upi-price-row">
-          <span class="upi-rupee">₹</span>
-          <span class="upi-amount">5</span>
-        </div>
-        <div class="upi-once">Pay ₹5 per download · instant resume generation</div>
-      </div>
-
-      <div class="upi-body">
-
-        <!-- Left column: QR + UPI ID -->
-        <div class="upi-qr-col">
-          <img id="upiQR" class="upi-qr" alt="UPI QR Code">
-          <div class="upi-qr-label">Scan with any UPI app</div>
-          <div class="upi-id-row">
-            <div class="upi-id-info">
-              <div class="upi-id-label">Or enter UPI ID manually</div>
-              <div class="upi-id-text">9739241381@hdfc</div>
-            </div>
-            <button class="btn-copy-upi" id="copyUPIBtn" onclick="copyUPIId()">Copy</button>
-          </div>
-        </div>
-
-        <!-- Right column (desktop) / compact row (mobile): Steps -->
-        <div class="upi-steps-col">
-          <div class="upi-steps">
-            <div class="upi-step-card">
-              <div class="upi-step-icon">📱<span class="upi-step-num">1</span></div>
-              <div class="upi-step-text">
-                <strong>Open UPI app</strong>
-                <div class="upi-step-sub">Google Pay · PhonePe · Paytm · BHIM</div>
-              </div>
-            </div>
-            <div class="upi-step-card">
-              <div class="upi-step-icon">📷<span class="upi-step-num">2</span></div>
-              <div class="upi-step-text">
-                <strong>Scan QR code</strong>
-                <div class="upi-step-sub">Tap "Scan" and point your camera at the code</div>
-              </div>
-            </div>
-            <div class="upi-step-card">
-              <div class="upi-step-icon">✅<span class="upi-step-num">3</span></div>
-              <div class="upi-step-text">
-                <strong>Pay ₹5</strong>
-                <div class="upi-step-sub">Approve the payment in your app</div>
-              </div>
-            </div>
-            <div class="upi-step-card">
-              <div class="upi-step-icon">🚀<span class="upi-step-num">4</span></div>
-              <div class="upi-step-text">
-                <strong>Tap below</strong>
-                <div class="upi-step-sub">Your resume generates instantly</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div><!-- /upi-drawer-scroll -->
-
-    <!-- CTA — pinned at bottom on mobile, in grid on desktop -->
-    <div class="upi-bottom">
-      <button class="btn-paid pulse" id="btnPaid" onclick="confirmUPIPayment()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-        I've paid ₹5 — Generate Resume
-      </button>
-      <button class="upi-cancel" onclick="closeUPIModal()">← Cancel</button>
+<!-- ── Razorpay Payment Modal ── -->
+<div id="payOverlay" style="display:none">
+  <div id="payModal" role="dialog" aria-modal="true">
+    <div class="pay-drawer-handle"><div class="pay-drawer-pill"></div></div>
+    <div class="pay-hdr">
+      <div class="pay-badge">💳 PDF Download</div>
+      <span id="payDisplayPrice">…</span>
+      <div class="pay-once">One-time · Unlimited downloads this session</div>
     </div>
-
+    <div class="pay-feats">
+      <div class="pay-feat"><span>✓</span> ATS-optimised PDF</div>
+      <div class="pay-feat"><span>✓</span> All 35+ templates</div>
+      <div class="pay-feat"><span>✓</span> Instant download</div>
+      <div class="pay-feat"><span>✓</span> Card · UPI · Netbanking</div>
+    </div>
+    <div class="pay-cta">
+      <button id="payNowBtn" onclick="startRazorpayPayment()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Pay &amp; Download PDF
+      </button>
+      <button class="pay-cancel" onclick="closePayModal()">← Cancel</button>
+    </div>
   </div>
 </div>
 
