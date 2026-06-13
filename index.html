@@ -3836,7 +3836,13 @@ async function handleResumeFile(file) {
       if (hasData) { onParseSuccess(data); return; }
       switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read this PDF — paste your resume text instead.'); return;
     }
-    if (!usableText) { switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read text from this file — paste your resume text in the box below.'); return; }
+    if (!usableText) {
+      const _ext = name.split('.').pop();
+      const _fmtMsg = /^(odt|pages|numbers|key|wps|wpd|tex)$/.test(_ext)
+        ? '⚠ .' + _ext + ' files are not supported — please save as PDF or DOCX and upload again.'
+        : '⚠ Could not read text from this file — please upload a PDF, DOCX, DOC, RTF, or TXT file, or paste your resume text below.';
+      switchUploadTab('paste'); showUploadStatus('err', _fmtMsg); return;
+    }
     showUploadStatus('parsing', '🤖 AI is parsing your resume…');
     const data = await parseResumeWithAI(text);
     const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
@@ -3928,9 +3934,19 @@ function readAsArrayBuffer(file) {
 async function extractTextFromFile(file) {
   const name = file.name.toLowerCase();
   if (name.endsWith('.txt')) return readAsText(file);
+  if (name.endsWith('.rtf')) {
+    // RTF is plain-text format; strip control words and group braces to get readable content
+    const raw = await readAsText(file);
+    let text = raw;
+    // Remove nested control groups like {\fonttbl...} {\colortbl...} {\info...}
+    for (let i = 0; i < 10; i++) text = text.replace(/\{\\[^{}]*\}/g, ' ');
+    // Remove remaining control words (\word, \word-123) and structural chars
+    text = text.replace(/\\[a-z]+\-?\d*\*? ?/gi, ' ').replace(/[{}\\]/g, ' ').replace(/\s+/g, ' ').trim();
+    return text;
+  }
   const buf = await readAsArrayBuffer(file);
   if (name.endsWith('.pdf')) return extractPDFText(buf);
-  return extractDOCXText(buf); // .docx / .doc
+  return extractDOCXText(buf); // .docx / .doc / other office formats
 }
 
 async function extractPDFText(buf) {
