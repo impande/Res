@@ -4975,16 +4975,19 @@ function closePreviewModal(e) {
         <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
       </div>
-      <!-- About Me editor -->
-      <div id="pfAboutEditor" style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
-        <div style="font-size:0.83rem;font-weight:600;color:var(--text);margin-bottom:8px;">✏️ About Me text (editable)</div>
-        <textarea id="pfAboutText" rows="4" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:0.87rem;color:var(--text);resize:vertical;background:var(--bg);font-family:inherit;line-height:1.6;" placeholder="Write a brief introduction about yourself…"></textarea>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-          <button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;">✨ Generate with AI</button>
-          <span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span>
+      <!-- Section detail wizard -->
+      <div id="pfFillWizard" style="margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:0.83rem;font-weight:600;color:var(--text);">Fill your portfolio details</div>
+          <div id="pfWzProgress" style="font-size:0.75rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:2px 10px;"></div>
+        </div>
+        <div id="pfWzCard" style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;min-height:100px;"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+          <button id="pfWzBackBtn" onclick="pfWzNav(-1)" style="padding:7px 14px;font-size:0.82rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;display:none;">← Prev</button>
+          <button id="pfWzNextBtn" onclick="pfWzNav(1)" style="padding:7px 16px;font-size:0.82rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;margin-left:auto;">Next →</button>
         </div>
       </div>
-      <div class="pf-footer" style="margin-top:16px;">
+      <div class="pf-footer" style="margin-top:16px;border-top:1px solid var(--border);">
         <button class="btn-secondary" onclick="pfGoStep(1)">← Back</button>
         <div class="pf-footer-right">
           <button class="btn-primary" onclick="pfGoStep(3)">Preview &amp; Download →</button>
@@ -5035,6 +5038,20 @@ var pfTemplate = 'professional';
 var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,contact:true};
 var pfCurrentStep = 1;
 
+// ── Portfolio wizard state ─────────────────────────────────────────────
+var pfWzIdx = 0;
+var pfWzSteps = [];  // built from enabled pfSections
+var pfWzData = { about:'', skills:[], experience:[], education:[], awards:[], email:'', phone:'', location:'', linkedin:'', github:'' };
+
+var _PF_DEFS = [
+  {id:'about',     icon:'👤', label:'About Me',     q:'Write a professional bio that introduces you on your portfolio'},
+  {id:'skills',    icon:'⚡', label:'Skills',        q:'List your key skills — separate with commas'},
+  {id:'experience',icon:'💼', label:'Experience',    q:'Describe your role and impact for each position'},
+  {id:'education', icon:'🎓', label:'Education',     q:'Confirm or edit your education details'},
+  {id:'awards',    icon:'🏆', label:'Awards',        q:'Your awards, certifications and achievements'},
+  {id:'contact',   icon:'📬', label:'Contact Info',  q:'How should visitors reach you?'},
+];
+
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
   pfGoStep(1);
@@ -5079,61 +5096,160 @@ function pfToggleAll() {
   });
   var btn = document.getElementById('pfSelectAllBtn');
   if (btn) btn.textContent = nextState ? 'Deselect All' : 'Select All';
-  var editor = document.getElementById('pfAboutEditor');
-  if (editor) editor.style.display = (nextState && pfSections.about) ? '' : (pfSections.about ? '' : 'none');
+  pfBuildWz(); pfWzRender();
 }
 
 function togglePfSection(el) {
   el.classList.toggle('on');
   pfSections[el.dataset.section] = el.classList.contains('on');
-  // Show/hide About Me editor
-  if (el.dataset.section === 'about') {
-    var editor = document.getElementById('pfAboutEditor');
-    if (editor) editor.style.display = pfSections.about ? '' : 'none';
-  }
-  // Update Select All button label
   var allOn = Object.values(pfSections).every(Boolean);
   var btn = document.getElementById('pfSelectAllBtn');
   if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
+  pfBuildWz(); pfWzRender();
+}
+
+// ── Wizard: build step list, save current, navigate, render ───────────
+
+function pfBuildWz() {
+  // Rebuild step order from enabled sections (preserve pfWzIdx if still valid)
+  pfWzSteps = _PF_DEFS.filter(function(d) { return pfSections[d.id]; });
+  if (pfWzIdx >= pfWzSteps.length) pfWzIdx = Math.max(0, pfWzSteps.length - 1);
+}
+
+function pfWzSave() {
+  var step = pfWzSteps[pfWzIdx];
+  if (!step) return;
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var cd = (typeof collectData === 'function') ? collectData() : {};
+  if (step.id === 'about') {
+    pfWzData.about = v('pfWzAbout');
+  } else if (step.id === 'skills') {
+    pfWzData.skills = v('pfWzSkills').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  } else if (step.id === 'experience') {
+    var cnt = parseInt(v('pfWzExpCount'))||0;
+    pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(e,i) {
+      return {title:e.title||'',company:e.co||'',dates:[e.start,e.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||e.desc||''};
+    });
+  } else if (step.id === 'education') {
+    var ecnt = parseInt(v('pfWzEduCount'))||0;
+    pfWzData.education = [];
+    for (var i=0;i<ecnt;i++) pfWzData.education.push({degree:v('pfWzEduDeg'+i),school:v('pfWzEduSch'+i),dates:v('pfWzEduYr'+i)});
+  } else if (step.id === 'awards') {
+    var acnt = parseInt(v('pfWzAwdCount'))||0;
+    pfWzData.awards = [];
+    for (var i=0;i<acnt;i++) pfWzData.awards.push({title:v('pfWzAwd'+i),issuer:v('pfWzAwdIss'+i)});
+  } else if (step.id === 'contact') {
+    pfWzData.email=v('pfWzEmail'); pfWzData.phone=v('pfWzPhone'); pfWzData.location=v('pfWzLoc');
+    pfWzData.linkedin=v('pfWzLI'); pfWzData.github=v('pfWzGH');
+  }
+}
+
+function pfWzNav(dir) {
+  pfWzSave();
+  pfWzIdx = Math.max(0, Math.min(pfWzSteps.length - 1, pfWzIdx + dir));
+  pfWzRender();
+}
+
+function pfWzRender() {
+  var step = pfWzSteps[pfWzIdx];
+  var card = document.getElementById('pfWzCard');
+  var prog = document.getElementById('pfWzProgress');
+  var backBtn = document.getElementById('pfWzBackBtn');
+  var nextBtn = document.getElementById('pfWzNextBtn');
+  if (!card) return;
+  if (!step) { card.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:8px 0;">Enable at least one section above to fill details.</div>'; if(prog)prog.textContent=''; return; }
+  if (prog) prog.textContent = (pfWzIdx+1) + ' of ' + pfWzSteps.length;
+  if (backBtn) backBtn.style.display = pfWzIdx > 0 ? '' : 'none';
+  if (nextBtn) nextBtn.textContent = pfWzIdx === pfWzSteps.length-1 ? '✓ Done' : 'Next →';
+
+  var cd = (typeof collectData === 'function') ? collectData() : {};
+  var e = function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+  var inp = 'width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;background:var(--bg);color:var(--text);';
+  var html = '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;"><span style="font-size:1rem;">' + step.icon + '</span><span style="font-size:0.9rem;font-weight:700;color:var(--text);">' + step.label + '</span></div>';
+  html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">' + step.q + '</div>';
+
+  if (step.id === 'about') {
+    var aval = pfWzData.about || (lastResumeData && lastResumeData.summary) || '';
+    html += '<textarea id="pfWzAbout" rows="5" style="' + inp + 'resize:vertical;line-height:1.6;" placeholder="I am a product designer with 5 years of experience building…">' + e(aval) + '</textarea>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;"><button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="padding:6px 13px;font-size:0.81rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✨ Generate with AI</button><span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'skills') {
+    var sval = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).join(', ');
+    html += '<textarea id="pfWzSkills" rows="3" style="' + inp + 'resize:vertical;" placeholder="React, Node.js, Python, Figma, Leadership…">' + e(sval) + '</textarea>';
+    html += '<div style="font-size:0.74rem;color:var(--muted);margin-top:5px;">Separate skills with commas</div>';
+
+  } else if (step.id === 'experience') {
+    var exps = (cd.experience||[]).slice(0,5);
+    if (!exps.length) { html += '<div style="color:var(--muted);font-size:0.85rem;">No experience entries found — add them in the form first.</div>'; }
+    exps.forEach(function(ex,i) {
+      var saved = pfWzData.experience[i];
+      html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
+      html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea></div>';
+    });
+    html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
+
+  } else if (step.id === 'education') {
+    var edus = pfWzData.education.length ? pfWzData.education : (cd.education||[]).map(function(e2){return{degree:e2.deg||'',school:e2.sch||'',dates:e2.yr||''};});
+    if (!edus.length) edus = [{degree:'',school:'',dates:''}];
+    edus.slice(0,4).forEach(function(ed,i) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-bottom:8px;">';
+      html += '<input id="pfWzEduDeg'+i+'" style="' + inp + '" placeholder="Degree / Major" value="' + e(ed.degree) + '">';
+      html += '<input id="pfWzEduSch'+i+'" style="' + inp + '" placeholder="University / School" value="' + e(ed.school) + '">';
+      html += '<input id="pfWzEduYr'+i+'" style="' + inp + '" placeholder="Year" value="' + e(ed.dates) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzEduCount" value="' + Math.min(edus.length,4) + '">';
+
+  } else if (step.id === 'awards') {
+    var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||'',issuer:[a.org,a.year].filter(Boolean).join(' · ')};});
+    if (!awds.length) awds = [{title:'',issuer:''}];
+    awds.slice(0,4).forEach(function(a,i) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
+      html += '<input id="pfWzAwd'+i+'" style="' + inp + '" placeholder="Award / Certification" value="' + e(a.title) + '">';
+      html += '<input id="pfWzAwdIss'+i+'" style="' + inp + '" placeholder="Issuer · Year" value="' + e(a.issuer) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzAwdCount" value="' + Math.min(awds.length,4) + '">';
+
+  } else if (step.id === 'contact') {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<input id="pfWzEmail" style="' + inp + '" placeholder="Email" value="' + e(pfWzData.email||cd.email||'') + '">';
+    html += '<input id="pfWzPhone" style="' + inp + '" placeholder="Phone" value="' + e(pfWzData.phone||cd.phone||'') + '">';
+    html += '<input id="pfWzLoc" style="' + inp + 'grid-column:span 2;" placeholder="City, Country" value="' + e(pfWzData.location||cd.location||'') + '">';
+    html += '<input id="pfWzLI" style="' + inp + '" placeholder="LinkedIn URL" value="' + e(pfWzData.linkedin||cd.linkedin||'') + '">';
+    html += '<input id="pfWzGH" style="' + inp + '" placeholder="GitHub URL" value="' + e(pfWzData.github||cd.github||'') + '">';
+    html += '</div>';
+  }
+
+  card.innerHTML = html;
 }
 
 async function pfGenerateAbout() {
   var btn = document.getElementById('pfGenAboutBtn');
   var status = document.getElementById('pfGenAboutStatus');
-  var ta = document.getElementById('pfAboutText');
+  var ta = document.getElementById('pfWzAbout') || document.getElementById('pfAboutText');
   if (!btn || !ta) return;
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Generating…';
+  btn.disabled = true; btn.innerHTML = '⏳ Generating…';
   if (status) status.textContent = '';
   try {
     var cd = (typeof collectData === 'function') ? collectData() : {};
     var fullName = ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim();
-    var expStr = (cd.experience||[]).slice(0,3).map(function(e){return e.title + (e.co?' at '+e.co:'');}).join(', ');
-    var skillStr = (cd.skills||[]).slice(0,8).join(', ');
+    var expStr = (cd.experience||[]).slice(0,3).map(function(e){return e.title+(e.co?' at '+e.co:'');}).join(', ');
+    var skillStr = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).slice(0,8).join(', ');
     var existing = (lastResumeData && lastResumeData.summary) || '';
-    var prompt = 'Write a 2-3 sentence professional "About Me" for a portfolio website. Person: ' + (fullName||'professional') + (cd.jobTitle ? ', ' + cd.jobTitle : '') + (expStr ? '. Experience: ' + expStr : '') + (skillStr ? '. Skills: ' + skillStr : '') + '. Make it engaging, first-person, warm. Output only the paragraph, no quotes.' + (existing ? ' Base it on: ' + existing : '');
-    var resp = await fetch('/.netlify/functions/generate', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({prompt: prompt})
-    });
+    var prompt = 'Write a 2-3 sentence professional "About Me" for a portfolio website. Person: '+(fullName||'professional')+(cd.jobTitle?', '+cd.jobTitle:'')+(expStr?'. Experience: '+expStr:'')+(skillStr?'. Skills: '+skillStr:'')+'. Make it engaging, first-person, warm. Output only the paragraph, no quotes.'+(existing?' Base it on: '+existing:'');
+    var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
     if (!resp.ok) throw new Error('Server error');
     var result = await resp.json();
-    var text = (result.content || result.text || '').trim();
-    if (text) {
-      ta.value = text;
-      if (status) status.textContent = '✓ Done';
-    } else {
-      if (status) status.textContent = 'No response — try again';
-    }
-  } catch(e) {
-    if (status) status.textContent = '⚠ ' + e.message;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '✨ Generate with AI';
-  }
+    var text = (result.content||result.text||'').trim();
+    if (text) { ta.value = text; pfWzData.about = text; if(status) status.textContent='✓ Done'; }
+    else { if(status) status.textContent='No response — try again'; }
+  } catch(ex) { if(status) status.textContent='⚠ '+ex.message; }
+  finally { btn.disabled=false; btn.innerHTML='✨ Generate with AI'; }
 }
 
 function pfGoStep(n) {
+  if (n === 3) pfWzSave(); // save wizard before preview
   pfCurrentStep = n;
   [1,2,3].forEach(function(i) {
     document.getElementById('pfStep' + i).style.display = i === n ? 'block' : 'none';
@@ -5147,15 +5263,12 @@ function pfGoStep(n) {
     else el.textContent = String(i + 1);
   });
   if (n === 2) {
-    // Pre-fill About Me textarea with existing summary
-    var ta = document.getElementById('pfAboutText');
-    if (ta && !ta.value) {
-      ta.value = (lastResumeData && lastResumeData.summary) || '';
-    }
-    // Sync Select All button label
     var allOn = Object.values(pfSections).every(Boolean);
     var btn = document.getElementById('pfSelectAllBtn');
     if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
+    pfBuildWz();
+    pfWzIdx = 0;
+    pfWzRender();
   }
   if (n === 3) {
     updatePfMiniSwitcher();
@@ -5165,27 +5278,27 @@ function pfGoStep(n) {
 
 function getPfData() {
   var cd = (typeof collectData === 'function') ? collectData() : {};
-  // Use editable About Me textarea if filled, fallback to AI summary
-  var aboutText = (document.getElementById('pfAboutText') || {}).value || '';
+  // Wizard data overrides resume data when the user has explicitly filled it in
+  var wz = pfWzData;
   return {
     name: ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim(),
     title: cd.jobTitle || '',
-    email: cd.email || '',
-    phone: cd.phone || '',
-    location: cd.location || '',
-    linkedin: cd.linkedin || '',
-    github: cd.github || '',
+    email: wz.email || cd.email || '',
+    phone: wz.phone || cd.phone || '',
+    location: wz.location || cd.location || '',
+    linkedin: wz.linkedin || cd.linkedin || '',
+    github: wz.github || cd.github || '',
     photo: userPhoto || '',
-    summary: aboutText || (lastResumeData && lastResumeData.summary) || '',
-    experience: (cd.experience || []).map(function(e) {
-      return {title: e.title, company: e.co, dates: [e.start, e.end].filter(Boolean).join(' – '), desc: e.desc};
+    summary: wz.about || (lastResumeData && lastResumeData.summary) || '',
+    experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
+      return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
     }),
-    education: (cd.education || []).map(function(e) {
-      return {degree: e.deg, school: e.sch, dates: e.yr};
+    education: wz.education.length ? wz.education : (cd.education||[]).map(function(e) {
+      return {degree:e.deg, school:e.sch, dates:e.yr};
     }),
-    skills: cd.skills || [],
-    awards: (cd.awards || []).map(function(a) {
-      return {title: a.name, issuer: [a.org, a.year].filter(Boolean).join(' · ')};
+    skills: wz.skills.length ? wz.skills : (cd.skills || []),
+    awards: wz.awards.length ? wz.awards : (cd.awards||[]).map(function(a) {
+      return {title:a.name, issuer:[a.org,a.year].filter(Boolean).join(' · ')};
     }),
   };
 }
