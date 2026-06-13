@@ -3114,8 +3114,8 @@ function renderResumeHTML(data) {
   if (data.experience && data.experience.length) {
     const items = data.experience.map(e => {
       const bullets = Array.isArray(e.bullets)
-        ? `<ul class="r-ul">${e.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`
-        : (e.desc ? `<ul class="r-ul"><li>${esc(e.desc)}</li></ul>` : '');
+        ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${esc(b)}</li>`).join('')}</ul>`
+        : (e.desc ? `<ul class="r-ul"><li contenteditable="true">${esc(e.desc)}</li></ul>` : '');
       const period = [e.start, e.end].filter(Boolean).join(' – ');
       return `<div class="r-exp"><div class="r-exp-top"><span class="r-role" contenteditable="true">${esc(e.title||e.role||'')}</span><span class="r-period">${esc(period)}</span></div><div class="r-co" contenteditable="true">${esc(e.co||e.company||'')}</div>${bullets}</div>`;
     }).join('');
@@ -3321,11 +3321,33 @@ async function _doGenerateResume() {
   }
 }
 
+function _measurePages(page) {
+  // Clone at full A4 width (794px = 210mm @96dpi) so count matches PDF on all devices
+  const clone = page.cloneNode(true);
+  clone.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;max-width:none;visibility:hidden;pointer-events:none;z-index:-1;';
+  document.body.appendChild(clone);
+  const pages = Math.max(1, Math.ceil(clone.scrollHeight / (297 * 3.7795)));
+  document.body.removeChild(clone);
+  return pages;
+}
+function _updatePageChip(pages) {
+  const chip = document.getElementById('pageCountChip');
+  if (!chip) return;
+  chip.textContent = pages === 1 ? '1 page ✓' : `${pages} pages`;
+  chip.style.color = pages > 1 ? '#b45309' : '#166534';
+  chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
+  chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
+}
+let _pageCountTimer;
+function _debouncedPageCount(page) {
+  clearTimeout(_pageCountTimer);
+  _pageCountTimer = setTimeout(() => _updatePageChip(_measurePages(page)), 600);
+}
 function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
-  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
+  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_debouncedPageCount(this)">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   setTimeout(() => {
@@ -3333,15 +3355,7 @@ function renderOutput(data) {
     const strip = document.getElementById('pageCountStrip');
     const chip = document.getElementById('pageCountChip');
     if (page && strip && chip) {
-      const pageH = 297 * 3.7795; // 297mm in px at 96dpi
-      const natW  = 210 * 3.7795; // 794px — natural A4 width at 96dpi
-      const rendW = page.getBoundingClientRect().width;
-      const widthScale = rendW > 0 ? rendW / natW : 1; // <1 on mobile (narrower = more lines)
-      const pages = Math.max(1, Math.ceil(page.scrollHeight * widthScale / pageH));
-      chip.textContent = pages === 1 ? '1 page ✓' : `${pages} pages`;
-      chip.style.color = pages > 1 ? '#b45309' : '#166534';
-      chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
-      chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
+      _updatePageChip(_measurePages(page));
       strip.style.display = 'flex';
     }
   }, 100);
