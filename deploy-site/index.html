@@ -3935,14 +3935,20 @@ async function extractTextFromFile(file) {
   const name = file.name.toLowerCase();
   if (name.endsWith('.txt')) return readAsText(file);
   if (name.endsWith('.rtf')) {
-    // RTF is plain-text format; strip control words and group braces to get readable content
     const raw = await readAsText(file);
     let text = raw;
-    // Remove nested control groups like {\fonttbl...} {\colortbl...} {\info...}
-    for (let i = 0; i < 10; i++) text = text.replace(/\{\\[^{}]*\}/g, ' ');
-    // Remove remaining control words (\word, \word-123) and structural chars
-    text = text.replace(/\\[a-z]+\-?\d*\*? ?/gi, ' ').replace(/[{}\\]/g, ' ').replace(/\s+/g, ' ').trim();
-    return text;
+    // Remove known non-content destination groups (font tables, colour tables, metadata, pictures)
+    // 4 passes handles typical nesting depth without touching inline formatting groups like {\b text}
+    const _rtfDest = /\{\\(?:fonttbl|colortbl|stylesheet|info|pict|object|fldinst|header|footer|footnote|tc|xe|bkmk\w*|datafield|wgrffmtfilter|nonesttables)\b[^{}]*\}/gi;
+    for (let _p = 0; _p < 4; _p++) {
+      text = text.replace(_rtfDest, ' ');
+      text = text.replace(/\{\\\*[^{}]*\}/g, ' '); // {\*\...} optional destination groups
+    }
+    // Strip all remaining control words — this preserves text that follows them
+    text = text.replace(/\\[a-zA-Z]+\-?\d*/g, ' ');
+    // Remove remaining structural chars (braces, backslashes)
+    text = text.replace(/[{}\\]/g, ' ');
+    return text.replace(/\s+/g, ' ').trim();
   }
   const buf = await readAsArrayBuffer(file);
   if (name.endsWith('.pdf')) return extractPDFText(buf);
@@ -4058,14 +4064,64 @@ async function extractPDFText(buf) {
   return texts.join(' ').replace(/\s+/g,' ').trim();
 }
 
-function extractDOCXText(buf) {
+async function extractDOCXText(buf) {
+  // DOCX/OOXML is a ZIP archive. word/document.xml inside is DEFLATE-compressed.
+  // Parse the ZIP structure to find and decompress that file.
+  try {
+    const bytes = new Uint8Array(buf);
+    const PK = 0x504B0304; // local file header signature
+    for (let i = 0; i < bytes.length - 30; i++) {
+      // Fast scan: look for PK\x03\x04 signature
+      if (bytes[i] !== 0x50 || bytes[i+1] !== 0x4B || bytes[i+2] !== 0x03 || bytes[i+3] !== 0x04) continue;
+      const method   = bytes[i+8]  | (bytes[i+9]  << 8);
+      const compSize = (bytes[i+18] | (bytes[i+19] << 8) | (bytes[i+20] << 16) | (bytes[i+21] << 24)) >>> 0;
+      const fnLen    = bytes[i+26] | (bytes[i+27] << 8);
+      const extraLen = bytes[i+28] | (bytes[i+29] << 8);
+      // Sanity-check to skip false PK signatures inside compressed data
+      if (fnLen > 512 || fnLen === 0) { continue; }
+      const dataStart = i + 30 + fnLen + extraLen;
+      if (dataStart + compSize > bytes.length) { continue; }
+      const fname = new TextDecoder().decode(bytes.slice(i+30, i+30+fnLen));
+      if (fname === 'word/document.xml') {
+        let xmlBytes;
+        if (method === 0) {
+          // Stored — no compression
+          xmlBytes = bytes.slice(dataStart, dataStart + compSize);
+        } else if (method === 8 && typeof DecompressionStream !== 'undefined') {
+          // Deflate — ZIP uses raw deflate (no zlib header)
+          try {
+            const ds = new DecompressionStream('deflate-raw');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+            writer.write(bytes.slice(dataStart, dataStart + compSize));
+            writer.close();
+            const chunks = [];
+            while (true) { const { value, done } = await reader.read(); if (done) break; if (value) chunks.push(value); }
+            const out = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
+            let pos = 0; for (const c of chunks) { out.set(c, pos); pos += c.length; }
+            xmlBytes = out;
+          } catch(e) {}
+        }
+        if (xmlBytes) {
+          const xml = new TextDecoder('utf-8', {fatal:false}).decode(xmlBytes);
+          const texts = [];
+          const re2 = /<w:t[^>]*>([^<]+)<\/w:t>/g;
+          let m2;
+          while ((m2 = re2.exec(xml)) !== null) { if (m2[1].trim()) texts.push(m2[1]); }
+          if (texts.length > 0) return texts.join(' ').replace(/\s+/g,' ').trim();
+        }
+      }
+      // Advance past this entry's data to avoid false-positive signatures inside compressed data
+      if (compSize > 0) i = dataStart + compSize - 1;
+    }
+  } catch(e) {}
+  // Fallback: raw decode — works for uncompressed OOXML or old .doc with embedded XML
   const str = new TextDecoder('utf-8',{fatal:false}).decode(buf);
   const texts = [];
   const re = /<w:t[^>]*>([^<]+)<\/w:t>/g;
   let m;
   while ((m = re.exec(str)) !== null) { if (m[1].trim()) texts.push(m[1]); }
   if (texts.length > 3) return texts.join(' ').replace(/\s+/g,' ').trim();
-  // Fallback: strip XML tags
   return str.replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim();
 }
 
