@@ -2340,16 +2340,40 @@ function startBuild() {
   }, 200);
 }
 
+let _syncResumeTimer;
 function markNeedsRegen() {
   if (!lastResumeData) return;
   needsRegenerate = true;
-  // Keep lastResumeData.customSections in sync so preview always reflects
-  // the latest user edits without requiring a full regeneration.
-  lastResumeData.customSections = collectCustomSections();
   const btn = document.getElementById('generateBtn');
   if (btn) btn.classList.add('regen-needed');
   const badge = document.getElementById('regenBadge');
   if (badge) badge.style.display = 'inline';
+  // Debounce full sync so rapid keystrokes don't thrash collectData()
+  clearTimeout(_syncResumeTimer);
+  _syncResumeTimer = setTimeout(_syncLastResumeData, 400);
+}
+function _syncLastResumeData() {
+  if (!lastResumeData) return;
+  const cur = collectData();
+  // Sync every non-AI field so preview modal and downloads always reflect
+  // the latest form state without a full regeneration.
+  lastResumeData.firstName = cur.firstName;
+  lastResumeData.lastName  = cur.lastName;
+  lastResumeData.jobTitle  = cur.jobTitle;
+  lastResumeData.email     = cur.email;
+  lastResumeData.phone     = cur.phone;
+  lastResumeData.location  = cur.location;
+  lastResumeData.linkedin  = cur.linkedin;
+  lastResumeData.github    = cur.github;
+  lastResumeData.skills    = cur.skills;
+  lastResumeData.awards    = cur.awards;
+  lastResumeData.education = cur.education;
+  lastResumeData.customSections = cur.customSections;
+  // Experience: update structure but preserve AI bullets for matching entries
+  lastResumeData.experience = cur.experience.map(e => {
+    const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
+    return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
+  });
 }
 
 function clearNeedsRegen() {
@@ -2815,6 +2839,7 @@ function addSkill() {
   const val = input.value.trim();
   if (!val || skills.includes(val)) { input.value=''; return; }
   skills.push(val);
+  if (lastResumeData) lastResumeData.skills = [...skills];
   const history = JSON.parse(localStorage.getItem('skillHistory')||'[]');
   if (!history.includes(val)) { history.unshift(val); localStorage.setItem('skillHistory', JSON.stringify(history.slice(0,50))); }
   input.value = '';
@@ -2823,7 +2848,7 @@ function addSkill() {
   markNeedsRegen();
 }
 
-function removeSkill(skill) { skills = skills.filter(s=>s!==skill); renderSkills(); renderSuggestions(); markNeedsRegen(); }
+function removeSkill(skill) { skills = skills.filter(s=>s!==skill); if (lastResumeData) lastResumeData.skills = [...skills]; renderSkills(); renderSuggestions(); markNeedsRegen(); }
 
 function renderSkills(newSkill) {
   const container = document.getElementById('skillTags');
