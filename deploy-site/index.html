@@ -5693,11 +5693,11 @@ function getPfData() {
     experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
       return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
     }),
-    education: wz.education.length ? wz.education : (cd.education||[]).map(function(e) {
+    education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
       return {degree:e.deg, school:e.sch, dates:e.yr};
     }),
     skills: wz.skills.length ? wz.skills : (cd.skills || []),
-    awards: wz.awards.length ? wz.awards : (cd.awards||[]).map(function(a) {
+    awards: wz.awards.some(function(a){return a.title;}) ? wz.awards : (cd.awards||[]).map(function(a) {
       return {title:a.name, issuer:[a.org,a.year].filter(Boolean).join(' · ')};
     }),
     projects: wz.projects || [],
