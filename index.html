@@ -244,7 +244,8 @@
     .tpl-card.tpl-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.18);}
     /* mock resume preview inside card */
     .tpl-card-thumb{height:170px;overflow:hidden;position:relative;}
-    .tpl-mini-inner{position:absolute;top:0;left:0;width:794px;padding:36px;box-sizing:border-box;transform:scale(0.2);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
+    .tpl-mini-inner{position:absolute;top:0;left:0;width:794px!important;padding:0;box-sizing:border-box;transform:scale(0.2);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
+    .tpl-mini-inner .r-head{margin:0!important;}
     .tpl-card-meta{padding:6px 8px 7px;border-top:1px solid var(--border);}
     .tpl-card-name{font-size:0.72rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .tpl-card-tag{font-size:0.6rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2303,12 +2304,15 @@ function _buildTplBodyHTML(data, tplKey) {
 }
 
 function calibrateTplPreviews() {
+  var anyMissed = false;
   document.querySelectorAll('.tpl-card-thumb').forEach(function(th) {
     var inn = th.querySelector('.tpl-mini-inner');
     if (!inn) return;
-    var s = th.offsetWidth / 794;
-    inn.style.transform = 'scale(' + s.toFixed(4) + ')';
+    var w = th.offsetWidth;
+    if (!w) { anyMissed = true; return; }
+    inn.style.transform = 'scale(' + (w / 794).toFixed(4) + ')';
   });
+  if (anyMissed) setTimeout(calibrateTplPreviews, 150);
 }
 var _tplRszT;
 window.addEventListener('resize', function() { clearTimeout(_tplRszT); _tplRszT = setTimeout(calibrateTplPreviews, 150); });
@@ -2346,7 +2350,8 @@ function renderTemplateGrid(filterCat) {
       </div>
     </div>`;
   }).join('');
-  requestAnimationFrame(calibrateTplPreviews);
+  requestAnimationFrame(function() { requestAnimationFrame(calibrateTplPreviews); });
+  setTimeout(calibrateTplPreviews, 250);
 }
 
 function filterTpls(btn, cat) {
@@ -2626,11 +2631,13 @@ function goToStep(step, skipScroll) {
     if (step === 5) renderSuggestions();
     if (step === 7) {
       renderTemplateGrid('all');
+      setTimeout(calibrateTplPreviews, 250);
       document.querySelectorAll('.tpl-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
       if (!lastResumeData) {
         document.getElementById('tplGuide')?.classList.add('visible');
         document.getElementById('generateBtn')?.classList.add('btn-ready');
       }
+      if (lastResumeData) _triggerPageCount(true);
     }
     updatePreview();
   }
@@ -3451,9 +3458,8 @@ function _doMeasureAndUpdate() {
 function _triggerPageCount(fast) {
   clearTimeout(_pcTimer);
   _pcTimer = setTimeout(function() {
-    // Use rAF to ensure the browser has finished layout before measuring
-    requestAnimationFrame(function() { _doMeasureAndUpdate(); });
-  }, fast ? 80 : 120);
+    requestAnimationFrame(function() { requestAnimationFrame(_doMeasureAndUpdate); });
+  }, fast ? 80 : 300);
 }
 function _triggerOffscreenPageCount() {
   clearTimeout(_pcTimer);
@@ -3485,10 +3491,15 @@ function renderOutput(data) {
     document.fonts.ready.then(function() { requestAnimationFrame(_doMeasureAndUpdate); });
   }
   if (window._pcObserver) window._pcObserver.disconnect();
+  if (window._pcResizeObserver) window._pcResizeObserver.disconnect();
   var _a4El = out.querySelector('.resume-a4-page');
   if (_a4El) {
     window._pcObserver = new MutationObserver(function() { _triggerPageCount(); });
     window._pcObserver.observe(_a4El, { characterData: true, subtree: true, childList: true });
+    if (window.ResizeObserver) {
+      window._pcResizeObserver = new ResizeObserver(function() { _triggerPageCount(); });
+      window._pcResizeObserver.observe(_a4El);
+    }
   }
   // Show cover letter section and pre-fill role
   const clSec = document.getElementById('clSection');

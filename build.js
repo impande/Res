@@ -24,7 +24,10 @@ try {
         unicodeEscapeSequence: false
       }).getObfuscatedCode();
       count++;
-      return `<script>${result}</script>`;
+      // Escape </script> so the HTML parser doesn't close the tag early.
+      // In JS strings <\/script> == </script> at runtime; only the HTML parser cares.
+      const safe = result.replace(/<\/script>/gi, '<\\/script>');
+      return `<script>${safe}</script>`;
     } catch(e) {
       return match;
     }
