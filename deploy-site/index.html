@@ -2253,13 +2253,54 @@ const TPL_META = {
   paper:    {label:'Paper',     tag:'Parchment · Warm',cat:'minimal'},
 };
 
-function _tplHeadHTML(key) {
-  var h = '<div class="r-name">Alex Johnson</div><div class="r-title">Senior Product Manager</div><div class="r-contact">alex@example.com</div>';
+function _tplHeadHTML(key, data) {
+  var name = data ? ((data.firstName||'') + ' ' + (data.lastName||'')).trim() || 'Your Name' : 'Alex Johnson';
+  var title = data ? (data.jobTitle || '') : 'Senior Product Manager';
+  var contact = data ? [data.email, data.phone, data.location].filter(Boolean).join(' · ') : 'alex@example.com';
+  var h = '<div class="r-name">' + esc(name) + '</div><div class="r-title">' + esc(title) + '</div>' + (contact ? '<div class="r-contact">' + esc(contact) + '</div>' : '');
   if (key === 'executive') return '<div class="r-head">' + h + '</div><div class="r-head-accent"></div>';
   if (key === 'academic') return '<div class="r-head"><div class="r-head-line"></div>' + h + '<div class="r-head-line"></div></div>';
   return '<div class="r-head">' + h + '</div>';
 }
-var _tplBodyHTML = '<div class="r-sec"><div class="r-sec-t">Experience</div><div class="r-exp"><div class="r-exp-top"><span class="r-role">Product Manager</span><span class="r-period">2022–Present</span></div><div class="r-co">Google</div><ul class="r-ul"><li>Led product roadmap and cross-team strategy</li><li>Grew user base by 40% in 12 months</li></ul></div></div><div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">BS Computer Science</div><div class="r-sch">MIT</div></div><div class="r-yr">2018</div></div></div><div class="r-sec"><div class="r-sec-t">Skills</div><div class="r-skills"><span class="r-sk">Strategy</span><span class="r-sk">Agile</span><span class="r-sk">Analytics</span><span class="r-sk">Leadership</span></div></div>';
+var _tplBodyFallback = '<div class="r-sec"><div class="r-sec-t">Experience</div><div class="r-exp"><div class="r-exp-top"><span class="r-role">Product Manager</span><span class="r-period">2022–Present</span></div><div class="r-co">Google</div><ul class="r-ul"><li>Led product roadmap and cross-team strategy</li><li>Grew user base by 40% in 12 months</li></ul></div></div><div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">BS Computer Science</div><div class="r-sch">MIT</div></div><div class="r-yr">2018</div></div></div><div class="r-sec"><div class="r-sec-t">Skills</div><div class="r-skills"><span class="r-sk">Strategy</span><span class="r-sk">Agile</span><span class="r-sk">Analytics</span><span class="r-sk">Leadership</span></div></div>';
+
+function _buildTplBodyHTML(data, tplKey) {
+  var hasContent = data && (data.experience && data.experience.length || data.education && data.education.length || data.skills && data.skills.length);
+  if (!hasContent) return _tplBodyFallback;
+  var e = esc;
+  var textTpls = ['classic','academic','simple','mono','retro','paper'];
+  var div = tplKey === 'minimal' ? '<div class="r-div"></div>' : '';
+  var sumHTML = '';
+  if (data.summary) {
+    var short = data.summary.length > 180 ? data.summary.slice(0,180).replace(/\s+\S*$/, '…') : data.summary;
+    sumHTML = '<div class="r-sec"><div class="r-sec-t">Professional Summary</div><div class="r-sum">' + e(short) + '</div></div>';
+  }
+  var expHTML = '';
+  var exps = (data.experience || []).slice(0,2);
+  if (exps.length) {
+    var items = exps.map(function(ex) {
+      var period = [ex.start, ex.end].filter(Boolean).join(' – ');
+      var bullets = Array.isArray(ex.bullets) ? ex.bullets.slice(0,2) : (ex.desc ? [ex.desc] : []);
+      return '<div class="r-exp"><div class="r-exp-top"><span class="r-role">' + e(ex.title||ex.role||'') + '</span><span class="r-period">' + e(period) + '</span></div><div class="r-co">' + e(ex.co||ex.company||'') + '</div>' + (bullets.length ? '<ul class="r-ul">' + bullets.map(function(b){return '<li>' + e(b) + '</li>';}).join('') + '</ul>' : '') + '</div>';
+    }).join('');
+    expHTML = '<div class="r-sec"><div class="r-sec-t">Experience</div>' + items + '</div>';
+  }
+  var eduHTML = '';
+  var edu = (data.education || [])[0];
+  if (edu) eduHTML = '<div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">' + e(edu.deg||edu.degree||'') + '</div><div class="r-sch">' + e(edu.sch||edu.school||edu.institution||'') + '</div></div><div class="r-yr">' + e(edu.yr||edu.year||'') + '</div></div></div>';
+  var skillArr = (data.skills || []).slice(0,6);
+  var skillsHTML = '';
+  if (skillArr.length) {
+    var inner = textTpls.includes(tplKey)
+      ? '<div class="r-skills r-sum">' + e(skillArr.join(' · ')) + '</div>'
+      : '<div class="r-skills">' + skillArr.map(function(sk){return '<span class="r-sk">' + e(sk) + '</span>';}).join('') + '</div>';
+    skillsHTML = '<div class="r-sec"><div class="r-sec-t">Skills</div>' + inner + '</div>';
+  }
+  if (['modern','executive','corporate'].includes(tplKey)) {
+    return '<div class="r-2col"><aside class="r-aside">' + skillsHTML + div + eduHTML + '</aside><div class="r-main-col">' + sumHTML + div + expHTML + '</div></div>';
+  }
+  return sumHTML + div + expHTML + div + eduHTML + div + skillsHTML;
+}
 
 function calibrateTplPreviews() {
   var A4_H = 297 * 3.7795;
@@ -2295,13 +2336,14 @@ function renderTemplateGrid(filterCat) {
   let entries = Object.entries(TPL_META).filter(([,v]) => !filterCat || filterCat === 'all' || v.cat === filterCat);
   // Sort most-used first; stable within same usage keeps original definition order
   entries.sort(([ka], [kb]) => (usage[kb] || 0) - (usage[ka] || 0));
+  const data = lastResumeData;
   grid.innerHTML = entries.map(([key, meta]) => {
     const useCount = usage[key] || 0;
     const tagText = useCount >= 3 ? `🔥 ${meta.tag}` : useCount >= 1 ? `★ ${meta.tag}` : meta.tag;
     return `<div class="tpl-card${key === currentTemplate ? ' tpl-active' : ''}" onclick="selectTemplate('${key}')">
       <div class="tpl-card-check">✓</div>
       <div class="tpl-card-thumb">
-        <div class="tpl-mini-inner tpl-${key}">${_tplHeadHTML(key)}${_tplBodyHTML}</div>
+        <div class="tpl-mini-inner tpl-${key}">${_tplHeadHTML(key, data)}${_buildTplBodyHTML(data, key)}</div>
       </div>
       <div class="tpl-card-meta">
         <div class="tpl-card-name">${meta.label}</div>
