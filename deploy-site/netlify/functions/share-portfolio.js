@@ -97,6 +97,39 @@ exports.handler = async function(event) {
       body: JSON.stringify(info, null, 2) };
   }
 
+  // ── RAW INSPECTOR: GET ?check=KEY  (shows raw API responses for a key) ───
+  if (event.httpMethod === 'GET' && qs.check) {
+    const key = qs.check;
+    const url = `${API_BASE}/${encodeURIComponent(key)}`;
+    const out = { key, urlBase: url.replace(SITE_ID || '', '[SITE_ID]') };
+
+    // Approach A: signed-url Accept header (current blobGet)
+    try {
+      const rA = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json;type=signed-url' }
+      });
+      const bodyA = await rA.text().catch(() => '');
+      out.signedUrl = { status: rA.status, ok: rA.ok, body: bodyA.substring(0, 300) };
+    } catch(e) { out.signedUrl = { error: e.message }; }
+
+    // Approach B: plain GET (no special Accept header)
+    try {
+      const rB = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${TOKEN}` }
+      });
+      const bodyB = await rB.text().catch(() => '');
+      out.plainGet = {
+        status: rB.status, ok: rB.ok,
+        redirected: rB.redirected, url: rB.url.substring(0, 120),
+        contentType: rB.headers.get('content-type'),
+        body: bodyB.substring(0, 300)
+      };
+    } catch(e) { out.plainGet = { error: e.message }; }
+
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify(out, null, 2) };
+  }
+
   // ── POST: save portfolio HTML, return shareable URL ────────────────────────
   if (event.httpMethod === 'POST') {
     if (!SITE_ID || !TOKEN) {
