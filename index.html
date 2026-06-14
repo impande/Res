@@ -5102,12 +5102,25 @@ function closePreviewModal(e) {
     </div>
     <!-- Step 3: Preview & Download -->
     <div class="pf-body" id="pfStep3" style="display:none">
-      <div class="pf-section-title">Your portfolio is ready!</div>
-      <div class="pf-section-sub">Preview below — download the HTML file and host it anywhere (GitHub Pages, Netlify Drop, or your own server).</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.25);border-radius:14px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>
+        <div style="flex:1;">
+          <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:2px;">Your portfolio is ready!</div>
+          <div style="font-size:0.78rem;color:var(--muted);">Download the HTML file and host it anywhere — GitHub Pages, Netlify, Vercel, or your own domain.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button onclick="downloadPortfolio()" style="padding:8px 16px;font-size:0.83rem;border:none;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML
+          </button>
+          <button id="pfShareBtn" onclick="generatePortfolioLink()" style="padding:7px 16px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Share Link
+          </button>
+        </div>
+      </div>
       <!-- Template mini-switcher -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <span style="font-size:0.8rem;font-weight:600;color:var(--muted);white-space:nowrap;">Switch template:</span>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="pfMiniRow">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="font-size:0.78rem;font-weight:600;color:var(--muted);white-space:nowrap;">Style:</span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="pfMiniRow">
           <button class="pf-mini-tpl active" id="pfMiniProfessional" onclick="switchPfTemplate('professional')">Professional</button>
           <button class="pf-mini-tpl" id="pfMiniCreative" onclick="switchPfTemplate('creative')">Creative</button>
           <button class="pf-mini-tpl" id="pfMiniMinimal" onclick="switchPfTemplate('minimal')">Minimal</button>
@@ -5124,18 +5137,9 @@ function closePreviewModal(e) {
         </div>
         <iframe class="pf-preview-frame" id="pfPreviewFrame" title="Portfolio Preview"></iframe>
       </div>
-      <div class="pf-footer">
+      <div class="pf-footer" style="margin-top:10px;">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
-        <div class="pf-footer-right" style="gap:8px;display:flex;flex-wrap:wrap;">
-          <button onclick="downloadPortfolio()" style="padding:9px 14px;font-size:0.83rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download
-          </button>
-          <button class="btn-accent" id="pfShareBtn" onclick="generatePortfolioLink()" style="gap:8px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Generate Link
-          </button>
-        </div>
+        <div style="font-size:0.74rem;color:var(--muted);text-align:right;">Free forever · no account needed · yours to host</div>
       </div>
     </div>
   </div>
@@ -5265,14 +5269,38 @@ function togglePfSection(el) {
 // ── Wizard: build step list, save current, navigate, render ───────────
 
 function pfBuildWz() {
-  // Rebuild step order from enabled sections (preserve pfWzIdx if still valid)
-  pfWzSteps = _PF_DEFS.filter(function(d) { return pfSections[d.id]; });
+  var photoStep = {id:'photo', icon:'📷', label:'Profile Photo', q:'Add a photo — it appears front-and-center in your portfolio hero'};
+  var contactDef = _PF_DEFS.find(function(d) { return d.id === 'contact'; });
+  var rest = _PF_DEFS.filter(function(d) { return d.id !== 'contact' && pfSections[d.id]; });
+  pfWzSteps = [photoStep];
+  if (pfSections.contact && contactDef) pfWzSteps.push(contactDef);
+  pfWzSteps = pfWzSteps.concat(rest);
   if (pfWzIdx >= pfWzSteps.length) pfWzIdx = Math.max(0, pfWzSteps.length - 1);
 }
+
+function handlePfWzPhoto(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    pfPhoto = e.target.result;
+    var circle = document.getElementById('pfPhotoCircle');
+    var preview = document.getElementById('pfPhotoPreview');
+    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+    if (circle) circle.style.display = 'none';
+    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+    if (removeBtn) removeBtn.style.display = '';
+    pfWzRender();
+  };
+  reader.readAsDataURL(file);
+}
+function removePfWzPhoto() { removePfPhoto(); pfWzRender(); }
 
 function pfWzSave() {
   var step = pfWzSteps[pfWzIdx];
   if (!step) return;
+  if (step.id === 'photo') return;
   var v = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
   var cd = (typeof collectData === 'function') ? collectData() : {};
   if (step.id === 'about') {
@@ -5333,7 +5361,23 @@ function pfWzRender() {
   var aiBtnStyle = 'padding:6px 13px;font-size:0.81rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
   var aiRowStyle = 'display:flex;align-items:center;gap:8px;margin-top:8px;';
 
-  if (step.id === 'about') {
+  if (step.id === 'photo') {
+    html += '<div style="display:flex;align-items:center;gap:16px;min-height:90px;">';
+    if (pfPhoto) {
+      html += '<img src="' + pfPhoto + '" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);flex-shrink:0;" alt="Your photo">';
+      html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:4px;">Photo added ✓</div>';
+      html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">This will appear in your portfolio hero section.</div>';
+      html += '<div style="display:flex;gap:7px;"><button onclick="document.getElementById(\'pfWzPh\').click()" style="padding:5px 12px;font-size:0.78rem;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;">↑ Change</button>';
+      html += '<button onclick="removePfWzPhoto()" style="padding:5px 10px;font-size:0.78rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--muted);">✕ Remove</button></div></div>';
+    } else {
+      html += '<div onclick="document.getElementById(\'pfWzPh\').click()" style="width:90px;height:90px;border-radius:50%;background:var(--input-bg,#f9fafb);border:2.5px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.2rem;cursor:pointer;flex-shrink:0;">📷</div>';
+      html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:4px;">Profile Photo <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">(optional)</span></div>';
+      html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">A professional headshot makes your portfolio stand out. Tap to upload.</div>';
+      html += '<button onclick="document.getElementById(\'pfWzPh\').click()" style="padding:6px 14px;font-size:0.82rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">📷 Upload Photo</button></div>';
+    }
+    html += '</div><input type="file" id="pfWzPh" accept="image/*" style="display:none" onchange="handlePfWzPhoto(event)">';
+
+  } else if (step.id === 'about') {
     var aval = pfWzData.about || (lastResumeData && lastResumeData.summary) || '';
     html += '<textarea id="pfWzAbout" rows="5" style="' + inp + 'resize:vertical;line-height:1.6;" placeholder="I am a product designer with 5 years of experience building…">' + e(aval) + '</textarea>';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
@@ -5713,23 +5757,27 @@ function generatePortfolioHTML(d, tpl, sections) {
 
   // Build sections HTML
   var expHtml = '';
-  if (sections.experience && d.experience && d.experience.length) {
-    expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
-    d.experience.forEach(function(e) {
-      if (!e.company && !e.title) return;
-      expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + (e.desc ? '<p class="pf-tl-desc">' + esc(e.desc) + '</p>' : '') + '</div></div>';
-    });
-    expHtml += '</div></div></section>';
+  if (sections.experience && d.experience) {
+    var expFiltered = d.experience.filter(function(e) { return e.company || e.title; });
+    if (expFiltered.length) {
+      expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
+      expFiltered.forEach(function(e) {
+        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + (e.desc ? '<p class="pf-tl-desc">' + esc(e.desc) + '</p>' : '') + '</div></div>';
+      });
+      expHtml += '</div></div></section>';
+    }
   }
 
   var eduHtml = '';
-  if (sections.education && d.education && d.education.length) {
-    eduHtml = '<section class="pf-sec pf-sec-alt" id="education"><div class="pf-container"><h2 class="pf-sec-title">Education</h2><div class="pf-edu-grid">';
-    d.education.forEach(function(e) {
-      if (!e.school && !e.degree) return;
-      eduHtml += '<div class="pf-edu-card"><div class="pf-edu-icon">🎓</div><h3 class="pf-edu-deg">' + esc(e.degree) + '</h3><div class="pf-edu-school">' + esc(e.school) + '</div>' + (e.dates ? '<div class="pf-edu-year">' + esc(e.dates) + '</div>' : '') + '</div>';
-    });
-    eduHtml += '</div></div></section>';
+  if (sections.education && d.education) {
+    var eduFiltered = d.education.filter(function(e) { return e.school || e.degree; });
+    if (eduFiltered.length) {
+      eduHtml = '<section class="pf-sec pf-sec-alt" id="education"><div class="pf-container"><h2 class="pf-sec-title">Education</h2><div class="pf-edu-grid">';
+      eduFiltered.forEach(function(e) {
+        eduHtml += '<div class="pf-edu-card"><div class="pf-edu-icon">🎓</div><h3 class="pf-edu-deg">' + esc(e.degree) + '</h3><div class="pf-edu-school">' + esc(e.school) + '</div>' + (e.dates ? '<div class="pf-edu-year">' + esc(e.dates) + '</div>' : '') + '</div>';
+      });
+      eduHtml += '</div></div></section>';
+    }
   }
 
   var skillsHtml = '';
@@ -5740,13 +5788,15 @@ function generatePortfolioHTML(d, tpl, sections) {
   }
 
   var awardsHtml = '';
-  if (sections.awards && d.awards && d.awards.length) {
-    awardsHtml = '<section class="pf-sec pf-sec-alt" id="awards"><div class="pf-container"><h2 class="pf-sec-title">Awards &amp; Achievements</h2><div class="pf-awards-grid">';
-    d.awards.forEach(function(a) {
-      if (!a.title) return;
-      awardsHtml += '<div class="pf-award-card"><div class="pf-award-ico">🏆</div><h3 class="pf-award-title">' + esc(a.title) + '</h3>' + (a.issuer ? '<div class="pf-award-issuer">' + esc(a.issuer) + '</div>' : '') + '</div>';
-    });
-    awardsHtml += '</div></div></section>';
+  if (sections.awards && d.awards) {
+    var awardsFiltered = d.awards.filter(function(a) { return a.title; });
+    if (awardsFiltered.length) {
+      awardsHtml = '<section class="pf-sec pf-sec-alt" id="awards"><div class="pf-container"><h2 class="pf-sec-title">Awards &amp; Achievements</h2><div class="pf-awards-grid">';
+      awardsFiltered.forEach(function(a) {
+        awardsHtml += '<div class="pf-award-card"><div class="pf-award-ico">🏆</div><h3 class="pf-award-title">' + esc(a.title) + '</h3>' + (a.issuer ? '<div class="pf-award-issuer">' + esc(a.issuer) + '</div>' : '') + '</div>';
+      });
+      awardsHtml += '</div></div></section>';
+    }
   }
 
   var aboutHtml = '';
@@ -5825,7 +5875,7 @@ function generatePortfolioHTML(d, tpl, sections) {
     + '<meta name="twitter:description" content="' + metaDesc + '">'
     + '<meta name="twitter:image" content="' + metaImg + '">'
     + '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"' + name + '"' + (d.title?',"jobTitle":"'+esc(d.title)+'"':'') + (d.email?',"email":"'+esc(d.email)+'"':'') + (d.phone?',"telephone":"'+esc(d.phone)+'"':'') + (d.location?',"address":{"@type":"PostalAddress","addressLocality":"'+esc(d.location)+'"}':'') + (d.linkedin?',"sameAs":["'+esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : "https://"+d.linkedin)+'"]':'') + (schemaSkills?',"knowsAbout":['+schemaSkills+']':'') + (schemaExp?',"hasOccupation":['+schemaExp+']':'') + (d.photo?',"image":"'+d.photo+'"':'') + '}<\/script>';
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (d.email ? '<a href="mailto:' + esc(d.email) + '" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + 'html{scroll-behavior:smooth;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (contactHtml ? '<a href="#contact" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
 }
 
 </script>
