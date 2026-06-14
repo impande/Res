@@ -5,17 +5,28 @@ const TOKEN   = process.env.NETLIFY_AUTH_TOKEN;
 const API_BASE = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/portfolios`;
 
 async function blobSet(key, value) {
+  // Step 1: ask the Blobs API for a signed write URL (no body here)
   const r = await fetch(`${API_BASE}/${encodeURIComponent(key)}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${TOKEN}`,
-      'Content-Type': 'text/plain; charset=utf-8'
-    },
-    body: value
+      'Accept': 'application/json;type=signed-url'
+    }
   });
   if (!r.ok) {
     const body = await r.text().catch(() => '');
-    throw new Error(`Blobs write failed (${r.status}): ${body}`);
+    throw new Error(`Blobs write init failed (${r.status}): ${body}`);
+  }
+  // Step 2: write actual content to the signed S3 URL
+  const { url: signedURL } = await r.json();
+  const r2 = await fetch(signedURL, {
+    method: 'PUT',
+    headers: { 'Cache-Control': 'max-age=0, stale-while-revalidate=60' },
+    body: value
+  });
+  if (!r2.ok) {
+    const body = await r2.text().catch(() => '');
+    throw new Error(`Blobs write failed (${r2.status}): ${body}`);
   }
 }
 
