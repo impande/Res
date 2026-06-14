@@ -685,7 +685,7 @@
     .btn-build-portfolio:hover{opacity:0.9;transform:translateY(-1px);}
     /* Portfolio Modal */
     .pf-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:8000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);-webkit-tap-highlight-color:transparent;}
-    .pf-modal{background:#fff;border-radius:20px;width:100%;max-width:700px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.18);animation:pfIn .3s cubic-bezier(.34,1.3,.64,1);}
+    .pf-modal{background:#fff;border-radius:20px;width:100%;max-width:700px;height:90vh;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.18);animation:pfIn .3s cubic-bezier(.34,1.3,.64,1);}
     @keyframes pfIn{from{opacity:0;transform:scale(0.9) translateY(20px);}to{opacity:1;transform:none;}}
     .pf-hdr{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
     .pf-hdr-left{display:flex;align-items:center;gap:12px;}
@@ -702,7 +702,7 @@
     .pf-step-pill.done .pf-step-num{background:#16a34a;border-color:#16a34a;color:#fff;}
     .pf-step-pill.active .pf-step-num{background:var(--accent);border-color:var(--accent);color:#fff;}
     .pf-step-sep{flex:1;height:1px;background:var(--border);margin:0 8px;}
-    .pf-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding:24px;}
+    .pf-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;overscroll-behavior-y:contain;touch-action:pan-y;padding:24px;}
     .pf-section-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
     .pf-section-sub{font-size:0.83rem;color:var(--muted);margin-bottom:18px;line-height:1.5;}
     /* Template picker */
@@ -745,7 +745,7 @@
     @media(max-width:600px){
       .pf-tpl-grid{grid-template-columns:1fr 1fr;}
       .pf-toggle-grid{grid-template-columns:1fr;}
-      .pf-modal{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:none;max-height:92vh;}
+      .pf-modal{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:none;height:92vh;max-height:92vh;}
     }
   </style>
 
@@ -5214,8 +5214,15 @@ function removePfPhoto() {
   if (pfCurrentStep === 3) buildPfPreview();
 }
 
+var _pfScrollY = 0;
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
+  // Lock background scroll (prevents iOS from scrolling the page behind the modal)
+  _pfScrollY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.position = 'fixed';
+  document.body.style.top = '-' + _pfScrollY + 'px';
+  document.body.style.width = '100%';
+  document.body.style.overflow = 'hidden';
   // Pre-fill portfolio photo from resume builder photo if available
   if (userPhoto && !pfPhoto) {
     pfPhoto = userPhoto;
@@ -5230,6 +5237,12 @@ function openPortfolioBuilder() {
 }
 function closePfModal() {
   document.getElementById('pfOverlay').style.display = 'none';
+  // Restore background scroll
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  document.body.style.overflow = '';
+  window.scrollTo(0, _pfScrollY);
 }
 
 function selectPfTemplate(tpl) {
@@ -5367,8 +5380,10 @@ function pfWzNav(dir) {
   pfWzSave();
   pfWzIdx = Math.max(0, Math.min(pfWzSteps.length - 1, pfWzIdx + dir));
   pfWzRender();
-  var body = document.getElementById('pfStep2');
-  if (body) body.scrollTop = 0;
+  // Scroll the wizard card into view within the modal rather than
+  // jumping the whole pf-body to 0 — smoother and less jarring.
+  var card = document.getElementById('pfWzCard');
+  if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 function pfWzRender() {
