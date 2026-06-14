@@ -5320,9 +5320,18 @@ function pfWzSave() {
     pfWzData.skills = v('pfWzSkills').split(',').map(function(s){return s.trim();}).filter(Boolean);
   } else if (step.id === 'experience') {
     var cnt = parseInt(v('pfWzExpCount'))||0;
-    pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(e,i) {
-      return {title:e.title||'',company:e.co||'',dates:[e.start,e.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||e.desc||''};
-    });
+    var manualCnt = parseInt(v('pfWzExpManualCount'))||0;
+    if (cnt > 0) {
+      pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(ex,i) {
+        return {title:ex.title||'',company:ex.co||'',dates:[ex.start,ex.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||ex.desc||''};
+      });
+    } else if (manualCnt > 0) {
+      pfWzData.experience = [];
+      for (var i=0;i<manualCnt;i++) {
+        var t=v('pfWzExpT'+i),co=v('pfWzExpCo'+i),dt=v('pfWzExpDt'+i),d=v('pfWzExpD'+i);
+        if (t||co) pfWzData.experience.push({title:t,company:co,dates:dt,desc:d});
+      }
+    }
   } else if (step.id === 'education') {
     var ecnt = parseInt(v('pfWzEduCount'))||0;
     pfWzData.education = [];
@@ -5343,6 +5352,12 @@ function pfWzSave() {
     pfWzData.email=v('pfWzEmail'); pfWzData.phone=v('pfWzPhone'); pfWzData.location=v('pfWzLoc');
     pfWzData.linkedin=v('pfWzLI'); pfWzData.github=v('pfWzGH');
   }
+}
+
+function pfAddManualExp() {
+  pfWzSave();
+  if (pfWzData.experience.length < 5) pfWzData.experience.push({title:'',company:'',dates:'',desc:''});
+  pfWzRender();
 }
 
 function pfWzNav(dir) {
@@ -5401,14 +5416,32 @@ function pfWzRender() {
 
   } else if (step.id === 'experience') {
     var exps = (cd.experience||[]).slice(0,5);
-    if (!exps.length) { html += '<div style="color:var(--muted);font-size:0.85rem;">No experience entries found — add them in the form first.</div>'; }
-    exps.forEach(function(ex,i) {
-      var saved = pfWzData.experience[i];
-      html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
-      html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
-      html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;' + aiBtnStyle + 'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
-    });
-    html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
+    if (!exps.length) {
+      // No resume form data — offer manual entry + AI generation
+      var manualExps = pfWzData.experience.length ? pfWzData.experience : [{title:'',company:'',dates:'',desc:''}];
+      manualExps.slice(0,5).forEach(function(ex,i) {
+        html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr 90px;gap:6px;margin-bottom:6px;">';
+        html += '<input id="pfWzExpT'+i+'" style="'+inp+'" placeholder="Job Title / Role" value="'+e(ex.title||'')+'">';
+        html += '<input id="pfWzExpCo'+i+'" style="'+inp+'" placeholder="Company" value="'+e(ex.company||'')+'">';
+        html += '<input id="pfWzExpDt'+i+'" style="'+inp+'" placeholder="2022–2024" value="'+e(ex.dates||'')+'">';
+        html += '</div>';
+        html += '<textarea id="pfWzExpD'+i+'" rows="2" style="'+inp+'resize:vertical;" placeholder="Key achievements and impact…">'+e(ex.desc||'')+'</textarea>';
+        html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button>';
+        html += '</div>';
+      });
+      html += '<input type="hidden" id="pfWzExpManualCount" value="'+Math.min(manualExps.length,5)+'">';
+      html += '<button onclick="pfAddManualExp()" style="font-size:0.8rem;color:var(--accent);background:none;border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Add another role</button>';
+      html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+    } else {
+      exps.forEach(function(ex,i) {
+        var saved = pfWzData.experience[i];
+        html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
+        html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
+        html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
+      });
+      html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
+    }
 
   } else if (step.id === 'education') {
     var edus = pfWzData.education.length ? pfWzData.education : (cd.education||[]).map(function(e2){return{degree:e2.deg||'',school:e2.sch||'',dates:e2.yr||''};});
@@ -5516,6 +5549,8 @@ async function pfGenSection(sectionId) {
       prompt = 'Suggest 2-3 realistic awards or certifications for ' + (title||'a professional') + '. Output as JSON array: [{"title":"...","issuer":"..."}]. Output only the JSON, no explanation.';
     } else if (sectionId === 'projects') {
       prompt = 'Suggest 2 realistic portfolio projects for ' + (fullName||'a professional') + (title?', '+title:'') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"title":"...","desc":"...","tech":"..."}]. Output only JSON.';
+    } else if (sectionId === 'experience') {
+      prompt = 'Suggest 2 realistic work experience entries for ' + (fullName||'a professional') + (title?', '+title:'') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"title":"...","company":"...","dates":"...","desc":"..."}]. Output only JSON, no explanation.';
     } else if (sectionId === 'certifications') {
       prompt = 'Suggest 3 real professional certifications relevant for ' + (title||'a tech professional') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"name":"...","issuer":"...","year":"2024"}]. Output only JSON.';
     }
@@ -5545,6 +5580,15 @@ async function pfGenSection(sectionId) {
           if(t) t.value=p.title||''; if(d) d.value=p.desc||''; if(tech) tech.value=p.tech||'';
         });
       } catch(ex2) {}
+    } else if (sectionId === 'experience') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(ex,i) {
+          var t=document.getElementById('pfWzExpT'+i); var co=document.getElementById('pfWzExpCo'+i); var dt=document.getElementById('pfWzExpDt'+i); var d=document.getElementById('pfWzExpD'+i);
+          if(t) t.value=ex.title||''; if(co) co.value=ex.company||''; if(dt) dt.value=ex.dates||''; if(d) d.value=ex.desc||'';
+        });
+        var cntEl=document.getElementById('pfWzExpManualCount'); if(cntEl) cntEl.value=arr.length;
+      } catch(ex2) {}
     } else if (sectionId === 'certifications') {
       try {
         var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
@@ -5565,10 +5609,20 @@ async function pfGenExpBullet(idx) {
   try {
     var cd = (typeof collectData === 'function') ? collectData() : {};
     var ex = (cd.experience||[])[idx];
-    if (!ex) return;
-    var ta = document.getElementById('pfWzExp'+idx);
+    var ta, titleVal, coVal;
+    if (ex) {
+      titleVal = ex.title||''; coVal = ex.co||'';
+      ta = document.getElementById('pfWzExp'+idx);
+    } else {
+      var titleEl = document.getElementById('pfWzExpT'+idx);
+      var coEl = document.getElementById('pfWzExpCo'+idx);
+      titleVal = titleEl ? titleEl.value.trim() : '';
+      coVal = coEl ? coEl.value.trim() : '';
+      ta = document.getElementById('pfWzExpD'+idx);
+    }
+    if (!titleVal && !coVal) return;
     var existing = ta ? ta.value.trim() : '';
-    var prompt = 'Write 2 concise achievement sentences for a portfolio about this role: ' + (ex.title||'') + (ex.co?' at '+ex.co:'') + (existing?'. Current text: '+existing:'') + '. Make them impactful and quantified where possible. Output only the 2 sentences separated by newline, no bullet prefix.';
+    var prompt = 'Write 2 concise achievement sentences for a portfolio about this role: ' + (titleVal||'') + (coVal?' at '+coVal:'') + (existing?'. Current text: '+existing:'') + '. Make them impactful and quantified where possible. Output only the 2 sentences separated by newline, no bullet prefix.';
     var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
     if (!resp.ok) throw new Error('Server error');
     var result = await resp.json();
