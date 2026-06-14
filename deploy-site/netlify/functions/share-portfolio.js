@@ -101,7 +101,13 @@ exports.handler = async function(event) {
         body: JSON.stringify({ error: 'BLOBS_NOT_CONFIGURED' }) };
     }
     try {
-      const { html, name } = JSON.parse(event.body || '{}');
+      const bodyStr = event.body || '{}';
+      // Guard against oversized payloads (Upstash free tier: 1 MB per item)
+      if (bodyStr.length > 950000) {
+        return { statusCode: 413, headers: { ...CORS, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'PAYLOAD_TOO_LARGE', detail: 'Portfolio is too large to share. Download it instead.' }) };
+      }
+      const { html, name } = JSON.parse(bodyStr);
       if (!html || !name) return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'Missing html or name' }) };
 
@@ -117,7 +123,7 @@ exports.handler = async function(event) {
         body: JSON.stringify({ url: siteUrl + '/p/' + slug }) };
     } catch(e) {
       return { statusCode: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'BLOBS_NOT_CONFIGURED', detail: e.message }) };
+        body: JSON.stringify({ error: 'SERVER_ERROR', detail: e.message }) };
     }
   }
 

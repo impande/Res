@@ -5753,23 +5753,48 @@ async function generatePortfolioLink() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
   try {
     var d = getPfData();
-    var html = generatePortfolioHTML(d, pfTemplate, pfSections);
+    // Strip the photo for the shared version — base64 images can be several MB,
+    // which exceeds Netlify function body limits and Upstash's 1 MB item cap.
+    // The downloaded HTML keeps the photo; the shared link shows everything else.
+    var dShare = Object.assign({}, d, { photo: '' });
+    var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
     var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
+
+    // Hard guard: if HTML is still somehow over 900 KB after stripping the photo,
+    // fall back to download so the user always gets their portfolio.
+    if (html.length > 900000) {
+      _showShareFallbackModal();
+      return;
+    }
+
+    var body = JSON.stringify({ html: html, name: name });
     var resp = await fetch('/.netlify/functions/share-portfolio', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html: html, name: name })
+      body: body
     });
-    var result = await resp.json();
+
+    var result;
+    try {
+      result = await resp.json();
+    } catch(_) {
+      // Response was not JSON (function crashed or Netlify returned an HTML error)
+      throw new Error('Server error (status ' + resp.status + '). Please try again.');
+    }
+
     if (result.url) {
       showPfShareModal(result.url, name);
     } else if (result.error === 'BLOBS_NOT_CONFIGURED') {
       _showShareFallbackModal();
     } else {
-      showToast('Could not generate link: ' + (result.error || 'Server error'), 'error');
+      throw new Error(result.detail || result.error || 'Server error');
     }
   } catch(ex) {
-    showToast('Error: ' + ex.message, 'error');
+    var msg = ex.message || 'Network error';
+    if (msg === 'Load failed' || msg === 'Failed to fetch' || msg.indexOf('pattern') !== -1) {
+      msg = 'Network error — check your connection and try again.';
+    }
+    showToast('Could not generate link: ' + msg, 'error');
   } finally {
     if (btn) {
       btn.disabled = false;
