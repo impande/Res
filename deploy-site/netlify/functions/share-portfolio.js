@@ -20,15 +20,27 @@ async function blobSet(key, value) {
 }
 
 async function blobGet(key) {
+  // Step 1: ask the Blobs API for a signed read URL
   const r = await fetch(`${API_BASE}/${encodeURIComponent(key)}`, {
-    headers: { 'Authorization': `Bearer ${TOKEN}` }
+    headers: {
+      'Authorization': `Bearer ${TOKEN}`,
+      'Accept': 'application/json;type=signed-url'
+    }
   });
   if (r.status === 404) return null;
   if (!r.ok) {
     const body = await r.text().catch(() => '');
     throw new Error(`Blobs read failed (${r.status}): ${body}`);
   }
-  return await r.text();
+  // Step 2: follow the signed URL to get the actual stored content
+  const { url: signedURL } = await r.json();
+  const r2 = await fetch(signedURL);
+  if (r2.status === 404) return null;
+  if (!r2.ok) {
+    const body = await r2.text().catch(() => '');
+    throw new Error(`Blobs signed read failed (${r2.status}): ${body}`);
+  }
+  return await r2.text();
 }
 
 const CORS = {
