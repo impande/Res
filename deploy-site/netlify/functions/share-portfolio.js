@@ -130,7 +130,8 @@ exports.handler = async function(event) {
       body: '<h1>Share link service not configured.</h1>' };
     try {
       const html = await blobGet(id);
-      if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      if (!html) return { statusCode: 404,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store, no-cache', 'Netlify-CDN-Cache-Control': 'no-store' },
         body: notFound() };
       return { statusCode: 200,
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },

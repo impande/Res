@@ -15,6 +15,12 @@
   Netlify-CDN-Cache-Control: no-cache, no-store
   Vary: *
 
+# Portfolio share pages — never cache (dynamic, served by function)
+/p/*
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0
+  Pragma: no-cache
+  Netlify-CDN-Cache-Control: no-cache, no-store
+
 # Static assets — cache 7 days (images, fonts, etc.)
 /og-image.png
   Cache-Control: public, max-age=604800, immutable
