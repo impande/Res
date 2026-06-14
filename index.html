@@ -5367,6 +5367,8 @@ function pfWzNav(dir) {
   pfWzSave();
   pfWzIdx = Math.max(0, Math.min(pfWzSteps.length - 1, pfWzIdx + dir));
   pfWzRender();
+  var body = document.getElementById('pfStep2');
+  if (body) body.scrollTop = 0;
 }
 
 function pfWzRender() {
@@ -5639,7 +5641,9 @@ function pfGoStep(n) {
   if (n === 3) pfWzSave(); // save wizard before preview
   pfCurrentStep = n;
   [1,2,3].forEach(function(i) {
-    document.getElementById('pfStep' + i).style.display = i === n ? 'block' : 'none';
+    var el = document.getElementById('pfStep' + i);
+    el.style.display = i === n ? 'block' : 'none';
+    if (i === n) el.scrollTop = 0;
     var pill = document.getElementById('pfPill' + i);
     pill.classList.remove('active','done');
     if (i === n) pill.classList.add('active');
