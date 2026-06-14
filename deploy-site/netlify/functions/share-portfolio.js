@@ -1,31 +1,43 @@
-// Netlify Blobs: use SDK with auto-detection first (uses edgeURL if NETLIFY_BLOBS_CONTEXT
-// is injected), fall back to explicit credentials only if context is absent.
-const { getStore } = require('@netlify/blobs');
+// Storage: Upstash Redis via REST API — reliable cross-invocation persistence.
+// Free tier: 10k requests/day, 256MB. Portfolio links expire after 90 days.
+const UPSTASH_URL   = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-const SITE_ID = process.env.NETLIFY_SITE_ID;
-const TOKEN   = process.env.NETLIFY_AUTH_TOKEN;
-const HAS_CTX = !!process.env.NETLIFY_BLOBS_CONTEXT;
-
-function portfolioStore() {
-  if (HAS_CTX) {
-    // Full Netlify context available — SDK uses edgeURL, reads are cross-invocation safe
-    return getStore('portfolios');
-  }
-  if (SITE_ID && TOKEN) {
-    // Explicit credentials fallback — still uses SDK (correct URL signing)
-    return getStore({ name: 'portfolios', siteID: SITE_ID, token: TOKEN });
-  }
-  throw new Error('BLOBS_NOT_CONFIGURED');
+function isConfigured() {
+  return !!(UPSTASH_URL && UPSTASH_TOKEN);
 }
 
 async function blobSet(key, value) {
-  const store = portfolioStore();
-  await store.set(key, value);
+  const r = await fetch(UPSTASH_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    // SET key value EX 7776000 (90 days TTL)
+    body: JSON.stringify(['SET', 'pf:' + key, value, 'EX', 7776000])
+  });
+  if (!r.ok) {
+    const txt = await r.text().catch(() => '');
+    throw new Error(`Redis SET ${r.status}: ${txt.substring(0, 200)}`);
+  }
 }
 
 async function blobGet(key) {
-  const store = portfolioStore();
-  return await store.get(key);
+  const r = await fetch(UPSTASH_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(['GET', 'pf:' + key])
+  });
+  if (!r.ok) {
+    const txt = await r.text().catch(() => '');
+    throw new Error(`Redis GET ${r.status}: ${txt.substring(0, 200)}`);
+  }
+  const json = await r.json();
+  return json.result || null;
 }
 
 const CORS = {
@@ -42,63 +54,29 @@ exports.handler = async function(event) {
   // ── DIAGNOSTIC: GET ?diag=1 ────────────────────────────────────────────────
   if (event.httpMethod === 'GET' && qs.diag === '1') {
     const info = {
-      hasContext: HAS_CTX,
-      hasSiteID: !!SITE_ID,
-      hasToken: !!TOKEN,
-      contextPrefix: process.env.NETLIFY_BLOBS_CONTEXT
-        ? process.env.NETLIFY_BLOBS_CONTEXT.substring(0, 30) + '...'
-        : 'NOT SET',
+      configured: isConfigured(),
+      hasUrl: !!UPSTASH_URL,
+      hasToken: !!UPSTASH_TOKEN,
     };
-
-    // Test SDK write + read (within same invocation)
-    const testKey = '__diag_sdk__';
-    const testVal = 'sdk-diag-' + Date.now();
-    try {
-      await blobSet(testKey, testVal);
-      info.write = 'ok';
-    } catch(e) {
-      info.write = 'ERROR: ' + e.message;
+    if (isConfigured()) {
+      const testKey = '__diag__';
+      const testVal = 'diag-' + Date.now();
+      try {
+        await blobSet(testKey, testVal);
+        info.write = 'ok';
+      } catch(e) { info.write = 'ERROR: ' + e.message; }
+      try {
+        const v = await blobGet(testKey);
+        info.read = v === testVal ? 'ok (matched)' : (v === null ? 'NULL' : 'MISMATCH: ' + String(v).substring(0, 50));
+      } catch(e) { info.read = 'ERROR: ' + e.message; }
     }
-    try {
-      const v = await blobGet(testKey);
-      info.read = v === null ? 'NULL (not found)'
-        : v === testVal ? 'ok (matched)' : 'MISMATCH: ' + String(v).substring(0, 80);
-    } catch(e) {
-      info.read = 'ERROR: ' + e.message;
-    }
-
-    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify(info, null, 2) };
-  }
-
-  // ── CROSS-INVOCATION TEST: GET ?persist=KEY ────────────────────────────────
-  // Write to KEY in this request, then visit /p/KEY to verify it persists
-  if (event.httpMethod === 'GET' && qs.persist) {
-    const key = qs.persist;
-    const val = 'persist-test-' + Date.now();
-    const info = { key, val, hasContext: HAS_CTX };
-    try {
-      await blobSet(key, val);
-      info.write = 'ok';
-    } catch(e) {
-      info.write = 'ERROR: ' + e.message;
-    }
-    try {
-      const v = await blobGet(key);
-      info.sameInvocationRead = v === val ? 'ok (matched)' : (v === null ? 'NULL' : 'MISMATCH');
-    } catch(e) {
-      info.sameInvocationRead = 'ERROR: ' + e.message;
-    }
-    info.crossInvocationTest = 'Now visit: /p/' + key;
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
       body: JSON.stringify(info, null, 2) };
   }
 
   // ── POST: save portfolio HTML, return shareable URL ────────────────────────
   if (event.httpMethod === 'POST') {
-    try {
-      portfolioStore(); // check credentials
-    } catch(e) {
+    if (!isConfigured()) {
       return { statusCode: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'BLOBS_NOT_CONFIGURED' }) };
     }
@@ -128,6 +106,8 @@ exports.handler = async function(event) {
     const id = qs.id;
     if (!id) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' },
       body: notFound() };
+    if (!isConfigured()) return { statusCode: 503, headers: { 'Content-Type': 'text/html' },
+      body: '<h1>Share link service not configured.</h1>' };
     try {
       const html = await blobGet(id);
       if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' },
