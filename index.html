@@ -5409,7 +5409,12 @@ function pfWzRender() {
     html += '</div><input type="file" id="pfWzPh" accept="image/*" style="display:none" onchange="handlePfWzPhoto(event)">';
 
   } else if (step.id === 'about') {
-    var aval = pfWzData.about || (lastResumeData && lastResumeData.summary) || '';
+    var _liveSumEl = document.querySelector('.r-sum');
+    var _liveSumTxt = _liveSumEl ? (_liveSumEl.innerText || _liveSumEl.textContent || '').trim() : '';
+    if (_liveSumTxt && _liveSumTxt.charAt(0) === '✨') _liveSumTxt = '';
+    var _lrSum = (lastResumeData && lastResumeData.summary) || '';
+    if (_lrSum && _lrSum.charAt(0) === '✨') _lrSum = '';
+    var aval = pfWzData.about || _lrSum || _liveSumTxt || '';
     html += '<textarea id="pfWzAbout" rows="5" style="' + inp + 'resize:vertical;line-height:1.6;" placeholder="I am a product designer with 5 years of experience building…">' + e(aval) + '</textarea>';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
@@ -5674,6 +5679,11 @@ function getPfData() {
   var cd = (typeof collectData === 'function') ? collectData() : {};
   // Wizard data overrides resume data when the user has explicitly filled it in
   var wz = pfWzData;
+  var _lrSum = (lastResumeData && lastResumeData.summary) || '';
+  if (_lrSum && _lrSum.charAt(0) === '✨') _lrSum = '';
+  var _rSumEl = document.querySelector('.r-sum');
+  var _liveSum = _rSumEl ? (_rSumEl.innerText || _rSumEl.textContent || '').trim() : '';
+  if (_liveSum && _liveSum.charAt(0) === '✨') _liveSum = '';
   return {
     name: ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim(),
     title: cd.jobTitle || '',
@@ -5683,15 +5693,15 @@ function getPfData() {
     linkedin: wz.linkedin || cd.linkedin || '',
     github: wz.github || cd.github || '',
     photo: pfPhoto || userPhoto || '',
-    summary: wz.about || (lastResumeData && lastResumeData.summary) || '',
+    summary: wz.about || _lrSum || _liveSum || '',
     experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
       return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
     }),
-    education: wz.education.length ? wz.education : (cd.education||[]).map(function(e) {
+    education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
       return {degree:e.deg, school:e.sch, dates:e.yr};
     }),
     skills: wz.skills.length ? wz.skills : (cd.skills || []),
-    awards: wz.awards.length ? wz.awards : (cd.awards||[]).map(function(a) {
+    awards: wz.awards.some(function(a){return a.title;}) ? wz.awards : (cd.awards||[]).map(function(a) {
       return {title:a.name, issuer:[a.org,a.year].filter(Boolean).join(' · ')};
     }),
     projects: wz.projects || [],

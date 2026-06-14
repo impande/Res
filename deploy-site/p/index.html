@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loading Portfolio…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Arial,sans-serif;background:#f8fafc;color:#1e293b;}
+  .msg{text-align:center;padding:24px;}
+  .spinner{width:44px;height:44px;border:3px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 18px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  h2{font-size:1.15rem;font-weight:700;margin:0 0 8px;}
+  p{font-size:0.88rem;color:#64748b;line-height:1.6;}
+  a{color:#2563eb;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="msg" id="msg">
+  <div class="spinner"></div>
+  <h2>Loading portfolio…</h2>
+  <p>Please wait a moment.</p>
+</div>
+<script>
+(function() {
+  var parts = window.location.pathname.split('/').filter(function(s){ return s.length > 0; });
+  var slug = parts[parts.length - 1] || '';
+  if (!slug || slug === 'p') {
+    document.getElementById('msg').innerHTML =
+      '<h2>Portfolio not found</h2><p>No portfolio ID in the URL.<br>Visit <a href="https://resume4u.help">resume4u.help</a> to create one.</p>';
+    return;
+  }
+  fetch('/.netlify/functions/share-portfolio?id=' + encodeURIComponent(slug))
+    .then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    })
+    .then(function(html) {
+      document.open('text/html', 'replace');
+      document.write(html);
+      document.close();
+    })
+    .catch(function() {
+      document.getElementById('msg').innerHTML =
+        '<h2>Portfolio not found</h2>'
+        + '<p>This link may have expired or the portfolio does not exist.<br>'
+        + 'Please <a href="https://resume4u.help">generate a new share link</a>.</p>';
+    });
+})();
+</script>
+</body>
+</html>
