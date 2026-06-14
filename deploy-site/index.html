@@ -238,13 +238,13 @@
     .tpl-filter-btn.active{background:var(--accent);color:#fff;}
 
     /* grid — no max-height, natural wrap */
-    .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:9px;padding:2px;}
+    .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:2px;}
     .tpl-card{background:var(--card-bg);border:2px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
     .tpl-card:hover{border-color:rgba(217,119,6,0.5);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
     .tpl-card.tpl-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.18);}
     /* mock resume preview inside card */
-    .tpl-card-thumb{height:96px;overflow:hidden;position:relative;}
-    .tpl-mini-inner{width:794px;padding:36px;box-sizing:border-box;transform:scale(0.14);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
+    .tpl-card-thumb{height:170px;overflow:hidden;position:relative;}
+    .tpl-mini-inner{position:absolute;top:0;left:0;width:794px;padding:36px;box-sizing:border-box;transform:scale(0.2);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
     .tpl-card-meta{padding:6px 8px 7px;border-top:1px solid var(--border);}
     .tpl-card-name{font-size:0.72rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .tpl-card-tag{font-size:0.6rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -663,7 +663,7 @@
     @media(max-width:768px){
       .tpl-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px!important;gap:8px!important;}
       .tpl-grid::-webkit-scrollbar{display:none;}
-      .tpl-card{flex-shrink:0!important;width:82px!important;scroll-snap-align:start;}
+      .tpl-card{flex-shrink:0!important;width:120px!important;scroll-snap-align:start;}
       .tpl-filter-btn{padding:5px 9px!important;font-size:0.68rem!important;}
     }
     /* ── Portfolio Builder Feature ── */
@@ -2028,11 +2028,11 @@
         <span class="tpl-section-badge">35 designs</span>
       </div>
       <div class="tpl-filter-row">
-        <button class="tpl-filter-btn active" onclick="filterTpls(this,'all')">All 35</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'dark')">Dark</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'light')">Light</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'creative')">Creative</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'minimal')">Minimal</button>
+        <button class="tpl-filter-btn active" data-cat="all" onclick="filterTpls(this,'all')">All 35</button>
+        <button class="tpl-filter-btn" data-cat="dark" onclick="filterTpls(this,'dark')">Dark</button>
+        <button class="tpl-filter-btn" data-cat="light" onclick="filterTpls(this,'light')">Light</button>
+        <button class="tpl-filter-btn" data-cat="creative" onclick="filterTpls(this,'creative')">Creative</button>
+        <button class="tpl-filter-btn" data-cat="minimal" onclick="filterTpls(this,'minimal')">Minimal</button>
       </div>
       <div class="tpl-grid" id="tplGrid"></div>
       <div id="tplGuide" class="tpl-guide">
@@ -2308,7 +2308,6 @@ function calibrateTplPreviews() {
     if (!inn) return;
     var s = th.offsetWidth / 794;
     inn.style.transform = 'scale(' + s.toFixed(4) + ')';
-    inn.style.height = Math.round(297 * 3.7795) + 'px';
   });
 }
 var _tplRszT;
@@ -3473,6 +3472,8 @@ function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
+  var _chipReset = document.getElementById('pageCountChip');
+  if (_chipReset) { _chipReset.textContent = '···'; _chipReset.style.color = '#888'; _chipReset.style.background = '#f3f4f6'; _chipReset.style.borderColor = '#d1d5db'; }
   out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_triggerPageCount()">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
@@ -3498,6 +3499,8 @@ function renderOutput(data) {
   }
   out.addEventListener('copy', e => e.preventDefault(), { once: false });
   out.addEventListener('cut', e => e.preventDefault(), { once: false });
+  var _tplBtn = document.querySelector('.tpl-filter-btn.active');
+  renderTemplateGrid(_tplBtn ? (_tplBtn.dataset.cat || 'all') : 'all');
 }
 
 // ── Download Doc (.docx) ─────────────────────────────────────────────
