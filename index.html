@@ -240,15 +240,8 @@
     .tpl-card:hover{border-color:rgba(217,119,6,0.5);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
     .tpl-card.tpl-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.18);}
     /* mock resume preview inside card */
-    .tpl-card-thumb{height:80px;overflow:hidden;position:relative;}
-    .tpl-card-hdr{height:30px;width:100%;display:flex;align-items:center;gap:5px;padding:0 7px;box-sizing:border-box;}
-    .tpl-card-avatar{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.35);flex-shrink:0;}
-    .tpl-card-hdr-lines{display:flex;flex-direction:column;gap:2px;flex:1;}
-    .tpl-card-hdr-name{height:3px;border-radius:2px;background:rgba(255,255,255,0.8);width:65%;}
-    .tpl-card-hdr-title{height:2px;border-radius:1px;background:rgba(255,255,255,0.45);width:45%;}
-    .tpl-card-body{padding:5px 7px;display:flex;flex-direction:column;gap:3px;background:#fff;height:50px;}
-    .tpl-card-line{height:2.5px;border-radius:2px;background:rgba(0,0,0,0.1);}
-    .tpl-card-line.lw80{width:80%;}.tpl-card-line.lw60{width:60%;}.tpl-card-line.lw70{width:70%;}.tpl-card-line.lw45{width:45%;}.tpl-card-line.lw55{width:55%;}
+    .tpl-card-thumb{height:96px;overflow:hidden;position:relative;}
+    .tpl-mini-inner{width:794px;padding:36px;box-sizing:border-box;transform:scale(0.14);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
     .tpl-card-meta{padding:6px 8px 7px;border-top:1px solid var(--border);}
     .tpl-card-name{font-size:0.72rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .tpl-card-tag{font-size:0.6rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -710,10 +703,17 @@
     .pf-section-sub{font-size:0.83rem;color:var(--muted);margin-bottom:18px;line-height:1.5;}
     /* Template picker */
     .pf-tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+    @media(min-width:500px){.pf-tpl-grid{grid-template-columns:repeat(5,1fr);}}
+    .pf-tpl-anim{height:100%;overflow:hidden;position:relative;}
+    .pf-anim-scroll{animation:pfScroll 5s ease-in-out infinite alternate;will-change:transform;transform-origin:top center;}
+    @keyframes pfScroll{0%{transform:translateY(0)}100%{transform:translateY(-38%)}}
+    .pf-mini-tpl{padding:5px 12px;font-size:0.77rem;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
+    .pf-mini-tpl:hover{border-color:rgba(217,119,6,0.4);color:var(--accent);}
+    .pf-mini-tpl.active{border-color:var(--accent);background:rgba(217,119,6,0.07);color:var(--accent);}
     .pf-tpl-card{border:2px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
     .pf-tpl-card:hover{border-color:rgba(217,119,6,0.4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
     .pf-tpl-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.15);}
-    .pf-tpl-preview{height:100px;display:flex;align-items:stretch;overflow:hidden;}
+    .pf-tpl-preview{height:120px;overflow:hidden;position:relative;}
     .pf-tpl-check{position:absolute;top:7px;right:7px;width:20px;height:20px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#fff;opacity:0;transition:opacity .15s;}
     .pf-tpl-card.selected .pf-tpl-check{opacity:1;}
     .pf-tpl-name{padding:9px 10px 10px;font-size:0.78rem;font-weight:700;color:var(--text);}
@@ -1949,7 +1949,7 @@
   <div class="step-content" id="step2">
     <h1 class="step-title">Work Experience</h1>
     <p class="step-subtitle">Add your most recent roles first. Leave description blank — AI will generate optimised bullets for you.</p>
-    <button class="add-entry-btn" onclick="addExperience()">+ Add Work Experience</button>
+    <button class="add-entry-btn" onclick="addExperience(true)">+ Add Work Experience</button>
     <div id="experienceEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
@@ -1960,7 +1960,7 @@
   <div class="step-content" id="step3">
     <h1 class="step-title">Awards &amp; Achievements</h1>
     <p class="step-subtitle">Certifications, honours, recognitions — anything that sets you apart</p>
-    <button class="add-entry-btn" onclick="addAward()">+ Add Award / Achievement</button>
+    <button class="add-entry-btn" onclick="addAward(true)">+ Add Award / Achievement</button>
     <div id="awardEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
@@ -1971,7 +1971,7 @@
   <div class="step-content" id="step4">
     <h1 class="step-title">Education</h1>
     <p class="step-subtitle">Your academic background</p>
-    <button class="add-entry-btn" onclick="addEducation()">+ Add Education</button>
+    <button class="add-entry-btn" onclick="addEducation(true)">+ Add Education</button>
     <div id="educationEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
@@ -2250,6 +2250,30 @@ const TPL_META = {
   paper:    {label:'Paper',     tag:'Parchment · Warm',cat:'minimal'},
 };
 
+function _tplHeadHTML(key) {
+  var h = '<div class="r-name">Alex Johnson</div><div class="r-title">Senior Product Manager</div><div class="r-contact">alex@example.com</div>';
+  if (key === 'executive') return '<div class="r-head">' + h + '</div><div class="r-head-accent"></div>';
+  if (key === 'academic') return '<div class="r-head"><div class="r-head-line"></div>' + h + '<div class="r-head-line"></div></div>';
+  return '<div class="r-head">' + h + '</div>';
+}
+var _tplBodyHTML = '<div class="r-sec"><div class="r-sec-t">Experience</div><div class="r-exp"><div class="r-exp-top"><span class="r-role">Product Manager</span><span class="r-period">2022–Present</span></div><div class="r-co">Google</div><ul class="r-ul"><li>Led product roadmap and cross-team strategy</li><li>Grew user base by 40% in 12 months</li></ul></div></div><div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">BS Computer Science</div><div class="r-sch">MIT</div></div><div class="r-yr">2018</div></div></div><div class="r-sec"><div class="r-sec-t">Skills</div><div class="r-skills"><span class="r-sk">Strategy</span><span class="r-sk">Agile</span><span class="r-sk">Analytics</span><span class="r-sk">Leadership</span></div></div>';
+
+function calibrateTplPreviews() {
+  var A4_H = 297 * 3.7795;
+  document.querySelectorAll('.tpl-card-thumb').forEach(function(th) {
+    var inn = th.querySelector('.tpl-mini-inner');
+    if (!inn) return;
+    var s = th.offsetHeight / A4_H;
+    var scaledW = Math.round(794 * s);
+    var leftOff = Math.max(0, Math.round((th.offsetWidth - scaledW) / 2));
+    inn.style.transform = 'scale(' + s.toFixed(4) + ')';
+    inn.style.left = leftOff + 'px';
+    inn.style.height = Math.round(A4_H) + 'px';
+  });
+}
+var _tplRszT;
+window.addEventListener('resize', function() { clearTimeout(_tplRszT); _tplRszT = setTimeout(calibrateTplPreviews, 150); });
+
 function renderTemplateGrid(filterCat) {
   const grid = document.getElementById('tplGrid');
   if (!grid) return;
@@ -2258,26 +2282,12 @@ function renderTemplateGrid(filterCat) {
   // Sort most-used first; stable within same usage keeps original definition order
   entries.sort(([ka], [kb]) => (usage[kb] || 0) - (usage[ka] || 0));
   grid.innerHTML = entries.map(([key, meta]) => {
-    const color = TPL_COLORS[key] || '#888';
     const useCount = usage[key] || 0;
     const tagText = useCount >= 3 ? `🔥 ${meta.tag}` : useCount >= 1 ? `★ ${meta.tag}` : meta.tag;
     return `<div class="tpl-card${key === currentTemplate ? ' tpl-active' : ''}" onclick="selectTemplate('${key}')">
       <div class="tpl-card-check">✓</div>
       <div class="tpl-card-thumb">
-        <div class="tpl-card-hdr" style="background:${color}">
-          <div class="tpl-card-avatar"></div>
-          <div class="tpl-card-hdr-lines">
-            <div class="tpl-card-hdr-name"></div>
-            <div class="tpl-card-hdr-title"></div>
-          </div>
-        </div>
-        <div class="tpl-card-body">
-          <div class="tpl-card-line lw80"></div>
-          <div class="tpl-card-line lw60"></div>
-          <div class="tpl-card-line lw70"></div>
-          <div class="tpl-card-line lw55"></div>
-          <div class="tpl-card-line lw45"></div>
-        </div>
+        <div class="tpl-mini-inner tpl-${key}">${_tplHeadHTML(key)}${_tplBodyHTML}</div>
       </div>
       <div class="tpl-card-meta">
         <div class="tpl-card-name">${meta.label}</div>
@@ -2285,6 +2295,7 @@ function renderTemplateGrid(filterCat) {
       </div>
     </div>`;
   }).join('');
+  requestAnimationFrame(calibrateTplPreviews);
 }
 
 function filterTpls(btn, cat) {
@@ -2340,16 +2351,42 @@ function startBuild() {
   }, 200);
 }
 
+let _syncResumeTimer;
 function markNeedsRegen() {
   if (!lastResumeData) return;
   needsRegenerate = true;
-  // Keep lastResumeData.customSections in sync so preview always reflects
-  // the latest user edits without requiring a full regeneration.
-  lastResumeData.customSections = collectCustomSections();
   const btn = document.getElementById('generateBtn');
   if (btn) btn.classList.add('regen-needed');
   const badge = document.getElementById('regenBadge');
   if (badge) badge.style.display = 'inline';
+  // Debounce full sync so rapid keystrokes don't thrash collectData()
+  clearTimeout(_syncResumeTimer);
+  _syncResumeTimer = setTimeout(_syncLastResumeData, 400);
+}
+function _syncLastResumeData() {
+  if (!lastResumeData) return;
+  const cur = collectData();
+  // Sync every non-AI field so preview modal and downloads always reflect
+  // the latest form state without a full regeneration.
+  lastResumeData.firstName = cur.firstName;
+  lastResumeData.lastName  = cur.lastName;
+  lastResumeData.jobTitle  = cur.jobTitle;
+  lastResumeData.email     = cur.email;
+  lastResumeData.phone     = cur.phone;
+  lastResumeData.location  = cur.location;
+  lastResumeData.linkedin  = cur.linkedin;
+  lastResumeData.github    = cur.github;
+  lastResumeData.skills    = cur.skills;
+  lastResumeData.awards    = cur.awards;
+  lastResumeData.education = cur.education;
+  lastResumeData.customSections = cur.customSections;
+  // Experience: update structure but preserve AI bullets for matching entries
+  lastResumeData.experience = cur.experience.map(e => {
+    const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
+    return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
+  });
+  // Refresh page count chip to reflect latest form data
+  _triggerOffscreenPageCount();
 }
 
 function clearNeedsRegen() {
@@ -2507,10 +2544,11 @@ function goToStep(step, skipScroll) {
   }
   const waFab = document.getElementById('waFab');
   if (waFab) waFab.style.display = step === 0 ? '' : 'none';
+  const _smallMobile = window.innerWidth <= 520;
   const previewFab = document.getElementById('previewFab');
-  if (previewFab) previewFab.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
+  if (previewFab) previewFab.style.display = (!_smallMobile && step >= 2 && step <= 7) ? 'flex' : 'none';
   const mobPreviewBtn = document.getElementById('mobPreviewBtn');
-  if (mobPreviewBtn) mobPreviewBtn.style.display = (step >= 1 && step <= 7) ? 'flex' : 'none';
+  if (mobPreviewBtn) mobPreviewBtn.style.display = (_smallMobile && step >= 1 && step <= 7) ? 'flex' : 'none';
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
@@ -2606,7 +2644,8 @@ function selectTemplate(tpl) {
     renderOutput(lastResumeData);
     setTimeout(() => {
       document.getElementById('resumeOutput')?.scrollIntoView({behavior:'smooth', block:'start'});
-    }, 200);
+      _triggerPageCount(true);
+    }, 300);
   } else {
     document.getElementById('tplGuide')?.classList.add('visible');
     document.getElementById('generateBtn')?.classList.add('btn-ready');
@@ -2698,7 +2737,7 @@ function updatePreview() {
 }
 
 // ── Entry adders ──────────────────────────────────────────────────────
-function addExperience() {
+function addExperience(prependNew = false) {
   const id = ++expCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'exp-'+id;
@@ -2719,11 +2758,12 @@ function addExperience() {
     </div>
     <div class="form-group"><label class="form-label">Key Achievements (optional — AI will enhance)</label><textarea rows="3" placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" id="exp-desc-${id}" oninput="markNeedsRegen()"></textarea><p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
     <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
-  document.getElementById('experienceEntries').appendChild(div);
+  const container = document.getElementById('experienceEntries');
+  if (prependNew) container.prepend(div); else container.appendChild(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
 }
 
-function addAward() {
+function addAward(prependNew = false) {
   const id = ++awardCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'award-'+id;
@@ -2736,11 +2776,12 @@ function addAward() {
       <div class="form-group"><label class="form-label">Organisation</label><input type="text" placeholder="e.g. Amazon Web Services" id="award-org-${id}"></div>
       <div class="form-group"><label class="form-label">Description (optional)</label><input type="text" placeholder="Brief description" id="award-desc-${id}"></div>
     </div>`;
-  document.getElementById('awardEntries').appendChild(div);
+  const awardContainer = document.getElementById('awardEntries');
+  if (prependNew) awardContainer.prepend(div); else awardContainer.appendChild(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
 }
 
-function addEducation() {
+function addEducation(prependNew = false) {
   const id = ++eduCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'edu-'+id;
@@ -2753,7 +2794,8 @@ function addEducation() {
       <div class="form-group"><label class="form-label">Graduation Year</label><input type="text" placeholder="e.g. 2018" id="edu-yr-${id}"></div>
       <div class="form-group"><label class="form-label">GPA / Grade (optional)</label><input type="text" placeholder="e.g. 8.4/10" id="edu-gpa-${id}"></div>
     </div>`;
-  document.getElementById('educationEntries').appendChild(div);
+  const eduContainer = document.getElementById('educationEntries');
+  if (prependNew) eduContainer.prepend(div); else eduContainer.appendChild(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
 }
 
@@ -2788,7 +2830,8 @@ function addCustomSection(title='', content='') {
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
     </div>`;
-  document.getElementById('customSectionEntries').appendChild(div);
+  document.getElementById('customSectionEntries').prepend(div);
+  setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
   updatePreview();
 }
 
@@ -2811,6 +2854,7 @@ function addSkill() {
   const val = input.value.trim();
   if (!val || skills.includes(val)) { input.value=''; return; }
   skills.push(val);
+  if (lastResumeData) lastResumeData.skills = [...skills];
   const history = JSON.parse(localStorage.getItem('skillHistory')||'[]');
   if (!history.includes(val)) { history.unshift(val); localStorage.setItem('skillHistory', JSON.stringify(history.slice(0,50))); }
   input.value = '';
@@ -2819,7 +2863,7 @@ function addSkill() {
   markNeedsRegen();
 }
 
-function removeSkill(skill) { skills = skills.filter(s=>s!==skill); renderSkills(); renderSuggestions(); markNeedsRegen(); }
+function removeSkill(skill) { skills = skills.filter(s=>s!==skill); if (lastResumeData) lastResumeData.skills = [...skills]; renderSkills(); renderSuggestions(); markNeedsRegen(); }
 
 function renderSkills(newSkill) {
   const container = document.getElementById('skillTags');
@@ -2932,7 +2976,20 @@ Bullet writing rules:
     if (!response.ok) throw new Error('Server error ' + response.status);
     const result = await response.json();
     const text = (result.content || result.text || '').trim();
-    if (text) { textarea.value = text; markNeedsRegen(); }
+    if (text) {
+      textarea.value = text;
+      // Parse bullet lines and sync directly into lastResumeData so preview
+      // shows structured bullets immediately without waiting for full regenerate.
+      const bulletArr = text.split('\n').map(l => l.replace(/^[•\-\*]\s*/,'').trim()).filter(Boolean);
+      if (lastResumeData && bulletArr.length) {
+        const expEntry = (lastResumeData.experience || []).find(e =>
+          e.title === (document.getElementById('exp-title-'+id)?.value.trim()||'') &&
+          e.co    === (document.getElementById('exp-co-'+id)?.value.trim()||'')
+        );
+        if (expEntry) expEntry.bullets = bulletArr;
+      }
+      markNeedsRegen();
+    }
     else throw new Error('Empty response');
   } catch(err) {
     showToast('Could not generate bullets: ' + err.message);
@@ -3111,8 +3168,8 @@ function renderResumeHTML(data) {
   if (data.experience && data.experience.length) {
     const items = data.experience.map(e => {
       const bullets = Array.isArray(e.bullets)
-        ? `<ul class="r-ul">${e.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`
-        : (e.desc ? `<ul class="r-ul"><li>${esc(e.desc)}</li></ul>` : '');
+        ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${esc(b)}</li>`).join('')}</ul>`
+        : (e.desc ? `<ul class="r-ul"><li contenteditable="true">${esc(e.desc)}</li></ul>` : '');
       const period = [e.start, e.end].filter(Boolean).join(' – ');
       return `<div class="r-exp"><div class="r-exp-top"><span class="r-role" contenteditable="true">${esc(e.title||e.role||'')}</span><span class="r-period">${esc(period)}</span></div><div class="r-co" contenteditable="true">${esc(e.co||e.company||'')}</div>${bullets}</div>`;
     }).join('');
@@ -3305,7 +3362,8 @@ async function _doGenerateResume() {
     const pfBanner = document.getElementById('portfolioBanner');
     if (pfBanner) pfBanner.style.display = 'flex';
     setTimeout(() => document.getElementById('resumeOutput').scrollIntoView({behavior:'smooth',block:'start'}), 200);
-    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } }, 500);
+    setTimeout(() => { const tips = document.getElementById('resumeTips'); const tipsBackdrop = document.getElementById('tipsBackdrop'); if (tips) { tips.classList.remove('tips-hidden'); tips.style.display = 'flex'; if (tipsBackdrop && window.innerWidth <= 520) tipsBackdrop.style.display = 'block'; } const noteEl = document.getElementById('tipsPriceNote'); if (noteEl) noteEl.textContent = _getPayRegion() === 'INR' ? '₹9' : '$0.99'; }, 500);
+    setTimeout(() => { const tc = document.getElementById('tipsContent'); if (tc) tc.scrollIntoView({behavior:'smooth', block:'center'}); }, 750);
   } catch (err) {
     clearInterval(_tlTimer);
     statusEl.textContent = 'Error: ' + err.message;
@@ -3317,27 +3375,59 @@ async function _doGenerateResume() {
   }
 }
 
+function _measurePages(page) {
+  // Clone at full A4 width (794px = 210mm @96dpi) so count matches PDF on all devices
+  const clone = page.cloneNode(true);
+  clone.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;max-width:none;visibility:hidden;pointer-events:none;z-index:-1;';
+  document.body.appendChild(clone);
+  const pages = Math.max(1, Math.ceil(clone.scrollHeight / (297 * 3.7795)));
+  document.body.removeChild(clone);
+  return pages;
+}
+function _updatePageChip(pages) {
+  const chip = document.getElementById('pageCountChip');
+  if (!chip) return;
+  chip.textContent = pages === 1 ? '1 page ✓' : `${pages} pages`;
+  chip.style.color = pages > 1 ? '#b45309' : '#166534';
+  chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
+  chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
+}
+let _pcTimer;
+function _triggerPageCount(fast) {
+  clearTimeout(_pcTimer);
+  _pcTimer = setTimeout(function() {
+    const strip = document.getElementById('pageCountStrip');
+    if (!strip || strip.style.display === 'none') return;
+    const page = document.querySelector('#resumeOutput .resume-a4-page');
+    if (page) _updatePageChip(_measurePages(page));
+  }, fast ? 80 : 120);
+}
+function _triggerOffscreenPageCount() {
+  clearTimeout(_pcTimer);
+  _pcTimer = setTimeout(function() {
+    const strip = document.getElementById('pageCountStrip');
+    if (!strip || strip.style.display === 'none') return;
+    if (!lastResumeData) return;
+    const tmp = document.createElement('div');
+    tmp.className = 'resume-a4-page';
+    tmp.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;max-width:none;visibility:hidden;pointer-events:none;z-index:-1;';
+    tmp.innerHTML = renderResumeHTML(lastResumeData);
+    document.body.appendChild(tmp);
+    _updatePageChip(Math.max(1, Math.ceil(tmp.scrollHeight / (297 * 3.7795))));
+    document.body.removeChild(tmp);
+  }, 300);
+}
 function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
-  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true">${renderResumeHTML(data)}</div>`;
+  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_triggerPageCount()">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
-  setTimeout(() => {
-    const page = out.querySelector('.resume-a4-page');
-    const strip = document.getElementById('pageCountStrip');
-    const chip = document.getElementById('pageCountChip');
-    if (page && strip && chip) {
-      const pageH = 297 * 3.7795; // 297mm in px at 96dpi
-      const pages = Math.max(1, Math.ceil(page.scrollHeight / pageH));
-      chip.textContent = pages === 1 ? '1 page ✓' : `${pages} pages`;
-      chip.style.color = pages > 1 ? '#b45309' : '#166534';
-      chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
-      chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
-      strip.style.display = 'flex';
-    }
-  }, 100);
+  const strip = document.getElementById('pageCountStrip');
+  if (strip) strip.style.display = 'flex';
+  _triggerPageCount(true);
+  setTimeout(function() { _triggerPageCount(true); }, 500);
   // Show cover letter section and pre-fill role
   const clSec = document.getElementById('clSection');
   if (clSec) {
@@ -3708,9 +3798,21 @@ async function handleResumeFile(file) {
   }
   showUploadStatus('parsing', '⏳ Reading file…');
   const name = file.name.toLowerCase();
-  // Old binary .doc format — XML extractor won't work, direct to Vision or paste
   if (name.endsWith('.doc') && !name.endsWith('.docx')) {
-    showUploadStatus('parsing', '🔍 Reading .doc file with AI vision…');
+    showUploadStatus('parsing', '📄 Reading .doc file…');
+    try {
+      // Many modern .doc files saved by Word are OOXML-compatible — try text extraction first
+      const text = await extractTextFromFile(file);
+      const usableText = text && text.replace(/\s/g,'').length >= 200;
+      if (usableText) {
+        showUploadStatus('parsing', '🤖 AI is parsing your resume…');
+        const data = await parseResumeWithAI(text);
+        const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
+        if (hasData) { onParseSuccess(data); return; }
+      }
+    } catch(e) {}
+    // Fallback: Vision API for older binary .doc format
+    showUploadStatus('parsing', '🔍 Reading .doc with AI vision…');
     try {
       const b64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result.split(',')[1]); r.onerror = () => rej(new Error('Read failed')); r.readAsDataURL(file); });
       const data = await parseResumeFromBase64Array([b64], 'application/msword');
@@ -3743,7 +3845,13 @@ async function handleResumeFile(file) {
       if (hasData) { onParseSuccess(data); return; }
       switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read this PDF — paste your resume text instead.'); return;
     }
-    if (!usableText) { switchUploadTab('paste'); showUploadStatus('err', '⚠ Could not read text from this file — paste your resume text in the box below.'); return; }
+    if (!usableText) {
+      const _ext = name.split('.').pop();
+      const _fmtMsg = /^(odt|pages|numbers|key|wps|wpd|tex)$/.test(_ext)
+        ? '⚠ .' + _ext + ' files are not supported — please save as PDF or DOCX and upload again.'
+        : '⚠ Could not read text from this file — please upload a PDF, DOCX, DOC, RTF, or TXT file, or paste your resume text below.';
+      switchUploadTab('paste'); showUploadStatus('err', _fmtMsg); return;
+    }
     showUploadStatus('parsing', '🤖 AI is parsing your resume…');
     const data = await parseResumeWithAI(text);
     const hasData = data.firstName || data.lastName || data.jobTitle || data.email || (data.experience && data.experience.length);
@@ -3835,9 +3943,25 @@ function readAsArrayBuffer(file) {
 async function extractTextFromFile(file) {
   const name = file.name.toLowerCase();
   if (name.endsWith('.txt')) return readAsText(file);
+  if (name.endsWith('.rtf')) {
+    const raw = await readAsText(file);
+    let text = raw;
+    // Remove known non-content destination groups (font tables, colour tables, metadata, pictures)
+    // 4 passes handles typical nesting depth without touching inline formatting groups like {\b text}
+    const _rtfDest = /\{\\(?:fonttbl|colortbl|stylesheet|info|pict|object|fldinst|header|footer|footnote|tc|xe|bkmk\w*|datafield|wgrffmtfilter|nonesttables)\b[^{}]*\}/gi;
+    for (let _p = 0; _p < 4; _p++) {
+      text = text.replace(_rtfDest, ' ');
+      text = text.replace(/\{\\\*[^{}]*\}/g, ' '); // {\*\...} optional destination groups
+    }
+    // Strip all remaining control words — this preserves text that follows them
+    text = text.replace(/\\[a-zA-Z]+\-?\d*/g, ' ');
+    // Remove remaining structural chars (braces, backslashes)
+    text = text.replace(/[{}\\]/g, ' ');
+    return text.replace(/\s+/g, ' ').trim();
+  }
   const buf = await readAsArrayBuffer(file);
   if (name.endsWith('.pdf')) return extractPDFText(buf);
-  return extractDOCXText(buf); // .docx / .doc
+  return extractDOCXText(buf); // .docx / .doc / other office formats
 }
 
 async function extractPDFText(buf) {
@@ -3949,14 +4073,64 @@ async function extractPDFText(buf) {
   return texts.join(' ').replace(/\s+/g,' ').trim();
 }
 
-function extractDOCXText(buf) {
+async function extractDOCXText(buf) {
+  // DOCX/OOXML is a ZIP archive. word/document.xml inside is DEFLATE-compressed.
+  // Parse the ZIP structure to find and decompress that file.
+  try {
+    const bytes = new Uint8Array(buf);
+    const PK = 0x504B0304; // local file header signature
+    for (let i = 0; i < bytes.length - 30; i++) {
+      // Fast scan: look for PK\x03\x04 signature
+      if (bytes[i] !== 0x50 || bytes[i+1] !== 0x4B || bytes[i+2] !== 0x03 || bytes[i+3] !== 0x04) continue;
+      const method   = bytes[i+8]  | (bytes[i+9]  << 8);
+      const compSize = (bytes[i+18] | (bytes[i+19] << 8) | (bytes[i+20] << 16) | (bytes[i+21] << 24)) >>> 0;
+      const fnLen    = bytes[i+26] | (bytes[i+27] << 8);
+      const extraLen = bytes[i+28] | (bytes[i+29] << 8);
+      // Sanity-check to skip false PK signatures inside compressed data
+      if (fnLen > 512 || fnLen === 0) { continue; }
+      const dataStart = i + 30 + fnLen + extraLen;
+      if (dataStart + compSize > bytes.length) { continue; }
+      const fname = new TextDecoder().decode(bytes.slice(i+30, i+30+fnLen));
+      if (fname === 'word/document.xml') {
+        let xmlBytes;
+        if (method === 0) {
+          // Stored — no compression
+          xmlBytes = bytes.slice(dataStart, dataStart + compSize);
+        } else if (method === 8 && typeof DecompressionStream !== 'undefined') {
+          // Deflate — ZIP uses raw deflate (no zlib header)
+          try {
+            const ds = new DecompressionStream('deflate-raw');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+            writer.write(bytes.slice(dataStart, dataStart + compSize));
+            writer.close();
+            const chunks = [];
+            while (true) { const { value, done } = await reader.read(); if (done) break; if (value) chunks.push(value); }
+            const out = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
+            let pos = 0; for (const c of chunks) { out.set(c, pos); pos += c.length; }
+            xmlBytes = out;
+          } catch(e) {}
+        }
+        if (xmlBytes) {
+          const xml = new TextDecoder('utf-8', {fatal:false}).decode(xmlBytes);
+          const texts = [];
+          const re2 = /<w:t[^>]*>([^<]+)<\/w:t>/g;
+          let m2;
+          while ((m2 = re2.exec(xml)) !== null) { if (m2[1].trim()) texts.push(m2[1]); }
+          if (texts.length > 0) return texts.join(' ').replace(/\s+/g,' ').trim();
+        }
+      }
+      // Advance past this entry's data to avoid false-positive signatures inside compressed data
+      if (compSize > 0) i = dataStart + compSize - 1;
+    }
+  } catch(e) {}
+  // Fallback: raw decode — works for uncompressed OOXML or old .doc with embedded XML
   const str = new TextDecoder('utf-8',{fatal:false}).decode(buf);
   const texts = [];
   const re = /<w:t[^>]*>([^<]+)<\/w:t>/g;
   let m;
   while ((m = re.exec(str)) !== null) { if (m[1].trim()) texts.push(m[1]); }
   if (texts.length > 3) return texts.join(' ').replace(/\s+/g,' ').trim();
-  // Fallback: strip XML tags
   return str.replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim();
 }
 
@@ -4051,6 +4225,9 @@ RULES:
 }
 
 function populateFormFromParsed(data) {
+  // Reset so preview shows fresh parsed data, not old AI-generated data
+  lastResumeData = null;
+  manuallyEdited = false;
   // Always set value (even empty) so old stale data doesn't persist
   function sv(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
   sv('firstName', data.firstName); sv('lastName', data.lastName);
@@ -4607,13 +4784,20 @@ function scalePreview() {
 function renderPreviewWithTemplate(tpl) {
   const body = document.getElementById('previewModalBody');
   if (!body) return;
-  // Always pick up latest custom sections from the DOM (markNeedsRegen keeps
-  // lastResumeData.customSections synced, but collectCustomSections() is the
-  // ground truth if the user is previewing before their first generation).
-  const freshCustom = collectCustomSections();
-  const data = lastResumeData
-    ? { ...lastResumeData, customSections: freshCustom }
-    : { ...collectData(), summary: '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
+  // Always use current form state (collectData) so additions/removals are reflected
+  // immediately. When AI has generated bullets, carry them over by matching on
+  // title+company so bullets aren't lost after a minor edit.
+  const current = collectData();
+  let data;
+  if (lastResumeData) {
+    const mergedExp = current.experience.map(e => {
+      const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
+      return prev && Array.isArray(prev.bullets) ? { ...e, bullets: prev.bullets } : e;
+    });
+    data = { ...current, summary: lastResumeData.summary || '', experience: mergedExp };
+  } else {
+    data = { ...current, summary: '✨ Your professional summary will appear here after you generate your resume. It will be crafted by AI to highlight your strengths and match the role you\'re targeting.' };
+  }
   if (!data.firstName && !data.lastName) {
     body.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#55557a;font-size:0.9rem;">Fill in your details to see a preview.</div>';
     return;
@@ -4640,6 +4824,8 @@ function refreshPreviewTemplate(tpl) {
 }
 window.addEventListener('resize', function() {
   if (document.getElementById('previewModalOverlay').classList.contains('open')) scalePreview();
+  // Re-evaluate which preview button to show when viewport changes (orientation, resize)
+  if (typeof currentStep !== 'undefined') goToStep(currentStep, true);
 });
 function closePreviewModal(e) {
   if (e && e.target !== document.getElementById('previewModalOverlay')) return;
@@ -4715,43 +4901,112 @@ function closePreviewModal(e) {
       <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
       <div class="pf-tpl-grid">
         <div class="pf-tpl-card selected" id="pfTplProfessional" onclick="selectPfTemplate('professional')">
-          <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#1e293b 45%,#f8fafc 45%);flex-direction:column;">
-            <div style="background:#1e293b;padding:8px 10px;flex-shrink:0;">
-              <div style="height:6px;background:#d97706;border-radius:3px;width:55%;margin-bottom:3px;"></div>
-              <div style="height:3px;background:rgba(255,255,255,0.3);border-radius:2px;width:38%;"></div>
-            </div>
-            <div style="background:#f8fafc;flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:3px;">
-              <div style="height:2.5px;background:#e2e8f0;border-radius:2px;width:80%;"></div>
-              <div style="height:2.5px;background:#e2e8f0;border-radius:2px;width:60%;"></div>
-              <div style="height:2.5px;background:#d97706;border-radius:2px;width:35%;margin-top:3px;"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-anim-scroll" style="width:100%;background:#f8fafc;">
+              <div style="background:linear-gradient(135deg,#1e293b,#2563eb);padding:10px 12px;color:#fff;">
+                <div style="font-size:6.5px;font-weight:800;margin-bottom:1px;">Alex Johnson</div>
+                <div style="font-size:4px;opacity:0.65;margin-bottom:4px;">Senior Product Manager · Google</div>
+                <div style="display:flex;gap:3px;"><span style="font-size:3px;border:0.5px solid rgba(255,255,255,0.4);border-radius:2px;padding:1px 4px;color:rgba(255,255,255,0.85);">LinkedIn</span><span style="font-size:3px;border:0.5px solid rgba(255,255,255,0.4);border-radius:2px;padding:1px 4px;color:rgba(255,255,255,0.85);">GitHub</span><span style="font-size:3px;border:0.5px solid rgba(255,255,255,0.4);border-radius:2px;padding:1px 4px;color:rgba(255,255,255,0.85);">Contact</span></div>
+              </div>
+              <div style="padding:7px 10px;background:#fff;">
+                <div style="font-size:4.5px;font-weight:700;color:#1e293b;border-bottom:1px solid #2563eb;padding-bottom:1px;margin-bottom:4px;display:inline-block;">About Me</div>
+                <div style="font-size:3px;color:#64748b;line-height:1.7;margin-bottom:6px;">Results-driven product leader with 6+ years shipping high-impact features at global scale.</div>
+                <div style="font-size:4.5px;font-weight:700;color:#1e293b;border-bottom:1px solid #2563eb;padding-bottom:1px;margin-bottom:4px;display:inline-block;">Experience</div>
+                <div style="display:flex;gap:4px;margin-bottom:3px;align-items:flex-start;"><div style="width:5px;height:5px;border-radius:50%;background:#2563eb;flex-shrink:0;margin-top:0.5px;"></div><div><div style="font-size:3.5px;font-weight:700;color:#1e293b;">Senior PM · Google</div><div style="font-size:3px;color:#2563eb;">2022–Present</div></div></div>
+                <div style="display:flex;gap:4px;margin-bottom:6px;align-items:flex-start;"><div style="width:5px;height:5px;border-radius:50%;background:#2563eb;flex-shrink:0;margin-top:0.5px;"></div><div><div style="font-size:3.5px;font-weight:700;color:#1e293b;">PM · Meta</div><div style="font-size:3px;color:#2563eb;">2019–2022</div></div></div>
+                <div style="font-size:4.5px;font-weight:700;color:#1e293b;border-bottom:1px solid #2563eb;padding-bottom:1px;margin-bottom:4px;display:inline-block;">Skills</div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px;"><span style="font-size:3px;padding:1.5px 4px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">Strategy</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">Agile</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">SQL</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">Analytics</span></div>
+              </div>
             </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Professional <span class="pf-tpl-tag">· Corporate</span></div>
         </div>
         <div class="pf-tpl-card" id="pfTplCreative" onclick="selectPfTemplate('creative')">
-          <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#d97706,#b45309);flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.25);"></div>
-            <div style="height:4px;background:rgba(255,255,255,0.85);border-radius:2px;width:60%;"></div>
-            <div style="height:3px;background:rgba(255,255,255,0.45);border-radius:2px;width:40%;"></div>
-            <div style="display:flex;gap:4px;margin-top:4px;">
-              <div style="height:14px;width:22px;border-radius:4px;background:rgba(255,255,255,0.2);"></div>
-              <div style="height:14px;width:22px;border-radius:4px;background:rgba(255,255,255,0.2);"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-anim-scroll" style="width:100%;background:#f8f9ff;">
+              <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:11px 12px;text-align:center;color:#fff;">
+                <div style="width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.3);margin:0 auto 2px;"></div>
+                <div style="font-size:6px;font-weight:800;margin-bottom:1px;">Alex Johnson</div>
+                <div style="font-size:3.5px;opacity:0.7;margin-bottom:4px;">Product Designer</div>
+                <div style="display:flex;gap:3px;justify-content:center;"><span style="font-size:3px;border:0.5px solid rgba(255,255,255,0.5);border-radius:3px;padding:1px 4px;">Portfolio</span><span style="font-size:3px;border:0.5px solid rgba(255,255,255,0.5);border-radius:3px;padding:1px 4px;">Contact</span></div>
+              </div>
+              <div style="padding:7px 10px;">
+                <div style="font-size:4px;font-weight:700;color:#7c3aed;margin-bottom:3px;">About Me</div>
+                <div style="font-size:3px;color:#64748b;line-height:1.7;margin-bottom:5px;">Creative professional with a passion for bold design and delightful user experiences.</div>
+                <div style="font-size:4px;font-weight:700;color:#7c3aed;margin-bottom:3px;">Skills</div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:5px;"><span style="font-size:3px;padding:1.5px 4px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">Figma</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">React</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">Branding</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">Framer</span></div>
+                <div style="font-size:4px;font-weight:700;color:#7c3aed;margin-bottom:3px;">Projects</div>
+                <div style="background:#fff;border:0.5px solid #e2e8f0;border-radius:4px;padding:4px 5px;"><div style="font-size:3.5px;font-weight:700;color:#1e293b;">Design System v2</div><div style="font-size:2.8px;color:#64748b;margin-top:1px;">React · Figma · Storybook</div></div>
+              </div>
             </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Creative <span class="pf-tpl-tag">· Bold</span></div>
         </div>
         <div class="pf-tpl-card" id="pfTplMinimal" onclick="selectPfTemplate('minimal')">
-          <div class="pf-tpl-preview" style="background:#ffffff;border-bottom:1px solid #e2e8f0;flex-direction:column;padding:10px;">
-            <div style="height:5px;background:#111827;border-radius:2px;width:50%;margin-bottom:4px;"></div>
-            <div style="height:3px;background:#6b7280;border-radius:2px;width:35%;margin-bottom:8px;"></div>
-            <div style="height:1.5px;background:#e2e8f0;width:100%;margin-bottom:6px;"></div>
-            <div style="height:2px;background:#d1d5db;border-radius:2px;width:80%;margin-bottom:3px;"></div>
-            <div style="height:2px;background:#d1d5db;border-radius:2px;width:65%;"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-anim-scroll" style="width:100%;background:#fff;">
+              <div style="background:#111827;padding:10px 12px;color:#fff;">
+                <div style="font-size:6.5px;font-weight:800;margin-bottom:1px;">Alex Johnson</div>
+                <div style="font-size:3.5px;opacity:0.55;margin-bottom:4px;">Senior Product Manager</div>
+                <div style="display:flex;gap:3px;"><span style="font-size:2.8px;border:0.5px solid rgba(255,255,255,0.3);border-radius:2px;padding:1px 3.5px;">Email</span><span style="font-size:2.8px;border:0.5px solid rgba(255,255,255,0.3);border-radius:2px;padding:1px 3.5px;">LinkedIn</span></div>
+              </div>
+              <div style="padding:7px 10px;">
+                <div style="border-bottom:0.5px solid #e5e7eb;padding-bottom:3px;margin-bottom:4px;"><div style="font-size:4px;font-weight:700;color:#111827;">About</div></div>
+                <div style="font-size:3px;color:#6b7280;line-height:1.7;margin-bottom:5px;">Experienced leader focused on building great products with minimal complexity.</div>
+                <div style="border-bottom:0.5px solid #e5e7eb;padding-bottom:3px;margin-bottom:4px;"><div style="font-size:4px;font-weight:700;color:#111827;">Experience</div></div>
+                <div style="font-size:3.5px;color:#111827;font-weight:600;margin-bottom:1px;">Sr. PM · Google · 2022–Now</div>
+                <div style="font-size:2.8px;color:#6b7280;line-height:1.6;margin-bottom:5px;">Led roadmap for Search serving 2B+ daily users.</div>
+                <div style="border-bottom:0.5px solid #e5e7eb;padding-bottom:3px;margin-bottom:4px;"><div style="font-size:4px;font-weight:700;color:#111827;">Skills</div></div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px;"><span style="font-size:3px;padding:1px 3px;background:#f3f4f6;color:#374151;border-radius:3px;">Strategy</span><span style="font-size:3px;padding:1px 3px;background:#f3f4f6;color:#374151;border-radius:3px;">SQL</span><span style="font-size:3px;padding:1px 3px;background:#f3f4f6;color:#374151;border-radius:3px;">Agile</span><span style="font-size:3px;padding:1px 3px;background:#f3f4f6;color:#374151;border-radius:3px;">Data</span></div>
+              </div>
+            </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Minimal <span class="pf-tpl-tag">· Clean</span></div>
+        </div>
+        <div class="pf-tpl-card" id="pfTplTech" onclick="selectPfTemplate('tech')">
+          <div class="pf-tpl-preview">
+            <div class="pf-anim-scroll" style="width:100%;background:#0d1117;">
+              <div style="background:#0d1117;padding:10px 12px;border-bottom:0.5px solid #30363d;">
+                <div style="font-size:6px;font-weight:800;color:#22c55e;margin-bottom:1px;">Alex Johnson</div>
+                <div style="font-size:3.5px;color:#8b949e;margin-bottom:4px;">Software Engineer · Open to work</div>
+                <div style="display:flex;gap:3px;"><span style="font-size:2.8px;border:0.5px solid rgba(34,197,94,0.4);border-radius:2px;padding:1px 3.5px;color:#22c55e;">GitHub</span><span style="font-size:2.8px;border:0.5px solid rgba(34,197,94,0.4);border-radius:2px;padding:1px 3.5px;color:#22c55e;">LinkedIn</span></div>
+              </div>
+              <div style="padding:7px 10px;">
+                <div style="font-size:4px;font-weight:700;color:#22c55e;margin-bottom:3px;">Skills</div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:5px;"><span style="font-size:3px;padding:1.5px 4px;background:rgba(34,197,94,0.1);color:#22c55e;border:0.5px solid rgba(34,197,94,0.3);border-radius:3px;">React</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(34,197,94,0.1);color:#22c55e;border:0.5px solid rgba(34,197,94,0.3);border-radius:3px;">Node</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(34,197,94,0.1);color:#22c55e;border:0.5px solid rgba(34,197,94,0.3);border-radius:3px;">Python</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(34,197,94,0.1);color:#22c55e;border:0.5px solid rgba(34,197,94,0.3);border-radius:3px;">AWS</span></div>
+                <div style="font-size:4px;font-weight:700;color:#22c55e;margin-bottom:3px;">Projects</div>
+                <div style="background:#161b22;border:0.5px solid #30363d;border-radius:4px;padding:4px 5px;margin-bottom:3px;"><div style="font-size:3.5px;font-weight:700;color:#e6edf3;">OpenAPI Client</div><div style="font-size:2.8px;color:#8b949e;margin-top:1px;">TypeScript · REST · CI/CD</div></div>
+                <div style="background:#161b22;border:0.5px solid #30363d;border-radius:4px;padding:4px 5px;"><div style="font-size:3.5px;font-weight:700;color:#e6edf3;">ML Dashboard</div><div style="font-size:2.8px;color:#8b949e;margin-top:1px;">Python · FastAPI · React</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="pf-tpl-check">✓</div>
+          <div class="pf-tpl-name">Tech <span class="pf-tpl-tag">· Dark</span></div>
+        </div>
+        <div class="pf-tpl-card" id="pfTplWarm" onclick="selectPfTemplate('warm')">
+          <div class="pf-tpl-preview">
+            <div class="pf-anim-scroll" style="width:100%;background:#fff7ed;">
+              <div style="background:linear-gradient(135deg,#7c2d12,#ea580c,#f97316);padding:10px 12px;text-align:center;color:#fff;">
+                <div style="width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,0.35);margin:0 auto 2px;"></div>
+                <div style="font-size:6px;font-weight:800;margin-bottom:1px;">Alex Johnson</div>
+                <div style="font-size:3.5px;opacity:0.8;margin-bottom:4px;">Coach · Educator · Speaker</div>
+                <div style="display:flex;gap:3px;justify-content:center;"><span style="font-size:3px;border:0.5px solid rgba(255,255,255,0.4);border-radius:2px;padding:1px 4px;">Contact</span></div>
+              </div>
+              <div style="padding:7px 10px;">
+                <div style="font-size:4px;font-weight:700;color:#ea580c;margin-bottom:3px;">About Me</div>
+                <div style="font-size:3px;color:#78350f;line-height:1.7;margin-bottom:5px;">Passionate coach helping teams unlock their full potential through empathy and strategy.</div>
+                <div style="font-size:4px;font-weight:700;color:#ea580c;margin-bottom:3px;">Experience</div>
+                <div style="display:flex;gap:3px;margin-bottom:4px;align-items:flex-start;"><div style="width:4px;height:4px;border-radius:50%;background:#ea580c;flex-shrink:0;margin-top:1px;"></div><div><div style="font-size:3.5px;font-weight:700;color:#1c0a00;">Leadership Coach · Coaching Co.</div><div style="font-size:2.8px;color:#ea580c;">2021–Present</div></div></div>
+                <div style="font-size:4px;font-weight:700;color:#ea580c;margin-bottom:3px;">Skills</div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px;"><span style="font-size:3px;padding:1.5px 4px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Leadership</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Mentoring</span><span style="font-size:3px;padding:1.5px 4px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Strategy</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="pf-tpl-check">✓</div>
+          <div class="pf-tpl-name">Warm <span class="pf-tpl-tag">· Vibrant</span></div>
         </div>
       </div>
       <div class="pf-footer">
@@ -4765,15 +5020,33 @@ function closePreviewModal(e) {
     <div class="pf-body" id="pfStep2" style="display:none">
       <div class="pf-section-title">Choose what to include</div>
       <div class="pf-section-sub">Toggle sections on or off. All data is pulled from your resume automatically.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:0.8rem;color:var(--muted)">Tap a section to toggle it</span>
+        <button id="pfSelectAllBtn" onclick="pfToggleAll()" style="padding:5px 13px;font-size:0.8rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;">Deselect All</button>
+      </div>
       <div class="pf-toggle-grid" id="pfToggleGrid">
         <div class="pf-toggle on" data-section="about" onclick="togglePfSection(this)"><span class="pf-toggle-ico">👤</span><span class="pf-toggle-lbl">About Me</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="experience" onclick="togglePfSection(this)"><span class="pf-toggle-ico">💼</span><span class="pf-toggle-lbl">Experience</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="skills" onclick="togglePfSection(this)"><span class="pf-toggle-ico">⚡</span><span class="pf-toggle-lbl">Skills</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="education" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🎓</span><span class="pf-toggle-lbl">Education</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
+        <div class="pf-toggle" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
+        <div class="pf-toggle" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
       </div>
-      <div class="pf-footer">
+      <!-- Section detail wizard -->
+      <div id="pfFillWizard" style="margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:0.83rem;font-weight:600;color:var(--text);">Fill your portfolio details</div>
+          <div id="pfWzProgress" style="font-size:0.75rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:2px 10px;"></div>
+        </div>
+        <div id="pfWzCard" style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;min-height:100px;"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+          <button id="pfWzBackBtn" onclick="pfWzNav(-1)" style="padding:7px 14px;font-size:0.82rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;display:none;">← Prev</button>
+          <button id="pfWzNextBtn" onclick="pfWzNav(1)" style="padding:7px 16px;font-size:0.82rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;margin-left:auto;">Next →</button>
+        </div>
+      </div>
+      <div class="pf-footer" style="margin-top:16px;border-top:1px solid var(--border);">
         <button class="btn-secondary" onclick="pfGoStep(1)">← Back</button>
         <div class="pf-footer-right">
           <button class="btn-primary" onclick="pfGoStep(3)">Preview &amp; Download →</button>
@@ -4784,21 +5057,36 @@ function closePreviewModal(e) {
     <div class="pf-body" id="pfStep3" style="display:none">
       <div class="pf-section-title">Your portfolio is ready!</div>
       <div class="pf-section-sub">Preview below — download the HTML file and host it anywhere (GitHub Pages, Netlify Drop, or your own server).</div>
+      <!-- Template mini-switcher -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <span style="font-size:0.8rem;font-weight:600;color:var(--muted);white-space:nowrap;">Switch template:</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="pfMiniRow">
+          <button class="pf-mini-tpl active" id="pfMiniProfessional" onclick="switchPfTemplate('professional')">Professional</button>
+          <button class="pf-mini-tpl" id="pfMiniCreative" onclick="switchPfTemplate('creative')">Creative</button>
+          <button class="pf-mini-tpl" id="pfMiniMinimal" onclick="switchPfTemplate('minimal')">Minimal</button>
+          <button class="pf-mini-tpl" id="pfMiniTech" onclick="switchPfTemplate('tech')">Tech</button>
+          <button class="pf-mini-tpl" id="pfMiniWarm" onclick="switchPfTemplate('warm')">Warm</button>
+        </div>
+      </div>
       <div class="pf-preview-wrap">
         <div class="pf-preview-bar">
           <div class="pf-preview-dot" style="background:#ef4444;"></div>
           <div class="pf-preview-dot" style="background:#f59e0b;"></div>
           <div class="pf-preview-dot" style="background:#22c55e;"></div>
-          <div class="pf-preview-url" id="pfPreviewUrl">yourname.portfolio.html</div>
+          <div class="pf-preview-url" id="pfPreviewUrl">yourname.com</div>
         </div>
         <iframe class="pf-preview-frame" id="pfPreviewFrame" title="Portfolio Preview"></iframe>
       </div>
       <div class="pf-footer">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
-        <div class="pf-footer-right">
-          <button class="btn-accent" onclick="downloadPortfolio()" style="gap:8px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download HTML
+        <div class="pf-footer-right" style="gap:8px;display:flex;flex-wrap:wrap;">
+          <button onclick="downloadPortfolio()" style="padding:9px 14px;font-size:0.83rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+          <button class="btn-accent" id="pfShareBtn" onclick="generatePortfolioLink()" style="gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Generate Link
           </button>
         </div>
       </div>
@@ -4810,8 +5098,24 @@ function closePreviewModal(e) {
 // ── Portfolio Builder ──────────────────────────────────────────────────
 
 var pfTemplate = 'professional';
-var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,contact:true};
+var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:false,contact:true};
 var pfCurrentStep = 1;
+
+// ── Portfolio wizard state ─────────────────────────────────────────────
+var pfWzIdx = 0;
+var pfWzSteps = [];  // built from enabled pfSections
+var pfWzData = { about:'', skills:[], experience:[], education:[], awards:[], projects:[], certifications:[], email:'', phone:'', location:'', linkedin:'', github:'' };
+
+var _PF_DEFS = [
+  {id:'about',          icon:'👤', label:'About Me',        q:'Write a professional bio that introduces you on your portfolio'},
+  {id:'skills',         icon:'⚡', label:'Skills',           q:'List your key skills — separate with commas'},
+  {id:'experience',     icon:'💼', label:'Experience',       q:'Describe your role and impact for each position'},
+  {id:'education',      icon:'🎓', label:'Education',        q:'Confirm or edit your education details'},
+  {id:'awards',         icon:'🏆', label:'Awards',           q:'Your awards, certifications and achievements'},
+  {id:'projects',       icon:'🔧', label:'Projects',         q:'List your key projects — title, description, and tech used'},
+  {id:'certifications', icon:'📜', label:'Certifications',   q:'Your professional certifications and licenses'},
+  {id:'contact',        icon:'📬', label:'Contact Info',     q:'How should visitors reach you?'},
+];
 
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
@@ -4823,17 +5127,315 @@ function closePfModal() {
 
 function selectPfTemplate(tpl) {
   pfTemplate = tpl;
-  ['professional','creative','minimal'].forEach(function(t) {
-    document.getElementById('pfTpl' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('selected', t === tpl);
+  ['professional','creative','minimal','tech','warm'].forEach(function(t) {
+    var el = document.getElementById('pfTpl' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('selected', t === tpl);
   });
+  if (pfCurrentStep === 3) { buildPfPreview(); updatePfMiniSwitcher(); }
+}
+
+function switchPfTemplate(tpl) {
+  pfTemplate = tpl;
+  updatePfMiniSwitcher();
+  buildPfPreview();
+  // Also sync the Step 1 cards
+  ['professional','creative','minimal','tech','warm'].forEach(function(t) {
+    var el = document.getElementById('pfTpl' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('selected', t === tpl);
+  });
+}
+
+function updatePfMiniSwitcher() {
+  ['professional','creative','minimal','tech','warm'].forEach(function(t) {
+    var btn = document.getElementById('pfMini' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) btn.classList.toggle('active', t === pfTemplate);
+  });
+}
+
+function pfToggleAll() {
+  var allOn = Object.values(pfSections).every(Boolean);
+  var nextState = !allOn;
+  document.querySelectorAll('#pfToggleGrid .pf-toggle').forEach(function(el) {
+    if (nextState) el.classList.add('on'); else el.classList.remove('on');
+    pfSections[el.dataset.section] = nextState;
+  });
+  var btn = document.getElementById('pfSelectAllBtn');
+  if (btn) btn.textContent = nextState ? 'Deselect All' : 'Select All';
+  pfBuildWz(); pfWzRender();
 }
 
 function togglePfSection(el) {
   el.classList.toggle('on');
   pfSections[el.dataset.section] = el.classList.contains('on');
+  var allOn = Object.values(pfSections).every(Boolean);
+  var btn = document.getElementById('pfSelectAllBtn');
+  if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
+  pfBuildWz(); pfWzRender();
+}
+
+// ── Wizard: build step list, save current, navigate, render ───────────
+
+function pfBuildWz() {
+  // Rebuild step order from enabled sections (preserve pfWzIdx if still valid)
+  pfWzSteps = _PF_DEFS.filter(function(d) { return pfSections[d.id]; });
+  if (pfWzIdx >= pfWzSteps.length) pfWzIdx = Math.max(0, pfWzSteps.length - 1);
+}
+
+function pfWzSave() {
+  var step = pfWzSteps[pfWzIdx];
+  if (!step) return;
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var cd = (typeof collectData === 'function') ? collectData() : {};
+  if (step.id === 'about') {
+    pfWzData.about = v('pfWzAbout');
+  } else if (step.id === 'skills') {
+    pfWzData.skills = v('pfWzSkills').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  } else if (step.id === 'experience') {
+    var cnt = parseInt(v('pfWzExpCount'))||0;
+    pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(e,i) {
+      return {title:e.title||'',company:e.co||'',dates:[e.start,e.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||e.desc||''};
+    });
+  } else if (step.id === 'education') {
+    var ecnt = parseInt(v('pfWzEduCount'))||0;
+    pfWzData.education = [];
+    for (var i=0;i<ecnt;i++) pfWzData.education.push({degree:v('pfWzEduDeg'+i),school:v('pfWzEduSch'+i),dates:v('pfWzEduYr'+i)});
+  } else if (step.id === 'awards') {
+    var acnt = parseInt(v('pfWzAwdCount'))||0;
+    pfWzData.awards = [];
+    for (var i=0;i<acnt;i++) pfWzData.awards.push({title:v('pfWzAwd'+i),issuer:v('pfWzAwdIss'+i)});
+  } else if (step.id === 'projects') {
+    var pcnt = parseInt(v('pfWzProjCount'))||0;
+    pfWzData.projects = [];
+    for (var i=0;i<pcnt;i++) pfWzData.projects.push({title:v('pfWzProjT'+i),desc:v('pfWzProjD'+i),tech:v('pfWzProjTech'+i)});
+  } else if (step.id === 'certifications') {
+    var ccnt = parseInt(v('pfWzCertCount'))||0;
+    pfWzData.certifications = [];
+    for (var i=0;i<ccnt;i++) pfWzData.certifications.push({name:v('pfWzCert'+i),issuer:v('pfWzCertIss'+i),year:v('pfWzCertYr'+i)});
+  } else if (step.id === 'contact') {
+    pfWzData.email=v('pfWzEmail'); pfWzData.phone=v('pfWzPhone'); pfWzData.location=v('pfWzLoc');
+    pfWzData.linkedin=v('pfWzLI'); pfWzData.github=v('pfWzGH');
+  }
+}
+
+function pfWzNav(dir) {
+  pfWzSave();
+  pfWzIdx = Math.max(0, Math.min(pfWzSteps.length - 1, pfWzIdx + dir));
+  pfWzRender();
+}
+
+function pfWzRender() {
+  var step = pfWzSteps[pfWzIdx];
+  var card = document.getElementById('pfWzCard');
+  var prog = document.getElementById('pfWzProgress');
+  var backBtn = document.getElementById('pfWzBackBtn');
+  var nextBtn = document.getElementById('pfWzNextBtn');
+  if (!card) return;
+  if (!step) { card.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:8px 0;">Enable at least one section above to fill details.</div>'; if(prog)prog.textContent=''; return; }
+  if (prog) prog.textContent = (pfWzIdx+1) + ' of ' + pfWzSteps.length;
+  if (backBtn) backBtn.style.display = pfWzIdx > 0 ? '' : 'none';
+  if (nextBtn) { nextBtn.textContent = pfWzIdx === pfWzSteps.length-1 ? 'Preview →' : 'Next →'; nextBtn.onclick = pfWzIdx === pfWzSteps.length-1 ? function(){ pfWzSave(); pfGoStep(3); } : function(){ pfWzNav(1); }; }
+
+  var cd = (typeof collectData === 'function') ? collectData() : {};
+  var e = function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+  var inp = 'width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;background:var(--bg);color:var(--text);';
+  var html = '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;"><span style="font-size:1rem;">' + step.icon + '</span><span style="font-size:0.9rem;font-weight:700;color:var(--text);">' + step.label + '</span></div>';
+  html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">' + step.q + '</div>';
+
+  var aiBtnStyle = 'padding:6px 13px;font-size:0.81rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+  var aiRowStyle = 'display:flex;align-items:center;gap:8px;margin-top:8px;';
+
+  if (step.id === 'about') {
+    var aval = pfWzData.about || (lastResumeData && lastResumeData.summary) || '';
+    html += '<textarea id="pfWzAbout" rows="5" style="' + inp + 'resize:vertical;line-height:1.6;" placeholder="I am a product designer with 5 years of experience building…">' + e(aval) + '</textarea>';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'skills') {
+    var sval = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).join(', ');
+    html += '<textarea id="pfWzSkills" rows="3" style="' + inp + 'resize:vertical;" placeholder="React, Node.js, Python, Figma, Leadership…">' + e(sval) + '</textarea>';
+    html += '<div style="font-size:0.74rem;color:var(--muted);margin-top:5px;">Separate skills with commas</div>';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'skills\')" id="pfGenSkillsBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenSkillsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'experience') {
+    var exps = (cd.experience||[]).slice(0,5);
+    if (!exps.length) { html += '<div style="color:var(--muted);font-size:0.85rem;">No experience entries found — add them in the form first.</div>'; }
+    exps.forEach(function(ex,i) {
+      var saved = pfWzData.experience[i];
+      html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
+      html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
+      html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;' + aiBtnStyle + 'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
+    });
+    html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
+
+  } else if (step.id === 'education') {
+    var edus = pfWzData.education.length ? pfWzData.education : (cd.education||[]).map(function(e2){return{degree:e2.deg||'',school:e2.sch||'',dates:e2.yr||''};});
+    if (!edus.length) edus = [{degree:'',school:'',dates:''}];
+    edus.slice(0,4).forEach(function(ed,i) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-bottom:8px;">';
+      html += '<input id="pfWzEduDeg'+i+'" style="' + inp + '" placeholder="Degree / Major" value="' + e(ed.degree) + '">';
+      html += '<input id="pfWzEduSch'+i+'" style="' + inp + '" placeholder="University / School" value="' + e(ed.school) + '">';
+      html += '<input id="pfWzEduYr'+i+'" style="' + inp + '" placeholder="Year" value="' + e(ed.dates) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzEduCount" value="' + Math.min(edus.length,4) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'education\')" id="pfGenEducationBtn" style="' + aiBtnStyle + '">✨ Polish with AI</button><span id="pfGenEducationStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'awards') {
+    var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||'',issuer:[a.org,a.year].filter(Boolean).join(' · ')};});
+    if (!awds.length) awds = [{title:'',issuer:''}];
+    awds.slice(0,4).forEach(function(a,i) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
+      html += '<input id="pfWzAwd'+i+'" style="' + inp + '" placeholder="Award / Certification" value="' + e(a.title) + '">';
+      html += '<input id="pfWzAwdIss'+i+'" style="' + inp + '" placeholder="Issuer · Year" value="' + e(a.issuer) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzAwdCount" value="' + Math.min(awds.length,4) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'awards\')" id="pfGenAwardsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenAwardsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'projects') {
+    var projs = pfWzData.projects.length ? pfWzData.projects : [{title:'',desc:'',tech:''}];
+    projs.slice(0,5).forEach(function(p,i) {
+      html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
+      html += '<input id="pfWzProjT'+i+'" style="' + inp + 'margin-bottom:5px;" placeholder="Project title" value="' + e(p.title) + '">';
+      html += '<textarea id="pfWzProjD'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-bottom:5px;" placeholder="What it does and your role…">' + e(p.desc) + '</textarea>';
+      html += '<input id="pfWzProjTech'+i+'" style="' + inp + '" placeholder="Tech used (e.g. React, Node, AWS)" value="' + e(p.tech) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzProjCount" value="' + Math.min(projs.length,5) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'projects\')" id="pfGenProjectsBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenProjectsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'certifications') {
+    var certs = pfWzData.certifications.length ? pfWzData.certifications : [{name:'',issuer:'',year:''}];
+    certs.slice(0,6).forEach(function(c,i) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 70px;gap:6px;margin-bottom:8px;">';
+      html += '<input id="pfWzCert'+i+'" style="' + inp + '" placeholder="Certification name" value="' + e(c.name) + '">';
+      html += '<input id="pfWzCertIss'+i+'" style="' + inp + '" placeholder="Issuing org" value="' + e(c.issuer) + '">';
+      html += '<input id="pfWzCertYr'+i+'" style="' + inp + '" placeholder="Year" value="' + e(c.year) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzCertCount" value="' + Math.min(certs.length,6) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'certifications\')" id="pfGenCertificationsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenCertificationsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'contact') {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<input id="pfWzEmail" style="' + inp + '" placeholder="Email" value="' + e(pfWzData.email||cd.email||'') + '">';
+    html += '<input id="pfWzPhone" style="' + inp + '" placeholder="Phone" value="' + e(pfWzData.phone||cd.phone||'') + '">';
+    html += '<input id="pfWzLoc" style="' + inp + 'grid-column:span 2;" placeholder="City, Country" value="' + e(pfWzData.location||cd.location||'') + '">';
+    html += '<input id="pfWzLI" style="' + inp + '" placeholder="LinkedIn URL" value="' + e(pfWzData.linkedin||cd.linkedin||'') + '">';
+    html += '<input id="pfWzGH" style="' + inp + '" placeholder="GitHub URL" value="' + e(pfWzData.github||cd.github||'') + '">';
+    html += '</div>';
+  }
+
+  card.innerHTML = html;
+}
+
+async function pfGenerateAbout() {
+  var btn = document.getElementById('pfGenAboutBtn');
+  var status = document.getElementById('pfGenAboutStatus');
+  var ta = document.getElementById('pfWzAbout') || document.getElementById('pfAboutText');
+  if (!btn || !ta) return;
+  btn.disabled = true; btn.innerHTML = '⏳ Generating…';
+  if (status) status.textContent = '';
+  try {
+    var cd = (typeof collectData === 'function') ? collectData() : {};
+    var fullName = ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim();
+    var expStr = (cd.experience||[]).slice(0,3).map(function(e){return e.title+(e.co?' at '+e.co:'');}).join(', ');
+    var skillStr = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).slice(0,8).join(', ');
+    var existing = (lastResumeData && lastResumeData.summary) || '';
+    var prompt = 'Write a 2-3 sentence professional "About Me" for a portfolio website. Person: '+(fullName||'professional')+(cd.jobTitle?', '+cd.jobTitle:'')+(expStr?'. Experience: '+expStr:'')+(skillStr?'. Skills: '+skillStr:'')+'. Make it engaging, first-person, warm. Output only the paragraph, no quotes.'+(existing?' Base it on: '+existing:'');
+    var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
+    if (!resp.ok) throw new Error('Server error');
+    var result = await resp.json();
+    var text = (result.content||result.text||'').trim();
+    if (text) { ta.value = text; pfWzData.about = text; if(status) status.textContent='✓ Done'; }
+    else { if(status) status.textContent='No response — try again'; }
+  } catch(ex) { if(status) status.textContent='⚠ '+ex.message; }
+  finally { btn.disabled=false; btn.innerHTML='✨ Generate with AI'; }
+}
+
+async function pfGenSection(sectionId) {
+  var btn = document.getElementById('pfGen' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1) + 'Btn');
+  var status = document.getElementById('pfGen' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1) + 'Status');
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Generating…'; }
+  if (status) status.textContent = '';
+  try {
+    var cd = (typeof collectData === 'function') ? collectData() : {};
+    var fullName = ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim();
+    var title = cd.jobTitle || '';
+    var skillList = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).slice(0,10).join(', ');
+    var prompt = '';
+    if (sectionId === 'skills') {
+      var expTitles = (cd.experience||[]).slice(0,3).map(function(e){return e.title+(e.co?' at '+e.co:'');}).join(', ');
+      prompt = 'List 8-12 professional skills for ' + (fullName||'a professional') + (title?', '+title:'') + (expTitles?', who has worked as: '+expTitles:'') + '. Output only a comma-separated list, no explanation.';
+    } else if (sectionId === 'education') {
+      prompt = 'Based on this context — job title: ' + (title||'professional') + ', name: ' + (fullName||'professional') + ' — suggest how to format 1-2 education entries. Output only formatted text like "BS Computer Science, MIT, 2019". No explanation.';
+    } else if (sectionId === 'awards') {
+      prompt = 'Suggest 2-3 realistic awards or certifications for ' + (title||'a professional') + '. Output as JSON array: [{"title":"...","issuer":"..."}]. Output only the JSON, no explanation.';
+    } else if (sectionId === 'projects') {
+      prompt = 'Suggest 2 realistic portfolio projects for ' + (fullName||'a professional') + (title?', '+title:'') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"title":"...","desc":"...","tech":"..."}]. Output only JSON.';
+    } else if (sectionId === 'certifications') {
+      prompt = 'Suggest 3 real professional certifications relevant for ' + (title||'a tech professional') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"name":"...","issuer":"...","year":"2024"}]. Output only JSON.';
+    }
+    if (!prompt) return;
+    var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
+    if (!resp.ok) throw new Error('Server error');
+    var result = await resp.json();
+    var text = (result.content||result.text||'').trim();
+    if (!text) { if(status) status.textContent='No response — try again'; return; }
+    if (sectionId === 'skills') {
+      var ta = document.getElementById('pfWzSkills');
+      if (ta) { ta.value = text.split(/[,\n]+/).map(function(s){return s.trim().replace(/^["'\[\]]+|["'\[\]]+$/g,'');}).filter(Boolean).join(', '); }
+      pfWzData.skills = ta ? ta.value.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    } else if (sectionId === 'awards') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(a,i) {
+          var t = document.getElementById('pfWzAwd'+i); var iss = document.getElementById('pfWzAwdIss'+i);
+          if (t) t.value = a.title||''; if (iss) iss.value = a.issuer||'';
+        });
+      } catch(ex2) {}
+    } else if (sectionId === 'projects') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(p,i) {
+          var t=document.getElementById('pfWzProjT'+i); var d=document.getElementById('pfWzProjD'+i); var tech=document.getElementById('pfWzProjTech'+i);
+          if(t) t.value=p.title||''; if(d) d.value=p.desc||''; if(tech) tech.value=p.tech||'';
+        });
+      } catch(ex2) {}
+    } else if (sectionId === 'certifications') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(c,i) {
+          var n=document.getElementById('pfWzCert'+i); var iss=document.getElementById('pfWzCertIss'+i); var yr=document.getElementById('pfWzCertYr'+i);
+          if(n) n.value=c.name||''; if(iss) iss.value=c.issuer||''; if(yr) yr.value=c.year||'';
+        });
+      } catch(ex2) {}
+    }
+    if(status) status.textContent='✓ Done';
+  } catch(ex) { if(status) status.textContent='⚠ '+ex.message; }
+  finally { if(btn){ btn.disabled=false; btn.innerHTML='✨ Generate with AI'; } }
+}
+
+async function pfGenExpBullet(idx) {
+  var btn = event && event.target;
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳…'; }
+  try {
+    var cd = (typeof collectData === 'function') ? collectData() : {};
+    var ex = (cd.experience||[])[idx];
+    if (!ex) return;
+    var ta = document.getElementById('pfWzExp'+idx);
+    var existing = ta ? ta.value.trim() : '';
+    var prompt = 'Write 2 concise achievement sentences for a portfolio about this role: ' + (ex.title||'') + (ex.co?' at '+ex.co:'') + (existing?'. Current text: '+existing:'') + '. Make them impactful and quantified where possible. Output only the 2 sentences separated by newline, no bullet prefix.';
+    var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
+    if (!resp.ok) throw new Error('Server error');
+    var result = await resp.json();
+    var text = (result.content||result.text||'').trim();
+    if (text && ta) ta.value = text;
+  } catch(ex2) {}
+  finally { if(btn){ btn.disabled=false; btn.innerHTML='✨ AI enhance'; } }
 }
 
 function pfGoStep(n) {
+  if (n === 3) pfWzSave(); // save wizard before preview
   pfCurrentStep = n;
   [1,2,3].forEach(function(i) {
     document.getElementById('pfStep' + i).style.display = i === n ? 'block' : 'none';
@@ -4846,31 +5448,46 @@ function pfGoStep(n) {
     if (i + 1 < n) el.textContent = '✓';
     else el.textContent = String(i + 1);
   });
-  if (n === 3) buildPfPreview();
+  if (n === 2) {
+    var allOn = Object.values(pfSections).every(Boolean);
+    var btn = document.getElementById('pfSelectAllBtn');
+    if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
+    pfBuildWz();
+    pfWzIdx = 0;
+    pfWzRender();
+  }
+  if (n === 3) {
+    updatePfMiniSwitcher();
+    buildPfPreview();
+  }
 }
 
 function getPfData() {
   var cd = (typeof collectData === 'function') ? collectData() : {};
+  // Wizard data overrides resume data when the user has explicitly filled it in
+  var wz = pfWzData;
   return {
     name: ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim(),
     title: cd.jobTitle || '',
-    email: cd.email || '',
-    phone: cd.phone || '',
-    location: cd.location || '',
-    linkedin: cd.linkedin || '',
-    github: cd.github || '',
+    email: wz.email || cd.email || '',
+    phone: wz.phone || cd.phone || '',
+    location: wz.location || cd.location || '',
+    linkedin: wz.linkedin || cd.linkedin || '',
+    github: wz.github || cd.github || '',
     photo: userPhoto || '',
-    summary: (lastResumeData && lastResumeData.summary) || '',
-    experience: (cd.experience || []).map(function(e) {
-      return {title: e.title, company: e.co, dates: [e.start, e.end].filter(Boolean).join(' – '), desc: e.desc};
+    summary: wz.about || (lastResumeData && lastResumeData.summary) || '',
+    experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
+      return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
     }),
-    education: (cd.education || []).map(function(e) {
-      return {degree: e.deg, school: e.sch, dates: e.yr};
+    education: wz.education.length ? wz.education : (cd.education||[]).map(function(e) {
+      return {degree:e.deg, school:e.sch, dates:e.yr};
     }),
-    skills: cd.skills || [],
-    awards: (cd.awards || []).map(function(a) {
-      return {title: a.name, issuer: [a.org, a.year].filter(Boolean).join(' · ')};
+    skills: wz.skills.length ? wz.skills : (cd.skills || []),
+    awards: wz.awards.length ? wz.awards : (cd.awards||[]).map(function(a) {
+      return {title:a.name, issuer:[a.org,a.year].filter(Boolean).join(' · ')};
     }),
+    projects: wz.projects || [],
+    certifications: wz.certifications || [],
   };
 }
 
@@ -4879,7 +5496,7 @@ function buildPfPreview() {
   var html = generatePortfolioHTML(d, pfTemplate, pfSections);
   var frame = document.getElementById('pfPreviewFrame');
   var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
-  document.getElementById('pfPreviewUrl').textContent = name + '.html';
+  document.getElementById('pfPreviewUrl').textContent = name + '.com';
   frame.srcdoc = html;
 }
 
@@ -4890,10 +5507,111 @@ function downloadPortfolio() {
   var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = name + '-portfolio.html';
+  a.download = name + '.com.html';
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('Portfolio downloaded! Open the HTML file in your browser.', 'success');
+  showToast('Portfolio downloaded!', 'success');
+}
+
+async function generatePortfolioLink() {
+  var btn = document.getElementById('pfShareBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
+  try {
+    var d = getPfData();
+    var html = generatePortfolioHTML(d, pfTemplate, pfSections);
+    var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
+    var resp = await fetch('/.netlify/functions/share-portfolio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: html, name: name })
+    });
+    var result = await resp.json();
+    if (result.url) {
+      showPfShareModal(result.url, name);
+    } else {
+      showToast('Could not generate link: ' + (result.error || 'Server error'), 'error');
+    }
+  } catch(ex) {
+    showToast('Error: ' + ex.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Generate Link';
+    }
+  }
+}
+
+function showPfShareModal(url, name) {
+  // Remove any existing share modal
+  var prev = document.getElementById('pfShareModal');
+  if (prev) prev.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'pfShareModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:18px;padding:28px 24px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.25);position:relative;';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:4px;';
+  title.textContent = '🎉 Your portfolio link is ready!';
+
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:0.82rem;color:#64748b;margin-bottom:18px;line-height:1.5;';
+  sub.textContent = 'Share this link — anyone with it can view your portfolio. Link is active for 30 days.';
+
+  var urlWrap = document.createElement('div');
+  urlWrap.style.cssText = 'background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;';
+
+  var urlText = document.createElement('div');
+  urlText.style.cssText = 'flex:1;font-size:0.8rem;color:#1e293b;word-break:break-all;line-height:1.5;';
+  urlText.textContent = url;
+
+  urlWrap.appendChild(urlText);
+
+  var btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+
+  var copyBtn = document.createElement('button');
+  copyBtn.style.cssText = 'flex:1;min-width:120px;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.87rem;transition:opacity .15s;';
+  copyBtn.textContent = '📋 Copy Link';
+  copyBtn.onclick = function() {
+    navigator.clipboard.writeText(url).then(function() {
+      copyBtn.textContent = '✓ Copied!';
+      copyBtn.style.background = '#16a34a';
+      setTimeout(function() { copyBtn.textContent = '📋 Copy Link'; copyBtn.style.background = '#7c3aed'; }, 2500);
+    }, function() {
+      // Fallback: select text
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      copyBtn.textContent = '✓ Copied!';
+    });
+  };
+
+  var openBtn = document.createElement('button');
+  openBtn.style.cssText = 'flex:1;min-width:100px;padding:10px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.87rem;color:#1e293b;';
+  openBtn.textContent = '↗ Preview';
+  openBtn.onclick = function() { window.open(url, '_blank'); };
+
+  var closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;line-height:1;';
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = function() { overlay.remove(); };
+
+  btns.appendChild(copyBtn);
+  btns.appendChild(openBtn);
+
+  box.appendChild(closeBtn);
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(urlWrap);
+  box.appendChild(btns);
+  overlay.appendChild(box);
+  overlay.onclick = function(ev) { if (ev.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
 }
 
 function generatePortfolioHTML(d, tpl, sections) {
@@ -4944,8 +5662,33 @@ function generatePortfolioHTML(d, tpl, sections) {
     aboutHtml = '<section class="pf-sec pf-sec-alt" id="about"><div class="pf-container"><h2 class="pf-sec-title">About Me</h2><p class="pf-about-text">' + esc(d.summary) + '</p></div></section>';
   }
 
+  var projectsHtml = '';
+  if (sections.projects && d.projects && d.projects.length) {
+    var projItems = d.projects.filter(function(p){return p.title;});
+    if (projItems.length) {
+      projectsHtml = '<section class="pf-sec" id="projects"><div class="pf-container"><h2 class="pf-sec-title">Projects</h2><div class="pf-proj-grid">';
+      projItems.forEach(function(p) {
+        projectsHtml += '<div class="pf-proj-card"><h3 class="pf-proj-title">' + esc(p.title) + '</h3>' + (p.desc?'<p class="pf-proj-desc">'+esc(p.desc)+'</p>':'') + (p.tech?'<div class="pf-proj-tech">'+p.tech.split(',').map(function(t){return '<span class="pf-skill-chip">'+esc(t.trim())+'</span>';}).join('')+'</div>':'') + '</div>';
+      });
+      projectsHtml += '</div></div></section>';
+    }
+  }
+
+  var certsHtml = '';
+  if (sections.certifications && d.certifications && d.certifications.length) {
+    var certItems = d.certifications.filter(function(c){return c.name;});
+    if (certItems.length) {
+      certsHtml = '<section class="pf-sec pf-sec-alt" id="certifications"><div class="pf-container"><h2 class="pf-sec-title">Certifications</h2><div class="pf-awards-grid">';
+      certItems.forEach(function(c) {
+        certsHtml += '<div class="pf-award-card"><div class="pf-award-ico">📜</div><h3 class="pf-award-title">' + esc(c.name) + '</h3>' + (c.issuer||c.year?'<div class="pf-award-issuer">'+esc([c.issuer,c.year].filter(Boolean).join(' · '))+'</div>':'') + '</div>';
+      });
+      certsHtml += '</div></div></section>';
+    }
+  }
+
   var contactHtml = '';
-  if (sections.contact) {
+  var hasContact = d.email || d.phone || d.location || d.linkedin || d.github;
+  if (sections.contact && hasContact) {
     contactHtml = '<section class="pf-sec" id="contact"><div class="pf-container"><h2 class="pf-sec-title">Get In Touch</h2><div class="pf-contact-row">';
     if (d.email) contactHtml += '<a href="mailto:' + esc(d.email) + '" class="pf-contact-item">📧 ' + esc(d.email) + '</a>';
     if (d.phone) contactHtml += '<a href="tel:' + esc(d.phone) + '" class="pf-contact-item">📞 ' + esc(d.phone) + '</a>';
@@ -4960,16 +5703,22 @@ function generatePortfolioHTML(d, tpl, sections) {
     ? ':root{--pf-accent:#7c3aed;--pf-accent2:#2563eb;--pf-hero-bg:linear-gradient(135deg,#7c3aed 0%,#2563eb 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.8);--pf-sec-bg:#fff;--pf-alt-bg:#f8f9ff;--pf-text:#1e293b;--pf-muted:#64748b;--pf-border:#e2e8f0;--pf-chip-bg:rgba(124,58,237,0.08);--pf-chip-color:#7c3aed;}'
     : tpl === 'minimal'
     ? ':root{--pf-accent:#111827;--pf-accent2:#374151;--pf-hero-bg:#111827;--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.7);--pf-sec-bg:#fff;--pf-alt-bg:#f9fafb;--pf-text:#111827;--pf-muted:#6b7280;--pf-border:#e5e7eb;--pf-chip-bg:#f3f4f6;--pf-chip-color:#374151;}'
+    : tpl === 'tech'
+    ? ':root{--pf-accent:#22c55e;--pf-accent2:#16a34a;--pf-hero-bg:#0d1117;--pf-hero-text:#e6edf3;--pf-hero-sub:rgba(230,237,243,0.6);--pf-sec-bg:#0d1117;--pf-alt-bg:#161b22;--pf-text:#e6edf3;--pf-muted:#8b949e;--pf-border:#30363d;--pf-chip-bg:rgba(34,197,94,0.1);--pf-chip-color:#22c55e;}'
+    : tpl === 'warm'
+    ? ':root{--pf-accent:#ea580c;--pf-accent2:#c2410c;--pf-hero-bg:linear-gradient(135deg,#7c2d12 0%,#ea580c 60%,#f97316 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.8);--pf-sec-bg:#fff;--pf-alt-bg:#fff7ed;--pf-text:#1c0a00;--pf-muted:#78350f;--pf-border:#fed7aa;--pf-chip-bg:rgba(234,88,12,0.08);--pf-chip-color:#ea580c;}'
     : ':root{--pf-accent:#2563eb;--pf-accent2:#1d4ed8;--pf-hero-bg:linear-gradient(135deg,#1e293b 0%,#2563eb 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.75);--pf-sec-bg:#fff;--pf-alt-bg:#f8fafc;--pf-text:#1e293b;--pf-muted:#64748b;--pf-border:#e2e8f0;--pf-chip-bg:rgba(37,99,235,0.08);--pf-chip-color:#2563eb;}';
 
   var navLinks = '';
-  if (sections.about) navLinks += '<a href="#about">About</a>';
-  if (sections.experience) navLinks += '<a href="#experience">Experience</a>';
-  if (sections.skills) navLinks += '<a href="#skills">Skills</a>';
-  if (sections.education) navLinks += '<a href="#education">Education</a>';
-  if (sections.contact) navLinks += '<a href="#contact">Contact</a>';
+  if (sections.about && d.summary) navLinks += '<a href="#about">About</a>';
+  if (sections.experience && d.experience && d.experience.length) navLinks += '<a href="#experience">Experience</a>';
+  if (sections.skills && d.skills && d.skills.length) navLinks += '<a href="#skills">Skills</a>';
+  if (sections.education && d.education && d.education.length) navLinks += '<a href="#education">Education</a>';
+  if (projectsHtml) navLinks += '<a href="#projects">Projects</a>';
+  if (certsHtml) navLinks += '<a href="#certifications">Certifications</a>';
+  if (contactHtml) navLinks += '<a href="#contact">Contact</a>';
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio</title><style>' + themeCSS + '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (d.email ? '<a href="mailto:' + esc(d.email) + '" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio</title><style>' + themeCSS + '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (d.email ? '<a href="mailto:' + esc(d.email) + '" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
 }
 
 </script>
