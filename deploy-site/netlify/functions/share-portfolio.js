@@ -74,6 +74,26 @@ exports.handler = async function(event) {
       body: JSON.stringify(info, null, 2) };
   }
 
+  // ── CHECK KEY: GET ?check=KEY  (reads directly from Redis and shows raw result) ─
+  if (event.httpMethod === 'GET' && qs.check) {
+    const key = qs.check;
+    const redisKey = 'pf:' + key;
+    const info = { key, redisKey };
+    try {
+      const r = await fetch(UPSTASH_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['GET', redisKey])
+      });
+      const json = await r.json();
+      info.status = r.status;
+      info.result = json.result === null ? 'NULL (key does not exist in Redis)'
+        : 'EXISTS, length=' + String(json.result).length + ', preview=' + String(json.result).substring(0, 80);
+    } catch(e) { info.error = e.message; }
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify(info, null, 2) };
+  }
+
   // ── POST: save portfolio HTML, return shareable URL ────────────────────────
   if (event.httpMethod === 'POST') {
     if (!isConfigured()) {
