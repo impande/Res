@@ -9,16 +9,9 @@ exports.handler = async function(event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
 
-  // Build a store using automatic Netlify context (NETLIFY_BLOBS_CONTEXT, injected at runtime).
-  // Falls back to explicit credentials from env vars if auto-context isn't available.
+  // Use automatic Netlify Blobs context (NETLIFY_BLOBS_CONTEXT injected at runtime by Netlify).
+  // This works with CDN reads AND origin writes — personal access tokens only work for writes.
   function makeStore() {
-    const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-    const token  = process.env.NETLIFY_AUTH_TOKEN;
-    if (siteID && token) {
-      // Explicit credentials — always site-scoped and consistent across invocations
-      return getStore({ name: 'portfolios', siteID, token });
-    }
-    // Auto-mode: relies on NETLIFY_BLOBS_CONTEXT injected by Netlify at function runtime
     return getStore('portfolios');
   }
 
@@ -35,10 +28,6 @@ exports.handler = async function(event) {
 
       const store = makeStore();
       await store.set(slug, html, { metadata: { name, created: Date.now() } });
-
-      // Verify the write is immediately readable — catches store context mismatches
-      const verify = await store.get(slug);
-      if (!verify) throw new Error('STORE_WRITE_VERIFY_FAILED: data written but not readable in same context. Check NETLIFY_SITE_ID is the correct UUID.');
 
       const siteUrl = (process.env.URL || 'https://resume4u.help').replace(/\/$/, '');
       return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: siteUrl + '/p/' + slug }) };
@@ -61,7 +50,7 @@ exports.handler = async function(event) {
       if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body: '<html><body style="font-family:sans-serif;text-align:center;padding:80px 20px;"><h2>Portfolio not found</h2><p>This link may have expired. Please generate a new one at <a href="https://resume4u.help">resume4u.help</a>.</p></body></html>' };
       return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }, body: html };
     } catch(e) {
-      return { statusCode: 500, headers: { 'Content-Type': 'text/html' }, body: '<h1>Error loading portfolio: ' + e.message + '</h1>' };
+      return { statusCode: 500, headers: { 'Content-Type': 'text/html' }, body: '<h1>Error: ' + e.message + '</h1>' };
     }
   }
 
