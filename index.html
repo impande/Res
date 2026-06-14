@@ -702,7 +702,7 @@
     .pf-step-pill.done .pf-step-num{background:#16a34a;border-color:#16a34a;color:#fff;}
     .pf-step-pill.active .pf-step-num{background:var(--accent);border-color:var(--accent);color:#fff;}
     .pf-step-sep{flex:1;height:1px;background:var(--border);margin:0 8px;}
-    .pf-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;overscroll-behavior-y:contain;touch-action:pan-y;padding:24px;}
+    .pf-body{flex:1;min-height:0;overflow-y:scroll;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;overscroll-behavior-y:contain;touch-action:pan-y;padding:24px;}
     .pf-section-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
     .pf-section-sub{font-size:0.83rem;color:var(--muted);margin-bottom:18px;line-height:1.5;}
     /* Template picker */
@@ -5215,8 +5215,37 @@ function removePfPhoto() {
 }
 
 var _pfScrollY = 0;
+var _pfTouchStartY = 0;
+var _pfTouchHandlersAttached = false;
+
+function _setupPfTouchHandlers() {
+  if (_pfTouchHandlersAttached) return;
+  _pfTouchHandlersAttached = true;
+  var overlay = document.getElementById('pfOverlay');
+  if (!overlay) return;
+  overlay.addEventListener('touchstart', function(e) {
+    _pfTouchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  overlay.addEventListener('touchmove', function(e) {
+    var body = null;
+    ['pfStep1','pfStep2','pfStep3'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.style.display !== 'none') body = el;
+    });
+    if (!body) { e.preventDefault(); return; }
+    var el = e.target, inBody = false;
+    while (el && el !== overlay) { if (el === body) { inBody = true; break; } el = el.parentElement; }
+    if (!inBody) { e.preventDefault(); return; }
+    var dir = e.touches[0].clientY - _pfTouchStartY;
+    var atTop = body.scrollTop <= 0;
+    var atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 1;
+    if ((dir > 0 && atTop) || (dir < 0 && atBottom)) e.preventDefault();
+  }, { passive: false });
+}
+
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
+  _setupPfTouchHandlers();
   // Lock background scroll (prevents iOS from scrolling the page behind the modal)
   _pfScrollY = window.scrollY || window.pageYOffset || 0;
   document.body.style.position = 'fixed';
@@ -5379,11 +5408,10 @@ function pfAddManualExp() {
 function pfWzNav(dir) {
   pfWzSave();
   pfWzIdx = Math.max(0, Math.min(pfWzSteps.length - 1, pfWzIdx + dir));
+  var body = document.getElementById('pfStep2');
+  if (body) body.scrollTop = 0;
   pfWzRender();
-  // Scroll the wizard card into view within the modal rather than
-  // jumping the whole pf-body to 0 — smoother and less jarring.
-  var card = document.getElementById('pfWzCard');
-  if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  if (body) requestAnimationFrame(function() { body.scrollTop = 0; });
 }
 
 function pfWzRender() {
