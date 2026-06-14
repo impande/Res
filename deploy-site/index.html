@@ -5825,28 +5825,34 @@ async function generatePortfolioLink() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
   try {
     var d = getPfData();
+    var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
-    // Compress photo before sharing — raw base64 can be several MB which exceeds
-    // Upstash's 1 MB item cap. At 400px/0.75q a profile photo is typically 30–80 KB.
+    // Compute slug client-side — must match server slug computation exactly so the
+    // photo URL (stored under photo:<slug>) points to the right Redis key.
+    var slug = name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60) || 'portfolio';
+
+    // Compress photo; store it separately on the server (not inline in the HTML).
+    // The HTML references it via a regular URL so the photo appears in the shared
+    // page without inflating the HTML size (base64 would appear 4x in og/twitter/LD).
     var compressedPhoto = await _compressPfPhoto(d.photo, 400, 0.75);
-    var dShare = Object.assign({}, d, { photo: compressedPhoto });
+    var photoUrl = compressedPhoto
+      ? (window.location.origin + '/.netlify/functions/share-portfolio?photo=' + encodeURIComponent(slug))
+      : '';
+    var dShare = Object.assign({}, d, { photo: photoUrl });
     var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
 
-    // If still too large (unlikely), retry without photo so user always gets a link.
+    // Fallback: if even without-photo HTML is enormous, show download modal.
     if (html.length > 900000) {
       dShare = Object.assign({}, d, { photo: '' });
       html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+      compressedPhoto = '';
     }
-    var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
-
-    // Hard guard: if HTML is still somehow over 900 KB after stripping the photo,
-    // fall back to download so the user always gets their portfolio.
     if (html.length > 900000) {
       _showShareFallbackModal();
       return;
     }
 
-    var body = JSON.stringify({ html: html, name: name });
+    var body = JSON.stringify({ html: html, name: name, photo: compressedPhoto });
     var resp = await fetch('/.netlify/functions/share-portfolio', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

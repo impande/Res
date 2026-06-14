@@ -94,7 +94,28 @@ exports.handler = async function(event) {
       body: JSON.stringify(info, null, 2) };
   }
 
-  // ── POST: save portfolio HTML, return shareable URL ────────────────────────
+  // ── GET ?photo=SLUG: serve stored profile photo as binary JPEG ─────────────
+  // The HTML references this URL instead of embedding base64 inline, which
+  // keeps the stored HTML small and avoids any size limits.
+  if (event.httpMethod === 'GET' && qs.photo) {
+    const slug = qs.photo;
+    if (!isConfigured()) return { statusCode: 404, headers: CORS, body: '' };
+    try {
+      const base64 = await blobGet('photo:' + slug);
+      if (!base64) return { statusCode: 404,
+        headers: { ...CORS, 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store' },
+        body: '' };
+      return { statusCode: 200,
+        headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=7776000',
+          'Access-Control-Allow-Origin': '*' },
+        body: base64,
+        isBase64Encoded: true };
+    } catch(e) {
+      return { statusCode: 500, headers: CORS, body: '' };
+    }
+  }
+
+  // ── POST: save portfolio HTML (+ optional photo), return shareable URL ──────
   if (event.httpMethod === 'POST') {
     if (!isConfigured()) {
       return { statusCode: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
@@ -102,12 +123,11 @@ exports.handler = async function(event) {
     }
     try {
       const bodyStr = event.body || '{}';
-      // Guard against oversized payloads (Upstash free tier: 1 MB per item)
-      if (bodyStr.length > 950000) {
+      if (bodyStr.length > 1200000) {
         return { statusCode: 413, headers: { ...CORS, 'Content-Type': 'application/json' },
           body: JSON.stringify({ error: 'PAYLOAD_TOO_LARGE', detail: 'Portfolio is too large to share. Download it instead.' }) };
       }
-      const { html, name } = JSON.parse(bodyStr);
+      const { html, name, photo } = JSON.parse(bodyStr);
       if (!html || !name) return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'Missing html or name' }) };
 
@@ -115,6 +135,13 @@ exports.handler = async function(event) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
         .substring(0, 60)) || 'portfolio';
+
+      // Store compressed photo separately (raw base64, data: prefix stripped).
+      // HTML references it via /.netlify/functions/share-portfolio?photo=<slug>.
+      if (photo && typeof photo === 'string' && photo.length < 200000) {
+        const base64 = photo.includes(',') ? photo.split(',')[1] : photo;
+        if (base64) await blobSet('photo:' + slug, base64);
+      }
 
       await blobSet(slug, html);
 
