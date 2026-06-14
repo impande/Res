@@ -21,8 +21,8 @@
   <title>Resume For You – Free AI Resume Builder | resume4u.help</title>
 
   <!-- ── SEO Core ──────────────────────────────────────────────────────── -->
-  <meta name="description" content="Build a professional resume in minutes with AI. Free AI-powered resume builder — choose from 30+ templates, get ATS score, download as PDF from ₹9 / $0.99. No sign-up required.">
-  <meta name="keywords" content="free AI resume builder, resume maker, ATS resume, professional resume templates, AI resume generator, resume builder online, CV maker">
+  <meta name="description" content="Build a professional resume and portfolio website in minutes with AI. Free AI resume builder — 30+ templates, ATS score, portfolio generator. Download PDF from ₹9 / $0.99. No sign-up required.">
+  <meta name="keywords" content="free AI resume builder, resume maker, ATS resume, professional resume templates, AI resume generator, resume builder online, CV maker, portfolio website builder, portfolio generator, online portfolio">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Resume For You">
   <link rel="canonical" href="https://resume4u.help/">
@@ -33,8 +33,8 @@
   <!-- ── Open Graph (Facebook, LinkedIn, WhatsApp previews) ────────────── -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://resume4u.help/">
-  <meta property="og:title" content="Resume For You – Free AI Resume Builder">
-  <meta property="og:description" content="Create a job-winning resume in minutes. AI-powered, ATS-optimised, 30+ templates. Free to build — download PDF from ₹9 / $0.99. No sign-up needed.">
+  <meta property="og:title" content="Resume For You – Free AI Resume &amp; Portfolio Builder">
+  <meta property="og:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 30+ templates. Free — download PDF from ₹9 / $0.99. No sign-up needed.">
   <meta property="og:image" content="https://resume4u.help/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -44,8 +44,8 @@
   <!-- ── Twitter / X Card ─────────────────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://resume4u.help/">
-  <meta name="twitter:title" content="Resume For You – Free AI Resume Builder">
-  <meta name="twitter:description" content="Create a job-winning resume in minutes. AI-powered, ATS-optimised, 30+ templates. Free — no sign-up needed.">
+  <meta name="twitter:title" content="Resume For You – Free AI Resume &amp; Portfolio Builder">
+  <meta name="twitter:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 30+ templates. Free — no sign-up needed.">
   <meta name="twitter:image" content="https://resume4u.help/og-image.png">
 
   <!-- ── Schema.org JSON-LD ────────────────────────────────────────────── -->
@@ -55,7 +55,7 @@
     "@type": "SoftwareApplication",
     "name": "Resume For You",
     "url": "https://resume4u.help/",
-    "description": "Free AI-powered resume builder. Generate ATS-optimised resumes with 30+ professional templates in minutes. No sign-up required.",
+    "description": "Free AI-powered resume and portfolio builder. Generate ATS-optimised resumes with 30+ professional templates, build a portfolio website, and share it live — all in minutes. No sign-up required.",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "offers": [
@@ -84,6 +84,9 @@
       "ATS score checker",
       "30+ professional templates",
       "PDF download",
+      "Portfolio website builder",
+      "AI-generated portfolio content",
+      "Shareable portfolio link",
       "Cover letter generator",
       "No sign-up required"
     ],
@@ -4897,6 +4900,20 @@ function closePreviewModal(e) {
     </div>
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
+      <!-- Photo upload -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;">
+        <div id="pfPhotoCircle" onclick="document.getElementById('pfPhotoInput').click()" style="width:64px;height:64px;border-radius:50%;background:var(--input-bg);border:2.5px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;flex-shrink:0;overflow:hidden;position:relative;">📷</div>
+        <img id="pfPhotoPreview" style="display:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid var(--accent);flex-shrink:0;cursor:pointer;" onclick="document.getElementById('pfPhotoInput').click()" alt="Portfolio photo">
+        <input type="file" id="pfPhotoInput" accept="image/*" style="display:none" onchange="handlePfPhoto(event)">
+        <div style="flex:1;">
+          <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:3px;">Profile Photo <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">(optional)</span></div>
+          <div style="font-size:0.77rem;color:var(--muted);margin-bottom:6px;">Appears in your portfolio hero. Tap the circle to upload.</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            <button onclick="document.getElementById('pfPhotoInput').click()" style="padding:5px 12px;font-size:0.78rem;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;">📷 Upload Photo</button>
+            <button id="pfPhotoRemoveBtn" onclick="removePfPhoto()" style="display:none;padding:5px 10px;font-size:0.78rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--muted);">✕ Remove</button>
+          </div>
+        </div>
+      </div>
       <div class="pf-section-title">Choose a style for your portfolio</div>
       <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
       <div class="pf-tpl-grid">
@@ -5098,6 +5115,7 @@ function closePreviewModal(e) {
 // ── Portfolio Builder ──────────────────────────────────────────────────
 
 var pfTemplate = 'professional';
+var pfPhoto = null;
 var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:false,contact:true};
 var pfCurrentStep = 1;
 
@@ -5117,8 +5135,49 @@ var _PF_DEFS = [
   {id:'contact',        icon:'📬', label:'Contact Info',     q:'How should visitors reach you?'},
 ];
 
+function handlePfPhoto(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 4 * 1024 * 1024) { alert('Photo must be under 4 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    pfPhoto = e.target.result;
+    var circle = document.getElementById('pfPhotoCircle');
+    var preview = document.getElementById('pfPhotoPreview');
+    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+    if (circle) circle.style.display = 'none';
+    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+    if (removeBtn) removeBtn.style.display = '';
+    if (pfCurrentStep === 3) buildPfPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePfPhoto() {
+  pfPhoto = null;
+  var circle = document.getElementById('pfPhotoCircle');
+  var preview = document.getElementById('pfPhotoPreview');
+  var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+  var inp = document.getElementById('pfPhotoInput');
+  if (circle) circle.style.display = '';
+  if (preview) { preview.style.display = 'none'; preview.src = ''; }
+  if (removeBtn) removeBtn.style.display = 'none';
+  if (inp) inp.value = '';
+  if (pfCurrentStep === 3) buildPfPreview();
+}
+
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
+  // Pre-fill portfolio photo from resume builder photo if available
+  if (userPhoto && !pfPhoto) {
+    pfPhoto = userPhoto;
+    var circle = document.getElementById('pfPhotoCircle');
+    var preview = document.getElementById('pfPhotoPreview');
+    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+    if (circle) circle.style.display = 'none';
+    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+    if (removeBtn) removeBtn.style.display = '';
+  }
   pfGoStep(1);
 }
 function closePfModal() {
@@ -5474,7 +5533,7 @@ function getPfData() {
     location: wz.location || cd.location || '',
     linkedin: wz.linkedin || cd.linkedin || '',
     github: wz.github || cd.github || '',
-    photo: userPhoto || '',
+    photo: pfPhoto || userPhoto || '',
     summary: wz.about || (lastResumeData && lastResumeData.summary) || '',
     experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
       return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
@@ -5718,7 +5777,22 @@ function generatePortfolioHTML(d, tpl, sections) {
   if (certsHtml) navLinks += '<a href="#certifications">Certifications</a>';
   if (contactHtml) navLinks += '<a href="#contact">Contact</a>';
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio</title><style>' + themeCSS + '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (d.email ? '<a href="mailto:' + esc(d.email) + '" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
+  var metaDesc = d.summary ? esc(d.summary.slice(0,155).replace(/\s+\S*$/, '…')) : (name + ' — professional portfolio. View my experience, skills, and projects.');
+  var metaImg = d.photo ? d.photo : 'https://resume4u.help/og-image.png';
+  var schemaSkills = d.skills && d.skills.length ? '"' + d.skills.slice(0,8).map(esc).join('","') + '"' : '';
+  var schemaExp = d.experience && d.experience.length ? d.experience.slice(0,3).map(function(e){ return '{"@type":"OrganizationRole","roleName":"'+esc(e.title)+'","memberOf":{"@type":"Organization","name":"'+esc(e.company)+'"}'+( e.dates?',"startDate":"'+esc(e.dates)+'"':'')+'}'; }).join(',') : '';
+  var seoHead = '<meta name="description" content="' + metaDesc + '">'
+    + '<meta name="robots" content="index, follow">'
+    + '<meta property="og:type" content="profile">'
+    + '<meta property="og:title" content="' + name + ' — Portfolio">'
+    + '<meta property="og:description" content="' + metaDesc + '">'
+    + '<meta property="og:image" content="' + metaImg + '">'
+    + '<meta name="twitter:card" content="' + (d.photo ? 'summary_large_image' : 'summary') + '">'
+    + '<meta name="twitter:title" content="' + name + ' — Portfolio">'
+    + '<meta name="twitter:description" content="' + metaDesc + '">'
+    + '<meta name="twitter:image" content="' + metaImg + '">'
+    + '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"' + name + '"' + (d.title?',"jobTitle":"'+esc(d.title)+'"':'') + (d.email?',"email":"'+esc(d.email)+'"':'') + (d.phone?',"telephone":"'+esc(d.phone)+'"':'') + (d.location?',"address":{"@type":"PostalAddress","addressLocality":"'+esc(d.location)+'"}':'') + (d.linkedin?',"sameAs":["'+esc(d.linkedin.match(/^https?:\\/\\//) ? d.linkedin : "https://"+d.linkedin)+'"]':'') + (schemaSkills?',"knowsAbout":['+schemaSkills+']':'') + (schemaExp?',"hasOccupation":['+schemaExp+']':'') + (d.photo?',"image":"'+d.photo+'"':'') + '}<\/script>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (d.email ? '<a href="mailto:' + esc(d.email) + '" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
 }
 
 </script>
