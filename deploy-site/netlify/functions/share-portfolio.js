@@ -36,6 +36,10 @@ exports.handler = async function(event) {
       const store = makeStore();
       await store.set(slug, html, { metadata: { name, created: Date.now() } });
 
+      // Verify the write is immediately readable — catches store context mismatches
+      const verify = await store.get(slug);
+      if (!verify) throw new Error('STORE_WRITE_VERIFY_FAILED: data written but not readable in same context. Check NETLIFY_SITE_ID is the correct UUID.');
+
       const siteUrl = (process.env.URL || 'https://resume4u.help').replace(/\/$/, '');
       return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: siteUrl + '/p/' + slug }) };
     } catch(e) {
