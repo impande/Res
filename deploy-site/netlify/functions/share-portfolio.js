@@ -1,63 +1,31 @@
-// Netlify Blobs via direct HTTP API with full two-step signed-URL flow.
-// Both GET and PUT go through the same pattern:
-//   1. Hit the Netlify API with Accept: application/json;type=signed-url
-//   2. Follow the returned signed S3 URL for the actual read/write
+// Netlify Blobs: use SDK with auto-detection first (uses edgeURL if NETLIFY_BLOBS_CONTEXT
+// is injected), fall back to explicit credentials only if context is absent.
+const { getStore } = require('@netlify/blobs');
+
 const SITE_ID = process.env.NETLIFY_SITE_ID;
 const TOKEN   = process.env.NETLIFY_AUTH_TOKEN;
-const API_BASE = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/portfolios`;
+const HAS_CTX = !!process.env.NETLIFY_BLOBS_CONTEXT;
+
+function portfolioStore() {
+  if (HAS_CTX) {
+    // Full Netlify context available — SDK uses edgeURL, reads are cross-invocation safe
+    return getStore('portfolios');
+  }
+  if (SITE_ID && TOKEN) {
+    // Explicit credentials fallback — still uses SDK (correct URL signing)
+    return getStore({ name: 'portfolios', siteID: SITE_ID, token: TOKEN });
+  }
+  throw new Error('BLOBS_NOT_CONFIGURED');
+}
 
 async function blobSet(key, value) {
-  // Step 1: request a signed PUT URL from the Blobs API (no body here)
-  const r1 = await fetch(`${API_BASE}/${encodeURIComponent(key)}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'Accept': 'application/json;type=signed-url'
-    }
-  });
-  if (!r1.ok) {
-    const txt = await r1.text().catch(() => '');
-    throw new Error(`blobSet step1 ${r1.status}: ${txt}`);
-  }
-  const json1 = await r1.json();
-  if (!json1.url) throw new Error(`blobSet step1 no url: ${JSON.stringify(json1)}`);
-
-  // Step 2: PUT actual content to the signed S3 URL
-  const r2 = await fetch(json1.url, {
-    method: 'PUT',
-    headers: { 'Cache-Control': 'max-age=0, stale-while-revalidate=60' },
-    body: value
-  });
-  if (!r2.ok) {
-    const txt = await r2.text().catch(() => '');
-    throw new Error(`blobSet step2 ${r2.status}: ${txt.substring(0, 300)}`);
-  }
+  const store = portfolioStore();
+  await store.set(key, value);
 }
 
 async function blobGet(key) {
-  // Step 1: request a signed GET URL from the Blobs API
-  const r1 = await fetch(`${API_BASE}/${encodeURIComponent(key)}`, {
-    headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'Accept': 'application/json;type=signed-url'
-    }
-  });
-  if (r1.status === 404) return null;
-  if (!r1.ok) {
-    const txt = await r1.text().catch(() => '');
-    throw new Error(`blobGet step1 ${r1.status}: ${txt}`);
-  }
-  const json1 = await r1.json();
-  if (!json1.url) throw new Error(`blobGet step1 no url: ${JSON.stringify(json1)}`);
-
-  // Step 2: fetch actual content from the signed S3 URL
-  const r2 = await fetch(json1.url);
-  if (r2.status === 404) return null;
-  if (!r2.ok) {
-    const txt = await r2.text().catch(() => '');
-    throw new Error(`blobGet step2 ${r2.status}: ${txt.substring(0, 300)}`);
-  }
-  return await r2.text();
+  const store = portfolioStore();
+  return await store.get(key);
 }
 
 const CORS = {
@@ -71,16 +39,20 @@ exports.handler = async function(event) {
 
   const qs = event.queryStringParameters || {};
 
-  // ── DIAGNOSTIC: GET ?diag=1  (tests write + read cycle) ──────────────────
+  // ── DIAGNOSTIC: GET ?diag=1 ────────────────────────────────────────────────
   if (event.httpMethod === 'GET' && qs.diag === '1') {
     const info = {
+      hasContext: HAS_CTX,
       hasSiteID: !!SITE_ID,
-      siteIDPrefix: SITE_ID ? SITE_ID.substring(0, 8) + '...' : 'MISSING',
       hasToken: !!TOKEN,
-      apiBase: API_BASE.replace(SITE_ID || '', '[SITE_ID]'),
+      contextPrefix: process.env.NETLIFY_BLOBS_CONTEXT
+        ? process.env.NETLIFY_BLOBS_CONTEXT.substring(0, 30) + '...'
+        : 'NOT SET',
     };
-    const testKey = '__diag__';
-    const testVal = 'diag-ok-' + Date.now();
+
+    // Test SDK write + read (within same invocation)
+    const testKey = '__diag_sdk__';
+    const testVal = 'sdk-diag-' + Date.now();
     try {
       await blobSet(testKey, testVal);
       info.write = 'ok';
@@ -89,79 +61,44 @@ exports.handler = async function(event) {
     }
     try {
       const v = await blobGet(testKey);
-      info.read = v === null ? 'NULL (not found)' : (v === testVal ? 'ok (matched)' : 'MISMATCH got: ' + v.substring(0, 80));
+      info.read = v === null ? 'NULL (not found)'
+        : v === testVal ? 'ok (matched)' : 'MISMATCH: ' + String(v).substring(0, 80);
     } catch(e) {
       info.read = 'ERROR: ' + e.message;
     }
+
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
       body: JSON.stringify(info, null, 2) };
   }
 
-  // ── FULL CYCLE TEST: GET ?fulltest=KEY  (write+read with all step details) ──
-  if (event.httpMethod === 'GET' && qs.fulltest) {
-    const key = qs.fulltest;
-    const testVal = 'fulltest-' + Date.now();
-    const url = `${API_BASE}/${encodeURIComponent(key)}`;
-    const out = { key, testVal };
-
-    // Write step 1: get signed PUT URL
+  // ── CROSS-INVOCATION TEST: GET ?persist=KEY ────────────────────────────────
+  // Write to KEY in this request, then visit /p/KEY to verify it persists
+  if (event.httpMethod === 'GET' && qs.persist) {
+    const key = qs.persist;
+    const val = 'persist-test-' + Date.now();
+    const info = { key, val, hasContext: HAS_CTX };
     try {
-      const rW1 = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json;type=signed-url' }
-      });
-      const wBody = await rW1.text().catch(() => '');
-      out.write1 = { status: rW1.status, ok: rW1.ok, body: wBody.substring(0, 200) };
-
-      // Write step 2: PUT content to signed S3 URL
-      if (rW1.ok) {
-        const wJson = JSON.parse(wBody);
-        if (wJson.url) {
-          out.write1.s3UrlPrefix = wJson.url.substring(0, 80);
-          const rW2 = await fetch(wJson.url, {
-            method: 'PUT',
-            headers: { 'Cache-Control': 'max-age=0, stale-while-revalidate=60' },
-            body: testVal
-          });
-          const w2Body = await rW2.text().catch(() => '');
-          out.write2 = { status: rW2.status, ok: rW2.ok, body: w2Body.substring(0, 200) };
-        }
-      }
-    } catch(e) { out.writeError = e.message; }
-
-    // Read step 1: get signed GET URL
+      await blobSet(key, val);
+      info.write = 'ok';
+    } catch(e) {
+      info.write = 'ERROR: ' + e.message;
+    }
     try {
-      const rR1 = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json;type=signed-url' }
-      });
-      const rBody = await rR1.text().catch(() => '');
-      out.read1 = { status: rR1.status, ok: rR1.ok };
-
-      // Read step 2: GET content from signed S3 URL
-      if (rR1.ok) {
-        const rJson = JSON.parse(rBody);
-        if (rJson.url) {
-          out.read1.s3UrlPrefix = rJson.url.substring(0, 80);
-          const rR2 = await fetch(rJson.url);
-          const r2Body = await rR2.text().catch(() => '');
-          out.read2 = {
-            status: rR2.status, ok: rR2.ok,
-            contentType: rR2.headers.get('content-type'),
-            bodyLength: r2Body.length,
-            bodyPreview: r2Body.substring(0, 100),
-            matched: r2Body === testVal
-          };
-        }
-      }
-    } catch(e) { out.readError = e.message; }
-
+      const v = await blobGet(key);
+      info.sameInvocationRead = v === val ? 'ok (matched)' : (v === null ? 'NULL' : 'MISMATCH');
+    } catch(e) {
+      info.sameInvocationRead = 'ERROR: ' + e.message;
+    }
+    info.crossInvocationTest = 'Now visit: /p/' + key;
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify(out, null, 2) };
+      body: JSON.stringify(info, null, 2) };
   }
 
   // ── POST: save portfolio HTML, return shareable URL ────────────────────────
   if (event.httpMethod === 'POST') {
-    if (!SITE_ID || !TOKEN) {
+    try {
+      portfolioStore(); // check credentials
+    } catch(e) {
       return { statusCode: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'BLOBS_NOT_CONFIGURED' }) };
     }
@@ -190,26 +127,27 @@ exports.handler = async function(event) {
   if (event.httpMethod === 'GET') {
     const id = qs.id;
     if (!id) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' },
-      body: notFound('No portfolio ID in request') };
+      body: notFound() };
     try {
       const html = await blobGet(id);
       if (!html) return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        body: notFound('Key "' + id + '" not found in store') };
-      return { statusCode: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
+        body: notFound() };
+      return { statusCode: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
         body: html };
     } catch(e) {
       return { statusCode: 500, headers: { 'Content-Type': 'text/html' },
-        body: '<h1>Error loading portfolio</h1><pre>' + e.message + '</pre>' };
+        body: '<h1>Error</h1><pre>' + e.message + '</pre>' };
     }
   }
 
   return { statusCode: 405, headers: CORS, body: 'Method not allowed' };
 };
 
-function notFound(reason) {
+function notFound() {
   return '<html><body style="font-family:sans-serif;text-align:center;padding:80px 20px;">'
     + '<h2>Portfolio not found</h2>'
-    + '<p>This link may have expired. Please generate a new one at <a href="https://resume4u.help">resume4u.help</a>.</p>'
-    + (reason ? '<p style="color:#999;font-size:0.8rem">' + reason + '</p>' : '')
+    + '<p>This link may have expired. Please generate a new one at '
+    + '<a href="https://resume4u.help">resume4u.help</a>.</p>'
     + '</body></html>';
 }
