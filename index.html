@@ -3480,7 +3480,16 @@ function renderOutput(data) {
   out.style.justifyContent = 'flex-start';
   var _chipReset = document.getElementById('pageCountChip');
   if (_chipReset) { _chipReset.textContent = '···'; _chipReset.style.color = '#888'; _chipReset.style.background = '#f3f4f6'; _chipReset.style.borderColor = '#d1d5db'; }
-  out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_triggerPageCount()">${renderResumeHTML(data)}</div>`;
+  out.innerHTML = `<div class="resume-a4-page">${renderResumeHTML(data)}</div>`;
+  const _a4Live = out.querySelector('.resume-a4-page');
+  if (_a4Live) {
+    _a4Live.addEventListener('input', function() {
+      manuallyEdited = true;
+      var _c = document.getElementById('pageCountChip');
+      if (_c) { _c.textContent = '···'; _c.style.color = '#888'; _c.style.background = '#f3f4f6'; _c.style.borderColor = '#d1d5db'; }
+      _triggerPageCount();
+    });
+  }
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
   const strip = document.getElementById('pageCountStrip');
@@ -4972,20 +4981,6 @@ function closePreviewModal(e) {
     </div>
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
-      <!-- Photo upload -->
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;">
-        <div id="pfPhotoCircle" onclick="document.getElementById('pfPhotoInput').click()" style="width:64px;height:64px;border-radius:50%;background:var(--input-bg);border:2.5px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;flex-shrink:0;overflow:hidden;position:relative;">📷</div>
-        <img id="pfPhotoPreview" style="display:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid var(--accent);flex-shrink:0;cursor:pointer;" onclick="document.getElementById('pfPhotoInput').click()" alt="Portfolio photo">
-        <input type="file" id="pfPhotoInput" accept="image/*" style="display:none" onchange="handlePfPhoto(event)">
-        <div style="flex:1;">
-          <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:3px;">Profile Photo <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">(optional)</span></div>
-          <div style="font-size:0.77rem;color:var(--muted);margin-bottom:6px;">Appears in your portfolio hero. Tap the circle to upload.</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;">
-            <button onclick="document.getElementById('pfPhotoInput').click()" style="padding:5px 12px;font-size:0.78rem;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;">📷 Upload Photo</button>
-            <button id="pfPhotoRemoveBtn" onclick="removePfPhoto()" style="display:none;padding:5px 10px;font-size:0.78rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--muted);">✕ Remove</button>
-          </div>
-        </div>
-      </div>
       <div class="pf-section-title">Choose a style for your portfolio</div>
       <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
       <div class="pf-tpl-grid">
