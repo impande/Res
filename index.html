@@ -5791,16 +5791,42 @@ function _showShareFallbackModal() {
   document.body.appendChild(overlay);
 }
 
+function _compressPfPhoto(dataUrl, maxDim, quality) {
+  return new Promise(function(resolve) {
+    if (!dataUrl) { resolve(''); return; }
+    var img = new Image();
+    img.onload = function() {
+      var W = img.naturalWidth, H = img.naturalHeight;
+      if (!W || !H) { resolve(dataUrl); return; }
+      var scale = Math.min(maxDim / W, maxDim / H, 1);
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(W * scale);
+      cv.height = Math.round(H * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      resolve(cv.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = function() { resolve(''); };
+    img.src = dataUrl;
+  });
+}
+
 async function generatePortfolioLink() {
   var btn = document.getElementById('pfShareBtn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
   try {
     var d = getPfData();
-    // Strip the photo for the shared version — base64 images can be several MB,
-    // which exceeds Netlify function body limits and Upstash's 1 MB item cap.
-    // The downloaded HTML keeps the photo; the shared link shows everything else.
-    var dShare = Object.assign({}, d, { photo: '' });
+
+    // Compress photo before sharing — raw base64 can be several MB which exceeds
+    // Upstash's 1 MB item cap. At 400px/0.75q a profile photo is typically 30–80 KB.
+    var compressedPhoto = await _compressPfPhoto(d.photo, 400, 0.75);
+    var dShare = Object.assign({}, d, { photo: compressedPhoto });
     var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+
+    // If still too large (unlikely), retry without photo so user always gets a link.
+    if (html.length > 900000) {
+      dShare = Object.assign({}, d, { photo: '' });
+      html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+    }
     var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
     // Hard guard: if HTML is still somehow over 900 KB after stripping the photo,
