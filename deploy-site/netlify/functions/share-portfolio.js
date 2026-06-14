@@ -11,8 +11,11 @@ exports.handler = async function(event) {
 
   function makeStore() {
     const opts = { name: 'portfolios' };
-    if (process.env.NETLIFY_SITE_ID) opts.siteID = process.env.NETLIFY_SITE_ID;
-    if (process.env.NETLIFY_AUTH_TOKEN) opts.token = process.env.NETLIFY_AUTH_TOKEN;
+    // SITE_ID is auto-injected by Netlify; NETLIFY_SITE_ID is the user-set fallback
+    const siteID = process.env.SITE_ID || process.env.NETLIFY_SITE_ID;
+    const token = process.env.NETLIFY_AUTH_TOKEN;
+    if (siteID) opts.siteID = siteID;
+    if (token) opts.token = token;
     return getStore(opts);
   }
 
