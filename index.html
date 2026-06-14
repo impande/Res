@@ -745,7 +745,13 @@
     @media(max-width:600px){
       .pf-tpl-grid{grid-template-columns:1fr 1fr;}
       .pf-toggle-grid{grid-template-columns:1fr;}
-      .pf-modal{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:none;height:92vh;max-height:92vh;}
+      /* On mobile the overlay becomes a bottom-sheet container.
+         Do NOT use position:fixed on the modal — backdrop-filter on the
+         overlay creates a new containing block, making fixed children
+         position relative to the overlay (not viewport) on iOS Safari,
+         which breaks scroll. Use flexbox alignment instead. */
+      .pf-overlay{align-items:flex-end;padding:0;}
+      .pf-modal{border-radius:20px 20px 0 0;width:100%;max-width:none;height:92vh;max-height:92vh;}
     }
   </style>
 
@@ -5215,7 +5221,7 @@ function removePfPhoto() {
 }
 
 var _pfScrollY = 0;
-var _pfTouchStartY = 0;
+var _pfTouchLastY = 0;
 var _pfTouchHandlersAttached = false;
 
 function _setupPfTouchHandlers() {
@@ -5224,9 +5230,12 @@ function _setupPfTouchHandlers() {
   var overlay = document.getElementById('pfOverlay');
   if (!overlay) return;
   overlay.addEventListener('touchstart', function(e) {
-    _pfTouchStartY = e.touches[0].clientY;
+    _pfTouchLastY = e.touches[0].clientY;
   }, { passive: true });
   overlay.addEventListener('touchmove', function(e) {
+    var currentY = e.touches[0].clientY;
+    var delta = currentY - _pfTouchLastY;  // direction of this move, not cumulative
+    _pfTouchLastY = currentY;
     var body = null;
     ['pfStep1','pfStep2','pfStep3'].forEach(function(id) {
       var el = document.getElementById(id);
@@ -5236,18 +5245,18 @@ function _setupPfTouchHandlers() {
     var el = e.target, inBody = false;
     while (el && el !== overlay) { if (el === body) { inBody = true; break; } el = el.parentElement; }
     if (!inBody) { e.preventDefault(); return; }
-    var dir = e.touches[0].clientY - _pfTouchStartY;
-    var atTop = body.scrollTop <= 0;
-    var atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 1;
-    if ((dir > 0 && atTop) || (dir < 0 && atBottom)) e.preventDefault();
+    var atTop = body.scrollTop <= 0 && delta > 0;
+    var atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 1 && delta < 0;
+    if (atTop || atBottom) e.preventDefault();
   }, { passive: false });
 }
 
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
   _setupPfTouchHandlers();
-  // Lock background scroll (prevents iOS from scrolling the page behind the modal)
+  // Lock background scroll on both html and body — iOS Safari requires both
   _pfScrollY = window.scrollY || window.pageYOffset || 0;
+  document.documentElement.style.overflow = 'hidden';
   document.body.style.position = 'fixed';
   document.body.style.top = '-' + _pfScrollY + 'px';
   document.body.style.width = '100%';
@@ -5267,6 +5276,7 @@ function openPortfolioBuilder() {
 function closePfModal() {
   document.getElementById('pfOverlay').style.display = 'none';
   // Restore background scroll
+  document.documentElement.style.overflow = '';
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.width = '';
