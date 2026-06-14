@@ -21,8 +21,8 @@
   <title>Resume For You – Free AI Resume Builder | resume4u.help</title>
 
   <!-- ── SEO Core ──────────────────────────────────────────────────────── -->
-  <meta name="description" content="Build a professional resume in minutes with AI. Free AI-powered resume builder — choose from 30+ templates, get ATS score, download as PDF from ₹9 / $0.99. No sign-up required.">
-  <meta name="keywords" content="free AI resume builder, resume maker, ATS resume, professional resume templates, AI resume generator, resume builder online, CV maker">
+  <meta name="description" content="Build a professional resume and portfolio website in minutes with AI. Free AI resume builder — 30+ templates, ATS score, portfolio generator. Download PDF from ₹9 / $0.99. No sign-up required.">
+  <meta name="keywords" content="free AI resume builder, resume maker, ATS resume, professional resume templates, AI resume generator, resume builder online, CV maker, portfolio website builder, portfolio generator, online portfolio">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Resume For You">
   <link rel="canonical" href="https://resume4u.help/">
@@ -33,8 +33,8 @@
   <!-- ── Open Graph (Facebook, LinkedIn, WhatsApp previews) ────────────── -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://resume4u.help/">
-  <meta property="og:title" content="Resume For You – Free AI Resume Builder">
-  <meta property="og:description" content="Create a job-winning resume in minutes. AI-powered, ATS-optimised, 30+ templates. Free to build — download PDF from ₹9 / $0.99. No sign-up needed.">
+  <meta property="og:title" content="Resume For You – Free AI Resume &amp; Portfolio Builder">
+  <meta property="og:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 30+ templates. Free — download PDF from ₹9 / $0.99. No sign-up needed.">
   <meta property="og:image" content="https://resume4u.help/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -44,8 +44,8 @@
   <!-- ── Twitter / X Card ─────────────────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://resume4u.help/">
-  <meta name="twitter:title" content="Resume For You – Free AI Resume Builder">
-  <meta name="twitter:description" content="Create a job-winning resume in minutes. AI-powered, ATS-optimised, 30+ templates. Free — no sign-up needed.">
+  <meta name="twitter:title" content="Resume For You – Free AI Resume &amp; Portfolio Builder">
+  <meta name="twitter:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 30+ templates. Free — no sign-up needed.">
   <meta name="twitter:image" content="https://resume4u.help/og-image.png">
 
   <!-- ── Schema.org JSON-LD ────────────────────────────────────────────── -->
@@ -55,7 +55,7 @@
     "@type": "SoftwareApplication",
     "name": "Resume For You",
     "url": "https://resume4u.help/",
-    "description": "Free AI-powered resume builder. Generate ATS-optimised resumes with 30+ professional templates in minutes. No sign-up required.",
+    "description": "Free AI-powered resume and portfolio builder. Generate ATS-optimised resumes with 30+ professional templates, build a portfolio website, and share it live — all in minutes. No sign-up required.",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "offers": [
@@ -84,6 +84,9 @@
       "ATS score checker",
       "30+ professional templates",
       "PDF download",
+      "Portfolio website builder",
+      "AI-generated portfolio content",
+      "Shareable portfolio link",
       "Cover letter generator",
       "No sign-up required"
     ],
@@ -235,13 +238,14 @@
     .tpl-filter-btn.active{background:var(--accent);color:#fff;}
 
     /* grid — no max-height, natural wrap */
-    .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:9px;padding:2px;}
+    .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:2px;}
     .tpl-card{background:var(--card-bg);border:2px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
     .tpl-card:hover{border-color:rgba(217,119,6,0.5);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
     .tpl-card.tpl-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.18);}
     /* mock resume preview inside card */
-    .tpl-card-thumb{height:96px;overflow:hidden;position:relative;}
-    .tpl-mini-inner{width:794px;padding:36px;box-sizing:border-box;transform:scale(0.14);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
+    .tpl-card-thumb{height:170px;overflow:hidden;position:relative;}
+    .tpl-mini-inner{position:absolute;top:0;left:0;width:794px!important;padding:0;box-sizing:border-box;transform:scale(0.2);transform-origin:top left;will-change:transform;pointer-events:none;user-select:none;background:#fff;}
+    .tpl-mini-inner .r-head{margin:0!important;}
     .tpl-card-meta{padding:6px 8px 7px;border-top:1px solid var(--border);}
     .tpl-card-name{font-size:0.72rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .tpl-card-tag{font-size:0.6rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -660,7 +664,7 @@
     @media(max-width:768px){
       .tpl-grid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px!important;gap:8px!important;}
       .tpl-grid::-webkit-scrollbar{display:none;}
-      .tpl-card{flex-shrink:0!important;width:82px!important;scroll-snap-align:start;}
+      .tpl-card{flex-shrink:0!important;width:120px!important;scroll-snap-align:start;}
       .tpl-filter-btn{padding:5px 9px!important;font-size:0.68rem!important;}
     }
     /* ── Portfolio Builder Feature ── */
@@ -704,14 +708,16 @@
     /* Template picker */
     .pf-tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
     @media(min-width:500px){.pf-tpl-grid{grid-template-columns:repeat(5,1fr);}}
-    .pf-tpl-desc{padding:0 8px 10px;font-size:0.67rem;color:var(--muted);line-height:1.4;}
+    .pf-preview-inner{position:absolute;top:0;left:0;width:500px;transform-origin:top left;pointer-events:none;user-select:none;}
+    .pf-anim-scroll{animation:pfScroll 6s ease-in-out 0.4s infinite alternate;will-change:transform;}
+    @keyframes pfScroll{0%{transform:translateY(0)}100%{transform:translateY(-22%)}}
     .pf-mini-tpl{padding:5px 12px;font-size:0.77rem;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
     .pf-mini-tpl:hover{border-color:rgba(217,119,6,0.4);color:var(--accent);}
     .pf-mini-tpl.active{border-color:var(--accent);background:rgba(217,119,6,0.07);color:var(--accent);}
     .pf-tpl-card{border:2px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
     .pf-tpl-card:hover{border-color:rgba(217,119,6,0.4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
     .pf-tpl-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.15);}
-    .pf-tpl-preview{height:100px;display:flex;align-items:stretch;overflow:hidden;}
+    .pf-tpl-preview{height:120px;overflow:hidden;position:relative;}
     .pf-tpl-check{position:absolute;top:7px;right:7px;width:20px;height:20px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#fff;opacity:0;transition:opacity .15s;}
     .pf-tpl-card.selected .pf-tpl-check{opacity:1;}
     .pf-tpl-name{padding:9px 10px 10px;font-size:0.78rem;font-weight:700;color:var(--text);}
@@ -2023,11 +2029,11 @@
         <span class="tpl-section-badge">35 designs</span>
       </div>
       <div class="tpl-filter-row">
-        <button class="tpl-filter-btn active" onclick="filterTpls(this,'all')">All 35</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'dark')">Dark</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'light')">Light</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'creative')">Creative</button>
-        <button class="tpl-filter-btn" onclick="filterTpls(this,'minimal')">Minimal</button>
+        <button class="tpl-filter-btn active" data-cat="all" onclick="filterTpls(this,'all')">All 35</button>
+        <button class="tpl-filter-btn" data-cat="dark" onclick="filterTpls(this,'dark')">Dark</button>
+        <button class="tpl-filter-btn" data-cat="light" onclick="filterTpls(this,'light')">Light</button>
+        <button class="tpl-filter-btn" data-cat="creative" onclick="filterTpls(this,'creative')">Creative</button>
+        <button class="tpl-filter-btn" data-cat="minimal" onclick="filterTpls(this,'minimal')">Minimal</button>
       </div>
       <div class="tpl-grid" id="tplGrid"></div>
       <div id="tplGuide" class="tpl-guide">
@@ -2248,25 +2254,79 @@ const TPL_META = {
   paper:    {label:'Paper',     tag:'Parchment · Warm',cat:'minimal'},
 };
 
-function _tplHeadHTML(key) {
-  var h = '<div class="r-name">Alex Johnson</div><div class="r-title">Senior Product Manager</div><div class="r-contact">alex@example.com</div>';
+function _tplHeadHTML(key, data) {
+  var name = data ? ((data.firstName||'') + ' ' + (data.lastName||'')).trim() || 'Your Name' : 'Alex Johnson';
+  var title = data ? (data.jobTitle || '') : 'Senior Product Manager';
+  var contact = data ? [data.email, data.phone, data.location].filter(Boolean).join(' · ') : 'alex@example.com';
+  var h = '<div class="r-name">' + esc(name) + '</div><div class="r-title">' + esc(title) + '</div>' + (contact ? '<div class="r-contact">' + esc(contact) + '</div>' : '');
   if (key === 'executive') return '<div class="r-head">' + h + '</div><div class="r-head-accent"></div>';
   if (key === 'academic') return '<div class="r-head"><div class="r-head-line"></div>' + h + '<div class="r-head-line"></div></div>';
   return '<div class="r-head">' + h + '</div>';
 }
-var _tplBodyHTML = '<div class="r-sec"><div class="r-sec-t">Experience</div><div class="r-exp"><div class="r-exp-top"><span class="r-role">Product Manager</span><span class="r-period">2022–Present</span></div><div class="r-co">Google</div><ul class="r-ul"><li>Led product roadmap and cross-team strategy</li><li>Grew user base by 40% in 12 months</li></ul></div></div><div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">BS Computer Science</div><div class="r-sch">MIT</div></div><div class="r-yr">2018</div></div></div><div class="r-sec"><div class="r-sec-t">Skills</div><div class="r-skills"><span class="r-sk">Strategy</span><span class="r-sk">Agile</span><span class="r-sk">Analytics</span><span class="r-sk">Leadership</span></div></div>';
+var _tplBodyFallback = '<div class="r-sec"><div class="r-sec-t">Experience</div><div class="r-exp"><div class="r-exp-top"><span class="r-role">Product Manager</span><span class="r-period">2022–Present</span></div><div class="r-co">Google</div><ul class="r-ul"><li>Led product roadmap and cross-team strategy</li><li>Grew user base by 40% in 12 months</li></ul></div></div><div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">BS Computer Science</div><div class="r-sch">MIT</div></div><div class="r-yr">2018</div></div></div><div class="r-sec"><div class="r-sec-t">Skills</div><div class="r-skills"><span class="r-sk">Strategy</span><span class="r-sk">Agile</span><span class="r-sk">Analytics</span><span class="r-sk">Leadership</span></div></div>';
+
+function _buildTplBodyHTML(data, tplKey) {
+  var hasContent = data && (data.experience && data.experience.length || data.education && data.education.length || data.skills && data.skills.length);
+  if (!hasContent) return _tplBodyFallback;
+  var e = esc;
+  var textTpls = ['classic','academic','simple','mono','retro','paper'];
+  var div = tplKey === 'minimal' ? '<div class="r-div"></div>' : '';
+  var sumHTML = '';
+  if (data.summary) {
+    var short = data.summary.length > 180 ? data.summary.slice(0,180).replace(/\s+\S*$/, '…') : data.summary;
+    sumHTML = '<div class="r-sec"><div class="r-sec-t">Professional Summary</div><div class="r-sum">' + e(short) + '</div></div>';
+  }
+  var expHTML = '';
+  var exps = (data.experience || []).slice(0,2);
+  if (exps.length) {
+    var items = exps.map(function(ex) {
+      var period = [ex.start, ex.end].filter(Boolean).join(' – ');
+      var bullets = Array.isArray(ex.bullets) ? ex.bullets.slice(0,2) : (ex.desc ? [ex.desc] : []);
+      return '<div class="r-exp"><div class="r-exp-top"><span class="r-role">' + e(ex.title||ex.role||'') + '</span><span class="r-period">' + e(period) + '</span></div><div class="r-co">' + e(ex.co||ex.company||'') + '</div>' + (bullets.length ? '<ul class="r-ul">' + bullets.map(function(b){return '<li>' + e(b) + '</li>';}).join('') + '</ul>' : '') + '</div>';
+    }).join('');
+    expHTML = '<div class="r-sec"><div class="r-sec-t">Experience</div>' + items + '</div>';
+  }
+  var eduHTML = '';
+  var edu = (data.education || [])[0];
+  if (edu) eduHTML = '<div class="r-sec"><div class="r-sec-t">Education</div><div class="r-edu"><div><div class="r-deg">' + e(edu.deg||edu.degree||'') + '</div><div class="r-sch">' + e(edu.sch||edu.school||edu.institution||'') + '</div></div><div class="r-yr">' + e(edu.yr||edu.year||'') + '</div></div></div>';
+  var skillArr = (data.skills || []).slice(0,6);
+  var skillsHTML = '';
+  if (skillArr.length) {
+    var inner = textTpls.includes(tplKey)
+      ? '<div class="r-skills r-sum">' + e(skillArr.join(' · ')) + '</div>'
+      : '<div class="r-skills">' + skillArr.map(function(sk){return '<span class="r-sk">' + e(sk) + '</span>';}).join('') + '</div>';
+    skillsHTML = '<div class="r-sec"><div class="r-sec-t">Skills</div>' + inner + '</div>';
+  }
+  if (['modern','executive','corporate'].includes(tplKey)) {
+    return '<div class="r-2col"><aside class="r-aside">' + skillsHTML + div + eduHTML + '</aside><div class="r-main-col">' + sumHTML + div + expHTML + '</div></div>';
+  }
+  return sumHTML + div + expHTML + div + eduHTML + div + skillsHTML;
+}
 
 function calibrateTplPreviews() {
+  var anyMissed = false;
   document.querySelectorAll('.tpl-card-thumb').forEach(function(th) {
     var inn = th.querySelector('.tpl-mini-inner');
     if (!inn) return;
-    var s = th.offsetWidth / 794;
-    inn.style.transform = 'scale(' + s.toFixed(4) + ')';
-    inn.style.height = Math.ceil(th.offsetHeight / s) + 'px';
+    var w = th.offsetWidth;
+    if (!w) { anyMissed = true; return; }
+    inn.style.transform = 'scale(' + (w / 794).toFixed(4) + ')';
   });
+  if (anyMissed) setTimeout(calibrateTplPreviews, 150);
 }
 var _tplRszT;
 window.addEventListener('resize', function() { clearTimeout(_tplRszT); _tplRszT = setTimeout(calibrateTplPreviews, 150); });
+
+function calibratePfPreviews() {
+  document.querySelectorAll('.pf-tpl-preview').forEach(function(prev) {
+    var inn = prev.querySelector('.pf-preview-inner');
+    if (!inn) return;
+    var s = prev.offsetWidth / 500;
+    inn.style.transform = 'scale(' + s.toFixed(4) + ')';
+  });
+}
+var _pfPrevRszT;
+window.addEventListener('resize', function() { clearTimeout(_pfPrevRszT); _pfPrevRszT = setTimeout(calibratePfPreviews, 150); });
 
 function renderTemplateGrid(filterCat) {
   const grid = document.getElementById('tplGrid');
@@ -2275,13 +2335,14 @@ function renderTemplateGrid(filterCat) {
   let entries = Object.entries(TPL_META).filter(([,v]) => !filterCat || filterCat === 'all' || v.cat === filterCat);
   // Sort most-used first; stable within same usage keeps original definition order
   entries.sort(([ka], [kb]) => (usage[kb] || 0) - (usage[ka] || 0));
+  const data = lastResumeData;
   grid.innerHTML = entries.map(([key, meta]) => {
     const useCount = usage[key] || 0;
     const tagText = useCount >= 3 ? `🔥 ${meta.tag}` : useCount >= 1 ? `★ ${meta.tag}` : meta.tag;
     return `<div class="tpl-card${key === currentTemplate ? ' tpl-active' : ''}" onclick="selectTemplate('${key}')">
       <div class="tpl-card-check">✓</div>
       <div class="tpl-card-thumb">
-        <div class="tpl-mini-inner tpl-${key}">${_tplHeadHTML(key)}${_tplBodyHTML}</div>
+        <div class="tpl-mini-inner tpl-${key}">${_tplHeadHTML(key, data)}${_buildTplBodyHTML(data, key)}</div>
       </div>
       <div class="tpl-card-meta">
         <div class="tpl-card-name">${meta.label}</div>
@@ -2289,7 +2350,8 @@ function renderTemplateGrid(filterCat) {
       </div>
     </div>`;
   }).join('');
-  requestAnimationFrame(calibrateTplPreviews);
+  requestAnimationFrame(function() { requestAnimationFrame(calibrateTplPreviews); });
+  setTimeout(calibrateTplPreviews, 250);
 }
 
 function filterTpls(btn, cat) {
@@ -2569,11 +2631,13 @@ function goToStep(step, skipScroll) {
     if (step === 5) renderSuggestions();
     if (step === 7) {
       renderTemplateGrid('all');
+      setTimeout(calibrateTplPreviews, 250);
       document.querySelectorAll('.tpl-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
       if (!lastResumeData) {
         document.getElementById('tplGuide')?.classList.add('visible');
         document.getElementById('generateBtn')?.classList.add('btn-ready');
       }
+      if (lastResumeData) _triggerPageCount(true);
     }
     updatePreview();
   }
@@ -3387,20 +3451,19 @@ function _updatePageChip(pages) {
   chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
 }
 let _pcTimer;
+function _doMeasureAndUpdate() {
+  const page = document.querySelector('#resumeOutput .resume-a4-page');
+  if (page) _updatePageChip(_measurePages(page));
+}
 function _triggerPageCount(fast) {
   clearTimeout(_pcTimer);
   _pcTimer = setTimeout(function() {
-    const strip = document.getElementById('pageCountStrip');
-    if (!strip || strip.style.display === 'none') return;
-    const page = document.querySelector('#resumeOutput .resume-a4-page');
-    if (page) _updatePageChip(_measurePages(page));
-  }, fast ? 80 : 120);
+    requestAnimationFrame(function() { requestAnimationFrame(_doMeasureAndUpdate); });
+  }, fast ? 80 : 300);
 }
 function _triggerOffscreenPageCount() {
   clearTimeout(_pcTimer);
   _pcTimer = setTimeout(function() {
-    const strip = document.getElementById('pageCountStrip');
-    if (!strip || strip.style.display === 'none') return;
     if (!lastResumeData) return;
     const tmp = document.createElement('div');
     tmp.className = 'resume-a4-page';
@@ -3415,6 +3478,8 @@ function renderOutput(data) {
   const out = document.getElementById('resumeOutput');
   out.style.alignItems = 'flex-start';
   out.style.justifyContent = 'flex-start';
+  var _chipReset = document.getElementById('pageCountChip');
+  if (_chipReset) { _chipReset.textContent = '···'; _chipReset.style.color = '#888'; _chipReset.style.background = '#f3f4f6'; _chipReset.style.borderColor = '#d1d5db'; }
   out.innerHTML = `<div class="resume-a4-page" oninput="manuallyEdited=true;_triggerPageCount()">${renderResumeHTML(data)}</div>`;
   const dl = document.getElementById('dlActions');
   if (dl) dl.style.display = 'flex';
@@ -3422,6 +3487,20 @@ function renderOutput(data) {
   if (strip) strip.style.display = 'flex';
   _triggerPageCount(true);
   setTimeout(function() { _triggerPageCount(true); }, 500);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function() { requestAnimationFrame(_doMeasureAndUpdate); });
+  }
+  if (window._pcObserver) window._pcObserver.disconnect();
+  if (window._pcResizeObserver) window._pcResizeObserver.disconnect();
+  var _a4El = out.querySelector('.resume-a4-page');
+  if (_a4El) {
+    window._pcObserver = new MutationObserver(function() { _triggerPageCount(); });
+    window._pcObserver.observe(_a4El, { characterData: true, subtree: true, childList: true });
+    if (window.ResizeObserver) {
+      window._pcResizeObserver = new ResizeObserver(function() { _triggerPageCount(); });
+      window._pcResizeObserver.observe(_a4El);
+    }
+  }
   // Show cover letter section and pre-fill role
   const clSec = document.getElementById('clSection');
   if (clSec) {
@@ -3431,6 +3510,8 @@ function renderOutput(data) {
   }
   out.addEventListener('copy', e => e.preventDefault(), { once: false });
   out.addEventListener('cut', e => e.preventDefault(), { once: false });
+  var _tplBtn = document.querySelector('.tpl-filter-btn.active');
+  renderTemplateGrid(_tplBtn ? (_tplBtn.dataset.cat || 'all') : 'all');
 }
 
 // ── Download Doc (.docx) ─────────────────────────────────────────────
@@ -4891,73 +4972,99 @@ function closePreviewModal(e) {
     </div>
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
+      <!-- Photo upload -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;">
+        <div id="pfPhotoCircle" onclick="document.getElementById('pfPhotoInput').click()" style="width:64px;height:64px;border-radius:50%;background:var(--input-bg);border:2.5px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;flex-shrink:0;overflow:hidden;position:relative;">📷</div>
+        <img id="pfPhotoPreview" style="display:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid var(--accent);flex-shrink:0;cursor:pointer;" onclick="document.getElementById('pfPhotoInput').click()" alt="Portfolio photo">
+        <input type="file" id="pfPhotoInput" accept="image/*" style="display:none" onchange="handlePfPhoto(event)">
+        <div style="flex:1;">
+          <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:3px;">Profile Photo <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">(optional)</span></div>
+          <div style="font-size:0.77rem;color:var(--muted);margin-bottom:6px;">Appears in your portfolio hero. Tap the circle to upload.</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            <button onclick="document.getElementById('pfPhotoInput').click()" style="padding:5px 12px;font-size:0.78rem;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;">📷 Upload Photo</button>
+            <button id="pfPhotoRemoveBtn" onclick="removePfPhoto()" style="display:none;padding:5px 10px;font-size:0.78rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--muted);">✕ Remove</button>
+          </div>
+        </div>
+      </div>
       <div class="pf-section-title">Choose a style for your portfolio</div>
       <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
       <div class="pf-tpl-grid">
         <div class="pf-tpl-card selected" id="pfTplProfessional" onclick="selectPfTemplate('professional')">
-          <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#1e293b 45%,#f8fafc 45%);flex-direction:column;">
-            <div style="background:#1e293b;padding:8px 10px;flex-shrink:0;">
-              <div style="height:6px;background:#d97706;border-radius:3px;width:55%;margin-bottom:3px;"></div>
-              <div style="height:3px;background:rgba(255,255,255,0.3);border-radius:2px;width:38%;"></div>
-            </div>
-            <div style="background:#f8fafc;flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:3px;">
-              <div style="height:2.5px;background:#e2e8f0;border-radius:2px;width:80%;"></div>
-              <div style="height:2.5px;background:#e2e8f0;border-radius:2px;width:60%;"></div>
-              <div style="height:2.5px;background:#d97706;border-radius:2px;width:35%;margin-top:3px;"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-preview-inner">
+              <div class="pf-anim-scroll" style="font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;">
+                <div style="background:#1e293b;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;"><span style="color:#fff;font-size:13px;font-weight:800;letter-spacing:-0.3px;">Alex Johnson</span><span style="display:flex;gap:10px;"><span style="color:rgba(255,255,255,0.6);font-size:10px;">About</span><span style="color:rgba(255,255,255,0.6);font-size:10px;">Work</span><span style="color:rgba(255,255,255,0.6);font-size:10px;">Skills</span></span></div>
+                <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:22px 18px;color:#fff;display:flex;align-items:center;gap:14px;"><div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.45);flex-shrink:0;"></div><div><div style="font-size:19px;font-weight:800;line-height:1.1;margin-bottom:3px;">Alex Johnson</div><div style="font-size:11px;opacity:0.8;margin-bottom:8px;">Senior Product Manager · Google</div><div style="display:flex;gap:5px;"><span style="font-size:9px;border:1px solid rgba(255,255,255,0.4);border-radius:4px;padding:2px 8px;">LinkedIn</span><span style="font-size:9px;border:1px solid rgba(255,255,255,0.4);border-radius:4px;padding:2px 8px;">GitHub</span></div></div></div>
+                <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #f1f5f9;"><div style="font-size:12px;font-weight:800;color:#1e293b;border-bottom:2px solid #2563eb;padding-bottom:3px;margin-bottom:8px;display:inline-block;">About Me</div><div style="font-size:10px;color:#64748b;line-height:1.65;">Results-driven product leader with 6+ years shipping high-impact features at global scale. Passionate about user-centered design and data-driven decisions.</div></div>
+                <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #f1f5f9;"><div style="font-size:12px;font-weight:800;color:#1e293b;border-bottom:2px solid #2563eb;padding-bottom:3px;margin-bottom:10px;display:inline-block;">Experience</div><div style="display:flex;gap:8px;margin-bottom:9px;"><div style="width:7px;height:7px;border-radius:50%;background:#2563eb;flex-shrink:0;margin-top:2px;"></div><div><div style="font-size:11px;font-weight:700;color:#1e293b;">Senior PM · Google</div><div style="font-size:9px;color:#2563eb;margin-bottom:2px;">2022–Present</div><div style="font-size:9.5px;color:#64748b;">Led roadmap for Search serving 2B+ daily users.</div></div></div><div style="display:flex;gap:8px;"><div style="width:7px;height:7px;border-radius:50%;background:#2563eb;flex-shrink:0;margin-top:2px;"></div><div><div style="font-size:11px;font-weight:700;color:#1e293b;">PM · Meta</div><div style="font-size:9px;color:#2563eb;margin-bottom:2px;">2019–2022</div><div style="font-size:9.5px;color:#64748b;">Grew Marketplace engagement by 40%.</div></div></div></div>
+                <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #f1f5f9;"><div style="font-size:12px;font-weight:800;color:#1e293b;border-bottom:2px solid #2563eb;padding-bottom:3px;margin-bottom:10px;display:inline-block;">Skills</div><div style="display:flex;flex-wrap:wrap;gap:5px;"><span style="font-size:10px;padding:3px 9px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">Strategy</span><span style="font-size:10px;padding:3px 9px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">Agile</span><span style="font-size:10px;padding:3px 9px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">SQL</span><span style="font-size:10px;padding:3px 9px;background:rgba(37,99,235,0.1);color:#2563eb;border-radius:99px;font-weight:600;">Analytics</span></div></div>
+                <div style="padding:13px 16px;background:#fff;"><div style="font-size:12px;font-weight:800;color:#1e293b;border-bottom:2px solid #2563eb;padding-bottom:3px;margin-bottom:10px;display:inline-block;">Education</div><div style="display:flex;gap:8px;"><div style="width:7px;height:7px;border-radius:50%;background:#2563eb;flex-shrink:0;margin-top:2px;"></div><div><div style="font-size:11px;font-weight:700;color:#1e293b;">MBA · Stanford GSB</div><div style="font-size:9px;color:#2563eb;">2017–2019</div></div></div></div>
+              </div>
             </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Professional <span class="pf-tpl-tag">· Corporate</span></div>
-          <div class="pf-tpl-desc">Dark header with blue accents and a clean timeline. Ideal for finance, consulting &amp; enterprise roles.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplCreative" onclick="selectPfTemplate('creative')">
-          <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#d97706,#b45309);flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.25);"></div>
-            <div style="height:4px;background:rgba(255,255,255,0.85);border-radius:2px;width:60%;"></div>
-            <div style="height:3px;background:rgba(255,255,255,0.45);border-radius:2px;width:40%;"></div>
-            <div style="display:flex;gap:4px;margin-top:4px;">
-              <div style="height:14px;width:22px;border-radius:4px;background:rgba(255,255,255,0.2);"></div>
-              <div style="height:14px;width:22px;border-radius:4px;background:rgba(255,255,255,0.2);"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-preview-inner">
+              <div class="pf-anim-scroll" style="font-family:system-ui,-apple-system,sans-serif;background:#f8f9ff;">
+                <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;"><span style="color:#fff;font-size:13px;font-weight:800;">Alex Johnson</span><span style="display:flex;gap:10px;"><span style="color:rgba(255,255,255,0.7);font-size:10px;">Work</span><span style="color:rgba(255,255,255,0.7);font-size:10px;">About</span><span style="color:rgba(255,255,255,0.7);font-size:10px;">Contact</span></span></div>
+                <div style="background:linear-gradient(160deg,#7c3aed 0%,#2563eb 100%);padding:26px 18px;text-align:center;color:#fff;"><div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.25);border:2.5px solid rgba(255,255,255,0.6);margin:0 auto 10px;"></div><div style="font-size:20px;font-weight:800;margin-bottom:3px;">Alex Johnson</div><div style="font-size:11px;opacity:0.8;margin-bottom:10px;">Product Designer · UX Researcher</div><div style="display:flex;gap:6px;justify-content:center;"><span style="font-size:9px;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:3px 11px;">Portfolio</span><span style="font-size:9px;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:3px 11px;">Contact</span></div></div>
+                <div style="padding:14px 16px;background:#fff;border-bottom:1px solid #ede9fe;"><div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:8px;">About Me</div><div style="font-size:10px;color:#64748b;line-height:1.65;">Creative professional with a passion for bold design and user experiences that delight and inspire.</div></div>
+                <div style="padding:14px 16px;background:#fff;border-bottom:1px solid #ede9fe;"><div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:10px;">Skills</div><div style="display:flex;flex-wrap:wrap;gap:5px;"><span style="font-size:10px;padding:3px 10px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">Figma</span><span style="font-size:10px;padding:3px 10px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">React</span><span style="font-size:10px;padding:3px 10px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">Branding</span><span style="font-size:10px;padding:3px 10px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:99px;font-weight:600;">Framer</span></div></div>
+                <div style="padding:14px 16px;background:#fff;"><div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:10px;">Projects</div><div style="background:#f8f5ff;border:1px solid #ede9fe;border-radius:10px;padding:10px 12px;margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:2px;">Design System v2</div><div style="font-size:9.5px;color:#64748b;">React · Figma · Storybook</div></div><div style="background:#f8f5ff;border:1px solid #ede9fe;border-radius:10px;padding:10px 12px;"><div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:2px;">Brand Rebrand — TechCo</div><div style="font-size:9.5px;color:#64748b;">Logo · Typography · Guidelines</div></div></div>
+              </div>
             </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Creative <span class="pf-tpl-tag">· Bold</span></div>
-          <div class="pf-tpl-desc">Purple-to-blue gradient hero with vibrant skill chips. Great for designers, marketers &amp; creatives.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplMinimal" onclick="selectPfTemplate('minimal')">
-          <div class="pf-tpl-preview" style="background:#ffffff;border-bottom:1px solid #e2e8f0;flex-direction:column;padding:10px;">
-            <div style="height:5px;background:#111827;border-radius:2px;width:50%;margin-bottom:4px;"></div>
-            <div style="height:3px;background:#6b7280;border-radius:2px;width:35%;margin-bottom:8px;"></div>
-            <div style="height:1.5px;background:#e2e8f0;width:100%;margin-bottom:6px;"></div>
-            <div style="height:2px;background:#d1d5db;border-radius:2px;width:80%;margin-bottom:3px;"></div>
-            <div style="height:2px;background:#d1d5db;border-radius:2px;width:65%;"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-preview-inner">
+              <div class="pf-anim-scroll" style="font-family:system-ui,-apple-system,sans-serif;background:#fff;">
+                <div style="background:#111827;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;"><span style="color:#fff;font-size:13px;font-weight:700;letter-spacing:-0.3px;">Alex Johnson</span><span style="display:flex;gap:10px;"><span style="color:rgba(255,255,255,0.45);font-size:10px;">About</span><span style="color:rgba(255,255,255,0.45);font-size:10px;">Work</span><span style="color:rgba(255,255,255,0.45);font-size:10px;">Contact</span></span></div>
+                <div style="background:#111827;padding:22px 18px;color:#fff;display:flex;align-items:center;gap:14px;"><div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);flex-shrink:0;"></div><div><div style="font-size:19px;font-weight:700;margin-bottom:3px;">Alex Johnson</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">Senior Product Manager</div></div></div>
+                <div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;"><div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">About</div><div style="font-size:10px;color:#374151;line-height:1.65;">Experienced leader focused on building great products with minimal complexity and maximal impact.</div></div>
+                <div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;"><div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Experience</div><div style="margin-bottom:9px;"><div style="font-size:11px;font-weight:600;color:#111827;">Sr. Product Manager · Google</div><div style="font-size:9.5px;color:#9ca3af;margin-bottom:3px;">2022 – Present</div><div style="font-size:9.5px;color:#374151;line-height:1.5;">Led roadmap for Search serving 2B+ daily users.</div></div><div><div style="font-size:11px;font-weight:600;color:#111827;">PM · Meta</div><div style="font-size:9.5px;color:#9ca3af;margin-bottom:3px;">2019 – 2022</div><div style="font-size:9.5px;color:#374151;line-height:1.5;">Grew Marketplace engagement by 40%.</div></div></div>
+                <div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;"><div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Skills</div><div style="display:flex;flex-wrap:wrap;gap:5px;"><span style="font-size:10px;padding:3px 9px;background:#f3f4f6;color:#374151;border-radius:5px;">Strategy</span><span style="font-size:10px;padding:3px 9px;background:#f3f4f6;color:#374151;border-radius:5px;">SQL</span><span style="font-size:10px;padding:3px 9px;background:#f3f4f6;color:#374151;border-radius:5px;">Agile</span><span style="font-size:10px;padding:3px 9px;background:#f3f4f6;color:#374151;border-radius:5px;">Data</span><span style="font-size:10px;padding:3px 9px;background:#f3f4f6;color:#374151;border-radius:5px;">UX Research</span></div></div>
+                <div style="padding:14px 18px;"><div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Education</div><div style="font-size:11px;font-weight:600;color:#111827;">MBA · Stanford GSB</div><div style="font-size:9.5px;color:#9ca3af;">2017 – 2019</div></div>
+              </div>
+            </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Minimal <span class="pf-tpl-tag">· Clean</span></div>
-          <div class="pf-tpl-desc">Pure white with dark typography and generous whitespace. Timeless — works for any field.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplTech" onclick="selectPfTemplate('tech')">
-          <div class="pf-tpl-preview" style="background:#0d1117;flex-direction:column;padding:8px;">
-            <div style="height:4px;background:#22c55e;border-radius:2px;width:45%;margin-bottom:5px;"></div>
-            <div style="height:2.5px;background:rgba(255,255,255,0.25);border-radius:2px;width:65%;margin-bottom:8px;"></div>
-            <div style="display:flex;gap:4px;">
-              <div style="height:14px;width:28px;border-radius:4px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);"></div>
-              <div style="height:14px;width:28px;border-radius:4px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-preview-inner">
+              <div class="pf-anim-scroll" style="font-family:'Courier New',monospace;background:#0d1117;">
+                <div style="background:#0d1117;padding:10px 18px;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between;"><span style="color:#22c55e;font-size:13px;font-weight:700;">Alex Johnson</span><span style="display:flex;gap:10px;"><span style="color:#8b949e;font-size:10px;">About</span><span style="color:#8b949e;font-size:10px;">Projects</span><span style="color:#8b949e;font-size:10px;">Contact</span></span></div>
+                <div style="background:#161b22;padding:22px 18px;border-bottom:1px solid #21262d;"><div style="font-size:18px;font-weight:700;color:#22c55e;margin-bottom:3px;">Alex Johnson</div><div style="font-size:11px;color:#8b949e;margin-bottom:12px;">Software Engineer · Open to Work</div><div style="display:flex;gap:6px;"><span style="font-size:9px;border:1px solid rgba(34,197,94,0.4);border-radius:4px;padding:2px 8px;color:#22c55e;">GitHub</span><span style="font-size:9px;border:1px solid rgba(34,197,94,0.4);border-radius:4px;padding:2px 8px;color:#22c55e;">LinkedIn</span></div></div>
+                <div style="padding:13px 18px;border-bottom:1px solid #21262d;"><div style="font-size:11px;font-weight:700;color:#22c55e;margin-bottom:8px;">// Skills</div><div style="display:flex;flex-wrap:wrap;gap:5px;"><span style="font-size:10px;padding:3px 9px;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:4px;">React</span><span style="font-size:10px;padding:3px 9px;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:4px;">Node.js</span><span style="font-size:10px;padding:3px 9px;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:4px;">Python</span><span style="font-size:10px;padding:3px 9px;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:4px;">AWS</span><span style="font-size:10px;padding:3px 9px;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:4px;">Docker</span></div></div>
+                <div style="padding:13px 18px;border-bottom:1px solid #21262d;"><div style="font-size:11px;font-weight:700;color:#22c55e;margin-bottom:10px;">// Projects</div><div style="background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px 12px;margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#e6edf3;margin-bottom:2px;">OpenAPI Client</div><div style="font-size:9.5px;color:#8b949e;">TypeScript · REST · CI/CD</div></div><div style="background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px 12px;"><div style="font-size:11px;font-weight:700;color:#e6edf3;margin-bottom:2px;">ML Dashboard</div><div style="font-size:9.5px;color:#8b949e;">Python · FastAPI · React</div></div></div>
+                <div style="padding:13px 18px;"><div style="font-size:11px;font-weight:700;color:#22c55e;margin-bottom:8px;">// Experience</div><div style="font-size:11px;font-weight:600;color:#e6edf3;">Software Engineer · Stripe</div><div style="font-size:9.5px;color:#8b949e;margin-bottom:3px;">2021 – Present</div><div style="font-size:9.5px;color:#6e7681;">Built high-throughput payment APIs serving 50K req/s.</div></div>
+              </div>
             </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Tech <span class="pf-tpl-tag">· Dark</span></div>
-          <div class="pf-tpl-desc">Dark mode with terminal-green accents. Built for engineers, developers &amp; data scientists.</div>
         </div>
         <div class="pf-tpl-card" id="pfTplWarm" onclick="selectPfTemplate('warm')">
-          <div class="pf-tpl-preview" style="background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.3);"></div>
-            <div style="height:4px;background:rgba(255,255,255,0.9);border-radius:2px;width:55%;"></div>
-            <div style="height:2.5px;background:rgba(255,255,255,0.55);border-radius:2px;width:38%;"></div>
+          <div class="pf-tpl-preview">
+            <div class="pf-preview-inner">
+              <div class="pf-anim-scroll" style="font-family:system-ui,-apple-system,sans-serif;background:#fff7ed;">
+                <div style="background:linear-gradient(135deg,#7c2d12,#ea580c,#f97316);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;"><span style="color:#fff;font-size:13px;font-weight:800;">Alex Johnson</span><span style="display:flex;gap:10px;"><span style="color:rgba(255,255,255,0.75);font-size:10px;">About</span><span style="color:rgba(255,255,255,0.75);font-size:10px;">Work</span><span style="color:rgba(255,255,255,0.75);font-size:10px;">Contact</span></span></div>
+                <div style="background:linear-gradient(160deg,#9a3412,#ea580c 60%,#f97316 100%);padding:26px 18px;text-align:center;color:#fff;"><div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.25);border:2.5px solid rgba(255,255,255,0.5);margin:0 auto 10px;"></div><div style="font-size:19px;font-weight:800;margin-bottom:3px;">Alex Johnson</div><div style="font-size:11px;opacity:0.85;margin-bottom:10px;">Coach · Educator · Speaker</div><div style="display:flex;gap:6px;justify-content:center;"><span style="font-size:9px;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:3px 11px;">LinkedIn</span><span style="font-size:9px;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:3px 11px;">Contact</span></div></div>
+                <div style="padding:14px 16px;background:#fff7ed;border-bottom:1px solid #fed7aa;"><div style="font-size:13px;font-weight:800;color:#ea580c;margin-bottom:8px;">About Me</div><div style="font-size:10px;color:#78350f;line-height:1.65;">Passionate coach helping teams unlock their full potential through empathy, strategy, and honest conversations.</div></div>
+                <div style="padding:14px 16px;background:#fff7ed;border-bottom:1px solid #fed7aa;"><div style="font-size:13px;font-weight:800;color:#ea580c;margin-bottom:10px;">Experience</div><div style="display:flex;gap:8px;margin-bottom:9px;"><div style="width:7px;height:7px;border-radius:50%;background:#ea580c;flex-shrink:0;margin-top:2px;"></div><div><div style="font-size:11px;font-weight:700;color:#7c2d12;">Leadership Coach · CoachCo</div><div style="font-size:9px;color:#ea580c;margin-bottom:2px;">2021–Present</div><div style="font-size:9.5px;color:#78350f;">Coached 200+ leaders across 12 countries.</div></div></div><div style="display:flex;gap:8px;"><div style="width:7px;height:7px;border-radius:50%;background:#ea580c;flex-shrink:0;margin-top:2px;"></div><div><div style="font-size:11px;font-weight:700;color:#7c2d12;">Educator · Coursera</div><div style="font-size:9px;color:#ea580c;margin-bottom:2px;">2018–2021</div><div style="font-size:9.5px;color:#78350f;">Created 5 courses with 50K+ enrollments.</div></div></div></div>
+                <div style="padding:14px 16px;background:#fff7ed;"><div style="font-size:13px;font-weight:800;color:#ea580c;margin-bottom:10px;">Skills</div><div style="display:flex;flex-wrap:wrap;gap:5px;"><span style="font-size:10px;padding:3px 10px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Leadership</span><span style="font-size:10px;padding:3px 10px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Mentoring</span><span style="font-size:10px;padding:3px 10px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Strategy</span><span style="font-size:10px;padding:3px 10px;background:rgba(234,88,12,0.1);color:#ea580c;border-radius:99px;font-weight:600;">Public Speaking</span></div></div>
+              </div>
+            </div>
           </div>
           <div class="pf-tpl-check">✓</div>
           <div class="pf-tpl-name">Warm <span class="pf-tpl-tag">· Vibrant</span></div>
-          <div class="pf-tpl-desc">Warm orange gradient with an inviting feel. Perfect for educators, coaches &amp; people-facing roles.</div>
         </div>
       </div>
       <div class="pf-footer">
@@ -4981,6 +5088,8 @@ function closePreviewModal(e) {
         <div class="pf-toggle on" data-section="skills" onclick="togglePfSection(this)"><span class="pf-toggle-ico">⚡</span><span class="pf-toggle-lbl">Skills</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="education" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🎓</span><span class="pf-toggle-lbl">Education</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
+        <div class="pf-toggle" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
+        <div class="pf-toggle" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
       </div>
       <!-- Section detail wizard -->
@@ -5004,12 +5113,25 @@ function closePreviewModal(e) {
     </div>
     <!-- Step 3: Preview & Download -->
     <div class="pf-body" id="pfStep3" style="display:none">
-      <div class="pf-section-title">Your portfolio is ready!</div>
-      <div class="pf-section-sub">Preview below — download the HTML file and host it anywhere (GitHub Pages, Netlify Drop, or your own server).</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.25);border-radius:14px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>
+        <div style="flex:1;">
+          <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:2px;">Your portfolio is ready!</div>
+          <div style="font-size:0.78rem;color:var(--muted);">Download the HTML file and host it anywhere — GitHub Pages, Netlify, Vercel, or your own domain.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button onclick="downloadPortfolio()" style="padding:8px 16px;font-size:0.83rem;border:none;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML
+          </button>
+          <button id="pfShareBtn" onclick="generatePortfolioLink()" style="padding:7px 16px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Share Link
+          </button>
+        </div>
+      </div>
       <!-- Template mini-switcher -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <span style="font-size:0.8rem;font-weight:600;color:var(--muted);white-space:nowrap;">Switch template:</span>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="pfMiniRow">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="font-size:0.78rem;font-weight:600;color:var(--muted);white-space:nowrap;">Style:</span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="pfMiniRow">
           <button class="pf-mini-tpl active" id="pfMiniProfessional" onclick="switchPfTemplate('professional')">Professional</button>
           <button class="pf-mini-tpl" id="pfMiniCreative" onclick="switchPfTemplate('creative')">Creative</button>
           <button class="pf-mini-tpl" id="pfMiniMinimal" onclick="switchPfTemplate('minimal')">Minimal</button>
@@ -5026,18 +5148,9 @@ function closePreviewModal(e) {
         </div>
         <iframe class="pf-preview-frame" id="pfPreviewFrame" title="Portfolio Preview"></iframe>
       </div>
-      <div class="pf-footer">
+      <div class="pf-footer" style="margin-top:10px;">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
-        <div class="pf-footer-right" style="gap:8px;display:flex;flex-wrap:wrap;">
-          <button onclick="downloadPortfolio()" style="padding:9px 14px;font-size:0.83rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download
-          </button>
-          <button class="btn-accent" id="pfShareBtn" onclick="generatePortfolioLink()" style="gap:8px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Generate Link
-          </button>
-        </div>
+        <div style="font-size:0.74rem;color:var(--muted);text-align:right;">Free forever · no account needed · yours to host</div>
       </div>
     </div>
   </div>
@@ -5047,25 +5160,69 @@ function closePreviewModal(e) {
 // ── Portfolio Builder ──────────────────────────────────────────────────
 
 var pfTemplate = 'professional';
-var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,contact:true};
+var pfPhoto = null;
+var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:false,contact:true};
 var pfCurrentStep = 1;
 
 // ── Portfolio wizard state ─────────────────────────────────────────────
 var pfWzIdx = 0;
 var pfWzSteps = [];  // built from enabled pfSections
-var pfWzData = { about:'', skills:[], experience:[], education:[], awards:[], email:'', phone:'', location:'', linkedin:'', github:'' };
+var pfWzData = { about:'', skills:[], experience:[], education:[], awards:[], projects:[], certifications:[], email:'', phone:'', location:'', linkedin:'', github:'' };
 
 var _PF_DEFS = [
-  {id:'about',     icon:'👤', label:'About Me',     q:'Write a professional bio that introduces you on your portfolio'},
-  {id:'skills',    icon:'⚡', label:'Skills',        q:'List your key skills — separate with commas'},
-  {id:'experience',icon:'💼', label:'Experience',    q:'Describe your role and impact for each position'},
-  {id:'education', icon:'🎓', label:'Education',     q:'Confirm or edit your education details'},
-  {id:'awards',    icon:'🏆', label:'Awards',        q:'Your awards, certifications and achievements'},
-  {id:'contact',   icon:'📬', label:'Contact Info',  q:'How should visitors reach you?'},
+  {id:'about',          icon:'👤', label:'About Me',        q:'Write a professional bio that introduces you on your portfolio'},
+  {id:'skills',         icon:'⚡', label:'Skills',           q:'List your key skills — separate with commas'},
+  {id:'experience',     icon:'💼', label:'Experience',       q:'Describe your role and impact for each position'},
+  {id:'education',      icon:'🎓', label:'Education',        q:'Confirm or edit your education details'},
+  {id:'awards',         icon:'🏆', label:'Awards',           q:'Your awards, certifications and achievements'},
+  {id:'projects',       icon:'🔧', label:'Projects',         q:'List your key projects — title, description, and tech used'},
+  {id:'certifications', icon:'📜', label:'Certifications',   q:'Your professional certifications and licenses'},
+  {id:'contact',        icon:'📬', label:'Contact Info',     q:'How should visitors reach you?'},
 ];
+
+function handlePfPhoto(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    pfPhoto = e.target.result;
+    var circle = document.getElementById('pfPhotoCircle');
+    var preview = document.getElementById('pfPhotoPreview');
+    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+    if (circle) circle.style.display = 'none';
+    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+    if (removeBtn) removeBtn.style.display = '';
+    if (pfCurrentStep === 3) buildPfPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePfPhoto() {
+  pfPhoto = null;
+  var circle = document.getElementById('pfPhotoCircle');
+  var preview = document.getElementById('pfPhotoPreview');
+  var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+  var inp = document.getElementById('pfPhotoInput');
+  if (circle) circle.style.display = '';
+  if (preview) { preview.style.display = 'none'; preview.src = ''; }
+  if (removeBtn) removeBtn.style.display = 'none';
+  if (inp) inp.value = '';
+  if (pfCurrentStep === 3) buildPfPreview();
+}
 
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
+  // Pre-fill portfolio photo from resume builder photo if available
+  if (userPhoto && !pfPhoto) {
+    pfPhoto = userPhoto;
+    var circle = document.getElementById('pfPhotoCircle');
+    var preview = document.getElementById('pfPhotoPreview');
+    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+    if (circle) circle.style.display = 'none';
+    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+    if (removeBtn) removeBtn.style.display = '';
+  }
   pfGoStep(1);
 }
 function closePfModal() {
@@ -5123,14 +5280,38 @@ function togglePfSection(el) {
 // ── Wizard: build step list, save current, navigate, render ───────────
 
 function pfBuildWz() {
-  // Rebuild step order from enabled sections (preserve pfWzIdx if still valid)
-  pfWzSteps = _PF_DEFS.filter(function(d) { return pfSections[d.id]; });
+  var photoStep = {id:'photo', icon:'📷', label:'Profile Photo', q:'Add a photo — it appears front-and-center in your portfolio hero'};
+  var contactDef = _PF_DEFS.find(function(d) { return d.id === 'contact'; });
+  var rest = _PF_DEFS.filter(function(d) { return d.id !== 'contact' && pfSections[d.id]; });
+  pfWzSteps = [photoStep];
+  if (pfSections.contact && contactDef) pfWzSteps.push(contactDef);
+  pfWzSteps = pfWzSteps.concat(rest);
   if (pfWzIdx >= pfWzSteps.length) pfWzIdx = Math.max(0, pfWzSteps.length - 1);
 }
+
+function handlePfWzPhoto(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    pfPhoto = e.target.result;
+    var circle = document.getElementById('pfPhotoCircle');
+    var preview = document.getElementById('pfPhotoPreview');
+    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+    if (circle) circle.style.display = 'none';
+    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+    if (removeBtn) removeBtn.style.display = '';
+    pfWzRender();
+  };
+  reader.readAsDataURL(file);
+}
+function removePfWzPhoto() { removePfPhoto(); pfWzRender(); }
 
 function pfWzSave() {
   var step = pfWzSteps[pfWzIdx];
   if (!step) return;
+  if (step.id === 'photo') return;
   var v = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
   var cd = (typeof collectData === 'function') ? collectData() : {};
   if (step.id === 'about') {
@@ -5139,9 +5320,18 @@ function pfWzSave() {
     pfWzData.skills = v('pfWzSkills').split(',').map(function(s){return s.trim();}).filter(Boolean);
   } else if (step.id === 'experience') {
     var cnt = parseInt(v('pfWzExpCount'))||0;
-    pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(e,i) {
-      return {title:e.title||'',company:e.co||'',dates:[e.start,e.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||e.desc||''};
-    });
+    var manualCnt = parseInt(v('pfWzExpManualCount'))||0;
+    if (cnt > 0) {
+      pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(ex,i) {
+        return {title:ex.title||'',company:ex.co||'',dates:[ex.start,ex.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||ex.desc||''};
+      });
+    } else if (manualCnt > 0) {
+      pfWzData.experience = [];
+      for (var i=0;i<manualCnt;i++) {
+        var t=v('pfWzExpT'+i),co=v('pfWzExpCo'+i),dt=v('pfWzExpDt'+i),d=v('pfWzExpD'+i);
+        if (t||co) pfWzData.experience.push({title:t,company:co,dates:dt,desc:d});
+      }
+    }
   } else if (step.id === 'education') {
     var ecnt = parseInt(v('pfWzEduCount'))||0;
     pfWzData.education = [];
@@ -5150,10 +5340,24 @@ function pfWzSave() {
     var acnt = parseInt(v('pfWzAwdCount'))||0;
     pfWzData.awards = [];
     for (var i=0;i<acnt;i++) pfWzData.awards.push({title:v('pfWzAwd'+i),issuer:v('pfWzAwdIss'+i)});
+  } else if (step.id === 'projects') {
+    var pcnt = parseInt(v('pfWzProjCount'))||0;
+    pfWzData.projects = [];
+    for (var i=0;i<pcnt;i++) pfWzData.projects.push({title:v('pfWzProjT'+i),desc:v('pfWzProjD'+i),tech:v('pfWzProjTech'+i)});
+  } else if (step.id === 'certifications') {
+    var ccnt = parseInt(v('pfWzCertCount'))||0;
+    pfWzData.certifications = [];
+    for (var i=0;i<ccnt;i++) pfWzData.certifications.push({name:v('pfWzCert'+i),issuer:v('pfWzCertIss'+i),year:v('pfWzCertYr'+i)});
   } else if (step.id === 'contact') {
     pfWzData.email=v('pfWzEmail'); pfWzData.phone=v('pfWzPhone'); pfWzData.location=v('pfWzLoc');
     pfWzData.linkedin=v('pfWzLI'); pfWzData.github=v('pfWzGH');
   }
+}
+
+function pfAddManualExp() {
+  pfWzSave();
+  if (pfWzData.experience.length < 5) pfWzData.experience.push({title:'',company:'',dates:'',desc:''});
+  pfWzRender();
 }
 
 function pfWzNav(dir) {
@@ -5172,7 +5376,7 @@ function pfWzRender() {
   if (!step) { card.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:8px 0;">Enable at least one section above to fill details.</div>'; if(prog)prog.textContent=''; return; }
   if (prog) prog.textContent = (pfWzIdx+1) + ' of ' + pfWzSteps.length;
   if (backBtn) backBtn.style.display = pfWzIdx > 0 ? '' : 'none';
-  if (nextBtn) nextBtn.textContent = pfWzIdx === pfWzSteps.length-1 ? '✓ Done' : 'Next →';
+  if (nextBtn) { nextBtn.textContent = pfWzIdx === pfWzSteps.length-1 ? 'Preview →' : 'Next →'; nextBtn.onclick = pfWzIdx === pfWzSteps.length-1 ? function(){ pfWzSave(); pfGoStep(3); } : function(){ pfWzNav(1); }; }
 
   var cd = (typeof collectData === 'function') ? collectData() : {};
   var e = function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
@@ -5180,25 +5384,64 @@ function pfWzRender() {
   var html = '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;"><span style="font-size:1rem;">' + step.icon + '</span><span style="font-size:0.9rem;font-weight:700;color:var(--text);">' + step.label + '</span></div>';
   html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">' + step.q + '</div>';
 
-  if (step.id === 'about') {
+  var aiBtnStyle = 'padding:6px 13px;font-size:0.81rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+  var aiRowStyle = 'display:flex;align-items:center;gap:8px;margin-top:8px;';
+
+  if (step.id === 'photo') {
+    html += '<div style="display:flex;align-items:center;gap:16px;min-height:90px;">';
+    if (pfPhoto) {
+      html += '<img src="' + pfPhoto + '" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);flex-shrink:0;" alt="Your photo">';
+      html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:4px;">Photo added ✓</div>';
+      html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">This will appear in your portfolio hero section.</div>';
+      html += '<div style="display:flex;gap:7px;"><button onclick="document.getElementById(\'pfWzPh\').click()" style="padding:5px 12px;font-size:0.78rem;background:var(--accent);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;">↑ Change</button>';
+      html += '<button onclick="removePfWzPhoto()" style="padding:5px 10px;font-size:0.78rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--muted);">✕ Remove</button></div></div>';
+    } else {
+      html += '<div onclick="document.getElementById(\'pfWzPh\').click()" style="width:90px;height:90px;border-radius:50%;background:var(--input-bg,#f9fafb);border:2.5px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.2rem;cursor:pointer;flex-shrink:0;">📷</div>';
+      html += '<div><div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:4px;">Profile Photo <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">(optional)</span></div>';
+      html += '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">A professional headshot makes your portfolio stand out. Tap to upload.</div>';
+      html += '<button onclick="document.getElementById(\'pfWzPh\').click()" style="padding:6px 14px;font-size:0.82rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">📷 Upload Photo</button></div>';
+    }
+    html += '</div><input type="file" id="pfWzPh" accept="image/*" style="display:none" onchange="handlePfWzPhoto(event)">';
+
+  } else if (step.id === 'about') {
     var aval = pfWzData.about || (lastResumeData && lastResumeData.summary) || '';
     html += '<textarea id="pfWzAbout" rows="5" style="' + inp + 'resize:vertical;line-height:1.6;" placeholder="I am a product designer with 5 years of experience building…">' + e(aval) + '</textarea>';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;"><button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="padding:6px 13px;font-size:0.81rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✨ Generate with AI</button><span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenerateAbout()" id="pfGenAboutBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenAboutStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'skills') {
     var sval = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).join(', ');
     html += '<textarea id="pfWzSkills" rows="3" style="' + inp + 'resize:vertical;" placeholder="React, Node.js, Python, Figma, Leadership…">' + e(sval) + '</textarea>';
     html += '<div style="font-size:0.74rem;color:var(--muted);margin-top:5px;">Separate skills with commas</div>';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'skills\')" id="pfGenSkillsBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenSkillsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'experience') {
     var exps = (cd.experience||[]).slice(0,5);
-    if (!exps.length) { html += '<div style="color:var(--muted);font-size:0.85rem;">No experience entries found — add them in the form first.</div>'; }
-    exps.forEach(function(ex,i) {
-      var saved = pfWzData.experience[i];
-      html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
-      html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea></div>';
-    });
-    html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
+    if (!exps.length) {
+      // No resume form data — offer manual entry + AI generation
+      var manualExps = pfWzData.experience.length ? pfWzData.experience : [{title:'',company:'',dates:'',desc:''}];
+      manualExps.slice(0,5).forEach(function(ex,i) {
+        html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr 90px;gap:6px;margin-bottom:6px;">';
+        html += '<input id="pfWzExpT'+i+'" style="'+inp+'" placeholder="Job Title / Role" value="'+e(ex.title||'')+'">';
+        html += '<input id="pfWzExpCo'+i+'" style="'+inp+'" placeholder="Company" value="'+e(ex.company||'')+'">';
+        html += '<input id="pfWzExpDt'+i+'" style="'+inp+'" placeholder="2022–2024" value="'+e(ex.dates||'')+'">';
+        html += '</div>';
+        html += '<textarea id="pfWzExpD'+i+'" rows="2" style="'+inp+'resize:vertical;" placeholder="Key achievements and impact…">'+e(ex.desc||'')+'</textarea>';
+        html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button>';
+        html += '</div>';
+      });
+      html += '<input type="hidden" id="pfWzExpManualCount" value="'+Math.min(manualExps.length,5)+'">';
+      html += '<button onclick="pfAddManualExp()" style="font-size:0.8rem;color:var(--accent);background:none;border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Add another role</button>';
+      html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+    } else {
+      exps.forEach(function(ex,i) {
+        var saved = pfWzData.experience[i];
+        html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
+        html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
+        html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
+      });
+      html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
+    }
 
   } else if (step.id === 'education') {
     var edus = pfWzData.education.length ? pfWzData.education : (cd.education||[]).map(function(e2){return{degree:e2.deg||'',school:e2.sch||'',dates:e2.yr||''};});
@@ -5211,6 +5454,7 @@ function pfWzRender() {
       html += '</div>';
     });
     html += '<input type="hidden" id="pfWzEduCount" value="' + Math.min(edus.length,4) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'education\')" id="pfGenEducationBtn" style="' + aiBtnStyle + '">✨ Polish with AI</button><span id="pfGenEducationStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'awards') {
     var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||'',issuer:[a.org,a.year].filter(Boolean).join(' · ')};});
@@ -5222,6 +5466,31 @@ function pfWzRender() {
       html += '</div>';
     });
     html += '<input type="hidden" id="pfWzAwdCount" value="' + Math.min(awds.length,4) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'awards\')" id="pfGenAwardsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenAwardsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'projects') {
+    var projs = pfWzData.projects.length ? pfWzData.projects : [{title:'',desc:'',tech:''}];
+    projs.slice(0,5).forEach(function(p,i) {
+      html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
+      html += '<input id="pfWzProjT'+i+'" style="' + inp + 'margin-bottom:5px;" placeholder="Project title" value="' + e(p.title) + '">';
+      html += '<textarea id="pfWzProjD'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-bottom:5px;" placeholder="What it does and your role…">' + e(p.desc) + '</textarea>';
+      html += '<input id="pfWzProjTech'+i+'" style="' + inp + '" placeholder="Tech used (e.g. React, Node, AWS)" value="' + e(p.tech) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzProjCount" value="' + Math.min(projs.length,5) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'projects\')" id="pfGenProjectsBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenProjectsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
+
+  } else if (step.id === 'certifications') {
+    var certs = pfWzData.certifications.length ? pfWzData.certifications : [{name:'',issuer:'',year:''}];
+    certs.slice(0,6).forEach(function(c,i) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 70px;gap:6px;margin-bottom:8px;">';
+      html += '<input id="pfWzCert'+i+'" style="' + inp + '" placeholder="Certification name" value="' + e(c.name) + '">';
+      html += '<input id="pfWzCertIss'+i+'" style="' + inp + '" placeholder="Issuing org" value="' + e(c.issuer) + '">';
+      html += '<input id="pfWzCertYr'+i+'" style="' + inp + '" placeholder="Year" value="' + e(c.year) + '">';
+      html += '</div>';
+    });
+    html += '<input type="hidden" id="pfWzCertCount" value="' + Math.min(certs.length,6) + '">';
+    html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'certifications\')" id="pfGenCertificationsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenCertificationsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'contact') {
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
@@ -5260,6 +5529,109 @@ async function pfGenerateAbout() {
   finally { btn.disabled=false; btn.innerHTML='✨ Generate with AI'; }
 }
 
+async function pfGenSection(sectionId) {
+  var btn = document.getElementById('pfGen' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1) + 'Btn');
+  var status = document.getElementById('pfGen' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1) + 'Status');
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Generating…'; }
+  if (status) status.textContent = '';
+  try {
+    var cd = (typeof collectData === 'function') ? collectData() : {};
+    var fullName = ((cd.firstName||'') + ' ' + (cd.lastName||'')).trim();
+    var title = cd.jobTitle || '';
+    var skillList = (pfWzData.skills.length ? pfWzData.skills : (cd.skills||[])).slice(0,10).join(', ');
+    var prompt = '';
+    if (sectionId === 'skills') {
+      var expTitles = (cd.experience||[]).slice(0,3).map(function(e){return e.title+(e.co?' at '+e.co:'');}).join(', ');
+      prompt = 'List 8-12 professional skills for ' + (fullName||'a professional') + (title?', '+title:'') + (expTitles?', who has worked as: '+expTitles:'') + '. Output only a comma-separated list, no explanation.';
+    } else if (sectionId === 'education') {
+      prompt = 'Based on this context — job title: ' + (title||'professional') + ', name: ' + (fullName||'professional') + ' — suggest how to format 1-2 education entries. Output only formatted text like "BS Computer Science, MIT, 2019". No explanation.';
+    } else if (sectionId === 'awards') {
+      prompt = 'Suggest 2-3 realistic awards or certifications for ' + (title||'a professional') + '. Output as JSON array: [{"title":"...","issuer":"..."}]. Output only the JSON, no explanation.';
+    } else if (sectionId === 'projects') {
+      prompt = 'Suggest 2 realistic portfolio projects for ' + (fullName||'a professional') + (title?', '+title:'') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"title":"...","desc":"...","tech":"..."}]. Output only JSON.';
+    } else if (sectionId === 'experience') {
+      prompt = 'Suggest 2 realistic work experience entries for ' + (fullName||'a professional') + (title?', '+title:'') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"title":"...","company":"...","dates":"...","desc":"..."}]. Output only JSON, no explanation.';
+    } else if (sectionId === 'certifications') {
+      prompt = 'Suggest 3 real professional certifications relevant for ' + (title||'a tech professional') + (skillList?', skills: '+skillList:'') + '. Output JSON array: [{"name":"...","issuer":"...","year":"2024"}]. Output only JSON.';
+    }
+    if (!prompt) return;
+    var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
+    if (!resp.ok) throw new Error('Server error');
+    var result = await resp.json();
+    var text = (result.content||result.text||'').trim();
+    if (!text) { if(status) status.textContent='No response — try again'; return; }
+    if (sectionId === 'skills') {
+      var ta = document.getElementById('pfWzSkills');
+      if (ta) { ta.value = text.split(/[,\n]+/).map(function(s){return s.trim().replace(/^["'\[\]]+|["'\[\]]+$/g,'');}).filter(Boolean).join(', '); }
+      pfWzData.skills = ta ? ta.value.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+    } else if (sectionId === 'awards') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(a,i) {
+          var t = document.getElementById('pfWzAwd'+i); var iss = document.getElementById('pfWzAwdIss'+i);
+          if (t) t.value = a.title||''; if (iss) iss.value = a.issuer||'';
+        });
+      } catch(ex2) {}
+    } else if (sectionId === 'projects') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(p,i) {
+          var t=document.getElementById('pfWzProjT'+i); var d=document.getElementById('pfWzProjD'+i); var tech=document.getElementById('pfWzProjTech'+i);
+          if(t) t.value=p.title||''; if(d) d.value=p.desc||''; if(tech) tech.value=p.tech||'';
+        });
+      } catch(ex2) {}
+    } else if (sectionId === 'experience') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(ex,i) {
+          var t=document.getElementById('pfWzExpT'+i); var co=document.getElementById('pfWzExpCo'+i); var dt=document.getElementById('pfWzExpDt'+i); var d=document.getElementById('pfWzExpD'+i);
+          if(t) t.value=ex.title||''; if(co) co.value=ex.company||''; if(dt) dt.value=ex.dates||''; if(d) d.value=ex.desc||'';
+        });
+        var cntEl=document.getElementById('pfWzExpManualCount'); if(cntEl) cntEl.value=arr.length;
+      } catch(ex2) {}
+    } else if (sectionId === 'certifications') {
+      try {
+        var arr = JSON.parse(text.match(/\[[\s\S]*\]/)[0]);
+        arr.forEach(function(c,i) {
+          var n=document.getElementById('pfWzCert'+i); var iss=document.getElementById('pfWzCertIss'+i); var yr=document.getElementById('pfWzCertYr'+i);
+          if(n) n.value=c.name||''; if(iss) iss.value=c.issuer||''; if(yr) yr.value=c.year||'';
+        });
+      } catch(ex2) {}
+    }
+    if(status) status.textContent='✓ Done';
+  } catch(ex) { if(status) status.textContent='⚠ '+ex.message; }
+  finally { if(btn){ btn.disabled=false; btn.innerHTML='✨ Generate with AI'; } }
+}
+
+async function pfGenExpBullet(idx) {
+  var btn = event && event.target;
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳…'; }
+  try {
+    var cd = (typeof collectData === 'function') ? collectData() : {};
+    var ex = (cd.experience||[])[idx];
+    var ta, titleVal, coVal;
+    if (ex) {
+      titleVal = ex.title||''; coVal = ex.co||'';
+      ta = document.getElementById('pfWzExp'+idx);
+    } else {
+      var titleEl = document.getElementById('pfWzExpT'+idx);
+      var coEl = document.getElementById('pfWzExpCo'+idx);
+      titleVal = titleEl ? titleEl.value.trim() : '';
+      coVal = coEl ? coEl.value.trim() : '';
+      ta = document.getElementById('pfWzExpD'+idx);
+    }
+    if (!titleVal && !coVal) return;
+    var existing = ta ? ta.value.trim() : '';
+    var prompt = 'Write 2 concise achievement sentences for a portfolio about this role: ' + (titleVal||'') + (coVal?' at '+coVal:'') + (existing?'. Current text: '+existing:'') + '. Make them impactful and quantified where possible. Output only the 2 sentences separated by newline, no bullet prefix.';
+    var resp = await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
+    if (!resp.ok) throw new Error('Server error');
+    var result = await resp.json();
+    var text = (result.content||result.text||'').trim();
+    if (text && ta) ta.value = text;
+  } catch(ex2) {}
+  finally { if(btn){ btn.disabled=false; btn.innerHTML='✨ AI enhance'; } }
+}
+
 function pfGoStep(n) {
   if (n === 3) pfWzSave(); // save wizard before preview
   pfCurrentStep = n;
@@ -5274,6 +5646,9 @@ function pfGoStep(n) {
     if (i + 1 < n) el.textContent = '✓';
     else el.textContent = String(i + 1);
   });
+  if (n === 1) {
+    requestAnimationFrame(calibratePfPreviews);
+  }
   if (n === 2) {
     var allOn = Object.values(pfSections).every(Boolean);
     var btn = document.getElementById('pfSelectAllBtn');
@@ -5300,7 +5675,7 @@ function getPfData() {
     location: wz.location || cd.location || '',
     linkedin: wz.linkedin || cd.linkedin || '',
     github: wz.github || cd.github || '',
-    photo: userPhoto || '',
+    photo: pfPhoto || userPhoto || '',
     summary: wz.about || (lastResumeData && lastResumeData.summary) || '',
     experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
       return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
@@ -5312,6 +5687,8 @@ function getPfData() {
     awards: wz.awards.length ? wz.awards : (cd.awards||[]).map(function(a) {
       return {title:a.name, issuer:[a.org,a.year].filter(Boolean).join(' · ')};
     }),
+    projects: wz.projects || [],
+    certifications: wz.certifications || [],
   };
 }
 
@@ -5445,23 +5822,27 @@ function generatePortfolioHTML(d, tpl, sections) {
 
   // Build sections HTML
   var expHtml = '';
-  if (sections.experience && d.experience && d.experience.length) {
-    expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
-    d.experience.forEach(function(e) {
-      if (!e.company && !e.title) return;
-      expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + (e.desc ? '<p class="pf-tl-desc">' + esc(e.desc) + '</p>' : '') + '</div></div>';
-    });
-    expHtml += '</div></div></section>';
+  if (sections.experience && d.experience) {
+    var expFiltered = d.experience.filter(function(e) { return e.company || e.title; });
+    if (expFiltered.length) {
+      expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
+      expFiltered.forEach(function(e) {
+        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + (e.desc ? '<p class="pf-tl-desc">' + esc(e.desc) + '</p>' : '') + '</div></div>';
+      });
+      expHtml += '</div></div></section>';
+    }
   }
 
   var eduHtml = '';
-  if (sections.education && d.education && d.education.length) {
-    eduHtml = '<section class="pf-sec pf-sec-alt" id="education"><div class="pf-container"><h2 class="pf-sec-title">Education</h2><div class="pf-edu-grid">';
-    d.education.forEach(function(e) {
-      if (!e.school && !e.degree) return;
-      eduHtml += '<div class="pf-edu-card"><div class="pf-edu-icon">🎓</div><h3 class="pf-edu-deg">' + esc(e.degree) + '</h3><div class="pf-edu-school">' + esc(e.school) + '</div>' + (e.dates ? '<div class="pf-edu-year">' + esc(e.dates) + '</div>' : '') + '</div>';
-    });
-    eduHtml += '</div></div></section>';
+  if (sections.education && d.education) {
+    var eduFiltered = d.education.filter(function(e) { return e.school || e.degree; });
+    if (eduFiltered.length) {
+      eduHtml = '<section class="pf-sec pf-sec-alt" id="education"><div class="pf-container"><h2 class="pf-sec-title">Education</h2><div class="pf-edu-grid">';
+      eduFiltered.forEach(function(e) {
+        eduHtml += '<div class="pf-edu-card"><div class="pf-edu-icon">🎓</div><h3 class="pf-edu-deg">' + esc(e.degree) + '</h3><div class="pf-edu-school">' + esc(e.school) + '</div>' + (e.dates ? '<div class="pf-edu-year">' + esc(e.dates) + '</div>' : '') + '</div>';
+      });
+      eduHtml += '</div></div></section>';
+    }
   }
 
   var skillsHtml = '';
@@ -5472,13 +5853,15 @@ function generatePortfolioHTML(d, tpl, sections) {
   }
 
   var awardsHtml = '';
-  if (sections.awards && d.awards && d.awards.length) {
-    awardsHtml = '<section class="pf-sec pf-sec-alt" id="awards"><div class="pf-container"><h2 class="pf-sec-title">Awards &amp; Achievements</h2><div class="pf-awards-grid">';
-    d.awards.forEach(function(a) {
-      if (!a.title) return;
-      awardsHtml += '<div class="pf-award-card"><div class="pf-award-ico">🏆</div><h3 class="pf-award-title">' + esc(a.title) + '</h3>' + (a.issuer ? '<div class="pf-award-issuer">' + esc(a.issuer) + '</div>' : '') + '</div>';
-    });
-    awardsHtml += '</div></div></section>';
+  if (sections.awards && d.awards) {
+    var awardsFiltered = d.awards.filter(function(a) { return a.title; });
+    if (awardsFiltered.length) {
+      awardsHtml = '<section class="pf-sec pf-sec-alt" id="awards"><div class="pf-container"><h2 class="pf-sec-title">Awards &amp; Achievements</h2><div class="pf-awards-grid">';
+      awardsFiltered.forEach(function(a) {
+        awardsHtml += '<div class="pf-award-card"><div class="pf-award-ico">🏆</div><h3 class="pf-award-title">' + esc(a.title) + '</h3>' + (a.issuer ? '<div class="pf-award-issuer">' + esc(a.issuer) + '</div>' : '') + '</div>';
+      });
+      awardsHtml += '</div></div></section>';
+    }
   }
 
   var aboutHtml = '';
@@ -5486,8 +5869,33 @@ function generatePortfolioHTML(d, tpl, sections) {
     aboutHtml = '<section class="pf-sec pf-sec-alt" id="about"><div class="pf-container"><h2 class="pf-sec-title">About Me</h2><p class="pf-about-text">' + esc(d.summary) + '</p></div></section>';
   }
 
+  var projectsHtml = '';
+  if (sections.projects && d.projects && d.projects.length) {
+    var projItems = d.projects.filter(function(p){return p.title;});
+    if (projItems.length) {
+      projectsHtml = '<section class="pf-sec" id="projects"><div class="pf-container"><h2 class="pf-sec-title">Projects</h2><div class="pf-proj-grid">';
+      projItems.forEach(function(p) {
+        projectsHtml += '<div class="pf-proj-card"><h3 class="pf-proj-title">' + esc(p.title) + '</h3>' + (p.desc?'<p class="pf-proj-desc">'+esc(p.desc)+'</p>':'') + (p.tech?'<div class="pf-proj-tech">'+p.tech.split(',').map(function(t){return '<span class="pf-skill-chip">'+esc(t.trim())+'</span>';}).join('')+'</div>':'') + '</div>';
+      });
+      projectsHtml += '</div></div></section>';
+    }
+  }
+
+  var certsHtml = '';
+  if (sections.certifications && d.certifications && d.certifications.length) {
+    var certItems = d.certifications.filter(function(c){return c.name;});
+    if (certItems.length) {
+      certsHtml = '<section class="pf-sec pf-sec-alt" id="certifications"><div class="pf-container"><h2 class="pf-sec-title">Certifications</h2><div class="pf-awards-grid">';
+      certItems.forEach(function(c) {
+        certsHtml += '<div class="pf-award-card"><div class="pf-award-ico">📜</div><h3 class="pf-award-title">' + esc(c.name) + '</h3>' + (c.issuer||c.year?'<div class="pf-award-issuer">'+esc([c.issuer,c.year].filter(Boolean).join(' · '))+'</div>':'') + '</div>';
+      });
+      certsHtml += '</div></div></section>';
+    }
+  }
+
   var contactHtml = '';
-  if (sections.contact) {
+  var hasContact = d.email || d.phone || d.location || d.linkedin || d.github;
+  if (sections.contact && hasContact) {
     contactHtml = '<section class="pf-sec" id="contact"><div class="pf-container"><h2 class="pf-sec-title">Get In Touch</h2><div class="pf-contact-row">';
     if (d.email) contactHtml += '<a href="mailto:' + esc(d.email) + '" class="pf-contact-item">📧 ' + esc(d.email) + '</a>';
     if (d.phone) contactHtml += '<a href="tel:' + esc(d.phone) + '" class="pf-contact-item">📞 ' + esc(d.phone) + '</a>';
@@ -5509,13 +5917,30 @@ function generatePortfolioHTML(d, tpl, sections) {
     : ':root{--pf-accent:#2563eb;--pf-accent2:#1d4ed8;--pf-hero-bg:linear-gradient(135deg,#1e293b 0%,#2563eb 100%);--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.75);--pf-sec-bg:#fff;--pf-alt-bg:#f8fafc;--pf-text:#1e293b;--pf-muted:#64748b;--pf-border:#e2e8f0;--pf-chip-bg:rgba(37,99,235,0.08);--pf-chip-color:#2563eb;}';
 
   var navLinks = '';
-  if (sections.about) navLinks += '<a href="#about">About</a>';
-  if (sections.experience) navLinks += '<a href="#experience">Experience</a>';
-  if (sections.skills) navLinks += '<a href="#skills">Skills</a>';
-  if (sections.education) navLinks += '<a href="#education">Education</a>';
-  if (sections.contact) navLinks += '<a href="#contact">Contact</a>';
+  if (sections.about && d.summary) navLinks += '<a href="#about">About</a>';
+  if (sections.experience && d.experience && d.experience.length) navLinks += '<a href="#experience">Experience</a>';
+  if (sections.skills && d.skills && d.skills.length) navLinks += '<a href="#skills">Skills</a>';
+  if (sections.education && d.education && d.education.length) navLinks += '<a href="#education">Education</a>';
+  if (projectsHtml) navLinks += '<a href="#projects">Projects</a>';
+  if (certsHtml) navLinks += '<a href="#certifications">Certifications</a>';
+  if (contactHtml) navLinks += '<a href="#contact">Contact</a>';
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio</title><style>' + themeCSS + '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (d.email ? '<a href="mailto:' + esc(d.email) + '" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
+  var metaDesc = d.summary ? esc(d.summary.slice(0,155).replace(/\s+\S*$/, '…')) : (name + ' — professional portfolio. View my experience, skills, and projects.');
+  var metaImg = d.photo ? d.photo : 'https://resume4u.help/og-image.png';
+  var schemaSkills = d.skills && d.skills.length ? '"' + d.skills.slice(0,8).map(esc).join('","') + '"' : '';
+  var schemaExp = d.experience && d.experience.length ? d.experience.slice(0,3).map(function(e){ return '{"@type":"OrganizationRole","roleName":"'+esc(e.title)+'","memberOf":{"@type":"Organization","name":"'+esc(e.company)+'"}'+( e.dates?',"startDate":"'+esc(e.dates)+'"':'')+'}'; }).join(',') : '';
+  var seoHead = '<meta name="description" content="' + metaDesc + '">'
+    + '<meta name="robots" content="index, follow">'
+    + '<meta property="og:type" content="profile">'
+    + '<meta property="og:title" content="' + name + ' — Portfolio">'
+    + '<meta property="og:description" content="' + metaDesc + '">'
+    + '<meta property="og:image" content="' + metaImg + '">'
+    + '<meta name="twitter:card" content="' + (d.photo ? 'summary_large_image' : 'summary') + '">'
+    + '<meta name="twitter:title" content="' + name + ' — Portfolio">'
+    + '<meta name="twitter:description" content="' + metaDesc + '">'
+    + '<meta name="twitter:image" content="' + metaImg + '">'
+    + '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"' + name + '"' + (d.title?',"jobTitle":"'+esc(d.title)+'"':'') + (d.email?',"email":"'+esc(d.email)+'"':'') + (d.phone?',"telephone":"'+esc(d.phone)+'"':'') + (d.location?',"address":{"@type":"PostalAddress","addressLocality":"'+esc(d.location)+'"}':'') + (d.linkedin?',"sameAs":["'+esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : "https://"+d.linkedin)+'"]':'') + (schemaSkills?',"knowsAbout":['+schemaSkills+']':'') + (schemaExp?',"hasOccupation":['+schemaExp+']':'') + (d.photo?',"image":"'+d.photo+'"':'') + '}<\/script>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + 'html{scroll-behavior:smooth;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid rgba(255,255,255,0.35);border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-text);color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (contactHtml ? '<a href="#contact" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
 }
 
 </script>

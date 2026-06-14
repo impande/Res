@@ -5,7 +5,7 @@
 # publish directory at deploy time. `|| true` keeps the deploy succeeding even
 # if the copy is ever a no-op, in which case the committed copy below is served.
 [build]
-  command   = "cp ../index.html index.html || true"
+  command   = "npm install && cp ../index.html index.html || true"
   publish   = "."
   functions = "netlify/functions"
 
