@@ -97,34 +97,63 @@ exports.handler = async function(event) {
       body: JSON.stringify(info, null, 2) };
   }
 
-  // ── RAW INSPECTOR: GET ?check=KEY  (shows raw API responses for a key) ───
-  if (event.httpMethod === 'GET' && qs.check) {
-    const key = qs.check;
+  // ── FULL CYCLE TEST: GET ?fulltest=KEY  (write+read with all step details) ──
+  if (event.httpMethod === 'GET' && qs.fulltest) {
+    const key = qs.fulltest;
+    const testVal = 'fulltest-' + Date.now();
     const url = `${API_BASE}/${encodeURIComponent(key)}`;
-    const out = { key, urlBase: url.replace(SITE_ID || '', '[SITE_ID]') };
+    const out = { key, testVal };
 
-    // Approach A: signed-url Accept header (current blobGet)
+    // Write step 1: get signed PUT URL
     try {
-      const rA = await fetch(url, {
+      const rW1 = await fetch(url, {
+        method: 'PUT',
         headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json;type=signed-url' }
       });
-      const bodyA = await rA.text().catch(() => '');
-      out.signedUrl = { status: rA.status, ok: rA.ok, body: bodyA.substring(0, 300) };
-    } catch(e) { out.signedUrl = { error: e.message }; }
+      const wBody = await rW1.text().catch(() => '');
+      out.write1 = { status: rW1.status, ok: rW1.ok, body: wBody.substring(0, 200) };
 
-    // Approach B: plain GET (no special Accept header)
+      // Write step 2: PUT content to signed S3 URL
+      if (rW1.ok) {
+        const wJson = JSON.parse(wBody);
+        if (wJson.url) {
+          out.write1.s3UrlPrefix = wJson.url.substring(0, 80);
+          const rW2 = await fetch(wJson.url, {
+            method: 'PUT',
+            headers: { 'Cache-Control': 'max-age=0, stale-while-revalidate=60' },
+            body: testVal
+          });
+          const w2Body = await rW2.text().catch(() => '');
+          out.write2 = { status: rW2.status, ok: rW2.ok, body: w2Body.substring(0, 200) };
+        }
+      }
+    } catch(e) { out.writeError = e.message; }
+
+    // Read step 1: get signed GET URL
     try {
-      const rB = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${TOKEN}` }
+      const rR1 = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json;type=signed-url' }
       });
-      const bodyB = await rB.text().catch(() => '');
-      out.plainGet = {
-        status: rB.status, ok: rB.ok,
-        redirected: rB.redirected, url: rB.url.substring(0, 120),
-        contentType: rB.headers.get('content-type'),
-        body: bodyB.substring(0, 300)
-      };
-    } catch(e) { out.plainGet = { error: e.message }; }
+      const rBody = await rR1.text().catch(() => '');
+      out.read1 = { status: rR1.status, ok: rR1.ok };
+
+      // Read step 2: GET content from signed S3 URL
+      if (rR1.ok) {
+        const rJson = JSON.parse(rBody);
+        if (rJson.url) {
+          out.read1.s3UrlPrefix = rJson.url.substring(0, 80);
+          const rR2 = await fetch(rJson.url);
+          const r2Body = await rR2.text().catch(() => '');
+          out.read2 = {
+            status: rR2.status, ok: rR2.ok,
+            contentType: rR2.headers.get('content-type'),
+            bodyLength: r2Body.length,
+            bodyPreview: r2Body.substring(0, 100),
+            matched: r2Body === testVal
+          };
+        }
+      }
+    } catch(e) { out.readError = e.message; }
 
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
       body: JSON.stringify(out, null, 2) };
