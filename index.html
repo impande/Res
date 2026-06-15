@@ -310,10 +310,10 @@
     @media(max-width:768px){
       body{display:block;}
       #mobileHeader{display:block;position:sticky;top:0;z-index:50;touch-action:pan-y;}
-      #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow-x:auto;overflow-y:visible;gap:10px;-webkit-overflow-scrolling:auto;}
+      #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow:visible;gap:10px;}
       .logo{padding-bottom:0;border-bottom:none;margin-bottom:0;flex-shrink:0;gap:0;}
       .logo-text{display:none;}
-      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;}
+      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none;}
       .step-item{padding:6px 8px;border-radius:8px;flex-shrink:0;flex-direction:column;align-items:center;gap:3px;}
       .step-label{font-size:0.62rem;text-align:center;}
 #mobileProgress{display:block;}
@@ -5252,6 +5252,30 @@ function _setupPfTouchHandlers() {
   }, { passive: false });
 }
 
+// Pre-iOS-16.4 elastic bounce prevention for the main page document scroll.
+// overscroll-behavior:none is CSS-only and only works on iOS 16.4+; this JS
+// handles older iOS by cancelling touchmove at scroll boundaries.
+(function() {
+  var _lastY = 0, _lastX = 0;
+  document.addEventListener('touchstart', function(e) {
+    _lastY = e.touches[0].clientY;
+    _lastX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchmove', function(e) {
+    // Modal open: body is position:fixed, document doesn't scroll — skip
+    if (document.body.style.position === 'fixed') return;
+    var y = e.touches[0].clientY, x = e.touches[0].clientX;
+    var dy = y - _lastY, dx = x - _lastX;
+    _lastY = y; _lastX = x;
+    // Skip if primarily horizontal (steps nav horizontal scroll)
+    if (Math.abs(dx) > Math.abs(dy)) return;
+    var scrollY = window.scrollY || window.pageYOffset;
+    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (dy > 0 && scrollY <= 0) { e.preventDefault(); return; }
+    if (dy < 0 && scrollY >= maxScroll - 1) { e.preventDefault(); return; }
+  }, { passive: false });
+})();
+
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
   _setupPfTouchHandlers();
@@ -5828,32 +5852,31 @@ async function generatePortfolioLink() {
     var d = getPfData();
     var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
-    // Compute slug client-side — must match server slug computation exactly so the
-    // photo URL (stored under photo:<slug>) points to the right Redis key.
-    var slug = name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60) || 'portfolio';
-
-    // Compress photo; store it separately on the server (not inline in the HTML).
-    // The HTML references it via a regular URL so the photo appears in the shared
-    // page without inflating the HTML size (base64 would appear 4x in og/twitter/LD).
+    // Compress photo and embed it inline in the hero <img> (one occurrence only).
+    // After generating HTML, strip the base64 out of og:image / twitter:image /
+    // JSON-LD so it doesn't appear 4× in the payload (which would quadruple size).
     var compressedPhoto = await _compressPfPhoto(d.photo, 400, 0.75);
-    var photoUrl = compressedPhoto
-      ? (window.location.origin + '/.netlify/functions/share-portfolio?photo=' + encodeURIComponent(slug))
-      : '';
-    var dShare = Object.assign({}, d, { photo: photoUrl });
+    var dShare = Object.assign({}, d, { photo: compressedPhoto });
     var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+    if (compressedPhoto) {
+      var _ogFallback = 'https://resume4u.help/og-image.png';
+      html = html.split('<meta property="og:image" content="' + compressedPhoto + '">').join('<meta property="og:image" content="' + _ogFallback + '">');
+      html = html.split('<meta name="twitter:image" content="' + compressedPhoto + '">').join('<meta name="twitter:image" content="' + _ogFallback + '">');
+      html = html.split(',"image":"' + compressedPhoto + '"').join('');
+      html = html.split('<meta name="twitter:card" content="summary_large_image">').join('<meta name="twitter:card" content="summary">');
+    }
 
-    // Fallback: if even without-photo HTML is enormous, show download modal.
     if (html.length > 900000) {
+      // Still too large (very long resume content) — retry without photo
       dShare = Object.assign({}, d, { photo: '' });
       html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
-      compressedPhoto = '';
     }
     if (html.length > 900000) {
       _showShareFallbackModal();
       return;
     }
 
-    var body = JSON.stringify({ html: html, name: name, photo: compressedPhoto });
+    var body = JSON.stringify({ html: html, name: name });
     var resp = await fetch('/.netlify/functions/share-portfolio', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
