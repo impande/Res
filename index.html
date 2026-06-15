@@ -309,11 +309,11 @@
     #mobileHeader{display:contents;}
     @media(max-width:768px){
       body{display:block;}
-      #mobileHeader{display:block;position:sticky;top:0;z-index:50;touch-action:pan-y;}
+      #mobileHeader{display:block;position:sticky;top:0;z-index:50;}
       #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow:visible;gap:10px;}
       .logo{padding-bottom:0;border-bottom:none;margin-bottom:0;flex-shrink:0;gap:0;}
       .logo-text{display:none;}
-      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none;}
+      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;}
       .step-item{padding:6px 8px;border-radius:8px;flex-shrink:0;flex-direction:column;align-items:center;gap:3px;}
       .step-label{font-size:0.62rem;text-align:center;}
 #mobileProgress{display:block;}
@@ -5266,30 +5266,6 @@ function _setupPfTouchHandlers() {
   }, { passive: false });
 }
 
-// Pre-iOS-16.4 elastic bounce prevention for the main page document scroll.
-// overscroll-behavior:none is CSS-only and only works on iOS 16.4+; this JS
-// handles older iOS by cancelling touchmove at scroll boundaries.
-(function() {
-  var _lastY = 0, _lastX = 0;
-  document.addEventListener('touchstart', function(e) {
-    _lastY = e.touches[0].clientY;
-    _lastX = e.touches[0].clientX;
-  }, { passive: true });
-  document.addEventListener('touchmove', function(e) {
-    // Modal open: body is position:fixed, document doesn't scroll — skip
-    if (document.body.style.position === 'fixed') return;
-    var y = e.touches[0].clientY, x = e.touches[0].clientX;
-    var dy = y - _lastY, dx = x - _lastX;
-    _lastY = y; _lastX = x;
-    // Skip tiny movements (noise) and horizontal swipes (steps nav)
-    if (Math.abs(dy) < 3) return;
-    if (Math.abs(dx) > Math.abs(dy)) return;
-    var scrollY = window.scrollY || window.pageYOffset;
-    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (dy > 0 && scrollY <= 0) { e.preventDefault(); return; }
-    if (dy < 0 && scrollY >= maxScroll - 1) { e.preventDefault(); return; }
-  }, { passive: false });
-})();
 
 function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
