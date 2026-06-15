@@ -2293,7 +2293,7 @@
       <div class="tpl-grid" id="tplGrid"></div>
       <div id="tplGuide" class="tpl-guide">
         <div class="tpl-guide-check">✓</div>
-        <span class="tpl-guide-text">Template chosen! Now click <strong>✦ Generate with AI</strong> below to build your resume</span>
+        <span class="tpl-guide-text">Template chosen! Now click <strong>Generate Resume</strong> below to build your resume</span>
         <span class="tpl-guide-caret">↓</span>
       </div>
       <!-- hidden select kept for JS compatibility -->
@@ -2304,7 +2304,7 @@
     <input type="hidden" id="outputFormat" value="full">
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(6)">← Back</button>
-      <button class="btn-accent" id="generateBtn" onclick="generateResume()">✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span></button>
+      <button class="btn-accent" id="generateBtn" onclick="generateResume()">Generate Resume <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span></button>
     </div>
     <div class="resume-bar">
       <div class="resume-bar-left">
@@ -2323,7 +2323,7 @@
     </div>
     <div style="position:relative;">
       <div class="resume-output-card" id="resumeOutput">
-        <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
+        <div class="resume-placeholder">Click <strong>Generate Resume</strong> to create your resume</div>
       </div>
       <!-- Tips — overlay on desktop, bottom drawer on mobile -->
       <div id="tipsBackdrop" onclick="dismissTips()"></div>
@@ -3153,6 +3153,7 @@ function addCustomSection(title='', content='', includeInResume=true) {
     <div class="form-group">
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
+      <button id="gen-custom-btn-${id}" onclick="generateCustomBullets('${id}')" style="margin-top:6px;padding:5px 12px;font-size:0.78rem;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;">✦ Generate with AI</button>
     </div>
     <div class="form-group" style="margin-top:2px;">
       <label style="display:flex;align-items:center;gap:7px;font-size:0.8rem;color:var(--muted);cursor:pointer;">
@@ -3330,6 +3331,32 @@ Bullet writing rules:
   }
 }
 
+async function generateCustomBullets(id) {
+  const titleEl = document.getElementById('custom-title-'+id);
+  const textarea = document.getElementById('custom-content-'+id);
+  const btn = document.getElementById('gen-custom-btn-'+id);
+  const sectionTitle = titleEl?.value.trim() || '';
+  if (!sectionTitle) { showToast('Please fill in a Section Title first.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--accent);width:11px;height:11px;border-width:2px;"></span> Generating…';
+  const jobTitle = document.getElementById('jobTitle')?.value.trim() || '';
+  const existing = textarea?.value.trim() || '';
+  const prompt = `You are an expert resume writer. Generate 3–5 powerful, ATS-optimised bullet points for a resume section titled "${sectionTitle}".${jobTitle ? ` Candidate job title: ${jobTitle}.` : ''}${existing ? ` Use these notes: ${existing}` : ' Generate professional content relevant to the section title.'}
+Output ONLY bullet points, one per line, each starting with •. No intro, headers, or explanation.`;
+  try {
+    const response = await fetch('/.netlify/functions/generate', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({prompt})
+    });
+    if (!response.ok) throw new Error('Server error ' + response.status);
+    const result = await response.json();
+    const text = (result.content || result.text || '').trim();
+    if (text) { textarea.value = text; updatePreview(); markNeedsRegen(); }
+    else throw new Error('Empty response');
+  } catch(err) { showToast('Could not generate content: ' + err.message); }
+  finally { btn.disabled = false; btn.innerHTML = '✦ Generate with AI'; }
+}
+
 function onFormatChange() {}
 
 // ── Validation & data collection ──────────────────────────────────────
@@ -3382,12 +3409,18 @@ function collectData() {
     const id = card.id.replace('exp-','');
     const title = document.getElementById('exp-title-'+id)?.value.trim()||'';
     const co = document.getElementById('exp-co-'+id)?.value.trim()||'';
-    if (title||co) experience.push({
-      title, co,
-      start: document.getElementById('exp-start-'+id)?.value.trim()||'',
-      end: document.getElementById('exp-end-'+id)?.value.trim()||'',
-      desc: document.getElementById('exp-desc-'+id)?.value.trim()||''
-    });
+    if (title||co) {
+      const descRaw = document.getElementById('exp-desc-'+id)?.value.trim()||'';
+      const bulletLines = descRaw.split('\n').map(l=>l.trim()).filter(l=>/^[•\-\*]/.test(l));
+      const entry = {
+        title, co,
+        start: document.getElementById('exp-start-'+id)?.value.trim()||'',
+        end:   document.getElementById('exp-end-'+id)?.value.trim()||'',
+        desc:  descRaw
+      };
+      if (bulletLines.length >= 2) entry.bullets = bulletLines.map(l=>l.replace(/^[•\-\*]\s*/,'').trim());
+      experience.push(entry);
+    }
   });
   const awards = [];
   document.querySelectorAll('#awardEntries .entry-card').forEach(card => {
@@ -3644,6 +3677,11 @@ async function _doGenerateResume() {
   btn.disabled = true;
   btn.classList.remove('btn-ready');
   btn.innerHTML = '<span class="spinner"></span> Generating…';
+  // Reset page count chip immediately so user sees '···' during generation
+  var _pcStrip = document.getElementById('pageCountStrip');
+  var _pcChip = document.getElementById('pageCountChip');
+  if (_pcStrip) _pcStrip.style.display = 'flex';
+  if (_pcChip) { _pcChip.textContent = '···'; _pcChip.style.color = '#888'; _pcChip.style.background = '#f3f4f6'; _pcChip.style.borderColor = '#d1d5db'; }
   document.getElementById('tplGuide')?.classList.remove('visible');
   statusEl.textContent = 'AI is crafting your resume…';
   const _timelapse = ['Analyzing your profile…','Writing experience bullets…','Optimizing for ATS…','Adding finishing touches…'];
@@ -3670,8 +3708,8 @@ async function _doGenerateResume() {
       email: data.email, phone: data.phone, location: data.location, linkedin: data.linkedin, github: data.github,
       summary: parsed.summary || '',
       experience: parsed.experience || data.experience,
-      awards: parsed.awards || data.awards,
-      education: parsed.education || data.education,
+      awards: data.awards,
+      education: data.education,
       skills: data.skills.length ? data.skills : (parsed.skills || []),
       customSections: data.customSections || []
     };
@@ -3682,10 +3720,21 @@ async function _doGenerateResume() {
       merged.experience = data.experience; merged.awards = data.awards; merged.education = data.education;
     }
 
+    // Always overlay user-edited bullets from form fields — prevents AI from
+    // rewriting bullet points the user manually edited before clicking Generate
+    merged.experience = (merged.experience || []).map(function(exp) {
+      const userExp = (data.experience || []).find(e => e.title === exp.title && e.co === exp.co);
+      return (userExp && userExp.bullets && userExp.bullets.length)
+        ? Object.assign({}, exp, {bullets: userExp.bullets})
+        : exp;
+    });
+
     lastResumeData = merged;
     manuallyEdited = false;
     clearNeedsRegen();
     renderOutput(merged);
+    // Immediately kick off page count update (rAF ensures DOM is painted first)
+    requestAnimationFrame(function() { requestAnimationFrame(_doMeasureAndUpdate); });
     // Measure page count at multiple intervals to ensure DOM + fonts are fully settled
     setTimeout(_doMeasureAndUpdate, 300);
     setTimeout(_doMeasureAndUpdate, 900);
@@ -3705,20 +3754,21 @@ async function _doGenerateResume() {
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
+    btn.innerHTML = 'Generate Resume <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
     btn.classList.remove('regen-needed');
   }
 }
 
 function _measurePages(page) {
-  // Wrap clone in a 794px-wide container so mobile media queries don't affect padding/layout
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;overflow:hidden;visibility:hidden;pointer-events:none;z-index:-1;';
+  wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;';
   const clone = page.cloneNode(true);
-  // Force desktop A4 geometry; overrides any responsive media-query rules
-  clone.style.cssText = 'width:794px!important;max-width:none!important;padding:18mm 16mm!important;box-sizing:border-box!important;';
+  // Force desktop A4 geometry and remove min-height so clone scrollHeight
+  // reflects actual content, not the 297mm floor
+  clone.style.cssText = 'width:794px!important;max-width:none!important;min-height:0!important;padding:18mm 16mm!important;box-sizing:border-box!important;';
   wrap.appendChild(clone);
   document.body.appendChild(wrap);
+  void clone.offsetHeight; // force reflow before reading scrollHeight
   const pages = Math.max(1, Math.ceil(clone.scrollHeight / (297 * 3.7795)));
   document.body.removeChild(wrap);
   return pages;
@@ -3762,6 +3812,10 @@ function renderOutput(data) {
   var _chipReset = document.getElementById('pageCountChip');
   if (_chipReset) { _chipReset.textContent = '···'; _chipReset.style.color = '#888'; _chipReset.style.background = '#f3f4f6'; _chipReset.style.borderColor = '#d1d5db'; }
   out.innerHTML = `<div class="resume-a4-page">${renderResumeHTML(data)}</div>`;
+  // Measure synchronously — scrollHeight forces a reflow, guaranteeing the chip
+  // always updates on every generate click regardless of async timer state
+  const _syncPage = out.querySelector('.resume-a4-page');
+  if (_syncPage) _updatePageChip(_measurePages(_syncPage));
   const _a4Live = out.querySelector('.resume-a4-page');
   if (_a4Live) {
     _a4Live.addEventListener('input', function() {
@@ -3775,11 +3829,11 @@ function renderOutput(data) {
   if (dl) dl.style.display = 'flex';
   const strip = document.getElementById('pageCountStrip');
   if (strip) strip.style.display = 'flex';
-  _triggerPageCount(true);
-  setTimeout(function() { _triggerPageCount(true); }, 500);
+  // Async re-measurements after fonts settle
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function() { requestAnimationFrame(_doMeasureAndUpdate); });
   }
+  setTimeout(_doMeasureAndUpdate, 800);
   if (window._pcObserver) window._pcObserver.disconnect();
   if (window._pcResizeObserver) window._pcResizeObserver.disconnect();
   var _a4El = out.querySelector('.resume-a4-page');
@@ -4621,8 +4675,10 @@ function populateFormFromParsed(data) {
     if (cont) { cont.innerHTML = ''; awardCount = 0; }
     data.awards.slice(0,5).forEach(a => {
       addAward();
-      sv('award-name-'+awardCount, a.name); sv('award-year-'+awardCount, a.year);
-      sv('award-org-'+awardCount, a.org);   sv('award-desc-'+awardCount, a.desc);
+      sv('award-name-'+awardCount, a.name||a.title||a.award||'');
+      sv('award-year-'+awardCount, a.year||a.date||'');
+      sv('award-org-'+awardCount, a.org||a.issuer||a.organization||'');
+      sv('award-desc-'+awardCount, a.desc||a.description||'');
     });
   }
   // Education
@@ -4631,8 +4687,10 @@ function populateFormFromParsed(data) {
     if (cont) { cont.innerHTML = ''; eduCount = 0; }
     data.education.slice(0,4).forEach(e => {
       addEducation();
-      sv('edu-deg-'+eduCount, e.deg); sv('edu-sch-'+eduCount, e.sch);
-      sv('edu-yr-'+eduCount, e.yr);   sv('edu-gpa-'+eduCount, e.gpa);
+      sv('edu-deg-'+eduCount, e.deg||e.degree||e.qualification||'');
+      sv('edu-sch-'+eduCount, e.sch||e.school||e.institution||e.university||'');
+      sv('edu-yr-'+eduCount, e.yr||e.year||e.dates||'');
+      sv('edu-gpa-'+eduCount, e.gpa||'');
     });
   }
   // Skills
@@ -5266,6 +5324,10 @@ function closePreviewModal(e) {
     <div class="pf-body" id="pfStep1">
       <div class="pf-section-title">Choose a style for your portfolio</div>
       <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
+      <div id="pfResumeHint" style="display:flex;align-items:flex-start;gap:10px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.22);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:0.8rem;color:var(--text);line-height:1.55;">
+        <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">💡</span>
+        <span><b>Auto-fill tip:</b> Upload your existing resume (PDF or Word) or paste your resume text in the <b>Build Your Resume</b> section first — your experience, education, skills, and awards will be pulled in automatically when you reach the details step.</span>
+      </div>
       <div class="pf-tpl-grid">
         <div class="pf-tpl-card selected" id="pfTplProfessional" onclick="selectPfTemplate('professional')">
           <div class="pf-tpl-preview">
@@ -5682,7 +5744,25 @@ function pfWzSave() {
 
 function pfAddManualExp() {
   pfWzSave();
-  if (pfWzData.experience.length < 20) pfWzData.experience.push({title:'',company:'',dates:'',desc:''});
+  if (pfWzData.experience.length < 20) pfWzData.experience.unshift({title:'',company:'',dates:'',desc:''});
+  pfWzRender();
+}
+
+function pfAddPfEdu() {
+  pfWzSave();
+  if (pfWzData.education.length < 8) pfWzData.education.unshift({degree:'',school:'',dates:''});
+  pfWzRender();
+}
+
+function pfAddPfAwd() {
+  pfWzSave();
+  if (pfWzData.awards.length < 8) pfWzData.awards.unshift({title:'',issuer:''});
+  pfWzRender();
+}
+
+function pfAddPfCert() {
+  pfWzSave();
+  if (pfWzData.certifications.length < 10) pfWzData.certifications.unshift({name:'',issuer:'',year:''});
   pfWzRender();
 }
 
@@ -5761,6 +5841,7 @@ function pfWzRender() {
     if (!exps.length) {
       // No resume form data — offer manual entry + AI generation
       var manualExps = pfWzData.experience.length ? pfWzData.experience : [{title:'',company:'',dates:'',desc:''}];
+      html += '<button onclick="pfAddManualExp()" style="font-size:0.8rem;color:var(--accent);background:none;border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Add another role</button>';
       manualExps.slice(0,20).forEach(function(ex,i) {
         html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
         html += '<div style="display:grid;grid-template-columns:1fr 1fr 90px;gap:6px;margin-bottom:6px;">';
@@ -5773,7 +5854,6 @@ function pfWzRender() {
         html += '</div>';
       });
       html += '<input type="hidden" id="pfWzExpManualCount" value="'+Math.min(manualExps.length,20)+'">';
-      html += '<button onclick="pfAddManualExp()" style="font-size:0.8rem;color:var(--accent);background:none;border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Add another role</button>';
       html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
     } else {
       exps.forEach(function(ex,i) {
@@ -5788,26 +5868,30 @@ function pfWzRender() {
   } else if (step.id === 'education') {
     var edus = pfWzData.education.length ? pfWzData.education : (cd.education||[]).map(function(e2){return{degree:e2.deg||'',school:e2.sch||'',dates:e2.yr||''};});
     if (!edus.length) edus = [{degree:'',school:'',dates:''}];
-    edus.slice(0,4).forEach(function(ed,i) {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<button onclick="pfAddPfEdu()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Education</button></div>';
+    edus.slice(0,8).forEach(function(ed,i) {
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-bottom:8px;">';
       html += '<input id="pfWzEduDeg'+i+'" style="' + inp + '" placeholder="Degree / Major" value="' + e(ed.degree) + '">';
       html += '<input id="pfWzEduSch'+i+'" style="' + inp + '" placeholder="University / School" value="' + e(ed.school) + '">';
       html += '<input id="pfWzEduYr'+i+'" style="' + inp + '" placeholder="Year" value="' + e(ed.dates) + '">';
       html += '</div>';
     });
-    html += '<input type="hidden" id="pfWzEduCount" value="' + Math.min(edus.length,4) + '">';
+    html += '<input type="hidden" id="pfWzEduCount" value="' + Math.min(edus.length,8) + '">';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'education\')" id="pfGenEducationBtn" style="' + aiBtnStyle + '">✨ Polish with AI</button><span id="pfGenEducationStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'awards') {
-    var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||'',issuer:[a.org,a.year].filter(Boolean).join(' · ')};});
+    var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||a.title||'',issuer:[a.org||a.issuer,a.year||a.date].filter(Boolean).join(' · ')};});
     if (!awds.length) awds = [{title:'',issuer:''}];
-    awds.slice(0,4).forEach(function(a,i) {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<button onclick="pfAddPfAwd()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Award</button></div>';
+    awds.slice(0,8).forEach(function(a,i) {
       html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
-      html += '<input id="pfWzAwd'+i+'" style="' + inp + '" placeholder="Award / Certification" value="' + e(a.title) + '">';
+      html += '<input id="pfWzAwd'+i+'" style="' + inp + '" placeholder="Award title" value="' + e(a.title) + '">';
       html += '<input id="pfWzAwdIss'+i+'" style="' + inp + '" placeholder="Issuer · Year" value="' + e(a.issuer) + '">';
       html += '</div>';
     });
-    html += '<input type="hidden" id="pfWzAwdCount" value="' + Math.min(awds.length,4) + '">';
+    html += '<input type="hidden" id="pfWzAwdCount" value="' + Math.min(awds.length,8) + '">';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'awards\')" id="pfGenAwardsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenAwardsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'projects') {
@@ -5827,14 +5911,16 @@ function pfWzRender() {
 
   } else if (step.id === 'certifications') {
     var certs = pfWzData.certifications.length ? pfWzData.certifications : [{name:'',issuer:'',year:''}];
-    certs.slice(0,6).forEach(function(c,i) {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<button onclick="pfAddPfCert()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Certification</button></div>';
+    certs.slice(0,10).forEach(function(c,i) {
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 70px;gap:6px;margin-bottom:8px;">';
       html += '<input id="pfWzCert'+i+'" style="' + inp + '" placeholder="Certification name" value="' + e(c.name) + '">';
       html += '<input id="pfWzCertIss'+i+'" style="' + inp + '" placeholder="Issuing org" value="' + e(c.issuer) + '">';
       html += '<input id="pfWzCertYr'+i+'" style="' + inp + '" placeholder="Year" value="' + e(c.year) + '">';
       html += '</div>';
     });
-    html += '<input type="hidden" id="pfWzCertCount" value="' + Math.min(certs.length,6) + '">';
+    html += '<input type="hidden" id="pfWzCertCount" value="' + Math.min(certs.length,10) + '">';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'certifications\')" id="pfGenCertificationsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenCertificationsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'contact') {
@@ -5995,6 +6081,12 @@ function pfGoStep(n) {
   });
   if (n === 1) {
     requestAnimationFrame(calibratePfPreviews);
+    var hint = document.getElementById('pfResumeHint');
+    if (hint) {
+      var cd = (typeof collectData === 'function') ? collectData() : {};
+      var hasData = (cd.experience && cd.experience.length) || (cd.education && cd.education.length) || (cd.skills && cd.skills.length);
+      hint.style.display = hasData ? 'none' : 'flex';
+    }
   }
   if (n === 2) {
     var allOn = Object.values(pfSections).every(Boolean);
