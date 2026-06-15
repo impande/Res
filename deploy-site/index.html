@@ -3806,6 +3806,10 @@ function renderOutput(data) {
   var _chipReset = document.getElementById('pageCountChip');
   if (_chipReset) { _chipReset.textContent = '···'; _chipReset.style.color = '#888'; _chipReset.style.background = '#f3f4f6'; _chipReset.style.borderColor = '#d1d5db'; }
   out.innerHTML = `<div class="resume-a4-page">${renderResumeHTML(data)}</div>`;
+  // Measure synchronously — scrollHeight forces a reflow, guaranteeing the chip
+  // always updates on every generate click regardless of async timer state
+  const _syncPage = out.querySelector('.resume-a4-page');
+  if (_syncPage) _updatePageChip(_measurePages(_syncPage));
   const _a4Live = out.querySelector('.resume-a4-page');
   if (_a4Live) {
     _a4Live.addEventListener('input', function() {
@@ -3819,11 +3823,11 @@ function renderOutput(data) {
   if (dl) dl.style.display = 'flex';
   const strip = document.getElementById('pageCountStrip');
   if (strip) strip.style.display = 'flex';
-  _triggerPageCount(true);
-  setTimeout(function() { _triggerPageCount(true); }, 500);
+  // Async re-measurements after fonts settle
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function() { requestAnimationFrame(_doMeasureAndUpdate); });
   }
+  setTimeout(_doMeasureAndUpdate, 800);
   if (window._pcObserver) window._pcObserver.disconnect();
   if (window._pcResizeObserver) window._pcResizeObserver.disconnect();
   var _a4El = out.querySelector('.resume-a4-page');
