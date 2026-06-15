@@ -3677,6 +3677,11 @@ async function _doGenerateResume() {
   btn.disabled = true;
   btn.classList.remove('btn-ready');
   btn.innerHTML = '<span class="spinner"></span> Generating…';
+  // Reset page count chip immediately so user sees '···' during generation
+  var _pcStrip = document.getElementById('pageCountStrip');
+  var _pcChip = document.getElementById('pageCountChip');
+  if (_pcStrip) _pcStrip.style.display = 'flex';
+  if (_pcChip) { _pcChip.textContent = '···'; _pcChip.style.color = '#888'; _pcChip.style.background = '#f3f4f6'; _pcChip.style.borderColor = '#d1d5db'; }
   document.getElementById('tplGuide')?.classList.remove('visible');
   statusEl.textContent = 'AI is crafting your resume…';
   const _timelapse = ['Analyzing your profile…','Writing experience bullets…','Optimizing for ATS…','Adding finishing touches…'];
@@ -3755,14 +3760,15 @@ async function _doGenerateResume() {
 }
 
 function _measurePages(page) {
-  // Wrap clone in a 794px-wide container so mobile media queries don't affect padding/layout
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;overflow:hidden;visibility:hidden;pointer-events:none;z-index:-1;';
+  wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;';
   const clone = page.cloneNode(true);
-  // Force desktop A4 geometry; overrides any responsive media-query rules
-  clone.style.cssText = 'width:794px!important;max-width:none!important;padding:18mm 16mm!important;box-sizing:border-box!important;';
+  // Force desktop A4 geometry and remove min-height so clone scrollHeight
+  // reflects actual content, not the 297mm floor
+  clone.style.cssText = 'width:794px!important;max-width:none!important;min-height:0!important;padding:18mm 16mm!important;box-sizing:border-box!important;';
   wrap.appendChild(clone);
   document.body.appendChild(wrap);
+  void clone.offsetHeight; // force reflow before reading scrollHeight
   const pages = Math.max(1, Math.ceil(clone.scrollHeight / (297 * 3.7795)));
   document.body.removeChild(wrap);
   return pages;
