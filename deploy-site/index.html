@@ -389,8 +389,7 @@
     .val-banner{display:none;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.83rem;color:#dc2626;}
     #mobileHeader{display:contents;}
     @media(max-width:768px){
-      html{height:100%;overflow:hidden;}
-      body{display:block;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+      body{display:block;}
       #mobileHeader{display:block;position:sticky;top:0;z-index:50;}
       #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow:visible;gap:10px;}
       .logo{padding-bottom:0;border-bottom:none;margin-bottom:0;flex-shrink:0;gap:0;}
@@ -6368,8 +6367,8 @@ function generatePortfolioHTML(d, tpl, sections) {
     var overlay = document.getElementById('pfOverlay');
     if (overlay && overlay.style.display !== 'none') return;
     var dy = e.touches[0].clientY - _tsY;
-    var st = document.body.scrollTop || window.scrollY || 0;
-    var maxSt = document.body.scrollHeight - window.innerHeight;
+    var st = window.scrollY || window.pageYOffset || document.body.scrollTop || 0;
+    var maxSt = document.documentElement.scrollHeight - window.innerHeight;
     // Fast path: not near a boundary — no work needed
     if (dy > 0 && st > 4) return;
     if (dy < 0 && st < maxSt - 4) return;
