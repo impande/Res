@@ -2631,7 +2631,15 @@ const TPL_COLORS = {
 };
 
 // ── Hero ──────────────────────────────────────────────────────────────
+var _flowStarted = false;
+function _hideRichContent() {
+  _flowStarted = true;
+  var richWrap = document.querySelector('.seo-rich-wrap');
+  if (richWrap) richWrap.style.display = 'none';
+}
+
 function startBuild() {
+  _hideRichContent();
   heroClickCount++;
   goToStep(1);
   setTimeout(function() {
@@ -2837,6 +2845,8 @@ function goToStep(step, skipScroll) {
   document.body.scrollTop = 0;
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
+  if (step !== 0) _hideRichContent();
+  if (_flowStarted) { var richWrap = document.querySelector('.seo-rich-wrap'); if (richWrap) richWrap.style.display = 'none'; }
   const topBar = document.getElementById('top-sticky-bar');
   if (topBar) topBar.style.display = (step === 0 || step === 1) ? '' : 'none';
   const pfStickyCta = document.getElementById('pf-sticky-cta');
@@ -4139,6 +4149,7 @@ function onParseSuccess(data) {
 }
 
 async function handleResumeFile(file) {
+  _hideRichContent();
   if (!file) return;
   // 20 MB hard limit — larger files are unlikely to be resumes and would time out
   if (file.size > 20 * 1024 * 1024) {
@@ -4263,6 +4274,7 @@ RULES:
 
 
 async function handleResumeText() {
+  _hideRichContent();
   const text = document.getElementById('resumePasteArea')?.value.trim();
   if (!text || text.length < 50) { showUploadStatus('err', '⚠ Please paste your resume text first.'); return; }
   const btn = document.getElementById('btnParseText');
