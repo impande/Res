@@ -5738,25 +5738,25 @@ function pfWzSave() {
 
 function pfAddManualExp() {
   pfWzSave();
-  if (pfWzData.experience.length < 20) pfWzData.experience.push({title:'',company:'',dates:'',desc:''});
+  if (pfWzData.experience.length < 20) pfWzData.experience.unshift({title:'',company:'',dates:'',desc:''});
   pfWzRender();
 }
 
 function pfAddPfEdu() {
   pfWzSave();
-  if (pfWzData.education.length < 8) pfWzData.education.push({degree:'',school:'',dates:''});
+  if (pfWzData.education.length < 8) pfWzData.education.unshift({degree:'',school:'',dates:''});
   pfWzRender();
 }
 
 function pfAddPfAwd() {
   pfWzSave();
-  if (pfWzData.awards.length < 8) pfWzData.awards.push({title:'',issuer:''});
+  if (pfWzData.awards.length < 8) pfWzData.awards.unshift({title:'',issuer:''});
   pfWzRender();
 }
 
 function pfAddPfCert() {
   pfWzSave();
-  if (pfWzData.certifications.length < 10) pfWzData.certifications.push({name:'',issuer:'',year:''});
+  if (pfWzData.certifications.length < 10) pfWzData.certifications.unshift({name:'',issuer:'',year:''});
   pfWzRender();
 }
 
