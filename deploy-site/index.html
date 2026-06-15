@@ -2293,7 +2293,7 @@
       <div class="tpl-grid" id="tplGrid"></div>
       <div id="tplGuide" class="tpl-guide">
         <div class="tpl-guide-check">✓</div>
-        <span class="tpl-guide-text">Template chosen! Now click <strong>✦ Generate with AI</strong> below to build your resume</span>
+        <span class="tpl-guide-text">Template chosen! Now click <strong>Generate Resume</strong> below to build your resume</span>
         <span class="tpl-guide-caret">↓</span>
       </div>
       <!-- hidden select kept for JS compatibility -->
@@ -2304,7 +2304,7 @@
     <input type="hidden" id="outputFormat" value="full">
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(6)">← Back</button>
-      <button class="btn-accent" id="generateBtn" onclick="generateResume()">✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span></button>
+      <button class="btn-accent" id="generateBtn" onclick="generateResume()">Generate Resume <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span></button>
     </div>
     <div class="resume-bar">
       <div class="resume-bar-left">
@@ -2323,7 +2323,7 @@
     </div>
     <div style="position:relative;">
       <div class="resume-output-card" id="resumeOutput">
-        <div class="resume-placeholder">Click <strong>Generate with AI</strong> to create your resume</div>
+        <div class="resume-placeholder">Click <strong>Generate Resume</strong> to create your resume</div>
       </div>
       <!-- Tips — overlay on desktop, bottom drawer on mobile -->
       <div id="tipsBackdrop" onclick="dismissTips()"></div>
@@ -3153,6 +3153,7 @@ function addCustomSection(title='', content='', includeInResume=true) {
     <div class="form-group">
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
+      <button id="gen-custom-btn-${id}" onclick="generateCustomBullets('${id}')" style="margin-top:6px;padding:5px 12px;font-size:0.78rem;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;">✦ Generate with AI</button>
     </div>
     <div class="form-group" style="margin-top:2px;">
       <label style="display:flex;align-items:center;gap:7px;font-size:0.8rem;color:var(--muted);cursor:pointer;">
@@ -3330,6 +3331,32 @@ Bullet writing rules:
   }
 }
 
+async function generateCustomBullets(id) {
+  const titleEl = document.getElementById('custom-title-'+id);
+  const textarea = document.getElementById('custom-content-'+id);
+  const btn = document.getElementById('gen-custom-btn-'+id);
+  const sectionTitle = titleEl?.value.trim() || '';
+  if (!sectionTitle) { showToast('Please fill in a Section Title first.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--accent);width:11px;height:11px;border-width:2px;"></span> Generating…';
+  const jobTitle = document.getElementById('jobTitle')?.value.trim() || '';
+  const existing = textarea?.value.trim() || '';
+  const prompt = `You are an expert resume writer. Generate 3–5 powerful, ATS-optimised bullet points for a resume section titled "${sectionTitle}".${jobTitle ? ` Candidate job title: ${jobTitle}.` : ''}${existing ? ` Use these notes: ${existing}` : ' Generate professional content relevant to the section title.'}
+Output ONLY bullet points, one per line, each starting with •. No intro, headers, or explanation.`;
+  try {
+    const response = await fetch('/.netlify/functions/generate', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({prompt})
+    });
+    if (!response.ok) throw new Error('Server error ' + response.status);
+    const result = await response.json();
+    const text = (result.content || result.text || '').trim();
+    if (text) { textarea.value = text; updatePreview(); markNeedsRegen(); }
+    else throw new Error('Empty response');
+  } catch(err) { showToast('Could not generate content: ' + err.message); }
+  finally { btn.disabled = false; btn.innerHTML = '✦ Generate with AI'; }
+}
+
 function onFormatChange() {}
 
 // ── Validation & data collection ──────────────────────────────────────
@@ -3382,12 +3409,18 @@ function collectData() {
     const id = card.id.replace('exp-','');
     const title = document.getElementById('exp-title-'+id)?.value.trim()||'';
     const co = document.getElementById('exp-co-'+id)?.value.trim()||'';
-    if (title||co) experience.push({
-      title, co,
-      start: document.getElementById('exp-start-'+id)?.value.trim()||'',
-      end: document.getElementById('exp-end-'+id)?.value.trim()||'',
-      desc: document.getElementById('exp-desc-'+id)?.value.trim()||''
-    });
+    if (title||co) {
+      const descRaw = document.getElementById('exp-desc-'+id)?.value.trim()||'';
+      const bulletLines = descRaw.split('\n').map(l=>l.trim()).filter(l=>/^[•\-\*]/.test(l));
+      const entry = {
+        title, co,
+        start: document.getElementById('exp-start-'+id)?.value.trim()||'',
+        end:   document.getElementById('exp-end-'+id)?.value.trim()||'',
+        desc:  descRaw
+      };
+      if (bulletLines.length >= 2) entry.bullets = bulletLines.map(l=>l.replace(/^[•\-\*]\s*/,'').trim());
+      experience.push(entry);
+    }
   });
   const awards = [];
   document.querySelectorAll('#awardEntries .entry-card').forEach(card => {
@@ -3682,6 +3715,15 @@ async function _doGenerateResume() {
       merged.experience = data.experience; merged.awards = data.awards; merged.education = data.education;
     }
 
+    // Always overlay user-edited bullets from form fields — prevents AI from
+    // rewriting bullet points the user manually edited before clicking Generate
+    merged.experience = (merged.experience || []).map(function(exp) {
+      const userExp = (data.experience || []).find(e => e.title === exp.title && e.co === exp.co);
+      return (userExp && userExp.bullets && userExp.bullets.length)
+        ? Object.assign({}, exp, {bullets: userExp.bullets})
+        : exp;
+    });
+
     lastResumeData = merged;
     manuallyEdited = false;
     clearNeedsRegen();
@@ -3705,7 +3747,7 @@ async function _doGenerateResume() {
     document.getElementById('resumeOutput').innerHTML = `<div class="resume-placeholder"><strong>Generation failed.</strong><br>Check your connection and try again.<br><small style="color:#888">${esc(err.message)}</small></div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '✦ Generate with AI <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
+    btn.innerHTML = 'Generate Resume <span class="regen-badge" id="regenBadge" style="display:none">REGENERATE</span>';
     btn.classList.remove('regen-needed');
   }
 }
@@ -5367,7 +5409,7 @@ function closePreviewModal(e) {
         <div class="pf-toggle on" data-section="education" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🎓</span><span class="pf-toggle-lbl">Education</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
+        <div class="pf-toggle on" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
         <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
       </div>
       <!-- Section detail wizard -->
@@ -5439,7 +5481,7 @@ function closePreviewModal(e) {
 
 var pfTemplate = 'professional';
 var pfPhoto = null;
-var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:false,contact:true};
+var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:true,contact:true};
 var pfCurrentStep = 1;
 
 // ── Portfolio wizard state ─────────────────────────────────────────────
@@ -5608,7 +5650,8 @@ function togglePfSection(el) {
 function pfBuildWz() {
   var photoStep = {id:'photo', icon:'📷', label:'Profile Photo', q:'Add a photo — it appears front-and-center in your portfolio hero'};
   var contactDef = _PF_DEFS.find(function(d) { return d.id === 'contact'; });
-  var rest = _PF_DEFS.filter(function(d) { return d.id !== 'contact' && pfSections[d.id]; });
+  var alwaysOn = ['education','awards','certifications'];
+  var rest = _PF_DEFS.filter(function(d) { return d.id !== 'contact' && (alwaysOn.indexOf(d.id) >= 0 || pfSections[d.id]); });
   pfWzSteps = [photoStep];
   if (pfSections.contact && contactDef) pfWzSteps.push(contactDef);
   pfWzSteps = pfWzSteps.concat(rest);
