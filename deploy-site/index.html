@@ -2851,7 +2851,6 @@ function goToStep(step, skipScroll) {
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  document.body.scrollTop = 0;
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   if (step !== 0) _hideRichContent();
@@ -6374,31 +6373,21 @@ function generatePortfolioHTML(d, tpl, sections) {
 }
 
 // Scroll bounce fix — covers iOS < 16 where overscroll-behavior is unsupported.
-// Strategy A (CSS): overscroll-behavior:none on html+body handles iOS 16+, Chrome 63+.
-// Strategy B (JS sentinel): nudge scrollY off the true boundary on touchstart so
-//   momentum scroll can never rubber-band even when e.cancelable is false.
-// Strategy C (touchmove): preventDefault at boundaries for non-momentum moves.
+// CSS overscroll-behavior:none handles iOS 16+, Chrome 63+.
+// JS touchmove guard handles older iOS: blocks e.preventDefault only at true boundaries.
 (function() {
   var _lastY = 0;
   document.addEventListener('touchstart', function(e) {
     _lastY = e.touches[0].clientY;
-    var overlay = document.getElementById('pfOverlay');
-    if (overlay && overlay.style.display !== 'none') return;
-    // Sentinel: if truly at top or bottom, nudge 1px so momentum can't over-pull
-    var st = window.scrollY || window.pageYOffset || 0;
-    var maxSt = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    if (maxSt > 2) {
-      if (st <= 0) window.scrollTo(0, 1);
-      else if (st >= maxSt) window.scrollTo(0, maxSt - 1);
-    }
   }, { passive: true });
   document.addEventListener('touchmove', function(e) {
     if (!e.cancelable) return;
     var overlay = document.getElementById('pfOverlay');
     if (overlay && overlay.style.display !== 'none') return;
     var curY = e.touches[0].clientY;
-    var dy = curY - _lastY;  // per-frame delta, not cumulative
+    var dy = curY - _lastY;
     _lastY = curY;
+    if (!dy) return; // no movement this frame — never block
     var st = window.scrollY || window.pageYOffset || 0;
     var maxSt = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     // Fast path: not near a boundary — skip DOM walk
