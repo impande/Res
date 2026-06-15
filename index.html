@@ -187,7 +187,7 @@
       box-shadow:0 2px 10px rgba(0,0,0,0.04);
       display:flex;flex-direction:column;align-items:center;gap:10px;
     }
-    #top-sticky-bar .btn-hero{margin-top:4px;}
+    #top-sticky-bar .top-cta-row{margin-top:4px;width:100%;justify-content:center;}
     #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
     .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;position:relative;}
@@ -318,7 +318,8 @@
       .step-label{font-size:0.62rem;text-align:center;}
 #mobileProgress{display:block;}
       #main{padding:20px 16px 28px;max-width:100%;overflow-y:visible;}
-      #top-sticky-bar{margin:-20px -16px 20px;padding:12px 16px 14px;}
+      #top-sticky-bar{margin:-20px -16px 20px;padding:12px 16px 14px;position:static;}
+      #pf-sticky-cta{position:static;padding:10px 16px;margin:-20px -16px 0;}
       .step-title{font-size:1.5rem;}
       .step-subtitle{margin-bottom:20px;}
       .form-grid-2{grid-template-columns:1fr;gap:0;}
@@ -669,6 +670,10 @@
       .tpl-filter-btn{padding:5px 9px!important;font-size:0.68rem!important;}
     }
     /* ── Portfolio Builder Feature ── */
+    .top-cta-row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;}
+    #pf-sticky-cta{display:none;position:sticky;top:0;z-index:39;background:var(--bg);border-bottom:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,0.04);padding:10px 48px;align-items:center;justify-content:center;gap:8px;flex-direction:column;}
+    #pf-sticky-cta .btn-portfolio-hero{font-size:0.88rem;padding:10px 22px;}
+    #pf-sticky-cta .portfolio-hero-note{margin-top:4px;}
     .portfolio-cta-wrap{margin-top:24px;width:100%;max-width:450px;text-align:center;}
     .btn-portfolio-hero{display:inline-flex;align-items:center;gap:9px;padding:13px 28px;background:#fff;color:var(--accent);font-size:0.95rem;font-weight:700;border:2px solid rgba(217,119,6,0.3);border-radius:12px;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 2px 10px rgba(217,119,6,0.1);}
     .btn-portfolio-hero:hover{border-color:var(--accent);background:rgba(217,119,6,0.04);box-shadow:0 4px 18px rgba(217,119,6,0.18);}
@@ -1833,9 +1838,12 @@
 
 <main id="main">
 
-  <!-- Always-visible sticky bar: Generate Resume CTA + import existing resume -->
+  <!-- Always-visible sticky bar: Generate Resume CTA + portfolio CTA + import existing resume -->
   <div id="top-sticky-bar">
-    <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
+    <div class="top-cta-row">
+      <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
+      <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
+    </div>
     <p class="hero-note">No sign-up required · 100% free to build</p>
     <div class="hero-upload-wrap">
       <div class="hero-or">— or import your existing resume —</div>
@@ -1861,6 +1869,12 @@
       </div>
       <div id="uploadStatusBar" class="upload-status-bar" style="display:none"></div>
     </div>
+  </div>
+
+  <!-- Compact portfolio sticky CTA — shown on steps 2-7 (steps where topBar is hidden) -->
+  <div id="pf-sticky-cta">
+    <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
+    <p class="portfolio-hero-note">Turn your resume into a stunning personal site — free download</p>
   </div>
 
   <div class="step-content active" id="step0">
@@ -1898,7 +1912,7 @@
       <div class="portfolio-divider-line"></div>
     </div>
     <div class="portfolio-cta-wrap">
-      <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build My Portfolio Website →</button>
+      <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
       <p class="portfolio-hero-note">Turn your experience into a stunning personal website — free download</p>
     </div>
   </div>
@@ -2599,6 +2613,8 @@ function goToStep(step, skipScroll) {
   // doesn't overlap the step title on any device or viewport size.
   const topBar = document.getElementById('top-sticky-bar');
   if (topBar) topBar.style.display = (step === 0 || step === 1) ? '' : 'none';
+  const pfStickyCta = document.getElementById('pf-sticky-cta');
+  if (pfStickyCta) pfStickyCta.style.display = (step >= 2 && step <= 7) ? 'flex' : 'none';
   // Once the user reaches Experience or beyond, permanently hide the landing
   // hero so it never reappears when navigating between form steps.
   if (step >= 2) {
@@ -5267,7 +5283,8 @@ function _setupPfTouchHandlers() {
     var y = e.touches[0].clientY, x = e.touches[0].clientX;
     var dy = y - _lastY, dx = x - _lastX;
     _lastY = y; _lastX = x;
-    // Skip if primarily horizontal (steps nav horizontal scroll)
+    // Skip tiny movements (noise) and horizontal swipes (steps nav)
+    if (Math.abs(dy) < 3) return;
     if (Math.abs(dx) > Math.abs(dy)) return;
     var scrollY = window.scrollY || window.pageYOffset;
     var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
