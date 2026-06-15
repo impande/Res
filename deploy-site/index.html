@@ -3728,6 +3728,8 @@ async function _doGenerateResume() {
     manuallyEdited = false;
     clearNeedsRegen();
     renderOutput(merged);
+    // Immediately kick off page count update (rAF ensures DOM is painted first)
+    requestAnimationFrame(function() { requestAnimationFrame(_doMeasureAndUpdate); });
     // Measure page count at multiple intervals to ensure DOM + fonts are fully settled
     setTimeout(_doMeasureAndUpdate, 300);
     setTimeout(_doMeasureAndUpdate, 900);
@@ -4663,8 +4665,10 @@ function populateFormFromParsed(data) {
     if (cont) { cont.innerHTML = ''; awardCount = 0; }
     data.awards.slice(0,5).forEach(a => {
       addAward();
-      sv('award-name-'+awardCount, a.name); sv('award-year-'+awardCount, a.year);
-      sv('award-org-'+awardCount, a.org);   sv('award-desc-'+awardCount, a.desc);
+      sv('award-name-'+awardCount, a.name||a.title||a.award||'');
+      sv('award-year-'+awardCount, a.year||a.date||'');
+      sv('award-org-'+awardCount, a.org||a.issuer||a.organization||'');
+      sv('award-desc-'+awardCount, a.desc||a.description||'');
     });
   }
   // Education
@@ -4673,8 +4677,10 @@ function populateFormFromParsed(data) {
     if (cont) { cont.innerHTML = ''; eduCount = 0; }
     data.education.slice(0,4).forEach(e => {
       addEducation();
-      sv('edu-deg-'+eduCount, e.deg); sv('edu-sch-'+eduCount, e.sch);
-      sv('edu-yr-'+eduCount, e.yr);   sv('edu-gpa-'+eduCount, e.gpa);
+      sv('edu-deg-'+eduCount, e.deg||e.degree||e.qualification||'');
+      sv('edu-sch-'+eduCount, e.sch||e.school||e.institution||e.university||'');
+      sv('edu-yr-'+eduCount, e.yr||e.year||e.dates||'');
+      sv('edu-gpa-'+eduCount, e.gpa||'');
     });
   }
   // Skills
@@ -5825,6 +5831,7 @@ function pfWzRender() {
     if (!exps.length) {
       // No resume form data — offer manual entry + AI generation
       var manualExps = pfWzData.experience.length ? pfWzData.experience : [{title:'',company:'',dates:'',desc:''}];
+      html += '<button onclick="pfAddManualExp()" style="font-size:0.8rem;color:var(--accent);background:none;border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Add another role</button>';
       manualExps.slice(0,20).forEach(function(ex,i) {
         html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
         html += '<div style="display:grid;grid-template-columns:1fr 1fr 90px;gap:6px;margin-bottom:6px;">';
@@ -5837,7 +5844,6 @@ function pfWzRender() {
         html += '</div>';
       });
       html += '<input type="hidden" id="pfWzExpManualCount" value="'+Math.min(manualExps.length,20)+'">';
-      html += '<button onclick="pfAddManualExp()" style="font-size:0.8rem;color:var(--accent);background:none;border:1.5px dashed var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Add another role</button>';
       html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
     } else {
       exps.forEach(function(ex,i) {
@@ -5852,6 +5858,8 @@ function pfWzRender() {
   } else if (step.id === 'education') {
     var edus = pfWzData.education.length ? pfWzData.education : (cd.education||[]).map(function(e2){return{degree:e2.deg||'',school:e2.sch||'',dates:e2.yr||''};});
     if (!edus.length) edus = [{degree:'',school:'',dates:''}];
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<button onclick="pfAddPfEdu()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Education</button></div>';
     edus.slice(0,8).forEach(function(ed,i) {
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-bottom:8px;">';
       html += '<input id="pfWzEduDeg'+i+'" style="' + inp + '" placeholder="Degree / Major" value="' + e(ed.degree) + '">';
@@ -5860,13 +5868,13 @@ function pfWzRender() {
       html += '</div>';
     });
     html += '<input type="hidden" id="pfWzEduCount" value="' + Math.min(edus.length,8) + '">';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:2px;">';
-    html += '<button onclick="pfAddPfEdu()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Education</button></div>';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'education\')" id="pfGenEducationBtn" style="' + aiBtnStyle + '">✨ Polish with AI</button><span id="pfGenEducationStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'awards') {
-    var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||'',issuer:[a.org,a.year].filter(Boolean).join(' · ')};});
+    var awds = pfWzData.awards.length ? pfWzData.awards : (cd.awards||[]).map(function(a){return{title:a.name||a.title||'',issuer:[a.org||a.issuer,a.year||a.date].filter(Boolean).join(' · ')};});
     if (!awds.length) awds = [{title:'',issuer:''}];
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<button onclick="pfAddPfAwd()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Award</button></div>';
     awds.slice(0,8).forEach(function(a,i) {
       html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
       html += '<input id="pfWzAwd'+i+'" style="' + inp + '" placeholder="Award title" value="' + e(a.title) + '">';
@@ -5874,8 +5882,6 @@ function pfWzRender() {
       html += '</div>';
     });
     html += '<input type="hidden" id="pfWzAwdCount" value="' + Math.min(awds.length,8) + '">';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:2px;">';
-    html += '<button onclick="pfAddPfAwd()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Award</button></div>';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'awards\')" id="pfGenAwardsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenAwardsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'projects') {
@@ -5895,6 +5901,8 @@ function pfWzRender() {
 
   } else if (step.id === 'certifications') {
     var certs = pfWzData.certifications.length ? pfWzData.certifications : [{name:'',issuer:'',year:''}];
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<button onclick="pfAddPfCert()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Certification</button></div>';
     certs.slice(0,10).forEach(function(c,i) {
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 70px;gap:6px;margin-bottom:8px;">';
       html += '<input id="pfWzCert'+i+'" style="' + inp + '" placeholder="Certification name" value="' + e(c.name) + '">';
@@ -5903,8 +5911,6 @@ function pfWzRender() {
       html += '</div>';
     });
     html += '<input type="hidden" id="pfWzCertCount" value="' + Math.min(certs.length,10) + '">';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:2px;">';
-    html += '<button onclick="pfAddPfCert()" style="padding:5px 12px;font-size:0.78rem;border:1px dashed var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">+ Add Certification</button></div>';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'certifications\')" id="pfGenCertificationsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenCertificationsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'contact') {
