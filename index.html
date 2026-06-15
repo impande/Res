@@ -2882,7 +2882,7 @@ function addEducation(prependNew = false) {
 let customSectionCount = 0;
 const CUSTOM_SECTION_PRESETS = ['Projects','Certifications','Hobbies','References','Languages','Volunteer Work'];
 
-function addCustomSection(title='', content='') {
+function addCustomSection(title='', content='', includeInResume=true) {
   const id = ++customSectionCount;
   const presetOptions = CUSTOM_SECTION_PRESETS.map(p => `<option value="${p}">${p}</option>`).join('');
   const div = document.createElement('div');
@@ -2908,6 +2908,12 @@ function addCustomSection(title='', content='') {
     <div class="form-group">
       <label class="form-label">Content</label>
       <textarea id="custom-content-${id}" rows="4" placeholder="Describe this section…" oninput="updatePreview()" style="resize:vertical">${content}</textarea>
+    </div>
+    <div class="form-group" style="margin-top:2px;">
+      <label style="display:flex;align-items:center;gap:7px;font-size:0.8rem;color:var(--muted);cursor:pointer;">
+        <input type="checkbox" id="custom-resume-${id}" ${includeInResume ? 'checked' : ''} onchange="updatePreview()" style="accent-color:var(--accent);width:14px;height:14px;">
+        Include in resume
+      </label>
     </div>`;
   document.getElementById('customSectionEntries').prepend(div);
   setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
@@ -2922,7 +2928,8 @@ function collectCustomSections() {
     const content = document.getElementById('custom-content-'+id)?.value.trim()||'';
     const start = document.getElementById('custom-start-'+id)?.value.trim()||'';
     const end = document.getElementById('custom-end-'+id)?.value.trim()||'';
-    if (title||content) sections.push({title, content, start, end});
+    const includeInResume = document.getElementById('custom-resume-'+id)?.checked !== false;
+    if (title||content) sections.push({title, content, start, end, includeInResume});
   });
   return sections;
 }
@@ -3279,7 +3286,7 @@ function renderResumeHTML(data) {
   // Custom sections
   let customHTML = '';
   if (data.customSections && data.customSections.length) {
-    customHTML = data.customSections.filter(s=>s.title||s.content).map(s => {
+    customHTML = data.customSections.filter(s=>(s.title||s.content) && s.includeInResume !== false).map(s => {
       const dateRange = [s.start, s.end].filter(Boolean).join(' – ');
       return `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}${dateRange ? `<span class="r-yr" style="float:right;font-weight:400;font-size:0.8em" contenteditable="true">${esc(dateRange)}</span>` : ''}</div><div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`;
     }).join(div);
@@ -5434,10 +5441,12 @@ function pfAddManualExp() {
 function pfWzNav(dir) {
   pfWzSave();
   pfWzIdx = Math.max(0, Math.min(pfWzSteps.length - 1, pfWzIdx + dir));
-  var body = document.getElementById('pfStep2');
-  if (body) body.scrollTop = 0;
   pfWzRender();
-  if (body) requestAnimationFrame(function() { body.scrollTop = 0; });
+  requestAnimationFrame(function() {
+    var wizard = document.getElementById('pfFillWizard');
+    var body = document.getElementById('pfStep2');
+    if (wizard && body) body.scrollTop = wizard.offsetTop - 8;
+  });
 }
 
 function pfWzRender() {
