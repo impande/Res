@@ -5308,6 +5308,10 @@ function closePreviewModal(e) {
     <div class="pf-body" id="pfStep1">
       <div class="pf-section-title">Choose a style for your portfolio</div>
       <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
+      <div id="pfResumeHint" style="display:flex;align-items:flex-start;gap:10px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.22);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:0.8rem;color:var(--text);line-height:1.55;">
+        <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">💡</span>
+        <span><b>Auto-fill tip:</b> Upload your existing resume (PDF or Word) or paste your resume text in the <b>Build Your Resume</b> section first — your experience, education, skills, and awards will be pulled in automatically when you reach the details step.</span>
+      </div>
       <div class="pf-tpl-grid">
         <div class="pf-tpl-card selected" id="pfTplProfessional" onclick="selectPfTemplate('professional')">
           <div class="pf-tpl-preview">
@@ -6061,6 +6065,12 @@ function pfGoStep(n) {
   });
   if (n === 1) {
     requestAnimationFrame(calibratePfPreviews);
+    var hint = document.getElementById('pfResumeHint');
+    if (hint) {
+      var cd = (typeof collectData === 'function') ? collectData() : {};
+      var hasData = (cd.experience && cd.experience.length) || (cd.education && cd.education.length) || (cd.skills && cd.skills.length);
+      hint.style.display = hasData ? 'none' : 'flex';
+    }
   }
   if (n === 2) {
     var allOn = Object.values(pfSections).every(Boolean);
