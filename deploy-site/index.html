@@ -2850,7 +2850,7 @@ function goToStep(step, skipScroll) {
   currentStep = step;
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!skipScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   if (step !== 0) _hideRichContent();
@@ -5054,7 +5054,7 @@ addAward();
 addEducation();
 
 window.addEventListener('load', function() {
-  goToStep(0);
+  goToStep(0, true); // page already at top on init — skip scrollTo to avoid interrupting early user scroll
   renderTemplateGrid('all');
   updateTplSelBar('modern');
   setTimeout(() => {
@@ -6387,12 +6387,15 @@ function generatePortfolioHTML(d, tpl, sections) {
     var curY = e.touches[0].clientY;
     var dy = curY - _lastY;
     _lastY = curY;
-    if (!dy) return; // no movement this frame — never block
+    if (!dy) return; // stationary frame — never block
     var st = window.scrollY || window.pageYOffset || 0;
     var maxSt = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     // Fast path: not near a boundary — skip DOM walk
     if (dy > 0 && st > 4) return;
     if (dy < 0 && st < maxSt - 4) return;
+    // Near boundary but tiny movement (jitter) — don't block; a 1-2px wobble at
+    // the edge must not call preventDefault or iOS locks the whole gesture as non-scroll
+    if (Math.abs(dy) <= 2) return;
     // At boundary — allow scroll only if inside a scrollable child
     var el = e.target;
     while (el && el !== document.documentElement) {
