@@ -389,7 +389,8 @@
     .val-banner{display:none;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.83rem;color:#dc2626;}
     #mobileHeader{display:contents;}
     @media(max-width:768px){
-      body{display:block;}
+      html{height:100%;overflow:hidden;}
+      body{display:block;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
       #mobileHeader{display:block;position:sticky;top:0;z-index:50;}
       #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow:visible;gap:10px;}
       .logo{padding-bottom:0;border-bottom:none;margin-bottom:0;flex-shrink:0;gap:0;}
@@ -1956,29 +1957,15 @@
       <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
       <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
     </div>
-    <p class="hero-note">No sign-up required · 100% free to build</p>
     <div class="hero-upload-wrap">
-      <div class="hero-or">— or import your existing resume —</div>
-      <div class="upload-tabs">
-        <button class="upload-tab" id="tabUpload" onclick="switchUploadTab('upload')">📄 Upload PDF / DOC</button>
-        <button class="upload-tab active" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.5rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;line-height:1.6;white-space:nowrap;box-shadow:0 2px 8px rgba(34,197,94,0.55);">✓ RECOMMENDED</span></button>
-      </div>
-      <!-- Upload PDF/Doc panel -->
-      <div class="upload-panel" id="panelUpload">
-        <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
-          <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleResumeFile(this.files[0]);this.value='';">
-          <div class="upload-zone-icon">📄</div>
-          <div class="upload-zone-title">Upload your resume</div>
-          <div class="upload-zone-sub">PDF · DOCX · DOC · TXT · JPG · PNG &nbsp;·&nbsp; Drag &amp; drop</div>
-          <span class="btn-browse">Choose File</span>
-        </label>
-      </div>
-
-      <!-- Paste text panel -->
-      <div class="upload-panel active" id="panelPaste">
-        <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
-        <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
-      </div>
+      <div class="hero-or">— or upload your existing resume —</div>
+      <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
+        <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleResumeFile(this.files[0]);this.value='';">
+        <div class="upload-zone-icon">📄</div>
+        <div class="upload-zone-title">Upload your resume</div>
+        <div class="upload-zone-sub">PDF · DOCX · DOC · TXT · JPG · PNG &nbsp;·&nbsp; Drag &amp; drop</div>
+        <span class="btn-browse">Choose File</span>
+      </label>
       <div id="uploadStatusBar" class="upload-status-bar" style="display:none"></div>
     </div>
   </div>
@@ -2812,6 +2799,7 @@ function goToStep(step, skipScroll) {
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.body.scrollTop = 0;
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   const topBar = document.getElementById('top-sticky-bar');
@@ -5483,7 +5471,7 @@ function openPortfolioBuilder() {
   document.getElementById('pfOverlay').style.display = 'flex';
   _setupPfTouchHandlers();
   // Lock background scroll on both html and body — iOS Safari requires both
-  _pfScrollY = window.scrollY || window.pageYOffset || 0;
+  _pfScrollY = document.body.scrollTop || window.scrollY || window.pageYOffset || 0;
   document.documentElement.style.overflow = 'hidden';
   document.body.style.position = 'fixed';
   document.body.style.top = '-' + _pfScrollY + 'px';
@@ -5510,6 +5498,7 @@ function closePfModal() {
   document.body.style.width = '';
   document.body.style.overflow = '';
   window.scrollTo(0, _pfScrollY);
+  document.body.scrollTop = _pfScrollY;
 }
 
 function selectPfTemplate(tpl) {
