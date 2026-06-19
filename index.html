@@ -5,18 +5,6 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <!-- Cache buster: if URL has no _r param, redirect to one with timestamp.
-       This forces Chrome/Safari to fetch from network instead of disk cache
-       on kill+reopen. The _r URL is always unique so it can never be cached. -->
-  <script>
-    (function() {
-      var u = new URL(location.href);
-      if (!u.searchParams.has('_r')) {
-        u.searchParams.set('_r', Date.now());
-        location.replace(u.toString());
-      }
-    })();
-  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resume For You – Free AI Resume &amp; Portfolio Builder | resume4u.help</title>
 
@@ -1955,7 +1943,6 @@
       .preview-modal-handle{display:none;}
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -4288,7 +4275,22 @@ async function handleResumeFile(file) {
   }
 }
 
+var _pdfJsLoadPromise = null;
+function _loadPdfJs() {
+  if (typeof pdfjsLib !== 'undefined') return Promise.resolve();
+  if (_pdfJsLoadPromise) return _pdfJsLoadPromise;
+  _pdfJsLoadPromise = new Promise(function(resolve) {
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = resolve;
+    s.onerror = resolve; // resolve even on failure — callers check typeof pdfjsLib
+    document.head.appendChild(s);
+  });
+  return _pdfJsLoadPromise;
+}
+
 async function renderPDFPagesAsBase64(file) {
+  await _loadPdfJs();
   if (typeof pdfjsLib === 'undefined') return [];
   try {
     const buf = await readAsArrayBuffer(file);
@@ -4392,6 +4394,7 @@ async function extractTextFromFile(file) {
 }
 
 async function extractPDFText(buf) {
+  await _loadPdfJs();
   // Use PDF.js for proper text extraction from modern compressed PDFs
   if (typeof pdfjsLib !== 'undefined') {
     try {
