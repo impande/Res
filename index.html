@@ -48,6 +48,11 @@
   <meta name="twitter:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 30+ templates. Free — no sign-up needed.">
   <meta name="twitter:image" content="https://resume4u.help/og-image.png">
 
+  <!-- ── Favicon ──────────────────────────────────────────────────────────── -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
   <!-- ── Schema.org JSON-LD ────────────────────────────────────────────── -->
   <script type="application/ld+json">
   {
@@ -57,6 +62,7 @@
         "@type": "SoftwareApplication",
         "name": "Resume For You",
         "url": "https://resume4u.help/",
+        "image": "https://resume4u.help/og-image.png",
         "description": "Free AI-powered resume and portfolio builder. Generate ATS-optimised resumes with 35+ professional templates, build a portfolio website, and share it live — all in minutes. No sign-up required.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
@@ -206,7 +212,7 @@
   })();
   </script>
   <style>
-    :root { --bg:#fafaf7;--sidebar-bg:#ffffff;--card-bg:#ffffff;--border:#e5e5e0;--text:#1a1a1a;--muted:#6b7280;--accent:#d97706;--input-bg:#ffffff;--input-border:#d5d5cf;--white:#ffffff; }
+    :root { --bg:#fafaf7;--sidebar-bg:#ffffff;--card-bg:#ffffff;--border:#e5e5e0;--text:#1a1a1a;--muted:#6b7280;--accent:#d97706;--input-bg:#ffffff;--input-border:#d5d5cf;--white:#ffffff;--surface:#f4f4ef; }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;cursor:default;user-select:none;-webkit-user-select:none;line-height:1.6;overscroll-behavior:none;}
     html{overscroll-behavior:none;}
@@ -1935,7 +1941,7 @@
     .preview-scale-inner{transform-origin:top left;display:block;}
     /* Resume tips — overlay on resume card (desktop), bottom drawer (mobile) */
     #tipsBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:8499;}
-    #resumeTips{position:absolute;inset:0;background:rgba(10,10,20,0.92);backdrop-filter:blur(3px);z-index:10;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+    #resumeTips{position:absolute;inset:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);z-index:10;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.08);}
     #resumeTips.tips-hidden{display:none!important;}
     .tips-drag-handle{display:none;}
     @media(max-width:520px){
@@ -2329,32 +2335,32 @@
       <div id="tipsBackdrop" onclick="dismissTips()"></div>
       <div id="resumeTips" style="display:none;">
         <!-- drag handle pill (mobile only) -->
-        <div class="tips-drag-handle"><div style="width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div></div>
+        <div class="tips-drag-handle"><div style="width:40px;height:4px;background:rgba(0,0,0,0.12);border-radius:2px;"></div></div>
         <div id="tipsContent" style="width:100%;max-width:640px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <div style="font-size:0.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;">💡 Quick Tips</div>
-            <button onclick="dismissTips()" style="background:rgba(255,255,255,0.1);border:1px solid #44445a;color:#e8e8ff;font-size:0.8rem;font-weight:700;cursor:pointer;padding:6px 16px;border-radius:20px;line-height:1;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕ Dismiss</button>
+            <div style="font-size:0.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);">💡 Quick Tips</div>
+            <button onclick="dismissTips()" style="background:#fff;border:1px solid var(--border);color:var(--text);font-size:0.8rem;font-weight:700;cursor:pointer;padding:6px 16px;border-radius:20px;line-height:1;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='#fff'">✕ Dismiss</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
-            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;">
               <span style="font-size:1.3rem;flex-shrink:0;margin-top:1px;">✎</span>
               <div>
-                <div style="font-size:0.83rem;font-weight:700;color:#e8e8ff;margin-bottom:4px;">Click any text to edit</div>
-                <div style="font-size:0.73rem;color:#6666aa;line-height:1.55;">Your resume is fully editable! Tap directly on your name, job title, bullet points, or any section to make changes inline — without re-generating the entire resume.</div>
+                <div style="font-size:0.83rem;font-weight:700;color:var(--text);margin-bottom:4px;">Click any text to edit</div>
+                <div style="font-size:0.73rem;color:var(--muted);line-height:1.55;">Your resume is fully editable! Tap directly on your name, job title, bullet points, or any section to make changes inline — without re-generating the entire resume.</div>
               </div>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;">
               <span style="font-size:1.3rem;flex-shrink:0;margin-top:1px;">🎨</span>
               <div>
-                <div style="font-size:0.83rem;font-weight:700;color:#e8e8ff;margin-bottom:4px;">Try different templates</div>
-                <div style="font-size:0.73rem;color:#6666aa;line-height:1.55;">Not happy with the look? Tap <strong style="color:#f59e0b;">Preview Resume</strong> to browse 35+ templates and instantly see how your resume looks in each style — same content, new design.</div>
+                <div style="font-size:0.83rem;font-weight:700;color:var(--text);margin-bottom:4px;">Try different templates</div>
+                <div style="font-size:0.73rem;color:var(--muted);line-height:1.55;">Not happy with the look? Tap <strong style="color:var(--accent);">Preview Resume</strong> to browse 35+ templates and instantly see how your resume looks in each style — same content, new design.</div>
               </div>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(26,26,42,0.95);border:1px solid #2e2e4a;border-radius:12px;padding:12px 14px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;">
               <span style="font-size:1.3rem;flex-shrink:0;margin-top:1px;">📥</span>
               <div>
-                <div style="font-size:0.83rem;font-weight:700;color:#e8e8ff;margin-bottom:4px;">Download when ready</div>
-                <div style="font-size:0.73rem;color:#6666aa;line-height:1.55;">Once you're satisfied with your resume, tap <strong style="color:#f59e0b;">Download PDF</strong> below. Pay once (<span id="tipsPriceNote">₹9 / $0.99</span>) and get a clean, ATS-optimised PDF ready to send to recruiters.</div>
+                <div style="font-size:0.83rem;font-weight:700;color:var(--text);margin-bottom:4px;">Download when ready</div>
+                <div style="font-size:0.73rem;color:var(--muted);line-height:1.55;">Once you're satisfied with your resume, tap <strong style="color:var(--accent);">Download PDF</strong> below. Pay once (<span id="tipsPriceNote">₹9 / $0.99</span>) and get a clean, ATS-optimised PDF ready to send to recruiters.</div>
               </div>
             </div>
           </div>
