@@ -4077,6 +4077,16 @@ function _showPageAdvisor() {
     var certs = (d.certifications || []).filter(Boolean);
     if (certs.length > 5) tips.push({ impact: 'Low', text: certs.length + ' certifications listed. Keep only the most recent or role-specific ones.' });
   }
+  // Custom sections (Step 6) — always checked from live form data
+  var _liveData = typeof collectData === 'function' ? collectData() : {};
+  var _customSecs = (_liveData.customSections || []).filter(function(cs){ return cs.includeInResume !== false && (cs.title || cs.content); });
+  if (_customSecs.length > 2) {
+    tips.push({ impact: 'Medium', text: _customSecs.length + ' custom sections included in your resume. Each adds page space — keep only the most role-relevant ones.' });
+  }
+  var _longCustom = _customSecs.filter(function(cs){ return cs.content && cs.content.trim().split(/\s+/).length > 80; });
+  if (_longCustom.length) {
+    tips.push({ impact: 'Medium', text: _longCustom.length + ' custom section' + (_longCustom.length > 1 ? 's have' : ' has') + ' lengthy content (80+ words). Trim to 3–5 concise bullet points.' });
+  }
   if (!tips.length) tips.push({ impact: 'Info', text: 'Content density is high overall. Try a more compact template, or make small cuts across multiple sections rather than one big cut.' });
   var colors = { High: '#dc2626', Medium: '#b45309', Low: '#6b7280', Info: '#6b7280' };
   panel.innerHTML =
@@ -6286,15 +6296,6 @@ function openPortfolioBuilder() {
     if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
     if (removeBtn) removeBtn.style.display = '';
   }
-  // Auto-enable Projects section when resume has custom section projects
-  var _opCd = typeof collectData === 'function' ? collectData() : {};
-  if ((_opCd.customSections||[]).some(function(cs){ return cs.title && cs.title.toLowerCase().includes('project') && cs.content; })) {
-    if (!pfSections.projects) {
-      pfSections.projects = true;
-      var _pjToggle = document.querySelector('#pfToggleGrid [data-section="projects"]');
-      if (_pjToggle) _pjToggle.classList.add('on');
-    }
-  }
   pfGoStep(1);
 }
 function closePfModal() {
@@ -6942,6 +6943,16 @@ function pfGoStep(n) {
     }
   }
   if (n === 2) {
+    // Live-sync projects toggle: ON if resume has project custom sections, OFF otherwise
+    var _pfLive = typeof collectData === 'function' ? collectData() : {};
+    pfSections.projects = (_pfLive.customSections||[]).some(function(cs){
+      return cs.title && cs.title.toLowerCase().includes('project') && cs.content;
+    });
+    // Sync all DOM toggle classes from pfSections (handles cloud restore too)
+    document.querySelectorAll('#pfToggleGrid .pf-toggle').forEach(function(el) {
+      if (pfSections[el.dataset.section]) el.classList.add('on');
+      else el.classList.remove('on');
+    });
     var allOn = Object.values(pfSections).every(Boolean);
     var btn = document.getElementById('pfSelectAllBtn');
     if (btn) btn.textContent = allOn ? 'Deselect All' : 'Select All';
