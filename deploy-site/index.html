@@ -5457,6 +5457,7 @@ function _initFirebase() {
     _fbAuth = firebase.auth();
     _fbDb   = firebase.firestore();
     _fbAuth.onAuthStateChanged(function(user) {
+      sessionStorage.removeItem('_pendingSignIn');
       _fbUser = user;
       _renderAuthBtn(user);
       clearInterval(_autoSaveIv);
@@ -5466,12 +5467,15 @@ function _initFirebase() {
       }
     });
     _fbAuth.getRedirectResult().catch(function(e) {
+      sessionStorage.removeItem('_pendingSignIn');
+      _hideCloudLoader();
       if (e.code !== 'auth/no-current-user') showToast('Sign-in error: ' + e.message);
     });
   } catch(e) { console.warn('Firebase init:', e.message); }
 }
 
 function _showSignInLoader() {
+  sessionStorage.setItem('_pendingSignIn', '1');
   if (document.getElementById('_signinLoader')) return;
   var el = document.createElement('div');
   el.id = '_signinLoader';
@@ -5529,12 +5533,17 @@ function _saveToCloud(uid, showMsg) {
     .catch(function(e) { console.warn('Cloud save:', e); });
 }
 
-function _showCloudLoader() {
-  if (document.getElementById('_cloudLoader')) return;
+function _showCloudLoader(msg) {
+  var existing = document.getElementById('_cloudLoader');
+  if (existing) {
+    var t = existing.querySelector('[data-lt]');
+    if (t && msg) t.textContent = msg;
+    return;
+  }
   var el = document.createElement('div');
   el.id = '_cloudLoader';
   el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.94);z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .3s;';
-  el.innerHTML = '<div style="width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#16a34a;border-radius:50%;animation:spin .7s linear infinite;"></div><div style="font-size:0.9rem;color:#374151;font-weight:500;font-family:\'Segoe UI\',system-ui,sans-serif;">Restoring your resume…</div>';
+  el.innerHTML = '<div style="width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#16a34a;border-radius:50%;animation:spin .7s linear infinite;"></div><div data-lt style="font-size:0.9rem;color:#374151;font-weight:500;font-family:\'Segoe UI\',system-ui,sans-serif;">' + (msg || 'Restoring your resume…') + '</div>';
   document.body.appendChild(el);
 }
 function _hideCloudLoader() {
@@ -5545,7 +5554,7 @@ function _hideCloudLoader() {
 }
 function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
-  _showCloudLoader();
+  _showCloudLoader('Restoring your resume…');
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
     if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1); return; }
     var d = doc.data().resume;
@@ -5620,7 +5629,7 @@ function _renderAuthBtn(user) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Defer Firebase init to after deferred scripts have loaded
+  if (sessionStorage.getItem('_pendingSignIn')) _showCloudLoader('Signing you in…');
   setTimeout(_initFirebase, 100);
 });
 </script>
