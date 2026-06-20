@@ -805,9 +805,12 @@
     .pf-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.3rem;padding:4px;border-radius:6px;line-height:1;}
     .pf-close:hover{background:var(--card-bg);color:var(--text);}
     .pf-steps-bar{display:flex;align-items:center;gap:0;padding:12px 24px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .pf-step-pill{display:flex;align-items:center;gap:7px;font-size:0.78rem;font-weight:600;color:var(--muted);flex-shrink:0;}
+    .pf-step-pill{display:flex;align-items:center;gap:7px;font-size:0.78rem;font-weight:600;color:var(--muted);flex-shrink:0;cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;transition:background .15s,color .15s;}
+    .pf-step-pill:hover{background:rgba(0,0,0,0.05);color:var(--text);}
     .pf-step-pill.active{color:var(--accent);}
+    .pf-step-pill.active:hover{background:rgba(217,119,6,0.07);}
     .pf-step-pill.done{color:#16a34a;}
+    .pf-step-pill.done:hover{background:rgba(22,163,74,0.07);}
     .pf-step-num{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:0.67rem;font-weight:700;flex-shrink:0;}
     .pf-step-pill.done .pf-step-num{background:#16a34a;border-color:#16a34a;color:#fff;}
     .pf-step-pill.active .pf-step-num{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -5327,11 +5330,11 @@ function closePreviewModal(e) {
       <button class="pf-close" onclick="closePfModal()">✕</button>
     </div>
     <div class="pf-steps-bar">
-      <div class="pf-step-pill" id="pfPill1"><div class="pf-step-num">1</div>Template</div>
+      <div class="pf-step-pill" id="pfPill1" onclick="pfGoStep(1)" role="button" aria-label="Go to step 1: Template"><div class="pf-step-num">1</div>Template</div>
       <div class="pf-step-sep"></div>
-      <div class="pf-step-pill" id="pfPill2"><div class="pf-step-num">2</div>Sections</div>
+      <div class="pf-step-pill" id="pfPill2" onclick="pfGoStep(2)" role="button" aria-label="Go to step 2: Sections"><div class="pf-step-num">2</div>Sections</div>
       <div class="pf-step-sep"></div>
-      <div class="pf-step-pill" id="pfPill3"><div class="pf-step-num">3</div>Preview</div>
+      <div class="pf-step-pill" id="pfPill3" onclick="pfGoStep(3)" role="button" aria-label="Go to step 3: Preview"><div class="pf-step-num">3</div>Preview</div>
     </div>
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
