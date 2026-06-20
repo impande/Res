@@ -488,7 +488,6 @@
       #sidebar{width:100%;height:auto;position:static;padding:10px 14px;flex-direction:row;align-items:center;border-right:none;border-bottom:none;overflow:visible;gap:10px;}
       .logo{padding-bottom:0;border-bottom:none;margin-bottom:0;flex-shrink:0;gap:0;}
       .logo-text{display:none;}
-      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;}
       .step-item{padding:6px 8px;border-radius:8px;flex-shrink:0;flex-direction:column;align-items:center;gap:3px;}
       .step-label{font-size:0.62rem;text-align:center;}
 #mobileProgress{display:block;}
@@ -524,11 +523,14 @@
       .entry-card{padding:16px 14px;}
       .nav-buttons{margin-top:24px;}
       .step-subtitle{font-size:0.88rem;margin-bottom:18px;}
-      .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;order:10;}
+      .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;order:3;}
+      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;order:2;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;}
       #_authBtn{padding:5px;font-size:0.72rem;border-radius:50%;width:34px;height:34px;justify-content:center;}
       #_authBtn .auth-lbl{display:none;}
       #_authBtn .auth-check{display:none;}
       #_authBtn .auth-out-btn{display:none;}
+      .step-item .step-num{border-color:var(--muted);}
+      .step-item{color:var(--muted);}
       #_mobileAuthMenu{position:fixed;top:58px;right:10px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:999;overflow:hidden;min-width:140px;}
       #_mobileAuthMenu button{display:block;width:100%;padding:10px 14px;border:none;background:none;text-align:left;font-size:0.82rem;cursor:pointer;font-family:inherit;}
       #_mobileAuthMenu button:hover{background:#f9f9f7;}
