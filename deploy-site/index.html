@@ -530,6 +530,19 @@
     #pageCountStrip{display:none;align-items:center;justify-content:space-between;padding:9px 12px;margin-top:12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(245,158,11,.03);}
     .pcs-label{font-size:0.65rem;color:var(--muted);}
     .pcs-chip{display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:800;color:#b45309;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:20px;padding:3px 10px;letter-spacing:0.2px;}
+    /* ── Page Length Advisor ── */
+    #pageAdvisorPanel{display:none;background:#fffbeb;border:1.5px solid #f59e0b;border-radius:14px;padding:14px 16px;margin:8px 0 4px;}
+    .pca-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+    .pca-title{font-size:0.79rem;font-weight:800;color:#92400e;}
+    .pca-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:2px 6px;border-radius:4px;line-height:1;}
+    .pca-close:hover{background:rgba(0,0,0,0.06);}
+    .pca-sub{font-size:0.71rem;color:#78350f;margin-bottom:10px;line-height:1.5;}
+    .pca-tip{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1px solid rgba(245,158,11,0.2);border-radius:10px;margin-bottom:7px;background:#fff;}
+    .pca-tip:last-child{margin-bottom:0;}
+    .pca-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+    .pca-tip-body{flex:1;}
+    .pca-impact{font-size:0.63rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;}
+    .pca-text{font-size:0.75rem;color:var(--text);margin-top:3px;line-height:1.55;}
     #tipsContent{scroll-margin-top:20px;}
     /* A4 page layout for all print paths — top-level so Safari respects it */
     @page { size: A4 portrait; margin: 0; }
@@ -2322,6 +2335,7 @@
       <span class="pcs-label">Resume length</span>
       <span class="pcs-chip" id="pageCountChip">1 page</span>
     </div>
+    <div id="pageAdvisorPanel"></div>
     <div style="position:relative;">
       <div class="resume-output-card" id="resumeOutput">
         <div class="resume-placeholder">Click <strong>Generate Resume</strong> to create your resume</div>
@@ -3774,13 +3788,64 @@ function _measurePages(page) {
   document.body.removeChild(wrap);
   return pages;
 }
+var _lastPageCount = 1;
 function _updatePageChip(pages) {
+  _lastPageCount = pages;
   const chip = document.getElementById('pageCountChip');
   if (!chip) return;
-  chip.textContent = pages === 1 ? '1 page ✓' : `${pages} pages`;
-  chip.style.color = pages > 1 ? '#b45309' : '#166534';
-  chip.style.background = pages > 1 ? '#fef3c7' : '#dcfce7';
-  chip.style.borderColor = pages > 1 ? '#f59e0b' : '#22c55e';
+  if (pages === 1) {
+    chip.textContent = '1 page ✓';
+    chip.style.color = '#166534';
+    chip.style.background = '#dcfce7';
+    chip.style.borderColor = '#22c55e';
+    chip.style.cursor = '';
+    chip.onclick = null;
+    var _ap = document.getElementById('pageAdvisorPanel');
+    if (_ap) _ap.style.display = 'none';
+  } else {
+    chip.textContent = pages + ' pages — see why ↓';
+    chip.style.color = '#b45309';
+    chip.style.background = '#fef3c7';
+    chip.style.borderColor = '#f59e0b';
+    chip.style.cursor = 'pointer';
+    chip.onclick = _showPageAdvisor;
+  }
+}
+function _showPageAdvisor() {
+  var panel = document.getElementById('pageAdvisorPanel');
+  if (!panel) return;
+  if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
+  var tips = [];
+  var d = lastResumeData;
+  if (d) {
+    var summary = (d.summary || '').trim();
+    var sw = summary ? summary.split(/\s+/).length : 0;
+    if (sw > 55) tips.push({ impact: 'High', text: 'Summary is ' + sw + ' words. Cut to 30–50 words — recruiters skim it in seconds and your bullets carry the weight.' });
+    var jobs = d.experience || [];
+    var tooMany = jobs.filter(function(j){ return (j.bullets||[]).filter(Boolean).length > 5; });
+    var verboseCount = 0;
+    jobs.forEach(function(job){ (job.bullets||[]).filter(Boolean).forEach(function(b){ if(b.trim().split(/\s+/).length > 22) verboseCount++; }); });
+    if (tooMany.length) tips.push({ impact: 'High', text: tooMany.length + ' role' + (tooMany.length > 1 ? 's have' : ' has') + ' 6+ bullets. Trim to 4–5 per role — keep only quantified achievements.' });
+    if (verboseCount) tips.push({ impact: 'Medium', text: verboseCount + ' bullet' + (verboseCount > 1 ? 's are' : ' is') + ' over 22 words. Lead with an action verb — aim for 12–18 words each.' });
+    if (jobs.length > 3) tips.push({ impact: 'Medium', text: 'You have ' + jobs.length + ' jobs listed. For roles older than 5 years, use 1–2 bullets or remove them entirely.' });
+    var skillList = (d.skills || '').split(/[,\n]/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if (skillList.length > 15) tips.push({ impact: 'Medium', text: 'You listed ' + skillList.length + ' skills. Narrow to your top 10–12 most relevant to the role.' });
+    var projects = (d.projects || []).filter(function(p){ return p && (p.name || p.title); });
+    if (projects.length > 3) tips.push({ impact: 'Low', text: 'Only 2–3 projects are needed. Removing ' + (projects.length - 3) + ' could free up meaningful space.' });
+    var certs = (d.certifications || []).filter(Boolean);
+    if (certs.length > 5) tips.push({ impact: 'Low', text: certs.length + ' certifications listed. Keep only the most recent or role-specific ones.' });
+  }
+  if (!tips.length) tips.push({ impact: 'Info', text: 'Content density is high overall. Try a more compact template, or make small cuts across multiple sections rather than one big cut.' });
+  var colors = { High: '#dc2626', Medium: '#b45309', Low: '#6b7280', Info: '#6b7280' };
+  panel.innerHTML =
+    '<div class="pca-header"><span class="pca-title">📏 Why ' + _lastPageCount + ' pages? Here\'s what to trim:</span>' +
+    '<button onclick="document.getElementById(\'pageAdvisorPanel\').style.display=\'none\'" class="pca-close" title="Close">✕</button></div>' +
+    '<p class="pca-sub">Based on your resume — specific edits to get it down to 1 page:</p>' +
+    tips.map(function(t) {
+      var c = colors[t.impact] || '#6b7280';
+      return '<div class="pca-tip"><span class="pca-dot" style="background:' + c + '"></span><div class="pca-tip-body"><span class="pca-impact" style="color:' + c + '">' + t.impact + ' impact</span><p class="pca-text">' + t.text + '</p></div></div>';
+    }).join('');
+  panel.style.display = 'block';
 }
 let _pcTimer;
 function _doMeasureAndUpdate() {
