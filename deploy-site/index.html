@@ -528,7 +528,7 @@
       .auth-section::after{content:"Sign in";font-size:0.52rem;color:var(--accent);font-weight:700;letter-spacing:0.3px;line-height:1;}
       .auth-section._signed-in::after{display:none;}
       #_authBtn:not(._signed-in){background:var(--accent);color:#fff;border-color:var(--accent);animation:authPulse 2s ease-in-out 3;}
-      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;order:2;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;}
+      .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;order:2;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
       #_authBtn{padding:5px;font-size:0.72rem;border-radius:50%;width:34px;height:34px;justify-content:center;}
       #_authBtn .auth-lbl{display:none;}
       #_authBtn .auth-check{display:none;}
@@ -3120,7 +3120,7 @@ function goToStep(step, skipScroll) {
         const firstField = stepEl && stepEl.querySelector('input[type="text"], input[type="email"], input[type="tel"], textarea');
         // Focus the first field without scrolling — scrollTop is already 0 so
         // the step title is visible at the top; scrollIntoView would hide it.
-        if (firstField) firstField.focus({ preventScroll: true });
+        if (firstField && window.innerWidth > 768) firstField.focus({ preventScroll: true });
       }, 250);
     }
     if (step === 5) renderSuggestions();
@@ -5514,16 +5514,9 @@ function _loadFromCloud(uid) {
     var d = doc.data().resume;
     var prev = document.getElementById('_cloudBanner');
     if (prev) prev.remove();
-    var banner = document.createElement('div');
-    banner.id = '_cloudBanner';
-    banner.style.cssText = 'position:fixed;bottom:max(24px,env(safe-area-inset-bottom,24px));left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 14px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:9999;display:flex;align-items:center;gap:8px;font-size:0.82rem;max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center;';
-    var dt = d.savedAt ? ' (saved ' + new Date(d.savedAt).toLocaleDateString() + ')' : '';
-    banner.innerHTML = '<span style="white-space:nowrap">☁️ Saved resume found' + dt + '</span>'
-      + '<button onclick="window._cld&&typeof populateFormFromParsed===\'function\'&&populateFormFromParsed(window._cld);window._cld&&window._cld.template&&typeof selectTemplate===\'function\'&&selectTemplate(window._cld.template);document.getElementById(\'_cloudBanner\')?.remove();showToast(\'✓ Resume restored from cloud\');" style="background:#f59e0b;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Restore</button>'
-      + '<button onclick="document.getElementById(\'_cloudBanner\')?.remove();" style="background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:0.8rem;cursor:pointer;">Dismiss</button>';
-    window._cld = d;
-    document.body.appendChild(banner);
-    setTimeout(function() { document.getElementById('_cloudBanner')?.remove(); }, 12000);
+    if (typeof populateFormFromParsed === 'function') populateFormFromParsed(d);
+    if (d.template && typeof selectTemplate === 'function') selectTemplate(d.template);
+    showToast('✓ Resume restored from cloud');
   }).catch(function(e) { console.warn('Cloud load:', e); });
 }
 
