@@ -6711,7 +6711,7 @@ function pfWzRender() {
       html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
     } else {
       exps.forEach(function(ex,i) {
-        var saved = pfWzData.experience[i];
+        var saved = pfWzData.experience.find(function(s){ return s.title === ex.title && s.company === (ex.co||''); });
         html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
         html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
         html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
@@ -6750,11 +6750,16 @@ function pfWzRender() {
 
   } else if (step.id === 'projects') {
     var _extrasProjs = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().includes('project'); }).map(function(cs){ return {title: cs.projectTitle || '', desc:cs.content||'', tech:''}; });
-    var projs = (function(){
-      var merged = _extrasProjs.slice();
-      pfWzData.projects.forEach(function(p){ if ((p.title||p.desc) && !merged.some(function(m){return m.title===p.title && m.desc===p.desc;})) merged.push(p); });
-      return merged.length ? merged : [{title:'',desc:'',tech:''}];
-    })();
+    // Step 6 is source of truth — preserve wizard tech/desc edits by matching title.
+    // Never append stale pfWzData entries (handles removed projects correctly).
+    var projs = _extrasProjs.length
+      ? _extrasProjs.map(function(p){
+          var sv = pfWzData.projects.find(function(s){ return s.title === p.title; });
+          return { title: p.title, desc: (sv&&sv.desc)||p.desc, tech: (sv&&sv.tech)||'' };
+        })
+      : (pfWzData.projects.filter(function(p){ return p.title||p.desc; }).length
+          ? pfWzData.projects
+          : [{title:'',desc:'',tech:''}]);
     var _projHint = 'display:flex;align-items:flex-start;gap:8px;background:#fffbeb;border:1px solid rgba(217,119,6,0.22);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:0.77rem;color:#92400e;line-height:1.5;';
     html += '<div style="'+_projHint+'">🔧 <span>Add projects in <b>Step 6 (Extras)</b> using the Projects preset — they\'ll appear here automatically.</span></div>';
     projs.slice(0,10).forEach(function(p,i) {
@@ -6992,9 +6997,16 @@ function getPfData() {
     photo: pfPhoto || userPhoto || '',
     coverPhoto: pfCoverPhoto || '',
     summary: wz.about || _lrSum || _liveSum || '',
-    experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
-      return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
-    }),
+    experience: (function(){
+      var live = (cd.experience||[]);
+      if (!live.length) return wz.experience;
+      // Always use live resume as source of truth; match wizard descriptions by title+company
+      // so stale pfWzData (e.g. from cloud restore) never misassigns descriptions to wrong jobs
+      return live.map(function(e){
+        var sv = wz.experience.find(function(s){ return s.title === e.title && s.company === (e.co||''); });
+        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:(sv&&sv.desc)||e.desc||''};
+      });
+    })(),
     education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
       return {degree:e.deg, school:e.sch, dates:e.yr};
     }),
@@ -7003,13 +7015,14 @@ function getPfData() {
       return {title:a.name, issuer:[a.org,a.year].filter(Boolean).join(' · ')};
     }),
     projects: (function(){
-      var lp = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().includes('project') && (cs.projectTitle||cs.content); }).map(function(cs){ return {title:cs.projectTitle||'', desc:cs.content, tech:''}; });
+      var lp = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().includes('project'); }).map(function(cs){ return {title:cs.projectTitle||'', desc:cs.content||'', tech:''}; });
       var wp = wz.projects.filter(function(p){ return p.title||p.desc; });
       if (!lp.length) return wp;
-      if (!wp.length) return lp;
-      var merged = lp.slice();
-      wp.forEach(function(p){ if (!merged.some(function(m){ return m.title===p.title && m.desc===p.desc; })) merged.push(p); });
-      return merged;
+      // Step 6 is source of truth — preserve tech edits from wizard by matching title
+      return lp.map(function(p){
+        var sv = wp.find(function(w){ return w.title === p.title; });
+        return { title: p.title, desc: p.desc, tech: (sv&&sv.tech)||'' };
+      });
     })(),
     certifications: wz.certifications || [],
   };
@@ -7079,12 +7092,12 @@ async function generatePortfolioLink() {
   var btn = document.getElementById('pfShareBtn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
   try {
+    if (!_fbDb) throw new Error('Storage not ready — please refresh and try again.');
+
     var d = getPfData();
     var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
-    // Compress photo and embed it inline in the hero <img> (one occurrence only).
-    // After generating HTML, strip the base64 out of og:image / twitter:image /
-    // JSON-LD so it doesn't appear 4× in the payload (which would quadruple size).
+    // Compress photo and strip base64 out of meta tags so it doesn't appear 4× in payload
     var compressedPhoto = await _compressPfPhoto(d.photo, 400, 0.75);
     var dShare = Object.assign({}, d, { photo: compressedPhoto });
     var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
@@ -7097,7 +7110,6 @@ async function generatePortfolioLink() {
     }
 
     if (html.length > 900000) {
-      // Still too large (very long resume content) — retry without photo
       dShare = Object.assign({}, d, { photo: '' });
       html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
     }
@@ -7106,33 +7118,26 @@ async function generatePortfolioLink() {
       return;
     }
 
-    var body = JSON.stringify({ html: html, name: name });
-    var resp = await fetch('/.netlify/functions/share-portfolio', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: body
-    });
+    // Unique slug: name + base-36 timestamp suffix to avoid collisions
+    var slug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 50) || 'portfolio')
+               + '-' + Date.now().toString(36);
 
-    var result;
+    // Write directly to Firestore (no server round-trip, no Netlify Blobs dependency)
     try {
-      result = await resp.json();
-    } catch(_) {
-      // Response was not JSON (function crashed or Netlify returned an HTML error)
-      throw new Error('Server error (status ' + resp.status + '). Please try again.');
+      await _fbDb.collection('portfolios').doc(slug).set({ html: html, ts: Date.now() });
+    } catch(fe) {
+      if (fe.code === 'permission-denied') {
+        _showShareFallbackModal();
+        return;
+      }
+      throw fe;
     }
 
-    if (result.url) {
-      showPfShareModal(result.url, name);
-    } else if (result.error === 'BLOBS_NOT_CONFIGURED') {
-      _showShareFallbackModal();
-    } else {
-      throw new Error(result.detail || result.error || 'Server error');
-    }
+    var siteUrl = 'https://resume4u.help';
+    showPfShareModal(siteUrl + '/p/' + slug, name);
   } catch(ex) {
     var msg = ex.message || 'Network error';
-    if (msg === 'Load failed' || msg === 'Failed to fetch' || msg.indexOf('pattern') !== -1) {
-      msg = 'Network error — check your connection and try again.';
-    }
+    if (msg === 'Load failed' || msg === 'Failed to fetch') msg = 'Network error — check your connection and try again.';
     showToast('Could not generate link: ' + msg, 'error');
   } finally {
     if (btn) {
