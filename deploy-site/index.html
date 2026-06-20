@@ -524,11 +524,15 @@
       .entry-card{padding:16px 14px;}
       .nav-buttons{margin-top:24px;}
       .step-subtitle{font-size:0.88rem;margin-bottom:18px;}
-      .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;}
-      #_authBtn{padding:6px 9px;font-size:0.72rem;}
+      .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;order:10;}
+      #_authBtn{padding:5px;font-size:0.72rem;border-radius:50%;width:34px;height:34px;justify-content:center;}
       #_authBtn .auth-lbl{display:none;}
       #_authBtn .auth-check{display:none;}
       #_authBtn .auth-out-btn{display:none;}
+      #_mobileAuthMenu{position:fixed;top:58px;right:10px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:999;overflow:hidden;min-width:140px;}
+      #_mobileAuthMenu button{display:block;width:100%;padding:10px 14px;border:none;background:none;text-align:left;font-size:0.82rem;cursor:pointer;font-family:inherit;}
+      #_mobileAuthMenu button:hover{background:#f9f9f7;}
+      #_mobileAuthMenu .mob-signout{color:#dc2626;}
     }
     @media(max-width:480px){
       .step-label{display:none;}
@@ -5413,7 +5417,7 @@ window.addEventListener('load', function() {
 //   match /users/{uid} { allow read, write: if request.auth.uid == uid; }
 var _FB_CONFIG = {
   apiKey:            'AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10',
-  authDomain:        'resume4u.help',
+  authDomain:        'resume-ai-2eda1.firebaseapp.com',
   projectId:         'resume-ai-2eda1',
   storageBucket:     'resume-ai-2eda1.firebasestorage.app',
   messagingSenderId: '888944549224',
@@ -5490,16 +5494,34 @@ function _loadFromCloud(uid) {
   }).catch(function(e) { console.warn('Cloud load:', e); });
 }
 
+function _mobileAuthMenu(user) {
+  var existing = document.getElementById('_mobileAuthMenu');
+  if (existing) { existing.remove(); return; }
+  var menu = document.createElement('div');
+  menu.id = '_mobileAuthMenu';
+  menu.innerHTML =
+    '<button onclick="_saveToCloud(\'' + user.uid + '\',true);document.getElementById(\'_mobileAuthMenu\').remove();">💾 Save now</button>'
+    + '<button class="mob-signout" onclick="signOutUser();document.getElementById(\'_mobileAuthMenu\').remove();">Sign out</button>';
+  document.body.appendChild(menu);
+  setTimeout(function() {
+    function _rm(e) { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', _rm); } }
+    document.addEventListener('click', _rm);
+  }, 50);
+}
+
 function _renderAuthBtn(user) {
   var btn = document.getElementById('_authBtn');
   if (!btn) return;
   if (user) {
+    var isMobile = window.innerWidth <= 768;
     var pic = user.photoURL
-      ? '<img src="' + user.photoURL + '" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+      ? '<img src="' + user.photoURL + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
       : '<span style="flex-shrink:0;font-size:1rem;">👤</span>';
     var name = user.displayName ? user.displayName.split(' ')[0] : 'Account';
-    btn.onclick = function() { _saveToCloud(user.uid, true); };
-    btn.title = 'Click to save · ' + user.email;
+    btn.onclick = isMobile
+      ? function(e) { e.stopPropagation(); _mobileAuthMenu(user); }
+      : function() { _saveToCloud(user.uid, true); };
+    btn.title = isMobile ? 'Tap to save or sign out' : 'Click to save · ' + user.email;
     btn.innerHTML = pic
       + '<span class="auth-lbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
       + '<span class="auth-check" style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
