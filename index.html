@@ -6685,7 +6685,7 @@ function pfWzRender() {
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'skills\')" id="pfGenSkillsBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenSkillsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'experience') {
-    var exps = (cd.experience||[]).slice(0,5);
+    var exps = (cd.experience||[]);
     var _expHint = 'display:flex;align-items:flex-start;gap:8px;background:#fffbeb;border:1px solid rgba(217,119,6,0.22);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:0.77rem;color:#92400e;line-height:1.5;';
     if (exps.length) {
       html += '<div style="'+_expHint+'">💼 <span>Pre-filled from your <b>Step 2 (Work Experience)</b>. Go back to Step 2 to add or edit jobs and they\'ll update here.</span></div>';
@@ -6749,18 +6749,22 @@ function pfWzRender() {
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'awards\')" id="pfGenAwardsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenAwardsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'projects') {
-    var _extrasProjs = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().startsWith('project') && cs.content; }).map(function(cs){ return {title: cs.projectTitle || '', desc:cs.content, tech:''}; });
-    var projs = pfWzData.projects.length ? pfWzData.projects : (_extrasProjs.length ? _extrasProjs : [{title:'',desc:'',tech:''}]);
+    var _extrasProjs = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().includes('project'); }).map(function(cs){ return {title: cs.projectTitle || '', desc:cs.content||'', tech:''}; });
+    var projs = (function(){
+      var merged = _extrasProjs.slice();
+      pfWzData.projects.forEach(function(p){ if ((p.title||p.desc) && !merged.some(function(m){return m.title===p.title && m.desc===p.desc;})) merged.push(p); });
+      return merged.length ? merged : [{title:'',desc:'',tech:''}];
+    })();
     var _projHint = 'display:flex;align-items:flex-start;gap:8px;background:#fffbeb;border:1px solid rgba(217,119,6,0.22);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:0.77rem;color:#92400e;line-height:1.5;';
     html += '<div style="'+_projHint+'">🔧 <span>Add projects in <b>Step 6 (Extras)</b> using the Projects preset — they\'ll appear here automatically.</span></div>';
-    projs.slice(0,5).forEach(function(p,i) {
+    projs.slice(0,10).forEach(function(p,i) {
       html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
       html += '<input id="pfWzProjT'+i+'" style="' + inp + 'margin-bottom:5px;" placeholder="Project title" value="' + e(p.title) + '">';
       html += '<textarea id="pfWzProjD'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-bottom:5px;" placeholder="What it does and your role…">' + e(p.desc) + '</textarea>';
       html += '<input id="pfWzProjTech'+i+'" style="' + inp + '" placeholder="Tech used (e.g. React, Node, AWS)" value="' + e(p.tech) + '">';
       html += '</div>';
     });
-    html += '<input type="hidden" id="pfWzProjCount" value="' + Math.min(projs.length,5) + '">';
+    html += '<input type="hidden" id="pfWzProjCount" value="' + Math.min(projs.length,10) + '">';
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'projects\')" id="pfGenProjectsBtn" style="' + aiBtnStyle + '">✨ Generate with AI</button><span id="pfGenProjectsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'certifications') {

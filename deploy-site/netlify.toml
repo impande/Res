@@ -11,13 +11,13 @@
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@netlify/blobs"]
 
 [functions."generate"]
   timeout = 26
 
 [functions."share-portfolio"]
   timeout = 15
-  external_node_modules = ["@netlify/blobs"]
 
 [[redirects]]
   from = "/p/:slug"
