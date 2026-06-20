@@ -5409,7 +5409,8 @@ function showToast(msg, type='error') {
   toast.style.cssText = `background:${c.bg};border:1.5px solid ${c.border};border-radius:12px;padding:12px 18px;font-size:0.88rem;color:${c.color};display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.12);pointer-events:auto;max-width:380px;animation:toastIn .25s ease-out;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.4;`;
   toast.innerHTML = `<span style="font-size:1rem;flex-shrink:0">${c.icon}</span><span style="flex:1">${msg}</span><button onclick="this.closest('[data-toast]').remove()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:0.95rem;padding:0;margin-left:6px;opacity:0.55;flex-shrink:0">✕</button>`;
   container.appendChild(toast);
-  setTimeout(()=>{toast.style.animation='toastOut .25s ease-in forwards';setTimeout(()=>toast.remove(),250);},4000);
+  var dur = isSuccess ? 6000 : 4000;
+  setTimeout(()=>{toast.style.animation='toastOut .25s ease-in forwards';setTimeout(()=>toast.remove(),250);},dur);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
@@ -5461,8 +5462,6 @@ function _initFirebase() {
       clearInterval(_autoSaveIv);
       if (user) {
         _loadFromCloud(user.uid);
-        goToStep(1);
-        setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 400);
         _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 60000);
       }
     });
@@ -5513,17 +5512,35 @@ function _saveToCloud(uid, showMsg) {
     .catch(function(e) { console.warn('Cloud save:', e); });
 }
 
+function _showCloudLoader() {
+  if (document.getElementById('_cloudLoader')) return;
+  var el = document.createElement('div');
+  el.id = '_cloudLoader';
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.94);z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .3s;';
+  el.innerHTML = '<div style="width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#16a34a;border-radius:50%;animation:spin .7s linear infinite;"></div><div style="font-size:0.9rem;color:#374151;font-weight:500;font-family:\'Segoe UI\',system-ui,sans-serif;">Restoring your resume…</div>';
+  document.body.appendChild(el);
+}
+function _hideCloudLoader() {
+  var el = document.getElementById('_cloudLoader');
+  if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(function() { el.remove(); }, 300);
+}
 function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
+  _showCloudLoader();
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
-    if (!doc.exists || !doc.data().resume) return;
+    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1); return; }
     var d = doc.data().resume;
     var prev = document.getElementById('_cloudBanner');
     if (prev) prev.remove();
     if (typeof populateFormFromParsed === 'function') populateFormFromParsed(d);
     if (d.template && typeof selectTemplate === 'function') selectTemplate(d.template);
-    showToast('✓ Resume restored from cloud');
-  }).catch(function(e) { console.warn('Cloud load:', e); });
+    _hideCloudLoader();
+    goToStep(1);
+    setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
+    setTimeout(function() { showToast('✓ Resume restored from cloud', 'success'); }, 450);
+  }).catch(function(e) { _hideCloudLoader(); goToStep(1); console.warn('Cloud load:', e); });
 }
 
 function _mobileAuthMenu(user) {
