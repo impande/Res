@@ -527,6 +527,8 @@
       .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;}
       #_authBtn{padding:6px 9px;font-size:0.72rem;}
       #_authBtn .auth-lbl{display:none;}
+      #_authBtn .auth-check{display:none;}
+      #_authBtn .auth-out-btn{display:none;}
     }
     @media(max-width:480px){
       .step-label{display:none;}
@@ -5411,7 +5413,7 @@ window.addEventListener('load', function() {
 //   match /users/{uid} { allow read, write: if request.auth.uid == uid; }
 var _FB_CONFIG = {
   apiKey:            'AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10',
-  authDomain:        'resume-ai-2eda1.firebaseapp.com',
+  authDomain:        'resume4u.help',
   projectId:         'resume-ai-2eda1',
   storageBucket:     'resume-ai-2eda1.firebasestorage.app',
   messagingSenderId: '888944549224',
@@ -5500,8 +5502,8 @@ function _renderAuthBtn(user) {
     btn.title = 'Click to save · ' + user.email;
     btn.innerHTML = pic
       + '<span class="auth-lbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
-      + '<span style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
-      + '<button onclick="event.stopPropagation();signOutUser();" style="background:rgba(0,0,0,0.08);border:none;border-radius:5px;color:var(--muted);font-size:0.68rem;padding:2px 7px;cursor:pointer;flex-shrink:0;">out</button>';
+      + '<span class="auth-check" style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
+      + '<button class="auth-out-btn" onclick="event.stopPropagation();signOutUser();" style="background:rgba(0,0,0,0.08);border:none;border-radius:5px;color:var(--muted);font-size:0.68rem;padding:2px 7px;cursor:pointer;flex-shrink:0;">out</button>';
   } else {
     btn.onclick = signInWithGoogle;
     btn.title = 'Sign in with Google to save your resume';
