@@ -20,6 +20,20 @@
   to = "/p/index.html"
   status = 200
 
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
 [[redirects]]
   from = "/__/auth/*"
   to = "https://resume-ai-2eda1.firebaseapp.com/__/auth/:splat"

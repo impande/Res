@@ -9,8 +9,8 @@
   <title>Resume For You – Free AI Resume &amp; Portfolio Builder | resume4u.help</title>
 
   <!-- ── SEO Core ──────────────────────────────────────────────────────── -->
-  <meta name="description" content="Build a professional resume and portfolio website in minutes with AI. Free AI resume builder — 30+ templates, ATS score, portfolio generator. Download PDF from ₹9 / $0.99. No sign-up required.">
-  <meta name="keywords" content="free AI resume builder, resume maker, ATS resume, professional resume templates, AI resume generator, resume builder online, CV maker, portfolio website builder, portfolio generator, online portfolio">
+  <meta name="description" content="Create and save your resume online in minutes — no physical resume required. Free AI resume builder with 30+ templates, ATS score, and portfolio generator. Download PDF from ₹9 / $0.99. No sign-up needed.">
+  <meta name="keywords" content="free AI resume builder, resume maker, ATS resume, professional resume templates, AI resume generator, resume builder online, CV maker, portfolio website builder, portfolio generator, online portfolio, save resume online, no physical resume required, digital resume builder, save resume to cloud, online resume maker">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Resume For You">
   <link rel="canonical" href="https://resume4u.help/">
@@ -476,6 +476,7 @@
     .resume-placeholder strong{color:var(--text);}
     .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
     @keyframes spin{to{transform:rotate(360deg);}}
+    @keyframes authPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,0);}50%{box-shadow:0 0 0 5px rgba(217,119,6,0.25);}}
     .val-banner{display:none;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.83rem;color:#dc2626;}
     #mobileHeader{display:contents;}
     /* ── Auth / Login ── */
@@ -523,7 +524,10 @@
       .entry-card{padding:16px 14px;}
       .nav-buttons{margin-top:24px;}
       .step-subtitle{font-size:0.88rem;margin-bottom:18px;}
-      .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;order:3;width:auto;}
+      .auth-section{margin-bottom:0;padding-bottom:0;border-bottom:none;flex-shrink:0;order:3;width:auto;display:flex;flex-direction:column;align-items:center;gap:1px;}
+      .auth-section::after{content:"Sign in";font-size:0.52rem;color:var(--accent);font-weight:700;letter-spacing:0.3px;line-height:1;}
+      .auth-section._signed-in::after{display:none;}
+      #_authBtn:not(._signed-in){background:var(--accent);color:#fff;border-color:var(--accent);animation:authPulse 2s ease-in-out 3;}
       .steps-list{flex-direction:row;flex-wrap:nowrap;gap:3px;flex:1;order:2;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-ms-overflow-style:none;scrollbar-width:none;}
       #_authBtn{padding:5px;font-size:0.72rem;border-radius:50%;width:34px;height:34px;justify-content:center;}
       #_authBtn .auth-lbl{display:none;}
@@ -2168,11 +2172,11 @@
       <div class="hero-icon-ring"></div>
     </div>
     <h1 class="hero-title">Build your <span class="hero-title-grad">resume</span><br>with AI</h1>
-    <p class="hero-sub">Create a professional, ATS-optimised resume in minutes. Just fill in your details — our AI handles the rest.</p>
+    <p class="hero-sub">Create and save your resume online in minutes — no physical resume required. Fill in your details, our AI handles the rest.</p>
     <div class="hero-feat-grid">
       <div class="hero-feat-card"><div class="hero-feat-card-ico">🎨</div><div class="hero-feat-card-lbl">35 Templates</div></div>
       <div class="hero-feat-card"><div class="hero-feat-card-ico">🤖</div><div class="hero-feat-card-lbl">AI-Powered</div></div>
-      <div class="hero-feat-card"><div class="hero-feat-card-ico">📄</div><div class="hero-feat-card-lbl">PDF Export</div></div>
+      <div class="hero-feat-card"><div class="hero-feat-card-ico">☁️</div><div class="hero-feat-card-lbl">Save Online</div></div>
       <div class="hero-feat-card"><div class="hero-feat-card-ico">✅</div><div class="hero-feat-card-lbl">ATS Score</div></div>
     </div>
     <div class="hero-stats">
@@ -2218,6 +2222,10 @@
           <div class="seo-feat-card">
             <h3>✉️ Cover Letter Generator</h3>
             <p>Generate a tailored cover letter for any job in seconds. Paste the job description and our AI crafts a personalised letter that matches the role.</p>
+          </div>
+          <div class="seo-feat-card">
+            <h3>☁️ Save Your Resume Online</h3>
+            <p>Sign in with Google to save your resume to the cloud — no physical resume required. Access, edit, and download from any device, anywhere. Your data is stored securely and always available when you need it.</p>
           </div>
         </div>
       </section>
@@ -2317,6 +2325,10 @@
           <details>
             <summary>Can I save my resume and come back to edit it later?</summary>
             <div class="faq-answer">Yes. Your resume data is automatically saved in your browser's local storage, so it persists when you close and reopen the tab — no account needed. You can also share a link to your resume that encodes all your data, allowing you to reopen and edit it on any device.</div>
+          </details>
+          <details>
+            <summary>Can I save my resume online without a physical copy?</summary>
+            <div class="faq-answer">Yes. Sign in with Google to save your resume securely to the cloud — no physical resume required. Access and edit your resume from any device, anytime. Your data is always available when you need it, without needing to carry or store a physical copy.</div>
           </details>
           <details>
             <summary>Can I use this resume builder for jobs in India?</summary>
@@ -5448,12 +5460,25 @@ function _initFirebase() {
         _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 120000);
       }
     });
+    _fbAuth.getRedirectResult().catch(function(e) {
+      if (e.code !== 'auth/no-current-user') showToast('Sign-in error: ' + e.message);
+    });
   } catch(e) { console.warn('Firebase init:', e.message); }
 }
 
 function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
-  _fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e) { showToast('Sign-in error: ' + e.message); });
+  var provider = new firebase.auth.GoogleAuthProvider();
+  var isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    _fbAuth.signInWithRedirect(provider);
+  } else {
+    _fbAuth.signInWithPopup(provider).catch(function(e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+        _fbAuth.signInWithRedirect(provider);
+      } else { showToast('Sign-in error: ' + e.message); }
+    });
+  }
 }
 function signOutUser() {
   if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out'); });
@@ -5517,10 +5542,27 @@ function _mobileAuthMenu(user) {
   }, 50);
 }
 
+function _showMobileAuthHint() {
+  if (localStorage.getItem('_authHintSeen') || window.innerWidth > 768) return;
+  localStorage.setItem('_authHintSeen', '1');
+  var chip = document.createElement('div');
+  chip.style.cssText = 'position:fixed;top:62px;right:10px;background:var(--accent);color:#fff;font-size:0.75rem;font-weight:600;padding:7px 12px;border-radius:99px;z-index:998;box-shadow:0 4px 14px rgba(217,119,6,0.35);white-space:nowrap;pointer-events:none;';
+  chip.textContent = '👆 Tap here to sign in & save';
+  document.body.appendChild(chip);
+  setTimeout(function() {
+    chip.style.transition = 'opacity .5s';
+    chip.style.opacity = '0';
+    setTimeout(function() { chip.remove(); }, 500);
+  }, 5000);
+}
+
 function _renderAuthBtn(user) {
   var btn = document.getElementById('_authBtn');
   if (!btn) return;
+  var authSection = btn.closest('.auth-section');
   if (user) {
+    btn.classList.add('_signed-in');
+    if (authSection) authSection.classList.add('_signed-in');
     var isMobile = window.innerWidth <= 768;
     var pic = user.photoURL
       ? '<img src="' + user.photoURL + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
@@ -5535,9 +5577,12 @@ function _renderAuthBtn(user) {
       + '<span class="auth-check" style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
       + '<button class="auth-out-btn" onclick="event.stopPropagation();signOutUser();" style="background:rgba(0,0,0,0.08);border:none;border-radius:5px;color:var(--muted);font-size:0.68rem;padding:2px 7px;cursor:pointer;flex-shrink:0;">out</button>';
   } else {
+    btn.classList.remove('_signed-in');
+    if (authSection) authSection.classList.remove('_signed-in');
     btn.onclick = signInWithGoogle;
     btn.title = 'Sign in with Google to save your resume';
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="auth-lbl">Sign in to save</span>';
+    if (window.innerWidth <= 768) _showMobileAuthHint();
   }
 }
 
