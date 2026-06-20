@@ -6102,16 +6102,26 @@ function closePreviewModal(e) {
       </div>
       <!-- Profile photo quick-add / change -->
       <div id="pfStep3Photo" style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;">
-        <div id="pfReviewPhotoThumb" style="width:62px;height:62px;border-radius:50%;background:var(--input-bg,#f9fafb);border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;overflow:hidden;"></div>
+        <div id="pfReviewPhotoThumb" onclick="document.getElementById('pfReviewPhotoInput').click()" style="width:54px;height:54px;border-radius:50%;background:var(--input-bg,#f9fafb);border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden;cursor:pointer;">📷</div>
         <div style="flex:1;min-width:0;">
           <div id="pfReviewPhotoLabel" style="font-size:0.84rem;font-weight:700;color:var(--text);margin-bottom:2px;">Profile Photo</div>
-          <div id="pfReviewPhotoSub" style="font-size:0.73rem;color:var(--muted);margin-bottom:7px;">Appears in your portfolio hero section</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
-            <button id="pfReviewPhotoBtn" onclick="document.getElementById('pfReviewPhotoInput').click()" style="padding:5px 13px;font-size:0.77rem;border:none;border-radius:7px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;">📷 Upload Photo</button>
-            <button id="pfReviewPhotoRemove" onclick="pfRemoveReviewPhoto()" style="display:none;padding:5px 10px;font-size:0.75rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;">✕ Remove</button>
-          </div>
+          <div id="pfReviewPhotoSub" style="font-size:0.73rem;color:var(--muted);">Tap to add — appears in your portfolio hero section</div>
         </div>
         <input type="file" id="pfReviewPhotoInput" accept="image/*" style="display:none" onchange="handlePfReviewPhoto(event)">
+        <button id="pfReviewPhotoRemove" onclick="pfRemoveReviewPhoto()" style="display:none;padding:4px 10px;font-size:0.74rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">✕ Remove</button>
+      </div>
+      <!-- Cover photo -->
+      <div id="pfStep3Cover" style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;">
+        <div id="pfReviewCoverThumb" onclick="document.getElementById('pfReviewCoverInput').click()" style="width:84px;height:48px;border-radius:8px;background:var(--input-bg,#f9fafb);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;overflow:hidden;cursor:pointer;">🖼️</div>
+        <div style="flex:1;min-width:0;">
+          <div id="pfReviewCoverLabel" style="font-size:0.84rem;font-weight:700;color:var(--text);margin-bottom:2px;">Cover Photo</div>
+          <div id="pfReviewCoverSub" style="font-size:0.73rem;color:var(--muted);margin-bottom:7px;">Hero section background image</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+            <button id="pfReviewCoverBtn" onclick="document.getElementById('pfReviewCoverInput').click()" style="padding:5px 13px;font-size:0.77rem;border:1.5px solid var(--border);border-radius:7px;background:transparent;color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;">🖼️ Upload Cover</button>
+            <button id="pfReviewCoverRemove" onclick="pfRemoveReviewCover()" style="display:none;padding:5px 10px;font-size:0.75rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;">✕ Remove</button>
+          </div>
+        </div>
+        <input type="file" id="pfReviewCoverInput" accept="image/*" style="display:none" onchange="handlePfReviewCover(event)">
       </div>
       <!-- Template mini-switcher -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
@@ -6146,11 +6156,32 @@ function closePreviewModal(e) {
   </div>
 </div>
 
+<!-- Photo crop modal -->
+<div id="pfCropModal" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--card,#1c1c2e);border:1px solid var(--border);border-radius:18px;padding:22px 20px;width:min(320px,96%);text-align:center;">
+    <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:3px;">Adjust Photo</div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">Drag to position · scroll or pinch to zoom</div>
+    <div style="width:260px;height:260px;margin:0 auto 12px;border-radius:50%;overflow:hidden;border:2.5px solid var(--accent);box-shadow:0 0 0 4px rgba(129,140,248,0.18);">
+      <canvas id="pfCropCanvas" width="260" height="260" style="display:block;touch-action:none;cursor:grab;user-select:none;"></canvas>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:0 2px;">
+      <span style="font-size:0.75rem;color:var(--muted);">–</span>
+      <input type="range" id="pfCropZoom" min="1" max="4" step="0.02" value="1" style="flex:1;accent-color:var(--accent);cursor:pointer;">
+      <span style="font-size:0.9rem;color:var(--muted);">+</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="pfCropCancel()" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;font-size:0.88rem;">Cancel</button>
+      <button onclick="pfCropApply()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-size:0.88rem;">✓ Apply</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Portfolio Builder ──────────────────────────────────────────────────
 
 var pfTemplate = 'obsidian';
 var pfPhoto = null;
+var pfCoverPhoto = null;
 var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:false,contact:true};
 var pfCurrentStep = 1;
 
@@ -6176,14 +6207,16 @@ function handlePfPhoto(ev) {
   if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
   var reader = new FileReader();
   reader.onload = function(e) {
-    pfPhoto = e.target.result;
-    var circle = document.getElementById('pfPhotoCircle');
-    var preview = document.getElementById('pfPhotoPreview');
-    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
-    if (circle) circle.style.display = 'none';
-    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
-    if (removeBtn) removeBtn.style.display = '';
-    if (pfCurrentStep === 3) buildPfPreview();
+    pfShowCrop(e.target.result, function(cropped) {
+      pfPhoto = cropped;
+      var circle = document.getElementById('pfPhotoCircle');
+      var preview = document.getElementById('pfPhotoPreview');
+      var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+      if (circle) circle.style.display = 'none';
+      if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+      if (removeBtn) removeBtn.style.display = '';
+      if (pfCurrentStep === 3) { updatePfStep3Photo(); buildPfPreview(); }
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -6332,14 +6365,16 @@ function handlePfWzPhoto(ev) {
   if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
   var reader = new FileReader();
   reader.onload = function(e) {
-    pfPhoto = e.target.result;
-    var circle = document.getElementById('pfPhotoCircle');
-    var preview = document.getElementById('pfPhotoPreview');
-    var removeBtn = document.getElementById('pfPhotoRemoveBtn');
-    if (circle) circle.style.display = 'none';
-    if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
-    if (removeBtn) removeBtn.style.display = '';
-    pfWzRender();
+    pfShowCrop(e.target.result, function(cropped) {
+      pfPhoto = cropped;
+      var circle = document.getElementById('pfPhotoCircle');
+      var preview = document.getElementById('pfPhotoPreview');
+      var removeBtn = document.getElementById('pfPhotoRemoveBtn');
+      if (circle) circle.style.display = 'none';
+      if (preview) { preview.src = pfPhoto; preview.style.display = 'block'; }
+      if (removeBtn) removeBtn.style.display = '';
+      pfWzRender();
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -6350,22 +6385,19 @@ function updatePfStep3Photo() {
   var label = document.getElementById('pfReviewPhotoLabel');
   var sub   = document.getElementById('pfReviewPhotoSub');
   var rmBtn = document.getElementById('pfReviewPhotoRemove');
-  var upBtn = document.getElementById('pfReviewPhotoBtn');
   if (!thumb) return;
   if (pfPhoto) {
     thumb.style.border = '2px solid var(--accent)';
     thumb.innerHTML = '<img src="' + pfPhoto + '" style="width:100%;height:100%;object-fit:cover;" alt="Photo">';
     if (label) label.textContent = 'Profile Photo ✓';
-    if (sub)   sub.textContent = 'Looking great — tap to change your photo';
+    if (sub)   sub.textContent = 'Tap to change';
     if (rmBtn) rmBtn.style.display = '';
-    if (upBtn) upBtn.innerHTML = '📷 Change Photo';
   } else {
     thumb.style.border = '2px dashed var(--accent)';
     thumb.innerHTML = '📷';
     if (label) label.textContent = 'Profile Photo';
-    if (sub)   sub.textContent = 'Appears in your portfolio hero section';
+    if (sub)   sub.textContent = 'Tap to add — appears in your portfolio hero section';
     if (rmBtn) rmBtn.style.display = 'none';
-    if (upBtn) upBtn.innerHTML = '📷 Upload Photo';
   }
 }
 function handlePfReviewPhoto(ev) {
@@ -6374,9 +6406,11 @@ function handlePfReviewPhoto(ev) {
   if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
   var reader = new FileReader();
   reader.onload = function(e) {
-    pfPhoto = e.target.result;
-    updatePfStep3Photo();
-    buildPfPreview();
+    pfShowCrop(e.target.result, function(cropped) {
+      pfPhoto = cropped;
+      updatePfStep3Photo();
+      buildPfPreview();
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -6387,6 +6421,124 @@ function pfRemoveReviewPhoto() {
   updatePfStep3Photo();
   buildPfPreview();
 }
+
+// ── Cover photo (hero background) ─────────────────────────────────────
+function updatePfStep3Cover() {
+  var thumb = document.getElementById('pfReviewCoverThumb');
+  var label = document.getElementById('pfReviewCoverLabel');
+  var sub   = document.getElementById('pfReviewCoverSub');
+  var rmBtn = document.getElementById('pfReviewCoverRemove');
+  var upBtn = document.getElementById('pfReviewCoverBtn');
+  if (!thumb) return;
+  if (pfCoverPhoto) {
+    thumb.style.border = '2px solid var(--accent)';
+    thumb.innerHTML = '<img src="' + pfCoverPhoto + '" style="width:100%;height:100%;object-fit:cover;" alt="Cover">';
+    if (label) label.textContent = 'Cover Photo ✓';
+    if (sub)   sub.textContent   = 'Hero background set — tap thumbnail to change';
+    if (rmBtn) rmBtn.style.display = '';
+    if (upBtn) upBtn.innerHTML   = '🖼️ Change Cover';
+  } else {
+    thumb.style.border = '2px dashed var(--border)';
+    thumb.innerHTML = '🖼️';
+    if (label) label.textContent = 'Cover Photo';
+    if (sub)   sub.textContent   = 'Hero section background image';
+    if (rmBtn) rmBtn.style.display = 'none';
+    if (upBtn) upBtn.innerHTML   = '🖼️ Upload Cover';
+  }
+}
+function handlePfReviewCover(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Image must be under 10 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) { pfCoverPhoto = e.target.result; updatePfStep3Cover(); buildPfPreview(); };
+  reader.readAsDataURL(file);
+}
+function pfRemoveReviewCover() {
+  pfCoverPhoto = null;
+  var inp = document.getElementById('pfReviewCoverInput');
+  if (inp) inp.value = '';
+  updatePfStep3Cover();
+  buildPfPreview();
+}
+
+// ── Photo crop tool ────────────────────────────────────────────────────
+var _pfCropCb = null, _pfCropImg = null;
+var _pfCropOffX = 0, _pfCropOffY = 0, _pfCropBase = 1, _pfCropZoom = 1;
+var _pfCropDrag = null, _pfCropPinch = 0, _pfCropEvSet = false;
+var _PFC = 260;
+
+function pfShowCrop(dataUrl, cb) {
+  _pfCropCb = cb;
+  _pfCropImg = new Image();
+  _pfCropImg.onload = function() {
+    _pfCropBase = Math.max(_PFC / _pfCropImg.naturalWidth, _PFC / _pfCropImg.naturalHeight);
+    _pfCropZoom = 1;
+    _pfCropOffX = (_PFC - _pfCropImg.naturalWidth  * _pfCropBase) / 2;
+    _pfCropOffY = (_PFC - _pfCropImg.naturalHeight * _pfCropBase) / 2;
+    var sl = document.getElementById('pfCropZoom'); if (sl) sl.value = 1;
+    _pfCropEventsOnce();
+    _pfCropDraw();
+    var m = document.getElementById('pfCropModal'); if (m) m.style.display = 'flex';
+  };
+  _pfCropImg.src = dataUrl;
+}
+function _pfCropDraw() {
+  var c = document.getElementById('pfCropCanvas'); if (!c || !_pfCropImg) return;
+  var ctx = c.getContext('2d'), sc = _pfCropBase * _pfCropZoom;
+  ctx.clearRect(0, 0, _PFC, _PFC);
+  ctx.drawImage(_pfCropImg, _pfCropOffX, _pfCropOffY, _pfCropImg.naturalWidth * sc, _pfCropImg.naturalHeight * sc);
+  ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.52)';
+  ctx.beginPath(); ctx.rect(0, 0, _PFC, _PFC); ctx.arc(_PFC/2, _PFC/2, _PFC/2, 0, Math.PI*2, true); ctx.fill('evenodd'); ctx.restore();
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(_PFC/2, _PFC/2, _PFC/2 - 1, 0, Math.PI*2); ctx.stroke();
+}
+function _pfCropZoomAt(nz, fx, fy) {
+  nz = Math.max(1, Math.min(4, nz));
+  var os = _pfCropBase * _pfCropZoom, ns = _pfCropBase * nz;
+  var ix = (fx - _pfCropOffX) / os, iy = (fy - _pfCropOffY) / os;
+  _pfCropZoom = nz; _pfCropOffX = fx - ix * ns; _pfCropOffY = fy - iy * ns;
+  var sl = document.getElementById('pfCropZoom'); if (sl) sl.value = nz;
+  _pfCropDraw();
+}
+function _pfCropEventsOnce() {
+  if (_pfCropEvSet) return; _pfCropEvSet = true;
+  var c = document.getElementById('pfCropCanvas'); if (!c) return;
+  c.addEventListener('mousedown',  function(e) { _pfCropDrag = {ox: e.clientX - _pfCropOffX, oy: e.clientY - _pfCropOffY}; c.style.cursor = 'grabbing'; });
+  window.addEventListener('mousemove', function(e) { if (!_pfCropDrag) return; _pfCropOffX = e.clientX - _pfCropDrag.ox; _pfCropOffY = e.clientY - _pfCropDrag.oy; _pfCropDraw(); });
+  window.addEventListener('mouseup',   function()  { _pfCropDrag = null; if (c) c.style.cursor = 'grab'; });
+  c.addEventListener('wheel', function(e) {
+    e.preventDefault(); var r = c.getBoundingClientRect();
+    _pfCropZoomAt(_pfCropZoom - e.deltaY * 0.003 * _pfCropZoom, e.clientX - r.left, e.clientY - r.top);
+  }, {passive: false});
+  c.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) { _pfCropDrag = {ox: e.touches[0].clientX - _pfCropOffX, oy: e.touches[0].clientY - _pfCropOffY}; }
+    else if (e.touches.length === 2) { _pfCropDrag = null; var dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; _pfCropPinch = Math.sqrt(dx*dx + dy*dy); }
+  }, {passive: false});
+  c.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 1 && _pfCropDrag) { _pfCropOffX = e.touches[0].clientX - _pfCropDrag.ox; _pfCropOffY = e.touches[0].clientY - _pfCropDrag.oy; _pfCropDraw(); }
+    else if (e.touches.length === 2) {
+      var dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY, dist = Math.sqrt(dx*dx+dy*dy);
+      var r = c.getBoundingClientRect(), cx = (e.touches[0].clientX+e.touches[1].clientX)/2 - r.left, cy2 = (e.touches[0].clientY+e.touches[1].clientY)/2 - r.top;
+      if (_pfCropPinch > 0) _pfCropZoomAt(_pfCropZoom * dist / _pfCropPinch, cx, cy2); _pfCropPinch = dist;
+    }
+  }, {passive: false});
+  c.addEventListener('touchend', function() { _pfCropDrag = null; _pfCropPinch = 0; });
+  var sl = document.getElementById('pfCropZoom');
+  if (sl) sl.addEventListener('input', function() { _pfCropZoomAt(parseFloat(this.value), _PFC/2, _PFC/2); });
+}
+function pfCropApply() {
+  var out = document.createElement('canvas'); out.width = _PFC; out.height = _PFC;
+  var ctx = out.getContext('2d');
+  ctx.beginPath(); ctx.arc(_PFC/2, _PFC/2, _PFC/2, 0, Math.PI*2); ctx.clip();
+  ctx.drawImage(_pfCropImg, _pfCropOffX, _pfCropOffY, _pfCropImg.naturalWidth * _pfCropBase * _pfCropZoom, _pfCropImg.naturalHeight * _pfCropBase * _pfCropZoom);
+  var url = out.toDataURL('image/jpeg', 0.88);
+  document.getElementById('pfCropModal').style.display = 'none';
+  if (_pfCropCb) { _pfCropCb(url); _pfCropCb = null; }
+}
+function pfCropCancel() { document.getElementById('pfCropModal').style.display = 'none'; _pfCropCb = null; }
 
 function pfWzSave() {
   var step = pfWzSteps[pfWzIdx];
@@ -6791,6 +6943,7 @@ function pfGoStep(n) {
   if (n === 3) {
     updatePfMiniSwitcher();
     updatePfStep3Photo();
+    updatePfStep3Cover();
     buildPfPreview();
   }
 }
@@ -6813,6 +6966,7 @@ function getPfData() {
     linkedin: wz.linkedin || cd.linkedin || '',
     github: wz.github || cd.github || '',
     photo: pfPhoto || userPhoto || '',
+    coverPhoto: pfCoverPhoto || '',
     summary: wz.about || _lrSum || _liveSum || '',
     experience: wz.experience.length ? wz.experience : (cd.experience||[]).map(function(e) {
       return {title:e.title, company:e.co, dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc};
@@ -7149,6 +7303,10 @@ function generatePortfolioHTML(d, tpl, sections) {
   if (certsHtml) navLinks += '<a href="#certifications" onclick="event.preventDefault();document.getElementById(\'certifications\').scrollIntoView({behavior:\'smooth\'})">Certifications</a>';
   if (contactHtml) navLinks += '<a href="#contact" onclick="event.preventDefault();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})">Contact</a>';
 
+  var heroStyle = d.coverPhoto
+    ? ' style="background:linear-gradient(rgba(0,0,0,0.38),rgba(0,0,0,0.5)),url(\'' + d.coverPhoto + '\') center/cover no-repeat;--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.78);--pf-hero-link-border:rgba(255,255,255,0.38);"'
+    : '';
+
   var metaDesc = d.summary ? esc(d.summary.slice(0,155).replace(/\s+\S*$/, '…')) : (name + ' — professional portfolio. View my experience, skills, and projects.');
   var metaImg = d.photo ? d.photo : 'https://resume4u.help/og-image.png';
   var schemaSkills = d.skills && d.skills.length ? '"' + d.skills.slice(0,8).map(esc).join('","') + '"' : '';
@@ -7164,7 +7322,7 @@ function generatePortfolioHTML(d, tpl, sections) {
     + '<meta name="twitter:description" content="' + metaDesc + '">'
     + '<meta name="twitter:image" content="' + metaImg + '">'
     + '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"' + name + '"' + (d.title?',"jobTitle":"'+esc(d.title)+'"':'') + (d.email?',"email":"'+esc(d.email)+'"':'') + (d.phone?',"telephone":"'+esc(d.phone)+'"':'') + (d.location?',"address":{"@type":"PostalAddress","addressLocality":"'+esc(d.location)+'"}':'') + (d.linkedin?',"sameAs":["'+esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : "https://"+d.linkedin)+'"]':'') + (schemaSkills?',"knowsAbout":['+schemaSkills+']':'') + (schemaExp?',"hasOccupation":['+schemaExp+']':'') + (d.photo?',"image":"'+d.photo+'"':'') + '}<\/script>';
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + 'html{scroll-behavior:smooth;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--pf-nav-bg,rgba(255,255,255,0.95));backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid var(--pf-hero-link-border,rgba(255,255,255,0.35));border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,340px));gap:20px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-top:3px solid var(--pf-accent);border-radius:0 0 14px 14px;padding:22px;transition:box-shadow .2s,transform .15s;}.pf-proj-card:hover{box-shadow:0 8px 28px rgba(0,0,0,0.1);transform:translateY(-2px);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-footer-bg,var(--pf-text));color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}.pf-hamburger{display:none;background:none;border:none;color:var(--pf-accent);font-size:1.45rem;cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0;}.pf-mobile-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--pf-nav-bg,rgba(255,255,255,0.97));border-bottom:1px solid var(--pf-border);padding:6px 5% 12px;flex-direction:column;z-index:99;backdrop-filter:blur(10px);max-height:calc(100vh - 56px);overflow-y:auto;}.pf-mobile-nav.open{display:flex;}.pf-mobile-nav a{display:block;padding:13px 0;font-size:0.95rem;font-weight:600;color:var(--pf-text);border-bottom:1px solid var(--pf-border);text-decoration:none;transition:color .15s;}.pf-mobile-nav a:hover{color:var(--pf-accent);}.pf-mobile-nav a:last-child{border-bottom:none;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hamburger{display:flex;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div><button class="pf-hamburger" id="pfHamBtn" onclick="_pfMenu()" aria-label="Open menu"><span id="pfHamIco">☰</span></button></div><div class="pf-mobile-nav" id="pfMobNav" onclick="if(event.target.closest(\'a\')){this.classList.remove(\'open\');document.getElementById(\'pfHamIco\').textContent=\'☰\';}">' + navLinks + '</div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (contactHtml ? '<a href="#contact" onclick="event.preventDefault();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer><script>function _pfMenu(){var m=document.getElementById("pfMobNav"),i=document.getElementById("pfHamIco");if(!m)return;var o=m.classList.toggle("open");i.textContent=o?"✕":"☰";}document.addEventListener("click",function(e){var m=document.getElementById("pfMobNav"),b=document.getElementById("pfHamBtn");if(m&&b&&!m.contains(e.target)&&!b.contains(e.target)&&m.classList.contains("open")){m.classList.remove("open");var i=document.getElementById("pfHamIco");if(i)i.textContent="☰";}});<\/script></body></html>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + 'html{scroll-behavior:smooth;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--pf-nav-bg,rgba(255,255,255,0.95));backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid var(--pf-hero-link-border,rgba(255,255,255,0.35));border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,340px));gap:20px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-top:3px solid var(--pf-accent);border-radius:0 0 14px 14px;padding:22px;transition:box-shadow .2s,transform .15s;}.pf-proj-card:hover{box-shadow:0 8px 28px rgba(0,0,0,0.1);transform:translateY(-2px);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-footer-bg,var(--pf-text));color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}.pf-hamburger{display:none;background:none;border:none;color:var(--pf-accent);font-size:1.45rem;cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0;}.pf-mobile-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--pf-nav-bg,rgba(255,255,255,0.97));border-bottom:1px solid var(--pf-border);padding:6px 5% 12px;flex-direction:column;z-index:99;backdrop-filter:blur(10px);max-height:calc(100vh - 56px);overflow-y:auto;}.pf-mobile-nav.open{display:flex;}.pf-mobile-nav a{display:block;padding:13px 0;font-size:0.95rem;font-weight:600;color:var(--pf-text);border-bottom:1px solid var(--pf-border);text-decoration:none;transition:color .15s;}.pf-mobile-nav a:hover{color:var(--pf-accent);}.pf-mobile-nav a:last-child{border-bottom:none;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hamburger{display:flex;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div><button class="pf-hamburger" id="pfHamBtn" onclick="_pfMenu()" aria-label="Open menu"><span id="pfHamIco">☰</span></button></div><div class="pf-mobile-nav" id="pfMobNav" onclick="if(event.target.closest(\'a\')){this.classList.remove(\'open\');document.getElementById(\'pfHamIco\').textContent=\'☰\';}">' + navLinks + '</div></nav><header class="pf-hero"' + heroStyle + '><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (contactHtml ? '<a href="#contact" onclick="event.preventDefault();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer><script>function _pfMenu(){var m=document.getElementById("pfMobNav"),i=document.getElementById("pfHamIco");if(!m)return;var o=m.classList.toggle("open");i.textContent=o?"✕":"☰";}document.addEventListener("click",function(e){var m=document.getElementById("pfMobNav"),b=document.getElementById("pfHamBtn");if(m&&b&&!m.contains(e.target)&&!b.contains(e.target)&&m.classList.contains("open")){m.classList.remove("open");var i=document.getElementById("pfHamIco");if(i)i.textContent="☰";}});<\/script></body></html>';
 }
 
 // Scroll bounce fix — covers iOS < 16 where overscroll-behavior is unsupported.
