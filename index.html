@@ -478,6 +478,10 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .val-banner{display:none;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.83rem;color:#dc2626;}
     #mobileHeader{display:contents;}
+    /* ── Auth / Login ── */
+    .auth-section{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);width:100%;}
+    #_authBtn{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;width:100%;text-align:left;}
+    #_authBtn:hover{border-color:var(--accent);background:rgba(245,158,11,0.04);}
     @media(max-width:768px){
       body{display:block;}
       #mobileHeader{display:block;position:sticky;top:0;z-index:50;}
@@ -520,6 +524,9 @@
       .entry-card{padding:16px 14px;}
       .nav-buttons{margin-top:24px;}
       .step-subtitle{font-size:0.88rem;margin-bottom:18px;}
+      .auth-section{margin-top:0;padding-top:0;border-top:none;flex-shrink:0;}
+      #_authBtn{padding:6px 9px;font-size:0.72rem;}
+      #_authBtn .auth-lbl{display:none;}
     }
     @media(max-width:480px){
       .step-label{display:none;}
@@ -2066,6 +2073,10 @@
       .preview-modal-handle{display:none;}
     }
   </style>
+  <!-- Firebase Auth + Firestore (compat SDK — works with existing vanilla JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
 </head>
 <body>
 
@@ -2083,6 +2094,12 @@
     <li class="step-item" data-step="6" onclick="goToStep(6)"><div class="step-num"><span>6</span></div><span class="step-label">Extras</span></li>
     <li class="step-item" data-step="7" onclick="goToStep(7)"><div class="step-num"><span>7</span></div><span class="step-label">Generate</span></li>
   </ul>
+  <div class="auth-section">
+    <button id="_authBtn" onclick="signInWithGoogle()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="auth-lbl">Sign in to save</span>
+    </button>
+  </div>
 </aside>
 
 <div id="mobileProgress">
@@ -5382,6 +5399,120 @@ window.addEventListener('load', function() {
     document.getElementById(id).addEventListener('input', markNeedsRegen);
   });
 });
+
+// ── Firebase / Cloud Save ─────────────────────────────────────────────────────
+// SETUP (one-time):
+// 1. console.firebase.google.com → create project
+// 2. Authentication → Sign-in method → Enable Google
+// 3. Firestore Database → Create (test mode)
+// 4. Project Settings → Your apps → Add web app → copy config below
+// 5. Authentication → Settings → Authorized domains → Add resume4u.help
+// Firestore rules (Firestore → Rules):
+//   match /users/{uid} { allow read, write: if request.auth.uid == uid; }
+var _FB_CONFIG = {
+  apiKey:            'REPLACE_FIREBASE_API_KEY',
+  authDomain:        'REPLACE_PROJECT_ID.firebaseapp.com',
+  projectId:         'REPLACE_PROJECT_ID',
+  storageBucket:     'REPLACE_PROJECT_ID.appspot.com',
+  messagingSenderId: 'REPLACE_MESSAGING_SENDER_ID',
+  appId:             'REPLACE_APP_ID'
+};
+var _fbAuth = null, _fbDb = null, _fbUser = null, _autoSaveIv = null;
+
+function _initFirebase() {
+  try {
+    if (!window.firebase || _FB_CONFIG.apiKey.startsWith('REPLACE')) return;
+    if (!firebase.apps.length) firebase.initializeApp(_FB_CONFIG);
+    _fbAuth = firebase.auth();
+    _fbDb   = firebase.firestore();
+    _fbAuth.onAuthStateChanged(function(user) {
+      _fbUser = user;
+      _renderAuthBtn(user);
+      clearInterval(_autoSaveIv);
+      if (user) {
+        _loadFromCloud(user.uid);
+        _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 120000);
+      }
+    });
+  } catch(e) { console.warn('Firebase init:', e.message); }
+}
+
+function signInWithGoogle() {
+  if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
+  _fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e) { showToast('Sign-in error: ' + e.message); });
+}
+function signOutUser() {
+  if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out'); });
+}
+
+function _collectCloudData() {
+  var d = typeof collectData === 'function' ? collectData() : {};
+  if (lastResumeData && lastResumeData.experience) {
+    d.experience = (d.experience || []).map(function(exp) {
+      var match = (lastResumeData.experience || []).find(function(e) {
+        return (e.title||'').toLowerCase() === (exp.title||'').toLowerCase();
+      });
+      return (match && match.bullets) ? Object.assign({}, exp, {bullets: match.bullets}) : exp;
+    });
+  }
+  d.summary = d.summary || (lastResumeData && lastResumeData.summary) || '';
+  d.template = typeof currentTemplate !== 'undefined' ? currentTemplate : 'modern';
+  d.savedAt  = new Date().toISOString();
+  return d;
+}
+
+function _saveToCloud(uid, showMsg) {
+  if (!_fbDb || !uid) return;
+  _fbDb.collection('users').doc(uid).set({ resume: _collectCloudData() }, { merge: true })
+    .then(function() { if (showMsg !== false) showToast('☁️ Saved to cloud'); })
+    .catch(function(e) { console.warn('Cloud save:', e); });
+}
+
+function _loadFromCloud(uid) {
+  if (!_fbDb || !uid) return;
+  _fbDb.collection('users').doc(uid).get().then(function(doc) {
+    if (!doc.exists || !doc.data().resume) return;
+    var d = doc.data().resume;
+    var prev = document.getElementById('_cloudBanner');
+    if (prev) prev.remove();
+    var banner = document.createElement('div');
+    banner.id = '_cloudBanner';
+    banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 20px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:9999;display:flex;align-items:center;gap:12px;font-size:0.84rem;max-width:90vw;';
+    var dt = d.savedAt ? ' (saved ' + new Date(d.savedAt).toLocaleDateString() + ')' : '';
+    banner.innerHTML = '<span style="white-space:nowrap">☁️ Saved resume found' + dt + '</span>'
+      + '<button onclick="window._cld&&typeof populateFormFromParsed===\'function\'&&populateFormFromParsed(window._cld);window._cld&&window._cld.template&&typeof selectTemplate===\'function\'&&selectTemplate(window._cld.template);document.getElementById(\'_cloudBanner\')?.remove();showToast(\'✓ Resume restored from cloud\');" style="background:#f59e0b;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Restore</button>'
+      + '<button onclick="document.getElementById(\'_cloudBanner\')?.remove();" style="background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:0.8rem;cursor:pointer;">Dismiss</button>';
+    window._cld = d;
+    document.body.appendChild(banner);
+    setTimeout(function() { document.getElementById('_cloudBanner')?.remove(); }, 12000);
+  }).catch(function(e) { console.warn('Cloud load:', e); });
+}
+
+function _renderAuthBtn(user) {
+  var btn = document.getElementById('_authBtn');
+  if (!btn) return;
+  if (user) {
+    var pic = user.photoURL
+      ? '<img src="' + user.photoURL + '" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+      : '<span style="flex-shrink:0;font-size:1rem;">👤</span>';
+    var name = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+    btn.onclick = function() { _saveToCloud(user.uid, true); };
+    btn.title = 'Click to save · ' + user.email;
+    btn.innerHTML = pic
+      + '<span class="auth-lbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
+      + '<span style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
+      + '<button onclick="event.stopPropagation();signOutUser();" style="background:rgba(0,0,0,0.08);border:none;border-radius:5px;color:var(--muted);font-size:0.68rem;padding:2px 7px;cursor:pointer;flex-shrink:0;">out</button>';
+  } else {
+    btn.onclick = signInWithGoogle;
+    btn.title = 'Sign in with Google to save your resume';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="auth-lbl">Sign in to save</span>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Defer Firebase init to after deferred scripts have loaded
+  setTimeout(_initFirebase, 100);
+});
 </script>
 
 <!-- ── Razorpay Payment Modal ── -->
@@ -6774,12 +6905,12 @@ function generatePortfolioHTML(d, tpl, sections) {
     : ':root{--pf-accent:#818cf8;--pf-accent2:#60a5fa;--pf-hero-bg:#0a0a0a;--pf-hero-text:#fff;--pf-hero-sub:rgba(255,255,255,0.5);--pf-sec-bg:#0a0a0a;--pf-alt-bg:#0f0f0f;--pf-text:#e2e8f0;--pf-muted:rgba(255,255,255,0.4);--pf-border:rgba(99,102,241,0.18);--pf-chip-bg:rgba(129,140,248,0.1);--pf-chip-color:#818cf8;--pf-nav-bg:rgba(10,10,10,0.9);--pf-footer-bg:#0a0a0a;}';
 
   var navLinks = '';
-  if (sections.about && d.summary) navLinks += '<a href="#about">About</a>';
-  if (sections.experience && d.experience && d.experience.length) navLinks += '<a href="#experience">Experience</a>';
-  if (sections.skills && d.skills && d.skills.length) navLinks += '<a href="#skills">Skills</a>';
-  if (sections.education && d.education && d.education.length) navLinks += '<a href="#education">Education</a>';
-  if (projectsHtml) navLinks += '<a href="#projects">Projects</a>';
-  if (certsHtml) navLinks += '<a href="#certifications">Certifications</a>';
+  if (sections.about && d.summary) navLinks += '<a href="#about" onclick="event.preventDefault();document.getElementById(\'about\').scrollIntoView({behavior:\'smooth\'})">About</a>';
+  if (sections.experience && d.experience && d.experience.length) navLinks += '<a href="#experience" onclick="event.preventDefault();document.getElementById(\'experience\').scrollIntoView({behavior:\'smooth\'})">Experience</a>';
+  if (sections.skills && d.skills && d.skills.length) navLinks += '<a href="#skills" onclick="event.preventDefault();document.getElementById(\'skills\').scrollIntoView({behavior:\'smooth\'})">Skills</a>';
+  if (sections.education && d.education && d.education.length) navLinks += '<a href="#education" onclick="event.preventDefault();document.getElementById(\'education\').scrollIntoView({behavior:\'smooth\'})">Education</a>';
+  if (projectsHtml) navLinks += '<a href="#projects" onclick="event.preventDefault();document.getElementById(\'projects\').scrollIntoView({behavior:\'smooth\'})">Projects</a>';
+  if (certsHtml) navLinks += '<a href="#certifications" onclick="event.preventDefault();document.getElementById(\'certifications\').scrollIntoView({behavior:\'smooth\'})">Certifications</a>';
   if (contactHtml) navLinks += '<a href="#contact" onclick="event.preventDefault();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})">Contact</a>';
 
   var metaDesc = d.summary ? esc(d.summary.slice(0,155).replace(/\s+\S*$/, '…')) : (name + ' — professional portfolio. View my experience, skills, and projects.');
