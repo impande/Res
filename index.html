@@ -5392,14 +5392,18 @@ function toggleATSCard() {
 
 // ── Toast notifications ───────────────────────────────────────────────
 function showToast(msg, type='error') {
-  let container = document.getElementById('toastContainer');
+  var isSuccess = type === 'success';
+  var containerId = isSuccess ? 'toastContainerTop' : 'toastContainer';
+  let container = document.getElementById(containerId);
   if (!container) {
     container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;max-width:90vw;width:max-content;';
+    container.id = containerId;
+    container.style.cssText = isSuccess
+      ? 'position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;max-width:90vw;width:max-content;'
+      : 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;max-width:90vw;width:max-content;';
     document.body.appendChild(container);
   }
-  const c = {error:{bg:'#fff0f0',border:'#ef4444',icon:'✗',color:'#dc2626'},success:{bg:'#f0fdf4',border:'#22c55e',icon:'✓',color:'#16a34a'},info:{bg:'#eff6ff',border:'#3b82f6',icon:'ℹ',color:'#2563eb'}}[type]||{bg:'#fff0f0',border:'#ef4444',icon:'✗',color:'#dc2626'};
+  const c = {error:{bg:'#fff0f0',border:'#ef4444',icon:'✗',color:'#dc2626'},success:{bg:'#16a34a',border:'#15803d',icon:'✓',color:'#fff'},info:{bg:'#eff6ff',border:'#3b82f6',icon:'ℹ',color:'#2563eb'}}[type]||{bg:'#fff0f0',border:'#ef4444',icon:'✗',color:'#dc2626'};
   const toast = document.createElement('div');
   toast.setAttribute('data-toast','');
   toast.style.cssText = `background:${c.bg};border:1.5px solid ${c.border};border-radius:12px;padding:12px 18px;font-size:0.88rem;color:${c.color};display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.12);pointer-events:auto;max-width:380px;animation:toastIn .25s ease-out;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.4;`;
@@ -5457,7 +5461,9 @@ function _initFirebase() {
       clearInterval(_autoSaveIv);
       if (user) {
         _loadFromCloud(user.uid);
-        _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 120000);
+        goToStep(1);
+        setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 400);
+        _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 60000);
       }
     });
     _fbAuth.getRedirectResult().catch(function(e) {
@@ -5481,7 +5487,7 @@ function signInWithGoogle() {
   }
 }
 function signOutUser() {
-  if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out'); });
+  if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out', 'success'); });
 }
 
 function _collectCloudData() {
