@@ -4050,7 +4050,13 @@ function _showPageAdvisor() {
 let _pcTimer;
 function _doMeasureAndUpdate() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
-  if (page) _updatePageChip(_measurePages(page));
+  if (!page) return;
+  _updatePageChip(_measurePages(page));
+  // Clip trailing blank space: lock height to actual content (min 1 A4 page)
+  page.style.height = 'auto';
+  page.style.minHeight = '0';
+  const onePagePx = Math.round(297 * 3.7795);
+  page.style.height = Math.max(page.scrollHeight, onePagePx) + 'px';
 }
 function _triggerPageCount(fast) {
   clearTimeout(_pcTimer);
