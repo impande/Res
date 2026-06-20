@@ -2060,6 +2060,7 @@
     .preview-modal-title{font-size:0.95rem;font-weight:700;color:#e8e8ff;}
     .preview-modal-close{background:none;border:none;color:#55557a;font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;}
     .preview-modal-close:hover{color:#e8e8ff;}
+    @media(max-width:520px){.preview-modal-close{color:#c8c8e8;font-size:1.55rem;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);border-radius:50%;padding:0;flex-shrink:0;}}
     .preview-modal-body{overflow-y:auto;flex:1;padding:0;-webkit-overflow-scrolling:touch;}
     .preview-modal-body::-webkit-scrollbar{display:none;}
     /* prevent copy/screenshot — keep pointer-events on body so touch-scroll works */
@@ -2137,11 +2138,11 @@
     <div class="hero-upload-wrap">
       <div class="hero-or">— or import your existing resume —</div>
       <div class="upload-tabs">
-        <button class="upload-tab" id="tabUpload" onclick="switchUploadTab('upload')">📄 Upload PDF / DOC</button>
-        <button class="upload-tab active" id="tabPaste" onclick="switchUploadTab('paste')" style="position:relative;">📋 Paste Text <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.5rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;line-height:1.6;white-space:nowrap;box-shadow:0 2px 8px rgba(34,197,94,0.55);">✓ RECOMMENDED</span></button>
+        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')" style="position:relative;">📄 Upload PDF / DOC <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.5rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;line-height:1.6;white-space:nowrap;box-shadow:0 2px 8px rgba(34,197,94,0.55);">✓ RECOMMENDED</span></button>
+        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
       </div>
       <!-- Upload PDF/Doc panel -->
-      <div class="upload-panel" id="panelUpload">
+      <div class="upload-panel active" id="panelUpload">
         <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
           <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleResumeFile(this.files[0]);this.value='';">
           <div class="upload-zone-icon">📄</div>
@@ -2151,7 +2152,7 @@
         </label>
       </div>
       <!-- Paste text panel -->
-      <div class="upload-panel active" id="panelPaste">
+      <div class="upload-panel" id="panelPaste">
         <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
         <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
       </div>
@@ -3356,17 +3357,27 @@ function addEducation(prependNew = false) {
 let customSectionCount = 0;
 const CUSTOM_SECTION_PRESETS = ['Projects','Certifications','Hobbies','References','Languages','Volunteer Work'];
 
-function addCustomSection(title='', content='', includeInResume=true) {
+function addCustomSection(title='', content='', includeInResume=true, noScroll=false) {
   const id = ++customSectionCount;
-  const presetOptions = CUSTOM_SECTION_PRESETS.map(p => `<option value="${p}">${p}</option>`).join('');
+  const isCustomTitle = !!(title && !CUSTOM_SECTION_PRESETS.includes(title));
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'custom-'+id;
   div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
     <div class="form-row">
       <div class="form-group" style="flex:1">
         <label class="form-label">Section Title</label>
-        <input type="text" id="custom-title-${id}" placeholder="e.g. Projects, Hobbies…" value="${title}" list="custom-presets-${id}" oninput="updatePreview()">
-        <datalist id="custom-presets-${id}">${presetOptions}</datalist>
+        <select id="custom-title-sel-${id}" oninput="onCustomTitleSel(${id})" style="width:100%;border:1px solid var(--input-border,#d1d5db);border-radius:8px;padding:8px 10px;font-size:0.85rem;font-family:inherit;background:var(--bg,#fff);color:var(--text,#111);cursor:pointer;box-sizing:border-box;">
+          <option value="">— Choose section type —</option>
+          ${CUSTOM_SECTION_PRESETS.map(p => `<option value="${p}"${title === p ? ' selected' : ''}>${p}</option>`).join('')}
+          <option value="_other"${isCustomTitle ? ' selected' : ''}>Other (custom)…</option>
+        </select>
+        <input type="text" id="custom-title-${id}" value="${title}" placeholder="Enter custom section name…" style="${isCustomTitle ? '' : 'display:none;'}margin-top:6px;" oninput="updatePreview()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Project / Entry Title <span style="font-size:0.72rem;color:var(--muted);font-weight:400;">(optional)</span></label>
+        <input type="text" id="custom-proj-title-${id}" placeholder="e.g. E-commerce Platform, Volunteer Lead…" oninput="updatePreview()">
       </div>
     </div>
     <div class="form-row">
@@ -3391,7 +3402,7 @@ function addCustomSection(title='', content='', includeInResume=true) {
       </label>
     </div>`;
   document.getElementById('customSectionEntries').prepend(div);
-  setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
+  if (!noScroll) setTimeout(() => div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
   updatePreview();
 }
 
@@ -3403,10 +3414,26 @@ function collectCustomSections() {
     const content = document.getElementById('custom-content-'+id)?.value.trim()||'';
     const start = document.getElementById('custom-start-'+id)?.value.trim()||'';
     const end = document.getElementById('custom-end-'+id)?.value.trim()||'';
+    const projectTitle = document.getElementById('custom-proj-title-'+id)?.value.trim()||'';
     const includeInResume = document.getElementById('custom-resume-'+id)?.checked !== false;
-    if (title||content) sections.push({title, content, start, end, includeInResume});
+    if (title||content) sections.push({title, content, start, end, projectTitle, includeInResume});
   });
   return sections;
+}
+
+function onCustomTitleSel(id) {
+  var sel = document.getElementById('custom-title-sel-' + id);
+  var inp = document.getElementById('custom-title-' + id);
+  if (!sel || !inp) return;
+  if (sel.value === '_other') {
+    inp.style.display = '';
+    inp.value = '';
+    inp.focus();
+  } else {
+    inp.style.display = 'none';
+    inp.value = sel.value;
+  }
+  updatePreview();
 }
 
 // ── Skills ────────────────────────────────────────────────────────────
@@ -3795,7 +3822,8 @@ function renderResumeHTML(data) {
   if (data.customSections && data.customSections.length) {
     customHTML = data.customSections.filter(s=>(s.title||s.content) && s.includeInResume !== false).map(s => {
       const dateRange = [s.start, s.end].filter(Boolean).join(' – ');
-      return `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}${dateRange ? `<span class="r-yr" style="float:right;font-weight:400;font-size:0.8em" contenteditable="true">${esc(dateRange)}</span>` : ''}</div><div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`;
+      const projTitle = s.projectTitle ? `<div class="r-role" contenteditable="true" style="font-size:0.88em;font-weight:700;margin-bottom:2px;">${esc(s.projectTitle)}</div>` : '';
+      return `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}${dateRange ? `<span class="r-yr" style="float:right;font-weight:400;font-size:0.8em" contenteditable="true">${esc(dateRange)}</span>` : ''}</div>${projTitle}<div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`;
     }).join(div);
   }
 
@@ -5002,6 +5030,18 @@ function populateFormFromParsed(data) {
     renderSkills();
     if (typeof renderSuggestions === 'function') renderSuggestions();
   }
+  // Custom Sections (step 6: Projects, Certifications, etc.)
+  if (data.customSections && data.customSections.length) {
+    const cont = document.getElementById('customSectionEntries');
+    if (cont) { cont.innerHTML = ''; customSectionCount = 0; }
+    data.customSections.slice().reverse().forEach(s => {
+      addCustomSection(s.title || '', s.content || '', s.includeInResume !== false, true);
+      const id = customSectionCount;
+      sv('custom-start-' + id, s.start || '');
+      sv('custom-end-' + id, s.end || '');
+      sv('custom-proj-title-' + id, s.projectTitle || '');
+    });
+  }
   updatePreview();
 }
 
@@ -5523,12 +5563,17 @@ function _collectCloudData() {
   d.summary = d.summary || (lastResumeData && lastResumeData.summary) || '';
   d.template = typeof currentTemplate !== 'undefined' ? currentTemplate : 'modern';
   d.savedAt  = new Date().toISOString();
+  if (typeof userPhoto === 'string' && userPhoto && userPhoto.length < 400000) d.photo = userPhoto;
   return d;
+}
+
+function _collectPortfolioData() {
+  return { template: pfTemplate, sections: pfSections, wizardData: pfWzData, savedAt: new Date().toISOString() };
 }
 
 function _saveToCloud(uid, showMsg) {
   if (!_fbDb || !uid) return;
-  _fbDb.collection('users').doc(uid).set({ resume: _collectCloudData() }, { merge: true })
+  _fbDb.collection('users').doc(uid).set({ resume: _collectCloudData(), portfolio: _collectPortfolioData() }, { merge: true })
     .then(function() { if (showMsg !== false) showToast('☁️ Saved to cloud'); })
     .catch(function(e) { console.warn('Cloud save:', e); });
 }
@@ -5558,10 +5603,25 @@ function _loadFromCloud(uid) {
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
     if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1); return; }
     var d = doc.data().resume;
+    var pf = doc.data().portfolio;
+    if (pf) {
+      if (pf.template) pfTemplate = pf.template;
+      if (pf.sections) Object.assign(pfSections, pf.sections);
+      if (pf.wizardData) Object.assign(pfWzData, pf.wizardData);
+    }
     var prev = document.getElementById('_cloudBanner');
     if (prev) prev.remove();
     if (typeof populateFormFromParsed === 'function') populateFormFromParsed(d);
     if (d.template && typeof selectTemplate === 'function') selectTemplate(d.template);
+    if (d.photo) {
+      userPhoto = d.photo;
+      var _pp = document.getElementById('photoPreview');
+      var _ph = document.getElementById('photoPlaceholder');
+      var _rb = document.getElementById('removePhotoBtn');
+      if (_pp) { _pp.src = userPhoto; _pp.style.display = 'block'; }
+      if (_ph) _ph.style.display = 'none';
+      if (_rb) _rb.style.display = 'inline-flex';
+    }
     _hideCloudLoader();
     goToStep(1);
     setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
@@ -6040,6 +6100,16 @@ function closePreviewModal(e) {
           </button>
         </div>
       </div>
+      <!-- Profile photo quick-add / change -->
+      <div id="pfStep3Photo" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;">
+        <div id="pfReviewPhotoThumb" onclick="document.getElementById('pfReviewPhotoInput').click()" style="width:46px;height:46px;border-radius:50%;background:var(--input-bg,#f9fafb);border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;flex-shrink:0;overflow:hidden;">📷</div>
+        <div style="flex:1;min-width:0;">
+          <div id="pfReviewPhotoLabel" style="font-size:0.84rem;font-weight:700;color:var(--text);margin-bottom:1px;">Profile Photo</div>
+          <div id="pfReviewPhotoSub" style="font-size:0.73rem;color:var(--muted);">Tap to add — appears in your portfolio hero section</div>
+        </div>
+        <input type="file" id="pfReviewPhotoInput" accept="image/*" style="display:none" onchange="handlePfReviewPhoto(event)">
+        <button id="pfReviewPhotoRemove" onclick="pfRemoveReviewPhoto()" style="display:none;padding:4px 10px;font-size:0.74rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">✕ Remove</button>
+      </div>
       <!-- Template mini-switcher -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
         <span style="font-size:0.78rem;font-weight:600;color:var(--muted);white-space:nowrap;">Style:</span>
@@ -6272,6 +6342,46 @@ function handlePfWzPhoto(ev) {
 }
 function removePfWzPhoto() { removePfPhoto(); pfWzRender(); }
 
+function updatePfStep3Photo() {
+  var thumb = document.getElementById('pfReviewPhotoThumb');
+  var label = document.getElementById('pfReviewPhotoLabel');
+  var sub   = document.getElementById('pfReviewPhotoSub');
+  var rmBtn = document.getElementById('pfReviewPhotoRemove');
+  if (!thumb) return;
+  if (pfPhoto) {
+    thumb.style.border = '2px solid var(--accent)';
+    thumb.innerHTML = '<img src="' + pfPhoto + '" style="width:100%;height:100%;object-fit:cover;" alt="Photo">';
+    if (label) label.textContent = 'Profile Photo ✓';
+    if (sub)   sub.textContent = 'Photo added — showing in your portfolio hero';
+    if (rmBtn) rmBtn.style.display = '';
+  } else {
+    thumb.style.border = '2px dashed var(--accent)';
+    thumb.innerHTML = '📷';
+    if (label) label.textContent = 'Profile Photo';
+    if (sub)   sub.textContent = 'Tap to add — appears in your portfolio hero section';
+    if (rmBtn) rmBtn.style.display = 'none';
+  }
+}
+function handlePfReviewPhoto(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Photo must be under 10 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    pfPhoto = e.target.result;
+    updatePfStep3Photo();
+    buildPfPreview();
+  };
+  reader.readAsDataURL(file);
+}
+function pfRemoveReviewPhoto() {
+  pfPhoto = null;
+  var inp = document.getElementById('pfReviewPhotoInput');
+  if (inp) inp.value = '';
+  updatePfStep3Photo();
+  buildPfPreview();
+}
+
 function pfWzSave() {
   var step = pfWzSteps[pfWzIdx];
   if (!step) return;
@@ -6471,7 +6581,7 @@ function pfWzRender() {
     html += '<div style="' + aiRowStyle + '"><button onclick="pfGenSection(\'awards\')" id="pfGenAwardsBtn" style="' + aiBtnStyle + '">✨ Suggest with AI</button><span id="pfGenAwardsStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
 
   } else if (step.id === 'projects') {
-    var _extrasProjs = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().startsWith('project') && cs.content; }).map(function(cs){ return {title:'', desc:cs.content, tech:''}; });
+    var _extrasProjs = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().startsWith('project') && cs.content; }).map(function(cs){ return {title: cs.projectTitle || '', desc:cs.content, tech:''}; });
     var projs = pfWzData.projects.length ? pfWzData.projects : (_extrasProjs.length ? _extrasProjs : [{title:'',desc:'',tech:''}]);
     var _projHint = 'display:flex;align-items:flex-start;gap:8px;background:#fffbeb;border:1px solid rgba(217,119,6,0.22);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:0.77rem;color:#92400e;line-height:1.5;';
     html += '<div style="'+_projHint+'">🔧 <span>Add projects in <b>Step 6 (Extras)</b> using the Projects preset — they\'ll appear here automatically.</span></div>';
@@ -6674,6 +6784,7 @@ function pfGoStep(n) {
   }
   if (n === 3) {
     updatePfMiniSwitcher();
+    updatePfStep3Photo();
     buildPfPreview();
   }
 }
@@ -7047,7 +7158,7 @@ function generatePortfolioHTML(d, tpl, sections) {
     + '<meta name="twitter:description" content="' + metaDesc + '">'
     + '<meta name="twitter:image" content="' + metaImg + '">'
     + '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"' + name + '"' + (d.title?',"jobTitle":"'+esc(d.title)+'"':'') + (d.email?',"email":"'+esc(d.email)+'"':'') + (d.phone?',"telephone":"'+esc(d.phone)+'"':'') + (d.location?',"address":{"@type":"PostalAddress","addressLocality":"'+esc(d.location)+'"}':'') + (d.linkedin?',"sameAs":["'+esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : "https://"+d.linkedin)+'"]':'') + (schemaSkills?',"knowsAbout":['+schemaSkills+']':'') + (schemaExp?',"hasOccupation":['+schemaExp+']':'') + (d.photo?',"image":"'+d.photo+'"':'') + '}<\/script>';
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + 'html{scroll-behavior:smooth;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--pf-nav-bg,rgba(255,255,255,0.95));backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid var(--pf-hero-link-border,rgba(255,255,255,0.35));border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-footer-bg,var(--pf-text));color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div></div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (contactHtml ? '<a href="#contact" onclick="event.preventDefault();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer></body></html>';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ' — Portfolio | resume4u.help</title>' + seoHead + '<style>' + themeCSS + 'html{scroll-behavior:smooth;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--pf-sec-bg);color:var(--pf-text);line-height:1.6;}a{color:inherit;text-decoration:none;}.pf-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--pf-nav-bg,rgba(255,255,255,0.95));backdrop-filter:blur(10px);border-bottom:1px solid var(--pf-border);padding:0 5%;}.pf-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1000px;margin:0 auto;}.pf-nav-name{font-size:1rem;font-weight:700;color:var(--pf-accent);}.pf-nav-links{display:flex;gap:24px;}.pf-nav-links a{font-size:0.85rem;font-weight:500;color:var(--pf-muted);transition:color .15s;}.pf-nav-links a:hover{color:var(--pf-accent);}.pf-hero{background:var(--pf-hero-bg);color:var(--pf-hero-text);padding:100px 5% 70px;text-align:center;}.pf-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}.pf-hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}.pf-hero .pf-hero-title{font-size:1.1rem;color:var(--pf-hero-sub);margin-bottom:20px;}.pf-hero .pf-hero-loc{font-size:0.85rem;color:var(--pf-hero-sub);margin-top:6px;}.pf-hero-links{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;}.pf-hero-link{padding:9px 20px;border:1.5px solid var(--pf-hero-link-border,rgba(255,255,255,0.35));border-radius:8px;font-size:0.85rem;font-weight:600;color:var(--pf-hero-text);transition:all .2s;}.pf-hero-link:hover{background:rgba(255,255,255,0.12);}.pf-container{max-width:860px;margin:0 auto;padding:0 5%;}.pf-sec{padding:70px 0;background:var(--pf-sec-bg);}.pf-sec-alt{background:var(--pf-alt-bg);}.pf-sec-title{font-size:1.65rem;font-weight:700;color:var(--pf-text);margin-bottom:30px;position:relative;padding-bottom:12px;}.pf-sec-title::after{content:"";position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--pf-accent);border-radius:2px;}.pf-timeline{display:flex;flex-direction:column;gap:0;}.pf-tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}.pf-tl-item::before{content:"";position:absolute;left:6px;top:18px;bottom:0;width:1px;background:var(--pf-border);}.pf-tl-item:last-child::before{display:none;}.pf-tl-dot{width:14px;height:14px;border-radius:50%;background:var(--pf-accent);flex-shrink:0;margin-top:4px;box-shadow:0 0 0 4px rgba(37,99,235,0.12);}.pf-tl-body{flex:1;}.pf-tl-role{font-size:1rem;font-weight:700;color:var(--pf-text);margin-bottom:3px;}.pf-tl-meta{font-size:0.82rem;color:var(--pf-accent);font-weight:600;margin-bottom:7px;}.pf-tl-desc{font-size:0.87rem;color:var(--pf-muted);line-height:1.7;white-space:pre-line;}.pf-skill-cloud{display:flex;flex-wrap:wrap;gap:10px;}.pf-skill-chip{padding:7px 16px;background:var(--pf-chip-bg);color:var(--pf-chip-color);border-radius:99px;font-size:0.85rem;font-weight:600;}.pf-edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}.pf-edu-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-edu-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.07);}.pf-edu-icon{font-size:1.5rem;margin-bottom:10px;}.pf-edu-deg{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-edu-school{font-size:0.83rem;color:var(--pf-muted);}.pf-edu-year{font-size:0.78rem;color:var(--pf-accent);margin-top:6px;font-weight:600;}.pf-awards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.pf-award-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:12px;padding:16px;text-align:center;}.pf-award-ico{font-size:1.6rem;margin-bottom:8px;}.pf-award-title{font-size:0.88rem;font-weight:700;color:var(--pf-text);margin-bottom:4px;}.pf-award-issuer{font-size:0.76rem;color:var(--pf-muted);}.pf-about-text{font-size:1.02rem;color:var(--pf-muted);line-height:1.85;max-width:680px;}.pf-contact-row{display:flex;flex-wrap:wrap;gap:14px;}.pf-contact-item{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--pf-alt-bg);border:1.5px solid var(--pf-border);border-radius:10px;font-size:0.88rem;font-weight:600;color:var(--pf-text);transition:all .2s;}.pf-contact-item:hover{border-color:var(--pf-accent);color:var(--pf-accent);}.pf-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}.pf-proj-card{background:var(--pf-sec-bg);border:1.5px solid var(--pf-border);border-radius:14px;padding:20px;transition:box-shadow .2s;}.pf-proj-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.08);}.pf-proj-title{font-size:0.95rem;font-weight:700;color:var(--pf-text);margin-bottom:6px;}.pf-proj-desc{font-size:0.84rem;color:var(--pf-muted);line-height:1.65;margin-bottom:10px;}.pf-proj-tech{display:flex;flex-wrap:wrap;gap:5px;}.pf-footer{background:var(--pf-footer-bg,var(--pf-text));color:rgba(255,255,255,0.55);text-align:center;padding:28px 5%;font-size:0.8rem;}.pf-hamburger{display:none;background:none;border:none;color:var(--pf-accent);font-size:1.45rem;cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0;}.pf-mobile-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--pf-nav-bg,rgba(255,255,255,0.97));border-bottom:1px solid var(--pf-border);padding:6px 5% 12px;flex-direction:column;z-index:99;backdrop-filter:blur(10px);}.pf-mobile-nav.open{display:flex;}.pf-mobile-nav a{display:block;padding:13px 0;font-size:0.95rem;font-weight:600;color:var(--pf-text);border-bottom:1px solid var(--pf-border);text-decoration:none;transition:color .15s;}.pf-mobile-nav a:hover{color:var(--pf-accent);}.pf-mobile-nav a:last-child{border-bottom:none;}@media(max-width:768px){.pf-nav-links{display:none;}.pf-hamburger{display:flex;}.pf-hero h1{font-size:2rem;}.pf-sec{padding:48px 0;}.pf-edu-grid,.pf-awards-grid,.pf-proj-grid{grid-template-columns:1fr;}.pf-tpl-grid{grid-template-columns:1fr 1fr;}}</style></head><body><nav class="pf-nav"><div class="pf-nav-inner"><div class="pf-nav-name">' + name + '</div><div class="pf-nav-links">' + navLinks + '</div><button class="pf-hamburger" id="pfHamBtn" onclick="_pfMenu()" aria-label="Open menu"><span id="pfHamIco">☰</span></button></div><div class="pf-mobile-nav" id="pfMobNav" onclick="if(event.target.closest(\'a\')){this.classList.remove(\'open\');document.getElementById(\'pfHamIco\').textContent=\'☰\';}">' + navLinks + '</div></nav><header class="pf-hero"><div class="pf-hero-inner">' + photoHtml + '<h1>' + name + '</h1>' + (d.title ? '<div class="pf-hero-title">' + esc(d.title) + '</div>' : '') + (d.location ? '<div class="pf-hero-loc">📍 ' + esc(d.location) + '</div>' : '') + '<div class="pf-hero-links">' + (d.linkedin ? '<a href="' + esc(d.linkedin.match(/^https?:\/\//) ? d.linkedin : 'https://' + d.linkedin) + '" target="_blank" class="pf-hero-link">LinkedIn</a>' : '') + (d.github ? '<a href="' + esc(d.github.match(/^https?:\/\//) ? d.github : 'https://' + d.github) + '" target="_blank" class="pf-hero-link">GitHub</a>' : '') + (contactHtml ? '<a href="#contact" onclick="event.preventDefault();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})" class="pf-hero-link">Contact Me</a>' : '') + '</div></div></header>' + aboutHtml + expHtml + skillsHtml + eduHtml + awardsHtml + projectsHtml + certsHtml + contactHtml + '<footer class="pf-footer">Built with Resume For You · resume4u.help</footer><script>function _pfMenu(){var m=document.getElementById("pfMobNav"),i=document.getElementById("pfHamIco");if(!m)return;var o=m.classList.toggle("open");i.textContent=o?"✕":"☰";}document.addEventListener("click",function(e){var m=document.getElementById("pfMobNav"),b=document.getElementById("pfHamBtn");if(m&&b&&!m.contains(e.target)&&!b.contains(e.target)&&m.classList.contains("open")){m.classList.remove("open");var i=document.getElementById("pfHamIco");if(i)i.textContent="☰";}});<\/script></body></html>';
 }
 
 // Scroll bounce fix — covers iOS < 16 where overscroll-behavior is unsupported.
