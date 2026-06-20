@@ -6946,7 +6946,7 @@ function pfGoStep(n) {
     // Live-sync projects toggle: ON if resume has project custom sections, OFF otherwise
     var _pfLive = typeof collectData === 'function' ? collectData() : {};
     pfSections.projects = (_pfLive.customSections||[]).some(function(cs){
-      return cs.title && cs.title.toLowerCase().includes('project') && cs.content;
+      return cs.title && cs.title.toLowerCase().includes('project');
     });
     // Sync all DOM toggle classes from pfSections (handles cloud restore too)
     document.querySelectorAll('#pfToggleGrid .pf-toggle').forEach(function(el) {
@@ -7003,8 +7003,8 @@ function getPfData() {
       var wp = wz.projects.filter(function(p){ return p.title||p.desc; });
       if (!lp.length) return wp;
       if (!wp.length) return lp;
-      var merged = wp.slice();
-      lp.forEach(function(p){ if (!merged.some(function(w){ return w.title===p.title && w.desc===p.desc; })) merged.push(p); });
+      var merged = lp.slice();
+      wp.forEach(function(p){ if (!merged.some(function(m){ return m.title===p.title && m.desc===p.desc; })) merged.push(p); });
       return merged;
     })(),
     certifications: wz.certifications || [],
