@@ -6711,11 +6711,19 @@ function pfWzRender() {
       html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
     } else {
       exps.forEach(function(ex,i) {
-        var saved = pfWzData.experience.find(function(s){
-          if (s.title !== ex.title || s.company !== (ex.co||'')) return false;
-          if (ex.start && s.dates) return s.dates.startsWith(ex.start);
-          return true;
-        });
+        // Match by title+company only (not date) — date format can vary between sessions after cloud restore.
+        // For duplicate title+company entries (same role at same company), use date then position as tiebreaker.
+        var _sameGroup = pfWzData.experience.filter(function(s){ return s.title === ex.title && s.company === (ex.co||''); });
+        var saved;
+        if (_sameGroup.length === 1) {
+          saved = _sameGroup[0];
+        } else if (_sameGroup.length > 1) {
+          if (ex.start) saved = _sameGroup.find(function(s){ return s.dates && s.dates.startsWith(ex.start); });
+          if (!saved) {
+            var _grpPos = exps.slice(0, i).filter(function(x){ return x.title === ex.title && (x.co||'') === (ex.co||''); }).length;
+            saved = _sameGroup[_grpPos] || _sameGroup[0];
+          }
+        }
         html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
         html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
         html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
@@ -7004,16 +7012,21 @@ function getPfData() {
     experience: (function(){
       var live = (cd.experience||[]);
       if (!live.length) return wz.experience;
-      // Always use live resume as source of truth; match wizard descriptions by title+company
-      // so stale pfWzData (e.g. from cloud restore) never misassigns descriptions to wrong jobs
-      return live.map(function(e){
+      return live.map(function(e, ei){
         var eStart = e.start || '';
-        var sv = wz.experience.find(function(s){
-          if (s.title !== e.title || s.company !== (e.co||'')) return false;
-          // Use start date as tiebreaker when same title+company exists multiple times
-          if (eStart && s.dates) return s.dates.startsWith(eStart);
-          return true;
-        });
+        // Match by title+company (date only as tiebreaker for duplicate title+company entries).
+        // This handles date-format changes between sessions after cloud restore.
+        var _sg = wz.experience.filter(function(s){ return s.title === e.title && s.company === (e.co||''); });
+        var sv;
+        if (_sg.length === 1) {
+          sv = _sg[0];
+        } else if (_sg.length > 1) {
+          if (eStart) sv = _sg.find(function(s){ return s.dates && s.dates.startsWith(eStart); });
+          if (!sv) {
+            var _gp = live.slice(0, ei).filter(function(x){ return x.title === e.title && (x.co||'') === (e.co||''); }).length;
+            sv = _sg[_gp] || _sg[0];
+          }
+        }
         return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:(sv&&sv.desc)||e.desc||''};
       });
     })(),
@@ -7129,9 +7142,14 @@ async function generatePortfolioLink() {
     }
 
     var body = JSON.stringify({ html: html, name: name });
+    var _shareHeaders = { 'Content-Type': 'application/json' };
+    // Pass Firebase ID token so server can write with user auth (bypasses API-key server restrictions).
+    if (_fbUser) {
+      try { var _tok = await _fbUser.getIdToken(); if (_tok) _shareHeaders['X-Firebase-Token'] = _tok; } catch(_) {}
+    }
     var resp = await fetch('/.netlify/functions/share-portfolio', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: _shareHeaders,
       body: body,
     });
 

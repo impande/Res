@@ -5,7 +5,7 @@ const FS_KEY  = 'AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Firebase-Token',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
@@ -15,15 +15,19 @@ exports.handler = async function(event) {
   // ── POST: client sends HTML → write to Firestore → return shareable URL ──
   if (event.httpMethod === 'POST') {
     try {
-      const bodyStr = event.body || '{}';
-      if (bodyStr.length > 950000) {
+      // Netlify may base64-encode large request bodies; decode if needed
+      const rawBody = event.isBase64Encoded
+        ? Buffer.from(event.body || '', 'base64').toString('utf8')
+        : (event.body || '{}');
+
+      if (rawBody.length > 950000) {
         return {
           statusCode: 413,
           headers: { ...CORS, 'Content-Type': 'application/json' },
           body: JSON.stringify({ error: 'PAYLOAD_TOO_LARGE', detail: 'Portfolio is too large to share. Download it instead.' }),
         };
       }
-      const { html, name } = JSON.parse(bodyStr);
+      const { html, name } = JSON.parse(rawBody);
       if (!html || !name) {
         return {
           statusCode: 400,
@@ -38,10 +42,18 @@ exports.handler = async function(event) {
         .replace(/^-+|-+$/g, '')
         .substring(0, 60)) || 'portfolio';
 
+      // If client sent a Firebase ID token, use it for the write (bypasses API-key HTTP-referrer restrictions).
+      const idToken = (event.headers || {})['x-firebase-token'];
+      const writeUrl = idToken
+        ? `${FS_BASE}/${slug}`
+        : `${FS_BASE}/${slug}?key=${FS_KEY}`;
+      const writeHeaders = { 'Content-Type': 'application/json' };
+      if (idToken) writeHeaders['Authorization'] = 'Bearer ' + idToken;
+
       // PATCH creates-or-updates the Firestore document (real server round-trip, no SDK caching)
-      const fsResp = await fetch(`${FS_BASE}/${slug}?key=${FS_KEY}`, {
+      const fsResp = await fetch(writeUrl, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: writeHeaders,
         body: JSON.stringify({ fields: { html: { stringValue: html } } }),
       });
 
@@ -56,6 +68,17 @@ exports.handler = async function(event) {
         }
         throw new Error('Firestore write ' + fsResp.status + ': ' + (err.error && err.error.message || JSON.stringify(err)));
       }
+
+      // Verify the write actually persisted. If API key has server-side restrictions this read
+      // may fail — in that case the /p/index.html browser-side fallback will serve the portfolio.
+      const verifyResp = await fetch(`${FS_BASE}/${encodeURIComponent(slug)}?key=${FS_KEY}`).catch(() => null);
+      if (verifyResp && verifyResp.ok) {
+        const vDoc = await verifyResp.json().catch(() => null);
+        if (!vDoc || !vDoc.fields || !vDoc.fields.html || !vDoc.fields.html.stringValue) {
+          throw new Error('Portfolio written but verification read returned no html field. Check Firestore rules.');
+        }
+      }
+      // If verifyResp itself failed (network or key restriction), proceed anyway — browser fallback handles it.
 
       const siteUrl = (process.env.URL || 'https://resume4u.help').replace(/\/$/, '');
       return {

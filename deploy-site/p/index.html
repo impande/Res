@@ -31,21 +31,47 @@
       '<h2>Portfolio not found</h2><p>No portfolio ID in the URL.<br>Visit <a href="https://resume4u.help">resume4u.help</a> to create one.</p>';
     return;
   }
+
+  function showNotFound() {
+    document.getElementById('msg').innerHTML =
+      '<h2>Portfolio not found</h2>'
+      + '<p>This link may have expired or the portfolio does not exist.<br>'
+      + 'Please <a href="https://resume4u.help">generate a new share link</a>.</p>';
+  }
+
+  function renderHtml(html) {
+    document.open('text/html', 'replace');
+    document.write(html);
+    document.close();
+  }
+
+  // Step 2 fallback: read directly from Firestore in the browser.
+  // The browser sends the correct HTTP Referer so even restricted API keys work here.
+  function tryDirectFirestore() {
+    var fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
+      + encodeURIComponent(slug)
+      + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+    fetch(fsUrl)
+      .then(function(r) { return r.json(); })
+      .then(function(doc) {
+        var html = doc && doc.fields && doc.fields.html && doc.fields.html.stringValue;
+        if (html) { renderHtml(html); } else { showNotFound(); }
+      })
+      .catch(showNotFound);
+  }
+
+  // Step 1: try via Netlify function (server-side Firestore read).
   fetch('/.netlify/functions/share-portfolio?id=' + encodeURIComponent(slug))
     .then(function(r) {
       if (!r.ok) throw new Error(r.status);
       return r.text();
     })
     .then(function(html) {
-      document.open('text/html', 'replace');
-      document.write(html);
-      document.close();
+      renderHtml(html);
     })
     .catch(function() {
-      document.getElementById('msg').innerHTML =
-        '<h2>Portfolio not found</h2>'
-        + '<p>This link may have expired or the portfolio does not exist.<br>'
-        + 'Please <a href="https://resume4u.help">generate a new share link</a>.</p>';
+      // Function GET failed (server-side read issue) — fall back to browser-direct Firestore read.
+      tryDirectFirestore();
     });
 })();
 </script>
