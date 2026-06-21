@@ -7075,7 +7075,7 @@ function downloadPortfolio() {
   showToast('Portfolio downloaded!', 'success');
 }
 
-function _showShareFallbackModal() {
+function _showShareFallbackModal(debugInfo) {
   var prev = document.getElementById('_pfShareFallback');
   if (prev) prev.remove();
   var overlay = document.createElement('div');
@@ -7084,7 +7084,8 @@ function _showShareFallbackModal() {
   overlay.innerHTML = '<div style="background:#fff;border-radius:18px;padding:28px 24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);text-align:center;">'
     + '<div style="font-size:2rem;margin-bottom:12px;">🔗</div>'
     + '<div style="font-size:1rem;font-weight:700;color:#1e293b;margin-bottom:8px;">Share Link Unavailable</div>'
-    + '<div style="font-size:0.85rem;color:#64748b;line-height:1.6;margin-bottom:20px;">The share link service needs a one-time setup in Netlify.<br>You can still download your portfolio as a standalone HTML file and share it directly.</div>'
+    + '<div style="font-size:0.85rem;color:#64748b;line-height:1.6;margin-bottom:' + (debugInfo ? '8px' : '20px') + ';">Unable to save your portfolio. You can download it as a standalone HTML file and share directly.</div>'
+    + (debugInfo ? '<div style="font-size:0.72rem;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;margin-bottom:16px;word-break:break-all;text-align:left;">Error: ' + debugInfo + '</div>' : '')
     + '<button onclick="downloadPortfolio();document.getElementById(\'_pfShareFallback\').remove();" style="width:100%;padding:12px;margin-bottom:10px;background:var(--accent,#f59e0b);color:#fff;border:none;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;">⬇ Download Portfolio</button>'
     + '<button onclick="document.getElementById(\'_pfShareFallback\').remove();" style="width:100%;padding:11px;background:transparent;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;font-size:0.9rem;cursor:pointer;">Cancel</button>'
     + '</div>';
@@ -7137,12 +7138,13 @@ async function generatePortfolioLink() {
       html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
     }
     if (html.length > 900000) {
-      _showShareFallbackModal();
+      _showShareFallbackModal('HTML too large: ' + Math.round(html.length/1024) + 'KB');
       return;
     }
 
     var slug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60)) || 'portfolio';
     var _writeOk = false;
+    var _lastErr = '';
 
     // Attempt 1: client SDK write (uses signed-in user auth automatically)
     if (_fbDb) {
@@ -7150,11 +7152,14 @@ async function generatePortfolioLink() {
         await _fbDb.collection('portfolios').doc(slug).set({ html: html });
         _writeOk = true;
       } catch(we) {
+        _lastErr = 'SDK:' + (we.code || we.message || String(we));
         console.error('[share] SDK write failed:', we.code, we.message);
       }
+    } else {
+      _lastErr = 'SDK:not-initialized';
     }
 
-    // Attempt 2: direct browser REST API PATCH (no SDK, just the API key — confirmed working)
+    // Attempt 2: direct browser REST API PATCH (no SDK, just the API key)
     if (!_writeOk) {
       try {
         var _fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
@@ -7168,15 +7173,18 @@ async function generatePortfolioLink() {
           _writeOk = true;
         } else {
           var _fsErr = await _fsResp.json().catch(function(){ return {}; });
+          var _fsErrMsg = (_fsErr.error && (_fsErr.error.status || _fsErr.error.message)) || _fsResp.status;
+          _lastErr += ' REST:' + _fsErrMsg;
           console.error('[share] REST write failed:', _fsResp.status, JSON.stringify(_fsErr));
         }
       } catch(re) {
+        _lastErr += ' REST:' + re.message;
         console.error('[share] REST write error:', re.message);
       }
     }
 
     if (!_writeOk) {
-      _showShareFallbackModal();
+      _showShareFallbackModal(_lastErr);
       return;
     }
     showPfShareModal('https://resume4u.help/p/' + slug, name);
