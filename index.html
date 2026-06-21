@@ -6192,6 +6192,7 @@ function closePreviewModal(e) {
 var pfTemplate = 'obsidian';
 var pfPhoto = null;
 var pfCoverPhoto = null;
+var _pfSavedSlug = null;
 var pfSections = {about:true,experience:true,skills:true,education:true,awards:true,projects:false,certifications:false,contact:true};
 var pfCurrentStep = 1;
 
@@ -7145,7 +7146,12 @@ function generatePortfolioLink() {
   var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
   var defaultSlug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 40)) || 'portfolio';
   if (_fbUser && _fbUser.uid) defaultSlug = defaultSlug + '-' + _fbUser.uid.substring(0, 8).toLowerCase();
-  _showSlugPickerModal(defaultSlug);
+  var savedSlug = _pfSavedSlug || (typeof localStorage !== 'undefined' && localStorage.getItem('pfSlug_' + (_fbUser && _fbUser.uid)));
+  if (savedSlug) {
+    _doGeneratePortfolioLink(savedSlug);
+  } else {
+    _showSlugPickerModal(defaultSlug);
+  }
 }
 
 async function _checkSlugAvailability(slug) {
@@ -7373,6 +7379,10 @@ async function _doGeneratePortfolioLink(slug) {
       return;
     }
 
+    _pfSavedSlug = slug;
+    if (typeof localStorage !== 'undefined' && _fbUser && _fbUser.uid) {
+      localStorage.setItem('pfSlug_' + _fbUser.uid, slug);
+    }
     var picker = document.getElementById('_pfSlugPicker');
     if (picker) picker.remove();
     showPfShareModal('https://resume4u.help/p/' + slug, d.name.trim() || 'portfolio');
