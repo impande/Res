@@ -7141,24 +7141,41 @@ async function generatePortfolioLink() {
       return;
     }
 
-    // Write portfolio HTML directly to Firestore via client SDK (handles auth automatically).
-    // Then verify with source:'server' to confirm the write actually reached the server
-    // and bypass the SDK's local-cache false-success problem.
     var slug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60)) || 'portfolio';
-    try {
-      await _fbDb.collection('portfolios').doc(slug).set({ html: html });
-    } catch(we) {
-      _showShareFallbackModal();
-      return;
+    var _writeOk = false;
+
+    // Attempt 1: client SDK write (uses signed-in user auth automatically)
+    if (_fbDb) {
+      try {
+        await _fbDb.collection('portfolios').doc(slug).set({ html: html });
+        _writeOk = true;
+      } catch(we) {
+        console.error('[share] SDK write failed:', we.code, we.message);
+      }
     }
-    var _verifyDoc;
-    try {
-      _verifyDoc = await _fbDb.collection('portfolios').doc(slug).get({ source: 'server' });
-    } catch(ve) {
-      // Server read failed — still show URL; /p/index.html browser fallback will serve it
-      _verifyDoc = null;
+
+    // Attempt 2: direct browser REST API PATCH (no SDK, just the API key — confirmed working)
+    if (!_writeOk) {
+      try {
+        var _fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
+          + encodeURIComponent(slug) + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+        var _fsResp = await fetch(_fsUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: { html: { stringValue: html } } })
+        });
+        if (_fsResp.ok) {
+          _writeOk = true;
+        } else {
+          var _fsErr = await _fsResp.json().catch(function(){ return {}; });
+          console.error('[share] REST write failed:', _fsResp.status, JSON.stringify(_fsErr));
+        }
+      } catch(re) {
+        console.error('[share] REST write error:', re.message);
+      }
     }
-    if (_verifyDoc && (!_verifyDoc.exists || !(_verifyDoc.data() && _verifyDoc.data().html))) {
+
+    if (!_writeOk) {
       _showShareFallbackModal();
       return;
     }
