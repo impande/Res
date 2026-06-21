@@ -1,99 +1,16 @@
-// Stores and serves shared portfolio HTML via Firestore REST API.
-// Using REST API (not SDK) so writes get real server confirmation — no local-cache false-success.
+// Serves shared portfolio HTML from Firestore via REST API.
+// Writes are done client-side via Firebase SDK; this function only handles GET (serving).
 const FS_BASE = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios';
 const FS_KEY  = 'AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Firebase-Token',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
-
-  // ── POST: client sends HTML → write to Firestore → return shareable URL ──
-  if (event.httpMethod === 'POST') {
-    try {
-      // Netlify may base64-encode large request bodies; decode if needed
-      const rawBody = event.isBase64Encoded
-        ? Buffer.from(event.body || '', 'base64').toString('utf8')
-        : (event.body || '{}');
-
-      if (rawBody.length > 950000) {
-        return {
-          statusCode: 413,
-          headers: { ...CORS, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ error: 'PAYLOAD_TOO_LARGE', detail: 'Portfolio is too large to share. Download it instead.' }),
-        };
-      }
-      const { html, name } = JSON.parse(rawBody);
-      if (!html || !name) {
-        return {
-          statusCode: 400,
-          headers: { ...CORS, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ error: 'Missing html or name' }),
-        };
-      }
-
-      // Clean slug — no timestamp so URL stays as /p/first-last
-      const slug = (name.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .substring(0, 60)) || 'portfolio';
-
-      // If client sent a Firebase ID token, use it for the write (bypasses API-key HTTP-referrer restrictions).
-      const idToken = (event.headers || {})['x-firebase-token'];
-      const writeUrl = idToken
-        ? `${FS_BASE}/${slug}`
-        : `${FS_BASE}/${slug}?key=${FS_KEY}`;
-      const writeHeaders = { 'Content-Type': 'application/json' };
-      if (idToken) writeHeaders['Authorization'] = 'Bearer ' + idToken;
-
-      // PATCH creates-or-updates the Firestore document (real server round-trip, no SDK caching)
-      const fsResp = await fetch(writeUrl, {
-        method: 'PATCH',
-        headers: writeHeaders,
-        body: JSON.stringify({ fields: { html: { stringValue: html } } }),
-      });
-
-      if (!fsResp.ok) {
-        const err = await fsResp.json().catch(() => ({}));
-        if (err.error && err.error.status === 'PERMISSION_DENIED') {
-          return {
-            statusCode: 503,
-            headers: { ...CORS, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: 'STORAGE_NOT_CONFIGURED', detail: 'Firestore portfolios collection needs write rules.' }),
-          };
-        }
-        throw new Error('Firestore write ' + fsResp.status + ': ' + (err.error && err.error.message || JSON.stringify(err)));
-      }
-
-      // Verify the write actually persisted. If API key has server-side restrictions this read
-      // may fail — in that case the /p/index.html browser-side fallback will serve the portfolio.
-      const verifyResp = await fetch(`${FS_BASE}/${encodeURIComponent(slug)}?key=${FS_KEY}`).catch(() => null);
-      if (verifyResp && verifyResp.ok) {
-        const vDoc = await verifyResp.json().catch(() => null);
-        if (!vDoc || !vDoc.fields || !vDoc.fields.html || !vDoc.fields.html.stringValue) {
-          throw new Error('Portfolio written but verification read returned no html field. Check Firestore rules.');
-        }
-      }
-      // If verifyResp itself failed (network or key restriction), proceed anyway — browser fallback handles it.
-
-      const siteUrl = (process.env.URL || 'https://resume4u.help').replace(/\/$/, '');
-      return {
-        statusCode: 200,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: siteUrl + '/p/' + slug }),
-      };
-    } catch (e) {
-      return {
-        statusCode: 500,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'SERVER_ERROR', detail: e.message }),
-      };
-    }
-  }
 
   // ── GET: serve stored portfolio HTML (via /p/:slug redirect) ─────────────
   if (event.httpMethod === 'GET') {

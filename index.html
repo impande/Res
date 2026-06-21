@@ -6725,7 +6725,7 @@ function pfWzRender() {
           }
         }
         html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
-        html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
+        html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e(ex.desc||(saved&&saved.desc)||'') + '</textarea>';
         html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
       });
       html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
@@ -7027,7 +7027,7 @@ function getPfData() {
             sv = _sg[_gp] || _sg[0];
           }
         }
-        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:(sv&&sv.desc)||e.desc||''};
+        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||''};
       });
     })(),
     education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
@@ -7141,30 +7141,28 @@ async function generatePortfolioLink() {
       return;
     }
 
-    var body = JSON.stringify({ html: html, name: name });
-    var _shareHeaders = { 'Content-Type': 'application/json' };
-    // Pass Firebase ID token so server can write with user auth (bypasses API-key server restrictions).
-    if (_fbUser) {
-      try { var _tok = await _fbUser.getIdToken(); if (_tok) _shareHeaders['X-Firebase-Token'] = _tok; } catch(_) {}
-    }
-    var resp = await fetch('/.netlify/functions/share-portfolio', {
-      method: 'POST',
-      headers: _shareHeaders,
-      body: body,
-    });
-
-    var result;
-    try { result = await resp.json(); } catch(_) {
-      throw new Error('Server error (status ' + resp.status + '). Please try again.');
-    }
-
-    if (result.url) {
-      showPfShareModal(result.url, name);
-    } else if (result.error === 'STORAGE_NOT_CONFIGURED') {
+    // Write portfolio HTML directly to Firestore via client SDK (handles auth automatically).
+    // Then verify with source:'server' to confirm the write actually reached the server
+    // and bypass the SDK's local-cache false-success problem.
+    var slug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60)) || 'portfolio';
+    try {
+      await _fbDb.collection('portfolios').doc(slug).set({ html: html });
+    } catch(we) {
       _showShareFallbackModal();
-    } else {
-      throw new Error(result.detail || result.error || 'Server error');
+      return;
     }
+    var _verifyDoc;
+    try {
+      _verifyDoc = await _fbDb.collection('portfolios').doc(slug).get({ source: 'server' });
+    } catch(ve) {
+      // Server read failed — still show URL; /p/index.html browser fallback will serve it
+      _verifyDoc = null;
+    }
+    if (_verifyDoc && (!_verifyDoc.exists || !(_verifyDoc.data() && _verifyDoc.data().html))) {
+      _showShareFallbackModal();
+      return;
+    }
+    showPfShareModal('https://resume4u.help/p/' + slug, name);
   } catch(ex) {
     var msg = ex.message || 'Network error';
     if (msg === 'Load failed' || msg === 'Failed to fetch') msg = 'Network error — check your connection and try again.';
