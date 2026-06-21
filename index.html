@@ -7092,39 +7092,205 @@ function _showShareFallbackModal() {
   document.body.appendChild(overlay);
 }
 
-function _compressPfPhoto(dataUrl, maxDim, quality) {
+function _compressPfPhoto(dataUrl, maxW, maxHorQuality, quality) {
+  var maxH = (quality === undefined) ? maxW : maxHorQuality;
+  if (quality === undefined) quality = maxHorQuality;
   return new Promise(function(resolve) {
     if (!dataUrl) { resolve(''); return; }
+    var isHttp = /^https?:\/\//.test(dataUrl);
     var img = new Image();
     img.onload = function() {
       var W = img.naturalWidth, H = img.naturalHeight;
       if (!W || !H) { resolve(dataUrl); return; }
-      var scale = Math.min(maxDim / W, maxDim / H, 1);
+      var scale = Math.min(maxW / W, maxH / H, 1);
       var cv = document.createElement('canvas');
       cv.width = Math.round(W * scale);
       cv.height = Math.round(H * scale);
-      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-      resolve(cv.toDataURL('image/jpeg', quality));
+      try {
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        resolve(cv.toDataURL('image/jpeg', quality));
+      } catch(e) {
+        resolve(isHttp ? dataUrl : '');
+      }
     };
-    img.onerror = function() { resolve(''); };
+    img.onerror = function() { resolve(isHttp ? dataUrl : ''); };
+    if (isHttp) img.crossOrigin = 'anonymous';
     img.src = dataUrl;
   });
 }
 
-async function generatePortfolioLink() {
-  var btn = document.getElementById('pfShareBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
+function generatePortfolioLink() {
+  if (!_fbDb) { showToast('Storage not ready — please refresh and try again.', 'error'); return; }
+  var d = getPfData();
+  var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
+  var defaultSlug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 40)) || 'portfolio';
+  if (_fbUser && _fbUser.uid) defaultSlug = defaultSlug + '-' + _fbUser.uid.substring(0, 8).toLowerCase();
+  _showSlugPickerModal(defaultSlug);
+}
+
+async function _checkSlugAvailability(slug) {
+  var fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
+    + encodeURIComponent(slug) + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
   try {
-    if (!_fbDb) throw new Error('Storage not ready — please refresh and try again.');
+    var r = await fetch(fsUrl);
+    if (r.status === 404) return 'available';
+    var doc = await r.json();
+    if (doc.error && doc.error.status === 'NOT_FOUND') return 'available';
+    if (doc.error) return 'error';
+    var ownerUid = doc.fields && doc.fields.uid && doc.fields.uid.stringValue;
+    if (!ownerUid || (_fbUser && ownerUid === _fbUser.uid)) return 'yours';
+    return 'taken';
+  } catch(e) {
+    return 'error';
+  }
+}
 
+function _showSlugPickerModal(defaultSlug) {
+  var prev = document.getElementById('_pfSlugPicker');
+  if (prev) prev.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = '_pfSlugPicker';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:18px;padding:28px 24px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.25);position:relative;';
+
+  var closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;line-height:1;';
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = function() { overlay.remove(); };
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:4px;';
+  title.textContent = 'Choose your portfolio URL';
+
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:0.82rem;color:#64748b;margin-bottom:16px;line-height:1.5;';
+  sub.textContent = 'Pick a short, memorable URL or keep the suggested one.';
+
+  var prefixLabel = document.createElement('div');
+  prefixLabel.style.cssText = 'font-size:0.72rem;color:#94a3b8;margin-bottom:4px;font-family:monospace;letter-spacing:0.01em;';
+  prefixLabel.textContent = 'resume4u.help/p/';
+
+  var inputRow = document.createElement('div');
+  inputRow.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;';
+
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = defaultSlug;
+  inp.maxLength = 50;
+  inp.style.cssText = 'flex:1;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;font-family:monospace;outline:none;color:#1e293b;min-width:0;transition:border-color .15s;';
+  inp.placeholder = 'your-custom-url';
+
+  var checkBtn = document.createElement('button');
+  checkBtn.style.cssText = 'padding:10px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.82rem;font-weight:600;color:#475569;cursor:pointer;white-space:nowrap;flex-shrink:0;';
+  checkBtn.textContent = 'Check';
+
+  inputRow.appendChild(inp);
+  inputRow.appendChild(checkBtn);
+
+  var hint = document.createElement('div');
+  hint.style.cssText = 'font-size:0.72rem;color:#94a3b8;margin-bottom:14px;';
+  hint.textContent = 'Only a–z, 0–9 and hyphens · 3–50 characters';
+
+  var statusEl = document.createElement('div');
+  statusEl.style.cssText = 'font-size:0.82rem;min-height:20px;margin-bottom:16px;font-weight:600;';
+
+  var genBtn = document.createElement('button');
+  genBtn.id = '_pfSlugGenBtn';
+  genBtn.style.cssText = 'width:100%;padding:12px;background:#7c3aed;color:#fff;border:none;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;margin-bottom:10px;transition:opacity .15s;opacity:0.5;';
+  genBtn.textContent = 'Generate & Share Link';
+  genBtn.disabled = true;
+
+  var dlBtn = document.createElement('button');
+  dlBtn.style.cssText = 'width:100%;padding:11px;background:transparent;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;font-size:0.87rem;cursor:pointer;';
+  dlBtn.textContent = '⬇ Download as HTML instead';
+  dlBtn.onclick = function() { downloadPortfolio(); overlay.remove(); };
+
+  function setStatus(type, msg) {
+    if (!type) { statusEl.textContent = ''; return; }
+    var colors = { ok: '#16a34a', taken: '#dc2626', checking: '#7c3aed', error: '#d97706' };
+    var icons  = { ok: '✓ ', taken: '✗ ', checking: '⧗ ', error: '⚠ ' };
+    statusEl.style.color = colors[type] || '#64748b';
+    statusEl.textContent = (icons[type] || '') + msg;
+  }
+
+  inp.addEventListener('focus', function() { inp.style.borderColor = '#7c3aed'; });
+  inp.addEventListener('blur',  function() { inp.style.borderColor = '#e2e8f0'; });
+  inp.addEventListener('input', function() {
+    var cur = inp.selectionStart;
+    var cleaned = inp.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (cleaned !== inp.value) { inp.value = cleaned; try { inp.setSelectionRange(cur, cur); } catch(e){} }
+    setStatus('');
+    genBtn.disabled = true;
+    genBtn.style.opacity = '0.5';
+  });
+  inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); doCheck(); } });
+
+  async function doCheck() {
+    var slug = inp.value.trim().replace(/^-+|-+$/g, '');
+    if (slug.length < 3)  { setStatus('error', 'Must be at least 3 characters'); return; }
+    if (slug.length > 50) { setStatus('error', 'Must be 50 characters or less');  return; }
+    checkBtn.disabled = true;
+    setStatus('checking', 'Checking…');
+    var result = await _checkSlugAvailability(slug);
+    checkBtn.disabled = false;
+    if (result === 'available') {
+      setStatus('ok', 'Available — this URL is yours to claim.');
+      genBtn.disabled = false; genBtn.style.opacity = '1';
+    } else if (result === 'yours') {
+      setStatus('ok', 'Your existing portfolio — link will be updated.');
+      genBtn.disabled = false; genBtn.style.opacity = '1';
+    } else if (result === 'taken') {
+      setStatus('taken', 'Already taken. Try a different URL.');
+      genBtn.disabled = true; genBtn.style.opacity = '0.5';
+    } else {
+      setStatus('error', 'Could not verify — you can still try generating.');
+      genBtn.disabled = false; genBtn.style.opacity = '1';
+    }
+  }
+
+  checkBtn.onclick = doCheck;
+  genBtn.onclick = async function() {
+    var slug = inp.value.trim().replace(/^-+|-+$/g, '');
+    if (slug.length < 3) { setStatus('error', 'Must be at least 3 characters'); return; }
+    await _doGeneratePortfolioLink(slug);
+  };
+
+  box.appendChild(closeBtn);
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(prefixLabel);
+  box.appendChild(inputRow);
+  box.appendChild(hint);
+  box.appendChild(statusEl);
+  box.appendChild(genBtn);
+  box.appendChild(dlBtn);
+  overlay.appendChild(box);
+  overlay.onclick = function(ev) { if (ev.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+
+  setTimeout(function() { inp.focus(); inp.select(); doCheck(); }, 150);
+}
+
+async function _doGeneratePortfolioLink(slug) {
+  var btn = document.getElementById('_pfSlugGenBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⧗ Generating…'; }
+  try {
     var d = getPfData();
-    var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
-    // Compress photo and strip base64 out of meta tags so it doesn't appear 4× in payload
-    var compressedPhoto = await _compressPfPhoto(d.photo, 400, 0.75);
-    var dShare = Object.assign({}, d, { photo: compressedPhoto });
-    var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
-    if (compressedPhoto) {
+    // Compress cover photo at share time — handles legacy uncompressed pfCoverPhoto from cloud or onerror fallback
+    var coverPhotoForShare = d.coverPhoto ? await _compressPfPhoto(d.coverPhoto, 1200, 600, 0.72) : '';
+
+    // Compress profile photo; crossOrigin + try-catch inside _compressPfPhoto handle HTTP URLs (Google OAuth)
+    var compressedPhoto = await _compressPfPhoto(d.photo, 360, 0.75);
+    if (!compressedPhoto && d.photo) compressedPhoto = d.photo;
+
+    var html = generatePortfolioHTML(Object.assign({}, d, { photo: compressedPhoto, coverPhoto: coverPhotoForShare }), pfTemplate, pfSections);
+
+    // Strip base64 profile photo from OG/Twitter/JSON-LD — data URLs are too large for social crawlers
+    if (compressedPhoto && compressedPhoto.startsWith('data:')) {
       var _ogFallback = 'https://resume4u.help/og-image.png';
       html = html.split('<meta property="og:image" content="' + compressedPhoto + '">').join('<meta property="og:image" content="' + _ogFallback + '">');
       html = html.split('<meta name="twitter:image" content="' + compressedPhoto + '">').join('<meta name="twitter:image" content="' + _ogFallback + '">');
@@ -7132,46 +7298,70 @@ async function generatePortfolioLink() {
       html = html.split('<meta name="twitter:card" content="summary_large_image">').join('<meta name="twitter:card" content="summary">');
     }
 
+    // Safety: if still too large strip cover background, then all photos
     if (html.length > 900000) {
-      dShare = Object.assign({}, d, { photo: '' });
-      html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+      html = html.replace(/,url\('data:[^']*'\)\s*center\/cover\s*no-repeat/g, '');
     }
     if (html.length > 900000) {
-      _showShareFallbackModal();
+      html = generatePortfolioHTML(Object.assign({}, d, { photo: '', coverPhoto: '' }), pfTemplate, pfSections);
+    }
+    if (html.length > 900000) {
+      _showShareFallbackModal('HTML too large even without photos: ' + Math.round(html.length/1024) + 'KB');
       return;
     }
 
-    // Write portfolio HTML directly to Firestore via client SDK (handles auth automatically).
-    // Then verify with source:'server' to confirm the write actually reached the server
-    // and bypass the SDK's local-cache false-success problem.
-    var slug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60)) || 'portfolio';
-    try {
-      await _fbDb.collection('portfolios').doc(slug).set({ html: html });
-    } catch(we) {
-      _showShareFallbackModal();
+    var _writeOk = false;
+    var _lastErr = '';
+    var _uid = _fbUser ? _fbUser.uid : '';
+
+    // Attempt 1: client SDK write
+    if (_fbDb) {
+      try {
+        await _fbDb.collection('portfolios').doc(slug).set({ html: html, uid: _uid });
+        _writeOk = true;
+      } catch(we) {
+        _lastErr = 'SDK:' + (we.code || we.message || String(we));
+        console.error('[share] SDK write failed:', we.code, we.message);
+      }
+    }
+
+    // Attempt 2: REST PATCH fallback
+    if (!_writeOk) {
+      try {
+        var _fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
+          + encodeURIComponent(slug) + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+        var _fsResp = await fetch(_fsUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: { html: { stringValue: html }, uid: { stringValue: _uid } } })
+        });
+        if (_fsResp.ok) {
+          _writeOk = true;
+        } else {
+          var _fsErr = await _fsResp.json().catch(function(){ return {}; });
+          _lastErr += ' REST:' + ((_fsErr.error && (_fsErr.error.status || _fsErr.error.message)) || _fsResp.status);
+          console.error('[share] REST write failed:', _fsResp.status, JSON.stringify(_fsErr));
+        }
+      } catch(re) {
+        _lastErr += ' REST:' + re.message;
+        console.error('[share] REST write error:', re.message);
+      }
+    }
+
+    if (!_writeOk) {
+      _showShareFallbackModal(_lastErr);
       return;
     }
-    var _verifyDoc;
-    try {
-      _verifyDoc = await _fbDb.collection('portfolios').doc(slug).get({ source: 'server' });
-    } catch(ve) {
-      // Server read failed — still show URL; /p/index.html browser fallback will serve it
-      _verifyDoc = null;
-    }
-    if (_verifyDoc && (!_verifyDoc.exists || !(_verifyDoc.data() && _verifyDoc.data().html))) {
-      _showShareFallbackModal();
-      return;
-    }
-    showPfShareModal('https://resume4u.help/p/' + slug, name);
+
+    var picker = document.getElementById('_pfSlugPicker');
+    if (picker) picker.remove();
+    showPfShareModal('https://resume4u.help/p/' + slug, d.name.trim() || 'portfolio');
   } catch(ex) {
     var msg = ex.message || 'Network error';
     if (msg === 'Load failed' || msg === 'Failed to fetch') msg = 'Network error — check your connection and try again.';
     showToast('Could not generate link: ' + msg, 'error');
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Generate Link';
-    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate & Share Link'; }
   }
 }
 
