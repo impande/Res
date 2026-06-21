@@ -6711,7 +6711,11 @@ function pfWzRender() {
       html += '<div style="'+aiRowStyle+'"><button onclick="pfGenSection(\'experience\')" id="pfGenExperienceBtn" style="'+aiBtnStyle+'">✨ Generate with AI</button><span id="pfGenExperienceStatus" style="font-size:0.78rem;color:var(--muted);"></span></div>';
     } else {
       exps.forEach(function(ex,i) {
-        var saved = pfWzData.experience.find(function(s){ return s.title === ex.title && s.company === (ex.co||''); });
+        var saved = pfWzData.experience.find(function(s){
+          if (s.title !== ex.title || s.company !== (ex.co||'')) return false;
+          if (ex.start && s.dates) return s.dates.startsWith(ex.start);
+          return true;
+        });
         html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
         html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e((saved&&saved.desc)||ex.desc||'') + '</textarea>';
         html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
@@ -7003,7 +7007,13 @@ function getPfData() {
       // Always use live resume as source of truth; match wizard descriptions by title+company
       // so stale pfWzData (e.g. from cloud restore) never misassigns descriptions to wrong jobs
       return live.map(function(e){
-        var sv = wz.experience.find(function(s){ return s.title === e.title && s.company === (e.co||''); });
+        var eStart = e.start || '';
+        var sv = wz.experience.find(function(s){
+          if (s.title !== e.title || s.company !== (e.co||'')) return false;
+          // Use start date as tiebreaker when same title+company exists multiple times
+          if (eStart && s.dates) return s.dates.startsWith(eStart);
+          return true;
+        });
         return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:(sv&&sv.desc)||e.desc||''};
       });
     })(),
@@ -7118,23 +7128,25 @@ async function generatePortfolioLink() {
       return;
     }
 
-    // Unique slug: name + base-36 timestamp suffix to avoid collisions
-    var slug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 50) || 'portfolio')
-               + '-' + Date.now().toString(36);
+    var body = JSON.stringify({ html: html, name: name });
+    var resp = await fetch('/.netlify/functions/share-portfolio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body,
+    });
 
-    // Write directly to Firestore (no server round-trip, no Netlify Blobs dependency)
-    try {
-      await _fbDb.collection('portfolios').doc(slug).set({ html: html, ts: Date.now() });
-    } catch(fe) {
-      if (fe.code === 'permission-denied') {
-        _showShareFallbackModal();
-        return;
-      }
-      throw fe;
+    var result;
+    try { result = await resp.json(); } catch(_) {
+      throw new Error('Server error (status ' + resp.status + '). Please try again.');
     }
 
-    var siteUrl = 'https://resume4u.help';
-    showPfShareModal(siteUrl + '/p/' + slug, name);
+    if (result.url) {
+      showPfShareModal(result.url, name);
+    } else if (result.error === 'STORAGE_NOT_CONFIGURED') {
+      _showShareFallbackModal();
+    } else {
+      throw new Error(result.detail || result.error || 'Server error');
+    }
   } catch(ex) {
     var msg = ex.message || 'Network error';
     if (msg === 'Load failed' || msg === 'Failed to fetch') msg = 'Network error — check your connection and try again.';
