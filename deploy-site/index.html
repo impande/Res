@@ -6460,9 +6460,28 @@ function handlePfReviewCover(ev) {
   var file = ev.target.files && ev.target.files[0];
   if (!file) return;
   if (file.size > 10 * 1024 * 1024) { alert('Image must be under 10 MB'); return; }
-  var reader = new FileReader();
-  reader.onload = function(e) { pfCoverPhoto = e.target.result; updatePfStep3Cover(); buildPfPreview(); };
-  reader.readAsDataURL(file);
+  // Compress immediately using a blob URL (avoids loading a huge base64 string into img.src)
+  var blobUrl = URL.createObjectURL(file);
+  var img = new Image();
+  img.onload = function() {
+    var maxW = 1200, maxH = 600;
+    var scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+    var cv = document.createElement('canvas');
+    cv.width = Math.round(img.naturalWidth * scale);
+    cv.height = Math.round(img.naturalHeight * scale);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    pfCoverPhoto = cv.toDataURL('image/jpeg', 0.72);
+    URL.revokeObjectURL(blobUrl);
+    updatePfStep3Cover();
+    buildPfPreview();
+  };
+  img.onerror = function() {
+    URL.revokeObjectURL(blobUrl);
+    var reader = new FileReader();
+    reader.onload = function(e) { pfCoverPhoto = e.target.result; updatePfStep3Cover(); buildPfPreview(); };
+    reader.readAsDataURL(file);
+  };
+  img.src = blobUrl;
 }
 function pfRemoveReviewCover() {
   pfCoverPhoto = null;
@@ -7121,13 +7140,12 @@ async function generatePortfolioLink() {
     var d = getPfData();
     var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
-    // Compress photos: profile at 360px/0.72, cover at 800px/0.45
-    var compressedPhoto = await _compressPfPhoto(d.photo, 360, 0.72);
-    var compressedCover = await _compressPfPhoto(d.coverPhoto, 800, 0.45);
-    var dShare = Object.assign({}, d, { photo: compressedPhoto, coverPhoto: compressedCover });
-    var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+    // Photos are already compressed at upload time (cover: 1200×600/JPEG0.72, profile: 260px crop/JPEG0.88)
+    // Do a light additional pass on the profile photo for meta-tag stripping purposes
+    var compressedPhoto = await _compressPfPhoto(d.photo, 360, 0.75);
+    var html = generatePortfolioHTML(Object.assign({}, d, { photo: compressedPhoto }), pfTemplate, pfSections);
 
-    // Strip profile photo from meta tags (it appears 3× in og/twitter/json-ld otherwise)
+    // Strip profile photo from og/twitter/json-ld meta tags (it would appear 3× otherwise)
     if (compressedPhoto) {
       var _ogFallback = 'https://resume4u.help/og-image.png';
       html = html.split('<meta property="og:image" content="' + compressedPhoto + '">').join('<meta property="og:image" content="' + _ogFallback + '">');
@@ -7136,14 +7154,12 @@ async function generatePortfolioLink() {
       html = html.split('<meta name="twitter:card" content="summary_large_image">').join('<meta name="twitter:card" content="summary">');
     }
 
+    // Safety fallback: if somehow still too large, strip cover photo background then profile photo
     if (html.length > 900000) {
-      // Too large: strip cover photo base64 from hero background via regex (keeps gradient overlay)
       html = html.replace(/,url\('data:[^']*'\)\s*center\/cover\s*no-repeat/g, '');
     }
     if (html.length > 900000) {
-      // Still too large: remove profile photo too and regenerate
-      dShare = Object.assign({}, d, { photo: '', coverPhoto: '' });
-      html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
+      html = generatePortfolioHTML(Object.assign({}, d, { photo: '', coverPhoto: '' }), pfTemplate, pfSections);
     }
     if (html.length > 900000) {
       _showShareFallbackModal('HTML too large even without photos: ' + Math.round(html.length/1024) + 'KB');
