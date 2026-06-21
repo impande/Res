@@ -7121,14 +7121,13 @@ async function generatePortfolioLink() {
     var d = getPfData();
     var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
 
-    // Compress profile photo aggressively for sharing
-    var compressedPhoto = await _compressPfPhoto(d.photo, 300, 0.7);
-    // Compress cover photo to very small for sharing (it's just a background, quality doesn't matter much)
-    var compressedCover = await _compressPfPhoto(d.coverPhoto, 600, 0.4);
+    // Compress photos: profile at 360px/0.72, cover at 800px/0.45
+    var compressedPhoto = await _compressPfPhoto(d.photo, 360, 0.72);
+    var compressedCover = await _compressPfPhoto(d.coverPhoto, 800, 0.45);
     var dShare = Object.assign({}, d, { photo: compressedPhoto, coverPhoto: compressedCover });
     var html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
 
-    // Strip profile photo from meta tags (appears 3× in og/twitter/json-ld otherwise)
+    // Strip profile photo from meta tags (it appears 3× in og/twitter/json-ld otherwise)
     if (compressedPhoto) {
       var _ogFallback = 'https://resume4u.help/og-image.png';
       html = html.split('<meta property="og:image" content="' + compressedPhoto + '">').join('<meta property="og:image" content="' + _ogFallback + '">');
@@ -7136,14 +7135,15 @@ async function generatePortfolioLink() {
       html = html.split(',"image":"' + compressedPhoto + '"').join('');
       html = html.split('<meta name="twitter:card" content="summary_large_image">').join('<meta name="twitter:card" content="summary">');
     }
-    // Strip cover photo base64 from hero background (keep the gradient overlay, remove the image data)
-    html = html.replace(/,url\('data:[^']*'\)\s*center\/cover\s*no-repeat/g, '');
 
     if (html.length > 900000) {
-      // Still too large — drop profile photo entirely
+      // Too large: strip cover photo base64 from hero background via regex (keeps gradient overlay)
+      html = html.replace(/,url\('data:[^']*'\)\s*center\/cover\s*no-repeat/g, '');
+    }
+    if (html.length > 900000) {
+      // Still too large: remove profile photo too and regenerate
       dShare = Object.assign({}, d, { photo: '', coverPhoto: '' });
       html = generatePortfolioHTML(dShare, pfTemplate, pfSections);
-      html = html.replace(/,url\('data:[^']*'\)\s*center\/cover\s*no-repeat/g, '');
     }
     if (html.length > 900000) {
       _showShareFallbackModal('HTML too large even without photos: ' + Math.round(html.length/1024) + 'KB');
