@@ -995,7 +995,13 @@
     .tip-card-title{font-size:0.78rem;font-weight:700;color:var(--text);margin-bottom:4px;}
     .tip-card-body{font-size:0.72rem;color:var(--muted);line-height:1.55;}
     @media(min-width:1100px){#tipsSidebar{display:block;}}
-    @media(max-width:768px){#mobileHdr{display:none;}#mobileProgress{display:none;}}
+    @media(max-width:768px){#mobileHdr{display:none;}#mobileProgress{display:none;}#sidebar{display:none;}}
+    /* Ghost step preview strip — mobile landing page */
+    #landingGhostSteps{display:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 14px;gap:8px;background:var(--sidebar-bg);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;}
+    #landingGhostSteps::-webkit-scrollbar{display:none;}
+    .ghost-step-label{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:99px;border:1.5px solid var(--border);font-size:0.76rem;font-weight:500;color:var(--muted);opacity:0.6;white-space:nowrap;position:relative;overflow:hidden;background:var(--card-bg);}
+    .ghost-step-label::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 20%,rgba(255,255,255,0.35) 50%,transparent 80%);background-size:200% 100%;animation:ghostSweep 2.2s ease-in-out infinite;}
+    @keyframes ghostSweep{0%{background-position:150% 0;}100%{background-position:-150% 0;}}
     /* ── Upload Resume Feature ── */
     .hero-upload-wrap{margin-top:22px;width:100%;max-width:450px;}
     .upload-zone{display:block;border:2px dashed rgba(217,119,6,0.25);border-radius:14px;padding:20px 18px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(217,119,6,0.02);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
@@ -2261,6 +2267,15 @@
     <div class="mhdr-bar-track"><div class="mhdr-bar-fill" id="mhdrBarFill" style="width:14.28%"></div></div>
   </div>
 </div>
+<div id="landingGhostSteps">
+  <span class="ghost-step-label">📝 Basic Info</span>
+  <span class="ghost-step-label">💼 Experience</span>
+  <span class="ghost-step-label">🏆 Awards</span>
+  <span class="ghost-step-label">🎓 Education</span>
+  <span class="ghost-step-label">⚡ Skills</span>
+  <span class="ghost-step-label">✨ Extras</span>
+  <span class="ghost-step-label">🚀 Generate</span>
+</div>
 <aside id="sidebar">
   <div class="logo" onclick="goToStep(1)" style="cursor:pointer;" title="Go to Basic Info">
     <div class="logo-icon">R</div>
@@ -3286,14 +3301,25 @@ function goToStep(step, skipScroll) {
   const mobPreviewBtn = document.getElementById('mobPreviewBtn');
   if (mobPreviewBtn) mobPreviewBtn.style.display = (_smallMobile && step >= 1 && step <= 7) ? 'flex' : 'none';
   var mobileHdr = document.getElementById('mobileHdr');
+  var isMobile = window.innerWidth <= 768;
+  var sidebar = document.getElementById('sidebar');
+  var ghostSteps = document.getElementById('landingGhostSteps');
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
     if (mobileHdr) mobileHdr.style.display = 'none';
+    if (isMobile) {
+      if (sidebar) sidebar.style.display = 'none';
+      if (ghostSteps) ghostSteps.style.display = 'flex';
+    }
     _renderTips(0);
   } else {
     document.getElementById('mobileProgress').style.display = '';
     if (mobileHdr) mobileHdr.style.display = 'block';
+    if (isMobile) {
+      if (sidebar) sidebar.style.display = 'block';
+      if (ghostSteps) ghostSteps.style.display = 'none';
+    }
     document.getElementById('mobStepNum').textContent = step;
     document.getElementById('mobStepName').textContent = STEP_NAMES[step] || '';
     document.getElementById('mobProgFill').style.width = ((step / 7) * 100) + '%';
@@ -5813,6 +5839,8 @@ function _initFirebase() {
       if (user) {
         _loadFromCloud(user.uid);
         _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 60000);
+      } else {
+        _hideCloudLoader();
       }
     });
     _fbAuth.getRedirectResult().catch(function(e) {
@@ -6022,7 +6050,7 @@ function _renderAuthBtn(user) {
 // ── Contextual tips per step ───────────────────────────────────────────
 var _TIPS = {
   1: [
-    {icon:'💼', title:'Professional Title', body:'Be specific: "Senior React Developer" beats "Software Engineer". Match the exact title from job postings you're targeting.'},
+    {icon:'💼', title:'Professional Title', body:'Be specific: "Senior React Developer" beats "Software Engineer". Match the exact title from job postings you\'re targeting.'},
     {icon:'🔗', title:'LinkedIn URL', body:'Shorten your URL: linkedin.com/in/yourname. Edit it in LinkedIn → Profile → Edit public profile & URL.'},
     {icon:'📧', title:'Email', body:'Use a professional email (gmail/outlook). Avoid nicknames or numbers — recruiters notice.'},
     {icon:'📍', title:'Location', body:'City and country only. If open to remote, add "· Open to Remote" after your city.'}
@@ -6040,12 +6068,12 @@ var _TIPS = {
   ],
   4: [
     {icon:'🎓', title:'Degree first', body:'Put your highest degree at the top. Include field of study, university name, and graduation year.'},
-    {icon:'📈', title:'GPA', body:'Include GPA only if ≥ 3.5 / 8.0 CGPA, or if you're a recent graduate (< 3 years out).'},
-    {icon:'📚', title:'Relevant coursework', body:'Add 3–5 relevant courses if you're early-career. Skip them if you have 5+ years of experience.'}
+    {icon:'📈', title:'GPA', body:'Include GPA only if ≥ 3.5 / 8.0 CGPA, or if you\'re a recent graduate (< 3 years out).'},
+    {icon:'📚', title:'Relevant coursework', body:'Add 3–5 relevant courses if you\'re early-career. Skip them if you have 5+ years of experience.'}
   ],
   5: [
     {icon:'🗂️', title:'Group by category', body:'Technical, Soft, Languages. Makes scanning easy for recruiters who spend < 10 seconds on a resume.'},
-    {icon:'🚫', title:'Skip obvious skills', body:'Don't list "Microsoft Word" or "Email". Focus on skills that differentiate you in your field.'},
+    {icon:'🚫', title:'Skip obvious skills', body:'Don\'t list "Microsoft Word" or "Email". Focus on skills that differentiate you in your field.'},
     {icon:'⭐', title:'ATS matters here', body:'Paste the job description into a word cloud tool — the biggest words are your target keywords.'}
   ],
   6: [
@@ -6073,9 +6101,19 @@ function _renderTips(step) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  if (sessionStorage.getItem('_pendingSignIn')) _showCloudLoader('Signing you in…');
+  if (sessionStorage.getItem('_pendingSignIn')) {
+    _showCloudLoader('Signing you in…');
+    setTimeout(_hideCloudLoader, 10000); // safety: auto-clear if Firebase never responds
+  }
   setTimeout(_initFirebase, 100);
   _renderTips(0);
+  // Mobile landing: hide sidebar, show ghost steps strip
+  if (window.innerWidth <= 768) {
+    var s = document.getElementById('sidebar');
+    var g = document.getElementById('landingGhostSteps');
+    if (s) s.style.display = 'none';
+    if (g) g.style.display = 'flex';
+  }
 });
 </script>
 
