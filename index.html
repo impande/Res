@@ -977,6 +977,7 @@
     .mhdr-logo{width:32px;height:32px;background:linear-gradient(135deg,#f59e0b,#b45309);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:900;color:#fff;flex-shrink:0;cursor:pointer;}
     .mhdr-section{flex:1;font-size:0.88rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .mhdr-save-btn{display:flex;align-items:center;gap:5px;background:#92400e;color:#fff;border:none;border-radius:99px;padding:6px 11px 6px 9px;font-size:0.74rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+    .mhdr-save-btn.landing-signin{background:var(--card-bg);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:0.76rem;font-weight:600;gap:7px;}
     .mhdr-save-btn svg{width:13px;height:13px;flex-shrink:0;}
     .mhdr-icon-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .mhdr-icon-btn svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2;}
@@ -5869,12 +5870,28 @@ function _startGhostRotation() {
       sec.style.opacity = '';
     }, 180);
   }, 2000);
+  // Landing CTA: single desktop-style sign-in button, hide the icon button
+  var saveBtn = document.getElementById('mhdrSaveBtn');
+  var iconBtn = document.getElementById('mhdrIconBtn');
+  if (saveBtn && !saveBtn.classList.contains('landing-signin')) {
+    saveBtn.classList.add('landing-signin');
+    saveBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Sign In to Save';
+  }
+  if (iconBtn) iconBtn.style.display = 'none';
 }
 function _stopGhostRotation() {
   clearInterval(_ghostIv);
   _ghostIv = null;
   var sec = document.getElementById('mhdrSection');
   if (sec) { sec.style.opacity = ''; sec.classList.remove('ghost-rotating'); }
+  // Restore step-mode save button
+  var saveBtn = document.getElementById('mhdrSaveBtn');
+  var iconBtn = document.getElementById('mhdrIconBtn');
+  if (saveBtn) {
+    saveBtn.classList.remove('landing-signin');
+    saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save progress';
+  }
+  if (iconBtn) iconBtn.style.display = '';
 }
 function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
@@ -5886,29 +5903,15 @@ function signInWithGoogle() {
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
   var provider = new firebase.auth.GoogleAuthProvider();
-  var isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile) {
-    _showSignInLoader();
-    _fbAuth.signInWithRedirect(provider).catch(function(e) {
-      sessionStorage.removeItem('_pendingSignIn');
-      var el = document.getElementById('_signinLoader');
-      if (el) el.remove();
-      var msg = e.code === 'auth/unauthorized-domain'
-        ? 'Domain not authorized — add resume4u.help to Firebase Console → Authentication → Authorized domains'
-        : 'Sign-in error: ' + e.message;
-      showToast(msg);
-      _renderAuthBtn(null);
-    });
-  } else {
-    _fbAuth.signInWithPopup(provider).catch(function(e) {
-      _renderAuthBtn(null);
-      if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-        _fbAuth.signInWithRedirect(provider);
-      } else if (e.code === 'auth/unauthorized-domain') {
-        showToast('Domain not authorized — add resume4u.help to Firebase Console → Authentication → Authorized domains');
-      } else { showToast('Sign-in error: ' + e.message); }
-    });
-  }
+  _fbAuth.signInWithPopup(provider).catch(function(e) {
+    _renderAuthBtn(null);
+    if (e.code === 'auth/popup-closed-by-user') return;
+    if (e.code === 'auth/popup-blocked') {
+      showToast('Popup blocked — please allow popups for this site and try again');
+    } else {
+      showToast('Sign-in error: ' + e.message);
+    }
+  });
 }
 function signOutUser() {
   if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out', 'success'); });
@@ -6060,9 +6063,9 @@ function _renderAuthBtn(user) {
     btn.onclick = signInWithGoogle;
     btn.title = 'Sign in with Google to save your resume';
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="auth-lbl">Sign in to save progress</span>';
-    // Mobile header: show save/icon, hide avatar
+    // Mobile header: show save (landing-style on step 0), icon only on steps 1+, hide avatar
     if (mhdrSaveBtn) mhdrSaveBtn.style.display = '';
-    if (mhdrIconBtn) mhdrIconBtn.style.display = '';
+    if (mhdrIconBtn) mhdrIconBtn.style.display = (currentStep === 0) ? 'none' : '';
     if (mhdrAvatar) mhdrAvatar.style.display = 'none';
   }
 }
@@ -6734,13 +6737,20 @@ function openPortfolioBuilder() {
     if (removeBtn) removeBtn.style.display = '';
   }
   pfGoStep(1);
-  // Mobile: track visual viewport so keyboard open/close restores the overlay
-  if (window.visualViewport && window.innerWidth <= 768) {
+  // Mobile: adjust overlay + modal to visual viewport so keyboard open/close restores correctly
+  if (window.innerWidth <= 768 && window.visualViewport) {
     window._pfVVFn = function() {
       var ov = document.getElementById('pfOverlay');
       if (!ov || ov.style.display === 'none') return;
-      ov.style.height = window.visualViewport.height + 'px';
-      ov.style.top    = window.visualViewport.offsetTop + 'px';
+      var vv = window.visualViewport;
+      ov.style.top    = vv.offsetTop + 'px';
+      ov.style.left   = vv.offsetLeft + 'px';
+      ov.style.width  = vv.width + 'px';
+      ov.style.height = vv.height + 'px';
+      ov.style.right  = 'auto';
+      ov.style.bottom = 'auto';
+      var modal = ov.querySelector('.pf-modal');
+      if (modal) modal.style.maxHeight = (vv.height * 0.96) + 'px';
     };
     window.visualViewport.addEventListener('resize', window._pfVVFn);
     window.visualViewport.addEventListener('scroll', window._pfVVFn);
@@ -6748,15 +6758,20 @@ function openPortfolioBuilder() {
 }
 function closePfModal() {
   var _ov = document.getElementById('pfOverlay');
-  if (_ov) { _ov.style.display = 'none'; _ov.style.height = ''; _ov.style.top = ''; }
+  if (_ov) {
+    _ov.style.display = 'none';
+    _ov.style.top = ''; _ov.style.left = ''; _ov.style.width = '';
+    _ov.style.height = ''; _ov.style.right = ''; _ov.style.bottom = '';
+    var _modal = _ov.querySelector('.pf-modal');
+    if (_modal) _modal.style.maxHeight = '';
+  }
   // Restore background scroll
   document.documentElement.style.overflow = '';
+  document.body.style.overflow = '';
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.width = '';
-  document.body.style.overflow = '';
   window.scrollTo(0, _pfScrollY);
-  document.body.scrollTop = _pfScrollY;
   if (window._pfVVFn && window.visualViewport) {
     window.visualViewport.removeEventListener('resize', window._pfVVFn);
     window.visualViewport.removeEventListener('scroll', window._pfVVFn);
