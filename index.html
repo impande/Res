@@ -2253,10 +2253,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       Save progress
     </button>
-    <button class="mhdr-icon-btn" id="mhdrIconBtn" onclick="signInWithGoogle()">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <div class="mhdr-dot"></div>
-    </button>
     <div class="mhdr-avatar" id="mhdrAvatar" style="display:none" onclick="_mobileAuthMenu(_fbUser)"></div>
   </div>
   <div class="mhdr-row2">
@@ -5809,7 +5805,7 @@ window.addEventListener('load', function() {
 //   match /users/{uid} { allow read, write: if request.auth.uid == uid; }
 var _FB_CONFIG = {
   apiKey:            'AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10',
-  authDomain:        'resume-ai-2eda1.firebaseapp.com',
+  authDomain:        'resume4u.help',
   projectId:         'resume-ai-2eda1',
   storageBucket:     'resume-ai-2eda1.firebasestorage.app',
   messagingSenderId: '888944549224',
@@ -5824,6 +5820,7 @@ function _initFirebase() {
     _fbAuth = firebase.auth();
     _fbDb   = firebase.firestore();
     _fbAuth.onAuthStateChanged(function(user) {
+      _signInInProgress = false;
       sessionStorage.removeItem('_pendingSignIn');
       _fbUser = user;
       _renderAuthBtn(user);
@@ -5870,14 +5867,12 @@ function _startGhostRotation() {
       sec.style.opacity = '';
     }, 180);
   }, 2000);
-  // Landing CTA: single desktop-style sign-in button, hide the icon button
+  // Landing CTA: single desktop-style sign-in button
   var saveBtn = document.getElementById('mhdrSaveBtn');
-  var iconBtn = document.getElementById('mhdrIconBtn');
   if (saveBtn && !saveBtn.classList.contains('landing-signin')) {
     saveBtn.classList.add('landing-signin');
     saveBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Sign In to Save';
   }
-  if (iconBtn) iconBtn.style.display = 'none';
 }
 function _stopGhostRotation() {
   clearInterval(_ghostIv);
@@ -5886,24 +5881,29 @@ function _stopGhostRotation() {
   if (sec) { sec.style.opacity = ''; sec.classList.remove('ghost-rotating'); }
   // Restore step-mode save button
   var saveBtn = document.getElementById('mhdrSaveBtn');
-  var iconBtn = document.getElementById('mhdrIconBtn');
   if (saveBtn) {
     saveBtn.classList.remove('landing-signin');
     saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save progress';
   }
-  if (iconBtn) iconBtn.style.display = '';
 }
+var _signInInProgress = false;
 function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
+  if (_signInInProgress) return;
+  _signInInProgress = true;
+  _showCloudLoader('Redirecting to Google…');
   var btn = document.getElementById('_authBtn');
-  if (btn && btn.disabled) return;
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.8';
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
   var provider = new firebase.auth.GoogleAuthProvider();
-  _fbAuth.signInWithPopup(provider).catch(function(e) {
+  _fbAuth.signInWithPopup(provider).then(function() {
+    _showCloudLoader('Signing you in…');
+  }).catch(function(e) {
+    _signInInProgress = false;
+    _hideCloudLoader();
     _renderAuthBtn(null);
     if (e.code === 'auth/popup-closed-by-user') return;
     if (e.code === 'auth/popup-blocked') {
@@ -6031,7 +6031,6 @@ function _renderAuthBtn(user) {
   var authSection = btn.closest('.auth-section');
   // Mobile Style A header elements
   var mhdrSaveBtn = document.getElementById('mhdrSaveBtn');
-  var mhdrIconBtn = document.getElementById('mhdrIconBtn');
   var mhdrAvatar  = document.getElementById('mhdrAvatar');
   if (user) {
     btn.classList.add('_signed-in');
@@ -6049,9 +6048,8 @@ function _renderAuthBtn(user) {
       + '<span class="auth-lbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
       + '<span class="auth-check" style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
       + '<button class="auth-out-btn" onclick="event.stopPropagation();signOutUser();" style="background:rgba(0,0,0,0.08);border:none;border-radius:5px;color:var(--muted);font-size:0.68rem;padding:2px 7px;cursor:pointer;flex-shrink:0;">out</button>';
-    // Mobile header: hide save/icon, show avatar
+    // Mobile header: hide save, show avatar
     if (mhdrSaveBtn) mhdrSaveBtn.style.display = 'none';
-    if (mhdrIconBtn) mhdrIconBtn.style.display = 'none';
     if (mhdrAvatar) {
       var initials = (user.displayName || 'U').split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
       mhdrAvatar.textContent = initials || '👤';
@@ -6063,9 +6061,8 @@ function _renderAuthBtn(user) {
     btn.onclick = signInWithGoogle;
     btn.title = 'Sign in with Google to save your resume';
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="auth-lbl">Sign in to save progress</span>';
-    // Mobile header: show save (landing-style on step 0), icon only on steps 1+, hide avatar
+    // Mobile header: show save button, hide avatar
     if (mhdrSaveBtn) mhdrSaveBtn.style.display = '';
-    if (mhdrIconBtn) mhdrIconBtn.style.display = (currentStep === 0) ? 'none' : '';
     if (mhdrAvatar) mhdrAvatar.style.display = 'none';
   }
 }
