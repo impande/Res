@@ -995,13 +995,9 @@
     .tip-card-title{font-size:0.78rem;font-weight:700;color:var(--text);margin-bottom:4px;}
     .tip-card-body{font-size:0.72rem;color:var(--muted);line-height:1.55;}
     @media(min-width:1100px){#tipsSidebar{display:block;}}
-    @media(max-width:768px){#mobileHdr{display:none;}#mobileProgress{display:none;}#sidebar{display:none;}}
-    /* Ghost step preview strip — mobile landing page */
-    #landingGhostSteps{display:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 14px;gap:8px;background:var(--sidebar-bg);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;}
-    #landingGhostSteps::-webkit-scrollbar{display:none;}
-    .ghost-step-label{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:99px;border:1.5px solid var(--border);font-size:0.76rem;font-weight:500;color:var(--muted);opacity:0.6;white-space:nowrap;position:relative;overflow:hidden;background:var(--card-bg);}
-    .ghost-step-label::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 20%,rgba(255,255,255,0.35) 50%,transparent 80%);background-size:200% 100%;animation:ghostSweep 2.2s ease-in-out infinite;}
-    @keyframes ghostSweep{0%{background-position:150% 0;}100%{background-position:-150% 0;}}
+    @media(max-width:768px){#mobileProgress{display:none;}#sidebar{display:none;}}
+    #mhdrSection{transition:opacity .18s ease;}
+    #mhdrSection.ghost-rotating{color:var(--muted);font-weight:500;opacity:0.55;font-style:italic;}
     /* ── Upload Resume Feature ── */
     .hero-upload-wrap{margin-top:22px;width:100%;max-width:450px;}
     .upload-zone{display:block;border:2px dashed rgba(217,119,6,0.25);border-radius:14px;padding:20px 18px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(217,119,6,0.02);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
@@ -2267,15 +2263,6 @@
     <div class="mhdr-bar-track"><div class="mhdr-bar-fill" id="mhdrBarFill" style="width:14.28%"></div></div>
   </div>
 </div>
-<div id="landingGhostSteps">
-  <span class="ghost-step-label">📝 Basic Info</span>
-  <span class="ghost-step-label">💼 Experience</span>
-  <span class="ghost-step-label">🏆 Awards</span>
-  <span class="ghost-step-label">🎓 Education</span>
-  <span class="ghost-step-label">⚡ Skills</span>
-  <span class="ghost-step-label">✨ Extras</span>
-  <span class="ghost-step-label">🚀 Generate</span>
-</div>
 <aside id="sidebar">
   <div class="logo" onclick="goToStep(1)" style="cursor:pointer;" title="Go to Basic Info">
     <div class="logo-icon">R</div>
@@ -3302,23 +3289,27 @@ function goToStep(step, skipScroll) {
   if (mobPreviewBtn) mobPreviewBtn.style.display = (_smallMobile && step >= 1 && step <= 7) ? 'flex' : 'none';
   var mobileHdr = document.getElementById('mobileHdr');
   var isMobile = window.innerWidth <= 768;
-  var sidebar = document.getElementById('sidebar');
-  var ghostSteps = document.getElementById('landingGhostSteps');
   if (step === 0) {
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active','completed'));
     document.getElementById('mobileProgress').style.display = 'none';
-    if (mobileHdr) mobileHdr.style.display = 'none';
-    if (isMobile) {
-      if (sidebar) sidebar.style.display = 'none';
-      if (ghostSteps) ghostSteps.style.display = 'flex';
+    if (isMobile && mobileHdr) {
+      mobileHdr.style.display = 'block';
+      var _r2a = mobileHdr.querySelector('.mhdr-row2');
+      if (_r2a) _r2a.style.display = 'none';
+      _startGhostRotation();
+    } else if (mobileHdr) {
+      mobileHdr.style.display = 'none';
     }
     _renderTips(0);
   } else {
     document.getElementById('mobileProgress').style.display = '';
-    if (mobileHdr) mobileHdr.style.display = 'block';
-    if (isMobile) {
-      if (sidebar) sidebar.style.display = 'block';
-      if (ghostSteps) ghostSteps.style.display = 'none';
+    if (isMobile && mobileHdr) {
+      mobileHdr.style.display = 'block';
+      var _r2b = mobileHdr.querySelector('.mhdr-row2');
+      if (_r2b) _r2b.style.display = '';
+      _stopGhostRotation();
+    } else if (mobileHdr) {
+      mobileHdr.style.display = 'none';
     }
     document.getElementById('mobStepNum').textContent = step;
     document.getElementById('mobStepName').textContent = STEP_NAMES[step] || '';
@@ -5860,6 +5851,31 @@ function _showSignInLoader() {
   el.innerHTML = '<div style="width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#16a34a;border-radius:50%;animation:spin .7s linear infinite;"></div><div style="font-size:0.9rem;color:#374151;font-weight:500;font-family:\'Segoe UI\',system-ui,sans-serif;">Redirecting to Google…</div>';
   document.body.appendChild(el);
 }
+var _ghostIv = null;
+var _GHOST_NAMES = ['Basic Info','Experience','Awards','Education','Skills','Extras','Generate'];
+var _ghostIdx = 0;
+function _startGhostRotation() {
+  var sec = document.getElementById('mhdrSection');
+  if (!sec) return;
+  clearInterval(_ghostIv);
+  _ghostIdx = 0;
+  sec.textContent = _GHOST_NAMES[0];
+  sec.classList.add('ghost-rotating');
+  _ghostIv = setInterval(function() {
+    _ghostIdx = (_ghostIdx + 1) % _GHOST_NAMES.length;
+    sec.style.opacity = '0';
+    setTimeout(function() {
+      if (sec.classList.contains('ghost-rotating')) sec.textContent = _GHOST_NAMES[_ghostIdx];
+      sec.style.opacity = '';
+    }, 180);
+  }, 2000);
+}
+function _stopGhostRotation() {
+  clearInterval(_ghostIv);
+  _ghostIv = null;
+  var sec = document.getElementById('mhdrSection');
+  if (sec) { sec.style.opacity = ''; sec.classList.remove('ghost-rotating'); }
+}
 function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
   var btn = document.getElementById('_authBtn');
@@ -5877,7 +5893,10 @@ function signInWithGoogle() {
       sessionStorage.removeItem('_pendingSignIn');
       var el = document.getElementById('_signinLoader');
       if (el) el.remove();
-      showToast('Sign-in error: ' + e.message);
+      var msg = e.code === 'auth/unauthorized-domain'
+        ? 'Domain not authorized — add resume4u.help to Firebase Console → Authentication → Authorized domains'
+        : 'Sign-in error: ' + e.message;
+      showToast(msg);
       _renderAuthBtn(null);
     });
   } else {
@@ -5885,6 +5904,8 @@ function signInWithGoogle() {
       _renderAuthBtn(null);
       if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
         _fbAuth.signInWithRedirect(provider);
+      } else if (e.code === 'auth/unauthorized-domain') {
+        showToast('Domain not authorized — add resume4u.help to Firebase Console → Authentication → Authorized domains');
       } else { showToast('Sign-in error: ' + e.message); }
     });
   }
@@ -6043,7 +6064,6 @@ function _renderAuthBtn(user) {
     if (mhdrSaveBtn) mhdrSaveBtn.style.display = '';
     if (mhdrIconBtn) mhdrIconBtn.style.display = '';
     if (mhdrAvatar) mhdrAvatar.style.display = 'none';
-    if (window.innerWidth <= 768) _showMobileAuthHint();
   }
 }
 
@@ -6107,12 +6127,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   setTimeout(_initFirebase, 100);
   _renderTips(0);
-  // Mobile landing: hide sidebar, show ghost steps strip
+  // Mobile landing: show mobileHdr with ghost rotation (sidebar stays hidden via CSS)
   if (window.innerWidth <= 768) {
-    var s = document.getElementById('sidebar');
-    var g = document.getElementById('landingGhostSteps');
-    if (s) s.style.display = 'none';
-    if (g) g.style.display = 'flex';
+    var _mhdr = document.getElementById('mobileHdr');
+    if (_mhdr) {
+      _mhdr.style.display = 'block';
+      var _r2 = _mhdr.querySelector('.mhdr-row2');
+      if (_r2) _r2.style.display = 'none';
+    }
+    _startGhostRotation();
   }
 });
 </script>
@@ -6711,9 +6734,21 @@ function openPortfolioBuilder() {
     if (removeBtn) removeBtn.style.display = '';
   }
   pfGoStep(1);
+  // Mobile: track visual viewport so keyboard open/close restores the overlay
+  if (window.visualViewport && window.innerWidth <= 768) {
+    window._pfVVFn = function() {
+      var ov = document.getElementById('pfOverlay');
+      if (!ov || ov.style.display === 'none') return;
+      ov.style.height = window.visualViewport.height + 'px';
+      ov.style.top    = window.visualViewport.offsetTop + 'px';
+    };
+    window.visualViewport.addEventListener('resize', window._pfVVFn);
+    window.visualViewport.addEventListener('scroll', window._pfVVFn);
+  }
 }
 function closePfModal() {
-  document.getElementById('pfOverlay').style.display = 'none';
+  var _ov = document.getElementById('pfOverlay');
+  if (_ov) { _ov.style.display = 'none'; _ov.style.height = ''; _ov.style.top = ''; }
   // Restore background scroll
   document.documentElement.style.overflow = '';
   document.body.style.position = '';
@@ -6722,6 +6757,11 @@ function closePfModal() {
   document.body.style.overflow = '';
   window.scrollTo(0, _pfScrollY);
   document.body.scrollTop = _pfScrollY;
+  if (window._pfVVFn && window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', window._pfVVFn);
+    window.visualViewport.removeEventListener('scroll', window._pfVVFn);
+    window._pfVVFn = null;
+  }
 }
 
 function selectPfTemplate(tpl) {
@@ -7558,7 +7598,11 @@ function generatePortfolioLink() {
   var d = getPfData();
   var name = (d.name.trim() || 'portfolio').toLowerCase().replace(/\s+/g, '-');
   var defaultSlug = (name.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 40)) || 'portfolio';
-  if (_fbUser && _fbUser.uid) defaultSlug = defaultSlug + '-' + _fbUser.uid.substring(0, 8).toLowerCase();
+  if (_fbUser && _fbUser.uid) {
+    defaultSlug = defaultSlug + '-' + _fbUser.uid.substring(0, 8).toLowerCase();
+  } else {
+    defaultSlug = defaultSlug + '-' + Math.random().toString(36).slice(2, 7);
+  }
   var savedSlug = _pfSavedSlug || (typeof localStorage !== 'undefined' && localStorage.getItem('pfSlug_' + (_fbUser && _fbUser.uid)));
   if (savedSlug) {
     _doGeneratePortfolioLink(savedSlug);
@@ -7577,7 +7621,9 @@ async function _checkSlugAvailability(slug) {
     if (doc.error && doc.error.status === 'NOT_FOUND') return 'available';
     if (doc.error) return 'error';
     var ownerUid = doc.fields && doc.fields.uid && doc.fields.uid.stringValue;
-    if (!ownerUid || (_fbUser && ownerUid === _fbUser.uid)) return 'yours';
+    if (_fbUser && ownerUid && ownerUid === _fbUser.uid) return 'yours';
+    if (!ownerUid && !_fbUser) return 'yours';
+    if (!ownerUid) return 'available';
     return 'taken';
   } catch(e) {
     return 'error';
