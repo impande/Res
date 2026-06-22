@@ -18,6 +18,9 @@ exports.handler = async function(event) {
     }
 
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keySecret) {
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'RAZORPAY_KEY_SECRET not configured' }) };
+    }
     const expected = crypto
       .createHmac('sha256', keySecret)
       .update(razorpay_order_id + '|' + razorpay_payment_id)

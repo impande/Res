@@ -53,10 +53,6 @@ exports.handler = async function(event) {
       const pdfBuffer = await pdfRes.arrayBuffer();
       const safe = (filename || 'resume').replace(/[^\w\s\-]/g, '').trim() || 'resume';
 
-      const uint8 = new Uint8Array(pdfBuffer);
-      let binary = '';
-      for (let i = 0; i < uint8.length; i++) { binary += String.fromCharCode(uint8[i]); }
-
       return {
         statusCode: 200,
         headers: {
@@ -64,7 +60,7 @@ exports.handler = async function(event) {
           'Content-Type': 'application/pdf',
           'Content-Disposition': 'attachment; filename="' + safe + '.pdf"',
         },
-        body: btoa(binary),
+        body: Buffer.from(pdfBuffer).toString('base64'),
         isBase64Encoded: true,
       };
     }
@@ -79,6 +75,9 @@ exports.handler = async function(event) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Add ANTHROPIC_API_KEY to your Netlify environment variables, then redeploy' }) };
+    }
 
     // Vision path: use Sonnet for better image reading accuracy
     // Text path:   use Haiku for speed and cost efficiency
