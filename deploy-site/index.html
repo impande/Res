@@ -4256,7 +4256,11 @@ function renderResumeHTML(data) {
     customHTML = data.customSections.filter(s=>(s.title||s.content) && s.includeInResume !== false).map(s => {
       const dateRange = [s.start, s.end].filter(Boolean).join(' – ');
       const projTitle = s.projectTitle ? `<div class="r-role" contenteditable="true" style="font-size:0.88em;font-weight:700;margin-bottom:2px;">${esc(s.projectTitle)}</div>` : '';
-      return `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}${dateRange ? `<span class="r-yr" style="float:right;font-weight:400;font-size:0.8em" contenteditable="true">${esc(dateRange)}</span>` : ''}</div>${projTitle}<div class="r-sum" contenteditable="true">${esc(s.content)}</div></div>`;
+      const csLines = _getHtmlLines(s.content||'');
+      const csHtml = csLines.length > 1
+        ? `<ul class="r-ul">${csLines.map(l=>`<li contenteditable="true">${_sanitizeRich(l.replace(/^[•\-\*]\s*/,''))}</li>`).join('')}</ul>`
+        : `<div class="r-sum" contenteditable="true">${_sanitizeRich(s.content||'')}</div>`;
+      return `<div class="r-sec"><div class="r-sec-t" contenteditable="true">${esc(s.title)}${dateRange ? `<span class="r-yr" style="float:right;font-weight:400;font-size:0.8em" contenteditable="true">${esc(dateRange)}</span>` : ''}</div>${projTitle}${csHtml}</div>`;
     }).join(div);
   }
 
@@ -6050,8 +6054,7 @@ function signOutUser() {
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _showCloudLoader('Signing out…');
   if (_fbAuth) _fbAuth.signOut().then(function() {
-    _hideCloudLoader();
-    showToast('Signed out', 'success');
+    window.location.reload();
   }).catch(function() { _hideCloudLoader(); });
 }
 
@@ -6131,6 +6134,18 @@ function _loadFromCloud(uid) {
     goToStep(1);
     setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
     setTimeout(function() { showToast('✓ Resume restored from cloud', 'success'); }, 450);
+    // Restore portfolio slug for returning users (background — doesn't block load)
+    if (_fbDb && !_pfSavedSlug) {
+      try { var _lsSlug = localStorage.getItem('pfSlug_' + uid); if (_lsSlug) { _pfSavedSlug = _lsSlug; return; } } catch(e2) {}
+      _fbDb.collection('portfolios').where('uid','==',uid).limit(1).get().then(function(snap) {
+        if (!snap.empty) {
+          _pfSavedSlug = snap.docs[0].id;
+          try { localStorage.setItem('pfSlug_' + uid, _pfSavedSlug); } catch(e2) {}
+          // If user is already viewing portfolio Step 3, refresh the card immediately
+          if (typeof pfCurrentStep !== 'undefined' && pfCurrentStep === 3) _renderPfStep3Card();
+        }
+      }).catch(function(){});
+    }
   }).catch(function(e) { _hideCloudLoader(); goToStep(1); console.warn('Cloud load:', e); });
 }
 
@@ -6395,7 +6410,15 @@ function openPreviewModal() {
   if (sel) sel.value = currentTemplate;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  try { renderPreviewWithTemplate(currentTemplate); } catch(e) { console.error('Preview render error:', e); }
+  // If resume has been generated, clone the live DOM so inline bold/italic edits are reflected
+  const liveA4 = document.querySelector('#resumeOutput .resume-a4-page');
+  const body = document.getElementById('previewModalBody');
+  if (lastResumeData && liveA4 && body) {
+    body.innerHTML = `<div class="preview-scale-wrap"><div class="preview-scale-inner"><div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin:0;overflow:visible;"><div class="resume-a4-page" style="min-height:unset;width:794px;max-width:none;">${liveA4.innerHTML}</div></div></div></div>`;
+    requestAnimationFrame(function(){ requestAnimationFrame(scalePreview); });
+  } else {
+    try { renderPreviewWithTemplate(currentTemplate); } catch(e) { console.error('Preview render error:', e); }
+  }
 }
 function refreshPreviewTemplate(tpl) {
   renderPreviewWithTemplate(tpl);
@@ -8117,6 +8140,21 @@ function showPfShareModal(url, name) {
 
 function generatePortfolioHTML(d, tpl, sections) {
   var esc = function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+  // Render a desc (plain text or HTML) as a bullet list or paragraph for portfolio
+  var pfBullets = function(desc, cls) {
+    if (!desc) return '';
+    var lines = _getHtmlLines(desc);
+    if (!lines.length) lines = desc.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    if (lines.length > 1) {
+      return '<ul class="' + cls + '" style="padding-left:16px;margin-top:4px;">'
+        + lines.map(function(l){
+          var clean = /<[a-z]/i.test(l) ? _sanitizeRich(l.replace(/^[•\-\*]\s*/,'')) : esc(l.replace(/^[•\-\*]\s*/,'').trim());
+          return clean ? '<li>' + clean + '</li>' : '';
+        }).filter(Boolean).join('') + '</ul>';
+    }
+    var single = /<[a-z]/i.test(desc) ? _sanitizeRich(desc) : esc(desc.replace(/^[•\-\*]\s*/,'').trim());
+    return single ? '<p class="' + cls + '">' + single + '</p>' : '';
+  };
   var name = esc(d.name.trim());
   var photoHtml = d.photo ? '<img src="' + d.photo + '" alt="' + name + '" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,0.3);margin-bottom:16px;display:block;">' : '';
 
@@ -8127,7 +8165,7 @@ function generatePortfolioHTML(d, tpl, sections) {
     if (expFiltered.length) {
       expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
       expFiltered.forEach(function(e) {
-        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + (e.desc ? '<p class="pf-tl-desc">' + esc(e.desc) + '</p>' : '') + '</div></div>';
+        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + pfBullets(e.desc, 'pf-tl-desc') + '</div></div>';
       });
       expHtml += '</div></div></section>';
     }
@@ -8175,7 +8213,7 @@ function generatePortfolioHTML(d, tpl, sections) {
     if (projItems.length) {
       projectsHtml = '<section class="pf-sec" id="projects"><div class="pf-container"><h2 class="pf-sec-title">Projects</h2><div class="pf-proj-grid">';
       projItems.forEach(function(p) {
-        projectsHtml += '<div class="pf-proj-card"><h3 class="pf-proj-title">' + esc(p.title) + '</h3>' + (p.desc?'<p class="pf-proj-desc">'+esc(p.desc)+'</p>':'') + (p.tech?'<div class="pf-proj-tech">'+p.tech.split(',').map(function(t){return '<span class="pf-skill-chip">'+esc(t.trim())+'</span>';}).join('')+'</div>':'') + '</div>';
+        projectsHtml += '<div class="pf-proj-card"><h3 class="pf-proj-title">' + esc(p.title) + '</h3>' + pfBullets(p.desc, 'pf-proj-desc') + (p.tech?'<div class="pf-proj-tech">'+p.tech.split(',').map(function(t){return '<span class="pf-skill-chip">'+esc(t.trim())+'</span>';}).join('')+'</div>':'') + '</div>';
       });
       projectsHtml += '</div></div></section>';
     }
