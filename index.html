@@ -2653,10 +2653,8 @@
       <div class="suggestion-chips" id="suggestionChips"></div>
     </div>
     <div style="margin-top:10px;">
-      <button id="aiSkillsBtn" onclick="_suggestSkillsWithAI()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-        Suggest Skills with AI
-      </button>
+      <button id="aiSkillsBtn" class="btn-gen-bullets" onclick="_suggestSkillsWithAI()">✦ Suggest Skills with AI</button>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:5px;">Skills will be suggested based on your experience and job title.</div>
     </div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
@@ -3209,7 +3207,7 @@ async function _suggestSkillsWithAI() {
   if (!btn) return;
   const origHtml = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Suggesting…';
+  btn.innerHTML = '<div style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div> Suggesting…';
   try {
     const title = (document.getElementById('jobTitle')?.value || '').trim();
     const expData = typeof collectData === 'function' ? (collectData().experience || []) : [];
@@ -3525,6 +3523,25 @@ function _rteInsertBullet(id) {
   var el = document.getElementById(id);
   if (!el) return;
   el.focus();
+  var sel = window.getSelection();
+  if (sel && !sel.isCollapsed && el.contains(sel.anchorNode)) {
+    // Selection present — convert each line to a bullet
+    var lines = _getHtmlLines(el.innerHTML);
+    if (lines.length > 0) {
+      el.innerHTML = lines.map(function(line) {
+        var plain = line.replace(/<[^>]*>/g, '').trim();
+        if (!plain) return '';
+        if (/^[•\-\*]/.test(plain)) return '<div>' + line + '</div>';
+        return '<div>• ' + line + '</div>';
+      }).filter(Boolean).join('');
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+  }
   document.execCommand('insertText', false, '• ');
 }
 
@@ -4034,7 +4051,8 @@ function collectData() {
     const co = document.getElementById('exp-co-'+id)?.value.trim()||'';
     if (title||co) {
       const descText = _rteGetText('exp-desc-'+id).trim()||'';
-      const descHtml = _sanitizeRich(_rteGetHtml('exp-desc-'+id));
+      const rawHtml  = _rteGetHtml('exp-desc-'+id);
+      const descHtml = _sanitizeRich(rawHtml);
       const bulletTextLines = descText.split('\n').map(l=>l.trim()).filter(l=>/^[•\-\*]/.test(l));
       const entry = {
         title, co,
@@ -4042,11 +4060,12 @@ function collectData() {
         end:   document.getElementById('exp-end-'+id)?.value.trim()||'',
         desc:  descHtml
       };
-      if (bulletTextLines.length >= 2) {
-        const htmlLines = _getHtmlLines(descHtml);
+      if (bulletTextLines.length >= 1) {
+        // Use raw HTML so <p>/<div> line-breaks are intact before sanitizing each line
+        const htmlLines = _getHtmlLines(rawHtml);
         const htmlBullets = htmlLines.filter(h => /^[•\-\*]/.test(h.replace(/<[^>]*>/g,'').trim()))
           .map(h => _sanitizeRich(h.replace(/^[•\-\*]\s*/,'')));
-        entry.bullets = htmlBullets.length >= 2 ? htmlBullets : bulletTextLines.map(l=>l.replace(/^[•\-\*]\s*/,'').trim());
+        entry.bullets = htmlBullets.length > 0 ? htmlBullets : bulletTextLines.map(l=>l.replace(/^[•\-\*]\s*/,'').trim());
       }
       experience.push(entry);
     }
@@ -4123,6 +4142,16 @@ function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 // Safe HTML: strip everything except allowed inline formatting tags
+function _descToRteHtml(desc) {
+  if (!desc) return '';
+  if (/<[a-z]/i.test(desc)) return desc;
+  var lines = desc.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  if (lines.length <= 1) return desc;
+  return lines.map(function(l){
+    var clean = l.replace(/^[•\-\*]\s*/,'');
+    return '<div>• ' + clean.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+  }).join('');
+}
 function _sanitizeRich(html) {
   if (!html) return '';
   return String(html).replace(/<(?!\/?(?:b|i|strong|em|u)\b)[^>]*>/gi, '');
@@ -4185,9 +4214,15 @@ function renderResumeHTML(data) {
   let expHTML = '';
   if (data.experience && data.experience.length) {
     const items = data.experience.map(e => {
-      const bullets = Array.isArray(e.bullets)
+      const bullets = Array.isArray(e.bullets) && e.bullets.length
         ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${_sanitizeRich(b)}</li>`).join('')}</ul>`
-        : (e.desc ? `<ul class="r-ul"><li contenteditable="true">${_sanitizeRich(e.desc)}</li></ul>` : '');
+        : e.desc ? (function(){
+            var dl = _getHtmlLines(e.desc);
+            return dl.length > 1
+              ? `<ul class="r-ul">${dl.map(l=>`<li contenteditable="true">${_sanitizeRich(l)}</li>`).join('')}</ul>`
+              : `<ul class="r-ul"><li contenteditable="true">${_sanitizeRich(e.desc)}</li></ul>`;
+          })()
+        : '';
       const period = [e.start, e.end].filter(Boolean).join(' – ');
       return `<div class="r-exp"><div class="r-exp-top"><span class="r-role" contenteditable="true">${esc(e.title||e.role||'')}</span><span class="r-period">${esc(period)}</span></div><div class="r-co" contenteditable="true">${esc(e.co||e.company||'')}</div>${bullets}</div>`;
     }).join('');
@@ -5406,7 +5441,7 @@ function populateFormFromParsed(data) {
       sv('exp-start-'+expCount, e.start); sv('exp-end-'+expCount, e.end);
       const descContent = Array.isArray(e.bullets) && e.bullets.length
         ? e.bullets.map(b => '<div>• ' + b + '</div>').join('')
-        : (e.desc || '');
+        : _descToRteHtml(e.desc || '');
       _rteSet('exp-desc-'+expCount, descContent);
     });
   }
@@ -5975,6 +6010,13 @@ function _stopGhostRotation() {
   }
 }
 var _signInInProgress = false;
+var _signInTimer = null;
+function _resetSignIn() {
+  _signInInProgress = false;
+  if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
+  _hideCloudLoader();
+  _renderAuthBtn(_fbUser || null);
+}
 function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
   if (_signInInProgress) return;
@@ -5986,13 +6028,14 @@ function signInWithGoogle() {
     btn.style.opacity = '0.8';
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
+  // Safety: reset after 30s if neither success nor error fires (e.g. popup hung in some browsers)
+  _signInTimer = setTimeout(_resetSignIn, 30000);
   var provider = new firebase.auth.GoogleAuthProvider();
   _fbAuth.signInWithPopup(provider).then(function() {
+    if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
     _showCloudLoader('Signing you in…');
   }).catch(function(e) {
-    _signInInProgress = false;
-    _hideCloudLoader();
-    _renderAuthBtn(null);
+    _resetSignIn();
     if (e.code === 'auth/popup-closed-by-user') return;
     if (e.code === 'auth/popup-blocked') {
       showToast('Popup blocked — please allow popups for this site and try again');
@@ -6003,7 +6046,13 @@ function signInWithGoogle() {
 }
 function signOutUser() {
   _pfSavedSlug = null;
-  if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out', 'success'); });
+  _signInInProgress = false;
+  if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
+  _showCloudLoader('Signing out…');
+  if (_fbAuth) _fbAuth.signOut().then(function() {
+    _hideCloudLoader();
+    showToast('Signed out', 'success');
+  }).catch(function() { _hideCloudLoader(); });
 }
 
 function _collectCloudData() {
@@ -7498,27 +7547,43 @@ async function pfGenExpBullet(idx) {
   finally { if(btn){ btn.disabled=false; btn.innerHTML='✨ AI enhance'; } }
 }
 
+var _pfLiveUrl = '';
+function _pfCopyLink() {
+  if (!_pfLiveUrl) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(_pfLiveUrl).then(function() { showToast('Link copied!', 'success'); });
+  } else {
+    showToast(_pfLiveUrl, 'success');
+  }
+}
+function _pfVisitLink() {
+  if (_pfLiveUrl) window.open(_pfLiveUrl, '_blank');
+}
+
 function _renderPfStep3Card() {
   var card = document.getElementById('pfReadyCard');
   if (!card) return;
-  var slug = _pfSavedSlug || (typeof localStorage !== 'undefined' && _fbUser && localStorage.getItem('pfSlug_' + _fbUser.uid));
+  var lsSlug = '';
+  try { lsSlug = (_fbUser && localStorage.getItem('pfSlug_' + _fbUser.uid)) || ''; } catch(e) {}
+  var slug = _pfSavedSlug || lsSlug;
   var dlBtn = '<button onclick="downloadPortfolio()" style="padding:8px 16px;font-size:0.83rem;border:none;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML</button>';
   if (slug) {
-    var liveUrl = 'https://resume4u.help/p/' + slug;
+    _pfLiveUrl = 'https://resume4u.help/p/' + slug;
     card.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.3);border-radius:14px;">'
       + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>'
       + '<div style="flex:1;min-width:0;">'
         + '<div style="font-size:0.95rem;font-weight:800;color:var(--text);margin-bottom:3px;">Your portfolio is live!</div>'
-        + '<div style="font-size:0.78rem;color:#2563eb;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;">' + esc(liveUrl.replace('https://','')) + '</div>'
+        + '<div style="font-size:0.78rem;color:#2563eb;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;">' + esc(_pfLiveUrl.replace('https://','')) + '</div>'
         + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
-          + '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + esc(liveUrl) + '\').then(function(){showToast(\'Link copied!\',\'success\');})" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:none;border-radius:7px;background:#22c55e;color:#fff;cursor:pointer;">&#128203; Copy link</button>'
-          + '<button onclick="window.open(\'' + esc(liveUrl) + '\',\'_blank\')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:1.5px solid #2563eb;border-radius:7px;background:transparent;color:#2563eb;cursor:pointer;">&#8599; Visit</button>'
+          + '<button onclick="_pfCopyLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:none;border-radius:7px;background:#22c55e;color:#fff;cursor:pointer;">&#128203; Copy link</button>'
+          + '<button onclick="_pfVisitLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:1.5px solid #2563eb;border-radius:7px;background:transparent;color:#2563eb;cursor:pointer;">&#8599; Visit</button>'
           + '<button id="pfShareBtn" onclick="generatePortfolioLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:600;border:1.5px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;">&#8635; Update</button>'
         + '</div>'
       + '</div>'
       + '<div style="flex-shrink:0;">' + dlBtn + '</div>'
       + '</div>';
   } else {
+    _pfLiveUrl = '';
     card.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.25);border-radius:14px;flex-wrap:wrap;">'
       + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>'
       + '<div style="flex:1;min-width:0;">'
