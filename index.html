@@ -4152,6 +4152,31 @@ function _descToRteHtml(desc) {
     return '<div>• ' + clean.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
   }).join('');
 }
+// Convert experience entry to plain-text bullet lines for portfolio wizard textareas
+function _expToPlainText(ex) {
+  if (!ex) return '';
+  // Use bullets array first — each item is properly separated and has formatting stripped
+  if (Array.isArray(ex.bullets) && ex.bullets.length) {
+    return ex.bullets.map(function(b) {
+      return '• ' + b.replace(/<[^>]*>/g, '').trim();
+    }).filter(Boolean).join('\n');
+  }
+  var desc = ex.desc || '';
+  if (!desc) return '';
+  if (!/<[a-z]/i.test(desc)) {
+    // Already plain text — if bullets are concatenated (no newlines), split on • markers
+    if (desc.indexOf('•') > -1 && desc.indexOf('\n') === -1) {
+      return desc.split('•').map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '• '+p;}).join('\n');
+    }
+    return desc;
+  }
+  // Has HTML — strip tags, then split on • markers if concatenated
+  var plain = desc.replace(/<[^>]*>/g, '').trim();
+  if (plain.indexOf('•') > -1 && plain.indexOf('\n') === -1) {
+    return plain.split('•').map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '• '+p;}).join('\n');
+  }
+  return plain;
+}
 function _sanitizeRich(html) {
   if (!html) return '';
   return String(html).replace(/<(?!\/?(?:b|i|strong|em|u)\b)[^>]*>/gi, '');
@@ -7197,7 +7222,7 @@ function pfWzSave() {
     var manualCnt = parseInt(v('pfWzExpManualCount'))||0;
     if (cnt > 0) {
       pfWzData.experience = (cd.experience||[]).slice(0,cnt).map(function(ex,i) {
-        return {title:ex.title||'',company:ex.co||'',dates:[ex.start,ex.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||ex.desc||''};
+        return {title:ex.title||'',company:ex.co||'',dates:[ex.start,ex.end].filter(Boolean).join(' – '),desc:v('pfWzExp'+i)||_expToPlainText(ex)||''};
       });
     } else if (manualCnt > 0) {
       pfWzData.experience = [];
@@ -7335,7 +7360,7 @@ function pfWzRender() {
         html += '<input id="pfWzExpCo'+i+'" style="'+inp+'" placeholder="Company" value="'+e(ex.company||'')+'">';
         html += '<input id="pfWzExpDt'+i+'" style="'+inp+'" placeholder="2022–2024" value="'+e(ex.dates||'')+'">';
         html += '</div>';
-        html += '<textarea id="pfWzExpD'+i+'" rows="2" style="'+inp+'resize:vertical;" placeholder="Key achievements and impact…">'+e(ex.desc||'')+'</textarea>';
+        html += '<textarea id="pfWzExpD'+i+'" rows="2" style="'+inp+'resize:vertical;" placeholder="Key achievements and impact…">'+e(_expToPlainText(ex))+'</textarea>';
         html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button>';
         html += '</div>';
       });
@@ -7357,7 +7382,7 @@ function pfWzRender() {
           }
         }
         html += '<div style="margin-bottom:12px;"><div style="font-size:0.82rem;font-weight:700;color:var(--text);">' + e(ex.title||'') + (ex.co?' <span style="font-weight:400;color:var(--muted);">@ '+e(ex.co)+'</span>':'') + '</div>';
-        html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e(ex.desc||(saved&&saved.desc)||'') + '</textarea>';
+        html += '<textarea id="pfWzExp'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-top:4px;" placeholder="Describe your key achievements and impact…">' + e(_expToPlainText(ex)||(saved&&_expToPlainText(saved))||'') + '</textarea>';
         html += '<button onclick="pfGenExpBullet('+i+')" style="margin-top:4px;'+aiBtnStyle+'font-size:0.75rem;padding:4px 10px;">✨ AI enhance</button></div>';
       });
       html += '<input type="hidden" id="pfWzExpCount" value="' + exps.length + '">';
