@@ -2652,6 +2652,12 @@
       <span class="suggestions-header">✦ Suggested Skills</span>
       <div class="suggestion-chips" id="suggestionChips"></div>
     </div>
+    <div style="margin-top:10px;">
+      <button id="aiSkillsBtn" onclick="_suggestSkillsWithAI()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        Suggest Skills with AI
+      </button>
+    </div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
       <button class="btn-primary" onclick="goToStep(6)">Next: Extras →</button>
@@ -3198,6 +3204,54 @@ function addSuggestedSkill(skill) {
   renderSuggestions();
 }
 
+async function _suggestSkillsWithAI() {
+  const btn = document.getElementById('aiSkillsBtn');
+  if (!btn) return;
+  const origHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Suggesting…';
+  try {
+    const title = (document.getElementById('jobTitle')?.value || '').trim();
+    const expData = typeof collectData === 'function' ? (collectData().experience || []) : [];
+    const expSummary = expData.slice(0, 3).map(function(e) {
+      return (e.title||'') + (e.co ? ' at ' + e.co : '');
+    }).filter(Boolean).join(', ');
+    const prompt = 'List 12 highly relevant technical and professional skills for a ' + (title || 'professional')
+      + (expSummary ? ' with experience at: ' + expSummary : '')
+      + '. Return ONLY a comma-separated list of skill names, no explanation, no numbering.';
+    const resp = await fetch('/.netlify/functions/generate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    if (!resp.ok) throw new Error('AI error');
+    const result = await resp.json();
+    const raw = (result.content || result.text || '').trim();
+    const aiSkills = raw.split(/,\s*/).map(function(s) { return s.trim().replace(/^[\-\*\d\.]+\s*/,''); }).filter(function(s) { return s && s.length < 50; });
+    if (!aiSkills.length) throw new Error('No skills returned');
+    // Merge AI suggestions into existing chips
+    const existing = getSkillSuggestions();
+    const merged = [];
+    const seen = new Set(existing.map(function(s) { return s.toLowerCase(); }));
+    for (const s of aiSkills) { if (!seen.has(s.toLowerCase())) { merged.push(s); seen.add(s.toLowerCase()); } }
+    const all = existing.concat(merged).slice(0, 30);
+    const wrap = document.getElementById('suggestionsWrap');
+    const chips = document.getElementById('suggestionChips');
+    if (wrap && chips) {
+      wrap.style.display = 'block';
+      chips.innerHTML = all.map(function(s) {
+        const added = skills.includes(s);
+        return '<button class="sug-chip' + (added?' selected':'') + '" data-skill="' + s.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '">' + (added?'✓ ':'') + '<span>' + esc(s) + '</span></button>';
+      }).join('');
+    }
+    showToast('AI suggested ' + merged.length + ' skills', 'success');
+  } catch(e) {
+    showToast('Could not get AI suggestions — try again', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  }
+}
+
 // Wire tap/click on suggestion chips via event delegation (no inline onclick)
 document.addEventListener('DOMContentLoaded', function() {
   // Skill remove buttons — event delegation (avoids onclick double-quote issue)
@@ -3608,7 +3662,7 @@ function addExperience(prependNew = false) {
       <div class="form-group"><label class="form-label">Start Date</label><input type="text" placeholder="e.g. Jan 2020" id="exp-start-${id}"></div>
       <div class="form-group"><label class="form-label">End Date</label><input type="text" placeholder="e.g. Present" id="exp-end-${id}"></div>
     </div>
-    <div class="form-group"><label class="form-label">Key Achievements <span style="font-weight:400;color:var(--muted);font-size:0.78rem;">(optional — AI will enhance)</span></label>
+    <div class="form-group"><label class="form-label">Key Achievements <span style="font-weight:400;color:var(--muted);font-size:0.78rem;">(optional — AI generates if blank)</span></label>
     <div class="rte-wrap">
       <div class="rte-toolbar">
         <button type="button" class="rte-btn" onmousedown="event.preventDefault();document.execCommand('bold')" title="Bold"><b>B</b></button>
@@ -3979,15 +4033,21 @@ function collectData() {
     const title = document.getElementById('exp-title-'+id)?.value.trim()||'';
     const co = document.getElementById('exp-co-'+id)?.value.trim()||'';
     if (title||co) {
-      const descRaw = _rteGetText('exp-desc-'+id).trim()||'';
-      const bulletLines = descRaw.split('\n').map(l=>l.trim()).filter(l=>/^[•\-\*]/.test(l));
+      const descText = _rteGetText('exp-desc-'+id).trim()||'';
+      const descHtml = _sanitizeRich(_rteGetHtml('exp-desc-'+id));
+      const bulletTextLines = descText.split('\n').map(l=>l.trim()).filter(l=>/^[•\-\*]/.test(l));
       const entry = {
         title, co,
         start: document.getElementById('exp-start-'+id)?.value.trim()||'',
         end:   document.getElementById('exp-end-'+id)?.value.trim()||'',
-        desc:  descRaw
+        desc:  descHtml
       };
-      if (bulletLines.length >= 2) entry.bullets = bulletLines.map(l=>l.replace(/^[•\-\*]\s*/,'').trim());
+      if (bulletTextLines.length >= 2) {
+        const htmlLines = _getHtmlLines(descHtml);
+        const htmlBullets = htmlLines.filter(h => /^[•\-\*]/.test(h.replace(/<[^>]*>/g,'').trim()))
+          .map(h => _sanitizeRich(h.replace(/^[•\-\*]\s*/,'')));
+        entry.bullets = htmlBullets.length >= 2 ? htmlBullets : bulletTextLines.map(l=>l.replace(/^[•\-\*]\s*/,'').trim());
+      }
       experience.push(entry);
     }
   });
@@ -4062,6 +4122,31 @@ function contactLink(val) {
 function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+// Safe HTML: strip everything except allowed inline formatting tags
+function _sanitizeRich(html) {
+  if (!html) return '';
+  return String(html).replace(/<(?!\/?(?:b|i|strong|em|u)\b)[^>]*>/gi, '');
+}
+// Walk contenteditable HTML and return per-line HTML strings (preserving inline <b>/<i> etc.)
+function _getHtmlLines(html) {
+  if (!html) return [];
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  var lines = [], cur = [];
+  function flush() { var h = cur.join('').trim(); if (h) lines.push(h); cur = []; }
+  function walk(node) {
+    if (node.nodeType === 3) { if (node.textContent) cur.push(node.textContent); }
+    else if (node.nodeType === 1) {
+      var tag = node.tagName.toLowerCase();
+      if (tag === 'br') { flush(); }
+      else if (tag === 'div' || tag === 'p' || tag === 'li') { if (cur.length) flush(); Array.from(node.childNodes).forEach(walk); flush(); }
+      else { cur.push(node.outerHTML); }
+    }
+  }
+  Array.from(tmp.childNodes).forEach(walk);
+  flush();
+  return lines;
+}
 
 // ── Resume renderer ───────────────────────────────────────────────────
 function renderResumeHTML(data) {
@@ -4101,8 +4186,8 @@ function renderResumeHTML(data) {
   if (data.experience && data.experience.length) {
     const items = data.experience.map(e => {
       const bullets = Array.isArray(e.bullets)
-        ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${esc(b)}</li>`).join('')}</ul>`
-        : (e.desc ? `<ul class="r-ul"><li contenteditable="true">${esc(e.desc)}</li></ul>` : '');
+        ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${_sanitizeRich(b)}</li>`).join('')}</ul>`
+        : (e.desc ? `<ul class="r-ul"><li contenteditable="true">${_sanitizeRich(e.desc)}</li></ul>` : '');
       const period = [e.start, e.end].filter(Boolean).join(' – ');
       return `<div class="r-exp"><div class="r-exp-top"><span class="r-role" contenteditable="true">${esc(e.title||e.role||'')}</span><span class="r-period">${esc(period)}</span></div><div class="r-co" contenteditable="true">${esc(e.co||e.company||'')}</div>${bullets}</div>`;
     }).join('');
@@ -4159,7 +4244,8 @@ function buildPrompt(data) {
     const skillsStr = data.skills.length ? data.skills.join(', ') : 'None provided';
     const expStr = data.experience.map(e => {
       const period = [e.start, e.end].filter(Boolean).join(' – ');
-      return `  Role: ${e.title || 'N/A'} | Company: ${e.co || 'N/A'} | Period: ${period || 'N/A'} | Achievements/Notes: ${e.desc || 'Generate from role, company and skills'}`;
+      const plainDesc = (e.desc || '').replace(/<[^>]*>/g, '').trim();
+      return `  Role: ${e.title || 'N/A'} | Company: ${e.co || 'N/A'} | Period: ${period || 'N/A'} | Achievements/Notes: ${plainDesc || 'Generate from role, company and skills'}`;
     }).join('\n');
     return `You are an expert resume writer. Generate ATS-optimised bullet points for each work experience entry below.
 
@@ -5318,8 +5404,10 @@ function populateFormFromParsed(data) {
       addExperience();
       sv('exp-title-'+expCount, e.title); sv('exp-co-'+expCount, e.co);
       sv('exp-start-'+expCount, e.start); sv('exp-end-'+expCount, e.end);
-      const descText = Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.desc || '');
-      _rteSet('exp-desc-'+expCount, descText);
+      const descContent = Array.isArray(e.bullets) && e.bullets.length
+        ? e.bullets.map(b => '<div>• ' + b + '</div>').join('')
+        : (e.desc || '');
+      _rteSet('exp-desc-'+expCount, descContent);
     });
   }
   // Awards
@@ -5914,6 +6002,7 @@ function signInWithGoogle() {
   });
 }
 function signOutUser() {
+  _pfSavedSlug = null;
   if (_fbAuth) _fbAuth.signOut().then(function() { showToast('Signed out', 'success'); });
 }
 
@@ -6531,21 +6620,7 @@ function closePreviewModal(e) {
     </div>
     <!-- Step 3: Preview & Download -->
     <div class="pf-body" id="pfStep3" style="display:none">
-      <div class="pf-ready-card" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.25);border-radius:14px;">
-        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:2px;">Your portfolio is ready!</div>
-          <div style="font-size:0.78rem;color:var(--muted);">Download and host anywhere — GitHub Pages, Netlify, Vercel, or your own domain.</div>
-        </div>
-        <div class="pf-ready-btns" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-          <button onclick="downloadPortfolio()" style="padding:8px 16px;font-size:0.83rem;border:none;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML
-          </button>
-          <button id="pfShareBtn" onclick="generatePortfolioLink()" style="padding:7px 16px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Share Link
-          </button>
-        </div>
-      </div>
+      <div id="pfReadyCard" style="margin-bottom:14px;"></div>
       <!-- Profile photo quick-add / change -->
       <div id="pfStep3Photo" style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;">
         <div id="pfReviewPhotoThumb" onclick="document.getElementById('pfReviewPhotoInput').click()" style="width:54px;height:54px;border-radius:50%;background:var(--input-bg,#f9fafb);border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden;cursor:pointer;">📷</div>
@@ -7423,6 +7498,41 @@ async function pfGenExpBullet(idx) {
   finally { if(btn){ btn.disabled=false; btn.innerHTML='✨ AI enhance'; } }
 }
 
+function _renderPfStep3Card() {
+  var card = document.getElementById('pfReadyCard');
+  if (!card) return;
+  var slug = _pfSavedSlug || (typeof localStorage !== 'undefined' && _fbUser && localStorage.getItem('pfSlug_' + _fbUser.uid));
+  var dlBtn = '<button onclick="downloadPortfolio()" style="padding:8px 16px;font-size:0.83rem;border:none;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML</button>';
+  if (slug) {
+    var liveUrl = 'https://resume4u.help/p/' + slug;
+    card.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.3);border-radius:14px;">'
+      + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-size:0.95rem;font-weight:800;color:var(--text);margin-bottom:3px;">Your portfolio is live!</div>'
+        + '<div style="font-size:0.78rem;color:#2563eb;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;">' + esc(liveUrl.replace('https://','')) + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+          + '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + esc(liveUrl) + '\').then(function(){showToast(\'Link copied!\',\'success\');})" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:none;border-radius:7px;background:#22c55e;color:#fff;cursor:pointer;">&#128203; Copy link</button>'
+          + '<button onclick="window.open(\'' + esc(liveUrl) + '\',\'_blank\')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:1.5px solid #2563eb;border-radius:7px;background:transparent;color:#2563eb;cursor:pointer;">&#8599; Visit</button>'
+          + '<button id="pfShareBtn" onclick="generatePortfolioLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:600;border:1.5px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;">&#8635; Update</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="flex-shrink:0;">' + dlBtn + '</div>'
+      + '</div>';
+  } else {
+    card.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.25);border-radius:14px;flex-wrap:wrap;">'
+      + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:2px;">Your portfolio is ready!</div>'
+        + '<div style="font-size:0.78rem;color:var(--muted);">Download and host anywhere — GitHub Pages, Netlify, Vercel, or your own domain.</div>'
+      + '</div>'
+      + '<div class="pf-ready-btns" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">'
+        + dlBtn
+        + '<button id="pfShareBtn" onclick="generatePortfolioLink()" style="padding:7px 16px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Share Link</button>'
+      + '</div>'
+      + '</div>';
+  }
+}
+
 function pfGoStep(n) {
   if (n === 3) pfWzSave(); // save wizard before preview
   pfCurrentStep = n;
@@ -7467,6 +7577,7 @@ function pfGoStep(n) {
     pfWzRender();
   }
   if (n === 3) {
+    _renderPfStep3Card();
     updatePfMiniSwitcher();
     updatePfStep3Photo();
     updatePfStep3Cover();
