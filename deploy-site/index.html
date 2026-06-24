@@ -3111,6 +3111,9 @@ function _syncLastResumeData() {
     const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
     return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
   });
+  // Re-render the resume preview so changes are immediately visible
+  renderOutput(lastResumeData);
+  clearNeedsRegen();
   // Refresh page count chip to reflect latest form data
   _triggerOffscreenPageCount();
 }
@@ -3306,6 +3309,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+});
+
+// Live preview: re-render resume on any form field change across all steps
+document.addEventListener('input', function(e) {
+  if (!e.target.closest('.step-content')) return;
+  markNeedsRegen();
+});
+document.addEventListener('change', function(e) {
+  if (!e.target.closest('.step-content')) return;
+  markNeedsRegen();
 });
 
 // ── Navigation ────────────────────────────────────────────────────────
@@ -7419,12 +7432,12 @@ function pfWzRender() {
 
   } else if (step.id === 'projects') {
     var _extrasProjs = (cd.customSections||[]).filter(function(cs){ return cs.title && cs.title.toLowerCase().includes('project'); }).map(function(cs){ return {title: cs.projectTitle || '', desc:cs.content||'', tech:''}; });
-    // Step 6 is source of truth — preserve wizard tech/desc edits by matching title.
-    // Never append stale pfWzData entries (handles removed projects correctly).
+    // Step 6 is source of truth for desc — always prefer fresh step 6 content.
+    // Wizard-only fields (tech) are preserved by matching title.
     var projs = _extrasProjs.length
       ? _extrasProjs.map(function(p){
           var sv = pfWzData.projects.find(function(s){ return s.title === p.title; });
-          return { title: p.title, desc: (sv&&sv.desc)||p.desc, tech: (sv&&sv.tech)||'' };
+          return { title: p.title, desc: p.desc||(sv&&sv.desc)||'', tech: (sv&&sv.tech)||'' };
         })
       : (pfWzData.projects.filter(function(p){ return p.title||p.desc; }).length
           ? pfWzData.projects
@@ -7434,7 +7447,14 @@ function pfWzRender() {
     projs.slice(0,10).forEach(function(p,i) {
       html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
       html += '<input id="pfWzProjT'+i+'" style="' + inp + 'margin-bottom:5px;" placeholder="Project title" value="' + e(p.title) + '">';
-      html += '<textarea id="pfWzProjD'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-bottom:5px;" placeholder="What it does and your role…">' + e(p.desc) + '</textarea>';
+      var _projDescPlain = (function(d){
+        if (!d) return '';
+        if (!/<[a-z]/i.test(d)) return d;
+        var lines = _getHtmlLines(d);
+        if (lines.length > 1) return lines.map(function(l){return l.replace(/<[^>]*>/g,'').trim();}).filter(Boolean).join('\n');
+        return d.replace(/<[^>]*>/g,'').trim();
+      })(p.desc);
+      html += '<textarea id="pfWzProjD'+i+'" rows="2" style="' + inp + 'resize:vertical;margin-bottom:5px;" placeholder="What it does and your role…">' + e(_projDescPlain) + '</textarea>';
       html += '<input id="pfWzProjTech'+i+'" style="' + inp + '" placeholder="Tech used (e.g. React, Node, AWS)" value="' + e(p.tech) + '">';
       html += '</div>';
     });
@@ -7617,18 +7637,20 @@ function _renderPfStep3Card() {
   var dlBtn = '<button onclick="downloadPortfolio()" style="padding:8px 16px;font-size:0.83rem;border:none;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML</button>';
   if (slug) {
     _pfLiveUrl = 'https://resume4u.help/p/' + slug;
-    card.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.3);border-radius:14px;">'
-      + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>'
-      + '<div style="flex:1;min-width:0;">'
-        + '<div style="font-size:0.95rem;font-weight:800;color:var(--text);margin-bottom:3px;">Your portfolio is live!</div>'
-        + '<div style="font-size:0.78rem;color:#2563eb;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;">' + esc(_pfLiveUrl.replace('https://','')) + '</div>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
-          + '<button onclick="_pfCopyLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:none;border-radius:7px;background:#22c55e;color:#fff;cursor:pointer;">&#128203; Copy link</button>'
-          + '<button onclick="_pfVisitLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:700;border:1.5px solid #2563eb;border-radius:7px;background:transparent;color:#2563eb;cursor:pointer;">&#8599; Visit</button>'
-          + '<button id="pfShareBtn" onclick="generatePortfolioLink()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;font-size:0.76rem;font-weight:600;border:1.5px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;">&#8635; Update</button>'
+    card.innerHTML = '<div style="padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(37,99,235,0.06));border:1.5px solid rgba(34,197,94,0.3);border-radius:14px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+        + '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-weight:800;flex-shrink:0;">✓</div>'
+        + '<div style="min-width:0;">'
+          + '<div style="font-size:0.88rem;font-weight:800;color:var(--text);white-space:nowrap;">Your portfolio is live!</div>'
+          + '<div style="font-size:0.74rem;color:#2563eb;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;">' + esc(_pfLiveUrl.replace('https://','')) + '</div>'
         + '</div>'
       + '</div>'
-      + '<div style="flex-shrink:0;">' + dlBtn + '</div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+        + '<button onclick="_pfCopyLink()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:0.76rem;font-weight:700;border:none;border-radius:7px;background:#22c55e;color:#fff;cursor:pointer;white-space:nowrap;">&#128203; Copy link</button>'
+        + '<button onclick="_pfVisitLink()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:0.76rem;font-weight:700;border:1.5px solid #2563eb;border-radius:7px;background:transparent;color:#2563eb;cursor:pointer;white-space:nowrap;">&#8599; Visit</button>'
+        + '<button id="pfShareBtn" onclick="generatePortfolioLink()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:0.76rem;font-weight:600;border:1.5px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">&#8635; Update</button>'
+        + '<button onclick="downloadPortfolio()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:0.76rem;font-weight:700;border:none;border-radius:7px;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download HTML</button>'
+      + '</div>'
       + '</div>';
   } else {
     _pfLiveUrl = '';
