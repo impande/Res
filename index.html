@@ -3109,7 +3109,12 @@ function _syncLastResumeData() {
   // Experience: update structure but preserve AI bullets for matching entries
   lastResumeData.experience = cur.experience.map(e => {
     const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
-    return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
+    // User typed bullets in the RTE → use fresh bullets
+    if (Array.isArray(e.bullets) && e.bullets.length) return e;
+    // User typed plain text in the RTE → use desc, don't restore old AI bullets
+    if (e.desc) return e;
+    // RTE is empty → preserve AI-generated bullets so they aren't lost on unrelated field edits
+    return (prev && Array.isArray(prev.bullets) && prev.bullets.length) ? { ...e, bullets: prev.bullets } : e;
   });
   // Re-render the resume preview so changes are immediately visible
   renderOutput(lastResumeData);
@@ -3311,13 +3316,23 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Live preview: re-render resume on any form field change across all steps
+// Browser back button: navigate to previous step instead of leaving the app
+history.replaceState({ step: 1 }, ''); // seed initial state so first back goes to step 1
+window.addEventListener('popstate', function(e) {
+  var step = (e.state && e.state.step) ? e.state.step : 1;
+  goToStep(step, true); // skipScroll=true so we don't push another history entry
+});
+
+// Live preview: re-render resume on any form field change across all steps.
+// Exclude #resumeOutput — its contenteditable <li> elements would retrigger regen on scroll.
 document.addEventListener('input', function(e) {
   if (!e.target.closest('.step-content')) return;
+  if (e.target.closest('#resumeOutput')) return;
   markNeedsRegen();
 });
 document.addEventListener('change', function(e) {
   if (!e.target.closest('.step-content')) return;
+  if (e.target.closest('#resumeOutput')) return;
   markNeedsRegen();
 });
 
@@ -3326,6 +3341,10 @@ document.addEventListener('change', function(e) {
 function goToStep(step, skipScroll) {
   const prevStep = currentStep;
   currentStep = step;
+  // Flush any pending form-sync so the resume card is always current when entering Step 7
+  if (step === 7 && _syncResumeTimer) { clearTimeout(_syncResumeTimer); _syncResumeTimer = null; _syncLastResumeData(); }
+  // Push history state for browser back-button support (skip on popstate-driven calls)
+  if (!skipScroll) history.pushState({ step: step }, '');
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   if (!skipScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3506,6 +3525,7 @@ function setExpTitle(id, title) {
     });
     chipsEl.classList.remove('visible');
   }
+  markNeedsRegen();
 }
 
 // ── Rich text editor helpers ───────────────────────────────────────────
@@ -3677,7 +3697,7 @@ function addExperience(prependNew = false) {
   const id = ++expCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'exp-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Job Title</label>
@@ -3712,7 +3732,7 @@ function addAward(prependNew = false) {
   const id = ++awardCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'award-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Award / Certification</label><input type="text" placeholder="e.g. AWS Certified Solutions Architect" id="award-name-${id}"></div>
       <div class="form-group"><label class="form-label">Year</label><input type="text" placeholder="e.g. 2023" id="award-year-${id}"></div>
@@ -3730,7 +3750,7 @@ function addEducation(prependNew = false) {
   const id = ++eduCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'edu-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Degree / Qualification</label><input type="text" placeholder="e.g. B.Tech Computer Science" id="edu-deg-${id}"></div>
       <div class="form-group"><label class="form-label">Institution</label><input type="text" placeholder="e.g. IIT Bombay" id="edu-sch-${id}"></div>
@@ -3753,7 +3773,7 @@ function addCustomSection(title='', content='', includeInResume=true, noScroll=f
   const isCustomTitle = !!(title && !CUSTOM_SECTION_PRESETS.includes(title));
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'custom-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-row">
       <div class="form-group" style="flex:1">
         <label class="form-label">Section Title</label>
@@ -5988,7 +6008,7 @@ function _initFirebase() {
       _signInInProgress = false;
       sessionStorage.removeItem('_pendingSignIn');
       _fbUser = user;
-      _renderAuthBtn(user);
+      if (!_signingOut) _renderAuthBtn(user); // skip UI flash during sign-out reload
       clearInterval(_autoSaveIv);
       if (user) {
         _loadFromCloud(user.uid);
@@ -5997,7 +6017,14 @@ function _initFirebase() {
         _hideCloudLoader();
       }
     });
-    _fbAuth.getRedirectResult().catch(function(e) {
+    _fbAuth.getRedirectResult().then(function(result) {
+      if (result && result.user) {
+        // Redirect sign-in completed — ensure we're on the main app, not a sub-page
+        if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+          window.location.replace('/');
+        }
+      }
+    }).catch(function(e) {
       sessionStorage.removeItem('_pendingSignIn');
       _hideCloudLoader();
       if (e.code !== 'auth/no-current-user') showToast('Sign-in error: ' + e.message);
@@ -6053,6 +6080,7 @@ function _stopGhostRotation() {
 }
 var _signInInProgress = false;
 var _signInTimer = null;
+var _signingOut = false;
 function _resetSignIn() {
   _signInInProgress = false;
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
@@ -6080,20 +6108,23 @@ function signInWithGoogle() {
     _resetSignIn();
     if (e.code === 'auth/popup-closed-by-user') return;
     if (e.code === 'auth/popup-blocked') {
-      showToast('Popup blocked — please allow popups for this site and try again');
+      // Fall back to full-page redirect — Firebase will return to '/' after auth
+      sessionStorage.setItem('_pendingSignIn', '1');
+      _fbAuth.signInWithRedirect(provider);
     } else {
       showToast('Sign-in error: ' + e.message);
     }
   });
 }
 function signOutUser() {
+  _signingOut = true;
   _pfSavedSlug = null;
   _signInInProgress = false;
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _showCloudLoader('Signing out…');
   if (_fbAuth) _fbAuth.signOut().then(function() {
     window.location.reload();
-  }).catch(function() { _hideCloudLoader(); });
+  }).catch(function() { _signingOut = false; _hideCloudLoader(); });
 }
 
 function _collectCloudData() {
@@ -6444,6 +6475,8 @@ function renderPreviewWithTemplate(tpl) {
 function openPreviewModal() {
   const overlay = document.getElementById('previewModalOverlay');
   if (!overlay) return;
+  // Flush any pending form-sync so preview always shows latest edits
+  if (_syncResumeTimer) { clearTimeout(_syncResumeTimer); _syncResumeTimer = null; _syncLastResumeData(); }
   const sel = document.getElementById('previewTplSelect');
   if (sel) sel.value = currentTemplate;
   overlay.classList.add('open');
@@ -7758,7 +7791,7 @@ function getPfData() {
             sv = _sg[_gp] || _sg[0];
           }
         }
-        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||''};
+        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||'', bullets:Array.isArray(e.bullets)?e.bullets:[]};
       });
     })(),
     education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
@@ -8212,7 +8245,10 @@ function generatePortfolioHTML(d, tpl, sections) {
     if (expFiltered.length) {
       expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
       expFiltered.forEach(function(e) {
-        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + pfBullets(e.desc, 'pf-tl-desc') + '</div></div>';
+        var _expDesc = (Array.isArray(e.bullets) && e.bullets.length)
+          ? '<ul class="pf-tl-desc" style="padding-left:16px;margin-top:4px;">' + e.bullets.map(function(b){ return '<li>' + _sanitizeRich(b) + '</li>'; }).join('') + '</ul>'
+          : pfBullets(e.desc, 'pf-tl-desc');
+        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + _expDesc + '</div></div>';
       });
       expHtml += '</div></div></section>';
     }
