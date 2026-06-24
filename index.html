@@ -3323,11 +3323,22 @@ window.addEventListener('popstate', function(e) {
   goToStep(step, true); // skipScroll=true so we don't push another history entry
 });
 
+// iOS WebKit fires spurious `input` events on contenteditable elements during scroll.
+// Track touchmove so we can ignore those false positives without blocking real typing.
+var _isTouchScrolling = false;
+var _touchScrollTimer;
+document.addEventListener('touchmove', function() {
+  _isTouchScrolling = true;
+  clearTimeout(_touchScrollTimer);
+  _touchScrollTimer = setTimeout(function() { _isTouchScrolling = false; }, 300);
+}, { passive: true });
+
 // Live preview: re-render resume on any form field change across all steps.
 // Exclude #resumeOutput — its contenteditable <li> elements would retrigger regen on scroll.
 document.addEventListener('input', function(e) {
   if (!e.target.closest('.step-content')) return;
   if (e.target.closest('#resumeOutput')) return;
+  if (_isTouchScrolling && e.target.contentEditable === 'true') return; // iOS scroll fires spurious input on contenteditable
   markNeedsRegen();
 });
 document.addEventListener('change', function(e) {
@@ -4226,7 +4237,7 @@ function _getHtmlLines(html) {
     else if (node.nodeType === 1) {
       var tag = node.tagName.toLowerCase();
       if (tag === 'br') { flush(); }
-      else if (tag === 'div' || tag === 'p' || tag === 'li') { if (cur.length) flush(); Array.from(node.childNodes).forEach(walk); flush(); }
+      else if (tag === 'div' || tag === 'p' || tag === 'li' || tag === 'ul' || tag === 'ol') { if (cur.length) flush(); Array.from(node.childNodes).forEach(walk); flush(); }
       else { cur.push(node.outerHTML); }
     }
   }
@@ -6008,7 +6019,8 @@ function _initFirebase() {
       _signInInProgress = false;
       sessionStorage.removeItem('_pendingSignIn');
       _fbUser = user;
-      if (!_signingOut) _renderAuthBtn(user); // skip UI flash during sign-out reload
+      if (_signingOut) return; // page is about to reload — skip all UI updates including _hideCloudLoader
+      _renderAuthBtn(user);
       clearInterval(_autoSaveIv);
       if (user) {
         _loadFromCloud(user.uid);
@@ -6178,7 +6190,7 @@ function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
   _showCloudLoader('Restoring your resume…');
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
-    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1); return; }
+    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1, true); return; }
     var d = doc.data().resume;
     var pf = doc.data().portfolio;
     if (pf) {
@@ -6200,7 +6212,7 @@ function _loadFromCloud(uid) {
       if (_rb) _rb.style.display = 'inline-flex';
     }
     _hideCloudLoader();
-    goToStep(1);
+    goToStep(1, true);
     setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
     setTimeout(function() { showToast('✓ Resume restored from cloud', 'success'); }, 450);
     // Restore portfolio slug for returning users (background — doesn't block load)
@@ -6215,7 +6227,7 @@ function _loadFromCloud(uid) {
         }
       }).catch(function(){});
     }
-  }).catch(function(e) { _hideCloudLoader(); goToStep(1); console.warn('Cloud load:', e); });
+  }).catch(function(e) { _hideCloudLoader(); goToStep(1, true); console.warn('Cloud load:', e); });
 }
 
 function _mobileAuthMenu(user) {
@@ -7776,6 +7788,7 @@ function getPfData() {
     experience: (function(){
       var live = (cd.experience||[]);
       if (!live.length) return wz.experience;
+      var lrExpArr = (lastResumeData && lastResumeData.experience) || [];
       return live.map(function(e, ei){
         var eStart = e.start || '';
         // Match by title+company (date only as tiebreaker for duplicate title+company entries).
@@ -7791,7 +7804,13 @@ function getPfData() {
             sv = _sg[_gp] || _sg[0];
           }
         }
-        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||'', bullets:Array.isArray(e.bullets)?e.bullets:[]};
+        // Prefer lastResumeData bullets (AI-generated, explicitly stored) over collectData bullets
+        // (which may miss bullets if the RTE content lacks • prefixes, e.g. after cloud restore)
+        var lrMatch = lrExpArr.find(function(lr){ return lr.title === e.title && (lr.co||'') === (e.co||''); });
+        var _bullets = (lrMatch && Array.isArray(lrMatch.bullets) && lrMatch.bullets.length)
+          ? lrMatch.bullets
+          : (Array.isArray(e.bullets) ? e.bullets : []);
+        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||'', bullets:_bullets};
       });
     })(),
     education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
