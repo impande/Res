@@ -3316,29 +3316,58 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Browser back button: navigate to previous step instead of leaving the app
-history.replaceState({ step: 1 }, ''); // seed initial state so first back goes to step 1
+// Browser back button: navigate to previous step instead of leaving the app.
+// pushState (not replaceState) creates a real step-1 entry so pressing back
+// from step 1 hits the pre-app null-state entry — caught below — instead of
+// navigating away. history.go(1) bounces the user back into the app.
+history.pushState({ step: 1 }, '');
 window.addEventListener('popstate', function(e) {
-  var step = (e.state && e.state.step) ? e.state.step : 1;
-  goToStep(step, true); // skipScroll=true so we don't push another history entry
+  if (!e.state || !e.state.step) {
+    // Gone back past our initial entry — go forward one to stay in the app
+    history.go(1);
+    return;
+  }
+  goToStep(e.state.step, true); // skipScroll=true — don't push another entry
 });
 
-// iOS WebKit fires spurious `input` events on contenteditable elements during scroll.
-// Track touchmove so we can ignore those false positives without blocking real typing.
+// iOS/Android WebKit fires spurious `input` events on contenteditable elements during scroll
+// and during rubber-band bounce after touchend. Distinguish scroll (touchmove fired) from
+// tap (no touchmove) so we don't suppress real typing after a tap-to-focus.
 var _isTouchScrolling = false;
+var _hasTouchMoved = false;
 var _touchScrollTimer;
+document.addEventListener('touchstart', function() {
+  _hasTouchMoved = false;
+  clearTimeout(_touchScrollTimer);
+}, { passive: true });
 document.addEventListener('touchmove', function() {
+  _hasTouchMoved = true;
   _isTouchScrolling = true;
   clearTimeout(_touchScrollTimer);
-  _touchScrollTimer = setTimeout(function() { _isTouchScrolling = false; }, 300);
+}, { passive: true });
+document.addEventListener('touchend', function() {
+  if (_hasTouchMoved) {
+    // Scroll gesture ended — keep flag true for 600ms to cover iOS rubber-band bounce
+    clearTimeout(_touchScrollTimer);
+    _touchScrollTimer = setTimeout(function() { _isTouchScrolling = false; }, 600);
+  } else {
+    // Tap (no movement) — clear immediately so typing after tap-to-focus isn't blocked
+    _isTouchScrolling = false;
+  }
+}, { passive: true });
+document.addEventListener('touchcancel', function() {
+  clearTimeout(_touchScrollTimer);
+  _touchScrollTimer = setTimeout(function() { _isTouchScrolling = false; }, 600);
 }, { passive: true });
 
 // Live preview: re-render resume on any form field change across all steps.
 // Exclude #resumeOutput — its contenteditable <li> elements would retrigger regen on scroll.
+// Exclude step 7 entirely — it has no form inputs; only explicit Generate button should trigger.
 document.addEventListener('input', function(e) {
   if (!e.target.closest('.step-content')) return;
   if (e.target.closest('#resumeOutput')) return;
-  if (_isTouchScrolling && e.target.contentEditable === 'true') return; // iOS scroll fires spurious input on contenteditable
+  if (currentStep === 7) return;
+  if (e.target.contentEditable === 'true' && _isTouchScrolling) return;
   markNeedsRegen();
 });
 document.addEventListener('change', function(e) {
@@ -3730,7 +3759,7 @@ function addExperience(prependNew = false) {
         <button type="button" class="rte-btn" onmousedown="event.preventDefault();document.execCommand('italic')" title="Italic"><i>I</i></button>
         <button type="button" class="rte-btn" onmousedown="event.preventDefault();_rteInsertBullet('exp-desc-${id}')" title="Bullet">• List</button>
       </div>
-      <div class="rte-field" id="exp-desc-${id}" contenteditable="true" data-placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" oninput="markNeedsRegen()"></div>
+      <div class="rte-field" id="exp-desc-${id}" contenteditable="true" data-placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" oninput="if(!_isTouchScrolling)markNeedsRegen()"></div>
     </div>
     <p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
     <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
@@ -3820,7 +3849,7 @@ function addCustomSection(title='', content='', includeInResume=true, noScroll=f
           <button type="button" class="rte-btn" onmousedown="event.preventDefault();document.execCommand('italic')" title="Italic"><i>I</i></button>
           <button type="button" class="rte-btn" onmousedown="event.preventDefault();_rteInsertBullet('custom-content-${id}')" title="Bullet">• List</button>
         </div>
-        <div class="rte-field" id="custom-content-${id}" contenteditable="true" data-placeholder="Describe this section…" oninput="updatePreview()"></div>
+        <div class="rte-field" id="custom-content-${id}" contenteditable="true" data-placeholder="Describe this section…" oninput="if(!_isTouchScrolling)updatePreview()"></div>
       </div>
       <button id="gen-custom-btn-${id}" onclick="generateCustomBullets('${id}')" style="margin-top:6px;padding:5px 12px;font-size:0.78rem;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;">✦ Generate with AI</button>
     </div>
@@ -4102,7 +4131,8 @@ function collectData() {
         title, co,
         start: document.getElementById('exp-start-'+id)?.value.trim()||'',
         end:   document.getElementById('exp-end-'+id)?.value.trim()||'',
-        desc:  descHtml
+        desc:  descHtml,
+        rawDesc: rawHtml
       };
       if (bulletTextLines.length >= 1) {
         // Use raw HTML so <p>/<div> line-breaks are intact before sanitizing each line
@@ -4190,6 +4220,10 @@ function _descToRteHtml(desc) {
   if (!desc) return '';
   if (/<[a-z]/i.test(desc)) return desc;
   var lines = desc.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  // Flat string with concatenated bullet chars but no newlines (old sanitized cloud data)
+  if (lines.length <= 1 && desc.indexOf('•') > -1) {
+    lines = desc.split('•').map(function(l){return l.trim();}).filter(Boolean);
+  }
   if (lines.length <= 1) return desc;
   return lines.map(function(l){
     var clean = l.replace(/^[•\-\*]\s*/,'');
@@ -4287,6 +4321,8 @@ function renderResumeHTML(data) {
         ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${_sanitizeRich(b)}</li>`).join('')}</ul>`
         : e.desc ? (function(){
             var dl = _getHtmlLines(e.desc);
+            if (dl.length <= 1 && e.desc.indexOf('•') > -1)
+              dl = e.desc.split('•').map(function(l){return l.trim();}).filter(Boolean);
             return dl.length > 1
               ? `<ul class="r-ul">${dl.map(l=>`<li contenteditable="true">${_sanitizeRich(l)}</li>`).join('')}</ul>`
               : `<ul class="r-ul"><li contenteditable="true">${_sanitizeRich(e.desc)}</li></ul>`;
@@ -5986,7 +6022,10 @@ window.addEventListener('load', function() {
     if (heroBtn) heroBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 400);
   ['experienceEntries','awardEntries','educationEntries'].forEach(id => {
-    document.getElementById(id).addEventListener('input', markNeedsRegen);
+    document.getElementById(id).addEventListener('input', function(e) {
+      if (_isTouchScrolling && e.target.contentEditable === 'true') return;
+      markNeedsRegen();
+    });
   });
 });
 
@@ -6012,6 +6051,8 @@ var _fbAuth = null, _fbDb = null, _fbUser = null, _autoSaveIv = null;
 function _initFirebase() {
   try {
     if (!window.firebase || _FB_CONFIG.apiKey.startsWith('REPLACE')) return;
+    // Show loader immediately on reload after sign-out so there's no flash of signed-in UI
+    if (_signingOut) _showCloudLoader('Signing out…');
     if (!firebase.apps.length) firebase.initializeApp(_FB_CONFIG);
     _fbAuth = firebase.auth();
     _fbDb   = firebase.firestore();
@@ -6019,7 +6060,12 @@ function _initFirebase() {
       _signInInProgress = false;
       sessionStorage.removeItem('_pendingSignIn');
       _fbUser = user;
-      if (_signingOut) return; // page is about to reload — skip all UI updates including _hideCloudLoader
+      if (_signingOut && user) return; // suppress cached signed-in state flash during sign-out reload
+      if (_signingOut && !user) {
+        // Sign-out confirmed — clear the flag and fall through to show sign-in button
+        _signingOut = false;
+        sessionStorage.removeItem('_signingOutReload');
+      }
       _renderAuthBtn(user);
       clearInterval(_autoSaveIv);
       if (user) {
@@ -6092,7 +6138,7 @@ function _stopGhostRotation() {
 }
 var _signInInProgress = false;
 var _signInTimer = null;
-var _signingOut = false;
+var _signingOut = sessionStorage.getItem('_signingOutReload') === '1';
 function _resetSignIn() {
   _signInInProgress = false;
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
@@ -6130,13 +6176,14 @@ function signInWithGoogle() {
 }
 function signOutUser() {
   _signingOut = true;
+  sessionStorage.setItem('_signingOutReload', '1');
   _pfSavedSlug = null;
   _signInInProgress = false;
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _showCloudLoader('Signing out…');
   if (_fbAuth) _fbAuth.signOut().then(function() {
     window.location.reload();
-  }).catch(function() { _signingOut = false; _hideCloudLoader(); });
+  }).catch(function() { _signingOut = false; sessionStorage.removeItem('_signingOutReload'); _hideCloudLoader(); });
 }
 
 function _collectCloudData() {
@@ -7810,7 +7857,7 @@ function getPfData() {
         var _bullets = (lrMatch && Array.isArray(lrMatch.bullets) && lrMatch.bullets.length)
           ? lrMatch.bullets
           : (Array.isArray(e.bullets) ? e.bullets : []);
-        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||'', bullets:_bullets};
+        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||'', rawDesc:e.rawDesc||'', bullets:_bullets};
       });
     })(),
     education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
@@ -8244,6 +8291,9 @@ function generatePortfolioHTML(d, tpl, sections) {
     if (!desc) return '';
     var lines = _getHtmlLines(desc);
     if (!lines.length) lines = desc.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    // Flat string with concatenated bullet chars but no newlines (old sanitized cloud data)
+    if (lines.length <= 1 && desc.indexOf('•') > -1)
+      lines = desc.split('•').map(function(l){return l.trim();}).filter(Boolean);
     if (lines.length > 1) {
       return '<ul class="' + cls + '" style="padding-left:16px;margin-top:4px;">'
         + lines.map(function(l){
@@ -8266,7 +8316,7 @@ function generatePortfolioHTML(d, tpl, sections) {
       expFiltered.forEach(function(e) {
         var _expDesc = (Array.isArray(e.bullets) && e.bullets.length)
           ? '<ul class="pf-tl-desc" style="padding-left:16px;margin-top:4px;">' + e.bullets.map(function(b){ return '<li>' + _sanitizeRich(b) + '</li>'; }).join('') + '</ul>'
-          : pfBullets(e.desc, 'pf-tl-desc');
+          : pfBullets(e.rawDesc || e.desc, 'pf-tl-desc');
         expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + _expDesc + '</div></div>';
       });
       expHtml += '</div></div></section>';

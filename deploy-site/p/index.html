@@ -23,6 +23,14 @@
   <p>Please wait a moment.</p>
 </div>
 <script>
+// If we landed here after a Firebase redirect sign-in (popup blocked on iOS),
+// send the user back to the main app where the auth flow can complete properly.
+if (sessionStorage.getItem('_pendingSignIn')) {
+  sessionStorage.removeItem('_pendingSignIn');
+  window.location.replace('/');
+}
+</script>
+<script>
 (function() {
   var parts = window.location.pathname.split('/').filter(function(s){ return s.length > 0; });
   var slug = parts[parts.length - 1] || '';
