@@ -3109,7 +3109,12 @@ function _syncLastResumeData() {
   // Experience: update structure but preserve AI bullets for matching entries
   lastResumeData.experience = cur.experience.map(e => {
     const prev = (lastResumeData.experience || []).find(p => p.title === e.title && p.co === e.co);
-    return (prev && Array.isArray(prev.bullets)) ? { ...e, bullets: prev.bullets } : e;
+    // User typed bullets in the RTE → use fresh bullets
+    if (Array.isArray(e.bullets) && e.bullets.length) return e;
+    // User typed plain text in the RTE → use desc, don't restore old AI bullets
+    if (e.desc) return e;
+    // RTE is empty → preserve AI-generated bullets so they aren't lost on unrelated field edits
+    return (prev && Array.isArray(prev.bullets) && prev.bullets.length) ? { ...e, bullets: prev.bullets } : e;
   });
   // Re-render the resume preview so changes are immediately visible
   renderOutput(lastResumeData);
@@ -3311,13 +3316,63 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Live preview: re-render resume on any form field change across all steps
+// Browser back button: navigate to previous step instead of leaving the app.
+// pushState (not replaceState) creates a real step-1 entry so pressing back
+// from step 1 hits the pre-app null-state entry — caught below — instead of
+// navigating away. history.go(1) bounces the user back into the app.
+history.pushState({ step: 1 }, '');
+window.addEventListener('popstate', function(e) {
+  if (!e.state || !e.state.step) {
+    // Gone back past our initial entry — go forward one to stay in the app
+    history.go(1);
+    return;
+  }
+  goToStep(e.state.step, true); // skipScroll=true — don't push another entry
+});
+
+// iOS/Android WebKit fires spurious `input` events on contenteditable elements during scroll
+// and during rubber-band bounce after touchend. Distinguish scroll (touchmove fired) from
+// tap (no touchmove) so we don't suppress real typing after a tap-to-focus.
+var _isTouchScrolling = false;
+var _hasTouchMoved = false;
+var _touchScrollTimer;
+document.addEventListener('touchstart', function() {
+  _hasTouchMoved = false;
+  clearTimeout(_touchScrollTimer);
+}, { passive: true });
+document.addEventListener('touchmove', function() {
+  _hasTouchMoved = true;
+  _isTouchScrolling = true;
+  clearTimeout(_touchScrollTimer);
+}, { passive: true });
+document.addEventListener('touchend', function() {
+  if (_hasTouchMoved) {
+    // Scroll gesture ended — keep flag true for 600ms to cover iOS rubber-band bounce
+    clearTimeout(_touchScrollTimer);
+    _touchScrollTimer = setTimeout(function() { _isTouchScrolling = false; }, 600);
+  } else {
+    // Tap (no movement) — clear immediately so typing after tap-to-focus isn't blocked
+    _isTouchScrolling = false;
+  }
+}, { passive: true });
+document.addEventListener('touchcancel', function() {
+  clearTimeout(_touchScrollTimer);
+  _touchScrollTimer = setTimeout(function() { _isTouchScrolling = false; }, 600);
+}, { passive: true });
+
+// Live preview: re-render resume on any form field change across all steps.
+// Exclude #resumeOutput — its contenteditable <li> elements would retrigger regen on scroll.
+// Exclude step 7 entirely — it has no form inputs; only explicit Generate button should trigger.
 document.addEventListener('input', function(e) {
   if (!e.target.closest('.step-content')) return;
+  if (e.target.closest('#resumeOutput')) return;
+  if (currentStep === 7) return;
+  if (e.target.contentEditable === 'true' && _isTouchScrolling) return;
   markNeedsRegen();
 });
 document.addEventListener('change', function(e) {
   if (!e.target.closest('.step-content')) return;
+  if (e.target.closest('#resumeOutput')) return;
   markNeedsRegen();
 });
 
@@ -3326,6 +3381,10 @@ document.addEventListener('change', function(e) {
 function goToStep(step, skipScroll) {
   const prevStep = currentStep;
   currentStep = step;
+  // Flush any pending form-sync so the resume card is always current when entering Step 7
+  if (step === 7 && _syncResumeTimer) { clearTimeout(_syncResumeTimer); _syncResumeTimer = null; _syncLastResumeData(); }
+  // Push history state for browser back-button support (skip on popstate-driven calls)
+  if (!skipScroll) history.pushState({ step: step }, '');
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
   if (!skipScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3506,6 +3565,7 @@ function setExpTitle(id, title) {
     });
     chipsEl.classList.remove('visible');
   }
+  markNeedsRegen();
 }
 
 // ── Rich text editor helpers ───────────────────────────────────────────
@@ -3677,7 +3737,7 @@ function addExperience(prependNew = false) {
   const id = ++expCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'exp-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group">
         <label class="form-label">Job Title</label>
@@ -3699,7 +3759,7 @@ function addExperience(prependNew = false) {
         <button type="button" class="rte-btn" onmousedown="event.preventDefault();document.execCommand('italic')" title="Italic"><i>I</i></button>
         <button type="button" class="rte-btn" onmousedown="event.preventDefault();_rteInsertBullet('exp-desc-${id}')" title="Bullet">• List</button>
       </div>
-      <div class="rte-field" id="exp-desc-${id}" contenteditable="true" data-placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" oninput="markNeedsRegen()"></div>
+      <div class="rte-field" id="exp-desc-${id}" contenteditable="true" data-placeholder="e.g. Led a team of 8 engineers, reduced deployment time by 40%…" oninput="if(!_isTouchScrolling)markNeedsRegen()"></div>
     </div>
     <p class="field-tip">💡 Describe your responsibilities or leave blank — AI will generate professional bullets.</p>
     <button class="btn-gen-bullets" id="gen-bullets-btn-${id}" onclick="generateBullets(${id})">✦ Generate Bullets with AI</button></div>`;
@@ -3712,7 +3772,7 @@ function addAward(prependNew = false) {
   const id = ++awardCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'award-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Award / Certification</label><input type="text" placeholder="e.g. AWS Certified Solutions Architect" id="award-name-${id}"></div>
       <div class="form-group"><label class="form-label">Year</label><input type="text" placeholder="e.g. 2023" id="award-year-${id}"></div>
@@ -3730,7 +3790,7 @@ function addEducation(prependNew = false) {
   const id = ++eduCount;
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'edu-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-grid-2">
       <div class="form-group"><label class="form-label">Degree / Qualification</label><input type="text" placeholder="e.g. B.Tech Computer Science" id="edu-deg-${id}"></div>
       <div class="form-group"><label class="form-label">Institution</label><input type="text" placeholder="e.g. IIT Bombay" id="edu-sch-${id}"></div>
@@ -3753,7 +3813,7 @@ function addCustomSection(title='', content='', includeInResume=true, noScroll=f
   const isCustomTitle = !!(title && !CUSTOM_SECTION_PRESETS.includes(title));
   const div = document.createElement('div');
   div.className = 'entry-card'; div.id = 'custom-'+id;
-  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove()" title="Remove">✕</button>
+  div.innerHTML = `<button class="entry-remove" onclick="this.closest('.entry-card').remove();markNeedsRegen()" title="Remove">✕</button>
     <div class="form-row">
       <div class="form-group" style="flex:1">
         <label class="form-label">Section Title</label>
@@ -3789,7 +3849,7 @@ function addCustomSection(title='', content='', includeInResume=true, noScroll=f
           <button type="button" class="rte-btn" onmousedown="event.preventDefault();document.execCommand('italic')" title="Italic"><i>I</i></button>
           <button type="button" class="rte-btn" onmousedown="event.preventDefault();_rteInsertBullet('custom-content-${id}')" title="Bullet">• List</button>
         </div>
-        <div class="rte-field" id="custom-content-${id}" contenteditable="true" data-placeholder="Describe this section…" oninput="updatePreview()"></div>
+        <div class="rte-field" id="custom-content-${id}" contenteditable="true" data-placeholder="Describe this section…" oninput="if(!_isTouchScrolling)updatePreview()"></div>
       </div>
       <button id="gen-custom-btn-${id}" onclick="generateCustomBullets('${id}')" style="margin-top:6px;padding:5px 12px;font-size:0.78rem;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;">✦ Generate with AI</button>
     </div>
@@ -4071,7 +4131,8 @@ function collectData() {
         title, co,
         start: document.getElementById('exp-start-'+id)?.value.trim()||'',
         end:   document.getElementById('exp-end-'+id)?.value.trim()||'',
-        desc:  descHtml
+        desc:  descHtml,
+        rawDesc: rawHtml
       };
       if (bulletTextLines.length >= 1) {
         // Use raw HTML so <p>/<div> line-breaks are intact before sanitizing each line
@@ -4159,6 +4220,10 @@ function _descToRteHtml(desc) {
   if (!desc) return '';
   if (/<[a-z]/i.test(desc)) return desc;
   var lines = desc.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  // Flat string with concatenated bullet chars but no newlines (old sanitized cloud data)
+  if (lines.length <= 1 && desc.indexOf('•') > -1) {
+    lines = desc.split('•').map(function(l){return l.trim();}).filter(Boolean);
+  }
   if (lines.length <= 1) return desc;
   return lines.map(function(l){
     var clean = l.replace(/^[•\-\*]\s*/,'');
@@ -4206,7 +4271,7 @@ function _getHtmlLines(html) {
     else if (node.nodeType === 1) {
       var tag = node.tagName.toLowerCase();
       if (tag === 'br') { flush(); }
-      else if (tag === 'div' || tag === 'p' || tag === 'li') { if (cur.length) flush(); Array.from(node.childNodes).forEach(walk); flush(); }
+      else if (tag === 'div' || tag === 'p' || tag === 'li' || tag === 'ul' || tag === 'ol') { if (cur.length) flush(); Array.from(node.childNodes).forEach(walk); flush(); }
       else { cur.push(node.outerHTML); }
     }
   }
@@ -4256,6 +4321,8 @@ function renderResumeHTML(data) {
         ? `<ul class="r-ul">${e.bullets.map(b=>`<li contenteditable="true">${_sanitizeRich(b)}</li>`).join('')}</ul>`
         : e.desc ? (function(){
             var dl = _getHtmlLines(e.desc);
+            if (dl.length <= 1 && e.desc.indexOf('•') > -1)
+              dl = e.desc.split('•').map(function(l){return l.trim();}).filter(Boolean);
             return dl.length > 1
               ? `<ul class="r-ul">${dl.map(l=>`<li contenteditable="true">${_sanitizeRich(l)}</li>`).join('')}</ul>`
               : `<ul class="r-ul"><li contenteditable="true">${_sanitizeRich(e.desc)}</li></ul>`;
@@ -5955,7 +6022,10 @@ window.addEventListener('load', function() {
     if (heroBtn) heroBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 400);
   ['experienceEntries','awardEntries','educationEntries'].forEach(id => {
-    document.getElementById(id).addEventListener('input', markNeedsRegen);
+    document.getElementById(id).addEventListener('input', function(e) {
+      if (_isTouchScrolling && e.target.contentEditable === 'true') return;
+      markNeedsRegen();
+    });
   });
 });
 
@@ -5981,6 +6051,8 @@ var _fbAuth = null, _fbDb = null, _fbUser = null, _autoSaveIv = null;
 function _initFirebase() {
   try {
     if (!window.firebase || _FB_CONFIG.apiKey.startsWith('REPLACE')) return;
+    // Show loader immediately on reload after sign-out so there's no flash of signed-in UI
+    if (_signingOut) _showCloudLoader('Signing out…');
     if (!firebase.apps.length) firebase.initializeApp(_FB_CONFIG);
     _fbAuth = firebase.auth();
     _fbDb   = firebase.firestore();
@@ -5988,6 +6060,12 @@ function _initFirebase() {
       _signInInProgress = false;
       sessionStorage.removeItem('_pendingSignIn');
       _fbUser = user;
+      if (_signingOut && user) return; // suppress cached signed-in state flash during sign-out reload
+      if (_signingOut && !user) {
+        // Sign-out confirmed — clear the flag and fall through to show sign-in button
+        _signingOut = false;
+        sessionStorage.removeItem('_signingOutReload');
+      }
       _renderAuthBtn(user);
       clearInterval(_autoSaveIv);
       if (user) {
@@ -5997,7 +6075,14 @@ function _initFirebase() {
         _hideCloudLoader();
       }
     });
-    _fbAuth.getRedirectResult().catch(function(e) {
+    _fbAuth.getRedirectResult().then(function(result) {
+      if (result && result.user) {
+        // Redirect sign-in completed — ensure we're on the main app, not a sub-page
+        if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+          window.location.replace('/');
+        }
+      }
+    }).catch(function(e) {
       sessionStorage.removeItem('_pendingSignIn');
       _hideCloudLoader();
       if (e.code !== 'auth/no-current-user') showToast('Sign-in error: ' + e.message);
@@ -6053,6 +6138,7 @@ function _stopGhostRotation() {
 }
 var _signInInProgress = false;
 var _signInTimer = null;
+var _signingOut = sessionStorage.getItem('_signingOutReload') === '1';
 function _resetSignIn() {
   _signInInProgress = false;
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
@@ -6080,20 +6166,24 @@ function signInWithGoogle() {
     _resetSignIn();
     if (e.code === 'auth/popup-closed-by-user') return;
     if (e.code === 'auth/popup-blocked') {
-      showToast('Popup blocked — please allow popups for this site and try again');
+      // Fall back to full-page redirect — Firebase will return to '/' after auth
+      sessionStorage.setItem('_pendingSignIn', '1');
+      _fbAuth.signInWithRedirect(provider);
     } else {
       showToast('Sign-in error: ' + e.message);
     }
   });
 }
 function signOutUser() {
+  _signingOut = true;
+  sessionStorage.setItem('_signingOutReload', '1');
   _pfSavedSlug = null;
   _signInInProgress = false;
   if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _showCloudLoader('Signing out…');
   if (_fbAuth) _fbAuth.signOut().then(function() {
     window.location.reload();
-  }).catch(function() { _hideCloudLoader(); });
+  }).catch(function() { _signingOut = false; sessionStorage.removeItem('_signingOutReload'); _hideCloudLoader(); });
 }
 
 function _collectCloudData() {
@@ -6147,7 +6237,7 @@ function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
   _showCloudLoader('Restoring your resume…');
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
-    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1); return; }
+    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1, true); return; }
     var d = doc.data().resume;
     var pf = doc.data().portfolio;
     if (pf) {
@@ -6169,7 +6259,7 @@ function _loadFromCloud(uid) {
       if (_rb) _rb.style.display = 'inline-flex';
     }
     _hideCloudLoader();
-    goToStep(1);
+    goToStep(1, true);
     setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
     setTimeout(function() { showToast('✓ Resume restored from cloud', 'success'); }, 450);
     // Restore portfolio slug for returning users (background — doesn't block load)
@@ -6184,7 +6274,7 @@ function _loadFromCloud(uid) {
         }
       }).catch(function(){});
     }
-  }).catch(function(e) { _hideCloudLoader(); goToStep(1); console.warn('Cloud load:', e); });
+  }).catch(function(e) { _hideCloudLoader(); goToStep(1, true); console.warn('Cloud load:', e); });
 }
 
 function _mobileAuthMenu(user) {
@@ -6444,6 +6534,8 @@ function renderPreviewWithTemplate(tpl) {
 function openPreviewModal() {
   const overlay = document.getElementById('previewModalOverlay');
   if (!overlay) return;
+  // Flush any pending form-sync so preview always shows latest edits
+  if (_syncResumeTimer) { clearTimeout(_syncResumeTimer); _syncResumeTimer = null; _syncLastResumeData(); }
   const sel = document.getElementById('previewTplSelect');
   if (sel) sel.value = currentTemplate;
   overlay.classList.add('open');
@@ -7743,6 +7835,7 @@ function getPfData() {
     experience: (function(){
       var live = (cd.experience||[]);
       if (!live.length) return wz.experience;
+      var lrExpArr = (lastResumeData && lastResumeData.experience) || [];
       return live.map(function(e, ei){
         var eStart = e.start || '';
         // Match by title+company (date only as tiebreaker for duplicate title+company entries).
@@ -7758,7 +7851,13 @@ function getPfData() {
             sv = _sg[_gp] || _sg[0];
           }
         }
-        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||''};
+        // Prefer lastResumeData bullets (AI-generated, explicitly stored) over collectData bullets
+        // (which may miss bullets if the RTE content lacks • prefixes, e.g. after cloud restore)
+        var lrMatch = lrExpArr.find(function(lr){ return lr.title === e.title && (lr.co||'') === (e.co||''); });
+        var _bullets = (lrMatch && Array.isArray(lrMatch.bullets) && lrMatch.bullets.length)
+          ? lrMatch.bullets
+          : (Array.isArray(e.bullets) ? e.bullets : []);
+        return {title:e.title, company:e.co||'', dates:[e.start,e.end].filter(Boolean).join(' – '), desc:e.desc||(sv&&sv.desc)||'', rawDesc:e.rawDesc||'', bullets:_bullets};
       });
     })(),
     education: wz.education.some(function(e){return e.degree||e.school;}) ? wz.education : (cd.education||[]).map(function(e) {
@@ -8192,6 +8291,9 @@ function generatePortfolioHTML(d, tpl, sections) {
     if (!desc) return '';
     var lines = _getHtmlLines(desc);
     if (!lines.length) lines = desc.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    // Flat string with concatenated bullet chars but no newlines (old sanitized cloud data)
+    if (lines.length <= 1 && desc.indexOf('•') > -1)
+      lines = desc.split('•').map(function(l){return l.trim();}).filter(Boolean);
     if (lines.length > 1) {
       return '<ul class="' + cls + '" style="padding-left:16px;margin-top:4px;">'
         + lines.map(function(l){
@@ -8212,7 +8314,10 @@ function generatePortfolioHTML(d, tpl, sections) {
     if (expFiltered.length) {
       expHtml = '<section class="pf-sec" id="experience"><div class="pf-container"><h2 class="pf-sec-title">Experience</h2><div class="pf-timeline">';
       expFiltered.forEach(function(e) {
-        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + pfBullets(e.desc, 'pf-tl-desc') + '</div></div>';
+        var _expDesc = (Array.isArray(e.bullets) && e.bullets.length)
+          ? '<ul class="pf-tl-desc" style="padding-left:16px;margin-top:4px;">' + e.bullets.map(function(b){ return '<li>' + _sanitizeRich(b) + '</li>'; }).join('') + '</ul>'
+          : pfBullets(e.rawDesc || e.desc, 'pf-tl-desc');
+        expHtml += '<div class="pf-tl-item"><div class="pf-tl-dot"></div><div class="pf-tl-body"><h3 class="pf-tl-role">' + esc(e.title) + '</h3><div class="pf-tl-meta">' + esc(e.company) + (e.dates ? ' · ' + esc(e.dates) : '') + '</div>' + _expDesc + '</div></div>';
       });
       expHtml += '</div></div></section>';
     }
