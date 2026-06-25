@@ -574,7 +574,7 @@
     .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
     .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;position:relative;}
-    .pg-break{position:absolute;left:0;right:0;height:14px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,rgba(0,0,0,.14) 0,rgba(0,0,0,.14) 1px,#dde3ea 1px,#dde3ea 13px,rgba(0,0,0,.10) 13px,rgba(0,0,0,.10) 14px);}
+    .pg-break{position:absolute;left:0;right:0;height:20px;pointer-events:none;z-index:3;background:transparent;border-top:1.5px solid rgba(30,80,180,.3);border-bottom:1.5px solid rgba(30,80,180,.25);}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
@@ -4648,17 +4648,26 @@ function _showPageAdvisor() {
   panel.style.display = 'block';
 }
 let _pcTimer;
-function _injectPageBreaks(n) {
-  const out = document.getElementById('resumeOutput');
-  if (!out) return;
-  out.querySelectorAll('.pg-break').forEach(function(el) { el.remove(); });
-  const onePagePx = Math.round(297 * 3.7795);
+function _injectPageBreaks(container, n) {
+  if (!container) return;
+  container.querySelectorAll('.pg-break').forEach(function(el) { el.remove(); });
+  var onePagePx = Math.round(297 * 3.7795);
   for (var i = 1; i < n; i++) {
     var br = document.createElement('div');
     br.className = 'pg-break';
-    br.style.top = (i * onePagePx - 7) + 'px';
-    out.appendChild(br);
+    br.style.top = (i * onePagePx - 10) + 'px';
+    container.appendChild(br);
   }
+}
+function _injectPreviewPageBreaks() {
+  var body = document.getElementById('previewModalBody');
+  if (!body) return;
+  var card = body.querySelector('.resume-output-card');
+  var page = body.querySelector('.resume-a4-page');
+  if (!card || !page) return;
+  var onePagePx = Math.round(297 * 3.7795);
+  var n = Math.max(1, Math.ceil(page.scrollHeight / onePagePx));
+  _injectPageBreaks(card, n);
 }
 function _doMeasureAndUpdate() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
@@ -4670,7 +4679,6 @@ function _doMeasureAndUpdate() {
   page.style.minHeight = '0';
   const onePagePx = Math.round(297 * 3.7795);
   page.style.height = Math.max(page.scrollHeight, onePagePx) + 'px';
-  _injectPageBreaks(n);
 }
 function _triggerPageCount(fast) {
   clearTimeout(_pcTimer);
@@ -6549,7 +6557,7 @@ function renderPreviewWithTemplate(tpl) {
   currentTemplate = savedTpl;
   // Wrap in resume-a4-page so template negative-margin tricks (r-head, r-2col) work correctly
   body.innerHTML = `<div class="preview-scale-wrap"><div class="preview-scale-inner"><div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin:0;overflow:visible;"><div class="resume-a4-page" style="min-height:unset;width:794px;max-width:none;">${html}</div></div></div></div>`;
-  requestAnimationFrame(function(){ requestAnimationFrame(scalePreview); });
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ scalePreview(); _injectPreviewPageBreaks(); }); });
 }
 function openPreviewModal() {
   const overlay = document.getElementById('previewModalOverlay');
@@ -6565,7 +6573,7 @@ function openPreviewModal() {
   const body = document.getElementById('previewModalBody');
   if (lastResumeData && liveA4 && body) {
     body.innerHTML = `<div class="preview-scale-wrap"><div class="preview-scale-inner"><div class="resume-output-card" style="pointer-events:none;user-select:none;-webkit-user-select:none;margin:0;overflow:visible;"><div class="resume-a4-page" style="min-height:unset;width:794px;max-width:none;">${liveA4.innerHTML}</div></div></div></div>`;
-    requestAnimationFrame(function(){ requestAnimationFrame(scalePreview); });
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ scalePreview(); _injectPreviewPageBreaks(); }); });
   } else {
     try { renderPreviewWithTemplate(currentTemplate); } catch(e) { console.error('Preview render error:', e); }
   }
