@@ -3080,6 +3080,7 @@ function startBuild() {
 let _syncResumeTimer;
 function markNeedsRegen() {
   if (!lastResumeData) return;
+  if (_isTouchScrolling) return;
   needsRegenerate = true;
   const btn = document.getElementById('generateBtn');
   if (btn) btn.classList.add('regen-needed');
@@ -3373,6 +3374,7 @@ document.addEventListener('input', function(e) {
 document.addEventListener('change', function(e) {
   if (!e.target.closest('.step-content')) return;
   if (e.target.closest('#resumeOutput')) return;
+  if (currentStep === 7) return;
   markNeedsRegen();
 });
 
@@ -6058,7 +6060,7 @@ function _initFirebase() {
     _fbDb   = firebase.firestore();
     _fbAuth.onAuthStateChanged(function(user) {
       _signInInProgress = false;
-      sessionStorage.removeItem('_pendingSignIn');
+      localStorage.removeItem('_pendingSignIn');
       _fbUser = user;
       if (_signingOut && user) return; // suppress cached signed-in state flash during sign-out reload
       if (_signingOut && !user) {
@@ -6083,7 +6085,7 @@ function _initFirebase() {
         }
       }
     }).catch(function(e) {
-      sessionStorage.removeItem('_pendingSignIn');
+      localStorage.removeItem('_pendingSignIn');
       _hideCloudLoader();
       if (e.code !== 'auth/no-current-user') showToast('Sign-in error: ' + e.message);
     });
@@ -6091,7 +6093,7 @@ function _initFirebase() {
 }
 
 function _showSignInLoader() {
-  sessionStorage.setItem('_pendingSignIn', '1');
+  localStorage.setItem('_pendingSignIn', Date.now().toString());
   if (document.getElementById('_signinLoader')) return;
   var el = document.createElement('div');
   el.id = '_signinLoader';
@@ -6167,7 +6169,7 @@ function signInWithGoogle() {
     if (e.code === 'auth/popup-closed-by-user') return;
     if (e.code === 'auth/popup-blocked') {
       // Fall back to full-page redirect — Firebase will return to '/' after auth
-      sessionStorage.setItem('_pendingSignIn', '1');
+      localStorage.setItem('_pendingSignIn', Date.now().toString());
       _fbAuth.signInWithRedirect(provider);
     } else {
       showToast('Sign-in error: ' + e.message);
@@ -6402,7 +6404,8 @@ function _renderTips(step) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  if (sessionStorage.getItem('_pendingSignIn')) {
+  var _psiTs = parseInt(localStorage.getItem('_pendingSignIn') || '0');
+  if (_psiTs && (Date.now() - _psiTs) < 600000) {
     _showCloudLoader('Signing you in…');
     setTimeout(_hideCloudLoader, 10000); // safety: auto-clear if Firebase never responds
   }
