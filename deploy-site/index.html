@@ -4658,42 +4658,59 @@ function _injectPreviewPageBreaks() {
   var page = body.querySelector('.resume-a4-page');
   if (!card || !page) return;
   card.querySelectorAll('.pg-break').forEach(function(el) { el.remove(); });
-  var onePagePx = Math.round(297 * 3.7795);
-  var n = Math.max(1, Math.ceil(page.scrollHeight / onePagePx));
+  var ONE = Math.round(297 * 3.7795);
+  var n = Math.max(1, Math.ceil(page.scrollHeight / ONE));
   if (n <= 1) return;
-  var cardRect = card.getBoundingClientRect();
-  var pageRect = page.getBoundingClientRect();
-  var pageOffsetTop = pageRect.top - cardRect.top;
-  // Collect bottom and top edges of all block elements for snap logic
-  var blockEls = Array.from(page.querySelectorAll('p,li,h1,h2,h3,h4,h5,div,section'));
+  var cRect = card.getBoundingClientRect();
+  var pRect = page.getBoundingClientRect();
+  // Scale factor: preview is inside a CSS transform; getBoundingClientRect returns
+  // scaled viewport coords. Divide by scale to get unscaled CSS pixels for T comparison.
+  var scale = page.offsetWidth > 0 ? pRect.width / page.offsetWidth : 1;
+  var pOff = (pRect.top - cRect.top) / scale;
+  var MIN_H = 12;
+  // Only small elements (2–70px tall in CSS px) — excludes large container divs
+  var els = Array.from(page.querySelectorAll('*')).filter(function(el) {
+    var h = el.getBoundingClientRect().height / scale;
+    return h >= 2 && h <= 70;
+  });
+  // Pre-compute each element's unscaled top/bottom
+  var elData = els.map(function(el) {
+    var r = el.getBoundingClientRect();
+    return {
+      top: (r.top - pRect.top) / scale,
+      bot: (r.bottom - pRect.top) / scale
+    };
+  });
   for (var i = 1; i < n; i++) {
-    var targetY = i * onePagePx;
-    // Snap: find bottom of last block ending at or before targetY (within 150px)
-    var snapBot = targetY - 40;
-    var snapNext = targetY + 60;
-    var bestDist = Infinity;
-    blockEls.forEach(function(el) {
-      var r = el.getBoundingClientRect();
-      var bot = r.bottom - pageRect.top;
-      var top = r.top - pageRect.top;
-      if (bot <= targetY && targetY - bot < 150 && targetY - bot < bestDist) {
-        bestDist = targetY - bot; snapBot = bot;
-      }
-      // Find first element below snap point for flexible height
-      if (top > snapBot && top < snapNext) snapNext = top;
+    var T = i * ONE;
+    // Collect candidates: element bottoms at or before T, within 150px
+    var cands = [];
+    elData.forEach(function(d) {
+      if (d.bot <= T && T - d.bot < 150) cands.push(d.bot);
     });
-    // Flexible height: fill the natural gap, clamped 12–44px
-    var h = Math.max(12, Math.min(44, snapNext - snapBot));
+    // Sort: closest to T first
+    cands.sort(function(a, b) { return (T - a) - (T - b); });
+    // Find first candidate where no element top falls in [candBot, candBot + MIN_H)
+    // (guarantees the break band lands in real whitespace, not over content)
+    var snapBot = T - 50;
+    var snapNext = T + 50;
+    for (var k = 0; k < cands.length; k++) {
+      var cb = cands[k];
+      var hasOverlap = elData.some(function(d) { return d.top >= cb && d.top < cb + MIN_H; });
+      if (!hasOverlap) {
+        snapBot = cb;
+        // Find first element top strictly after snapBot
+        var sn = T + ONE;
+        elData.forEach(function(d) { if (d.top > cb && d.top < sn) sn = d.top; });
+        snapNext = sn;
+        break;
+      }
+    }
+    var h = Math.max(MIN_H, Math.min(32, snapNext - snapBot));
     var br = document.createElement('div');
     br.className = 'pg-break';
-    br.style.top = Math.round(pageOffsetTop + snapBot) + 'px';
+    br.style.top = Math.round(pOff + snapBot) + 'px';
     br.style.height = Math.round(h) + 'px';
-    if (h >= 24) {
-      var chip = document.createElement('div');
-      chip.className = 'pg-break-chip';
-      chip.textContent = 'Page ' + (i + 1);
-      br.appendChild(chip);
-    }
     card.appendChild(br);
   }
 }
