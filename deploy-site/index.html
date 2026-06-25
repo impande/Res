@@ -573,7 +573,9 @@
     .btn-dl-doc:hover{background:linear-gradient(135deg,#b45309,#92400e);transform:translateY(-1px);box-shadow:0 5px 16px rgba(217,119,6,0.38);}
     .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
-    .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;}
+    .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;position:relative;}
+    .pg-break{position:absolute;left:0;right:0;height:14px;pointer-events:none;z-index:3;background:linear-gradient(to bottom,rgba(0,0,0,.14) 0,rgba(0,0,0,.14) 1px,#dde3ea 1px,#dde3ea 13px,rgba(0,0,0,.10) 13px,rgba(0,0,0,.10) 14px);}
+    @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
@@ -3081,6 +3083,7 @@ let _syncResumeTimer;
 function markNeedsRegen() {
   if (!lastResumeData) return;
   if (_isTouchScrolling) return;
+  if (currentStep === 7) return;
   needsRegenerate = true;
   const btn = document.getElementById('generateBtn');
   if (btn) btn.classList.add('regen-needed');
@@ -3472,7 +3475,7 @@ function goToStep(step, skipScroll) {
       }
       if (lastResumeData) _triggerPageCount(true);
     }
-    updatePreview();
+    if (step !== 7) updatePreview();
   }
   document.getElementById('main').scrollTop = 0;
   // When clicking Step 1 from the landing page, scroll down to the profile photo section
@@ -4645,15 +4648,29 @@ function _showPageAdvisor() {
   panel.style.display = 'block';
 }
 let _pcTimer;
+function _injectPageBreaks(n) {
+  const out = document.getElementById('resumeOutput');
+  if (!out) return;
+  out.querySelectorAll('.pg-break').forEach(function(el) { el.remove(); });
+  const onePagePx = Math.round(297 * 3.7795);
+  for (var i = 1; i < n; i++) {
+    var br = document.createElement('div');
+    br.className = 'pg-break';
+    br.style.top = (i * onePagePx - 7) + 'px';
+    out.appendChild(br);
+  }
+}
 function _doMeasureAndUpdate() {
   const page = document.querySelector('#resumeOutput .resume-a4-page');
   if (!page) return;
-  _updatePageChip(_measurePages(page));
+  const n = _measurePages(page);
+  _updatePageChip(n);
   // Clip trailing blank space: lock height to actual content (min 1 A4 page)
   page.style.height = 'auto';
   page.style.minHeight = '0';
   const onePagePx = Math.round(297 * 3.7795);
   page.style.height = Math.max(page.scrollHeight, onePagePx) + 'px';
+  _injectPageBreaks(n);
 }
 function _triggerPageCount(fast) {
   clearTimeout(_pcTimer);

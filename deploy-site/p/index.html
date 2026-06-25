@@ -23,16 +23,6 @@
   <p>Please wait a moment.</p>
 </div>
 <script>
-// If we landed here after a Firebase redirect sign-in (popup blocked on iOS),
-// send the user back to the main app where the auth flow can complete properly.
-// Uses localStorage (shared across tabs) so Tab B sees what Tab A set.
-var _psiTs = parseInt(localStorage.getItem('_pendingSignIn') || '0');
-if (_psiTs && (Date.now() - _psiTs) < 600000) {
-  localStorage.removeItem('_pendingSignIn');
-  window.location.replace('/');
-}
-</script>
-<script>
 (function() {
   var parts = window.location.pathname.split('/').filter(function(s){ return s.length > 0; });
   var slug = parts[parts.length - 1] || '';
