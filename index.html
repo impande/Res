@@ -6186,20 +6186,29 @@ function signInWithGoogle() {
   // Safety: reset after 30s if neither success nor error fires (e.g. popup hung in some browsers)
   _signInTimer = setTimeout(_resetSignIn, 30000);
   var provider = new firebase.auth.GoogleAuthProvider();
-  _fbAuth.signInWithPopup(provider).then(function() {
-    if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
-    _showCloudLoader('Signing you in…');
-  }).catch(function(e) {
-    _resetSignIn();
-    if (e.code === 'auth/popup-closed-by-user') return;
-    if (e.code === 'auth/popup-blocked') {
-      // Fall back to full-page redirect — Firebase will return to '/' after auth
-      localStorage.setItem('_pendingSignIn', Date.now().toString());
-      _fbAuth.signInWithRedirect(provider);
-    } else {
-      showToast('Sign-in error: ' + e.message);
-    }
-  });
+  var _iosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (_iosDevice) {
+    // On iOS, signInWithPopup opens a new tab; after auth that tab closes and
+    // focus lands on whichever tab was last visible (often the portfolio tab).
+    // Skip popup entirely — redirect keeps the user in the same tab throughout.
+    localStorage.setItem('_pendingSignIn', Date.now().toString());
+    _fbAuth.signInWithRedirect(provider);
+  } else {
+    _fbAuth.signInWithPopup(provider).then(function() {
+      if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
+      _showCloudLoader('Signing you in…');
+    }).catch(function(e) {
+      _resetSignIn();
+      if (e.code === 'auth/popup-closed-by-user') return;
+      if (e.code === 'auth/popup-blocked') {
+        localStorage.setItem('_pendingSignIn', Date.now().toString());
+        _fbAuth.signInWithRedirect(provider);
+      } else {
+        showToast('Sign-in error: ' + e.message);
+      }
+    });
+  }
 }
 function signOutUser() {
   _signingOut = true;
