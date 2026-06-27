@@ -654,7 +654,6 @@
       #_authBtn{padding:5px;font-size:0.72rem;border-radius:50%;width:34px;height:34px;justify-content:center;}
       #_authBtn .auth-lbl{display:none;}
       #_authBtn .auth-check{display:none;}
-      #_authBtn .auth-out-btn{display:none;}
       .step-item .step-num{border-color:var(--muted);}
       .step-item{color:var(--muted);}
       #_mobileAuthMenu{position:fixed;top:58px;right:10px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:999;overflow:hidden;min-width:140px;}
@@ -6538,20 +6537,19 @@ function _authDropdown(user) {
     || _resumeVersions.length > 0;
   var hasData = isExistingUser || _hasMinimumData();
 
-  // Use _closeAuthDropdown in Save version onclick so stale listener is always cleaned up
-  var _saveBtn = '<button onclick="_saveVersionSnapshot(\'' + uid + '\',null,null,function(){showToast(\'☁️ Version saved\');});_closeAuthDropdown();">💾 Save version</button>';
+  var _userInfo = '<div style="padding:10px 14px 6px;">'
+    + '<div style="font-size:0.84rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (user.displayName || 'Account') + '</div>'
+    + '<div style="font-size:0.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">(' + (user.email || '') + ')</div>'
+    + '</div>';
   var _signOut = '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
   var _verSect = '<div class="drop-section-title">Saved Versions</div>'
                + '<div id="_versionListItems"><div style="padding:6px 14px 8px;font-size:0.8rem;color:var(--muted);">Loading…</div></div>';
   var _div     = '<div class="drop-divider"></div>';
 
   if (!hasData) {
-    menu.innerHTML =
-      '<div style="padding:10px 14px 6px;font-size:0.82rem;color:var(--text);font-weight:600;">👋 ' + (user.displayName ? user.displayName.split(' ')[0] : 'Hi') + '</div>'
-      + '<div style="padding:0 14px 10px;font-size:0.78rem;color:var(--muted);line-height:1.5;">Fill in Basic Info &amp; Experience to save your first version.</div>'
-      + _div + _signOut;
+    menu.innerHTML = _userInfo + _div + _signOut;
   } else {
-    menu.innerHTML = _saveBtn + _div + _verSect + _div + _signOut;
+    menu.innerHTML = _userInfo + _div + _verSect + _div + _signOut;
   }
   document.body.appendChild(menu);
 
@@ -6578,13 +6576,14 @@ function _authDropdown(user) {
       var listEl = document.getElementById('_versionListItems');
       if (!listEl) return;
       if (!versions.length) {
-        // Cloud user with resume in memory but no saved versions → auto-backup now
-        if (_isCloudUser && lastResumeData && _fbDb && !_autoBackupTriggered) {
+        // Cloud user with data but no saved versions → auto-backup now
+        var _backupData = lastResumeData || (_hasMinimumData() ? _collectCloudData() : null);
+        if (_isCloudUser && _backupData && _fbDb && !_autoBackupTriggered) {
           _autoBackupTriggered = true;
           var _al = _getVersionLabel();
           listEl.innerHTML = '<div style="padding:4px 14px 8px;font-size:0.8rem;color:var(--muted);">Creating backup…</div>';
           _fbDb.collection('users').doc(uid).collection('resumes').add({
-            resume: lastResumeData, label: _al, badge: '📌 Auto-backup', savedAt: new Date().toISOString()
+            resume: _backupData, label: _al, badge: '📌 Auto-backup', savedAt: new Date().toISOString()
           }).then(function(ref) {
             _resumeVersions = [{ id: ref.id, label: _al, badge: '📌 Auto-backup' }];
             var el2 = document.getElementById('_versionListItems');
@@ -6652,8 +6651,7 @@ function _renderAuthBtn(user) {
     btn.title = isMobile ? 'Tap to save or sign out' : 'Click to save · ' + user.email;
     btn.innerHTML = pic
       + '<span class="auth-lbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
-      + '<span class="auth-check" style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>'
-      + '<button class="auth-out-btn" onclick="event.stopPropagation();signOutUser();" style="background:rgba(0,0,0,0.08);border:none;border-radius:5px;color:var(--muted);font-size:0.68rem;padding:2px 7px;cursor:pointer;flex-shrink:0;">out</button>';
+      + '<span class="auth-check" style="font-size:0.65rem;color:#22c55e;flex-shrink:0;">✓</span>';
     // Mobile header: hide save, show avatar
     if (mhdrSaveBtn) mhdrSaveBtn.style.display = 'none';
     if (mhdrAvatar) {
