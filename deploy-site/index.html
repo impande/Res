@@ -6515,10 +6515,20 @@ function _doSwitchVersion(uid, resumeId) {
       }
     }).catch(function() { _hideCloudLoader(); showToast('Could not load version', 'error'); });
   };
-  // Only save a snapshot before switching if the user actually changed something
-  if (_versionDirty && (lastResumeData || _hasMinimumData()) && _fbDb) {
+  // If edits were made, save back to the same version (update in place), not a new one
+  if (_versionDirty && _fbDb) {
+    _versionDirty = false;
     _showCloudLoader('Saving current version…');
-    _saveVersionSnapshot(uid, null, null, function() { doLoad(); });
+    if (_currentVersionId) {
+      _fbDb.collection('users').doc(uid).collection('resumes').doc(_currentVersionId).update({
+        resume: _collectCloudData(),
+        portfolio: _collectPortfolioData(),
+        savedAt: new Date().toISOString()
+      }).then(doLoad).catch(doLoad);
+    } else {
+      _saveToCloud(uid, false);
+      doLoad();
+    }
   } else {
     doLoad();
   }
