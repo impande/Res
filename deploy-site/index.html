@@ -6515,8 +6515,8 @@ function _doSwitchVersion(uid, resumeId) {
       }
     }).catch(function() { _hideCloudLoader(); showToast('Could not load version', 'error'); });
   };
-  // Auto-save current data as a snapshot before switching
-  if ((lastResumeData || _hasMinimumData()) && _fbDb) {
+  // Only save a snapshot before switching if the user actually changed something
+  if (_versionDirty && (lastResumeData || _hasMinimumData()) && _fbDb) {
     _showCloudLoader('Saving current version…');
     _saveVersionSnapshot(uid, null, null, function() { doLoad(); });
   } else {
