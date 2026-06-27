@@ -6431,6 +6431,7 @@ function _saveVersionSnapshot(uid, label, badge, cb) {
   var data = { resume: _collectCloudData(), label: label || _getVersionLabel(), savedAt: new Date().toISOString() };
   if (badge) data.badge = badge;
   var p = _fbDb.collection('users').doc(uid).collection('resumes').add(data);
+  p.catch(function(e) { console.warn('Version save failed:', e.code, e.message); showToast('Version save failed: ' + (e.code || e.message), 'error'); });
   if (cb) p.then(cb).catch(function(){});
 }
 
