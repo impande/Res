@@ -574,7 +574,7 @@
     .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
     .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;position:relative;}
-    #_authDropdown{position:fixed;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.16);z-index:9999;overflow:hidden;min-width:210px;max-width:270px;}
+    #_authDropdown{position:fixed;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.16);z-index:9999;overflow-y:auto;min-width:210px;max-width:270px;max-height:calc(100vh - 80px);}
     #_authDropdown button{display:block;width:100%;padding:9px 14px;border:none;background:none;text-align:left;font-size:0.82rem;cursor:pointer;font-family:inherit;color:var(--text);}
     #_authDropdown button:hover{background:#f9f9f7;}
     #_authDropdown .drop-signout{color:#dc2626;}
@@ -4666,12 +4666,7 @@ function _injectPreviewPageBreaks() {
   var card = body.querySelector('.resume-output-card');
   var page = body.querySelector('.resume-a4-page');
   if (!card || !page) return;
-  // Remove old breaks and reset any pushed margins
   card.querySelectorAll('.pg-break').forEach(function(el) { el.remove(); });
-  page.querySelectorAll('[data-pgpush]').forEach(function(el) {
-    el.style.marginTop = el.getAttribute('data-pgpush');
-    el.removeAttribute('data-pgpush');
-  });
   var ONE = Math.round(297 * 3.7795);
   var n = Math.max(1, Math.ceil(page.scrollHeight / ONE));
   if (n <= 1) return;
@@ -4679,35 +4674,22 @@ function _injectPreviewPageBreaks() {
   var cRect = card.getBoundingClientRect();
   var scale = page.offsetWidth > 0 ? pRect.width / page.offsetWidth : 1;
   var pOff = (pRect.top - cRect.top) / scale;
-  // Leaf content elements only (not large wrapper divs)
-  var TAGS = 'p,li,h1,h2,h3,h4,h5,h6,td,th,span,a';
-  // Pre-pass: push any element that spans a page boundary down to the next page
+  // For each page boundary, place the dashed line just below any text that spans it
   for (var i = 1; i < n; i++) {
     var T = i * ONE;
-    pRect = page.getBoundingClientRect(); // re-measure after any prior push
-    Array.from(page.querySelectorAll(TAGS)).forEach(function(el) {
+    var linePos = T;
+    // Find the bottom of the lowest element that spans this boundary
+    Array.from(page.querySelectorAll('p,li,h1,h2,h3,h4,h5,h6,td,th,span,a,b,strong,em')).forEach(function(el) {
       var r = el.getBoundingClientRect();
       var elH = r.height / scale;
-      if (elH < 2 || elH > 80) return; // skip tiny/huge elements
+      if (elH < 2 || elH > 80) return;
       var elTop = (r.top - pRect.top) / scale;
       var elBot = elTop + elH;
-      if (elTop < T && elBot > T) {
-        // This element is split at T — add margin-top to push it below T
-        var prevMt = parseFloat(getComputedStyle(el).marginTop) || 0;
-        var push = Math.ceil(T - elTop) + 2;
-        el.setAttribute('data-pgpush', el.style.marginTop || '');
-        el.style.marginTop = (prevMt + push) + 'px';
-      }
+      if (elTop < T && elBot > T && elBot > linePos) linePos = elBot;
     });
-  }
-  // Re-measure page height after pushes, draw break lines at each page boundary
-  pRect = page.getBoundingClientRect();
-  pOff = (pRect.top - cRect.top) / scale;
-  n = Math.max(1, Math.ceil(page.scrollHeight / ONE));
-  for (var j = 1; j < n; j++) {
     var br = document.createElement('div');
     br.className = 'pg-break';
-    br.style.top = Math.round(pOff + j * ONE) + 'px';
+    br.style.top = Math.round(pOff + linePos) + 'px';
     card.appendChild(br);
   }
 }
@@ -6358,11 +6340,17 @@ function _applyCloudDoc(uid, d, pf) {
       }
     }).catch(function(){});
   }
-  // Silently create an initial snapshot if user has data but no saved versions yet
-  if (_fbDb && uid) {
+  // Silently create an initial snapshot from the raw Firestore doc if no versions exist yet
+  if (_fbDb && uid && d && (d.firstName || d.jobTitle || d.email)) {
     _loadVersionList(uid, function(versions) {
-      if (!versions.length && d && (d.firstName || d.jobTitle || d.email)) {
-        _saveVersionSnapshot(uid, null, '📌 Initial', null);
+      if (!versions.length) {
+        var _autoLabel = (d.jobTitle || d.firstName || 'Resume') + ' · ' + new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        _fbDb.collection('users').doc(uid).collection('resumes').add({
+          resume: d,
+          label: _autoLabel,
+          badge: '📌 Auto-backup',
+          savedAt: new Date().toISOString()
+        });
       }
     });
   }
@@ -6565,7 +6553,9 @@ function _authDropdown(user) {
     var _abtn = document.getElementById('_authBtn');
     if (_abtn) {
       var _r = _abtn.getBoundingClientRect();
-      menu.style.bottom = (window.innerHeight - _r.top + 6) + 'px';
+      // Clamp bottom so menu top is always ≥ 8px from viewport top
+      var _bot = window.innerHeight - _r.top + 6;
+      menu.style.bottom = _bot + 'px';
       menu.style.left = _r.left + 'px';
       menu.style.top = 'auto'; menu.style.right = 'auto';
     } else {
