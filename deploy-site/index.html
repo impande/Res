@@ -423,7 +423,7 @@
     .step-item.completed .step-num::after{content:'✓';font-size:0.72rem;}
     .step-label{font-size:0.84rem;font-weight:600;}
     .req-star{color:#ef4444;margin-left:2px;}
-#main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;}
+#main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;margin-left:auto;margin-right:auto;}
     .step-content{display:none;}
     .step-content.active{display:block;}
     .step-title{font-size:1.8rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.2;}
@@ -3403,7 +3403,7 @@ function goToStep(step, skipScroll) {
   if (!skipScroll) history.pushState({ step: step }, '');
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + step).classList.add('active');
-  if (!skipScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!skipScroll) { var _mn = document.getElementById('main'); if (_mn) _mn.scrollTop = 0; }
   // Top sticky bar is a landing-page element; hide it on all form steps so it
   // doesn't overlap the step title on any device or viewport size.
   if (step !== 0) _hideRichContent();
@@ -6466,19 +6466,39 @@ function _showVersionLoader() {
   tick();
 }
 
-function _switchVersion(uid, resumeId) {
-  var drop = document.getElementById('_authDropdown');
-  if (drop) drop.remove();
-  _showVersionLoader();
-  setTimeout(function() {
-    _saveToCloud(uid, false);
-    localStorage.setItem('_targetResumeId', resumeId);
-    setTimeout(function() {
-      _signingOut = true;
-      sessionStorage.setItem('_signingOutReload', '1');
-      if (_fbAuth) _fbAuth.signOut().then(function() { window.location.reload(); });
-    }, 900);
-  }, 50);
+function _switchVersion(uid, resumeId, vLabel) {
+  _closeAuthDropdown();
+  var safeLabel = (vLabel || 'this version').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var modal = document.createElement('div');
+  modal.id = '_verSwitchModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.48);z-index:99995;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:14px;padding:22px 22px 18px;max-width:320px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">'
+    + '<div style="font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:6px;">Load this version?</div>'
+    + '<div style="font-size:0.82rem;font-weight:600;color:var(--accent);margin-bottom:6px;">' + safeLabel + '</div>'
+    + '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:18px;line-height:1.5;">Your current unsaved changes will be replaced.</div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;">'
+    + '<button onclick="document.getElementById(\'_verSwitchModal\').remove();" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:none;font-size:0.82rem;cursor:pointer;color:var(--muted);font-family:inherit;">Cancel</button>'
+    + '<button onclick="_doSwitchVersion(\'' + uid + '\',\'' + resumeId + '\');" style="padding:8px 16px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:0.82rem;cursor:pointer;font-weight:600;font-family:inherit;">Load version</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+}
+
+function _doSwitchVersion(uid, resumeId) {
+  var modal = document.getElementById('_verSwitchModal');
+  if (modal) modal.remove();
+  _showCloudLoader('Loading version…');
+  _fbDb.collection('users').doc(uid).collection('resumes').doc(resumeId).get().then(function(vdoc) {
+    if (vdoc.exists && vdoc.data().resume) {
+      _applyCloudDoc(uid, vdoc.data().resume, null);
+      setTimeout(function() { showToast('✓ Version loaded', 'success'); }, 400);
+    } else {
+      _hideCloudLoader();
+      showToast('Version not found', 'error');
+    }
+  }).catch(function(e) {
+    _hideCloudLoader();
+    showToast('Could not load version', 'error');
+  });
 }
 
 function _showDraftConflict(draft, saved) {
@@ -6588,7 +6608,7 @@ function _authDropdown(user) {
           }).then(function(ref) {
             _resumeVersions = [{ id: ref.id, label: _al, badge: '📌 Auto-backup' }];
             var el2 = document.getElementById('_versionListItems');
-            if (el2) el2.innerHTML = '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + ref.id + '\');">'
+            if (el2) el2.innerHTML = '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + ref.id + '\',\'' + _al.replace(/'/g,'') + '\');">'
               + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _al + '</span>'
               + '<span class="drop-ver-badge">📌 Auto-backup</span>'
               + '</div>';
@@ -6602,7 +6622,8 @@ function _authDropdown(user) {
         return;
       }
       listEl.innerHTML = versions.map(function(v) {
-        return '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + v.id + '\');">'
+        var safeId = v.id, safeLbl = (v.label || 'Resume').replace(/'/g,'');
+        return '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + safeId + '\',\'' + safeLbl + '\');">'
           + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (v.label || 'Resume') + '</span>'
           + (v.badge ? '<span class="drop-ver-badge">' + v.badge + '</span>' : '')
           + '</div>';
