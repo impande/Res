@@ -6517,49 +6517,49 @@ function _authDropdown(user) {
   var menu = document.createElement('div');
   menu.id = '_authDropdown';
   var uid = user.uid;
-  // Existing users (cloud data loaded, already paid, or previously cached versions) always see full dropdown
+
+  // Check desktop vs mobile FIRST — needed to decide item order
+  var _sidebar = document.getElementById('sidebar');
+  var _isDesktop = _sidebar && _sidebar.offsetWidth > 0 && getComputedStyle(_sidebar).display !== 'none';
+
   var isExistingUser = _isCloudUser
     || (typeof lastResumeData !== 'undefined' && lastResumeData !== null)
     || (typeof hasPaid === 'function' && hasPaid())
     || _resumeVersions.length > 0;
   var hasData = isExistingUser || _hasMinimumData();
 
+  var _saveBtn  = '<button onclick="_saveVersionSnapshot(\'' + uid + '\',null,null,function(){showToast(\'☁️ Version saved\');});document.getElementById(\'_authDropdown\').remove();">💾 Save version</button>';
+  var _signOut  = '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
+  var _verSect  = '<div class="drop-section-title">Saved Versions</div>'
+                + '<div id="_versionListItems"><div style="padding:6px 14px 8px;font-size:0.8rem;color:var(--muted);">Loading…</div></div>';
+  var _div      = '<div class="drop-divider"></div>';
+
   if (!hasData) {
-    // First-time user hasn't filled Step 1 & 2 yet — no save or versions
     menu.innerHTML =
       '<div style="padding:10px 14px 6px;font-size:0.82rem;color:var(--text);font-weight:600;">👋 ' + (user.displayName ? user.displayName.split(' ')[0] : 'Hi') + '</div>'
       + '<div style="padding:0 14px 10px;font-size:0.78rem;color:var(--muted);line-height:1.5;">Fill in Basic Info &amp; Experience to save your first version.</div>'
-      + '<div class="drop-divider"></div>'
-      + '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
+      + _div + _signOut;
+  } else if (_isDesktop) {
+    // Desktop: menu grows upward — bottom item (Save version) is closest to the button
+    // and seen first. Sign out floats to the top, away from accidental tap.
+    menu.innerHTML = _signOut + _div + _verSect + _div + _saveBtn;
   } else {
-    menu.innerHTML =
-      '<button onclick="_saveVersionSnapshot(\'' + uid + '\',null,null,function(){showToast(\'☁️ Version saved\');});document.getElementById(\'_authDropdown\').remove();">💾 Save version</button>'
-      + '<div class="drop-divider"></div>'
-      + '<div class="drop-section-title">Saved Versions</div>'
-      + '<div id="_versionListItems"><div style="padding:6px 14px 8px;font-size:0.8rem;color:var(--muted);">Loading…</div></div>'
-      + '<div class="drop-divider"></div>'
-      + '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
+    // Mobile: menu drops downward — Save version is the first item visible at the top
+    menu.innerHTML = _saveBtn + _div + _verSect + _div + _signOut;
   }
   document.body.appendChild(menu);
 
-  // Position: check actual sidebar visibility, not just pixel width
-  var _sidebar = document.getElementById('sidebar');
-  var _sidebarVisible = _sidebar && _sidebar.offsetWidth > 0 && getComputedStyle(_sidebar).display !== 'none';
-  if (!_sidebarVisible) {
-    // Mobile / tablet portrait — anchor top-right below mobile header
+  // Position
+  if (!_isDesktop) {
     menu.style.top = '58px'; menu.style.right = '10px';
   } else {
-    // Desktop — anchor above the auth button in sidebar
     var _abtn = document.getElementById('_authBtn');
     if (_abtn) {
       var _r = _abtn.getBoundingClientRect();
-      // Clamp bottom so menu top is always ≥ 8px from viewport top
-      var _bot = window.innerHeight - _r.top + 6;
-      menu.style.bottom = _bot + 'px';
+      menu.style.bottom = (window.innerHeight - _r.top + 6) + 'px';
       menu.style.left = _r.left + 'px';
       menu.style.top = 'auto'; menu.style.right = 'auto';
     } else {
-      // Fallback: bottom-left corner
       menu.style.bottom = '80px'; menu.style.left = '18px';
     }
   }
