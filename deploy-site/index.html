@@ -574,9 +574,9 @@
     .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
     .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;position:relative;}
-    .pg-break{position:absolute;left:0;right:0;min-height:12px;pointer-events:none;z-index:3;background:#dde4eb;}
-    .pg-break::before{content:'';position:absolute;top:0;left:0;right:0;height:14px;background:linear-gradient(to bottom,rgba(0,0,0,.18) 0,rgba(0,0,0,.18) 1px,rgba(0,0,0,.10) 1px,rgba(0,0,0,.04) 8px,transparent 14px);}
-    .pg-break::after{content:'';position:absolute;bottom:0;left:0;right:0;height:14px;background:linear-gradient(to top,rgba(0,0,0,.15) 0,rgba(0,0,0,.15) 1px,rgba(0,0,0,.08) 1px,rgba(0,0,0,.03) 8px,transparent 14px);}
+    .pg-break{position:absolute;left:0;right:0;min-height:8px;pointer-events:none;z-index:3;background:#dde4eb;}
+    .pg-break::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:linear-gradient(to bottom,rgba(0,0,0,.14) 0,rgba(0,0,0,.14) 1px,rgba(0,0,0,.05) 1px,transparent 7px);}
+    .pg-break::after{content:'';position:absolute;bottom:0;left:0;right:0;height:7px;background:linear-gradient(to top,rgba(0,0,0,.10) 0,rgba(0,0,0,.10) 1px,rgba(0,0,0,.04) 1px,transparent 7px);}
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
@@ -6132,7 +6132,7 @@ var _FB_CONFIG = {
   messagingSenderId: '888944549224',
   appId:             '1:888944549224:web:1055799cbea2e484ff0add'
 };
-var _fbAuth = null, _fbDb = null, _fbUser = null, _autoSaveIv = null;
+var _fbAuth = null, _fbDb = null, _fbUser = null, _autoSaveIv = null, _isCloudUser = false;
 
 function _initFirebase() {
   try {
@@ -6337,6 +6337,7 @@ function _hideCloudLoader() {
   setTimeout(function() { el.remove(); }, 300);
 }
 function _applyCloudDoc(uid, d, pf) {
+  _isCloudUser = true;
   if (pf) {
     if (pf.template) pfTemplate = pf.template;
     if (pf.sections) Object.assign(pfSections, pf.sections);
@@ -6533,7 +6534,8 @@ function _authDropdown(user) {
   menu.id = '_authDropdown';
   var uid = user.uid;
   // Existing users (cloud data loaded, already paid, or previously cached versions) always see full dropdown
-  var isExistingUser = (typeof lastResumeData !== 'undefined' && lastResumeData !== null)
+  var isExistingUser = _isCloudUser
+    || (typeof lastResumeData !== 'undefined' && lastResumeData !== null)
     || (typeof hasPaid === 'function' && hasPaid())
     || _resumeVersions.length > 0;
   var hasData = isExistingUser || _hasMinimumData();
@@ -6556,16 +6558,23 @@ function _authDropdown(user) {
   }
   document.body.appendChild(menu);
 
-  // Position: mobile → top-right; desktop → above _authBtn
-  var isMobile = window.innerWidth <= 768;
-  if (isMobile) {
+  // Position: check actual sidebar visibility, not just pixel width
+  var _sidebar = document.getElementById('sidebar');
+  var _sidebarVisible = _sidebar && _sidebar.offsetWidth > 0 && getComputedStyle(_sidebar).display !== 'none';
+  if (!_sidebarVisible) {
+    // Mobile / tablet portrait — anchor top-right below mobile header
     menu.style.top = '58px'; menu.style.right = '10px';
   } else {
-    var btn = document.getElementById('_authBtn');
-    if (btn) {
-      var r = btn.getBoundingClientRect();
-      menu.style.bottom = (window.innerHeight - r.top + 8) + 'px';
-      menu.style.left = r.left + 'px';
+    // Desktop — anchor above the auth button in sidebar
+    var _abtn = document.getElementById('_authBtn');
+    if (_abtn) {
+      var _r = _abtn.getBoundingClientRect();
+      menu.style.bottom = (window.innerHeight - _r.top + 6) + 'px';
+      menu.style.left = _r.left + 'px';
+      menu.style.top = 'auto'; menu.style.right = 'auto';
+    } else {
+      // Fallback: bottom-left corner
+      menu.style.bottom = '80px'; menu.style.left = '18px';
     }
   }
 
