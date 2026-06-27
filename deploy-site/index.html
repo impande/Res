@@ -4903,6 +4903,9 @@ function downloadDoc() {
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  if (typeof _fbUser !== 'undefined' && _fbUser && lastResumeData) {
+    _saveVersionSnapshot(_fbUser.uid, _getVersionLabel(), '📄 DOC');
+  }
 }
 
 // ── PDF ───────────────────────────────────────────────────────────────
@@ -6343,13 +6346,16 @@ function _applyCloudDoc(uid, d, pf) {
   // Silently create an initial snapshot from the raw Firestore doc if no versions exist yet
   if (_fbDb && uid && d && (d.firstName || d.jobTitle || d.email)) {
     _loadVersionList(uid, function(versions) {
-      if (!versions.length) {
+      if (!versions.length && !_autoBackupTriggered) {
+        _autoBackupTriggered = true;
         var _autoLabel = (d.jobTitle || d.firstName || 'Resume') + ' · ' + new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short'});
         _fbDb.collection('users').doc(uid).collection('resumes').add({
           resume: d,
           label: _autoLabel,
           badge: '📌 Auto-backup',
           savedAt: new Date().toISOString()
+        }).then(function(ref) {
+          _resumeVersions = [{ id: ref.id, label: _autoLabel, badge: '📌 Auto-backup' }];
         });
       }
     });
@@ -6411,6 +6417,8 @@ function _loadMainCloudDoc(uid) {
 
 // ── Version management helpers ─────────────────────────────────────────
 var _resumeVersions = [];
+var _authDropdownRm = null; // stored click-outside listener so toggle path can clean it up
+var _autoBackupTriggered = false; // prevents duplicate auto-backups within a session
 
 function _getVersionLabel() {
   var title = (document.getElementById('jobTitle') || {}).value || '';
@@ -6511,16 +6519,18 @@ function _hasMinimumData() {
   return step1.trim().length > 0 && step2.trim().length > 0;
 }
 
+function _closeAuthDropdown() {
+  var el = document.getElementById('_authDropdown');
+  if (el) el.remove();
+  if (_authDropdownRm) { document.removeEventListener('click', _authDropdownRm); _authDropdownRm = null; }
+}
+
 function _authDropdown(user) {
   var existing = document.getElementById('_authDropdown');
-  if (existing) { existing.remove(); return; }
+  if (existing) { _closeAuthDropdown(); return; }
   var menu = document.createElement('div');
   menu.id = '_authDropdown';
   var uid = user.uid;
-
-  // Check desktop vs mobile FIRST — needed to decide item order
-  var _sidebar = document.getElementById('sidebar');
-  var _isDesktop = _sidebar && _sidebar.offsetWidth > 0 && getComputedStyle(_sidebar).display !== 'none';
 
   var isExistingUser = _isCloudUser
     || (typeof lastResumeData !== 'undefined' && lastResumeData !== null)
@@ -6528,39 +6538,38 @@ function _authDropdown(user) {
     || _resumeVersions.length > 0;
   var hasData = isExistingUser || _hasMinimumData();
 
-  var _saveBtn  = '<button onclick="_saveVersionSnapshot(\'' + uid + '\',null,null,function(){showToast(\'☁️ Version saved\');});document.getElementById(\'_authDropdown\').remove();">💾 Save version</button>';
-  var _signOut  = '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
-  var _verSect  = '<div class="drop-section-title">Saved Versions</div>'
-                + '<div id="_versionListItems"><div style="padding:6px 14px 8px;font-size:0.8rem;color:var(--muted);">Loading…</div></div>';
-  var _div      = '<div class="drop-divider"></div>';
+  // Use _closeAuthDropdown in Save version onclick so stale listener is always cleaned up
+  var _saveBtn = '<button onclick="_saveVersionSnapshot(\'' + uid + '\',null,null,function(){showToast(\'☁️ Version saved\');});_closeAuthDropdown();">💾 Save version</button>';
+  var _signOut = '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
+  var _verSect = '<div class="drop-section-title">Saved Versions</div>'
+               + '<div id="_versionListItems"><div style="padding:6px 14px 8px;font-size:0.8rem;color:var(--muted);">Loading…</div></div>';
+  var _div     = '<div class="drop-divider"></div>';
 
   if (!hasData) {
     menu.innerHTML =
       '<div style="padding:10px 14px 6px;font-size:0.82rem;color:var(--text);font-weight:600;">👋 ' + (user.displayName ? user.displayName.split(' ')[0] : 'Hi') + '</div>'
       + '<div style="padding:0 14px 10px;font-size:0.78rem;color:var(--muted);line-height:1.5;">Fill in Basic Info &amp; Experience to save your first version.</div>'
       + _div + _signOut;
-  } else if (_isDesktop) {
-    // Desktop: menu grows upward — bottom item (Save version) is closest to the button
-    // and seen first. Sign out floats to the top, away from accidental tap.
-    menu.innerHTML = _signOut + _div + _verSect + _div + _saveBtn;
   } else {
-    // Mobile: menu drops downward — Save version is the first item visible at the top
     menu.innerHTML = _saveBtn + _div + _verSect + _div + _signOut;
   }
   document.body.appendChild(menu);
 
-  // Position
+  // Position: mobile → top-right. Desktop/iPad → to the right of the sidebar auth button.
+  var _sidebar = document.getElementById('sidebar');
+  var _isDesktop = _sidebar && _sidebar.offsetWidth > 0 && getComputedStyle(_sidebar).display !== 'none';
   if (!_isDesktop) {
     menu.style.top = '58px'; menu.style.right = '10px';
   } else {
     var _abtn = document.getElementById('_authBtn');
     if (_abtn) {
       var _r = _abtn.getBoundingClientRect();
-      menu.style.bottom = (window.innerHeight - _r.top + 6) + 'px';
-      menu.style.left = _r.left + 'px';
-      menu.style.top = 'auto'; menu.style.right = 'auto';
+      // Appear to the right of the sidebar, vertically centred on the button
+      menu.style.left = (_r.right + 8) + 'px';
+      menu.style.top = Math.max(10, _r.top - 10) + 'px';
+      menu.style.right = 'auto'; menu.style.bottom = 'auto';
     } else {
-      menu.style.bottom = '80px'; menu.style.left = '18px';
+      menu.style.top = '70px'; menu.style.right = '20px';
     }
   }
 
@@ -6569,6 +6578,26 @@ function _authDropdown(user) {
       var listEl = document.getElementById('_versionListItems');
       if (!listEl) return;
       if (!versions.length) {
+        // Cloud user with resume in memory but no saved versions → auto-backup now
+        if (_isCloudUser && lastResumeData && _fbDb && !_autoBackupTriggered) {
+          _autoBackupTriggered = true;
+          var _al = _getVersionLabel();
+          listEl.innerHTML = '<div style="padding:4px 14px 8px;font-size:0.8rem;color:var(--muted);">Creating backup…</div>';
+          _fbDb.collection('users').doc(uid).collection('resumes').add({
+            resume: lastResumeData, label: _al, badge: '📌 Auto-backup', savedAt: new Date().toISOString()
+          }).then(function(ref) {
+            _resumeVersions = [{ id: ref.id, label: _al, badge: '📌 Auto-backup' }];
+            var el2 = document.getElementById('_versionListItems');
+            if (el2) el2.innerHTML = '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + ref.id + '\');">'
+              + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _al + '</span>'
+              + '<span class="drop-ver-badge">📌 Auto-backup</span>'
+              + '</div>';
+          }).catch(function() {
+            var el2 = document.getElementById('_versionListItems');
+            if (el2) el2.innerHTML = '<div style="padding:4px 14px 8px;font-size:0.8rem;color:var(--muted);">No saved versions yet.<br><span style="font-size:0.75rem;">Use "Save version" to create one.</span></div>';
+          });
+          return;
+        }
         listEl.innerHTML = '<div style="padding:4px 14px 8px;font-size:0.8rem;color:var(--muted);">No saved versions yet.<br><span style="font-size:0.75rem;">Use "Save version" to create one.</span></div>';
         return;
       }
@@ -6582,11 +6611,11 @@ function _authDropdown(user) {
   }
 
   setTimeout(function() {
-    function _rm(e) {
+    _authDropdownRm = function(e) {
       var el = document.getElementById('_authDropdown');
-      if (el && !el.contains(e.target)) { el.remove(); document.removeEventListener('click', _rm); }
-    }
-    document.addEventListener('click', _rm);
+      if (el && !el.contains(e.target)) { _closeAuthDropdown(); }
+    };
+    document.addEventListener('click', _authDropdownRm);
   }, 50);
 }
 
