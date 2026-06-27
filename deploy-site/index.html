@@ -578,6 +578,7 @@
     #_authDropdown button{display:block;width:100%;padding:9px 14px;border:none;background:none;text-align:left;font-size:0.82rem;cursor:pointer;font-family:inherit;color:var(--text);}
     #_authDropdown button:hover{background:#f9f9f7;}
     #_authDropdown .drop-signout{color:#dc2626;}
+    #_authDropdown a{color:inherit!important;text-decoration:none!important;pointer-events:none!important;}
     #_authDropdown .drop-divider{height:1px;background:var(--border);margin:3px 0;}
     #_authDropdown .drop-section-title{padding:7px 14px 3px;font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
     #_authDropdown .drop-ver-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:0.82rem;color:var(--text);}
@@ -6416,8 +6417,9 @@ function _loadMainCloudDoc(uid) {
 
 // ── Version management helpers ─────────────────────────────────────────
 var _resumeVersions = [];
-var _authDropdownRm = null; // stored click-outside listener so toggle path can clean it up
-var _autoBackupTriggered = false; // prevents duplicate auto-backups within a session
+var _authDropdownRm = null;
+var _autoBackupTriggered = false;
+var _currentVersionId = null; // id of the version currently loaded, null = main doc
 
 function _getVersionLabel() {
   var title = (document.getElementById('jobTitle') || {}).value || '';
@@ -6486,19 +6488,26 @@ function _switchVersion(uid, resumeId, vLabel) {
 function _doSwitchVersion(uid, resumeId) {
   var modal = document.getElementById('_verSwitchModal');
   if (modal) modal.remove();
-  _showCloudLoader('Loading version…');
-  _fbDb.collection('users').doc(uid).collection('resumes').doc(resumeId).get().then(function(vdoc) {
-    if (vdoc.exists && vdoc.data().resume) {
-      _applyCloudDoc(uid, vdoc.data().resume, null);
-      setTimeout(function() { showToast('✓ Version loaded', 'success'); }, 400);
-    } else {
-      _hideCloudLoader();
-      showToast('Version not found', 'error');
-    }
-  }).catch(function(e) {
-    _hideCloudLoader();
-    showToast('Could not load version', 'error');
-  });
+  var doLoad = function() {
+    _showCloudLoader('Loading version…');
+    _fbDb.collection('users').doc(uid).collection('resumes').doc(resumeId).get().then(function(vdoc) {
+      if (vdoc.exists && vdoc.data().resume) {
+        _currentVersionId = resumeId;
+        _applyCloudDoc(uid, vdoc.data().resume, null);
+        setTimeout(function() { showToast('✓ Version loaded', 'success'); }, 400);
+      } else {
+        _hideCloudLoader();
+        showToast('Version not found', 'error');
+      }
+    }).catch(function() { _hideCloudLoader(); showToast('Could not load version', 'error'); });
+  };
+  // Auto-save current data as a snapshot before switching
+  if ((lastResumeData || _hasMinimumData()) && _fbDb) {
+    _showCloudLoader('Saving current version…');
+    _saveVersionSnapshot(uid, null, null, function() { doLoad(); });
+  } else {
+    doLoad();
+  }
 }
 
 function _showDraftConflict(draft, saved) {
@@ -6560,7 +6569,7 @@ function _authDropdown(user) {
 
   var _userInfo = '<div style="padding:10px 14px 6px;">'
     + '<div style="font-size:0.84rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (user.displayName || 'Account') + '</div>'
-    + '<div style="font-size:0.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">(' + (user.email || '') + ')</div>'
+    + '<div style="font-size:0.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;cursor:default;">(' + (user.email || '') + ')</div>'
     + '</div>';
   var _signOut = '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
   var _verSect = '<div class="drop-section-title">Saved Versions</div>'
@@ -6623,9 +6632,12 @@ function _authDropdown(user) {
       }
       listEl.innerHTML = versions.map(function(v) {
         var safeId = v.id, safeLbl = (v.label || 'Resume').replace(/'/g,'');
-        return '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + safeId + '\',\'' + safeLbl + '\');">'
+        var isCurrent = v.id === _currentVersionId;
+        return '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + safeId + '\',\'' + safeLbl + '\');"'
+          + (isCurrent ? ' style="background:rgba(245,158,11,0.07);"' : '') + '>'
           + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (v.label || 'Resume') + '</span>'
-          + (v.badge ? '<span class="drop-ver-badge">' + v.badge + '</span>' : '')
+          + (isCurrent ? '<span style="font-size:0.7rem;color:#22c55e;font-weight:700;flex-shrink:0;">✓</span>' : '')
+          + (!isCurrent && v.badge ? '<span class="drop-ver-badge">' + v.badge + '</span>' : '')
           + '</div>';
       }).join('');
     });
