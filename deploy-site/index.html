@@ -3097,6 +3097,7 @@ function markNeedsRegen() {
   if (_isTouchScrolling) return;
   if (currentStep === 7) return;
   needsRegenerate = true;
+  _versionDirty = true;
   const btn = document.getElementById('generateBtn');
   if (btn) btn.classList.add('regen-needed');
   const badge = document.getElementById('regenBadge');
@@ -6106,6 +6107,7 @@ var _FB_CONFIG = {
   appId:             '1:888944549224:web:1055799cbea2e484ff0add'
 };
 var _fbAuth = null, _fbDb = null, _fbUser = null, _autoSaveIv = null, _isCloudUser = false;
+var _versionDirty = false; // true when form data changed since last version snapshot
 
 function _initFirebase() {
   try {
@@ -6129,7 +6131,13 @@ function _initFirebase() {
       clearInterval(_autoSaveIv);
       if (user) {
         _loadFromCloud(user.uid);
-        _autoSaveIv = setInterval(function() { _saveToCloud(user.uid, false); }, 60000);
+        _autoSaveIv = setInterval(function() {
+          _saveToCloud(user.uid, false);
+          if (_versionDirty && lastResumeData && _fbUser) {
+            _versionDirty = false;
+            _saveVersionSnapshot(_fbUser.uid, null, '⏱ Auto-save', null);
+          }
+        }, 60000);
       } else {
         _hideCloudLoader();
       }
@@ -6430,7 +6438,13 @@ function _getVersionLabel() {
 
 function _saveVersionSnapshot(uid, label, badge, cb) {
   if (!_fbDb || !uid) return;
-  var data = { resume: _collectCloudData(), label: label || _getVersionLabel(), savedAt: new Date().toISOString() };
+  _versionDirty = false;
+  var data = {
+    resume: _collectCloudData(),
+    portfolio: _collectPortfolioData(),
+    label: label || _getVersionLabel(),
+    savedAt: new Date().toISOString()
+  };
   if (badge) data.badge = badge;
   var p = _fbDb.collection('users').doc(uid).collection('resumes').add(data);
   p.catch(function(e) { console.warn('Version save failed:', e.code, e.message); showToast('Version save failed: ' + (e.code || e.message), 'error'); });
@@ -6493,7 +6507,7 @@ function _doSwitchVersion(uid, resumeId) {
     _fbDb.collection('users').doc(uid).collection('resumes').doc(resumeId).get().then(function(vdoc) {
       if (vdoc.exists && vdoc.data().resume) {
         _currentVersionId = resumeId;
-        _applyCloudDoc(uid, vdoc.data().resume, null);
+        _applyCloudDoc(uid, vdoc.data().resume, vdoc.data().portfolio || null);
         setTimeout(function() { showToast('✓ Version loaded', 'success'); }, 400);
       } else {
         _hideCloudLoader();
