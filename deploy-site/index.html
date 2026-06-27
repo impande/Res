@@ -652,6 +652,15 @@
       #_mobileAuthMenu button{display:block;width:100%;padding:10px 14px;border:none;background:none;text-align:left;font-size:0.82rem;cursor:pointer;font-family:inherit;}
       #_mobileAuthMenu button:hover{background:#f9f9f7;}
       #_mobileAuthMenu .mob-signout{color:#dc2626;}
+      #_authDropdown{position:fixed;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.16);z-index:9999;overflow:hidden;min-width:210px;max-width:270px;}
+      #_authDropdown button{display:block;width:100%;padding:9px 14px;border:none;background:none;text-align:left;font-size:0.82rem;cursor:pointer;font-family:inherit;color:var(--text);}
+      #_authDropdown button:hover{background:#f9f9f7;}
+      #_authDropdown .drop-signout{color:#dc2626;}
+      #_authDropdown .drop-divider{height:1px;background:var(--border);margin:3px 0;}
+      #_authDropdown .drop-section-title{padding:7px 14px 3px;font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
+      #_authDropdown .drop-ver-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:0.82rem;color:var(--text);}
+      #_authDropdown .drop-ver-item:hover{background:#f9f9f7;}
+      #_authDropdown .drop-ver-badge{font-size:0.66rem;background:rgba(217,119,6,0.12);color:var(--accent);padding:2px 6px;border-radius:6px;font-weight:700;white-space:nowrap;flex-shrink:0;}
     }
     @media(max-width:480px){
       .step-label{display:none;}
@@ -5906,6 +5915,11 @@ function _launchRazorpay(amount, currency, display) {
       markPaid();
       closePayModal();
       showToast('Payment successful! Generating PDF…', 'success');
+      // Auto-save version snapshot before download
+      if (typeof _fbUser !== 'undefined' && _fbUser) {
+        _saveVersionSnapshot(_fbUser.uid, _getVersionLabel(), '💳 Auto-saved');
+        setTimeout(function() { showToast('🎉 Version auto-saved before download', 'success'); }, 1800);
+      }
       if (_pendingPayAction === 'pdf') {
         _pendingPayAction = null;
         _doPrintPDF();
@@ -6233,6 +6247,14 @@ function signInWithGoogle() {
   var provider = new firebase.auth.GoogleAuthProvider();
   var _iosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  // Save any typed form data so it survives the redirect
+  try {
+    var _preDraft = _collectCloudData();
+    if (_preDraft && (_preDraft.firstName || _preDraft.email || _preDraft.jobTitle)) {
+      localStorage.setItem('_preSignInDraft', JSON.stringify(_preDraft));
+    }
+  } catch(e) {}
+
   if (_iosDevice) {
     // On iOS, signInWithPopup opens a new tab; after auth that tab closes and
     // focus lands on whichever tab was last visible (often the portfolio tab).
@@ -6314,61 +6336,261 @@ function _hideCloudLoader() {
   el.style.opacity = '0';
   setTimeout(function() { el.remove(); }, 300);
 }
+function _applyCloudDoc(uid, d, pf) {
+  if (pf) {
+    if (pf.template) pfTemplate = pf.template;
+    if (pf.sections) Object.assign(pfSections, pf.sections);
+    if (pf.wizardData) Object.assign(pfWzData, pf.wizardData);
+  }
+  var prev = document.getElementById('_cloudBanner');
+  if (prev) prev.remove();
+  if (typeof populateFormFromParsed === 'function') populateFormFromParsed(d);
+  if (d.template && typeof selectTemplate === 'function') selectTemplate(d.template);
+  if (d.photo) {
+    userPhoto = d.photo;
+    var _pp = document.getElementById('photoPreview');
+    var _ph = document.getElementById('photoPlaceholder');
+    var _rb = document.getElementById('removePhotoBtn');
+    if (_pp) { _pp.src = userPhoto; _pp.style.display = 'block'; }
+    if (_ph) _ph.style.display = 'none';
+    if (_rb) _rb.style.display = 'inline-flex';
+  }
+  _hideCloudLoader();
+  goToStep(1, true);
+  setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
+  setTimeout(function() { showToast('✓ Resume restored from cloud', 'success'); }, 450);
+  if (_fbDb && !_pfSavedSlug) {
+    try { var _lsSlug = localStorage.getItem('pfSlug_' + uid); if (_lsSlug) { _pfSavedSlug = _lsSlug; return; } } catch(e2) {}
+    _fbDb.collection('portfolios').where('uid','==',uid).limit(1).get().then(function(snap) {
+      if (!snap.empty) {
+        _pfSavedSlug = snap.docs[0].id;
+        try { localStorage.setItem('pfSlug_' + uid, _pfSavedSlug); } catch(e2) {}
+        if (typeof pfCurrentStep !== 'undefined' && pfCurrentStep === 3) _renderPfStep3Card();
+      }
+    }).catch(function(){});
+  }
+}
+
 function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
+
+  // Version switch: load specific subcollection doc
+  var targetId = localStorage.getItem('_targetResumeId');
+  if (targetId) {
+    localStorage.removeItem('_targetResumeId');
+    _showCloudLoader('Loading selected version…');
+    _fbDb.collection('users').doc(uid).collection('resumes').doc(targetId).get().then(function(vdoc) {
+      if (vdoc.exists && vdoc.data().resume) {
+        _applyCloudDoc(uid, vdoc.data().resume, null);
+        setTimeout(function() { showToast('✓ Version loaded', 'success'); }, 450);
+      } else {
+        _loadMainCloudDoc(uid); // fallback
+      }
+    }).catch(function() { _loadMainCloudDoc(uid); });
+    return;
+  }
+  _loadMainCloudDoc(uid);
+}
+
+function _loadMainCloudDoc(uid) {
   _showCloudLoader('Restoring your resume…');
+  // Check for pre-signin draft (user filled form before signing in)
+  var _draft = null;
+  try { _draft = JSON.parse(localStorage.getItem('_preSignInDraft') || 'null'); } catch(e) {}
+  if (_draft) localStorage.removeItem('_preSignInDraft');
+
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
-    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1, true); return; }
-    var d = doc.data().resume;
-    var pf = doc.data().portfolio;
-    if (pf) {
-      if (pf.template) pfTemplate = pf.template;
-      if (pf.sections) Object.assign(pfSections, pf.sections);
-      if (pf.wizardData) Object.assign(pfWzData, pf.wizardData);
+    var hasCloud = doc.exists && doc.data() && doc.data().resume;
+
+    // New user + draft → restore draft silently
+    if (_draft && !hasCloud) {
+      if (typeof populateFormFromParsed === 'function') populateFormFromParsed(_draft);
+      if (_draft.template && typeof selectTemplate === 'function') selectTemplate(_draft.template);
+      _hideCloudLoader();
+      goToStep(1, true);
+      setTimeout(function() { showToast('✓ Your progress was preserved', 'success'); }, 300);
+      return;
     }
-    var prev = document.getElementById('_cloudBanner');
-    if (prev) prev.remove();
-    if (typeof populateFormFromParsed === 'function') populateFormFromParsed(d);
-    if (d.template && typeof selectTemplate === 'function') selectTemplate(d.template);
-    if (d.photo) {
-      userPhoto = d.photo;
-      var _pp = document.getElementById('photoPreview');
-      var _ph = document.getElementById('photoPlaceholder');
-      var _rb = document.getElementById('removePhotoBtn');
-      if (_pp) { _pp.src = userPhoto; _pp.style.display = 'block'; }
-      if (_ph) _ph.style.display = 'none';
-      if (_rb) _rb.style.display = 'inline-flex';
+
+    // Existing user + draft → ask which to use
+    if (_draft && hasCloud) {
+      _showDraftConflict(_draft, doc.data().resume);
+      return;
     }
-    _hideCloudLoader();
-    goToStep(1, true);
-    setTimeout(function() { document.getElementById('firstName')?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
-    setTimeout(function() { showToast('✓ Resume restored from cloud', 'success'); }, 450);
-    // Restore portfolio slug for returning users (background — doesn't block load)
-    if (_fbDb && !_pfSavedSlug) {
-      try { var _lsSlug = localStorage.getItem('pfSlug_' + uid); if (_lsSlug) { _pfSavedSlug = _lsSlug; return; } } catch(e2) {}
-      _fbDb.collection('portfolios').where('uid','==',uid).limit(1).get().then(function(snap) {
-        if (!snap.empty) {
-          _pfSavedSlug = snap.docs[0].id;
-          try { localStorage.setItem('pfSlug_' + uid, _pfSavedSlug); } catch(e2) {}
-          // If user is already viewing portfolio Step 3, refresh the card immediately
-          if (typeof pfCurrentStep !== 'undefined' && pfCurrentStep === 3) _renderPfStep3Card();
-        }
-      }).catch(function(){});
-    }
+
+    // Normal load
+    if (!hasCloud) { _hideCloudLoader(); goToStep(1, true); return; }
+    _applyCloudDoc(uid, doc.data().resume, doc.data().portfolio);
   }).catch(function(e) { _hideCloudLoader(); goToStep(1, true); console.warn('Cloud load:', e); });
 }
 
-function _mobileAuthMenu(user) {
-  var existing = document.getElementById('_mobileAuthMenu');
+// ── Version management helpers ─────────────────────────────────────────
+var _resumeVersions = [];
+
+function _getVersionLabel() {
+  var title = (document.getElementById('jobTitle') || {}).value || '';
+  var first = (document.getElementById('firstName') || {}).value || '';
+  var label = title || first || 'Resume';
+  return label + ' · ' + new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+}
+
+function _saveVersionSnapshot(uid, label, badge, cb) {
+  if (!_fbDb || !uid) return;
+  var data = { resume: _collectCloudData(), label: label || _getVersionLabel(), savedAt: new Date().toISOString() };
+  if (badge) data.badge = badge;
+  var p = _fbDb.collection('users').doc(uid).collection('resumes').add(data);
+  if (cb) p.then(cb).catch(function(){});
+}
+
+function _loadVersionList(uid, cb) {
+  if (!_fbDb || !uid) { cb([]); return; }
+  _fbDb.collection('users').doc(uid).collection('resumes').orderBy('savedAt','desc').limit(10).get()
+    .then(function(snap) {
+      _resumeVersions = snap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+      cb(_resumeVersions);
+    }).catch(function() { cb([]); });
+}
+
+function _showVersionLoader() {
+  var steps = ['Saving current version…','Signing out…','Reloading…','Signing you back in…','Loading selected version…'];
+  var el = document.createElement('div');
+  el.id = '_verLoader';
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.97);z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;';
+  document.body.appendChild(el);
+  var idx = 0;
+  function tick() {
+    el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;text-align:left;min-width:220px;">' +
+      steps.map(function(s,i){
+        var done = i < idx, active = i === idx;
+        return '<div style="display:flex;align-items:center;gap:10px;font-size:0.88rem;font-family:\'Segoe UI\',system-ui,sans-serif;color:' + (done?'#16a34a':active?'#111827':'#9ca3af') + ';font-weight:' + (active?'600':'400') + ';">'
+          + (done ? '<span style="color:#16a34a;font-size:1rem;">✓</span>'
+              : active ? '<div style="width:13px;height:13px;border:2px solid #e5e7eb;border-top-color:#d97706;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div>'
+              : '<span style="color:#d1d5db;">○</span>')
+          + ' ' + s + '</div>';
+      }).join('') + '</div>';
+    if (idx < steps.length) { idx++; setTimeout(tick, 850); }
+  }
+  tick();
+}
+
+function _switchVersion(uid, resumeId) {
+  var drop = document.getElementById('_authDropdown');
+  if (drop) drop.remove();
+  _showVersionLoader();
+  setTimeout(function() {
+    _saveToCloud(uid, false);
+    localStorage.setItem('_targetResumeId', resumeId);
+    setTimeout(function() {
+      _signingOut = true;
+      sessionStorage.setItem('_signingOutReload', '1');
+      if (_fbAuth) _fbAuth.signOut().then(function() { window.location.reload(); });
+    }, 900);
+  }, 50);
+}
+
+function _showDraftConflict(draft, saved) {
+  _hideCloudLoader();
+  var ov = document.createElement('div');
+  ov.id = '_draftConflict';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99995;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML = '<div style="background:#fff;border-radius:14px;padding:24px;max-width:340px;width:100%;font-family:\'Segoe UI\',system-ui,sans-serif;">'
+    + '<div style="font-size:1rem;font-weight:700;color:#111;margin-bottom:8px;">You typed new info before signing in</div>'
+    + '<div style="font-size:0.85rem;color:#6b7280;margin-bottom:20px;line-height:1.5;">Which version do you want to use?</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px;">'
+    + '<button onclick="_resolveDraft(true)" style="padding:10px 14px;background:#d97706;color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:inherit;">Keep what I just typed</button>'
+    + '<button onclick="_resolveDraft(false)" style="padding:10px 14px;background:#f9fafb;color:#111;border:1px solid #e5e7eb;border-radius:8px;font-size:0.85rem;cursor:pointer;font-family:inherit;">Load my saved resume</button>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+  window._draftConflictData = { draft: draft, saved: saved };
+}
+
+function _resolveDraft(keepDraft) {
+  var el = document.getElementById('_draftConflict');
+  if (el) el.remove();
+  var c = window._draftConflictData;
+  if (!c) { goToStep(1, true); return; }
+  var d = keepDraft ? c.draft : c.saved;
+  if (typeof populateFormFromParsed === 'function') populateFormFromParsed(d);
+  if (d && d.template && typeof selectTemplate === 'function') selectTemplate(d.template);
+  goToStep(1, true);
+  setTimeout(function() { showToast(keepDraft ? '✓ Your typed data loaded' : '✓ Saved resume loaded', 'success'); }, 300);
+}
+
+// ── Unified auth dropdown (mobile + desktop) ───────────────────────────
+function _mobileAuthMenu(user) { _authDropdown(user); }
+
+function _hasMinimumData() {
+  var step1 = (document.getElementById('firstName') || {}).value || '';
+  var expTitle = document.querySelector('[id^="exp-title-"]');
+  var step2 = expTitle ? expTitle.value || '' : '';
+  return step1.trim().length > 0 && step2.trim().length > 0;
+}
+
+function _authDropdown(user) {
+  var existing = document.getElementById('_authDropdown');
   if (existing) { existing.remove(); return; }
   var menu = document.createElement('div');
-  menu.id = '_mobileAuthMenu';
-  menu.innerHTML =
-    '<button onclick="_saveToCloud(\'' + user.uid + '\',true);document.getElementById(\'_mobileAuthMenu\').remove();">💾 Save now</button>'
-    + '<button class="mob-signout" onclick="signOutUser();document.getElementById(\'_mobileAuthMenu\').remove();">Sign out</button>';
+  menu.id = '_authDropdown';
+  var uid = user.uid;
+  // Existing users (cloud data loaded, already paid, or previously cached versions) always see full dropdown
+  var isExistingUser = (typeof lastResumeData !== 'undefined' && lastResumeData !== null)
+    || (typeof hasPaid === 'function' && hasPaid())
+    || _resumeVersions.length > 0;
+  var hasData = isExistingUser || _hasMinimumData();
+
+  if (!hasData) {
+    // First-time user hasn't filled Step 1 & 2 yet — no save or versions
+    menu.innerHTML =
+      '<div style="padding:10px 14px 6px;font-size:0.82rem;color:var(--text);font-weight:600;">👋 ' + (user.displayName ? user.displayName.split(' ')[0] : 'Hi') + '</div>'
+      + '<div style="padding:0 14px 10px;font-size:0.78rem;color:var(--muted);line-height:1.5;">Fill in Basic Info &amp; Experience to save your first version.</div>'
+      + '<div class="drop-divider"></div>'
+      + '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
+  } else {
+    menu.innerHTML =
+      '<button onclick="_saveVersionSnapshot(\'' + uid + '\',null,null,function(){showToast(\'☁️ Version saved\');});document.getElementById(\'_authDropdown\').remove();">💾 Save version</button>'
+      + '<div class="drop-divider"></div>'
+      + '<div class="drop-section-title">Saved Versions</div>'
+      + '<div id="_versionListItems"><div style="padding:6px 14px 8px;font-size:0.8rem;color:var(--muted);">Loading…</div></div>'
+      + '<div class="drop-divider"></div>'
+      + '<button class="drop-signout" onclick="signOutUser();">Sign out</button>';
+  }
   document.body.appendChild(menu);
+
+  // Position: mobile → top-right; desktop → above _authBtn
+  var isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    menu.style.top = '58px'; menu.style.right = '10px';
+  } else {
+    var btn = document.getElementById('_authBtn');
+    if (btn) {
+      var r = btn.getBoundingClientRect();
+      menu.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      menu.style.left = r.left + 'px';
+    }
+  }
+
+  if (hasData) {
+    _loadVersionList(uid, function(versions) {
+      var listEl = document.getElementById('_versionListItems');
+      if (!listEl) return;
+      if (!versions.length) {
+        listEl.innerHTML = '<div style="padding:4px 14px 8px;font-size:0.8rem;color:var(--muted);">No saved versions yet.<br><span style="font-size:0.75rem;">Use "Save version" to create one.</span></div>';
+        return;
+      }
+      listEl.innerHTML = versions.map(function(v) {
+        return '<div class="drop-ver-item" onclick="_switchVersion(\'' + uid + '\',\'' + v.id + '\');">'
+          + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (v.label || 'Resume') + '</span>'
+          + (v.badge ? '<span class="drop-ver-badge">' + v.badge + '</span>' : '')
+          + '</div>';
+      }).join('');
+    });
+  }
+
   setTimeout(function() {
-    function _rm(e) { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', _rm); } }
+    function _rm(e) {
+      var el = document.getElementById('_authDropdown');
+      if (el && !el.contains(e.target)) { el.remove(); document.removeEventListener('click', _rm); }
+    }
     document.addEventListener('click', _rm);
   }, 50);
 }
@@ -6402,9 +6624,7 @@ function _renderAuthBtn(user) {
       ? '<img src="' + user.photoURL + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
       : '<span style="flex-shrink:0;font-size:1rem;">👤</span>';
     var name = user.displayName ? user.displayName.split(' ')[0] : 'Account';
-    btn.onclick = isMobile
-      ? function(e) { e.stopPropagation(); _mobileAuthMenu(user); }
-      : function() { _saveToCloud(user.uid, true); };
+    btn.onclick = function(e) { e.stopPropagation(); _authDropdown(user); };
     btn.title = isMobile ? 'Tap to save or sign out' : 'Click to save · ' + user.email;
     btn.innerHTML = pic
       + '<span class="auth-lbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
@@ -6981,6 +7201,25 @@ function closePreviewModal(e) {
   </div>
 </div>
 
+<div id="pfCoverCropModal" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--card,#1c1c2e);border:1px solid var(--border);border-radius:18px;padding:22px 20px;width:min(380px,96%);text-align:center;">
+    <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:3px;">Adjust Cover Photo</div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">Drag to position · scroll or pinch to zoom</div>
+    <div style="width:300px;height:150px;margin:0 auto 12px;border-radius:10px;overflow:hidden;border:2.5px solid var(--accent);box-shadow:0 0 0 4px rgba(129,140,248,0.18);">
+      <canvas id="pfCoverCropCanvas" width="300" height="150" style="display:block;touch-action:none;cursor:grab;user-select:none;"></canvas>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:0 2px;">
+      <span style="font-size:0.75rem;color:var(--muted);">–</span>
+      <input type="range" id="pfCoverCropZoom" min="1" max="4" step="0.02" value="1" style="flex:1;accent-color:var(--accent);cursor:pointer;">
+      <span style="font-size:0.9rem;color:var(--muted);">+</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="pfCoverCropCancel()" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;font-size:0.88rem;">Cancel</button>
+      <button onclick="pfCoverCropApply()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-size:0.88rem;">✓ Apply</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Portfolio Builder ──────────────────────────────────────────────────
 
@@ -7285,28 +7524,10 @@ function handlePfReviewCover(ev) {
   var file = ev.target.files && ev.target.files[0];
   if (!file) return;
   if (file.size > 10 * 1024 * 1024) { alert('Image must be under 10 MB'); return; }
-  // Compress immediately using a blob URL (avoids loading a huge base64 string into img.src)
-  var blobUrl = URL.createObjectURL(file);
-  var img = new Image();
-  img.onload = function() {
-    var maxW = 1200, maxH = 600;
-    var scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
-    var cv = document.createElement('canvas');
-    cv.width = Math.round(img.naturalWidth * scale);
-    cv.height = Math.round(img.naturalHeight * scale);
-    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-    pfCoverPhoto = cv.toDataURL('image/jpeg', 0.72);
-    URL.revokeObjectURL(blobUrl);
-    updatePfStep3Cover();
-    buildPfPreview();
-  };
-  img.onerror = function() {
-    URL.revokeObjectURL(blobUrl);
-    var reader = new FileReader();
-    reader.onload = function(e) { pfCoverPhoto = e.target.result; updatePfStep3Cover(); buildPfPreview(); };
-    reader.readAsDataURL(file);
-  };
-  img.src = blobUrl;
+  var reader = new FileReader();
+  reader.onload = function(e) { pfShowCoverCrop(e.target.result); };
+  reader.readAsDataURL(file);
+  ev.target.value = ''; // allow re-selecting same file after cancel
 }
 function pfRemoveReviewCover() {
   pfCoverPhoto = null;
@@ -7393,6 +7614,82 @@ function pfCropApply() {
   if (_pfCropCb) { _pfCropCb(url); _pfCropCb = null; }
 }
 function pfCropCancel() { document.getElementById('pfCropModal').style.display = 'none'; _pfCropCb = null; }
+
+// ── Cover photo crop (rectangular 2:1) ────────────────────────────────
+var _pfCoverCropImg = null;
+var _pfCoverCropOffX = 0, _pfCoverCropOffY = 0, _pfCoverCropBase = 1, _pfCoverCropZoom = 1;
+var _pfCoverCropDrag = null, _pfCoverCropPinch = 0, _pfCoverCropEvSet = false;
+var _PFCW = 300, _PFCH = 150;
+
+function pfShowCoverCrop(dataUrl) {
+  _pfCoverCropImg = new Image();
+  _pfCoverCropImg.onload = function() {
+    _pfCoverCropBase = Math.max(_PFCW / _pfCoverCropImg.naturalWidth, _PFCH / _pfCoverCropImg.naturalHeight);
+    _pfCoverCropZoom = 1;
+    _pfCoverCropOffX = (_PFCW - _pfCoverCropImg.naturalWidth  * _pfCoverCropBase) / 2;
+    _pfCoverCropOffY = (_PFCH - _pfCoverCropImg.naturalHeight * _pfCoverCropBase) / 2;
+    var sl = document.getElementById('pfCoverCropZoom'); if (sl) sl.value = 1;
+    _pfCoverCropEventsOnce();
+    _pfCoverCropDraw();
+    var m = document.getElementById('pfCoverCropModal'); if (m) m.style.display = 'flex';
+  };
+  _pfCoverCropImg.src = dataUrl;
+}
+function _pfCoverCropDraw() {
+  var c = document.getElementById('pfCoverCropCanvas'); if (!c || !_pfCoverCropImg) return;
+  var ctx = c.getContext('2d'), sc = _pfCoverCropBase * _pfCoverCropZoom;
+  ctx.clearRect(0, 0, _PFCW, _PFCH);
+  ctx.drawImage(_pfCoverCropImg, _pfCoverCropOffX, _pfCoverCropOffY, _pfCoverCropImg.naturalWidth * sc, _pfCoverCropImg.naturalHeight * sc);
+}
+function _pfCoverCropZoomAt(nz, fx, fy) {
+  nz = Math.max(1, Math.min(4, nz));
+  var os = _pfCoverCropBase * _pfCoverCropZoom, ns = _pfCoverCropBase * nz;
+  var ix = (fx - _pfCoverCropOffX) / os, iy = (fy - _pfCoverCropOffY) / os;
+  _pfCoverCropZoom = nz; _pfCoverCropOffX = fx - ix * ns; _pfCoverCropOffY = fy - iy * ns;
+  var sl = document.getElementById('pfCoverCropZoom'); if (sl) sl.value = nz;
+  _pfCoverCropDraw();
+}
+function _pfCoverCropEventsOnce() {
+  if (_pfCoverCropEvSet) return; _pfCoverCropEvSet = true;
+  var c = document.getElementById('pfCoverCropCanvas'); if (!c) return;
+  c.addEventListener('mousedown', function(e) { _pfCoverCropDrag = {ox: e.clientX - _pfCoverCropOffX, oy: e.clientY - _pfCoverCropOffY}; c.style.cursor = 'grabbing'; });
+  window.addEventListener('mousemove', function(e) { if (!_pfCoverCropDrag) return; _pfCoverCropOffX = e.clientX - _pfCoverCropDrag.ox; _pfCoverCropOffY = e.clientY - _pfCoverCropDrag.oy; _pfCoverCropDraw(); });
+  window.addEventListener('mouseup', function() { _pfCoverCropDrag = null; if (c) c.style.cursor = 'grab'; });
+  c.addEventListener('wheel', function(e) {
+    e.preventDefault(); var r = c.getBoundingClientRect();
+    _pfCoverCropZoomAt(_pfCoverCropZoom - e.deltaY * 0.003 * _pfCoverCropZoom, e.clientX - r.left, e.clientY - r.top);
+  }, {passive: false});
+  c.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) { _pfCoverCropDrag = {ox: e.touches[0].clientX - _pfCoverCropOffX, oy: e.touches[0].clientY - _pfCoverCropOffY}; }
+    else if (e.touches.length === 2) { _pfCoverCropDrag = null; var dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; _pfCoverCropPinch = Math.sqrt(dx*dx+dy*dy); }
+  }, {passive: false});
+  c.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 1 && _pfCoverCropDrag) { _pfCoverCropOffX = e.touches[0].clientX - _pfCoverCropDrag.ox; _pfCoverCropOffY = e.touches[0].clientY - _pfCoverCropDrag.oy; _pfCoverCropDraw(); }
+    else if (e.touches.length === 2) {
+      var dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY, dist = Math.sqrt(dx*dx+dy*dy);
+      var r = c.getBoundingClientRect(), cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, cy2 = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+      if (_pfCoverCropPinch > 0) _pfCoverCropZoomAt(_pfCoverCropZoom * dist / _pfCoverCropPinch, cx, cy2);
+      _pfCoverCropPinch = dist;
+    }
+  }, {passive: false});
+  c.addEventListener('touchend', function() { _pfCoverCropDrag = null; _pfCoverCropPinch = 0; });
+  var sl = document.getElementById('pfCoverCropZoom');
+  if (sl) sl.addEventListener('input', function() { _pfCoverCropZoomAt(parseFloat(this.value), _PFCW / 2, _PFCH / 2); });
+}
+function pfCoverCropApply() {
+  var out = document.createElement('canvas'); out.width = _PFCW * 2; out.height = _PFCH * 2;
+  out.getContext('2d').drawImage(_pfCoverCropImg,
+    _pfCoverCropOffX * 2, _pfCoverCropOffY * 2,
+    _pfCoverCropImg.naturalWidth * _pfCoverCropBase * _pfCoverCropZoom * 2,
+    _pfCoverCropImg.naturalHeight * _pfCoverCropBase * _pfCoverCropZoom * 2);
+  pfCoverPhoto = out.toDataURL('image/jpeg', 0.82);
+  document.getElementById('pfCoverCropModal').style.display = 'none';
+  updatePfStep3Cover();
+  buildPfPreview();
+}
+function pfCoverCropCancel() { document.getElementById('pfCoverCropModal').style.display = 'none'; }
 
 function pfWzSave() {
   var step = pfWzSteps[pfWzIdx];
