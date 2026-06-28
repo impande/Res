@@ -7,6 +7,9 @@ try {
   let count = 0;
   html = html.replace(/<script>([\s\S]*?)<\/script>/g, (match, js) => {
     if (js.trim().length < 200) return match;
+    // Skip blocks that are already obfuscated — any block whose first 100 chars
+    // contain a hex-style _0x identifier (all obfuscator output has this).
+    if (/_0x[0-9a-f]{3,}/i.test(js.trim().slice(0, 100))) return match;
     try {
       const result = JavaScriptObfuscator.obfuscate(js, {
         compact: true,
