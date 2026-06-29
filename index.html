@@ -6246,12 +6246,9 @@ function signInWithGoogle() {
     }).catch(function(e) {
       _resetSignIn();
       if (e.code === 'auth/popup-closed-by-user') return;
-      if (e.code === 'auth/popup-blocked') {
-        localStorage.setItem('_pendingSignIn', Date.now().toString());
-        _fbAuth.signInWithRedirect(provider);
-      } else {
-        showToast('Sign-in error: ' + e.message);
-      }
+      // Fall back to redirect for all popup failures (blocked, storage unavailable, etc.)
+      localStorage.setItem('_pendingSignIn', Date.now().toString());
+      _fbAuth.signInWithRedirect(provider);
     });
   }
 }

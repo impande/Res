@@ -3243,6 +3243,45 @@ if ('serviceWorker' in navigator) {
 (function(){
   var A4H = 1056;
 
+  /* ── Embedded template metadata (all 35 templates) ── */
+  var _TPL = {
+    modern:   {label:'Modern',    tag:'Professional',     cat:'dark'},
+    classic:  {label:'Classic',   tag:'Serif · Formal',   cat:'light'},
+    minimal:  {label:'Minimal',   tag:'Clean · Airy',     cat:'minimal'},
+    corporate:{label:'Corporate', tag:'Navy · Pro',        cat:'dark'},
+    creative: {label:'Creative',  tag:'Bold · Fresh',     cat:'creative'},
+    executive:{label:'Executive', tag:'Premium · Gold',   cat:'dark'},
+    fresh:    {label:'Fresh',     tag:'Teal · Clean',     cat:'light'},
+    elegant:  {label:'Elegant',   tag:'Wine · Serif',     cat:'light'},
+    bold:     {label:'Bold',      tag:'Red · Vibrant',    cat:'creative'},
+    tech:     {label:'Tech',      tag:'Dark · Cyan',      cat:'dark'},
+    academic: {label:'Academic',  tag:'Traditional',      cat:'minimal'},
+    simple:   {label:'Simple',    tag:'Black & White',    cat:'minimal'},
+    sky:      {label:'Sky',       tag:'Blue Gradient',    cat:'dark'},
+    purple:   {label:'Purple',    tag:'Deep Violet',      cat:'dark'},
+    warm:     {label:'Warm',      tag:'Brown · Earth',    cat:'dark'},
+    slate:    {label:'Slate',     tag:'Dark · Cyan',      cat:'dark'},
+    pink:     {label:'Pink',      tag:'Rose · Bold',      cat:'dark'},
+    indigo:   {label:'Indigo',    tag:'Deep · Violet',    cat:'dark'},
+    forest:   {label:'Forest',    tag:'Emerald · Dark',   cat:'dark'},
+    graphite: {label:'Graphite',  tag:'Charcoal · Sharp', cat:'dark'},
+    midnight: {label:'Midnight',  tag:'Deep · Elegant',   cat:'dark'},
+    copper:   {label:'Copper',    tag:'Rust · Warm',      cat:'dark'},
+    noir:     {label:'Noir',      tag:'Minimal · B&W',    cat:'dark'},
+    emerald:  {label:'Emerald',   tag:'Green · Teal',     cat:'dark'},
+    denim:    {label:'Denim',     tag:'Navy · Sky',       cat:'dark'},
+    ruby:     {label:'Ruby',      tag:'Deep Red',         cat:'dark'},
+    stone:    {label:'Stone',     tag:'Dark · Neutral',   cat:'dark'},
+    sunset:   {label:'Sunset',    tag:'Orange Gradient',  cat:'creative'},
+    ocean:    {label:'Ocean',     tag:'Blue Gradient',    cat:'dark'},
+    coral:    {label:'Coral',     tag:'Orange Accent',    cat:'creative'},
+    sage:     {label:'Sage',      tag:'Olive · Green',    cat:'creative'},
+    lime:     {label:'Lime',      tag:'Bright · Fresh',   cat:'creative'},
+    mono:     {label:'Mono',      tag:'Pure B&W',         cat:'minimal'},
+    retro:    {label:'Retro',     tag:'Typewriter',       cat:'minimal'},
+    paper:    {label:'Paper',     tag:'Parchment · Warm', cat:'minimal'},
+  };
+
   /* ── CSS ──────────────────────────────────────────────────── */
   var sty = document.createElement('style');
   sty.textContent = [
@@ -3291,10 +3330,21 @@ if ('serviceWorker' in navigator) {
 
   function _backBtn(fn){
     var b=document.createElement('button');
-    b.className='aig-back'; b.textContent='← Back';
+    b.className='aig-back'; b.textContent='← Back to menu';
     b.addEventListener('click', fn||_home);
     var m=$m(); if(m){ m.appendChild(b); _scroll(); }
     return b;
+  }
+
+  /* ── Detect current template from window var or CSS class ── */
+  function _getCurTpl(){
+    if(window.currentTemplate) return window.currentTemplate;
+    var out=document.getElementById('resumeOutput');
+    if(out){
+      var cls=Array.from(out.classList).find(function(c){return c.startsWith('tpl-');});
+      if(cls) return cls.slice(4);
+    }
+    return 'modern';
   }
 
   /* ── Template switch: swaps CSS class only — preserves DOM edits ── */
@@ -3351,17 +3401,12 @@ if ('serviceWorker' in navigator) {
   /* ──────────────── LAYOUT FLOW (same-category variants) ──── */
   function _layoutFlow(){
     _clear();
-    var tpls=window.TPL_META;
-    if(!tpls){
-      _msg('Templates load after your resume is generated — please generate it first.');
-      _backBtn(_home); return;
-    }
-    var cur=window.currentTemplate||'modern';
-    var curMeta=tpls[cur]||{label:cur,tag:'',cat:'dark'};
+    var cur=_getCurTpl();
+    var curMeta=_TPL[cur]||{label:cur,tag:'',cat:'dark'};
     var curCat=curMeta.cat;
 
-    // All templates in the same visual category, excluding the current one
-    var similar=Object.entries(tpls).filter(function(p){ return p[0]!==cur && p[1].cat===curCat; });
+    var similar=Object.keys(_TPL).filter(function(k){ return k!==cur && _TPL[k].cat===curCat; })
+                  .map(function(k){ return [k, _TPL[k]]; });
 
     if(!similar.length){
       _msg('No other styles in the same family. You\'re already on a unique one!');
@@ -3372,7 +3417,6 @@ if ('serviceWorker' in navigator) {
 
     var PAGE=6, page=0;
     function render(){
-      // Remove old grid/nav
       var m=$m();
       m.querySelectorAll('.aig-tgrid,.aig-tpl-nav,[data-tc]').forEach(function(el){el.remove();});
 
@@ -3405,7 +3449,7 @@ if ('serviceWorker' in navigator) {
         var n=document.createElement('button'); n.className='aig-opt'; n.textContent='More →';
         n.addEventListener('click',function(){page++;render();}); nav.appendChild(n);
       }
-      var b=document.createElement('button'); b.className='aig-back'; b.textContent='← Back';
+      var b=document.createElement('button'); b.className='aig-back'; b.textContent='← Back to menu';
       b.addEventListener('click',_home); nav.appendChild(b);
       m.appendChild(nav); _scroll();
     }
@@ -3451,10 +3495,11 @@ if ('serviceWorker' in navigator) {
   /* Step 1: font-size */
   function _askFontSize(tp, tpx){
     var out=document.getElementById('resumeOutput');
-    var d=_msg('<b>Step 1:</b> Reduce font size slightly? (keeps all content, just tighter spacing)');
+    var d=_msg('<b>Step 1 of 4:</b> Reduce font size slightly? (keeps all content, just tighter spacing)');
     var r=_row();
     var yes=document.createElement('button'); yes.className='aig-opt'; yes.textContent='Yes, reduce font';
     yes.addEventListener('click',function(){
+      r.querySelectorAll('button').forEach(function(b){b.disabled=true;});
       var fs=parseFloat(getComputedStyle(out).fontSize)||11;
       var min=fs-3;
       while(out.scrollHeight>tpx && fs>min){ fs-=0.35; out.style.fontSize=fs.toFixed(2)+'px'; }
@@ -3462,13 +3507,18 @@ if ('serviceWorker' in navigator) {
         _msg('<span class="aig-ok">✓ Font reduced to '+fs.toFixed(1)+'px — fits on '+tp+' page'+(tp>1?'s':'')+'!</span>');
         _backBtn(_home);
       } else {
-        _msg('Font reduced to '+fs.toFixed(1)+'px — still a bit long. Let\'s try more.');
+        _msg('<span class="aig-ok">✓ Font reduced to '+fs.toFixed(1)+'px.</span> Still a bit long — let\'s try a few more steps.');
         _askSummary(tp, tpx);
       }
     });
-    var no=document.createElement('button'); no.className='aig-opt'; no.textContent='Skip';
-    no.addEventListener('click',function(){ _askSummary(tp, tpx); });
+    var no=document.createElement('button'); no.className='aig-opt'; no.textContent='Skip this step';
+    no.addEventListener('click',function(){
+      r.querySelectorAll('button').forEach(function(b){b.disabled=true;});
+      _msg('Skipped font size — moving to next step.');
+      _askSummary(tp, tpx);
+    });
     r.appendChild(yes); r.appendChild(no); d.appendChild(r);
+    _backBtn(_home);
   }
 
   /* Step 2: shorten summary */
@@ -3476,33 +3526,40 @@ if ('serviceWorker' in navigator) {
     var out=document.getElementById('resumeOutput');
     var sumEl=out?out.querySelector('.r-sum'):null;
     if(!sumEl || sumEl.textContent.trim().length<=90){ _askBullets(tp, tpx); return; }
-    var d=_msg('<b>Step 2:</b> Shorten the professional summary? (trims to ~2 lines)');
+    var d=_msg('<b>Step 2 of 4:</b> Shorten the professional summary? (trims to ~2 lines)');
     var r=_row();
     var yes=document.createElement('button'); yes.className='aig-opt'; yes.textContent='Yes, shorten';
     yes.addEventListener('click',function(){
+      r.querySelectorAll('button').forEach(function(b){b.disabled=true;});
       sumEl.textContent=sumEl.textContent.slice(0,110).replace(/\s+\S*$/,'…');
       if(out.scrollHeight<=tpx){
         _msg('<span class="aig-ok">✓ Summary shortened — fits on '+tp+' page'+(tp>1?'s':'')+'!</span>');
         _backBtn(_home);
       } else {
-        _msg('Summary shortened. Let\'s continue.');
+        _msg('<span class="aig-ok">✓ Summary shortened.</span> Let\'s continue.');
         _askBullets(tp, tpx);
       }
     });
     var no=document.createElement('button'); no.className='aig-opt'; no.textContent='Keep it';
-    no.addEventListener('click',function(){ _askBullets(tp, tpx); });
+    no.addEventListener('click',function(){
+      r.querySelectorAll('button').forEach(function(b){b.disabled=true;});
+      _msg('Kept your summary — moving on.');
+      _askBullets(tp, tpx);
+    });
     r.appendChild(yes); r.appendChild(no); d.appendChild(r);
+    _backBtn(_home);
   }
 
   /* Step 3: trim bullets per job */
   function _askBullets(tp, tpx){
     var out=document.getElementById('resumeOutput');
-    // Collect experience blocks that have >2 visible bullets
     var jobs=Array.from(out?out.querySelectorAll('.r-exp'):[]).filter(function(job){
       return Array.from(job.querySelectorAll('.r-ul li')).filter(function(li){return li.style.display!=='none';}).length>2;
     });
     if(!jobs.length){ _askSkills(tp, tpx); return; }
-    _msg('<b>Step 3:</b> Trim bullet points? I\'ll ask about each job below.');
+    _msg('<b>Step 3 of 4:</b> Trim bullet points? I\'ll ask about each job below.');
+    _msg('<span class="aig-warn">💡 Tip: Short, impactful bullet points (one strong line each) are the most effective way to fit to 1 page.</span>');
+    _backBtn(_home);
     _askNextJob(jobs, 0, tp, tpx);
   }
 
@@ -3525,12 +3582,17 @@ if ('serviceWorker' in navigator) {
     var r=_row();
     var yes=document.createElement('button'); yes.className='aig-opt'; yes.textContent='Yes, trim it';
     yes.addEventListener('click',function(){
+      r.querySelectorAll('button').forEach(function(b){b.disabled=true;});
       extra.forEach(function(li){li.style.display='none';});
-      _msg('Trimmed <b>'+jobName+'</b>.');
+      _msg('<span class="aig-ok">✓ Trimmed bullets for '+jobName+'.</span>');
       _askNextJob(jobs, idx+1, tp, tpx);
     });
     var no=document.createElement('button'); no.className='aig-opt'; no.textContent='Keep all bullets';
-    no.addEventListener('click',function(){ _askNextJob(jobs, idx+1, tp, tpx); });
+    no.addEventListener('click',function(){
+      r.querySelectorAll('button').forEach(function(b){b.disabled=true;});
+      _msg('Kept all bullets for '+jobName+'.');
+      _askNextJob(jobs, idx+1, tp, tpx);
+    });
     r.appendChild(yes); r.appendChild(no); d.appendChild(r);
   }
 
@@ -3541,7 +3603,7 @@ if ('serviceWorker' in navigator) {
       _msg('<span class="aig-ok">✓ Your resume now fits on '+tp+' page'+(tp>1?'s':'')+'!</span>');
       _backBtn(_home); return;
     }
-    _msg('<span class="aig-warn">Still a bit long — a few more options:</span>');
+    _msg('<b>Step 4 of 4:</b> <span class="aig-warn">Still a bit long — a few more options:</span>');
     var skills=out?Array.from(out.querySelectorAll('.r-sk')).filter(function(el){return el.style.display!=='none';})
                  :[];
     if(skills.length){
@@ -3555,13 +3617,13 @@ if ('serviceWorker' in navigator) {
       sd.appendChild(sr);
     }
     var compact=['classic','minimal','simple','academic','mono','retro'];
-    var curKey=window.currentTemplate||'';
-    var others=compact.filter(function(k){return k!==curKey&&window.TPL_META&&window.TPL_META[k];}).slice(0,3);
+    var curKey=_getCurTpl();
+    var others=compact.filter(function(k){return k!==curKey && _TPL[k];}).slice(0,3);
     if(others.length){
       var td=_msg('<span class="aig-warn">Or try a more compact template style:</span>');
       var tr=_row();
       others.forEach(function(key){
-        var meta=window.TPL_META[key];
+        var meta=_TPL[key];
         var btn=document.createElement('button'); btn.className='aig-opt'; btn.textContent=meta.label;
         btn.addEventListener('click',function(){
           _applyTemplate(key);
@@ -3583,6 +3645,9 @@ if ('serviceWorker' in navigator) {
     if(!out){ _msg('Please generate your resume first.'); _backBtn(_home); return; }
     var secs=Array.from(out.querySelectorAll('.r-sec'));
     if(secs.length<2){ _msg('Not enough sections to rearrange.'); _backBtn(_home); return; }
+
+    /* Use actual parent of .r-sec elements — may be a child container inside #resumeOutput */
+    var secParent=secs[0].parentElement||out;
 
     function secTitle(s){ var t=s.querySelector('.r-sec-t'); return t?t.textContent.trim():'Section'; }
     var movingIdx=null;
@@ -3615,9 +3680,9 @@ if ('serviceWorker' in navigator) {
 
     function applyMove(afterIdx){
       var el=secs[movingIdx];
-      if(afterIdx===null) out.insertBefore(el,secs[0]);
-      else{ var anchor=secs[afterIdx]; out.insertBefore(el,anchor.nextSibling||null); }
-      secs=Array.from(out.querySelectorAll('.r-sec'));
+      if(afterIdx===null) secParent.insertBefore(el,secs[0]);
+      else{ var anchor=secs[afterIdx]; secParent.insertBefore(el,anchor.nextSibling||null); }
+      secs=Array.from(secParent.querySelectorAll('.r-sec'));
       movingIdx=null; _clear();
       _msg('<span class="aig-ok">✓ Moved! Want to rearrange another section?</span>');
       var r=_row();
@@ -3646,6 +3711,41 @@ if ('serviceWorker' in navigator) {
     var t=setInterval(function(){ var p2=document.getElementById('aiChatPanel'); if(p2){clearInterval(t);_bindPanel(p2);} },400);
   }
   _init();
+})();
+</script>
+<script>
+/* ── Sign-in popup fallback fix — incognito / fresh-browser ── */
+(function(){
+  var _orig = signInWithGoogle;
+  signInWithGoogle = function(){
+    if(!_fbAuth){showToast('Firebase not configured — see setup instructions in code');return;}
+    if(_signInInProgress)return;
+    _signInInProgress=true;
+    _showCloudLoader('Redirecting to Google…');
+    var btn=document.getElementById('_authBtn');
+    if(btn){
+      btn.disabled=true; btn.style.opacity='0.8';
+      btn.innerHTML='<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
+    }
+    _signInTimer=setTimeout(_resetSignIn,30000);
+    var provider=new firebase.auth.GoogleAuthProvider();
+    var _ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if(_ios){
+      localStorage.setItem('_pendingSignIn',Date.now().toString());
+      _fbAuth.signInWithRedirect(provider);
+    } else {
+      _fbAuth.signInWithPopup(provider).then(function(){
+        if(_signInTimer){clearTimeout(_signInTimer);_signInTimer=null;}
+        _showCloudLoader('Signing you in…');
+      }).catch(function(e){
+        _resetSignIn();
+        if(e.code==='auth/popup-closed-by-user') return;
+        /* Fall back to redirect for all popup failures (blocked, storage unavailable, etc.) */
+        localStorage.setItem('_pendingSignIn',Date.now().toString());
+        _fbAuth.signInWithRedirect(provider);
+      });
+    }
+  };
 })();
 </script>
 </body>
