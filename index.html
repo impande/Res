@@ -6219,7 +6219,7 @@ function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
   if (_signInInProgress) return;
   _signInInProgress = true;
-  _showCloudLoader('Redirecting to Google…');
+  _showCloudLoader('Signing in…');
   var btn = document.getElementById('_authBtn');
   if (btn) {
     btn.disabled = true;
@@ -6227,9 +6227,29 @@ function signInWithGoogle() {
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
   var provider = new firebase.auth.GoogleAuthProvider();
-  // Always use redirect — works reliably on all devices, including incognito and private browsing
-  localStorage.setItem('_pendingSignIn', Date.now().toString());
-  _fbAuth.signInWithRedirect(provider);
+  var _ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var _done = false;
+  var _doRedirect = function() {
+    if (_done) return; _done = true;
+    localStorage.setItem('_pendingSignIn', Date.now().toString());
+    _showCloudLoader('Redirecting to Google…');
+    _fbAuth.signInWithRedirect(provider);
+  };
+  if (_ios) { _doRedirect(); return; }
+  // Desktop: try popup (works in most browsers). Falls back to redirect after 4s
+  // if the popup is blocked, hangs, or throws (e.g. incognito / web-storage-unavailable).
+  var _timer = setTimeout(_doRedirect, 4000);
+  _fbAuth.signInWithPopup(provider).then(function() {
+    if (_done) return; _done = true;
+    clearTimeout(_timer);
+    _showCloudLoader('Signing you in…');
+  }).catch(function(e) {
+    clearTimeout(_timer);
+    if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+      _resetSignIn(); return;
+    }
+    _doRedirect(); // any other error (blocked, web-storage-unavailable, etc.) → redirect
+  });
 }
 function signOutUser() {
   _signingOut = true;
