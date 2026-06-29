@@ -76,7 +76,7 @@ exports.handler = async function(event) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Add ANTHROPIC_API_KEY to your Netlify environment variables, then redeploy' }) };
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: 'Add ANTHROPIC_API_KEY to your Netlify environment variables, then redeploy' }) };
     }
 
     // Vision path: use Sonnet for better image reading accuracy
@@ -121,13 +121,13 @@ exports.handler = async function(event) {
 
     const data = await response.json();
     if (!response.ok) {
-      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ error: data.error?.message || 'API error' }) };
+      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ text: '', error: data.error?.message || 'API error' }) };
     }
 
     const text = data.content?.[0]?.text;
     // Return both `text` (used by main resume generation) and `content` (used by AI Chat functions)
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text, content: [{ text }] }) };
   } catch (err) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: err.message }) };
   }
 }
