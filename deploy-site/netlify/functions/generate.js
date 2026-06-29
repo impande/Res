@@ -125,7 +125,8 @@ exports.handler = async function(event) {
     }
 
     const text = data.content?.[0]?.text;
-    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
+    // Return both `text` (used by main resume generation) and `content` (used by AI Chat functions)
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text, content: [{ text }] }) };
   } catch (err) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
   }
