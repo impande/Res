@@ -6228,27 +6228,27 @@ function signInWithGoogle() {
     btn.style.opacity = '0.8';
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
-  // Safety: reset after 30s if neither success nor error fires (e.g. popup hung in some browsers)
-  _signInTimer = setTimeout(_resetSignIn, 30000);
   var provider = new firebase.auth.GoogleAuthProvider();
   var _iosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (_iosDevice) {
-    // On iOS, signInWithPopup opens a new tab; after auth that tab closes and
-    // focus lands on whichever tab was last visible (often the portfolio tab).
-    // Skip popup entirely — redirect keeps the user in the same tab throughout.
     localStorage.setItem('_pendingSignIn', Date.now().toString());
     _fbAuth.signInWithRedirect(provider);
   } else {
+    // Desktop: try popup. If it fails OR hangs >20s (common in incognito), fall back to redirect.
+    var _doRedirect = function() {
+      _signInTimer = null;
+      localStorage.setItem('_pendingSignIn', Date.now().toString());
+      _fbAuth.signInWithRedirect(provider);
+    };
+    _signInTimer = setTimeout(_doRedirect, 20000);
     _fbAuth.signInWithPopup(provider).then(function() {
       if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
       _showCloudLoader('Signing you in…');
     }).catch(function(e) {
-      _resetSignIn();
-      if (e.code === 'auth/popup-closed-by-user') return;
-      // Fall back to redirect for all popup failures (blocked, storage unavailable, etc.)
-      localStorage.setItem('_pendingSignIn', Date.now().toString());
-      _fbAuth.signInWithRedirect(provider);
+      if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
+      if (e.code === 'auth/popup-closed-by-user') { _resetSignIn(); return; }
+      _doRedirect();
     });
   }
 }
