@@ -6209,11 +6209,9 @@ function _stopGhostRotation() {
   }
 }
 var _signInInProgress = false;
-var _signInTimer = null;
 var _signingOut = sessionStorage.getItem('_signingOutReload') === '1';
 function _resetSignIn() {
   _signInInProgress = false;
-  if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _hideCloudLoader();
   _renderAuthBtn(_fbUser || null);
 }
@@ -6229,35 +6227,15 @@ function signInWithGoogle() {
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
   var provider = new firebase.auth.GoogleAuthProvider();
-  var _iosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (_iosDevice) {
-    localStorage.setItem('_pendingSignIn', Date.now().toString());
-    _fbAuth.signInWithRedirect(provider);
-  } else {
-    // Desktop: try popup. If it fails OR hangs >20s (common in incognito), fall back to redirect.
-    var _doRedirect = function() {
-      _signInTimer = null;
-      localStorage.setItem('_pendingSignIn', Date.now().toString());
-      _fbAuth.signInWithRedirect(provider);
-    };
-    _signInTimer = setTimeout(_doRedirect, 20000);
-    _fbAuth.signInWithPopup(provider).then(function() {
-      if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
-      _showCloudLoader('Signing you in…');
-    }).catch(function(e) {
-      if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
-      if (e.code === 'auth/popup-closed-by-user') { _resetSignIn(); return; }
-      _doRedirect();
-    });
-  }
+  // Always use redirect — works reliably on all devices, including incognito and private browsing
+  localStorage.setItem('_pendingSignIn', Date.now().toString());
+  _fbAuth.signInWithRedirect(provider);
 }
 function signOutUser() {
   _signingOut = true;
   sessionStorage.setItem('_signingOutReload', '1');
   _pfSavedSlug = null;
   _signInInProgress = false;
-  if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _showCloudLoader('Signing out…');
   if (_fbAuth) _fbAuth.signOut().then(function() {
     window.location.reload();
