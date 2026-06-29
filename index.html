@@ -6318,7 +6318,15 @@ function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
   _showCloudLoader('Restoring your resume…');
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
-    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1, true); return; }
+    if (!doc.exists || !doc.data().resume) {
+      _showCloudLoader('Setting up your account…');
+      _fbDb.collection('users').doc(uid).set(
+        { resume: _collectCloudData(), portfolio: _collectPortfolioData() },
+        { merge: true }
+      ).then(function() { _hideCloudLoader(); goToStep(1, true); })
+       .catch(function() { _hideCloudLoader(); goToStep(1, true); });
+      return;
+    }
     var d = doc.data().resume;
     var pf = doc.data().portfolio;
     if (pf) {
