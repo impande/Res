@@ -71,7 +71,7 @@ exports.handler = async function(event) {
     // imageBase64: single image (backward compat)
     const images = imageBase64Array || (imageBase64 ? [imageBase64] : []);
     if (!prompt && !images.length) {
-      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Missing prompt' }) };
+      return { statusCode: 400, headers: CORS, body: JSON.stringify({ text: '', error: 'Missing prompt' }) };
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
