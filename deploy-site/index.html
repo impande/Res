@@ -3440,10 +3440,12 @@ if ('serviceWorker' in navigator) {
     var tools=[
       {ico:'📝',lbl:'Rewrite summary',ai:true,sub:'Craft a sharper professional summary',fn:_aiRewriteSummary},
       {ico:'✨',lbl:'Polish sections',ai:true,sub:'Rewrite bullets punchier, section by section',fn:_polishHome},
+      {ico:'🔎',lbl:'AI review',ai:true,sub:'Recruiter-style feedback tailored to your role',fn:_aiReview},
       {ico:'🧩',lbl:'Suggest skills',ai:true,sub:'Add role-relevant, ATS-friendly skills',fn:_aiSuggestSkills},
       {ico:'📄',lbl:'Fit to page',ai:true,sub:'Font, bullets & spacing — auto or manual',fn:_fitFlow},
       {ico:'🎯',lbl:'ATS breakdown',ai:false,sub:'See exactly what helps and what’s missing',fn:_atsBreakdown},
       {ico:'🎨',lbl:'Customise look',ai:false,sub:'Colours, fonts & section highlights',fn:_customiseFlow},
+      {ico:'🪄',lbl:'Template versions',ai:true,sub:'Restyle the current template — accent colour & spacing',fn:_templateVersions},
       {ico:'↕️',lbl:'Reorder sections',ai:false,sub:'Arrange sections for your target role',fn:_reorderFlow}
     ];
     tools.forEach(function(t){
@@ -3671,6 +3673,83 @@ if ('serviceWorker' in navigator) {
       $m().appendChild(row); _backBtn(_home); _scroll();
     }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; });
     _backBtn(_home);
+  }
+
+  /* AI recruiter review — uses AI for a higher-quality, tailored assessment */
+  function _aiReview(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.querySelector('.resume-a4-page')){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
+    _msg('<b>AI review</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">A senior recruiter reads your resume and gives specific, prioritised feedback.</div>');
+    var status=_msg('<span class="aig-warn">✨ Reviewing like a recruiter…</span>');
+    var role=d.jobTitle||'the role';
+    var resume='ROLE: '+role+'\nSUMMARY: '+(d.summary||'(none)')+'\nSKILLS: '+(((d.skills||[]).join(', '))||'(none)')+'\nEXPERIENCE:\n'+(d.experience||[]).map(function(e){ return '- '+(e.title||'')+' at '+(e.co||'')+':\n'+((e.bullets||[]).map(function(b){return '  • '+b;}).join('\n')); }).join('\n');
+    var prompt='You are a senior technical recruiter reviewing a resume for a "'+role+'" role. Return STRICT JSON only (no markdown), shape: {"verdict":"one short overall sentence","strengths":["..",".."],"improvements":["specific fix","specific fix","specific fix"]}. Each item under 16 words, specific and actionable.\n\nRESUME:\n'+resume;
+    _aiGenerate(prompt).then(function(resp){
+      var data=null; try{ var jm=resp.match(/\{[\s\S]*\}/); data=jm?JSON.parse(jm[0]):null; }catch(e){}
+      status.remove();
+      if(!data){ _msg(resp?resp.slice(0,400):'Could not review — try again.'); _backBtn(_home); return; }
+      if(data.verdict) _msg('<b>“'+data.verdict+'”</b>');
+      if(data.strengths&&data.strengths.length) _msg('<div class="airx-sect" style="margin:1px 0 6px">✅ Strengths</div>'+data.strengths.map(function(x){return '<div style="font-size:0.82rem;line-height:1.5;margin:3px 0">• '+x+'</div>';}).join(''));
+      if(data.improvements&&data.improvements.length) _msg('<div class="airx-sect" style="margin:6px 0 6px">⚡ Improve</div>'+data.improvements.map(function(x){return '<div style="font-size:0.82rem;line-height:1.5;margin:3px 0">• '+x+'</div>';}).join(''));
+      _scroll();
+    }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; _backBtn(_home); });
+    _backBtn(_home);
+  }
+
+  /* Template versions — variations (accent colour + density) of the CURRENT template */
+  function _applyAccentVersion(hex){
+    var id='airxAccentStyle'; var st=document.getElementById(id);
+    if(!st){ st=document.createElement('style'); st.id=id; document.head.appendChild(st); }
+    var sel='#resumeOutput';
+    st.textContent=sel+' .r-sec-t{color:'+hex+'!important;border-color:'+hex+'!important;}'
+      +sel+' .r-title,'+sel+' .r-co,'+sel+' .r-award-org{color:'+hex+'!important;}'
+      +sel+' .r-ul li::before{color:'+hex+'!important;}'
+      +sel+' .r-exp::before{background:'+hex+'!important;box-shadow:0 0 0 2px '+hex+'!important;}'
+      +sel+' .r-contact a:hover{color:'+hex+'!important;}';
+    try{ if(typeof lastResumeData!=='undefined'&&lastResumeData){ lastResumeData._accent=hex; } }catch(e){}
+  }
+  function _applyDensityVersion(dv){
+    var out=document.getElementById('resumeOutput'); if(!out) return;
+    if(dv.ls) out.style.lineHeight=dv.ls; else out.style.removeProperty('line-height');
+    out.querySelectorAll('.r-sec').forEach(function(s){ if(dv.ss) s.style.marginBottom=dv.ss; else s.style.removeProperty('margin-bottom'); });
+    if(typeof _updPageBadge==='function')_updPageBadge();
+  }
+  function _templateVersions(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.querySelector('.resume-a4-page')){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    var cur=(typeof currentTemplate!=='undefined'&&currentTemplate)?currentTemplate:'your template';
+    var curName=cur.charAt(0).toUpperCase()+cur.slice(1);
+    _msg('<b>Versions of “'+curName+'”</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Same template — restyle the accent colour and spacing. Your resume updates live.</div>');
+    _msg('<div class="airx-sect" style="margin:1px 0 7px">🎨 Accent colour</div>');
+    var accents=[{n:'Indigo',c:'#4f46e5'},{n:'Violet',c:'#7c3aed'},{n:'Blue',c:'#2563eb'},{n:'Teal',c:'#0d9488'},{n:'Emerald',c:'#059669'},{n:'Rose',c:'#e11d48'},{n:'Amber',c:'#d97706'},{n:'Slate',c:'#334155'}];
+    var row=document.createElement('div'); row.className='aig-row';
+    accents.forEach(function(a){
+      var dot=document.createElement('button'); dot.className='aig-clr-dot'; dot.title=a.n; dot.style.cssText='background:'+a.c+';width:30px;height:30px;';
+      dot.addEventListener('click',function(){ row.querySelectorAll('.aig-clr-dot').forEach(function(d){d.classList.remove('sel');}); dot.classList.add('sel'); _applyAccentVersion(a.c); if(typeof _markEdited==='function')_markEdited(); });
+      row.appendChild(dot);
+    });
+    $m().appendChild(row);
+    var aiBtn=document.createElement('button'); aiBtn.className='aig-opt'; aiBtn.style.marginTop='9px'; aiBtn.textContent='✨ Suggest a colour for my role';
+    aiBtn.addEventListener('click',function(){
+      if(aiBtn.disabled) return; aiBtn.disabled=true; var ol=aiBtn.textContent; aiBtn.textContent='…';
+      var role=(typeof lastResumeData!=='undefined'&&lastResumeData&&lastResumeData.jobTitle)?lastResumeData.jobTitle:'a professional';
+      _aiGenerate('Suggest ONE professional, ATS-safe accent colour for a "'+role+'" resume. Output ONLY a hex code like #1f6feb.').then(function(t){
+        aiBtn.disabled=false; aiBtn.textContent=ol;
+        var mm=(t||'').match(/#[0-9a-fA-F]{6}/); if(mm){ _applyAccentVersion(mm[0]); row.querySelectorAll('.aig-clr-dot').forEach(function(d){d.classList.remove('sel');}); if(typeof _markEdited==='function')_markEdited(); _msg('<span class="aig-ok">✓ Applied AI-picked accent '+mm[0]+'</span>'); _scroll(); }
+      }).catch(function(){ aiBtn.disabled=false; aiBtn.textContent=ol; });
+    });
+    $m().appendChild(aiBtn);
+    _msg('<div class="airx-sect" style="margin:11px 0 7px">↕ Spacing</div>');
+    var dRow=document.createElement('div'); dRow.className='aig-row';
+    [{n:'Compact',ls:'1.4',ss:'8px'},{n:'Standard',ls:'',ss:''},{n:'Roomy',ls:'1.85',ss:'18px'}].forEach(function(dv){
+      var b=document.createElement('button'); b.className='aig-sz-btn'; b.textContent=dv.n;
+      b.addEventListener('click',function(){ dRow.querySelectorAll('.aig-sz-btn').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); _applyDensityVersion(dv); if(typeof _markEdited==='function')_markEdited(); });
+      dRow.appendChild(b);
+    });
+    $m().appendChild(dRow);
+    _backBtn(_home); _scroll();
   }
 
   /* ── CUSTOMISE FLOW — colours, font & section styling ── */
@@ -4172,9 +4251,11 @@ if ('serviceWorker' in navigator) {
       if(afterIdx===null) secParent.insertBefore(el,secs[0]);
       else{ var anchor=secs[afterIdx]; secParent.insertBefore(el,anchor.nextSibling||null); }
       secs=Array.from(secParent.querySelectorAll('.r-sec'));
+      var _movedTitle=secTitle(el);
       movingIdx=null;
       _markEdited();
-      _msg('<span class="aig-ok">✓ Moved!</span>');
+      _clear(); showPages();
+      _msg('<span class="aig-ok">✓ Moved '+_movedTitle+' — nice!</span>');
       var r=_row();
       var again=document.createElement('button'); again.className='aig-opt'; again.textContent='Move another';
       again.addEventListener('click',pickSection);
@@ -4201,7 +4282,9 @@ if ('serviceWorker' in navigator) {
       var onStep7=step7&&step7.offsetParent!==null;
       var previewOpen=document.getElementById('previewModalOverlay');
       previewOpen=!!previewOpen&&previewOpen.classList.contains('open');
-      if(onStep7&&!previewOpen) cta.classList.add('ai-cta-visible');
+      var _pf=document.getElementById('pfOverlay');
+      var pfOpen=!!_pf&&getComputedStyle(_pf).display!=='none';
+      if(onStep7&&!previewOpen&&!pfOpen) cta.classList.add('ai-cta-visible');
       else cta.classList.remove('ai-cta-visible');
       _positionMobileCta();
     }
@@ -4474,7 +4557,8 @@ if ('serviceWorker' in navigator) {
     var badge=document.getElementById('aiCtaBadge');
     var step7=document.getElementById('step7'); var onStep7=step7&&step7.offsetParent!==null;
     var ro=document.getElementById('resumeOutput');
-    var ready=onStep7 && !panelOpen && typeof lastResumeData!=='undefined' && lastResumeData && ro && ro.querySelector('.resume-a4-page');
+    var _pfo=document.getElementById('pfOverlay'); var pfOpen2=!!_pfo&&getComputedStyle(_pfo).display!=='none';
+    var ready=onStep7 && !panelOpen && !pfOpen2 && typeof lastResumeData!=='undefined' && lastResumeData && ro && ro.querySelector('.resume-a4-page');
     if(!ready){ if(badge) badge.style.display='none'; cta.classList.remove('airx-cta-glow'); return; }
     var n=0; try{ if(typeof window._analyzeResume==='function'){ n=(window._analyzeResume().suggestions||[]).filter(function(x){return x&&x.pri!=='low';}).length; } }catch(e){}
     if(n>0){
