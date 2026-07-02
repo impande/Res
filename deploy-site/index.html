@@ -3471,9 +3471,9 @@ if ('serviceWorker' in navigator) {
     var bullets=[]; (d.experience||[]).forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b) bullets.push(String(b)); }); });
     if(bullets.length){
       var withNum=bullets.filter(function(b){ return /\d/.test(b); }).length;
-      if(withNum/bullets.length<0.4) sugg.push({pri:'high',ico:'📊',lbl:'Add impact metrics',ai:true,sub:'Few bullets have numbers — quantify results for impact.',action:_polishHome});
+      if(withNum/bullets.length<0.4) sugg.push({pri:'high',ico:'📊',lbl:'Add impact metrics',ai:true,sub:'Few bullets have numbers — quantify results for impact.',action:function(){_bulletIssuesFlow('metrics');}});
       var wordy=bullets.filter(function(b){ return b.split(/\s+/).length>24; }).length;
-      if(wordy) sugg.push({pri:'med',ico:'✂️',lbl:'Tighten wordy bullets',ai:true,sub:wordy+' bullet'+(wordy>1?'s are':' is')+' long — compact with AI.',action:_fitFlow});
+      if(wordy) sugg.push({pri:'med',ico:'✂️',lbl:'Tighten wordy bullets',ai:true,sub:wordy+' bullet'+(wordy>1?'s are':' is')+' long — compact with AI.',action:function(){_bulletIssuesFlow('wordy');}});
     }
     var sk=(d.skills||[]).length;
     if(sk<6) sugg.push({pri:'med',ico:'🧩',lbl:'Add more skills',ai:true,sub:'Only '+sk+' skill'+(sk===1?'':'s')+' — boost keyword coverage.',action:_aiSuggestSkills});
@@ -3503,28 +3503,101 @@ if ('serviceWorker' in navigator) {
   }
 
   /* Polish each section with AI */
+  function _diagSec(sec){
+    var sum=sec.querySelector('.r-sum,.r-desc');
+    var lis=Array.from(sec.querySelectorAll('.r-ul li,ul li')).filter(function(li){return li.style.display!=='none'&&li.textContent.trim();});
+    if(sum && !lis.length){
+      var t=(sum.textContent||'').trim();
+      if(t.length<70) return {need:true, reason:'Looks thin — add detail & keywords'};
+      return {need:false, reason:'Tighten wording for more punch'};
+    }
+    if(lis.length){
+      var texts=lis.map(function(li){return li.textContent.trim();});
+      var noNum=texts.filter(function(x){return !/\d/.test(x);}).length;
+      var wordy=texts.filter(function(x){return x.split(/\s+/).length>24;}).length;
+      var weak=texts.filter(function(x){return !/^(Led|Built|Drove|Delivered|Launched|Reduced|Increased|Improved|Designed|Created|Managed|Achieved|Cut|Grew|Scaled|Streamlined|Automated|Developed|Owned|Spearheaded|Boosted|Generated)/i.test(x);}).length;
+      var parts=[];
+      if(noNum) parts.push(noNum+' lack metrics');
+      if(wordy) parts.push(wordy+' too wordy');
+      if(!parts.length && weak) parts.push('start with action verbs');
+      if(parts.length) return {need:true, reason:parts.join(' · ')};
+      return {need:false, reason:'Looks solid — refine wording'};
+    }
+    return {need:false, reason:'Refine wording'};
+  }
+
+  /* Polish with AI — diagnostic: shows what's weak in each section */
   function _polishHome(){
     _clear(); var m=$m(); if(!m) return;
     var out=document.getElementById('resumeOutput'); if(!out){ _msg('Generate your resume first.'); _backBtn(_home); return; }
-    _msg('<b>Polish with AI</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Pick a section — AI rewrites it punchier, keeping your facts.</div>');
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    _msg('<b>Polish with AI</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">I checked each section — here’s what to improve. Tap to let AI rewrite it, keeping your facts.</div>');
     var wrap=document.createElement('div'); wrap.className='aig-wrap';
     var secs=Array.from(out.querySelectorAll('.r-sec')).filter(function(sec){ return sec.querySelector('.r-ul li, .r-sum, .r-desc'); });
     if(!secs.length){ _msg('Nothing to polish yet.'); _backBtn(_home); return; }
-    secs.forEach(function(sec){
-      var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
-      var b=document.createElement('button'); b.className='airx-tool';
-      var idle='<span class="airx-tool-ico">✨</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+'</span><span class="airx-tool-sub">Rewrite for impact with AI</span></span><span class="airx-go">→</span>';
-      b.innerHTML=idle;
-      b.addEventListener('click', function(){
-        if(b.disabled) return; b.disabled=true;
-        b.innerHTML='<span class="airx-tool-ico">⏳</span><span class="airx-tool-body"><span class="airx-tool-lbl">Polishing '+label+'…</span></span>';
-        _polishSection(sec).then(function(ok){
-          b.disabled=false;
-          if(ok){ b.innerHTML='<span class="airx-tool-ico">✅</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+' polished</span><span class="airx-tool-sub">Tap to polish again</span></span><span class="airx-go">→</span>'; if(typeof _markEdited==='function')_markEdited(); }
-          else { b.innerHTML=idle; _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
+    secs.map(function(sec){ return {sec:sec, d:_diagSec(sec)}; })
+      .sort(function(a,b){ return (b.d.need?1:0)-(a.d.need?1:0); })
+      .forEach(function(o){
+        var sec=o.sec, d=o.d;
+        var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
+        var b=document.createElement('button'); b.className='airx-tool';
+        function idle(){ return '<span class="airx-tool-ico">'+(d.need?'✨':'✅')+'</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+(d.need?' <span class="airx-pill-need">needs work</span>':' <span class="airx-pill-ok">looks good</span>')+'</span><span class="airx-tool-sub">'+d.reason+'</span></span><span class="airx-go">→</span>'; }
+        b.innerHTML=idle();
+        b.addEventListener('click', function(){
+          if(b.disabled) return; b.disabled=true;
+          b.innerHTML='<span class="airx-tool-ico">⏳</span><span class="airx-tool-body"><span class="airx-tool-lbl">Polishing '+label+'…</span></span>';
+          _polishSection(sec).then(function(ok){
+            b.disabled=false;
+            if(ok){ b.innerHTML='<span class="airx-tool-ico">✅</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+' polished</span><span class="airx-tool-sub">Tap to polish again</span></span><span class="airx-go">→</span>'; if(typeof _markEdited==='function')_markEdited(); }
+            else { b.innerHTML=idle(); _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
+          });
         });
+        wrap.appendChild(b);
       });
-      wrap.appendChild(b);
+    m.appendChild(wrap); _backBtn(_home); _scroll();
+  }
+
+  /* Smart bullet-fix flow: lists the exact bullets that need a metric (mode='metrics')
+     or are too wordy (mode='wordy'), inline-editable + a per-bullet AI action. */
+  function _bulletIssuesFlow(mode){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var isMetrics = mode==='metrics';
+    var title = isMetrics ? 'Add impact metrics' : 'Tighten wordy bullets';
+    var hint = isMetrics ? 'These bullets have no numbers. Add a measurable result — % saved, $ earned, count, or time — to boost impact.' : 'These bullets are long. Trim each to ~12 punchy words.';
+    var lis = Array.from(out.querySelectorAll('.r-exp .r-ul li, .r-exp ul li')).filter(function(li){ return li.style.display!=='none' && li.textContent.trim(); });
+    var target = lis.filter(function(li){ var tx=li.textContent.trim(); return isMetrics ? !/\d/.test(tx) : tx.split(/\s+/).length>24; });
+    _msg('<b>'+title+'</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">'+hint+'</div>');
+    if(!target.length){ _msg('<span class="aig-ok">✓ '+(isMetrics?'Every bullet already includes a number — nice!':'No overly long bullets — looks tight!')+'</span>'); _backBtn(_home); return; }
+    var wrap=document.createElement('div'); wrap.className='aig-wrap';
+    var hd=document.createElement('div'); hd.style.cssText='font-size:0.72rem;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px';
+    hd.innerHTML='<span style="font-size:0.85rem">✏️</span> '+target.length+' bullet'+(target.length>1?'s':'')+' to fix — edit inline or tap the button';
+    wrap.appendChild(hd);
+    target.forEach(function(li){
+      var row=document.createElement('div'); row.style.cssText='background:#fff;border:1px solid #ececf3;border-radius:12px;padding:10px 12px;margin-bottom:9px;box-shadow:0 2px 10px rgba(24,24,40,0.04)';
+      var txt=document.createElement('div'); txt.contentEditable='true'; txt.spellcheck=false;
+      txt.style.cssText='font-size:0.8rem;line-height:1.45;color:var(--text);outline:none;border:1px solid transparent;border-radius:6px;padding:3px 5px;';
+      txt.textContent=li.textContent.trim();
+      txt.addEventListener('focus',function(){ txt.style.borderColor='var(--accent,#7c3aed)'; });
+      txt.addEventListener('input',function(){ var v=txt.textContent.trim(); if(v) li.textContent=v; });
+      txt.addEventListener('blur',function(){ txt.style.borderColor='transparent'; var v=txt.textContent.trim(); if(v){ li.textContent=v; } else { txt.textContent=li.textContent.trim(); } if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge(); });
+      var act=document.createElement('button'); act.className='aig-opt'; act.style.marginTop='8px'; var lbl=isMetrics?'✨ Strengthen with AI':'✂️ Compact with AI'; act.textContent=lbl;
+      act.addEventListener('click',function(){
+        if(act.disabled) return; act.disabled=true; act.textContent='…';
+        var prompt = isMetrics
+          ? 'Rewrite this resume bullet to lead with a strong action verb and highlight measurable impact. Be truthful — do NOT invent specific numbers; if no metric exists, emphasise scope and outcome. One line, max 16 words. Output ONLY the bullet.\n\n'+li.textContent.trim()
+          : 'Rewrite this resume bullet to be concise and punchy — strong action verb, max 12 words, keep the key result. Output ONLY the bullet.\n\n'+li.textContent.trim();
+        _aiGenerate(prompt).then(function(text){
+          act.disabled=false;
+          if(!text){ act.textContent=lbl; return; }
+          text=text.replace(/^["'“‘\s•\-]+|["'”’\s]+$/g,'');
+          li.textContent=text; txt.textContent=text;
+          if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge();
+          act.textContent='✓ Updated'; setTimeout(function(){act.textContent=lbl;},1500);
+        }).catch(function(){ act.disabled=false; act.textContent=lbl; });
+      });
+      row.appendChild(txt); row.appendChild(act); wrap.appendChild(row);
     });
     m.appendChild(wrap); _backBtn(_home); _scroll();
   }
@@ -4530,6 +4603,10 @@ if ('serviceWorker' in navigator) {
 @keyframes airxCtaBadge{0%,100%{transform:scale(1);}50%{transform:scale(1.16);}}
 #aiChatCta.airx-cta-glow{animation:airxCtaGlow 2.2s ease-in-out infinite!important;}
 @keyframes airxCtaGlow{0%,100%{box-shadow:0 4px 20px rgba(109,40,217,0.55),0 0 0 2px rgba(255,255,255,0.15),0 1px 6px rgba(0,0,0,0.2);}50%{box-shadow:0 8px 30px rgba(109,40,217,0.85),0 0 0 5px rgba(124,58,237,0.22),0 1px 6px rgba(0,0,0,0.2);}}
+
+/* ---- diagnostic pills ---- */
+.airx-pill-need{display:inline-block;font-size:0.56rem;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;color:#b45309;background:#fef3c7;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle;}
+.airx-pill-ok{display:inline-block;font-size:0.56rem;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;color:#15803d;background:#dcfce7;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle;}
 </style>
 </body>
 </html>
