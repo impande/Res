@@ -3508,13 +3508,29 @@ if ('serviceWorker' in navigator) {
     if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
     var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
     var r=(typeof computeATSScore==='function')?computeATSScore(d):{score:0,items:[]};
-    _msg('<b>ATS Score — '+r.score+'/100</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Here’s what helps and what’s missing.</div>');
+    _msg('<b>ATS Score — '+r.score+'/100</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Green is good. Tap any highlighted amber/red item to jump straight to the fix.</div>');
+    function _fixFor(label){
+      if(/^Skills/.test(label)) return {fn:_aiSuggestSkills, cta:'Suggest skills'};
+      if(/^Length/.test(label)) return {fn:_fitFlow, cta:'Fit to page'};
+      if(label==='Professional summary') return {fn:_aiRewriteSummary, cta:'Rewrite'};
+      if(label==='Quantified achievements') return {fn:function(){_bulletIssuesFlow('metrics');}, cta:'Add metrics'};
+      if(label==='Action-verb bullets') return {fn:_polishHome, cta:'Polish'};
+      return null;
+    }
     var wrap=document.createElement('div'); wrap.className='aig-wrap';
     (r.items||[]).forEach(function(it){
       var icon=it.status==='pass'?'✅':(it.status==='warn'?'🟡':'⭕');
-      var row=document.createElement('div'); row.className='airx-ats-row airx-ats-'+it.status;
-      row.innerHTML='<span class="airx-ats-ico">'+icon+'</span><span>'+it.label+'</span>';
-      wrap.appendChild(row);
+      var fix=(it.status!=='pass')?_fixFor(it.label):null;
+      if(fix){
+        var b=document.createElement('button'); b.className='airx-ats-row airx-ats-'+it.status+' airx-ats-fixable';
+        b.innerHTML='<span class="airx-ats-ico">'+icon+'</span><span class="airx-ats-lbl">'+it.label+'</span><span class="airx-ats-fix">'+fix.cta+' →</span>';
+        b.addEventListener('click', fix.fn);
+        wrap.appendChild(b);
+      } else {
+        var row=document.createElement('div'); row.className='airx-ats-row airx-ats-'+it.status;
+        row.innerHTML='<span class="airx-ats-ico">'+icon+'</span><span class="airx-ats-lbl">'+it.label+'</span>';
+        wrap.appendChild(row);
+      }
     });
     m.appendChild(wrap); _backBtn(_home); _scroll();
   }
@@ -4913,6 +4929,14 @@ if ('serviceWorker' in navigator) {
 /* ---- diagnostic pills ---- */
 .airx-pill-need{display:inline-block;font-size:0.56rem;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;color:#b45309;background:#fef3c7;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle;}
 .airx-pill-ok{display:inline-block;font-size:0.56rem;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;color:#15803d;background:#dcfce7;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle;}
+
+/* ---- actionable ATS breakdown rows ---- */
+.airx-ats-lbl{flex:1;}
+.airx-ats-row.airx-ats-fixable{width:100%;text-align:left;cursor:pointer;transition:transform .12s,box-shadow .12s;font-family:inherit;}
+.airx-ats-fixable:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(24,24,40,0.1);}
+.airx-ats-fixable.airx-ats-fail{border:1px solid #fecaca;border-left:4px solid #ef4444;}
+.airx-ats-fixable.airx-ats-warn{border:1px solid #fde68a;border-left:4px solid #f59e0b;}
+.airx-ats-fix{font-size:0.66rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:3px 10px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
 </style>
 </body>
 </html>
