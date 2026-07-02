@@ -3491,7 +3491,7 @@ if ('serviceWorker' in navigator) {
     var _ti=_templateInfo();
     if(_ti.twoCol){
       var _maxB=0; (d.experience||[]).forEach(function(e){ var n=(e.bullets||[]).length; if(n>_maxB)_maxB=n; });
-      if(_maxB>6) sugg.push({pri:'med',ico:'📐',lbl:'Fit the two-column layout',ai:true,sub:'This template reads best with ≤5 bullets per role — you have '+_maxB+'.',action:_fitFlow});
+      if(_maxB>6) sugg.push({pri:'med',ico:'📐',lbl:'Fit the two-column layout',ai:true,sub:'This template reads best with ≤5 bullets per role — you have '+_maxB+'.',action:_trimBulletsFlow});
       var _ls=(d.skills||[]).filter(function(s){return String(s).length>18;}).length;
       if(_ls) sugg.push({pri:'low',ico:'📏',lbl:'Shorten sidebar skills',ai:true,sub:_ls+' skill'+(_ls>1?'s are':' is')+' long for the narrow sidebar.',action:_aiSuggestSkills});
     }
@@ -3875,6 +3875,55 @@ if ('serviceWorker' in navigator) {
       }).catch(function(){ _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); btn.disabled=false; btn.textContent='🎯 Check match'; });
     });
     $m().appendChild(btn);
+    _backBtn(_home); _scroll();
+  }
+
+  /* Focused bullet trimming for layouts that read best with fewer bullets per role */
+  function _trimBulletsFlow(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.querySelector('.resume-a4-page')){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    _msg('<b>Trim bullets per role</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">This layout reads best with ≤5 bullets per role. Compact the longest with AI, or untick to hide extras.</div>');
+    var exps=Array.from(out.querySelectorAll('.r-exp'));
+    var any=false;
+    exps.forEach(function(job){
+      var vis=Array.from(job.querySelectorAll('.r-ul li,ul li')).filter(function(li){ return li.style.display!=='none'; });
+      if(vis.length<=5) return;
+      any=true;
+      var roleEl=job.querySelector('.r-role'); var coEl=job.querySelector('.r-co');
+      var label=(roleEl?roleEl.textContent.trim():'Role')+((coEl&&coEl.textContent.trim())?(' · '+coEl.textContent.trim()):'');
+      var card=document.createElement('div'); card.style.cssText='background:#fff;border:1px solid #ececf3;border-radius:12px;padding:11px 12px;margin-bottom:9px';
+      var hd=document.createElement('div'); hd.style.cssText='font-size:0.83rem;font-weight:700;color:var(--text);margin-bottom:7px';
+      function setCount(n,ok){ hd.innerHTML=label+' <span class="'+(ok?'airx-pill-ok':'airx-pill-need')+'">'+n+' bullets</span>'; }
+      setCount(vis.length,false);
+      card.appendChild(hd);
+      var listWrap=document.createElement('div');
+      function renderList(){
+        listWrap.innerHTML='';
+        Array.from(job.querySelectorAll('.r-ul li,ul li')).forEach(function(li){
+          var row=document.createElement('label'); row.style.cssText='display:flex;gap:7px;align-items:flex-start;margin-bottom:5px;cursor:pointer';
+          var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=li.style.display!=='none'; cb.style.cssText='margin-top:3px;flex-shrink:0';
+          cb.addEventListener('change',function(){ li.style.display=cb.checked?'':'none'; var v=Array.from(job.querySelectorAll('.r-ul li,ul li')).filter(function(x){return x.style.display!=='none';}).length; setCount(v, v<=5); if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge(); });
+          var tx=document.createElement('span'); tx.style.cssText='font-size:0.78rem;color:var(--text);line-height:1.4'; tx.textContent=li.textContent.trim();
+          row.appendChild(cb); row.appendChild(tx); listWrap.appendChild(row);
+        });
+      }
+      renderList();
+      card.appendChild(listWrap);
+      var btn=document.createElement('button'); btn.className='aig-opt aig-primary'; btn.style.marginTop='4px'; btn.textContent='✨ Compact to 5 with AI';
+      btn.addEventListener('click',function(){
+        if(btn.disabled) return; btn.disabled=true; btn.textContent='Compacting…';
+        var visNow=Array.from(job.querySelectorAll('.r-ul li,ul li')).filter(function(li){ return li.style.display!=='none'; });
+        _compactBullets(visNow,5).then(function(ok){
+          btn.disabled=false; btn.textContent='✨ Compact to 5 with AI';
+          if(ok){ renderList(); setCount(5,true); if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge(); _scroll(); }
+          else { _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
+        });
+      });
+      card.appendChild(btn);
+      $m().appendChild(card);
+    });
+    if(!any) _msg('<span class="aig-ok">✓ No role has more than 5 bullets — well fitted for this layout!</span>');
     _backBtn(_home); _scroll();
   }
 
