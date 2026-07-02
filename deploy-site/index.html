@@ -3483,6 +3483,7 @@ if ('serviceWorker' in navigator) {
     sugg.sort(function(a,b){ return order[a.pri]-order[b.pri]; });
     return {score:score, suggestions:sugg.slice(0,4)};
   }
+  try{window._analyzeResume=_analyzeResume;}catch(_e){}
 
   /* ATS breakdown view */
   function _atsBreakdown(){
@@ -4394,9 +4395,25 @@ if ('serviceWorker' in navigator) {
     }
     return b;
   }
+  /* Smart CTA: show how many quick wins are available + glow, when idle on step 7 */
+  function _tickCta(panelOpen){
+    var cta=document.getElementById('aiChatCta'); if(!cta) return;
+    var badge=document.getElementById('aiCtaBadge');
+    var step7=document.getElementById('step7'); var onStep7=step7&&step7.offsetParent!==null;
+    var ro=document.getElementById('resumeOutput');
+    var ready=onStep7 && !panelOpen && typeof lastResumeData!=='undefined' && lastResumeData && ro && ro.querySelector('.resume-a4-page');
+    if(!ready){ if(badge) badge.style.display='none'; cta.classList.remove('airx-cta-glow'); return; }
+    var n=0; try{ if(typeof window._analyzeResume==='function'){ n=(window._analyzeResume().suggestions||[]).filter(function(x){return x&&x.pri!=='low';}).length; } }catch(e){}
+    if(n>0){
+      if(!badge){ badge=document.createElement('span'); badge.id='aiCtaBadge'; badge.className='airx-cta-badge'; cta.appendChild(badge); }
+      badge.textContent=n; badge.title=n+' quick improvement'+(n>1?'s':'')+' — tap to refine'; badge.style.display='';
+      cta.classList.add('airx-cta-glow');
+    } else { if(badge) badge.style.display='none'; cta.classList.remove('airx-cta-glow'); }
+  }
   function _tick(){
     var panel=document.getElementById('aiChatPanel');
     var open=panel&&panel.classList.contains('ai-panel-open');
+    _tickCta(open);
     var b=document.getElementById('aiAtsBadge');
     if(!open){ if(b) b.style.display='none'; return; }
     var pv=document.getElementById('previewModalOverlay');
@@ -4444,10 +4461,10 @@ if ('serviceWorker' in navigator) {
 
 /* ---- ATS score card ---- */
 .airx-score{display:flex;align-items:center;gap:15px;background:#fff;border:1px solid #ececf3;border-radius:16px;padding:14px 16px;margin-bottom:16px;box-shadow:0 4px 18px rgba(24,24,40,0.05);}
-.airx-ring{width:58px;height:58px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.airx-ring-in{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:baseline;justify-content:center;gap:1px;}
-.airx-ring-in b{font-size:1.15rem;font-weight:800;color:var(--text);line-height:1;}
-.airx-ring-in i{font-size:0.6rem;color:var(--muted);font-style:normal;}
+.airx-ring{width:64px;height:64px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.airx-ring-in{width:48px;height:48px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1;}
+.airx-ring-in b{font-size:1.18rem;font-weight:800;color:var(--text);line-height:1;}
+.airx-ring-in i{font-size:0.5rem;color:var(--muted);font-style:normal;line-height:1;margin-top:2px;letter-spacing:0.3px;}
 .airx-score-hd{font-size:0.66rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 .airx-score-lv{font-size:0.98rem;font-weight:800;margin:1px 0;}
 .airx-score-sub{font-size:0.72rem;color:var(--muted);}
@@ -4507,6 +4524,12 @@ if ('serviceWorker' in navigator) {
 @keyframes airxIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
 /* sub-flow messages as assistant bubbles */
 .aig-msg{background:#fff!important;border:1px solid #ececf3!important;border-radius:5px 16px 16px 16px!important;box-shadow:0 2px 10px rgba(24,24,40,0.05)!important;padding:11px 13px!important;}
+
+/* ---- smart CTA badge + glow ---- */
+.airx-cta-badge{position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:linear-gradient(135deg,#fb7185,#ef4444);color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,0.28);animation:airxCtaBadge 1.6s ease-in-out infinite;z-index:2;}
+@keyframes airxCtaBadge{0%,100%{transform:scale(1);}50%{transform:scale(1.16);}}
+#aiChatCta.airx-cta-glow{animation:airxCtaGlow 2.2s ease-in-out infinite!important;}
+@keyframes airxCtaGlow{0%,100%{box-shadow:0 4px 20px rgba(109,40,217,0.55),0 0 0 2px rgba(255,255,255,0.15),0 1px 6px rgba(0,0,0,0.2);}50%{box-shadow:0 8px 30px rgba(109,40,217,0.85),0 0 0 5px rgba(124,58,237,0.22),0 1px 6px rgba(0,0,0,0.2);}}
 </style>
 </body>
 </html>
