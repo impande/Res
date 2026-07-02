@@ -3417,6 +3417,13 @@ if ('serviceWorker' in navigator) {
       wrap.appendChild(av('Hi'+nm+' 👋 I’m your resume assistant. Generate your resume first — then I’ll read it and suggest smart, tailored improvements.'));
       m.appendChild(wrap); return;
     }
+    if(typeof lastResumeData!=='undefined'&&lastResumeData&&lastResumeData.skills&&lastResumeData.skills.length&&!lastResumeData._skillsCased){
+      var _chg=false;
+      lastResumeData.skills=lastResumeData.skills.map(function(sk){ var cc=_smartCase(sk); if(cc!==sk)_chg=true; return cc; });
+      if(typeof skills!=='undefined'){ skills.length=0; lastResumeData.skills.forEach(function(sk){skills.push(sk);}); }
+      lastResumeData._skillsCased=true;
+      if(_chg){ var _sn=(window._snapResumeStyles?window._snapResumeStyles():null); if(typeof renderOutput==='function') renderOutput(lastResumeData); if(window._applyResumeStyles)window._applyResumeStyles(_sn); }
+    }
     var analysis=_analyzeResume();
     var s=analysis.score, lvl=s>=75?'Strong — ATS ready':s>=50?'Good — room to improve':'Needs work';
     var ring=s>=75?'#16a34a':s>=50?'#d97706':'#dc2626';
@@ -3440,11 +3447,11 @@ if ('serviceWorker' in navigator) {
     var tools=[
       {ico:'📝',lbl:'Rewrite summary',ai:true,sub:'Craft a sharper professional summary',fn:_aiRewriteSummary},
       {ico:'✨',lbl:'Polish sections',ai:true,sub:'Rewrite bullets punchier, section by section',fn:_polishHome},
-      {ico:'🔎',lbl:'AI review',ai:true,sub:'Recruiter-style feedback tailored to your role',fn:_aiReview},
       {ico:'🧩',lbl:'Suggest skills',ai:true,sub:'Add role-relevant, ATS-friendly skills',fn:_aiSuggestSkills},
-      {ico:'📄',lbl:'Fit to page',ai:true,sub:'Font, bullets & spacing — auto or manual',fn:_fitFlow},
+      {ico:'🔎',lbl:'AI review',ai:true,sub:'Recruiter-style feedback tailored to your role',fn:_aiReview},
       {ico:'🎯',lbl:'ATS match to a job',ai:true,sub:'Paste a job — score keyword match like a real ATS',fn:_atsMatch},
-      {ico:'🎯',lbl:'ATS breakdown',ai:false,sub:'See exactly what helps and what’s missing',fn:_atsBreakdown},
+      {ico:'📊',lbl:'ATS breakdown',ai:false,sub:'See exactly what helps and what’s missing',fn:_atsBreakdown},
+      {ico:'📄',lbl:'Fit to page',ai:true,sub:'Font, bullets & spacing — auto or manual',fn:_fitFlow},
       {ico:'🎨',lbl:'Customise look',ai:false,sub:'Colours, fonts & section highlights',fn:_customiseFlow},
       {ico:'🪄',lbl:'Template versions',ai:true,sub:'Restyle the current template — accent colour & spacing',fn:_templateVersions},
       {ico:'↕️',lbl:'Reorder sections',ai:false,sub:'Arrange sections for your target role',fn:_reorderFlow}
@@ -3536,6 +3543,37 @@ if ('serviceWorker' in navigator) {
     return {need:false, reason:'Refine wording'};
   }
 
+  /* Per-section polish view — shows the actual bullets, then AI rewrites them */
+  function _polishSectionView(sec, label){
+    _clear(); var m=$m(); if(!m) return;
+    _msg('<b>Polish: '+label+'</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">These are the bullets AI will rewrite — punchier, keeping your facts. Review, then polish.</div>');
+    var wrap=document.createElement('div'); wrap.className='aig-wrap'; m.appendChild(wrap);
+    function renderBullets(){
+      wrap.innerHTML='';
+      var lis=Array.from(sec.querySelectorAll('.r-ul li,ul li')).filter(function(li){return li.style.display!=='none'&&li.textContent.trim();});
+      var sum=sec.querySelector('.r-sum,.r-desc');
+      if(!lis.length&&sum){ var r=document.createElement('div'); r.style.cssText='background:#fff;border:1px solid #ececf3;border-radius:10px;padding:9px 12px;font-size:0.8rem;line-height:1.5;color:var(--text)'; r.textContent=sum.textContent.trim(); wrap.appendChild(r); return; }
+      lis.forEach(function(li){
+        var row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;align-items:flex-start;background:#fff;border:1px solid #ececf3;border-radius:10px;padding:8px 11px;margin-bottom:6px;font-size:0.8rem;line-height:1.45;color:var(--text)';
+        var dot=document.createElement('span'); dot.textContent='▸'; dot.style.cssText='color:var(--accent,#7c3aed);flex-shrink:0;font-weight:700';
+        var tx=document.createElement('span'); tx.textContent=li.textContent.trim();
+        row.appendChild(dot); row.appendChild(tx); wrap.appendChild(row);
+      });
+    }
+    renderBullets();
+    var btn=document.createElement('button'); btn.className='aig-opt aig-primary'; btn.style.marginTop='4px'; btn.textContent='✨ Polish these with AI';
+    btn.addEventListener('click',function(){
+      if(btn.disabled) return; btn.disabled=true; btn.textContent='Polishing…';
+      _polishSection(sec).then(function(ok){
+        btn.disabled=false;
+        if(ok){ btn.textContent='✨ Polish again'; renderBullets(); _msg('<span class="aig-ok">✓ Polished — see the updated bullets above.</span>'); if(typeof _markEdited==='function')_markEdited(); _scroll(); }
+        else { btn.textContent='✨ Polish these with AI'; _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
+      });
+    });
+    m.appendChild(btn);
+    _backBtn(_polishHome); _scroll();
+  }
+
   /* Polish with AI — diagnostic: shows what's weak in each section */
   function _polishHome(){
     _clear(); var m=$m(); if(!m) return;
@@ -3553,15 +3591,7 @@ if ('serviceWorker' in navigator) {
         var b=document.createElement('button'); b.className='airx-tool';
         function idle(){ return '<span class="airx-tool-ico">'+(d.need?'✨':'✅')+'</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+(d.need?' <span class="airx-pill-need">needs work</span>':' <span class="airx-pill-ok">looks good</span>')+'</span><span class="airx-tool-sub">'+d.reason+'</span></span><span class="airx-go">→</span>'; }
         b.innerHTML=idle();
-        b.addEventListener('click', function(){
-          if(b.disabled) return; b.disabled=true;
-          b.innerHTML='<span class="airx-tool-ico">⏳</span><span class="airx-tool-body"><span class="airx-tool-lbl">Polishing '+label+'…</span></span>';
-          _polishSection(sec).then(function(ok){
-            b.disabled=false;
-            if(ok){ b.innerHTML='<span class="airx-tool-ico">✅</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+' polished</span><span class="airx-tool-sub">Tap to polish again</span></span><span class="airx-go">→</span>'; if(typeof _markEdited==='function')_markEdited(); }
-            else { b.innerHTML=idle(); _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
-          });
-        });
+        b.addEventListener('click', function(){ _polishSectionView(sec, label); });
         wrap.appendChild(b);
       });
     m.appendChild(wrap); _backBtn(_home); _scroll();
@@ -3612,6 +3642,16 @@ if ('serviceWorker' in navigator) {
     m.appendChild(wrap); _backBtn(_home); _scroll();
   }
 
+  function _smartCase(str){
+    if(!str) return str;
+    var ACR={'aws':'AWS','gcp':'GCP','sql':'SQL','nosql':'NoSQL','api':'API','apis':'APIs','ci/cd':'CI/CD','ux':'UX','ui':'UI','ui/ux':'UI/UX','kpi':'KPI','kpis':'KPIs','ml':'ML','ai':'AI','html':'HTML','css':'CSS','js':'JS','saas':'SaaS','paas':'PaaS','b2b':'B2B','b2c':'B2C','crm':'CRM','erp':'ERP','seo':'SEO','sem':'SEM','etl':'ETL','nlp':'NLP','ios':'iOS','devops':'DevOps','graphql':'GraphQL','postgresql':'PostgreSQL','mysql':'MySQL','rest':'REST','grpc':'gRPC','elk':'ELK','aws':'AWS','okrs':'OKRs','roi':'ROI'};
+    return String(str).trim().split(/\s+/).map(function(w){
+      var lw=w.toLowerCase();
+      if(ACR[lw]) return ACR[lw];
+      if(lw.indexOf('/')>-1){ return lw.split('/').map(function(p){ return ACR[p]||(p?p.charAt(0).toUpperCase()+p.slice(1):p); }).join('/'); }
+      return w.charAt(0).toUpperCase()+w.slice(1);
+    }).join(' ');
+  }
   function _aiGenerate(prompt){
     return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
       .then(function(resp){ if(!resp.ok) throw new Error('bad status'); return resp.json(); })
@@ -3654,7 +3694,8 @@ if ('serviceWorker' in navigator) {
     _msg('<b>Suggest skills with AI</b>');
     var status=_msg('<span class="aig-warn">✨ Finding relevant skills…</span>');
     var role=d.jobTitle||'this role'; var have=(d.skills||[]);
-    var prompt='You are an expert resume writer. Suggest 8 concise, ATS-friendly, role-relevant hard skills for a "'+role+'" that are NOT already present in: '+(have.join(', ')||'(none)')+'. Output ONLY a comma-separated list, no numbering or preamble.';
+    var ctx='Role/target title: '+role+'. '+(d.summary?('Summary: '+String(d.summary).slice(0,220)+'. '):'')+((d.experience&&d.experience.length)?('Recent roles: '+d.experience.slice(0,3).map(function(e){return (e.title||'')+(e.co?(' at '+e.co):'');}).join('; ')+'. '):'');
+    var prompt='You are an expert resume writer. Suggest exactly 8 concise, ATS-friendly HARD skills that are highly relevant to THIS candidate\'s job role and domain, and NOT already in their list. Match the role closely — never suggest skills from an unrelated field.'+String.fromCharCode(10)+String.fromCharCode(10)+ctx+String.fromCharCode(10)+'Existing skills: '+(have.join(', ')||'(none)')+String.fromCharCode(10)+String.fromCharCode(10)+'Output ONLY a comma-separated list, no numbering or preamble.';
     _aiGenerate(prompt).then(function(text){
       if(!text){ status.innerHTML='<span class="aig-warn">Could not generate. Try again.</span>'; return; }
       var list=text.split(/[,\n]/).map(function(s){ return s.replace(/^[-•\d.\s]+/,'').trim(); }).filter(Boolean).filter(function(s){ return have.indexOf(s)<0 && s.length<32; });
@@ -3667,9 +3708,10 @@ if ('serviceWorker' in navigator) {
         var chip=document.createElement('button'); chip.className='aig-chip'; chip.textContent='+ '+sk;
         chip.addEventListener('click', function(){
           if(chip.disabled) return;
-          if(!d.skills) d.skills=[]; if(d.skills.indexOf(sk)<0) d.skills.push(sk);
-          if(typeof skills!=='undefined' && skills.indexOf(sk)<0) skills.push(sk);
-          chip.className='aig-chip sel'; chip.textContent='✓ '+sk; chip.disabled=true;
+          var _sk2=_smartCase(sk);
+          if(!d.skills) d.skills=[]; if(d.skills.indexOf(_sk2)<0) d.skills.push(_sk2);
+          if(typeof skills!=='undefined' && skills.indexOf(_sk2)<0) skills.push(_sk2);
+          chip.className='aig-chip sel'; chip.textContent='✓ '+_sk2; chip.disabled=true;
           if(typeof _markEdited==='function')_markEdited();
           var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
           if(typeof renderOutput==='function') renderOutput(lastResumeData);
@@ -3814,10 +3856,11 @@ if ('serviceWorker' in navigator) {
             var chip=document.createElement('button'); chip.className='aig-chip'; chip.textContent='+ '+k; chip.style.textTransform='capitalize';
             chip.addEventListener('click',function(){
               if(chip.disabled) return;
+              var _sk=_smartCase(k);
               if(!lastResumeData.skills) lastResumeData.skills=[];
-              if(lastResumeData.skills.indexOf(k)<0) lastResumeData.skills.push(k);
-              if(typeof skills!=='undefined'&&skills.indexOf(k)<0) skills.push(k);
-              chip.className='aig-chip sel'; chip.textContent='✓ '+k; chip.disabled=true;
+              if(lastResumeData.skills.indexOf(_sk)<0) lastResumeData.skills.push(_sk);
+              if(typeof skills!=='undefined'&&skills.indexOf(_sk)<0) skills.push(_sk);
+              chip.className='aig-chip sel'; chip.textContent='✓ '+_sk; chip.disabled=true;
               if(typeof _markEdited==='function')_markEdited();
               var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
               if(typeof renderOutput==='function') renderOutput(lastResumeData);
@@ -4594,6 +4637,53 @@ if ('serviceWorker' in navigator) {
    - Item 2: live ATS score badge inside the Refine-with-AI panel
    - Item 4: preserve per-section customiser styling across template changes */
 (function(){
+  /* Enhanced, more ATS-realistic scoring: weighs parseable contact, standard
+     sections, quantified impact, action verbs, keyword richness, and length —
+     closer to how real ATS/recruiter screening rates a resume. */
+  var _STRONGV=/^(led|built|drove|delivered|launched|reduced|increased|improved|designed|created|managed|achieved|cut|grew|scaled|streamlined|automated|developed|owned|spearheaded|boosted|generated|implemented|optimi[sz]ed|architected|established|directed|orchestrated|accelerated|transformed|mentored|coordinated|shipped|enabled|negotiated|secured|expanded|championed|founded|revamped|analy[sz]ed|drove)\b/i;
+  function _atsPages(){ try{ var chip=document.getElementById('pageCountChip'); if(chip){ var mm=(chip.textContent||'').match(/\d+/); if(mm) return parseInt(mm[0]); } }catch(e){} return 1; }
+  window.computeATSScore=function(d){
+    d=d||{}; var items=[], score=0;
+    function it(l,s){ items.push({label:l,status:s}); }
+    var email=(d.email||'').trim(); var okEmail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    if(okEmail){ score+=8; it('Email address','pass'); } else it('Email address', email?'warn':'fail');
+    if(String(d.phone||'').trim()){ score+=5; it('Phone number','pass'); } else it('Phone number','warn');
+    if(String(d.location||'').trim()){ score+=4; it('Location / City','pass'); } else it('Location / City','warn');
+    var sum=String(d.summary||'').trim();
+    if(sum.length>=40){ score+=8; it('Professional summary', sum.length>=90?'pass':'warn'); } else it('Professional summary','fail');
+    var exp=d.experience||[]; var hasExp=exp.length>=1&&!!(exp[0].title||exp[0].co);
+    if(hasExp){ score+=12; it('Work experience','pass'); } else it('Work experience','fail');
+    var hasDates=exp.some(function(e){ return String(e.dates||e.period||e.start||'').trim(); });
+    if(hasDates){ score+=5; it('Employment dates','pass'); } else it('Employment dates','warn');
+    var bullets=[]; exp.forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b) bullets.push(String(b)); }); });
+    if(bullets.length){
+      var qn=bullets.filter(function(b){ return /\d/.test(b); }).length; var qp=qn/bullets.length;
+      score+=Math.round(qp*18); it('Quantified achievements', qp>=0.4?'pass':(qp>=0.15?'warn':'fail'));
+      var av=bullets.filter(function(b){ return _STRONGV.test(b.trim()); }).length; var ap=av/bullets.length;
+      score+=Math.round(ap*10); it('Action-verb bullets', ap>=0.6?'pass':(ap>=0.3?'warn':'fail'));
+    } else { it('Quantified achievements','fail'); it('Action-verb bullets','fail'); }
+    var sk=(d.skills||[]).length;
+    score+=sk>=5?8:0; score+=sk>=8?4:0;
+    it('Skills ('+sk+' listed)', sk>=8?'pass':(sk>=5?'warn':'fail'));
+    var edu=d.education||[]; if(edu.length&&(edu[0].deg||edu[0].sch)){ score+=8; it('Education section','pass'); } else it('Education section','warn');
+    var pg=_atsPages();
+    if(pg<=2){ score+=10; it('Length ('+pg+' page'+(pg>1?'s':'')+')','pass'); }
+    else if(pg===3){ score+=4; it('Length (3 pages — trim)','warn'); }
+    else it('Length ('+pg+' pages — too long)','fail');
+    return { score: Math.max(0, Math.min(100, Math.round(score))), items: items };
+  };
+
+  /* Keep the ATS score live: refresh whenever the resume card re-renders
+     (edits, version load/switch, template change). */
+  if(typeof window.renderOutput==='function'){
+    var _origRenderOut=window.renderOutput;
+    window.renderOutput=function(){
+      var r=_origRenderOut.apply(this, arguments);
+      try{ if(document.getElementById('atsScoreCard')&&typeof renderATSScore==='function'){ renderATSScore((typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:arguments[0]); } }catch(e){}
+      return r;
+    };
+  }
+
   /* Exposed globally so both the selectTemplate wrapper and _syncLastResumeData
      (form-edit sync) can preserve per-section customiser styling across a re-render. */
   window._snapResumeStyles=function(){
