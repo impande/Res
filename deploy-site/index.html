@@ -3443,6 +3443,7 @@ if ('serviceWorker' in navigator) {
       {ico:'🔎',lbl:'AI review',ai:true,sub:'Recruiter-style feedback tailored to your role',fn:_aiReview},
       {ico:'🧩',lbl:'Suggest skills',ai:true,sub:'Add role-relevant, ATS-friendly skills',fn:_aiSuggestSkills},
       {ico:'📄',lbl:'Fit to page',ai:true,sub:'Font, bullets & spacing — auto or manual',fn:_fitFlow},
+      {ico:'🎯',lbl:'ATS match to a job',ai:true,sub:'Paste a job — score keyword match like a real ATS',fn:_atsMatch},
       {ico:'🎯',lbl:'ATS breakdown',ai:false,sub:'See exactly what helps and what’s missing',fn:_atsBreakdown},
       {ico:'🎨',lbl:'Customise look',ai:false,sub:'Colours, fonts & section highlights',fn:_customiseFlow},
       {ico:'🪄',lbl:'Template versions',ai:true,sub:'Restyle the current template — accent colour & spacing',fn:_templateVersions},
@@ -3480,6 +3481,13 @@ if ('serviceWorker' in navigator) {
     var sk=(d.skills||[]).length;
     if(sk<6) sugg.push({pri:'med',ico:'🧩',lbl:'Add more skills',ai:true,sub:'Only '+sk+' skill'+(sk===1?'':'s')+' — boost keyword coverage.',action:_aiSuggestSkills});
     if(score<75) sugg.push({pri:'med',ico:'🎯',lbl:'Boost ATS score',ai:false,sub:'Close gaps so tracking systems parse it cleanly.',action:_atsBreakdown});
+    var _ti=_templateInfo();
+    if(_ti.twoCol){
+      var _maxB=0; (d.experience||[]).forEach(function(e){ var n=(e.bullets||[]).length; if(n>_maxB)_maxB=n; });
+      if(_maxB>6) sugg.push({pri:'med',ico:'📐',lbl:'Fit the two-column layout',ai:true,sub:'This template reads best with ≤5 bullets per role — you have '+_maxB+'.',action:_fitFlow});
+      var _ls=(d.skills||[]).filter(function(s){return String(s).length>18;}).length;
+      if(_ls) sugg.push({pri:'low',ico:'📏',lbl:'Shorten sidebar skills',ai:true,sub:_ls+' skill'+(_ls>1?'s are':' is')+' long for the narrow sidebar.',action:_aiSuggestSkills});
+    }
     if(!sugg.length) sugg.push({pri:'low',ico:'✅',lbl:'Looking sharp!',ai:false,sub:'No major gaps — fine-tune the look or wording below.',action:_customiseFlow});
     var order={high:0,med:1,low:2};
     sugg.sort(function(a,b){ return order[a.pri]-order[b.pri]; });
@@ -3685,7 +3693,8 @@ if ('serviceWorker' in navigator) {
     var status=_msg('<span class="aig-warn">✨ Reviewing like a recruiter…</span>');
     var role=d.jobTitle||'the role';
     var resume='ROLE: '+role+'\nSUMMARY: '+(d.summary||'(none)')+'\nSKILLS: '+(((d.skills||[]).join(', '))||'(none)')+'\nEXPERIENCE:\n'+(d.experience||[]).map(function(e){ return '- '+(e.title||'')+' at '+(e.co||'')+':\n'+((e.bullets||[]).map(function(b){return '  • '+b;}).join('\n')); }).join('\n');
-    var prompt='You are a senior technical recruiter reviewing a resume for a "'+role+'" role. Return STRICT JSON only (no markdown), shape: {"verdict":"one short overall sentence","strengths":["..",".."],"improvements":["specific fix","specific fix","specific fix"]}. Each item under 16 words, specific and actionable.\n\nRESUME:\n'+resume;
+    var _ti=_templateInfo(); var _tctx=' The resume uses a '+_ti.layout+(_ti.dark?', dark-header':'')+' template ("'+(_ti.name||'custom')+'") — make at least one improvement specific to this layout (bullet count for the columns, sidebar length, or colour/contrast).';
+    var prompt='You are a senior technical recruiter reviewing a resume for a "'+role+'" role.'+_tctx+' Return STRICT JSON only (no markdown), shape: {"verdict":"one short overall sentence","strengths":["..",".."],"improvements":["specific fix","specific fix","specific fix"]}. Each item under 16 words, specific and actionable.\n\nRESUME:\n'+resume;
     _aiGenerate(prompt).then(function(resp){
       var data=null; try{ var jm=resp.match(/\{[\s\S]*\}/); data=jm?JSON.parse(jm[0]):null; }catch(e){}
       status.remove();
@@ -3757,6 +3766,72 @@ if ('serviceWorker' in navigator) {
       dRow.appendChild(b);
     });
     $m().appendChild(dRow);
+    _backBtn(_home); _scroll();
+  }
+
+  /* Detect the applied template's layout so suggestions can be tailored to it */
+  function _templateInfo(){
+    var out=document.getElementById('resumeOutput'); var info={name:(typeof currentTemplate!=='undefined'&&currentTemplate)?currentTemplate:'',twoCol:false,dark:false,layout:'single-column'};
+    if(!out) return info;
+    info.twoCol=!!out.querySelector('.r-2col,.r-main-col');
+    info.layout=info.twoCol?'two-column':'single-column';
+    var head=out.querySelector('.r-head');
+    if(head){ try{ var m=(getComputedStyle(head).backgroundColor||'').match(/\d+/g); if(m&&m.length>=3){ var lum=0.299*(+m[0])+0.587*(+m[1])+0.114*(+m[2]); info.dark=lum<115; } }catch(e){} }
+    return info;
+  }
+
+  /* Real-ATS style keyword match: paste a job description, extract its key terms
+     with AI, and score how many appear in the resume (like an ATS keyword scan). */
+  function _atsMatch(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.querySelector('.resume-a4-page')){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    _msg('<b>ATS match — paste a job description</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Like a real ATS: I extract the role’s key terms and score how many appear in your resume.</div>');
+    var ta=document.createElement('textarea'); ta.placeholder='Paste the full job description here…';
+    ta.style.cssText='width:100%;min-height:130px;padding:11px;border:1px solid var(--border,#d1d5db);border-radius:11px;font-size:0.82rem;font-family:inherit;color:var(--text);background:#fff;margin:9px 0;box-sizing:border-box;resize:vertical;';
+    $m().appendChild(ta);
+    var btn=document.createElement('button'); btn.className='aig-opt aig-primary'; btn.textContent='🎯 Check match';
+    btn.addEventListener('click',function(){
+      var jd=ta.value.trim();
+      if(jd.length<40){ _msg('<span class="aig-warn">Paste a bit more of the job description.</span>'); return; }
+      btn.disabled=true; btn.textContent='Scanning…';
+      _aiGenerate('You are an ATS. Extract the 18 most important hard skills, tools, technologies and role keywords a tracking system would scan for in this job description. Output ONLY a comma-separated list, lowercase, no duplicates, no soft skills.\n\n'+jd).then(function(resp){
+        var kws=(resp||'').split(/[,\n]/).map(function(s){ return s.replace(/^[-•\d.\s]+/,'').trim().toLowerCase(); }).filter(function(s){ return s.length>1&&s.length<40; });
+        kws=kws.filter(function(v,i){ return kws.indexOf(v)===i; }).slice(0,18);
+        if(!kws.length){ _msg('<span class="aig-warn">Could not read that job description. Try again.</span>'); btn.disabled=false; btn.textContent='🎯 Check match'; return; }
+        if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+        var resumeText=((document.getElementById('resumeOutput').textContent)||'').toLowerCase();
+        var matched=kws.filter(function(k){ return resumeText.indexOf(k)>-1; });
+        var missing=kws.filter(function(k){ return resumeText.indexOf(k)<0; });
+        var pct=kws.length?Math.round(matched.length/kws.length*100):0;
+        _clear();
+        var col=pct>=70?'#16a34a':pct>=45?'#d97706':'#dc2626';
+        _msg('<b>ATS match: <span style="color:'+col+'">'+pct+'%</span></b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">'+matched.length+' of '+kws.length+' key terms from this job are in your resume.</div>');
+        if(matched.length) _msg('<div class="airx-sect" style="margin:1px 0 6px">✅ Found ('+matched.length+')</div><div style="display:flex;flex-wrap:wrap;gap:5px">'+matched.map(function(k){ return '<span style="font-size:0.72rem;background:#dcfce7;color:#166534;padding:2px 9px;border-radius:99px;text-transform:capitalize">'+k+'</span>'; }).join('')+'</div>');
+        if(missing.length){
+          _msg('<div class="airx-sect" style="margin:9px 0 6px">⭕ Missing ('+missing.length+') — tap to add any you genuinely have</div>');
+          var row=document.createElement('div'); row.className='aig-row';
+          missing.forEach(function(k){
+            var chip=document.createElement('button'); chip.className='aig-chip'; chip.textContent='+ '+k; chip.style.textTransform='capitalize';
+            chip.addEventListener('click',function(){
+              if(chip.disabled) return;
+              if(!lastResumeData.skills) lastResumeData.skills=[];
+              if(lastResumeData.skills.indexOf(k)<0) lastResumeData.skills.push(k);
+              if(typeof skills!=='undefined'&&skills.indexOf(k)<0) skills.push(k);
+              chip.className='aig-chip sel'; chip.textContent='✓ '+k; chip.disabled=true;
+              if(typeof _markEdited==='function')_markEdited();
+              var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
+              if(typeof renderOutput==='function') renderOutput(lastResumeData);
+              if(window._applyResumeStyles) window._applyResumeStyles(snap);
+            });
+            row.appendChild(chip);
+          });
+          $m().appendChild(row);
+          _msg('<div style="font-size:0.74rem;color:var(--muted);margin-top:7px">⚠ Only add terms you truly have — never keyword-stuff. Also weave them into your bullets, not just Skills.</div>');
+        } else { _msg('<span class="aig-ok">✓ Strong keyword coverage for this role.</span>'); }
+        _backBtn(_home); _scroll();
+      }).catch(function(){ _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); btn.disabled=false; btn.textContent='🎯 Check match'; });
+    });
+    $m().appendChild(btn);
     _backBtn(_home); _scroll();
   }
 
