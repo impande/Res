@@ -3406,22 +3406,197 @@ if ('serviceWorker' in navigator) {
   function _home(){
     _clear();
     var m=$m(); if(!m) return;
-    var wrap=document.createElement('div'); wrap.className='aig-wrap';
-    wrap.innerHTML='<div class="aig-hi">How can I help with your resume?</div>';
-    [{flow:'customise',ico:'🎨',lbl:'Customise',         sub:'Section colours, text colour, font & highlights'},
-     {flow:'fit',     ico:'📄',lbl:'Fit to page',        sub:'Auto-fit or fine-tune font, bullets & spacing'},
-     {flow:'reorder', ico:'↕️',lbl:'Rearrange sections', sub:'Move sections up or down in your resume'}
-    ].forEach(function(o){
-      var btn=document.createElement('button'); btn.className='aig-btn';
-      btn.innerHTML='<span class="aig-ico">'+o.ico+'</span><div><div class="aig-lbl">'+o.lbl+'</div><div class="aig-sub">'+o.sub+'</div></div>';
-      btn.addEventListener('click',function(){
-        if(o.flow==='customise') _customiseFlow();
-        else if(o.flow==='fit') _fitFlow();
-        else _reorderFlow();
+    var out=document.getElementById('resumeOutput');
+    var wrap=document.createElement('div'); wrap.className='aig-wrap airx-home airx-chat';
+    var nm=(typeof lastResumeData!=='undefined'&&lastResumeData&&lastResumeData.firstName)?(' '+lastResumeData.firstName):'';
+    function av(html){ var r=document.createElement('div'); r.className='airx-am'; r.innerHTML='<div class="airx-av">✨</div><div class="airx-ab">'+html+'</div>'; return r; }
+    function say(html){ var r=document.createElement('div'); r.className='airx-cont'; r.innerHTML='<div class="airx-ab">'+html+'</div>'; return r; }
+    function group(){ var r=document.createElement('div'); r.className='airx-cont airx-cards'; return r; }
+    var hasResume = out && out.querySelector('.resume-a4-page');
+    if(!hasResume){
+      wrap.appendChild(av('Hi'+nm+' 👋 I’m your resume assistant. Generate your resume first — then I’ll read it and suggest smart, tailored improvements.'));
+      m.appendChild(wrap); return;
+    }
+    var analysis=_analyzeResume();
+    var s=analysis.score, lvl=s>=75?'Strong — ATS ready':s>=50?'Good — room to improve':'Needs work';
+    var ring=s>=75?'#16a34a':s>=50?'#d97706':'#dc2626';
+    wrap.appendChild(av('Hi'+nm+' 👋 I read through your resume — here’s my quick take:'));
+    var sc=group();
+    sc.innerHTML='<div class="airx-score"><div class="airx-ring" style="background:conic-gradient('+ring+' '+(s*3.6)+'deg,#e6e8ec 0)"><div class="airx-ring-in"><b>'+s+'</b><i>/100</i></div></div><div class="airx-score-txt"><div class="airx-score-hd">ATS Score</div><div class="airx-score-lv" style="color:'+ring+'">'+lvl+'</div><div class="airx-score-sub">Updates live as you refine</div></div></div>';
+    wrap.appendChild(sc);
+    if(analysis.suggestions.length){
+      wrap.appendChild(say('Here’s what I’d tackle first — tap one and I’ll help:'));
+      var rc=group();
+      analysis.suggestions.forEach(function(sg){
+        var b=document.createElement('button'); b.className='airx-rec airx-p-'+sg.pri;
+        b.innerHTML='<span class="airx-rec-ico">'+sg.ico+'</span><span class="airx-rec-body"><span class="airx-rec-lbl">'+sg.lbl+(sg.ai?' <span class="airx-ai">AI</span>':'')+'</span><span class="airx-rec-sub">'+sg.sub+'</span></span><span class="airx-go">→</span>';
+        b.addEventListener('click', sg.action);
+        rc.appendChild(b);
       });
-      wrap.appendChild(btn);
+      wrap.appendChild(rc);
+    }
+    wrap.appendChild(say('Or pick any tool:'));
+    var tc=group();
+    var tools=[
+      {ico:'📝',lbl:'Rewrite summary',ai:true,sub:'Craft a sharper professional summary',fn:_aiRewriteSummary},
+      {ico:'✨',lbl:'Polish sections',ai:true,sub:'Rewrite bullets punchier, section by section',fn:_polishHome},
+      {ico:'🧩',lbl:'Suggest skills',ai:true,sub:'Add role-relevant, ATS-friendly skills',fn:_aiSuggestSkills},
+      {ico:'📄',lbl:'Fit to page',ai:true,sub:'Font, bullets & spacing — auto or manual',fn:_fitFlow},
+      {ico:'🎯',lbl:'ATS breakdown',ai:false,sub:'See exactly what helps and what’s missing',fn:_atsBreakdown},
+      {ico:'🎨',lbl:'Customise look',ai:false,sub:'Colours, fonts & section highlights',fn:_customiseFlow},
+      {ico:'↕️',lbl:'Reorder sections',ai:false,sub:'Arrange sections for your target role',fn:_reorderFlow}
+    ];
+    tools.forEach(function(t){
+      var b=document.createElement('button'); b.className='airx-tool';
+      b.innerHTML='<span class="airx-tool-ico">'+t.ico+'</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+t.lbl+(t.ai?' <span class="airx-ai">AI</span>':'')+'</span><span class="airx-tool-sub">'+t.sub+'</span></span><span class="airx-go">→</span>';
+      b.addEventListener('click', t.fn);
+      tc.appendChild(b);
     });
-    m.appendChild(wrap);
+    wrap.appendChild(tc);
+    m.appendChild(wrap); m.scrollTop=0;
+  }
+
+  /* Smart analysis: read the resume card + ATS score and surface tailored actions */
+  function _analyzeResume(){
+    var out=document.getElementById('resumeOutput');
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
+    var score=(typeof computeATSScore==='function')?(computeATSScore(d).score||0):0;
+    var pages=(out&&typeof _getPages==='function')?_getPages(out):1;
+    var sugg=[];
+    if(pages>=2) sugg.push({pri:'high',ico:'📄',lbl:'Trim to one page',ai:true,sub:'Your resume runs '+pages+' pages — condense to fit one.',action:_fitFlow});
+    var sum=(d.summary||'').trim();
+    if(!sum) sugg.push({pri:'high',ico:'📝',lbl:'Add a professional summary',ai:true,sub:'A tight 2–3 line summary lifts recruiter interest.',action:_aiRewriteSummary});
+    else if(sum.length<70) sugg.push({pri:'high',ico:'📝',lbl:'Strengthen your summary',ai:true,sub:'It looks thin — let AI sharpen it.',action:_aiRewriteSummary});
+    var bullets=[]; (d.experience||[]).forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b) bullets.push(String(b)); }); });
+    if(bullets.length){
+      var withNum=bullets.filter(function(b){ return /\d/.test(b); }).length;
+      if(withNum/bullets.length<0.4) sugg.push({pri:'high',ico:'📊',lbl:'Add impact metrics',ai:true,sub:'Few bullets have numbers — quantify results for impact.',action:_polishHome});
+      var wordy=bullets.filter(function(b){ return b.split(/\s+/).length>24; }).length;
+      if(wordy) sugg.push({pri:'med',ico:'✂️',lbl:'Tighten wordy bullets',ai:true,sub:wordy+' bullet'+(wordy>1?'s are':' is')+' long — compact with AI.',action:_fitFlow});
+    }
+    var sk=(d.skills||[]).length;
+    if(sk<6) sugg.push({pri:'med',ico:'🧩',lbl:'Add more skills',ai:true,sub:'Only '+sk+' skill'+(sk===1?'':'s')+' — boost keyword coverage.',action:_aiSuggestSkills});
+    if(score<75) sugg.push({pri:'med',ico:'🎯',lbl:'Boost ATS score',ai:false,sub:'Close gaps so tracking systems parse it cleanly.',action:_atsBreakdown});
+    if(!sugg.length) sugg.push({pri:'low',ico:'✅',lbl:'Looking sharp!',ai:false,sub:'No major gaps — fine-tune the look or wording below.',action:_customiseFlow});
+    var order={high:0,med:1,low:2};
+    sugg.sort(function(a,b){ return order[a.pri]-order[b.pri]; });
+    return {score:score, suggestions:sugg.slice(0,4)};
+  }
+
+  /* ATS breakdown view */
+  function _atsBreakdown(){
+    _clear(); var m=$m(); if(!m) return;
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
+    var r=(typeof computeATSScore==='function')?computeATSScore(d):{score:0,items:[]};
+    _msg('<b>ATS Score — '+r.score+'/100</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Here’s what helps and what’s missing.</div>');
+    var wrap=document.createElement('div'); wrap.className='aig-wrap';
+    (r.items||[]).forEach(function(it){
+      var icon=it.status==='pass'?'✅':(it.status==='warn'?'🟡':'⭕');
+      var row=document.createElement('div'); row.className='airx-ats-row airx-ats-'+it.status;
+      row.innerHTML='<span class="airx-ats-ico">'+icon+'</span><span>'+it.label+'</span>';
+      wrap.appendChild(row);
+    });
+    m.appendChild(wrap); _backBtn(_home); _scroll();
+  }
+
+  /* Polish each section with AI */
+  function _polishHome(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    _msg('<b>Polish with AI</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Pick a section — AI rewrites it punchier, keeping your facts.</div>');
+    var wrap=document.createElement('div'); wrap.className='aig-wrap';
+    var secs=Array.from(out.querySelectorAll('.r-sec')).filter(function(sec){ return sec.querySelector('.r-ul li, .r-sum, .r-desc'); });
+    if(!secs.length){ _msg('Nothing to polish yet.'); _backBtn(_home); return; }
+    secs.forEach(function(sec){
+      var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
+      var b=document.createElement('button'); b.className='airx-tool';
+      var idle='<span class="airx-tool-ico">✨</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+'</span><span class="airx-tool-sub">Rewrite for impact with AI</span></span><span class="airx-go">→</span>';
+      b.innerHTML=idle;
+      b.addEventListener('click', function(){
+        if(b.disabled) return; b.disabled=true;
+        b.innerHTML='<span class="airx-tool-ico">⏳</span><span class="airx-tool-body"><span class="airx-tool-lbl">Polishing '+label+'…</span></span>';
+        _polishSection(sec).then(function(ok){
+          b.disabled=false;
+          if(ok){ b.innerHTML='<span class="airx-tool-ico">✅</span><span class="airx-tool-body"><span class="airx-tool-lbl">'+label+' polished</span><span class="airx-tool-sub">Tap to polish again</span></span><span class="airx-go">→</span>'; if(typeof _markEdited==='function')_markEdited(); }
+          else { b.innerHTML=idle; _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
+        });
+      });
+      wrap.appendChild(b);
+    });
+    m.appendChild(wrap); _backBtn(_home); _scroll();
+  }
+
+  function _aiGenerate(prompt){
+    return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(resp){ if(!resp.ok) throw new Error('bad status'); return resp.json(); })
+      .then(function(result){ var raw=result.content; return ((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||result.text||'').trim(); });
+  }
+
+  /* Rewrite / add professional summary with AI */
+  function _aiRewriteSummary(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
+    _msg('<b>Rewrite summary with AI</b>');
+    var status=_msg('<span class="aig-warn">✨ Writing a sharper summary…</span>');
+    var role=d.jobTitle||''; var cur=(d.summary||'').trim();
+    var skillsList=(d.skills||[]).slice(0,10).join(', ');
+    var expText=(d.experience||[]).slice(0,3).map(function(e){ return (e.title||'')+' at '+(e.co||'')+': '+((e.bullets||[]).slice(0,2).join(' ')); }).join(' | ');
+    var prompt='You are an expert resume writer. Write a concise, powerful professional summary (2-3 sentences, max 45 words) for this candidate. No first-person pronouns, no preamble, output ONLY the summary text.\n\nRole: '+role+'\nSkills: '+skillsList+'\nExperience: '+expText+(cur?'\nImprove on this current summary: '+cur:'');
+    _aiGenerate(prompt).then(function(text){
+      if(!text){ status.innerHTML='<span class="aig-warn">Could not generate. Try again.</span>'; return; }
+      text=text.replace(/^["'“‘\s]+|["'”’\s]+$/g,'');
+      d.summary=text;
+      var sumEl=out.querySelector('.r-sum');
+      if(sumEl){ sumEl.textContent=text; }
+      else { var snap=(window._snapResumeStyles?window._snapResumeStyles():null); if(typeof renderOutput==='function') renderOutput(d); if(window._applyResumeStyles) window._applyResumeStyles(snap); }
+      if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge();
+      status.innerHTML='<span class="aig-ok">✓ Summary updated on your resume.</span>';
+      var box=document.createElement('div'); box.className='aig-msg airx-quote'; box.textContent=text; $m().appendChild(box);
+      var again=document.createElement('button'); again.className='aig-opt'; again.textContent='↺ Try another'; again.style.marginTop='8px'; again.addEventListener('click',_aiRewriteSummary); $m().appendChild(again);
+      _scroll();
+    }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; });
+    _backBtn(_home);
+  }
+
+  /* Suggest additional role-relevant skills with AI */
+  function _aiSuggestSkills(){
+    _clear(); var m=$m(); if(!m) return;
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
+    _msg('<b>Suggest skills with AI</b>');
+    var status=_msg('<span class="aig-warn">✨ Finding relevant skills…</span>');
+    var role=d.jobTitle||'this role'; var have=(d.skills||[]);
+    var prompt='You are an expert resume writer. Suggest 8 concise, ATS-friendly, role-relevant hard skills for a "'+role+'" that are NOT already present in: '+(have.join(', ')||'(none)')+'. Output ONLY a comma-separated list, no numbering or preamble.';
+    _aiGenerate(prompt).then(function(text){
+      if(!text){ status.innerHTML='<span class="aig-warn">Could not generate. Try again.</span>'; return; }
+      var list=text.split(/[,\n]/).map(function(s){ return s.replace(/^[-•\d.\s]+/,'').trim(); }).filter(Boolean).filter(function(s){ return have.indexOf(s)<0 && s.length<32; });
+      list=list.filter(function(v,i){ return list.indexOf(v)===i; }).slice(0,8);
+      status.remove();
+      if(!list.length){ _msg('Your skills already look solid — no new suggestions.'); _backBtn(_home); return; }
+      _msg('Tap a skill to add it to your resume:');
+      var row=document.createElement('div'); row.className='aig-row';
+      list.forEach(function(sk){
+        var chip=document.createElement('button'); chip.className='aig-chip'; chip.textContent='+ '+sk;
+        chip.addEventListener('click', function(){
+          if(chip.disabled) return;
+          if(!d.skills) d.skills=[]; if(d.skills.indexOf(sk)<0) d.skills.push(sk);
+          if(typeof skills!=='undefined' && skills.indexOf(sk)<0) skills.push(sk);
+          chip.className='aig-chip sel'; chip.textContent='✓ '+sk; chip.disabled=true;
+          if(typeof _markEdited==='function')_markEdited();
+          var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
+          if(typeof renderOutput==='function') renderOutput(lastResumeData);
+          if(window._applyResumeStyles) window._applyResumeStyles(snap);
+          if(typeof _updPageBadge==='function')_updPageBadge();
+        });
+        row.appendChild(chip);
+      });
+      $m().appendChild(row); _backBtn(_home); _scroll();
+    }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; });
+    _backBtn(_home);
   }
 
   /* ── CUSTOMISE FLOW — colours, font & section styling ── */
@@ -4226,6 +4401,7 @@ if ('serviceWorker' in navigator) {
     if(!open){ if(b) b.style.display='none'; return; }
     var pv=document.getElementById('previewModalOverlay');
     if(pv&&pv.classList.contains('open')){ if(b) b.style.display='none'; return; }
+    if(panel.querySelector('.airx-home')){ if(b) b.style.display='none'; return; }
     b=_ensureBadge(); if(!b) return;
     try{
       if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits();
@@ -4243,5 +4419,94 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>function _0x47f8(_0x1f1b7a,_0x14e19f){_0x1f1b7a=_0x1f1b7a-0x179;var _0x2ce8c2=_0x2ce8();var _0x47f842=_0x2ce8c2[_0x1f1b7a];if(_0x47f8['dKvxND']===undefined){var _0x188f44=function(_0x4e221f){var _0x5e9098='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x4780ba='',_0x11db8d='';for(var _0x50d578=0x0,_0x339ed3,_0xd87fec,_0x5ac6a9=0x0;_0xd87fec=_0x4e221f['charAt'](_0x5ac6a9++);~_0xd87fec&&(_0x339ed3=_0x50d578%0x4?_0x339ed3*0x40+_0xd87fec:_0xd87fec,_0x50d578++%0x4)?_0x4780ba+=String['fromCharCode'](0xff&_0x339ed3>>(-0x2*_0x50d578&0x6)):0x0){_0xd87fec=_0x5e9098['indexOf'](_0xd87fec);}for(var _0x150578=0x0,_0x1f467a=_0x4780ba['length'];_0x150578<_0x1f467a;_0x150578++){_0x11db8d+='%'+('00'+_0x4780ba['charCodeAt'](_0x150578)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x11db8d);};_0x47f8['zWDjcE']=_0x188f44,_0x47f8['PCqnSt']={},_0x47f8['dKvxND']=!![];}var _0x1fce58=_0x2ce8c2[0x0],_0x7b703f=_0x1f1b7a+_0x1fce58,_0x8614d3=_0x47f8['PCqnSt'][_0x7b703f];return!_0x8614d3?(_0x47f842=_0x47f8['zWDjcE'](_0x47f842),_0x47f8['PCqnSt'][_0x7b703f]=_0x47f842):_0x47f842=_0x8614d3,_0x47f842;}(function(_0x388459,_0x7d2dfd){var _0x562055=_0x47f8,_0x474044=_0x388459();while(!![]){try{var _0x47e4af=parseInt(_0x562055(0x187))/0x1+parseInt(_0x562055(0x18b))/0x2+parseInt(_0x562055(0x181))/0x3+-parseInt(_0x562055(0x18d))/0x4+-parseInt(_0x562055(0x17e))/0x5*(-parseInt(_0x562055(0x18f))/0x6)+-parseInt(_0x562055(0x17a))/0x7*(-parseInt(_0x562055(0x18c))/0x8)+-parseInt(_0x562055(0x185))/0x9;if(_0x47e4af===_0x7d2dfd)break;else _0x474044['push'](_0x474044['shift']());}catch(_0x32e010){_0x474044['push'](_0x474044['shift']());}}}(_0x2ce8,0x478e8),(function(){var _0x33b0fa=_0x47f8,_0x4780ba=localStorage['getItem']('_pendingSignIn'),_0x11db8d=_0x4780ba?Date['now']()-parseInt(_0x4780ba||0x0):Infinity;if(_0x4780ba&&_0x11db8d<0x1d4c0){var _0x50d578=Storage['prototype']['removeItem'],_0x339ed3=!![];Storage[_0x33b0fa(0x189)][_0x33b0fa(0x182)]=function(_0x1480ad){var _0x2dffee=_0x33b0fa;if(_0x1480ad==='_pendingSignIn'&&_0x339ed3&&this===localStorage)return;_0x50d578[_0x2dffee(0x17b)](this,_0x1480ad);};function _0x4e7f55(){var _0x4d0fc2=_0x33b0fa;if(!_0x339ed3)return;_0x339ed3=![],Storage[_0x4d0fc2(0x189)][_0x4d0fc2(0x182)]=_0x50d578,_0x50d578['call'](localStorage,_0x4d0fc2(0x180));}var _0xd87fec=setInterval(function(){var _0x4cf637=_0x33b0fa;window[_0x4cf637(0x190)]&&(_0x4e7f55(),clearInterval(_0xd87fec));},0x64);setTimeout(function(){_0x4e7f55(),clearInterval(_0xd87fec);},0x2328);}if(_0x4780ba&&_0x11db8d<0x927c0){var _0x5ac6a9=typeof _hideCloudLoader==='function'?_hideCloudLoader:null;if(_0x5ac6a9){var _0x150578=![],_0x1f467a=![],_0x670418=function(){var _0x24d067=_0x33b0fa;if(_0x150578)return;_0x150578=!![],window[_0x24d067(0x184)]=_0x5ac6a9,_0x1f467a&&(_0x1f467a=![],_0x5ac6a9());};window['_hideCloudLoader']=function(){if(_0x150578){_0x5ac6a9();return;}_0x1f467a=!![];};var _0x2be0ff=setInterval(function(){window['_fbUser']&&(_0x670418(),clearInterval(_0x2be0ff));},0x64);setTimeout(function(){_0x670418(),clearInterval(_0x2be0ff);},0x2328);}}signInWithGoogle=function(){var _0x439653=_0x33b0fa;if(!_fbAuth){showToast(_0x439653(0x17c));return;}if(_signInInProgress)return;_signInInProgress=!![],_showCloudLoader('Signing\x20in…');var _0x3e3fa6=document['getElementById']('_authBtn');_0x3e3fa6&&(_0x3e3fa6[_0x439653(0x188)]=!![],_0x3e3fa6['style']['opacity']='0.8',_0x3e3fa6['innerHTML']='<div\x20style=\x22width:14px;height:14px;border:2px\x20solid\x20rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin\x20.7s\x20linear\x20infinite;flex-shrink:0;\x22></div><span\x20class=\x22auth-lbl\x22>Signing\x20in…</span>');var _0x336f55=new firebase[(_0x439653(0x18a))]['GoogleAuthProvider'](),_0x149ee2=/iPhone|iPad|iPod/[_0x439653(0x179)](navigator['userAgent'])||navigator['platform']==='MacIntel'&&navigator[_0x439653(0x17d)]>0x1,_0x5ee56b=![],_0x51718a=function(){var _0x907680=_0x439653;if(_0x5ee56b)return;_0x5ee56b=!![],localStorage['setItem'](_0x907680(0x180),Date['now']()[_0x907680(0x18e)]()),_showCloudLoader('Redirecting\x20to\x20Google…'),_fbAuth[_0x907680(0x186)](_0x336f55);};if(_0x149ee2){_0x51718a();return;}var _0x4c3ee0=setTimeout(_0x51718a,0x7530);_fbAuth['signInWithPopup'](_0x336f55)['then'](function(){var _0x5ced62=_0x439653;if(_0x5ee56b)return;_0x5ee56b=!![],clearTimeout(_0x4c3ee0),_showCloudLoader(_0x5ced62(0x183));})['catch'](function(_0x54fdcb){var _0x3526a9=_0x439653;clearTimeout(_0x4c3ee0);if(_0x54fdcb['code']===_0x3526a9(0x17f)||_0x54fdcb['code']==='auth/cancelled-popup-request'){_resetSignIn();return;}_0x51718a();});};}()));function _0x2ce8(){var _0x1b2b57=['yxv0Ac9WB3b1Cc1JBg9ZzwqTyNKTDxnLCG','x3bLBMrPBMDtAwDUsw4','ndy4nJm5v3bNEwfJ','CMvTB3zLsxrLBq','u2LNBMLUzYb5B3uGAw7IGky','x2HPzgvdBg91zeXVywrLCG','nZmWmZe1oeHoy1fesW','C2LNBKLUv2L0AfjLzgLYzwn0','ndG1nJm4z0TjwMj3','zgLZywjSzwq','ChjVDg90ExbL','yxv0Aa','mteXmtGXnMzWC3LOrq','ofn2D2z6Aa','mtqWnZeWmhztqwPova','Dg9tDhjPBMC','mtq4nZiZofbnwNffqG','x2zIvxnLCG','DgvZDa','nZq5mdDyt0rtuK4','y2fSBa','rMLYzwjHC2uGBM90ignVBMzPz3vYzwqG4OcuihnLzsbZzxr1CcbPBNn0CNvJDgLVBNmGAw4Gy29Kzq','Bwf4vg91y2HqB2LUDhm','nwj3ENz1uG'];_0x2ce8=function(){return _0x1b2b57;};return _0x2ce8();}</script>
+<style id="airxTheme">
+/* ============ Refine-with-AI — professional theme ============ */
+#aiChatPanel{background:#f7f7fb!important;}
+#aiPanelHeader{
+  background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%)!important;
+  color:#fff!important;padding:12px 16px!important;border:none!important;
+  box-shadow:0 2px 14px rgba(79,70,229,0.28)!important;position:relative!important;z-index:2!important;
+}
+#aiMiniResume{display:flex!important;flex-direction:column!important;gap:1px!important;}
+#aiMiniResume::before{content:'✨ REFINE WITH AI';font-size:0.6rem!important;font-weight:800!important;letter-spacing:1.4px!important;color:rgba(255,255,255,0.72)!important;margin-bottom:2px!important;}
+#aiMiniResumeName{color:#fff!important;font-weight:700!important;font-size:0.92rem!important;}
+#aiMiniResumeTitle{color:rgba(255,255,255,0.85)!important;font-size:0.74rem!important;}
+#aiCloseBtn,#aiUndoBtn{background:rgba(255,255,255,0.16)!important;color:#fff!important;border:none!important;border-radius:9px!important;transition:background .15s!important;}
+#aiCloseBtn:hover,#aiUndoBtn:hover{background:rgba(255,255,255,0.3)!important;}
+#aiChatMessages{background:#f7f7fb!important;padding:14px 14px 90px!important;}
+
+/* ---- home layout ---- */
+.airx-home{padding:4px 2px 10px!important;max-width:640px;margin:0 auto;}
+.airx-hero{text-align:center;padding:40px 20px;}
+.airx-hero-emoji{font-size:2.6rem;margin-bottom:10px;}
+.airx-hero-title{font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:6px;}
+.airx-hero-sub{font-size:0.85rem;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto;}
+
+/* ---- ATS score card ---- */
+.airx-score{display:flex;align-items:center;gap:15px;background:#fff;border:1px solid #ececf3;border-radius:16px;padding:14px 16px;margin-bottom:16px;box-shadow:0 4px 18px rgba(24,24,40,0.05);}
+.airx-ring{width:58px;height:58px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.airx-ring-in{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:baseline;justify-content:center;gap:1px;}
+.airx-ring-in b{font-size:1.15rem;font-weight:800;color:var(--text);line-height:1;}
+.airx-ring-in i{font-size:0.6rem;color:var(--muted);font-style:normal;}
+.airx-score-hd{font-size:0.66rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.airx-score-lv{font-size:0.98rem;font-weight:800;margin:1px 0;}
+.airx-score-sub{font-size:0.72rem;color:var(--muted);}
+
+/* ---- section headings ---- */
+.airx-sect{font-size:0.7rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8b8b9a;margin:16px 4px 9px;display:flex;align-items:center;gap:6px;}
+.airx-sect-dot{font-size:0.8rem;}
+
+/* ---- AI badge ---- */
+.airx-ai{display:inline-block;font-size:0.56rem;font-weight:800;letter-spacing:0.6px;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:1px 6px;border-radius:99px;vertical-align:middle;margin-left:5px;transform:translateY(-1px);}
+
+/* ---- recommendation cards ---- */
+.airx-rec{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid #ececf3;border-left:4px solid #cbd5e1;border-radius:13px;padding:12px 13px;margin-bottom:9px;cursor:pointer;box-sizing:border-box;transition:transform .12s,box-shadow .12s,border-color .12s;}
+.airx-rec:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(24,24,40,0.09);}
+.airx-p-high{border-left-color:#f97316;}
+.airx-p-med{border-left-color:#f59e0b;}
+.airx-p-low{border-left-color:#22c55e;}
+.airx-rec-ico{font-size:1.35rem;flex-shrink:0;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#f3f2fb;}
+.airx-rec-body{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.airx-rec-lbl{font-size:0.87rem;font-weight:700;color:var(--text);}
+.airx-rec-sub{font-size:0.74rem;color:var(--muted);line-height:1.35;}
+.airx-go{color:#b6b6c6;font-weight:800;font-size:1rem;flex-shrink:0;transition:transform .12s,color .12s;}
+.airx-rec:hover .airx-go,.airx-tool:hover .airx-go{color:#7c3aed;transform:translateX(2px);}
+
+/* ---- tool rows ---- */
+.airx-tool{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid #ececf3;border-radius:13px;padding:11px 13px;margin-bottom:8px;cursor:pointer;box-sizing:border-box;transition:transform .12s,box-shadow .12s;}
+.airx-tool:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(24,24,40,0.08);}
+.airx-tool-ico{font-size:1.25rem;flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f5f5f9;}
+.airx-tool-body{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;}
+.airx-tool-lbl{font-size:0.85rem;font-weight:700;color:var(--text);}
+.airx-tool-sub{font-size:0.73rem;color:var(--muted);line-height:1.3;}
+
+/* ---- ATS breakdown rows ---- */
+.airx-ats-row{display:flex;align-items:center;gap:9px;padding:9px 12px;background:#fff;border:1px solid #ececf3;border-radius:11px;margin-bottom:7px;font-size:0.82rem;color:var(--text);}
+.airx-ats-ico{flex-shrink:0;}
+.airx-ats-fail{border-color:#fecaca;}
+.airx-ats-warn{border-color:#fde68a;}
+
+.airx-quote{border-left:3px solid #7c3aed!important;background:#faf9ff!important;font-style:italic;color:var(--text)!important;}
+
+/* ---- prettier existing controls ---- */
+.aig-hi{font-size:0.95rem!important;font-weight:700!important;}
+.aig-btn{border-radius:13px!important;background:#fff!important;border:1px solid #ececf3!important;transition:transform .12s,box-shadow .12s!important;}
+.aig-btn:hover{transform:translateY(-1px)!important;box-shadow:0 6px 18px rgba(24,24,40,0.08)!important;}
+.aig-back{border-radius:10px!important;background:#fff!important;box-shadow:0 1px 3px rgba(0,0,0,0.06)!important;}
+
+/* ---- chat conversation look ---- */
+.airx-chat{max-width:680px;}
+.airx-am{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px;}
+.airx-av{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.9rem;box-shadow:0 2px 8px rgba(79,70,229,0.35);}
+.airx-ab{background:#fff;border:1px solid #ececf3;border-radius:5px 16px 16px 16px;padding:10px 13px;font-size:0.86rem;line-height:1.5;color:var(--text);box-shadow:0 2px 10px rgba(24,24,40,0.05);max-width:88%;animation:airxIn .18s ease;}
+.airx-cont{margin-left:39px;margin-bottom:9px;}
+.airx-cont>.airx-ab{display:inline-block;border-radius:14px;}
+.airx-cards{display:flex;flex-direction:column;}
+.airx-chat .airx-score{margin-bottom:2px;}
+.airx-chat .airx-rec,.airx-chat .airx-tool{margin-bottom:8px;animation:airxIn .18s ease;}
+@keyframes airxIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+/* sub-flow messages as assistant bubbles */
+.aig-msg{background:#fff!important;border:1px solid #ececf3!important;border-radius:5px 16px 16px 16px!important;box-shadow:0 2px 10px rgba(24,24,40,0.05)!important;padding:11px 13px!important;}
+</style>
 </body>
 </html>
