@@ -2340,29 +2340,6 @@
       <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
     </div>
     <p class="hero-note">Free to build · Sign in anytime to save your progress</p>
-    <div class="hero-upload-wrap">
-      <div class="hero-or">— or import your existing resume —</div>
-      <div class="upload-tabs">
-        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')" style="position:relative;">📄 Upload PDF / DOC <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.5rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;line-height:1.6;white-space:nowrap;box-shadow:0 2px 8px rgba(34,197,94,0.55);">✓ RECOMMENDED</span></button>
-        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
-      </div>
-      <!-- Upload PDF/Doc panel -->
-      <div class="upload-panel active" id="panelUpload">
-        <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
-          <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleResumeFile(this.files[0]);this.value='';">
-          <div class="upload-zone-icon">📄</div>
-          <div class="upload-zone-title">Upload your resume</div>
-          <div class="upload-zone-sub">PDF · DOCX · DOC · TXT · JPG · PNG &nbsp;·&nbsp; Drag &amp; drop</div>
-          <span class="btn-browse">Choose File</span>
-        </label>
-      </div>
-      <!-- Paste text panel -->
-      <div class="upload-panel" id="panelPaste">
-        <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
-        <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
-      </div>
-      <div id="uploadStatusBar" class="upload-status-bar" style="display:none"></div>
-    </div>
   </div>
 
   <!-- Compact portfolio sticky CTA — shown on steps 2-7 (steps where topBar is hidden) -->
@@ -2589,6 +2566,29 @@
     <h1 class="step-title">Personal Information</h1>
     <p class="step-subtitle">Fields marked <span style="color:#ef4444">*</span> are required to generate your resume</p>
     <div id="valBanner1" class="val-banner"></div>
+    <!-- Import existing resume (always shown in Personal Information) -->
+    <div class="hero-upload-wrap">
+      <div class="upload-tabs">
+        <button class="upload-tab active" id="tabUpload" onclick="switchUploadTab('upload')" style="position:relative;">📄 Upload PDF / DOC <span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.5rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:0.4px;line-height:1.6;white-space:nowrap;box-shadow:0 2px 8px rgba(34,197,94,0.55);">✓ RECOMMENDED</span></button>
+        <button class="upload-tab" id="tabPaste" onclick="switchUploadTab('paste')">📋 Paste Text</button>
+      </div>
+      <!-- Upload PDF/Doc panel -->
+      <div class="upload-panel active" id="panelUpload">
+        <label class="upload-zone" id="uploadDropZone" for="resumeUploadInput">
+          <input type="file" id="resumeUploadInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleResumeFile(this.files[0]);this.value='';">
+          <div class="upload-zone-icon">📄</div>
+          <div class="upload-zone-title">Upload your resume</div>
+          <div class="upload-zone-sub">PDF · DOCX · DOC · TXT · JPG · PNG &nbsp;·&nbsp; Drag &amp; drop</div>
+          <span class="btn-browse">Choose File</span>
+        </label>
+      </div>
+      <!-- Paste text panel -->
+      <div class="upload-panel" id="panelPaste">
+        <textarea id="resumePasteArea" class="paste-area" placeholder="Paste your resume text here — copy it from your PDF viewer, LinkedIn, Google Docs, or anywhere…"></textarea>
+        <button class="btn-parse" id="btnParseText" onclick="handleResumeText()">🤖 Parse &amp; Import Resume</button>
+      </div>
+      <div id="uploadStatusBar" class="upload-status-bar" style="display:none"></div>
+    </div>
     <div class="prefill-section">
       <div class="prefill-title">⚡ Quick Prefill</div>
       <p class="prefill-desc">Import your basic info automatically from GitHub</p>
