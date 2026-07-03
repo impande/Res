@@ -1025,7 +1025,11 @@
     #mhdrSection{transition:opacity .18s ease;}
     #mhdrSection.ghost-rotating{color:var(--muted);font-weight:500;opacity:0.55;font-style:italic;}
     /* ── Upload Resume Feature ── */
-    .hero-upload-wrap{margin-top:22px;width:100%;max-width:450px;}
+    .hero-upload-wrap{margin-top:22px;margin-bottom:22px;width:100%;max-width:450px;}
+    /* In Personal Information the import block sits above Quick Prefill — give it
+       room so the two cards don't touch, and match the full content width so it
+       lines up with the Quick Prefill card below (the hero default caps at 450px). */
+    #step1 .hero-upload-wrap{margin:14px 0 26px;max-width:100%;}
     .upload-zone{display:block;border:2px dashed rgba(217,119,6,0.25);border-radius:14px;padding:20px 18px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(217,119,6,0.02);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(217,119,6,0.05);transform:translateY(-1px);}
     .upload-zone-icon{font-size:1.6rem;margin-bottom:6px;}
