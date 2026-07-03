@@ -4489,7 +4489,9 @@ if ('serviceWorker' in navigator) {
       previewOpen=!!previewOpen&&previewOpen.classList.contains('open');
       var _pf=document.getElementById('pfOverlay');
       var pfOpen=!!_pf&&getComputedStyle(_pf).display!=='none';
-      if(onStep7&&!previewOpen&&!pfOpen) cta.classList.add('ai-cta-visible');
+      var _pay=document.getElementById('payOverlay');
+      var payOpen=!!_pay&&getComputedStyle(_pay).display!=='none';
+      if(onStep7&&!previewOpen&&!pfOpen&&!payOpen) cta.classList.add('ai-cta-visible');
       else cta.classList.remove('ai-cta-visible');
       _positionMobileCta();
     }
