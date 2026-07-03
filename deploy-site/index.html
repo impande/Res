@@ -534,6 +534,11 @@
     .tpl-guide-text strong{color:var(--accent);}
     .tpl-guide-caret{font-size:1.1rem;color:var(--accent);animation:caretBounce .65s ease-in-out infinite alternate;flex-shrink:0;}
     @keyframes caretBounce{from{transform:translateY(0);}to{transform:translateY(5px);}}
+    /* Promote to its own compositor layer so an in-place label swap
+       (innerHTML → "Generating…") repaints cleanly. Without this, iOS Safari
+       can leave the old "Generate Resume" glyphs ghosted under the new text
+       when the swap happens during the tap's :active state. */
+    #generateBtn{transform:translateZ(0);-webkit-transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden;}
     #generateBtn.btn-ready{animation:generatePulse 1.9s ease-in-out infinite;}
     @keyframes generatePulse{0%,100%{box-shadow:0 2px 8px rgba(217,119,6,0.15);}55%{box-shadow:0 0 0 8px rgba(217,119,6,0.12),0 4px 22px rgba(217,119,6,0.3);}}
     #tplSelect{display:none;}
