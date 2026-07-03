@@ -403,6 +403,15 @@
     .step-label{font-size:0.84rem;font-weight:600;}
     .req-star{color:#ef4444;margin-left:2px;}
 #main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;margin-left:auto;margin-right:auto;}
+    /* Fixed app-shell on tablet/desktop: body is exactly one viewport tall with no
+       page-level scroll, so #main becomes the sole internal scroll container. This
+       stops iOS Safari's dynamic toolbar (which shifts 100vh/100dvh while scrolling
+       a page-level scroller) from rubber-banding blank whitespace below the form.
+       Mobile (≤768px) keeps its natural block-flow scroll and is left untouched. */
+    @media(min-width:769px){
+      html{height:100vh;height:100dvh;}
+      body{height:100vh;height:100dvh;min-height:0;overflow:hidden;}
+    }
     .step-content{display:none;}
     .step-content.active{display:block;}
     .step-title{font-size:1.8rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.2;}
