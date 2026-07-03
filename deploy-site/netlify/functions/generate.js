@@ -125,8 +125,13 @@ exports.handler = async function(event) {
     }
 
     const text = data.content?.[0]?.text;
-    // Return both `text` (used by main resume generation) and `content` (used by AI Chat functions)
-    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text, content: [{ text }] }) };
+    // Return only `text` (a plain string). Every client reader falls back to `text`,
+    // so this one shape works for all of them. Do NOT also return a `content` field:
+    // some callers read `(content || text).trim()` / `_extractJSON(content || text)`
+    // (which throw on a non-string) while others read `content[0].text` (which needs an
+    // array) — no single `content` shape satisfies both, so we omit it entirely and let
+    // every caller use `text`.
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
   } catch (err) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: err.message }) };
   }
