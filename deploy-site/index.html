@@ -5000,5 +5000,26 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('orientationchange',place);
 })();
 </script>
+<script>
+/* Always land at the top of the form when navigating between wizard steps —
+   sidebar clicks, Next/Back, and browser history all end up changing which
+   .step-content is active, so reset the scroll on any active-step change.
+   (goToStep only resets scroll for direct nav, not history back/forward.) */
+(function(){
+  var mainEl=document.getElementById('main');
+  var steps=document.querySelectorAll('.step-content');
+  if(!mainEl||!steps.length) return;
+  var last=document.querySelector('.step-content.active');
+  function toTop(){
+    var active=document.querySelector('.step-content.active');
+    if(!active||active===last) return;
+    last=active;
+    mainEl.scrollTop=0;                    /* desktop/tablet: #main is the scroll container */
+    try{ window.scrollTo(0,0); }catch(e){} /* mobile: the page scrolls */
+  }
+  var mo=new MutationObserver(toTop);
+  steps.forEach(function(sc){ mo.observe(sc,{attributes:true,attributeFilter:['class']}); });
+})();
+</script>
 </body>
 </html>
