@@ -5037,5 +5037,33 @@ if ('serviceWorker' in navigator) {
   steps.forEach(function(sc){ mo.observe(sc,{attributes:true,attributeFilter:['class']}); });
 })();
 </script>
+<script>
+/* Preserve work across the sign-in redirect. Google sign-in navigates the tab
+   away and back; the return handler (_loadMainCloudDoc) already restores a
+   `_preSignInDraft` for first-time users (no cloud data yet) via
+   populateFormFromParsed — but nothing ever wrote that key, so pre-sign-in work
+   was lost. Save the current form (only when it has real content, so returning
+   users with an empty form don't get a spurious draft/conflict prompt) right
+   before sign-in kicks off. */
+(function(){
+  function hasContent(d){
+    if(!d) return false;
+    return !!(d.firstName||d.lastName||d.jobTitle||d.email||d.phone||d.location
+      ||(d.experience&&d.experience.length)||(d.skills&&d.skills.length)
+      ||(d.education&&d.education.length)||(d.awards&&d.awards.length));
+  }
+  function saveDraft(){
+    try{
+      if(typeof collectData!=='function') return;
+      var d=collectData();
+      if(!hasContent(d)) return;
+      if(typeof currentTemplate!=='undefined'&&currentTemplate) d.template=currentTemplate;
+      localStorage.setItem('_preSignInDraft', JSON.stringify(d));
+    }catch(e){}
+  }
+  var orig=window.signInWithGoogle;
+  window.signInWithGoogle=function(){ saveDraft(); return (typeof orig==='function')?orig.apply(this,arguments):undefined; };
+})();
+</script>
 </body>
 </html>
