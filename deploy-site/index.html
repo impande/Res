@@ -2250,6 +2250,19 @@
     #resumeTips{position:absolute;inset:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);z-index:10;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.08);}
     #resumeTips.tips-hidden{display:none!important;}
     .tips-drag-handle{display:none;}
+    /* Desktop/tablet (≥769): Quick Tips as a full-width bottom drawer over the
+       resume canvas instead of a full-card overlay. left/width are set by JS to
+       match the #main column; drag handle stays hidden (mobile-only affordance). */
+    @keyframes tipsDrawerUp{from{transform:translateY(101%);}to{transform:translateY(0);}}
+    @media(min-width:769px){
+      #resumeTips{position:fixed;inset:auto auto 0 0;width:auto;max-height:70vh;overflow-y:auto;
+        border:1px solid var(--border);border-bottom:none;border-radius:22px 22px 0 0;
+        background:#fff;backdrop-filter:none;z-index:8500;padding:18px 26px 26px;
+        align-items:stretch;justify-content:flex-start;box-shadow:0 -8px 40px rgba(0,0,0,0.14);
+        animation:tipsDrawerUp .34s cubic-bezier(.34,1.3,.64,1);}
+      #resumeTips #tipsContent{max-width:100%!important;}
+    }
+    @media(min-width:769px) and (prefers-reduced-motion:reduce){#resumeTips{animation:none;}}
     @media(max-width:520px){
       .tips-drag-handle{display:flex;justify-content:center;padding:12px 0 6px;flex-shrink:0;width:100%;}
       #resumeTips{position:fixed;top:auto;left:0;right:0;bottom:0;border-radius:24px 24px 0 0;z-index:8500;padding:0 16px 36px;align-items:flex-start;justify-content:flex-start;flex-direction:column;overflow-y:auto;max-height:85vh;animation:drawerUp .35s cubic-bezier(.34,1.3,.64,1);}
@@ -4496,7 +4509,9 @@ if ('serviceWorker' in navigator) {
       var pfOpen=!!_pf&&getComputedStyle(_pf).display!=='none';
       var _pay=document.getElementById('payOverlay');
       var payOpen=!!_pay&&getComputedStyle(_pay).display!=='none';
-      if(onStep7&&!previewOpen&&!pfOpen&&!payOpen) cta.classList.add('ai-cta-visible');
+      var _tips=document.getElementById('resumeTips');
+      var tipsOpen=!!_tips&&!_tips.classList.contains('tips-hidden')&&getComputedStyle(_tips).display!=='none';
+      if(onStep7&&!previewOpen&&!pfOpen&&!payOpen&&!tipsOpen) cta.classList.add('ai-cta-visible');
       else cta.classList.remove('ai-cta-visible');
       _positionMobileCta();
     }
@@ -4959,5 +4974,31 @@ if ('serviceWorker' in navigator) {
 .airx-ats-fixable.airx-ats-warn{border:1px solid #fde68a;border-left:4px solid #f59e0b;}
 .airx-ats-fix{font-size:0.66rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:3px 10px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
 </style>
+<script>
+/* Quick Tips → bottom drawer on desktop/tablet (≥769px): size the fixed
+   #resumeTips to the #main resume column and dim the backdrop. Mobile (≤520px)
+   keeps its own full-width sheet; the drag handle stays mobile-only. */
+(function(){
+  var tips=document.getElementById('resumeTips');
+  var backdrop=document.getElementById('tipsBackdrop');
+  var mainEl=document.getElementById('main');
+  if(!tips||!mainEl) return;
+  var DESK=769;
+  function visible(){ return !tips.classList.contains('tips-hidden') && getComputedStyle(tips).display!=='none'; }
+  function place(){
+    if(window.innerWidth<DESK){ tips.style.removeProperty('left'); tips.style.removeProperty('width'); return; }
+    if(!visible()){ if(backdrop) backdrop.style.display='none'; return; }
+    var r=mainEl.getBoundingClientRect();
+    tips.style.left=Math.round(r.left)+'px';
+    tips.style.width=Math.round(r.width)+'px';
+    if(backdrop) backdrop.style.display='block';
+  }
+  /* disconnect during our own style writes so we don't observe them */
+  var mo=new MutationObserver(function(){ mo.disconnect(); place(); mo.observe(tips,{attributes:true,attributeFilter:['class','style']}); });
+  mo.observe(tips,{attributes:true,attributeFilter:['class','style']});
+  window.addEventListener('resize',place);
+  window.addEventListener('orientationchange',place);
+})();
+</script>
 </body>
 </html>
