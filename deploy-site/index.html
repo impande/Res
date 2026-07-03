@@ -409,8 +409,13 @@
        a page-level scroller) from rubber-banding blank whitespace below the form.
        Mobile (≤768px) keeps its natural block-flow scroll and is left untouched. */
     @media(min-width:769px){
-      html{height:100vh;height:100dvh;}
-      body{height:100vh;height:100dvh;min-height:0;overflow:hidden;}
+      html{height:100vh;height:100dvh;overflow:hidden;}
+      /* position:fixed pins body to the layout viewport. body/html overflow:hidden
+         alone does NOT stop iOS Safari's document-level scroll (Chromium honors it,
+         iOS doesn't) — so the page still rubber-banded blank whitespace below the
+         form. Fixing body to inset:0 removes it from the scroll flow entirely; #main
+         (flex:1; overflow-y:auto) stays the sole internal scroll container. */
+      body{position:fixed;inset:0;min-height:0;overflow:hidden;}
     }
     .step-content{display:none;}
     .step-content.active{display:block;}
