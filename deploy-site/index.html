@@ -5014,12 +5014,24 @@ if ('serviceWorker' in navigator) {
   var steps=document.querySelectorAll('.step-content');
   if(!mainEl||!steps.length) return;
   var last=document.querySelector('.step-content.active');
+  function reset(){
+    /* reset every possible scroll container so the step title sits at the top */
+    try{ mainEl.scrollTop=0; }catch(e){}                                   /* desktop/tablet: #main scrolls */
+    try{ window.scrollTo(0,0); }catch(e){}                                 /* mobile: the page scrolls */
+    try{ if(document.scrollingElement) document.scrollingElement.scrollTop=0; }catch(e){}
+    try{ document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){}
+  }
   function toTop(){
     var active=document.querySelector('.step-content.active');
     if(!active||active===last) return;
     last=active;
-    mainEl.scrollTop=0;                    /* desktop/tablet: #main is the scroll container */
-    try{ window.scrollTo(0,0); }catch(e){} /* mobile: the page scrolls */
+    /* Run now, on the next frame (after the new step lays out), and once more
+       shortly after — iOS Safari can restore/shift the scroll right after a step
+       swap or keyboard dismiss, so a single synchronous reset doesn't stick. */
+    reset();
+    if(window.requestAnimationFrame) requestAnimationFrame(function(){ reset(); requestAnimationFrame(reset); });
+    setTimeout(reset,80);
+    setTimeout(reset,200);
   }
   var mo=new MutationObserver(toTop);
   steps.forEach(function(sc){ mo.observe(sc,{attributes:true,attributeFilter:['class']}); });
