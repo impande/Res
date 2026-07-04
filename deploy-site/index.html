@@ -5358,5 +5358,36 @@ if ('serviceWorker' in navigator) {
   };
 })();
 </script>
+<script>
+/* Preload the full saved resume (professional summary + ATS score) when a
+   version is loaded or switched — without requiring a Generate click.
+   Previously: on a fresh load renderOutput drew the summary but the ATS score
+   was never computed (only _doGenerateResume computes it); on a version switch
+   with a resume already showing, the output was replaced by a "Click Generate
+   Resume" placeholder. Both left the loaded version looking incomplete. This
+   wrapper renders the saved resume and its ATS score for any version that
+   carries resume content. */
+(function(){
+  if(typeof window._applyCloudDoc!=='function') return;
+  var orig=window._applyCloudDoc;
+  window._applyCloudDoc=function(uid,data,portfolio){
+    var r=orig.apply(this,arguments);
+    try{
+      if(data && (data.summary || (data.experience && data.experience.length))){
+        var ro=document.getElementById('resumeOutput');
+        // orig shows a "Click Generate" placeholder on a version switch — replace
+        // it with the actual saved resume. (currentTemplate is already set by orig.)
+        if(ro && !ro.querySelector('.resume-a4-page') && typeof renderOutput==='function'){
+          renderOutput(data);
+        }
+        if(typeof renderATSScore==='function') renderATSScore(data);
+        var dl=document.getElementById('dlActions'); if(dl) dl.style.display='';
+        var st=document.getElementById('resumeStatus'); if(st) st.textContent='Generated';
+      }
+    }catch(e){}
+    return r;
+  };
+})();
+</script>
 </body>
 </html>
