@@ -5547,5 +5547,50 @@ if ('serviceWorker' in navigator) {
   })();
 })();
 </script>
+<script>
+/* FINAL sign-in override — supersedes the earlier duplicated blocks.
+   Those raced a 4s timer that fired signInWithRedirect() while the Google popup
+   was still open, cancelling slow-but-valid sign-ins (account pick / 2FA /
+   incognito with no saved session). This version has NO timer race: it uses the
+   popup, and falls back to redirect ONLY when the popup genuinely fails — which
+   is exactly what incognito / blocked-storage does (auth/popup-blocked,
+   auth/web-storage-unsupported). Robust for incognito and normal windows alike. */
+(function(){
+  if(typeof _fbAuth==='undefined' && typeof window._fbAuth==='undefined' && typeof firebase==='undefined') { /* still install; guarded below */ }
+  window.signInWithGoogle=function(){
+    try{
+      if(typeof _fbAuth==='undefined' || !_fbAuth){ if(typeof showToast==='function') showToast('Firebase not configured'); return; }
+      if(typeof _signInInProgress!=='undefined' && _signInInProgress) return;
+      try{ _signInInProgress=true; }catch(e){}
+      if(typeof _showCloudLoader==='function') _showCloudLoader('Signing in…');
+      var btn=document.getElementById('_authBtn');
+      if(btn){ btn.disabled=true; btn.style.opacity='0.8'; btn.innerHTML='<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>'; }
+      var provider=new firebase.auth.GoogleAuthProvider();
+      var isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+      var done=false;
+      function doRedirect(){
+        if(done) return; done=true;
+        try{ localStorage.setItem('_pendingSignIn',Date.now().toString()); }catch(e){}
+        if(typeof _showCloudLoader==='function') _showCloudLoader('Redirecting to Google…');
+        _fbAuth.signInWithRedirect(provider);
+      }
+      if(isIOS){ doRedirect(); return; }
+      _fbAuth.signInWithPopup(provider).then(function(){
+        if(done) return; done=true;
+        if(typeof _showCloudLoader==='function') _showCloudLoader('Signing you in…');
+      }).catch(function(e){
+        var c=e&&e.code;
+        if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){
+          if(typeof _resetSignIn==='function') _resetSignIn(); return;
+        }
+        // popup-blocked / web-storage-unsupported (incognito) / network → redirect
+        doRedirect();
+      });
+    }catch(err){
+      try{ if(typeof _resetSignIn==='function') _resetSignIn(); }catch(e){}
+    }
+  };
+})();
+</script>
 </body>
 </html>
