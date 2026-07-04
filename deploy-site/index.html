@@ -2974,6 +2974,8 @@ function selectTemplate(_0x3ca3f0){const _0x189500=_0xed2da9;_captureResumeOutpu
       <div class="pf-step-pill" id="pfPill2" onclick="pfGoStep(2)" role="button" aria-label="Go to step 2: Sections"><div class="pf-step-num">2</div>Sections</div>
       <div class="pf-step-sep"></div>
       <div class="pf-step-pill" id="pfPill3" onclick="pfGoStep(3)" role="button" aria-label="Go to step 3: Preview"><div class="pf-step-num">3</div>Preview</div>
+      <div class="pf-step-sep"></div>
+      <div class="pf-step-pill" id="pfPill4" onclick="pfGoStep(4)" role="button" aria-label="Go to step 4: Upload your own"><div class="pf-step-num">4</div>Upload</div>
     </div>
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
@@ -3211,6 +3213,12 @@ function selectTemplate(_0x3ca3f0){const _0x189500=_0xed2da9;_captureResumeOutpu
           <button class="pf-mini-tpl" id="pfMiniBloom" onclick="switchPfTemplate('bloom')">Bloom</button>
         </div>
       </div>
+      <!-- Shown only while a user-uploaded file is being previewed (upload lives in step 4) -->
+      <div id="pfUploadActiveBar" style="display:none;align-items:center;gap:10px;margin-bottom:10px;padding:9px 13px;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.3);border-radius:10px;">
+        <span style="font-size:1.05rem;flex-shrink:0;">📄</span>
+        <div style="flex:1;min-width:0;font-size:0.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Previewing your uploaded file: <b id="pfUploadActiveName" style="font-weight:700;"></b></div>
+        <button onclick="pfRemoveUpload()" style="padding:4px 11px;font-size:0.75rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;">✕ Use generated</button>
+      </div>
       <div class="pf-preview-wrap">
         <div class="pf-preview-bar">
           <div class="pf-preview-dot" style="background:#ef4444;"></div>
@@ -3223,6 +3231,31 @@ function selectTemplate(_0x3ca3f0){const _0x189500=_0xed2da9;_captureResumeOutpu
       <div class="pf-footer" style="margin-top:10px;">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
         <div style="font-size:0.74rem;color:var(--muted);text-align:right;">Free forever · no account needed · yours to host</div>
+      </div>
+    </div>
+    <!-- Step 4: Upload your own (HTML / PDF) -->
+    <div class="pf-body" id="pfStep4" style="display:none">
+      <div class="pf-section-title">Upload your own portfolio</div>
+      <div class="pf-section-sub">Already have a portfolio as an HTML or PDF file? Upload it here — it shows in the Preview step, ready to download and host.</div>
+      <div id="pfUploadZone" onclick="document.getElementById('pfUploadInput').click()" style="margin-top:16px;border:2px dashed var(--accent);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;background:var(--surface);">
+        <div style="font-size:2.4rem;margin-bottom:8px;">📄</div>
+        <div style="font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:4px;">Tap to choose a file</div>
+        <div style="font-size:0.78rem;color:var(--muted);">HTML (.html) or PDF (.pdf)</div>
+        <input type="file" id="pfUploadInput" accept=".html,.htm,.pdf,text/html,application/pdf" style="display:none" onchange="handlePfUpload(event)">
+      </div>
+      <div id="pfUploadStatus" style="display:none;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.35);border-radius:12px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">✅</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.84rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Uploaded: <span id="pfUploadStatusName"></span></div>
+          <div style="font-size:0.74rem;color:var(--muted);">Now showing in the Preview step.</div>
+        </div>
+        <button onclick="pfRemoveUpload()" style="padding:5px 11px;font-size:0.75rem;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;">✕ Remove</button>
+      </div>
+      <div class="pf-footer" style="margin-top:16px;border-top:1px solid var(--border);">
+        <button class="btn-secondary" onclick="pfGoStep(3)">← Preview</button>
+        <div class="pf-footer-right">
+          <button class="btn-primary" id="pfUploadViewBtn" onclick="pfGoStep(3)" style="display:none;">View in Preview →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5388,6 +5421,112 @@ if ('serviceWorker' in navigator) {
       }
     }catch(e){}
     return r;
+  };
+})();
+</script>
+<script>
+/* Portfolio: dedicated "Upload" step (step 4). The uploaded HTML/PDF is shown in
+   the Preview step's iframe instead of the generated portfolio (HTML via srcdoc,
+   PDF via a data: src). Choosing a template drops the upload (they want the
+   generated one); Download honours whichever is active. */
+(function(){
+  if(typeof window.buildPfPreview!=='function') return;
+  window._pfUploaded=null;
+
+  // --- 4th step (Upload) routing: orig pfGoStep only knows steps 1-3 -----------
+  var origGo=window.pfGoStep;
+  if(typeof origGo==='function'){
+    window.pfGoStep=function(n){
+      if(n===4){
+        [1,2,3].forEach(function(i){
+          var s=document.getElementById('pfStep'+i); if(s) s.style.display='none';
+          var pl=document.getElementById('pfPill'+i); if(pl) pl.classList.remove('active');
+        });
+        var s4=document.getElementById('pfStep4'); if(s4){ s4.style.display=''; s4.scrollTop=0; }
+        var p4=document.getElementById('pfPill4'); if(p4) p4.classList.add('active');
+        return;
+      }
+      var s4=document.getElementById('pfStep4'); if(s4) s4.style.display='none';
+      var p4=document.getElementById('pfPill4'); if(p4) p4.classList.remove('active');
+      return origGo.apply(this,arguments);
+    };
+  }
+
+  // --- preview reflects the upload when one is active --------------------------
+  var origBuild=window.buildPfPreview;
+  window.buildPfPreview=function(){
+    var up=window._pfUploaded, bar=document.getElementById('pfUploadActiveBar');
+    if(up){
+      var f=document.getElementById('pfPreviewFrame');
+      if(f){
+        if(up.type==='pdf'){ f.removeAttribute('srcdoc'); f.src=up.content; }
+        else { f.removeAttribute('src'); f.srcdoc=up.content; }
+      }
+      var u=document.getElementById('pfPreviewUrl'); if(u) u.textContent=up.name||'your-upload';
+      if(bar){ bar.style.display='flex'; var nm=document.getElementById('pfUploadActiveName'); if(nm) nm.textContent=up.name||''; }
+      return;
+    }
+    if(bar) bar.style.display='none';
+    return origBuild.apply(this,arguments);
+  };
+
+  // --- picking a template means "use the generated portfolio" -> drop upload ---
+  var origSwitch=window.switchPfTemplate;
+  if(typeof origSwitch==='function'){
+    window.switchPfTemplate=function(){
+      if(window._pfUploaded){ window._pfUploaded=null; _pfResetUploadUI(); }
+      return origSwitch.apply(this,arguments);
+    };
+  }
+
+  // --- download honours the active upload -------------------------------------
+  var origDownload=window.downloadPortfolio;
+  if(typeof origDownload==='function'){
+    window.downloadPortfolio=function(){
+      var up=window._pfUploaded;
+      if(up){
+        try{
+          var a=document.createElement('a');
+          if(up.type==='pdf'){ a.href=up.content; a.download=up.name||'portfolio.pdf'; }
+          else { var blob=new Blob([up.content],{type:'text/html'}); a.href=URL.createObjectURL(blob); a.download=up.name||'portfolio.html'; }
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          if(up.type!=='pdf'){ var h=a.href; setTimeout(function(){URL.revokeObjectURL(h);},2000); }
+          if(typeof showToast==='function') showToast('✓ Downloaded your uploaded file','success');
+        }catch(e){ if(typeof showToast==='function') showToast('Download failed','error'); }
+        return;
+      }
+      return origDownload.apply(this,arguments);
+    };
+  }
+
+  function _pfResetUploadUI(){
+    var st=document.getElementById('pfUploadStatus'); if(st) st.style.display='none';
+    var vb=document.getElementById('pfUploadViewBtn'); if(vb) vb.style.display='none';
+    var bar=document.getElementById('pfUploadActiveBar'); if(bar) bar.style.display='none';
+  }
+  window.pfRemoveUpload=function(){
+    window._pfUploaded=null; _pfResetUploadUI();
+    if(typeof buildPfPreview==='function') buildPfPreview();
+  };
+  window.handlePfUpload=function(ev){
+    var file=ev.target.files&&ev.target.files[0];
+    if(!file) return;
+    var isPdf=/pdf/i.test(file.type)||/\.pdf$/i.test(file.name);
+    var isHtml=/html/i.test(file.type)||/\.html?$/i.test(file.name);
+    if(!isPdf&&!isHtml){ if(typeof showToast==='function') showToast('Please choose an HTML or PDF file','error'); ev.target.value=''; return; }
+    var reader=new FileReader();
+    reader.onload=function(){
+      window._pfUploaded={type:isPdf?'pdf':'html', content:reader.result, name:file.name};
+      var st=document.getElementById('pfUploadStatus'); if(st) st.style.display='flex';
+      var sn=document.getElementById('pfUploadStatusName'); if(sn) sn.textContent=file.name;
+      var vb=document.getElementById('pfUploadViewBtn'); if(vb) vb.style.display='';
+      if(typeof buildPfPreview==='function') buildPfPreview();
+      if(typeof showToast==='function') showToast('✓ Uploaded — showing in Preview','success');
+      if(typeof pfGoStep==='function') pfGoStep(3);
+    };
+    reader.onerror=function(){ if(typeof showToast==='function') showToast('Could not read that file','error'); };
+    if(isPdf) reader.readAsDataURL(file); else reader.readAsText(file);
+    ev.target.value='';
   };
 })();
 </script>
