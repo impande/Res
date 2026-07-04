@@ -3417,8 +3417,8 @@ if ('serviceWorker' in navigator) {
     '@media(max-width:768px){#aiChatCta{top:83px!important;left:178px!important;right:auto!important;bottom:auto!important;transform:none!important;}}',
     /* Narrow phones: shrink both pills so they still fit side by side without overflowing */
     '@media(max-width:360px){.mob-preview-btn{padding:6px 9px 6px 8px!important;font-size:0.68rem!important;gap:4px!important;}.mob-preview-btn svg{width:11px!important;height:11px!important;}#aiChatCta{padding:6px 9px 6px 8px!important;}#aiChatCta *{font-size:0.68rem!important;}#aiChatCta svg{width:9px!important;height:9px!important;}}',
-    /* Desktop/tablet: bottom-right, not blocking resume */
-    '@media(min-width:769px){#aiChatCta{bottom:22px!important;left:191px!important;right:auto!important;transform:none!important;}}',
+    /* Desktop/tablet: bottom-right, inside the Writing Tips rail (which shows at >=1100px) */
+    '@media(min-width:769px){#aiChatCta{bottom:22px!important;right:22px!important;left:auto!important;transform:none!important;}}',
     /* Keep the AI chat panel above the resume-preview modal so it can be opened/used while the preview is open */
     '#aiChatPanel.ai-panel-open{z-index:9700!important;}',
     /* Bug D: mobileHdr must stay hidden on desktop/landscape even when JS set inline style */
