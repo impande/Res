@@ -5102,6 +5102,11 @@ if ('serviceWorker' in navigator) {
   /* Contact links: match the surrounding header colour instead of the
      default browser blue (illegible on the dark-header families). */
   [class*="tpl-meridian-"] .r-contact a,[class*="tpl-oxford-"] .r-contact a,[class*="tpl-chronicle-"] .r-contact a,[class*="tpl-monoline-"] .r-contact a,[class*="tpl-ledger-"] .r-contact a,[class*="tpl-cascade-"] .r-contact a,[class*="tpl-executive-"] .r-contact a,[class*="tpl-vertex-"] .r-contact a,[class*="tpl-aria-"] .r-contact a,[class*="tpl-spine-"] .r-contact a{color:inherit!important;text-decoration:none!important;}
+  /* Breathing room under every section title so the content (skill chips
+     especially) doesn't butt up against the title's underline / bar. The
+     new families set no margin-bottom of their own, so without this the
+     gap is 0 and chips overlap the section line. */
+  [class*="tpl-meridian-"] .r-sec-t,[class*="tpl-oxford-"] .r-sec-t,[class*="tpl-chronicle-"] .r-sec-t,[class*="tpl-monoline-"] .r-sec-t,[class*="tpl-ledger-"] .r-sec-t,[class*="tpl-cascade-"] .r-sec-t,[class*="tpl-executive-"] .r-sec-t,[class*="tpl-vertex-"] .r-sec-t,[class*="tpl-aria-"] .r-sec-t,[class*="tpl-spine-"] .r-sec-t{margin-bottom:10px!important;}
 
   /* ---------- Family: Meridian — bold accent header card (dark) ---------- */
   [class*="tpl-meridian-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
