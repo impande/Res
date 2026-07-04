@@ -402,7 +402,7 @@
     .step-item.completed .step-num::after{content:'✓';font-size:0.72rem;}
     .step-label{font-size:0.84rem;font-weight:600;}
     .req-star{color:#ef4444;margin-left:2px;}
-#main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;margin-left:auto;margin-right:auto;}
+#main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;margin-left:auto;margin-right:auto;overscroll-behavior:contain;}
     /* Fixed app-shell on tablet/desktop: body is exactly one viewport tall with no
        page-level scroll, so #main becomes the sole internal scroll container. This
        stops iOS Safari's dynamic toolbar (which shifts 100vh/100dvh while scrolling
@@ -5324,6 +5324,33 @@ if ('serviceWorker' in navigator) {
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',refreshUI); else refreshUI();
   setTimeout(refreshUI,800);
+})();
+</script>
+<script>
+/* Reset the #main scroller to the top on every step change.
+   iOS Safari does NOT re-clamp scrollTop when a scroll container's content
+   shrinks, so navigating from a long step to a shorter one left #main parked
+   past the new content and showed blank whitespace below the form. Forcing
+   scrollTop=0 (immediately, next frame, and after layout settles) re-clamps
+   the scroller and removes the gap. goToStep only ever scrolled *down* to
+   bring the form into view, so it never covered this case. */
+(function(){
+  if(typeof window.goToStep!=='function') return;
+  var orig=window.goToStep;
+  function toTop(){
+    try{
+      var main=document.getElementById('main');
+      if(main) main.scrollTop=0;
+      if(window.scrollY) window.scrollTo(0,0);
+    }catch(e){}
+  }
+  window.goToStep=function(){
+    var r=orig.apply(this,arguments);
+    toTop();
+    if(window.requestAnimationFrame) requestAnimationFrame(toTop);
+    setTimeout(toTop,80);
+    return r;
+  };
 })();
 </script>
 </body>
