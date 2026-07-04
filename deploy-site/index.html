@@ -5075,5 +5075,101 @@ if ('serviceWorker' in navigator) {
   window.signInWithGoogle=function(){ saveDraft(); return (typeof orig==='function')?orig.apply(this,arguments):undefined; };
 })();
 </script>
+
+<!-- ===== New advanced resume templates (Phase 1) =====
+     Registered from a readable script by extending the global TPL_META / TPL_COLORS
+     (no changes to the obfuscated render engine). The engine already tags the
+     resume with a `.tpl-<id>` wrapper class, so each new template's look is pure,
+     scoped CSS below. Three distinct layout families, two colour variants each. -->
+<style>
+  /* ---------- Layout base for the new templates ----------
+     The engine's flex rules for .r-exp-top / .r-skills are scoped to built-in
+     template ids, so new ids must declare them or title/date and skills run
+     together. */
+  .tpl-meridian-navy .r-exp-top,.tpl-meridian-emerald .r-exp-top,.tpl-oxford-ink .r-exp-top,.tpl-oxford-wine .r-exp-top,.tpl-chronicle-teal .r-exp-top,.tpl-chronicle-indigo .r-exp-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .tpl-meridian-navy .r-exp-top>*:last-child,.tpl-meridian-emerald .r-exp-top>*:last-child,.tpl-oxford-ink .r-exp-top>*:last-child,.tpl-oxford-wine .r-exp-top>*:last-child,.tpl-chronicle-teal .r-exp-top>*:last-child,.tpl-chronicle-indigo .r-exp-top>*:last-child{white-space:nowrap;color:#6b7280;font-size:0.82rem;font-weight:500;}
+  .tpl-meridian-navy .r-skills,.tpl-meridian-emerald .r-skills,.tpl-oxford-ink .r-skills,.tpl-oxford-wine .r-skills,.tpl-chronicle-teal .r-skills,.tpl-chronicle-indigo .r-skills{display:flex;flex-wrap:wrap;gap:7px;}
+  .tpl-meridian-navy .r-sk,.tpl-meridian-emerald .r-sk,.tpl-oxford-ink .r-sk,.tpl-oxford-wine .r-sk,.tpl-chronicle-teal .r-sk,.tpl-chronicle-indigo .r-sk{padding:4px 11px;font-size:0.77rem;}
+
+  /* ---------- Family: Meridian — bold accent header card ---------- */
+  .tpl-meridian-navy{--acc:#1e3a5f;--sk-bg:#eef2f8;--sk-fg:#1e3a5f;}
+  .tpl-meridian-emerald{--acc:#0f766e;--sk-bg:#e6f4f1;--sk-fg:#0f766e;}
+  .tpl-meridian-navy,.tpl-meridian-emerald{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  .tpl-meridian-navy .r-head,.tpl-meridian-emerald .r-head{background:var(--acc)!important;color:#fff!important;margin:0 0 7mm!important;padding:8mm 9mm!important;border:none!important;border-radius:7px!important;text-align:left!important;}
+  .tpl-meridian-navy .r-name,.tpl-meridian-emerald .r-name{color:#fff!important;font-weight:800;letter-spacing:-.3px;font-size:1.85rem;}
+  .tpl-meridian-navy .r-title,.tpl-meridian-emerald .r-title{color:rgba(255,255,255,.86)!important;font-style:normal;font-weight:500;font-size:.95rem;margin-top:3px;}
+  .tpl-meridian-navy .r-contact,.tpl-meridian-emerald .r-contact{color:rgba(255,255,255,.82)!important;justify-content:flex-start;margin-top:9px;}
+  .tpl-meridian-navy .r-sep,.tpl-meridian-emerald .r-sep{color:rgba(255,255,255,.5)!important;}
+  .tpl-meridian-navy .r-sec-t,.tpl-meridian-emerald .r-sec-t{color:var(--acc)!important;border:none!important;position:relative;padding-left:11px;letter-spacing:1.6px;}
+  .tpl-meridian-navy .r-sec-t::before,.tpl-meridian-emerald .r-sec-t::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:3px;border-radius:2px;background:var(--acc);}
+  .tpl-meridian-navy .r-co,.tpl-meridian-emerald .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  .tpl-meridian-navy .r-sk,.tpl-meridian-emerald .r-sk{background:var(--sk-bg)!important;color:var(--sk-fg)!important;border-radius:4px;font-weight:600;}
+  .tpl-meridian-navy .r-sum,.tpl-meridian-emerald .r-sum{color:#374151;}
+  .tpl-meridian-navy .r-div,.tpl-meridian-emerald .r-div{display:none;}
+
+  /* ---------- Family: Oxford — elegant serif (European CV) ---------- */
+  .tpl-oxford-ink{--acc:#161616;--sk-bd:#cfcfcf;--sk-fg:#333;}
+  .tpl-oxford-wine{--acc:#7b2d3a;--sk-bd:#d9b3ba;--sk-fg:#7b2d3a;}
+  .tpl-oxford-ink,.tpl-oxford-wine{color:#1a1a1a;font-family:Georgia,'Times New Roman',serif!important;}
+  .tpl-oxford-ink .r-head,.tpl-oxford-wine .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:2px solid var(--acc)!important;border-radius:0!important;text-align:center!important;}
+  .tpl-oxford-ink .r-name,.tpl-oxford-wine .r-name{font-family:Georgia,serif;color:var(--acc)!important;font-weight:700;font-size:2rem;letter-spacing:.6px;}
+  .tpl-oxford-ink .r-title,.tpl-oxford-wine .r-title{font-style:italic;color:#555!important;font-size:1rem;margin-top:4px;}
+  .tpl-oxford-ink .r-contact,.tpl-oxford-wine .r-contact{justify-content:center;color:#444!important;font-size:.8rem;margin-top:6px;}
+  .tpl-oxford-ink .r-sep,.tpl-oxford-wine .r-sep{color:#aaa!important;}
+  .tpl-oxford-ink .r-sec-t,.tpl-oxford-wine .r-sec-t{font-family:Georgia,serif;color:var(--acc)!important;text-transform:uppercase;letter-spacing:2px;font-size:.74rem;font-weight:700;border:none!important;border-bottom:1px solid #dcdcdc!important;padding-bottom:3px;}
+  .tpl-oxford-ink .r-co,.tpl-oxford-wine .r-co{font-style:italic;color:#444!important;}
+  .tpl-oxford-ink .r-sum,.tpl-oxford-wine .r-sum{font-size:.9rem;line-height:1.8;color:#222;}
+  .tpl-oxford-ink .r-sk,.tpl-oxford-wine .r-sk{background:none!important;border:1px solid var(--sk-bd)!important;color:var(--sk-fg)!important;border-radius:3px;font-weight:400;}
+  .tpl-oxford-ink .r-div,.tpl-oxford-wine .r-div{background:#ececec;}
+
+  /* ---------- Family: Chronicle — timeline experience ---------- */
+  .tpl-chronicle-teal{--acc:#0d9488;}
+  .tpl-chronicle-indigo{--acc:#4f46e5;}
+  .tpl-chronicle-teal,.tpl-chronicle-indigo{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  .tpl-chronicle-teal .r-head,.tpl-chronicle-indigo .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:3px solid var(--acc)!important;border-radius:0!important;text-align:left!important;}
+  .tpl-chronicle-teal .r-name,.tpl-chronicle-indigo .r-name{color:#111!important;font-weight:800;font-size:1.85rem;letter-spacing:-.3px;}
+  .tpl-chronicle-teal .r-title,.tpl-chronicle-indigo .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;font-size:.95rem;margin-top:2px;}
+  .tpl-chronicle-teal .r-contact,.tpl-chronicle-indigo .r-contact{color:#6b7280!important;margin-top:8px;}
+  .tpl-chronicle-teal .r-sep,.tpl-chronicle-indigo .r-sep{color:#cbd5e1!important;}
+  .tpl-chronicle-teal .r-sec-t,.tpl-chronicle-indigo .r-sec-t{color:var(--acc)!important;border:none!important;letter-spacing:1.8px;}
+  .tpl-chronicle-teal .r-exp,.tpl-chronicle-indigo .r-exp{position:relative;padding-left:15px;margin-bottom:0;padding-bottom:12px;border-left:2px solid #e5e7eb;}
+  .tpl-chronicle-teal .r-exp:last-child,.tpl-chronicle-indigo .r-exp:last-child{padding-bottom:2px;}
+  .tpl-chronicle-teal .r-exp::before,.tpl-chronicle-indigo .r-exp::before{content:"";position:absolute;left:-6px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px #fff;}
+  .tpl-chronicle-teal .r-co,.tpl-chronicle-indigo .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  .tpl-chronicle-teal .r-sk,.tpl-chronicle-indigo .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
+</style>
+<script>
+/* Register the new templates by extending the global template registry. */
+(function(){
+  if(typeof TPL_META==='undefined'||typeof TPL_COLORS==='undefined') return;
+  var NEW={
+    'meridian-navy':   {label:'Meridian Navy',    tag:'Band header · Navy',    cat:'dark',     color:'#1e3a5f'},
+    'meridian-emerald':{label:'Meridian Emerald', tag:'Band header · Emerald', cat:'dark',     color:'#0f766e'},
+    'oxford-ink':      {label:'Oxford',           tag:'Serif · Refined',       cat:'light',    color:'#161616'},
+    'oxford-wine':     {label:'Oxford Wine',      tag:'Serif · Wine',          cat:'light',    color:'#7b2d3a'},
+    'chronicle-teal':  {label:'Chronicle',        tag:'Timeline · Teal',       cat:'creative', color:'#0d9488'},
+    'chronicle-indigo':{label:'Chronicle Indigo', tag:'Timeline · Indigo',     cat:'creative', color:'#4f46e5'}
+  };
+  Object.keys(NEW).forEach(function(id){
+    var t=NEW[id];
+    if(!TPL_META[id])   TPL_META[id]={label:t.label,tag:t.tag,cat:t.cat};
+    if(!TPL_COLORS[id]) TPL_COLORS[id]=t.color;
+  });
+  var total=Object.keys(TPL_META).length;
+  function refreshUI(){
+    try{
+      var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent=total+' designs';
+      var allBtn=document.querySelector('.tpl-filter-btn[data-cat="all"]'); if(allBtn) allBtn.textContent='All '+total;
+      var grid=document.getElementById('tplGrid');
+      if(grid&&grid.children.length&&typeof renderTemplateGrid==='function'){
+        var active=document.querySelector('.tpl-filter-btn.active');
+        renderTemplateGrid(active?active.getAttribute('data-cat'):'all');
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',refreshUI); else refreshUI();
+  setTimeout(refreshUI,800);
+})();
+</script>
 </body>
 </html>
