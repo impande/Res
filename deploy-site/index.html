@@ -402,7 +402,7 @@
     .step-item.completed .step-num::after{content:'✓';font-size:0.72rem;}
     .step-label{font-size:0.84rem;font-weight:600;}
     .req-star{color:#ef4444;margin-left:2px;}
-#main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;margin-left:auto;margin-right:auto;overscroll-behavior:contain;}
+#main{flex:1;overflow-y:auto;padding:40px 48px;max-width:860px;overflow-anchor:none;margin-left:auto;margin-right:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
     /* Fixed app-shell on tablet/desktop: body is exactly one viewport tall with no
        page-level scroll, so #main becomes the sole internal scroll container. This
        stops iOS Safari's dynamic toolbar (which shifts 100vh/100dvh while scrolling
@@ -410,12 +410,14 @@
        Mobile (≤768px) keeps its natural block-flow scroll and is left untouched. */
     @media(min-width:769px){
       html{height:100vh;height:100dvh;overflow:hidden;}
-      /* position:fixed pins body to the layout viewport. body/html overflow:hidden
-         alone does NOT stop iOS Safari's document-level scroll (Chromium honors it,
-         iOS doesn't) — so the page still rubber-banded blank whitespace below the
-         form. Fixing body to inset:0 removes it from the scroll flow entirely; #main
-         (flex:1; overflow-y:auto) stays the sole internal scroll container. */
-      body{position:fixed;inset:0;min-height:0;overflow:hidden;}
+      /* position:fixed removes body from the scroll flow so iOS Safari can't
+         document-scroll (overflow:hidden alone doesn't stop it on iOS). Height is
+         pinned to 100dvh — the *dynamic* viewport that tracks the iOS toolbar —
+         rather than inset:0 (which resolves to the taller *layout* viewport). With
+         inset:0, #main was taller than the visible area, so scrolling revealed blank
+         whitespace below the content on step 2 / step 7. dvh keeps #main exactly the
+         visible height. vh is the fallback for browsers without dvh. */
+      body{position:fixed;top:0;left:0;right:0;height:100vh;height:100dvh;min-height:0;overflow:hidden;}
     }
     .step-content{display:none;}
     .step-content.active{display:block;}
