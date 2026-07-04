@@ -519,6 +519,16 @@
 
     /* grid — no max-height, natural wrap */
     .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:2px;}
+    /* Desktop/tablet: keep the current card size but cap the grid height so the
+       Choose Template section stays short — the templates scroll inside the grid
+       instead of the whole section growing. Mobile keeps its own horizontal
+       carousel (defined in a max-width media query below). */
+    @media(min-width:769px){
+      #tplGrid{max-height:440px;overflow-y:auto;padding-right:6px;overscroll-behavior:contain;scrollbar-gutter:stable;}
+      #tplGrid::-webkit-scrollbar{width:9px;}
+      #tplGrid::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.16);border-radius:99px;}
+      #tplGrid::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,0.28);}
+    }
     .tpl-card{background:var(--card-bg);border:2px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
     .tpl-card:hover{border-color:rgba(217,119,6,0.5);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
     .tpl-card.tpl-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 6px 20px rgba(217,119,6,0.18);}
