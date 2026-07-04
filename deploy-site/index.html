@@ -5290,10 +5290,31 @@ if ('serviceWorker' in navigator) {
       if(!TPL_COLORS[id]) TPL_COLORS[id]=f.colors[c];
     });
   });
+  // Append the new templates to the hidden main <select> and the preview
+  // modal's template switcher (both ship a hardcoded option list), so the
+  // Preview Resume modal offers every new design too. Idempotent.
+  function fillSelect(sel){
+    if(!sel) return;
+    var have={};
+    Array.prototype.forEach.call(sel.options,function(o){have[o.value]=1;});
+    FAM.forEach(function(f){
+      Object.keys(f.colors).forEach(function(c){
+        var id=f.key+'-'+c;
+        if(have[id]) return;
+        var o=document.createElement('option');
+        o.value=id;
+        o.textContent=(TPL_META[id]&&TPL_META[id].label)||id;
+        sel.appendChild(o);
+        have[id]=1;
+      });
+    });
+  }
   function refreshUI(){
     try{
       var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='50+ designs';
       var allBtn=document.querySelector('.tpl-filter-btn[data-cat="all"]'); if(allBtn) allBtn.textContent='All 50+';
+      fillSelect(document.getElementById('previewTplSelect'));
+      fillSelect(document.getElementById('tplSelect'));
       var grid=document.getElementById('tplGrid');
       if(grid&&grid.children.length&&typeof renderTemplateGrid==='function'){
         var active=document.querySelector('.tpl-filter-btn.active');
