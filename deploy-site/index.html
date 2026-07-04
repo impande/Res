@@ -5082,78 +5082,213 @@ if ('serviceWorker' in navigator) {
      resume with a `.tpl-<id>` wrapper class, so each new template's look is pure,
      scoped CSS below. Three distinct layout families, two colour variants each. -->
 <style>
-  /* ---------- Layout base for the new templates ----------
-     The engine's flex rules for .r-exp-top / .r-skills are scoped to built-in
-     template ids, so new ids must declare them or title/date and skills run
-     together. */
-  .tpl-meridian-navy .r-exp-top,.tpl-meridian-emerald .r-exp-top,.tpl-oxford-ink .r-exp-top,.tpl-oxford-wine .r-exp-top,.tpl-chronicle-teal .r-exp-top,.tpl-chronicle-indigo .r-exp-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
-  .tpl-meridian-navy .r-exp-top>*:last-child,.tpl-meridian-emerald .r-exp-top>*:last-child,.tpl-oxford-ink .r-exp-top>*:last-child,.tpl-oxford-wine .r-exp-top>*:last-child,.tpl-chronicle-teal .r-exp-top>*:last-child,.tpl-chronicle-indigo .r-exp-top>*:last-child{white-space:nowrap;color:#6b7280;font-size:0.82rem;font-weight:500;}
-  .tpl-meridian-navy .r-skills,.tpl-meridian-emerald .r-skills,.tpl-oxford-ink .r-skills,.tpl-oxford-wine .r-skills,.tpl-chronicle-teal .r-skills,.tpl-chronicle-indigo .r-skills{display:flex;flex-wrap:wrap;gap:7px;}
-  .tpl-meridian-navy .r-sk,.tpl-meridian-emerald .r-sk,.tpl-oxford-ink .r-sk,.tpl-oxford-wine .r-sk,.tpl-chronicle-teal .r-sk,.tpl-chronicle-indigo .r-sk{padding:4px 11px;font-size:0.77rem;}
+  /* ============================================================
+     ADVANCED TEMPLATE PACK — 10 layout families, 57 designs.
+     Each family is styled once via an attribute selector on its
+     wrapper class prefix ([class*="tpl-<family>-"]); every colour
+     variant is just a one-line --acc (+ optional tint) declaration.
+     Pure CSS scoped to the .tpl-<id> wrapper the engine already
+     applies to #resumeOutput / preview — no engine edits.
+     ============================================================ */
 
-  /* ---------- Family: Meridian — bold accent header card ---------- */
-  .tpl-meridian-navy{--acc:#1e3a5f;--sk-bg:#eef2f8;--sk-fg:#1e3a5f;}
-  .tpl-meridian-emerald{--acc:#0f766e;--sk-bg:#e6f4f1;--sk-fg:#0f766e;}
-  .tpl-meridian-navy,.tpl-meridian-emerald{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
-  .tpl-meridian-navy .r-head,.tpl-meridian-emerald .r-head{background:var(--acc)!important;color:#fff!important;margin:0 0 7mm!important;padding:8mm 9mm!important;border:none!important;border-radius:7px!important;text-align:left!important;}
-  .tpl-meridian-navy .r-name,.tpl-meridian-emerald .r-name{color:#fff!important;font-weight:800;letter-spacing:-.3px;font-size:1.85rem;}
-  .tpl-meridian-navy .r-title,.tpl-meridian-emerald .r-title{color:rgba(255,255,255,.86)!important;font-style:normal;font-weight:500;font-size:.95rem;margin-top:3px;}
-  .tpl-meridian-navy .r-contact,.tpl-meridian-emerald .r-contact{color:rgba(255,255,255,.82)!important;justify-content:flex-start;margin-top:9px;}
-  .tpl-meridian-navy .r-sep,.tpl-meridian-emerald .r-sep{color:rgba(255,255,255,.5)!important;}
-  .tpl-meridian-navy .r-sec-t,.tpl-meridian-emerald .r-sec-t{color:var(--acc)!important;border:none!important;position:relative;padding-left:11px;letter-spacing:1.6px;}
-  .tpl-meridian-navy .r-sec-t::before,.tpl-meridian-emerald .r-sec-t::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:3px;border-radius:2px;background:var(--acc);}
-  .tpl-meridian-navy .r-co,.tpl-meridian-emerald .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
-  .tpl-meridian-navy .r-sk,.tpl-meridian-emerald .r-sk{background:var(--sk-bg)!important;color:var(--sk-fg)!important;border-radius:4px;font-weight:600;}
-  .tpl-meridian-navy .r-sum,.tpl-meridian-emerald .r-sum{color:#374151;}
-  .tpl-meridian-navy .r-div,.tpl-meridian-emerald .r-div{display:none;}
+  /* ---------- Shared layout base ----------
+     The engine's flex rules for .r-exp-top / .r-skills are scoped to
+     built-in ids, so every new family must re-declare them or the
+     title/date and skill chips run together. */
+  [class*="tpl-meridian-"] .r-exp-top,[class*="tpl-oxford-"] .r-exp-top,[class*="tpl-chronicle-"] .r-exp-top,[class*="tpl-monoline-"] .r-exp-top,[class*="tpl-ledger-"] .r-exp-top,[class*="tpl-cascade-"] .r-exp-top,[class*="tpl-executive-"] .r-exp-top,[class*="tpl-vertex-"] .r-exp-top,[class*="tpl-aria-"] .r-exp-top,[class*="tpl-spine-"] .r-exp-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  [class*="tpl-meridian-"] .r-exp-top>*:last-child,[class*="tpl-oxford-"] .r-exp-top>*:last-child,[class*="tpl-chronicle-"] .r-exp-top>*:last-child,[class*="tpl-monoline-"] .r-exp-top>*:last-child,[class*="tpl-ledger-"] .r-exp-top>*:last-child,[class*="tpl-cascade-"] .r-exp-top>*:last-child,[class*="tpl-executive-"] .r-exp-top>*:last-child,[class*="tpl-vertex-"] .r-exp-top>*:last-child,[class*="tpl-aria-"] .r-exp-top>*:last-child,[class*="tpl-spine-"] .r-exp-top>*:last-child{white-space:nowrap;color:#6b7280;font-size:0.82rem;font-weight:500;}
+  [class*="tpl-meridian-"] .r-skills,[class*="tpl-oxford-"] .r-skills,[class*="tpl-chronicle-"] .r-skills,[class*="tpl-monoline-"] .r-skills,[class*="tpl-ledger-"] .r-skills,[class*="tpl-cascade-"] .r-skills,[class*="tpl-executive-"] .r-skills,[class*="tpl-vertex-"] .r-skills,[class*="tpl-aria-"] .r-skills,[class*="tpl-spine-"] .r-skills{display:flex;flex-wrap:wrap;gap:7px;}
+  [class*="tpl-meridian-"] .r-sk,[class*="tpl-oxford-"] .r-sk,[class*="tpl-chronicle-"] .r-sk,[class*="tpl-monoline-"] .r-sk,[class*="tpl-ledger-"] .r-sk,[class*="tpl-cascade-"] .r-sk,[class*="tpl-executive-"] .r-sk,[class*="tpl-vertex-"] .r-sk,[class*="tpl-aria-"] .r-sk,[class*="tpl-spine-"] .r-sk{padding:4px 11px;font-size:0.77rem;}
+  /* Contact links: match the surrounding header colour instead of the
+     default browser blue (illegible on the dark-header families). */
+  [class*="tpl-meridian-"] .r-contact a,[class*="tpl-oxford-"] .r-contact a,[class*="tpl-chronicle-"] .r-contact a,[class*="tpl-monoline-"] .r-contact a,[class*="tpl-ledger-"] .r-contact a,[class*="tpl-cascade-"] .r-contact a,[class*="tpl-executive-"] .r-contact a,[class*="tpl-vertex-"] .r-contact a,[class*="tpl-aria-"] .r-contact a,[class*="tpl-spine-"] .r-contact a{color:inherit!important;text-decoration:none!important;}
 
-  /* ---------- Family: Oxford — elegant serif (European CV) ---------- */
-  .tpl-oxford-ink{--acc:#161616;--sk-bd:#cfcfcf;--sk-fg:#333;}
-  .tpl-oxford-wine{--acc:#7b2d3a;--sk-bd:#d9b3ba;--sk-fg:#7b2d3a;}
-  .tpl-oxford-ink,.tpl-oxford-wine{color:#1a1a1a;font-family:Georgia,'Times New Roman',serif!important;}
-  .tpl-oxford-ink .r-head,.tpl-oxford-wine .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:2px solid var(--acc)!important;border-radius:0!important;text-align:center!important;}
-  .tpl-oxford-ink .r-name,.tpl-oxford-wine .r-name{font-family:Georgia,serif;color:var(--acc)!important;font-weight:700;font-size:2rem;letter-spacing:.6px;}
-  .tpl-oxford-ink .r-title,.tpl-oxford-wine .r-title{font-style:italic;color:#555!important;font-size:1rem;margin-top:4px;}
-  .tpl-oxford-ink .r-contact,.tpl-oxford-wine .r-contact{justify-content:center;color:#444!important;font-size:.8rem;margin-top:6px;}
-  .tpl-oxford-ink .r-sep,.tpl-oxford-wine .r-sep{color:#aaa!important;}
-  .tpl-oxford-ink .r-sec-t,.tpl-oxford-wine .r-sec-t{font-family:Georgia,serif;color:var(--acc)!important;text-transform:uppercase;letter-spacing:2px;font-size:.74rem;font-weight:700;border:none!important;border-bottom:1px solid #dcdcdc!important;padding-bottom:3px;}
-  .tpl-oxford-ink .r-co,.tpl-oxford-wine .r-co{font-style:italic;color:#444!important;}
-  .tpl-oxford-ink .r-sum,.tpl-oxford-wine .r-sum{font-size:.9rem;line-height:1.8;color:#222;}
-  .tpl-oxford-ink .r-sk,.tpl-oxford-wine .r-sk{background:none!important;border:1px solid var(--sk-bd)!important;color:var(--sk-fg)!important;border-radius:3px;font-weight:400;}
-  .tpl-oxford-ink .r-div,.tpl-oxford-wine .r-div{background:#ececec;}
+  /* ---------- Family: Meridian — bold accent header card (dark) ---------- */
+  [class*="tpl-meridian-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  [class*="tpl-meridian-"] .r-head{background:var(--acc)!important;color:#fff!important;margin:0 0 7mm!important;padding:8mm 9mm!important;border:none!important;border-radius:7px!important;text-align:left!important;}
+  [class*="tpl-meridian-"] .r-name{color:#fff!important;font-weight:800;letter-spacing:-.3px;font-size:1.85rem;}
+  [class*="tpl-meridian-"] .r-title{color:rgba(255,255,255,.86)!important;font-style:normal;font-weight:500;font-size:.95rem;margin-top:3px;}
+  [class*="tpl-meridian-"] .r-contact{color:rgba(255,255,255,.82)!important;justify-content:flex-start;margin-top:9px;}
+  [class*="tpl-meridian-"] .r-sep{color:rgba(255,255,255,.5)!important;}
+  [class*="tpl-meridian-"] .r-sec-t{color:var(--acc)!important;border:none!important;position:relative;padding-left:11px;letter-spacing:1.6px;}
+  [class*="tpl-meridian-"] .r-sec-t::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:3px;border-radius:2px;background:var(--acc);}
+  [class*="tpl-meridian-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  [class*="tpl-meridian-"] .r-sk{background:#eef1f5;background:color-mix(in srgb,var(--acc) 11%,#fff)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
+  [class*="tpl-meridian-"] .r-sum{color:#374151;}
+  [class*="tpl-meridian-"] .r-div{display:none;}
+  .tpl-meridian-navy{--acc:#1e3a5f;} .tpl-meridian-emerald{--acc:#0f766e;} .tpl-meridian-burgundy{--acc:#7f1d3a;} .tpl-meridian-slate{--acc:#334155;}
+  .tpl-meridian-charcoal{--acc:#1f2937;} .tpl-meridian-plum{--acc:#5b2a86;} .tpl-meridian-teal{--acc:#115e59;} .tpl-meridian-forest{--acc:#14532d;}
 
-  /* ---------- Family: Chronicle — timeline experience ---------- */
-  .tpl-chronicle-teal{--acc:#0d9488;}
-  .tpl-chronicle-indigo{--acc:#4f46e5;}
-  .tpl-chronicle-teal,.tpl-chronicle-indigo{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
-  .tpl-chronicle-teal .r-head,.tpl-chronicle-indigo .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:3px solid var(--acc)!important;border-radius:0!important;text-align:left!important;}
-  .tpl-chronicle-teal .r-name,.tpl-chronicle-indigo .r-name{color:#111!important;font-weight:800;font-size:1.85rem;letter-spacing:-.3px;}
-  .tpl-chronicle-teal .r-title,.tpl-chronicle-indigo .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;font-size:.95rem;margin-top:2px;}
-  .tpl-chronicle-teal .r-contact,.tpl-chronicle-indigo .r-contact{color:#6b7280!important;margin-top:8px;}
-  .tpl-chronicle-teal .r-sep,.tpl-chronicle-indigo .r-sep{color:#cbd5e1!important;}
-  .tpl-chronicle-teal .r-sec-t,.tpl-chronicle-indigo .r-sec-t{color:var(--acc)!important;border:none!important;letter-spacing:1.8px;}
-  .tpl-chronicle-teal .r-exp,.tpl-chronicle-indigo .r-exp{position:relative;padding-left:15px;margin-bottom:0;padding-bottom:12px;border-left:2px solid #e5e7eb;}
-  .tpl-chronicle-teal .r-exp:last-child,.tpl-chronicle-indigo .r-exp:last-child{padding-bottom:2px;}
-  .tpl-chronicle-teal .r-exp::before,.tpl-chronicle-indigo .r-exp::before{content:"";position:absolute;left:-6px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px #fff;}
-  .tpl-chronicle-teal .r-co,.tpl-chronicle-indigo .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
-  .tpl-chronicle-teal .r-sk,.tpl-chronicle-indigo .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
+  /* ---------- Family: Oxford — elegant serif, European CV (light) ---------- */
+  [class*="tpl-oxford-"]{color:#1a1a1a;font-family:Georgia,'Times New Roman',serif!important;}
+  [class*="tpl-oxford-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:2px solid var(--acc)!important;border-radius:0!important;text-align:center!important;}
+  [class*="tpl-oxford-"] .r-name{font-family:Georgia,serif;color:var(--acc)!important;font-weight:700;font-size:2rem;letter-spacing:.6px;}
+  [class*="tpl-oxford-"] .r-title{font-style:italic;color:#555!important;font-size:1rem;margin-top:4px;}
+  [class*="tpl-oxford-"] .r-contact{justify-content:center;color:#444!important;font-size:.8rem;margin-top:6px;}
+  [class*="tpl-oxford-"] .r-sep{color:#aaa!important;}
+  [class*="tpl-oxford-"] .r-sec-t{font-family:Georgia,serif;color:var(--acc)!important;text-transform:uppercase;letter-spacing:2px;font-size:.74rem;font-weight:700;border:none!important;border-bottom:1px solid #dcdcdc!important;padding-bottom:3px;}
+  [class*="tpl-oxford-"] .r-co{font-style:italic;color:#444!important;}
+  [class*="tpl-oxford-"] .r-sum{font-size:.9rem;line-height:1.8;color:#222;}
+  [class*="tpl-oxford-"] .r-sk{background:none!important;border:1px solid #ccc;border:1px solid color-mix(in srgb,var(--acc) 38%,#fff)!important;color:#333!important;border-radius:3px;font-weight:400;}
+  [class*="tpl-oxford-"] .r-div{background:#ececec;}
+  .tpl-oxford-ink{--acc:#161616;} .tpl-oxford-wine{--acc:#7b2d3a;} .tpl-oxford-navy{--acc:#1f3a5f;}
+  .tpl-oxford-forest{--acc:#1f4d2e;} .tpl-oxford-sepia{--acc:#6b4423;} .tpl-oxford-charcoal{--acc:#3a3a3a;}
+
+  /* ---------- Family: Chronicle — timeline experience (creative) ---------- */
+  [class*="tpl-chronicle-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  [class*="tpl-chronicle-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:3px solid var(--acc)!important;border-radius:0!important;text-align:left!important;}
+  [class*="tpl-chronicle-"] .r-name{color:#111!important;font-weight:800;font-size:1.85rem;letter-spacing:-.3px;}
+  [class*="tpl-chronicle-"] .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;font-size:.95rem;margin-top:2px;}
+  [class*="tpl-chronicle-"] .r-contact{color:#6b7280!important;margin-top:8px;}
+  [class*="tpl-chronicle-"] .r-sep{color:#cbd5e1!important;}
+  [class*="tpl-chronicle-"] .r-sec-t{color:var(--acc)!important;border:none!important;letter-spacing:1.8px;}
+  [class*="tpl-chronicle-"] .r-exp{position:relative;padding-left:15px;margin-bottom:0;padding-bottom:12px;border-left:2px solid #e5e7eb;}
+  [class*="tpl-chronicle-"] .r-exp:last-child{padding-bottom:2px;}
+  [class*="tpl-chronicle-"] .r-exp::before{content:"";position:absolute;left:-6px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px #fff;}
+  [class*="tpl-chronicle-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  [class*="tpl-chronicle-"] .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
+  .tpl-chronicle-teal{--acc:#0d9488;} .tpl-chronicle-indigo{--acc:#4f46e5;} .tpl-chronicle-rose{--acc:#be123c;}
+  .tpl-chronicle-amber{--acc:#b45309;} .tpl-chronicle-slate{--acc:#475569;} .tpl-chronicle-green{--acc:#15803d;}
+
+  /* ---------- Family: Monoline — minimalist, airy (minimal) ---------- */
+  [class*="tpl-monoline-"]{color:#222;font-family:'Helvetica Neue',Arial,system-ui,sans-serif;}
+  [class*="tpl-monoline-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:1px solid #222!important;border-radius:0!important;text-align:left!important;}
+  [class*="tpl-monoline-"] .r-name{color:#111!important;font-weight:700;font-size:1.7rem;letter-spacing:2px;text-transform:uppercase;}
+  [class*="tpl-monoline-"] .r-title{color:var(--acc)!important;font-weight:500;font-style:normal;letter-spacing:1px;font-size:.88rem;margin-top:4px;}
+  [class*="tpl-monoline-"] .r-contact{color:#555!important;font-size:.78rem;margin-top:7px;}
+  [class*="tpl-monoline-"] .r-sep{color:#bbb!important;}
+  [class*="tpl-monoline-"] .r-sec-t{color:var(--acc)!important;border:none!important;text-transform:uppercase;letter-spacing:3px;font-size:.72rem;font-weight:700;}
+  [class*="tpl-monoline-"] .r-co{color:#111!important;font-style:normal;font-weight:600;}
+  [class*="tpl-monoline-"] .r-sum{color:#333;line-height:1.75;}
+  [class*="tpl-monoline-"] .r-sk{background:none!important;border:1px solid #e0e0e0!important;color:#333!important;border-radius:2px;font-weight:400;}
+  [class*="tpl-monoline-"] .r-div{background:#eee;}
+  .tpl-monoline-graphite{--acc:#333333;} .tpl-monoline-blue{--acc:#2563eb;} .tpl-monoline-plum{--acc:#7c3aed;}
+  .tpl-monoline-teal{--acc:#0d9488;} .tpl-monoline-crimson{--acc:#dc2626;} .tpl-monoline-ink{--acc:#111111;}
+
+  /* ---------- Family: Ledger — tinted section bars (dark) ---------- */
+  [class*="tpl-ledger-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  [class*="tpl-ledger-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:2px solid var(--acc)!important;border-radius:0!important;text-align:left!important;}
+  [class*="tpl-ledger-"] .r-name{color:#111!important;font-weight:800;font-size:1.8rem;letter-spacing:-.2px;}
+  [class*="tpl-ledger-"] .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;font-size:.95rem;margin-top:2px;}
+  [class*="tpl-ledger-"] .r-contact{color:#6b7280!important;margin-top:8px;}
+  [class*="tpl-ledger-"] .r-sep{color:#cbd5e1!important;}
+  [class*="tpl-ledger-"] .r-sec-t{display:block;background:#eef1f5;background:color-mix(in srgb,var(--acc) 12%,#fff)!important;color:var(--acc)!important;border:none!important;padding:4px 10px;border-radius:3px;letter-spacing:1.2px;}
+  [class*="tpl-ledger-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  [class*="tpl-ledger-"] .r-sk{background:#eef1f5;background:color-mix(in srgb,var(--acc) 12%,#fff)!important;color:var(--acc)!important;border:none;border-radius:3px;font-weight:600;}
+  [class*="tpl-ledger-"] .r-div{display:none;}
+  .tpl-ledger-navy{--acc:#1e3a5f;} .tpl-ledger-green{--acc:#15803d;} .tpl-ledger-maroon{--acc:#7f1d1d;}
+  .tpl-ledger-indigo{--acc:#3730a3;} .tpl-ledger-bronze{--acc:#92600f;}
+
+  /* ---------- Family: Cascade — accent pill headings (creative) ---------- */
+  [class*="tpl-cascade-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  [class*="tpl-cascade-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:2px solid #eee!important;border-radius:0!important;text-align:left!important;}
+  [class*="tpl-cascade-"] .r-name{color:var(--acc)!important;font-weight:800;font-size:1.85rem;letter-spacing:-.3px;}
+  [class*="tpl-cascade-"] .r-title{color:#444!important;font-weight:500;font-style:normal;font-size:.95rem;margin-top:2px;}
+  [class*="tpl-cascade-"] .r-contact{color:#6b7280!important;margin-top:8px;}
+  [class*="tpl-cascade-"] .r-sep{color:#cbd5e1!important;}
+  [class*="tpl-cascade-"] .r-sec-t{display:inline-block;background:var(--acc)!important;color:#fff!important;border:none!important;padding:3px 13px;border-radius:13px;letter-spacing:.5px;font-size:.72rem;}
+  [class*="tpl-cascade-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  [class*="tpl-cascade-"] .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:13px;font-weight:600;}
+  [class*="tpl-cascade-"] .r-div{background:#eee;}
+  .tpl-cascade-coral{--acc:#e11d48;} .tpl-cascade-teal{--acc:#0d9488;} .tpl-cascade-blue{--acc:#2563eb;}
+  .tpl-cascade-violet{--acc:#7c3aed;} .tpl-cascade-amber{--acc:#d97706;}
+
+  /* ---------- Family: Executive — refined serif, double rule (light) ---------- */
+  [class*="tpl-executive-"]{color:#1a1a1a;font-family:Georgia,'Times New Roman',serif!important;}
+  [class*="tpl-executive-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:3px double var(--acc)!important;border-radius:0!important;text-align:center!important;}
+  [class*="tpl-executive-"] .r-name{font-family:Georgia,serif;color:#111!important;font-weight:700;font-size:2rem;letter-spacing:.5px;}
+  [class*="tpl-executive-"] .r-title{color:var(--acc)!important;font-style:normal;text-transform:uppercase;letter-spacing:2px;font-size:.82rem;font-weight:600;margin-top:5px;}
+  [class*="tpl-executive-"] .r-contact{justify-content:center;color:#444!important;font-size:.8rem;margin-top:6px;}
+  [class*="tpl-executive-"] .r-sep{color:#bbb!important;}
+  [class*="tpl-executive-"] .r-sec-t{font-family:Georgia,serif;color:#111!important;text-transform:uppercase;letter-spacing:2px;font-size:.76rem;font-weight:700;border:none!important;border-bottom:1px solid var(--acc)!important;padding-bottom:2px;}
+  [class*="tpl-executive-"] .r-co{font-style:italic;color:#333!important;}
+  [class*="tpl-executive-"] .r-sum{font-size:.9rem;line-height:1.75;color:#222;}
+  [class*="tpl-executive-"] .r-sk{background:none!important;border:1px solid #ccc!important;color:#333!important;border-radius:2px;font-weight:400;}
+  [class*="tpl-executive-"] .r-div{background:#e5e5e5;}
+  .tpl-executive-black{--acc:#111111;} .tpl-executive-navy{--acc:#1f3a5f;} .tpl-executive-bronze{--acc:#92600f;}
+  .tpl-executive-burgundy{--acc:#6b1f2e;} .tpl-executive-forest{--acc:#1f4d2e;}
+
+  /* ---------- Family: Vertex — right-aligned nameplate (dark) ---------- */
+  [class*="tpl-vertex-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+  [class*="tpl-vertex-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:2px solid var(--acc)!important;border-radius:0!important;text-align:right!important;}
+  [class*="tpl-vertex-"] .r-name{display:inline-block;background:var(--acc)!important;color:#fff!important;font-weight:800;font-size:1.7rem;letter-spacing:-.2px;padding:4px 13px;border-radius:4px;}
+  [class*="tpl-vertex-"] .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;font-size:.95rem;margin-top:5px;}
+  [class*="tpl-vertex-"] .r-contact{justify-content:flex-end;color:#6b7280!important;margin-top:8px;}
+  [class*="tpl-vertex-"] .r-sep{color:#cbd5e1!important;}
+  [class*="tpl-vertex-"] .r-sec-t{color:var(--acc)!important;border:none!important;border-bottom:2px solid #eee!important;padding-bottom:3px;letter-spacing:1.5px;}
+  [class*="tpl-vertex-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  [class*="tpl-vertex-"] .r-sk{background:var(--acc)!important;color:#fff!important;border-radius:3px;font-weight:600;}
+  [class*="tpl-vertex-"] .r-div{display:none;}
+  .tpl-vertex-indigo{--acc:#4338ca;} .tpl-vertex-teal{--acc:#0f766e;} .tpl-vertex-orange{--acc:#c2410c;}
+  .tpl-vertex-rose{--acc:#be123c;} .tpl-vertex-slate{--acc:#334155;}
+
+  /* ---------- Family: Aria — light, thin elegant (light) ---------- */
+  [class*="tpl-aria-"]{color:#2a2a2a;font-family:'Helvetica Neue',Arial,system-ui,sans-serif;}
+  [class*="tpl-aria-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 3mm!important;border:none!important;border-radius:0!important;text-align:left!important;}
+  [class*="tpl-aria-"] .r-name{color:#111!important;font-weight:300;font-size:2.15rem;letter-spacing:-.5px;}
+  [class*="tpl-aria-"] .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;text-transform:uppercase;letter-spacing:2px;font-size:.8rem;margin-top:4px;}
+  [class*="tpl-aria-"] .r-contact{color:#666!important;font-size:.8rem;margin-top:8px;}
+  [class*="tpl-aria-"] .r-sep{color:#ccc!important;}
+  [class*="tpl-aria-"] .r-sec-t{color:#111!important;border:none!important;position:relative;padding-left:15px;font-weight:700;letter-spacing:1px;}
+  [class*="tpl-aria-"] .r-sec-t::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--acc);}
+  [class*="tpl-aria-"] .r-co{color:#111!important;font-style:normal;font-weight:600;}
+  [class*="tpl-aria-"] .r-sum{color:#333;line-height:1.75;}
+  [class*="tpl-aria-"] .r-sk{background:#f3f4f6!important;color:#374151!important;border:none;border-radius:12px;font-weight:500;}
+  [class*="tpl-aria-"] .r-div{background:#eee;}
+  .tpl-aria-rose{--acc:#e11d48;} .tpl-aria-sky{--acc:#0284c7;} .tpl-aria-mint{--acc:#0d9488;}
+  .tpl-aria-amber{--acc:#d97706;} .tpl-aria-violet{--acc:#7c3aed;} .tpl-aria-coral{--acc:#ea580c;}
+
+  /* ---------- Family: Spine — colour spine on the page edge (creative) ---------- */
+  [class*="tpl-spine-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;border-left:6px solid var(--acc);padding-left:10px;}
+  [class*="tpl-spine-"] .r-head{background:none!important;color:inherit!important;margin:0 0 6mm!important;padding:0 0 4mm!important;border:none!important;border-bottom:1px solid #eee!important;border-radius:0!important;text-align:left!important;}
+  [class*="tpl-spine-"] .r-name{color:#111!important;font-weight:800;font-size:1.85rem;letter-spacing:-.3px;}
+  [class*="tpl-spine-"] .r-title{color:var(--acc)!important;font-weight:600;font-style:normal;font-size:.95rem;margin-top:2px;}
+  [class*="tpl-spine-"] .r-contact{color:#6b7280!important;margin-top:8px;}
+  [class*="tpl-spine-"] .r-sep{color:#cbd5e1!important;}
+  [class*="tpl-spine-"] .r-sec-t{color:var(--acc)!important;border:none!important;text-transform:uppercase;letter-spacing:1.5px;position:relative;padding-left:14px;}
+  [class*="tpl-spine-"] .r-sec-t::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:9px;height:2px;background:var(--acc);}
+  [class*="tpl-spine-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
+  [class*="tpl-spine-"] .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
+  [class*="tpl-spine-"] .r-div{display:none;}
+  .tpl-spine-blue{--acc:#2563eb;} .tpl-spine-red{--acc:#dc2626;} .tpl-spine-green{--acc:#16a34a;}
+  .tpl-spine-gray{--acc:#4b5563;} .tpl-spine-purple{--acc:#7c3aed;}
 </style>
 <script>
-/* Register the new templates by extending the global template registry. */
+/* Register the advanced template pack by extending the global registry.
+   Data-driven: one entry per family, colours listed once. */
 (function(){
   if(typeof TPL_META==='undefined'||typeof TPL_COLORS==='undefined') return;
-  var NEW={
-    'meridian-navy':   {label:'Meridian Navy',    tag:'Band header · Navy',    cat:'dark',     color:'#1e3a5f'},
-    'meridian-emerald':{label:'Meridian Emerald', tag:'Band header · Emerald', cat:'dark',     color:'#0f766e'},
-    'oxford-ink':      {label:'Oxford',           tag:'Serif · Refined',       cat:'light',    color:'#161616'},
-    'oxford-wine':     {label:'Oxford Wine',      tag:'Serif · Wine',          cat:'light',    color:'#7b2d3a'},
-    'chronicle-teal':  {label:'Chronicle',        tag:'Timeline · Teal',       cat:'creative', color:'#0d9488'},
-    'chronicle-indigo':{label:'Chronicle Indigo', tag:'Timeline · Indigo',     cat:'creative', color:'#4f46e5'}
-  };
-  Object.keys(NEW).forEach(function(id){
-    var t=NEW[id];
-    if(!TPL_META[id])   TPL_META[id]={label:t.label,tag:t.tag,cat:t.cat};
-    if(!TPL_COLORS[id]) TPL_COLORS[id]=t.color;
+  var FAM=[
+    {key:'meridian', name:'Meridian', tag:'Band header', cat:'dark',
+     colors:{navy:'#1e3a5f',emerald:'#0f766e',burgundy:'#7f1d3a',slate:'#334155',charcoal:'#1f2937',plum:'#5b2a86',teal:'#115e59',forest:'#14532d'}},
+    {key:'oxford', name:'Oxford', tag:'Serif CV', cat:'light',
+     colors:{ink:'#161616',wine:'#7b2d3a',navy:'#1f3a5f',forest:'#1f4d2e',sepia:'#6b4423',charcoal:'#3a3a3a'}},
+    {key:'chronicle', name:'Chronicle', tag:'Timeline', cat:'creative',
+     colors:{teal:'#0d9488',indigo:'#4f46e5',rose:'#be123c',amber:'#b45309',slate:'#475569',green:'#15803d'}},
+    {key:'monoline', name:'Monoline', tag:'Minimalist', cat:'minimal',
+     colors:{graphite:'#333333',blue:'#2563eb',plum:'#7c3aed',teal:'#0d9488',crimson:'#dc2626',ink:'#111111'}},
+    {key:'ledger', name:'Ledger', tag:'Section bars', cat:'dark',
+     colors:{navy:'#1e3a5f',green:'#15803d',maroon:'#7f1d1d',indigo:'#3730a3',bronze:'#92600f'}},
+    {key:'cascade', name:'Cascade', tag:'Pill headings', cat:'creative',
+     colors:{coral:'#e11d48',teal:'#0d9488',blue:'#2563eb',violet:'#7c3aed',amber:'#d97706'}},
+    {key:'executive', name:'Executive', tag:'Serif · double rule', cat:'light',
+     colors:{black:'#111111',navy:'#1f3a5f',bronze:'#92600f',burgundy:'#6b1f2e',forest:'#1f4d2e'}},
+    {key:'vertex', name:'Vertex', tag:'Nameplate', cat:'dark',
+     colors:{indigo:'#4338ca',teal:'#0f766e',orange:'#c2410c',rose:'#be123c',slate:'#334155'}},
+    {key:'aria', name:'Aria', tag:'Thin · elegant', cat:'light',
+     colors:{rose:'#e11d48',sky:'#0284c7',mint:'#0d9488',amber:'#d97706',violet:'#7c3aed',coral:'#ea580c'}},
+    {key:'spine', name:'Spine', tag:'Edge accent', cat:'creative',
+     colors:{blue:'#2563eb',red:'#dc2626',green:'#16a34a',gray:'#4b5563',purple:'#7c3aed'}}
+  ];
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+  FAM.forEach(function(f){
+    Object.keys(f.colors).forEach(function(c){
+      var id=f.key+'-'+c;
+      var label=f.name+' '+cap(c);
+      var tag=f.tag+' · '+cap(c);
+      if(!TPL_META[id])   TPL_META[id]={label:label,tag:tag,cat:f.cat};
+      if(!TPL_COLORS[id]) TPL_COLORS[id]=f.colors[c];
+    });
   });
   var total=Object.keys(TPL_META).length;
   function refreshUI(){
