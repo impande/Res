@@ -5070,9 +5070,10 @@ if ('serviceWorker' in navigator) {
   function reset(){
     /* reset every possible scroll container so the step title sits at the top */
     try{ mainEl.scrollTop=0; }catch(e){}                                   /* desktop/tablet: #main scrolls */
-    try{ window.scrollTo(0,0); }catch(e){}                                 /* mobile: the page scrolls */
-    try{ if(document.scrollingElement) document.scrollingElement.scrollTop=0; }catch(e){}
-    try{ document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){}
+    /* window-level scroll reset only on desktop (body is position:fixed there, window.scrollY is 0).
+       On mobile body is position:static and the window IS the scroller — calling window.scrollTo(0,0)
+       would yank the user to the very top of the page on every step change, which is the scroll bug. */
+    try{ if(getComputedStyle(document.body).position==='fixed'){ window.scrollTo(0,0); if(document.scrollingElement) document.scrollingElement.scrollTop=0; document.documentElement.scrollTop=0; document.body.scrollTop=0; } }catch(e){}
   }
   function toTop(){
     var active=document.querySelector('.step-content.active');
@@ -5392,7 +5393,9 @@ if ('serviceWorker' in navigator) {
       if(typeof currentStep!=='undefined' && currentStep===0) return;
       var main=document.getElementById('main'); if(!main) return;
       main.scrollTop=0;                       // reset + re-clamp (iOS)
-      if(window.scrollY) window.scrollTo(0,0);
+      /* window scroll reset only on desktop (body:fixed) — on mobile body:static, window IS the scroller
+         and scrollTo(0,0) yanks the user to page-top on every step change */
+      if(window.scrollY && getComputedStyle(document.body).position==='fixed') window.scrollTo(0,0);
       var active=document.querySelector('.step-content.active');
       var title=active&&(active.querySelector('.step-title')||active.firstElementChild);
       if(!title) return;
@@ -5578,6 +5581,18 @@ if ('serviceWorker' in navigator) {
 (function(){
   if(typeof _fbAuth==='undefined' && typeof window._fbAuth==='undefined' && typeof firebase==='undefined') { /* still install; guarded below */ }
   window.signInWithGoogle=function(){
+    /* Save any current form data as a pre-sign-in draft so _loadMainCloudDoc can
+       restore it after the redirect returns (redirect clears in-memory state). */
+    try{
+      if(typeof collectData==='function'){
+        var _d=collectData();
+        var _hasContent=!!(_d.firstName||_d.lastName||_d.jobTitle||_d.email||(_d.experience&&_d.experience.length));
+        if(_hasContent){
+          if(typeof currentTemplate!=='undefined') _d.template=currentTemplate;
+          localStorage.setItem('_preSignInDraft',JSON.stringify(_d));
+        }
+      }
+    }catch(e){}
     try{
       if(typeof _fbAuth==='undefined' || !_fbAuth){ if(typeof showToast==='function') showToast('Firebase not configured'); return; }
       if(typeof _signInInProgress!=='undefined' && _signInInProgress) return;
