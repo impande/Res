@@ -4739,8 +4739,9 @@ Resume:
     /* Sync visibility with step 7 — always show on step 7, hide on other steps */
     function _syncCta(){
       var step7=document.getElementById('step7');
-      /* offsetParent===null means hidden (display:none anywhere in ancestor chain) */
-      var onStep7=step7&&step7.offsetParent!==null;
+      /* classList.contains('active') is the wizard's own toggle (see .step-content.active CSS);
+         offsetParent fallback catches edge-cases where the class hasn't propagated yet */
+      var onStep7=step7&&(step7.classList.contains('active')||step7.offsetParent!==null);
       var previewOpen=document.getElementById('previewModalOverlay');
       previewOpen=!!previewOpen&&previewOpen.classList.contains('open');
       var _pf=document.getElementById('pfOverlay');
@@ -5067,7 +5068,7 @@ Resume:
   function _tickCta(panelOpen){
     var cta=document.getElementById('aiChatCta'); if(!cta) return;
     var badge=document.getElementById('aiCtaBadge');
-    var step7=document.getElementById('step7'); var onStep7=step7&&step7.offsetParent!==null;
+    var step7=document.getElementById('step7'); var onStep7=step7&&(step7.classList.contains('active')||step7.offsetParent!==null);
     var ro=document.getElementById('resumeOutput');
     var _pfo=document.getElementById('pfOverlay'); var pfOpen2=!!_pfo&&getComputedStyle(_pfo).display!=='none';
     var ready=onStep7 && !panelOpen && !pfOpen2 && typeof lastResumeData!=='undefined' && lastResumeData && ro && ro.querySelector('.resume-a4-page');
@@ -5624,6 +5625,49 @@ Resume:
     }catch(e){}
     return r;
   };
+})();
+</script>
+<script>
+/* Auto-save: fill the persistence gaps that existed before.
+   Saves form fields + rendered resume to localStorage on:
+   – page kill / refresh (beforeunload)
+   – iOS tab close (pagehide — Safari skips beforeunload on back/tab-close)
+   – tab switch to background (visibilitychange hidden — covers iOS WKWebView)
+   – before version switch (_applyCloudDoc wrapper)
+   Fields go to _preSignInDraft (same key as sign-in draft, so restore already works).
+   Resume HTML goes to _lastResumeOutput for future restore support. */
+(function(){
+  function _hasContent(d){
+    if(!d) return false;
+    return !!(d.firstName||d.lastName||d.jobTitle||d.email||d.phone||d.location
+      ||(d.experience&&d.experience.length)||(d.skills&&d.skills.length)
+      ||(d.education&&d.education.length)||(d.awards&&d.awards.length));
+  }
+  function _snap(){
+    try{
+      if(typeof collectData==='function'){
+        var d=collectData();
+        if(_hasContent(d)){
+          if(typeof currentTemplate!=='undefined'&&currentTemplate) d.template=currentTemplate;
+          localStorage.setItem('_preSignInDraft',JSON.stringify(d));
+        }
+      }
+      var ro=document.getElementById('resumeOutput');
+      if(ro){ var a4=ro.querySelector('.resume-a4-page'); if(a4&&a4.innerHTML.trim()) localStorage.setItem('_lastResumeOutput',a4.outerHTML); }
+    }catch(e){}
+  }
+  window.addEventListener('beforeunload',_snap);
+  window.addEventListener('pagehide',_snap);
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') _snap(); });
+  /* Wrap _applyCloudDoc to flush before loading a different version */
+  function _wrapSnap(){
+    if(typeof window._applyCloudDoc!=='function'){ setTimeout(_wrapSnap,500); return; }
+    if(window._applyCloudDoc._snapWrapped) return;
+    var prev=window._applyCloudDoc;
+    window._applyCloudDoc=function(uid,data,portfolio){ _snap(); return prev.apply(this,arguments); };
+    window._applyCloudDoc._snapWrapped=true;
+  }
+  _wrapSnap();
 })();
 </script>
 <script>
