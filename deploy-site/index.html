@@ -2619,6 +2619,7 @@
         <div class="photo-actions-title">Add your profile photo</div>
         <button class="btn-accent" style="padding:10px 20px;font-size:0.88rem" onclick="document.getElementById('photoInput').click()">📷 Upload Photo</button>
         <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="removePhotoBtn" onclick="removePhoto()">Remove</button>
+        <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="editPhotoBtn" onclick="_rpc.openCrop()">✏️ Edit</button>
         <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
         <p class="photo-hint">Appears in the resume header alongside your name</p>
         <p class="photo-hint" style="margin-top:4px;color:var(--muted);">Optional — skip if not needed</p>
@@ -3283,6 +3284,22 @@ function selectTemplate(_0x3ca3f0){const _0x189500=_0xed2da9;_captureResumeOutpu
     <div style="display:flex;gap:10px;">
       <button onclick="pfCropCancel()" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;font-size:0.88rem;">Cancel</button>
       <button onclick="pfCropApply()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-size:0.88rem;">✓ Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile photo crop/edit modal (step 1 — Basic Info) -->
+<div id="rpcModal" style="display:none;position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--card,#1c1c2e);border:1px solid var(--border);border-radius:18px;padding:22px 20px;width:min(320px,96%);text-align:center;">
+    <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:3px;">Adjust Photo</div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">Drag to position · scroll or pinch to zoom</div>
+    <div style="width:240px;height:240px;margin:0 auto 12px;border-radius:50%;overflow:hidden;border:2.5px solid var(--accent);box-shadow:0 0 0 4px rgba(129,140,248,0.18);">
+      <canvas id="rpcCanvas" width="240" height="240" style="display:block;touch-action:none;cursor:grab;user-select:none;"></canvas>
+    </div>
+    <input type="range" id="rpcZoom" min="1" max="4" step="0.02" value="1" style="width:90%;margin:0 auto 14px;display:block;accent-color:var(--accent);">
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="_rpc.cancel()" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;font-size:0.88rem;">Cancel</button>
+      <button onclick="_rpc.apply()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-size:0.88rem;">✓ Apply</button>
     </div>
   </div>
 </div>
@@ -5639,6 +5656,222 @@ if ('serviceWorker' in navigator) {
   };
 })();
 </script>
+<!-- Step-1 profile photo crop editor -->
+<script>
+(function(){
+  var _img=null, _origSrc='', _scale=1, _ox=0, _oy=0;
+  var _dragging=false, _dragStartX=0, _dragStartY=0, _dragStartOX=0, _dragStartOY=0;
+  var _pinchDist=0, _pinchStartScale=1;
+
+  function _cv(){ return document.getElementById('rpcCanvas'); }
+  function _modal(){ return document.getElementById('rpcModal'); }
+  function _zoomEl(){ return document.getElementById('rpcZoom'); }
+
+  function _coverScale(){
+    if(!_img) return 1;
+    var c=_cv(); if(!c) return 1;
+    return Math.max(c.width/_img.naturalWidth, c.height/_img.naturalHeight);
+  }
+
+  function _draw(){
+    var c=_cv(); if(!c||!_img) return;
+    var ctx=c.getContext('2d');
+    var W=c.width, H=c.height;
+    ctx.clearRect(0,0,W,H);
+    var cs=_coverScale();
+    ctx.drawImage(_img, _ox, _oy, _img.naturalWidth*cs*_scale, _img.naturalHeight*cs*_scale);
+  }
+
+  function _clamp(){
+    if(!_img) return;
+    var c=_cv(); if(!c) return;
+    var W=c.width, H=c.height, cs=_coverScale();
+    var dw=_img.naturalWidth*cs*_scale, dh=_img.naturalHeight*cs*_scale;
+    if(_ox>0) _ox=0; if(_oy>0) _oy=0;
+    if(_ox+dw<W) _ox=W-dw; if(_oy+dh<H) _oy=H-dh;
+  }
+
+  function _open(src){
+    _origSrc=src; _scale=1; _ox=0; _oy=0;
+    var z=_zoomEl(); if(z) z.value='1';
+    var m=_modal(); if(!m) return;
+    m.style.display='flex';
+    _img=new Image();
+    _img.onload=function(){
+      var c=_cv(); if(!c) return;
+      var W=c.width, H=c.height, cs=_coverScale();
+      _ox=(W-_img.naturalWidth*cs)/2;
+      _oy=(H-_img.naturalHeight*cs)/2;
+      _clamp(); _draw();
+    };
+    _img.src=src;
+  }
+
+  function _apply(){
+    if(!_img) return;
+    var c=_cv(); if(!c) return;
+    var W=c.width, H=c.height;
+    var out=document.createElement('canvas');
+    out.width=W; out.height=H;
+    var ctx=out.getContext('2d');
+    ctx.beginPath(); ctx.arc(W/2,H/2,W/2,0,Math.PI*2); ctx.closePath(); ctx.clip();
+    var cs=_coverScale();
+    ctx.drawImage(_img, _ox, _oy, _img.naturalWidth*cs*_scale, _img.naturalHeight*cs*_scale);
+    var dataUrl=out.toDataURL('image/jpeg',0.88);
+
+    var prev=document.getElementById('photoPreview');
+    var ph=document.getElementById('photoPlaceholder');
+    var removeBtn=document.getElementById('removePhotoBtn');
+    var editBtn=document.getElementById('editPhotoBtn');
+    var title=document.querySelector('.photo-actions-title');
+    if(prev){ prev.src=dataUrl; prev.style.display=''; }
+    if(ph) ph.style.display='none';
+    if(removeBtn) removeBtn.style.display='';
+    if(editBtn) editBtn.style.display='';
+    if(title) title.style.display='none';
+    try{ if(typeof updatePreview==='function') updatePreview(); }catch(e){}
+    try{ if(typeof markNeedsRegen==='function') markNeedsRegen(); }catch(e){}
+    _close();
+  }
+
+  function _cancel(){ _close(); }
+  function _close(){ var m=_modal(); if(m) m.style.display='none'; }
+
+  function _openCrop(){
+    var prev=document.getElementById('photoPreview');
+    var src=(_origSrc&&prev&&prev.src&&prev.style.display!=='none')?_origSrc:(prev&&prev.style.display!=='none'?prev.src:'');
+    if(src) _open(src);
+  }
+
+  /* Zoom slider */
+  function _onZoom(){
+    var prev_scale=_scale;
+    _scale=parseFloat(this.value);
+    var c=_cv(); if(!c) return;
+    var W=c.width, H=c.height, ratio=_scale/prev_scale;
+    _ox=W/2-ratio*(W/2-_ox); _oy=H/2-ratio*(H/2-_oy);
+    _clamp(); _draw();
+  }
+
+  /* Mouse drag */
+  function _onMD(e){
+    _dragging=true; _dragStartX=e.clientX; _dragStartY=e.clientY;
+    _dragStartOX=_ox; _dragStartOY=_oy; e.preventDefault();
+  }
+  function _onMM(e){
+    if(!_dragging) return;
+    _ox=_dragStartOX+(e.clientX-_dragStartX);
+    _oy=_dragStartOY+(e.clientY-_dragStartY);
+    _clamp(); _draw(); e.preventDefault();
+  }
+  function _onMU(){ _dragging=false; }
+
+  /* Touch drag + pinch */
+  function _pinchDist2(t){ return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY); }
+  function _onTD(e){
+    if(e.touches.length===1){
+      _dragging=true; _dragStartX=e.touches[0].clientX; _dragStartY=e.touches[0].clientY;
+      _dragStartOX=_ox; _dragStartOY=_oy;
+    } else if(e.touches.length===2){
+      _dragging=false; _pinchDist=_pinchDist2(e.touches); _pinchStartScale=_scale;
+    }
+    e.preventDefault();
+  }
+  function _onTM(e){
+    if(e.touches.length===1&&_dragging){
+      _ox=_dragStartOX+(e.touches[0].clientX-_dragStartX);
+      _oy=_dragStartOY+(e.touches[0].clientY-_dragStartY);
+      _clamp(); _draw();
+    } else if(e.touches.length===2){
+      var d=_pinchDist2(e.touches), prev_scale=_scale;
+      _scale=Math.min(4,Math.max(1,_pinchStartScale*(d/_pinchDist)));
+      var z=_zoomEl(); if(z) z.value=String(_scale);
+      var c=_cv(); if(!c) return;
+      var W=c.width, H=c.height, ratio=_scale/prev_scale;
+      _ox=W/2-ratio*(W/2-_ox); _oy=H/2-ratio*(H/2-_oy);
+      _clamp(); _draw();
+    }
+    e.preventDefault();
+  }
+  function _onTU(e){ if(e.touches.length===0) _dragging=false; }
+
+  /* Wheel zoom */
+  function _onWheel(e){
+    var prev_scale=_scale;
+    _scale=Math.min(4,Math.max(1,_scale*(e.deltaY<0?1.08:0.93)));
+    var z=_zoomEl(); if(z) z.value=String(_scale);
+    var c=_cv(); if(!c) return;
+    var W=c.width, H=c.height, ratio=_scale/prev_scale;
+    _ox=W/2-ratio*(W/2-_ox); _oy=H/2-ratio*(H/2-_oy);
+    _clamp(); _draw(); e.preventDefault();
+  }
+
+  /* Show edit button if photo already present on load (e.g. restored from cloud) */
+  function _syncEditBtn(){
+    var prev=document.getElementById('photoPreview');
+    var editBtn=document.getElementById('editPhotoBtn');
+    if(!prev||!editBtn) return;
+    var shown=prev.style.display!=='none'&&prev.src&&prev.src!==window.location.href;
+    if(shown) editBtn.style.display='';
+  }
+
+  function _setup(){
+    var c=_cv();
+    if(c){
+      c.addEventListener('mousedown',_onMD);
+      c.addEventListener('mousemove',_onMM);
+      c.addEventListener('mouseup',_onMU);
+      c.addEventListener('mouseleave',_onMU);
+      c.addEventListener('touchstart',_onTD,{passive:false});
+      c.addEventListener('touchmove',_onTM,{passive:false});
+      c.addEventListener('touchend',_onTU);
+      c.addEventListener('wheel',_onWheel,{passive:false});
+    }
+    var z=_zoomEl(); if(z) z.addEventListener('input',_onZoom);
+    _syncEditBtn();
+    /* Watch for cloud-restored photo becoming visible */
+    var prev=document.getElementById('photoPreview');
+    if(prev&&window.MutationObserver){
+      new MutationObserver(function(){ _syncEditBtn(); }).observe(prev,{attributes:true,attributeFilter:['src','style']});
+    }
+  }
+
+  /* Wrap handlePhoto: intercept file selection → open crop modal */
+  function _patchHandlePhoto(){
+    var orig=window.handlePhoto;
+    window.handlePhoto=function(event){
+      var file=event&&event.target&&event.target.files&&event.target.files[0];
+      if(!file||!file.type.startsWith('image/')){
+        if(typeof orig==='function') orig.call(this,event); return;
+      }
+      if(file.size>10*1024*1024){
+        try{ if(typeof showToast==='function') showToast('Image too large (max 10 MB)'); }catch(e){}
+        return;
+      }
+      var reader=new FileReader();
+      reader.onload=function(ev){ _origSrc=ev.target.result; _open(_origSrc); };
+      reader.readAsDataURL(file);
+      event.target.value=''; /* allow re-selecting same file */
+    };
+  }
+
+  function _tryPatch(){
+    if(typeof window.handlePhoto==='function'){ _patchHandlePhoto(); return; }
+    var n=0, iv=setInterval(function(){
+      if(typeof window.handlePhoto==='function'||n++>60){ clearInterval(iv); _patchHandlePhoto(); }
+    },80);
+  }
+
+  window._rpc={open:_open, apply:_apply, cancel:_cancel, openCrop:_openCrop};
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){ _setup(); _tryPatch(); });
+  } else {
+    _setup(); _tryPatch();
+  }
+})();
+</script>
+
 <!-- Build stamp: shows the deployed build id on non-production hosts (UAT /
      previews / localhost) so it's obvious at a glance whether the tab is on the
      latest build or a cached one. build.js replaces __BUILD_ID__ at deploy time;
