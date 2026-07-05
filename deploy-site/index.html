@@ -5391,6 +5391,21 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>
+/* Landing-page scroll fix. On load the app auto-scrolls init-created elements
+   into view — the first form entries (exp-1/award-1/edu-1) and the hero button
+   — via scrollIntoView(). Because #main is the shared scroller, those calls
+   dragged the landing page (step 0) back to the top and fought the user's own
+   scroll. Suppress programmatic scrollIntoView while step 0 is active; the
+   entry-focus behaviour on the form steps (1–7) is untouched. */
+(function(){
+  var orig=Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView=function(){
+    try{ if(typeof currentStep!=='undefined' && currentStep===0) return; }catch(e){}
+    return orig.apply(this,arguments);
+  };
+})();
+</script>
+<script>
 /* Preload the full saved resume (professional summary + ATS score) when a
    version is loaded or switched — without requiring a Generate click.
    Previously: on a fresh load renderOutput drew the summary but the ATS score
