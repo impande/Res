@@ -5449,7 +5449,10 @@ if ('serviceWorker' in navigator) {
    regenerates from that data with the selected template — same idea as the
    resume "upload PDF/DOC or paste text" import. */
 (function(){
-  if(typeof window.buildPfPreview!=='function') return;
+  /* NOTE: do NOT guard the whole IIFE on buildPfPreview — that function comes from
+     the portfolio-builder obfuscated script which may not have run yet on Android
+     when this script executes. The pfGoStep routing (step 4 visibility) must always
+     be installed; buildPfPreview is only called inside _pfImport at runtime. */
 
   // --- 4th step (Import) routing: orig pfGoStep only knows steps 1-3 -----------
   var origGo=window.pfGoStep;
@@ -5460,7 +5463,9 @@ if ('serviceWorker' in navigator) {
           var s=document.getElementById('pfStep'+i); if(s) s.style.display='none';
           var pl=document.getElementById('pfPill'+i); if(pl) pl.classList.remove('active');
         });
-        var s4=document.getElementById('pfStep4'); if(s4){ s4.style.display=''; s4.scrollTop=0; }
+        /* Use explicit 'block' — display:'' relies on CSS inheritance which can be
+           unreliable on Android Chrome when the element had display:none inline. */
+        var s4=document.getElementById('pfStep4'); if(s4){ s4.style.display='block'; s4.scrollTop=0; }
         var p4=document.getElementById('pfPill4'); if(p4) p4.classList.add('active');
         return;
       }
