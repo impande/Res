@@ -5724,6 +5724,7 @@ if ('serviceWorker' in navigator) {
     var removeBtn=document.getElementById('removePhotoBtn');
     var editBtn=document.getElementById('editPhotoBtn');
     var title=document.querySelector('.photo-actions-title');
+    window.userPhoto=dataUrl; /* mirrors what handlePhoto sets so the resume renderer picks it up */
     if(prev){ prev.src=dataUrl; prev.style.display=''; }
     if(ph) ph.style.display='none';
     if(removeBtn) removeBtn.style.display='';
