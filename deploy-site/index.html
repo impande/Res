@@ -2619,7 +2619,6 @@
         <div class="photo-actions-title">Add your profile photo</div>
         <button class="btn-accent" style="padding:10px 20px;font-size:0.88rem" onclick="document.getElementById('photoInput').click()">📷 Upload Photo</button>
         <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="removePhotoBtn" onclick="removePhoto()">Remove</button>
-        <button class="btn-secondary" style="padding:8px 16px;font-size:0.82rem;display:none" id="editPhotoBtn" onclick="_rpc.openCrop()">✏️ Edit</button>
         <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
         <p class="photo-hint">Appears in the resume header alongside your name</p>
         <p class="photo-hint" style="margin-top:4px;color:var(--muted);">Optional — skip if not needed</p>
@@ -5662,6 +5661,7 @@ if ('serviceWorker' in navigator) {
   var _img=null, _origSrc='', _scale=1, _ox=0, _oy=0;
   var _dragging=false, _dragStartX=0, _dragStartY=0, _dragStartOX=0, _dragStartOY=0;
   var _pinchDist=0, _pinchStartScale=1;
+  var _origHandlePhoto=null;
 
   function _cv(){ return document.getElementById('rpcCanvas'); }
   function _modal(){ return document.getElementById('rpcModal'); }
@@ -5719,30 +5719,30 @@ if ('serviceWorker' in navigator) {
     ctx.drawImage(_img, _ox, _oy, _img.naturalWidth*cs*_scale, _img.naturalHeight*cs*_scale);
     var dataUrl=out.toDataURL('image/jpeg',0.88);
 
-    var prev=document.getElementById('photoPreview');
-    var ph=document.getElementById('photoPlaceholder');
-    var removeBtn=document.getElementById('removePhotoBtn');
-    var editBtn=document.getElementById('editPhotoBtn');
-    var title=document.querySelector('.photo-actions-title');
-    window.userPhoto=dataUrl; /* mirrors what handlePhoto sets so the resume renderer picks it up */
-    if(prev){ prev.src=dataUrl; prev.style.display=''; }
-    if(ph) ph.style.display='none';
-    if(removeBtn) removeBtn.style.display='';
-    if(editBtn) editBtn.style.display='';
-    if(title) title.style.display='none';
-    try{ if(typeof updatePreview==='function') updatePreview(); }catch(e){}
-    try{ if(typeof markNeedsRegen==='function') markNeedsRegen(); }catch(e){}
+    /* userPhoto is a let-scoped variable inside the obfuscated IIFE — window.userPhoto
+       is a different binding. Call the original handlePhoto with a File built from
+       the cropped data so its FileReader callback sets userPhoto + updatePreview(). */
+    try{
+      var arr=dataUrl.split(','), bstr=atob(arr[1]), n=bstr.length, u8=new Uint8Array(n);
+      for(var i=0;i<n;i++) u8[i]=bstr.charCodeAt(i);
+      var blob=new Blob([u8],{type:'image/jpeg'});
+      var file=new File([blob],'photo.jpg',{type:'image/jpeg'});
+      var dt=new DataTransfer(); dt.items.add(file);
+      if(typeof _origHandlePhoto==='function') _origHandlePhoto({target:{files:dt.files}});
+    }catch(e){
+      /* Fallback: manually update DOM if DataTransfer unavailable */
+      var prev=document.getElementById('photoPreview');
+      if(prev){ prev.src=dataUrl; prev.style.display=''; }
+      var ph=document.getElementById('photoPlaceholder'); if(ph) ph.style.display='none';
+      var rb=document.getElementById('removePhotoBtn'); if(rb) rb.style.display='';
+      try{ if(typeof updatePreview==='function') updatePreview(); }catch(e2){}
+      try{ if(typeof markNeedsRegen==='function') markNeedsRegen(); }catch(e2){}
+    }
     _close();
   }
 
   function _cancel(){ _close(); }
   function _close(){ var m=_modal(); if(m) m.style.display='none'; }
-
-  function _openCrop(){
-    var prev=document.getElementById('photoPreview');
-    var src=(_origSrc&&prev&&prev.src&&prev.style.display!=='none')?_origSrc:(prev&&prev.style.display!=='none'?prev.src:'');
-    if(src) _open(src);
-  }
 
   /* Zoom slider */
   function _onZoom(){
@@ -5807,13 +5807,21 @@ if ('serviceWorker' in navigator) {
     _clamp(); _draw(); e.preventDefault();
   }
 
-  /* Show edit button if photo already present on load (e.g. restored from cloud) */
-  function _syncEditBtn(){
+  /* MutationObserver: hide Upload button + title when photo is set; restore on Remove */
+  function _setupPhotoObserver(){
     var prev=document.getElementById('photoPreview');
-    var editBtn=document.getElementById('editPhotoBtn');
-    if(!prev||!editBtn) return;
-    var shown=prev.style.display!=='none'&&prev.src&&prev.src!==window.location.href;
-    if(shown) editBtn.style.display='';
+    var uploadBtn=document.querySelector('#photoSection .btn-accent');
+    var title=document.querySelector('.photo-actions-title');
+    if(!prev||!uploadBtn) return;
+    function _sync(){
+      var hasPhoto=prev.style.display!=='none'&&prev.src&&prev.src!==window.location.href;
+      uploadBtn.style.display=hasPhoto?'none':'';
+      if(title) title.style.display=hasPhoto?'none':'';
+    }
+    if(window.MutationObserver){
+      new MutationObserver(_sync).observe(prev,{attributes:true,attributeFilter:['style','src']});
+    }
+    _sync();
   }
 
   function _setup(){
@@ -5829,21 +5837,16 @@ if ('serviceWorker' in navigator) {
       c.addEventListener('wheel',_onWheel,{passive:false});
     }
     var z=_zoomEl(); if(z) z.addEventListener('input',_onZoom);
-    _syncEditBtn();
-    /* Watch for cloud-restored photo becoming visible */
-    var prev=document.getElementById('photoPreview');
-    if(prev&&window.MutationObserver){
-      new MutationObserver(function(){ _syncEditBtn(); }).observe(prev,{attributes:true,attributeFilter:['src','style']});
-    }
+    _setupPhotoObserver();
   }
 
-  /* Wrap handlePhoto: intercept file selection → open crop modal */
+  /* Wrap handlePhoto: file selection opens crop modal; store original for _apply */
   function _patchHandlePhoto(){
-    var orig=window.handlePhoto;
+    _origHandlePhoto=window.handlePhoto;
     window.handlePhoto=function(event){
       var file=event&&event.target&&event.target.files&&event.target.files[0];
       if(!file||!file.type.startsWith('image/')){
-        if(typeof orig==='function') orig.call(this,event); return;
+        if(typeof _origHandlePhoto==='function') _origHandlePhoto.call(this,event); return;
       }
       if(file.size>10*1024*1024){
         try{ if(typeof showToast==='function') showToast('Image too large (max 10 MB)'); }catch(e){}
@@ -5852,7 +5855,7 @@ if ('serviceWorker' in navigator) {
       var reader=new FileReader();
       reader.onload=function(ev){ _origSrc=ev.target.result; _open(_origSrc); };
       reader.readAsDataURL(file);
-      event.target.value=''; /* allow re-selecting same file */
+      event.target.value='';
     };
   }
 
@@ -5863,7 +5866,7 @@ if ('serviceWorker' in navigator) {
     },80);
   }
 
-  window._rpc={open:_open, apply:_apply, cancel:_cancel, openCrop:_openCrop};
+  window._rpc={open:_open, apply:_apply, cancel:_cancel};
 
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',function(){ _setup(); _tryPatch(); });
