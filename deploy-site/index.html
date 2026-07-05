@@ -1191,6 +1191,8 @@
       .pf-section-sub{font-size:0.8rem;margin-bottom:14px;}
       .pf-hdr{padding:14px 16px;}
       .pf-footer .btn-primary,.pf-footer .btn-secondary{padding:8px 14px;font-size:0.82rem;white-space:nowrap;}
+      /* Tighten the upload zone on small screens so it fits without scrolling */
+      #pfUploadZone{padding:20px 16px!important;}
     }
     @media(min-width:700px){
       .pf-tpl-preview{height:190px;}
@@ -5463,9 +5465,18 @@ if ('serviceWorker' in navigator) {
           var s=document.getElementById('pfStep'+i); if(s) s.style.display='none';
           var pl=document.getElementById('pfPill'+i); if(pl) pl.classList.remove('active');
         });
-        /* Use explicit 'block' — display:'' relies on CSS inheritance which can be
-           unreliable on Android Chrome when the element had display:none inline. */
-        var s4=document.getElementById('pfStep4'); if(s4){ s4.style.display='block'; s4.scrollTop=0; }
+        var s4=document.getElementById('pfStep4');
+        if(s4){
+          s4.style.display='block';
+          /* Force flex height constraint explicitly — Android Chrome doesn't always
+             apply flex:1 + min-height:0 from a class when display is set via inline
+             style, causing the body to extend below the modal's overflow:hidden. */
+          s4.style.flex='1';
+          s4.style.minHeight='0';
+          s4.style.overflowY='auto';
+          s4.style.webkitOverflowScrolling='touch';
+          s4.scrollTop=0;
+        }
         var p4=document.getElementById('pfPill4'); if(p4) p4.classList.add('active');
         return;
       }
