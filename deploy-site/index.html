@@ -460,13 +460,9 @@
       box-shadow:0 2px 10px rgba(0,0,0,0.04);
       display:flex;flex-direction:column;align-items:center;gap:10px;
     }
-    /* The landing hero/upload bar belongs to the intro (step0) only. Once the
-       user is on any form step, hide it so they can't scroll up into leftover
-       landing content (the empty-whitespace scroll on desktop/tablet). Mobile
-       keeps its own natural flow and is intentionally left untouched. */
-    @media(min-width:769px){
-      #main:has(.step-content.active:not(#step0)) #top-sticky-bar{display:none!important;}
-    }
+    /* The landing hero/upload bar belongs to the intro (step0) only. Hide on all
+       form steps on every viewport — mobile included. */
+    #main:has(.step-content.active:not(#step0)) #top-sticky-bar{display:none!important;}
     #top-sticky-bar .top-cta-row{margin-top:4px;width:100%;justify-content:center;}
     #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
