@@ -4169,16 +4169,17 @@ if ('serviceWorker' in navigator) {
     var out=document.getElementById('resumeOutput');
     if(!out){ _msg('Please generate your resume first.'); _backBtn(_home); return; }
     var pages=_getPages(out);
-    var d=_msg('Resume is <b>'+pages+' page'+(pages===1?'':'s')+'</b> right now. What\'s your target?');
+    var d=_msg('Resume is currently <b>'+pages+' page'+(pages===1?'':'s')+'</b>. Choose your target:');
     var r=_row();
     [1,2].forEach(function(n){
       var btn=document.createElement('button'); btn.className='aig-opt';
-      btn.textContent=n+' page'+(n>1?'s':'');
       if(n===pages) btn.style.cssText='border-color:#059669!important;color:#059669!important;background:rgba(5,150,105,0.08)!important;';
+      btn.textContent=n+' page'+(n>1?'s':'');
       btn.addEventListener('click',function(){ _fitCheck(n); });
       r.appendChild(btn);
     });
-    d.appendChild(r); _backBtn(_home);
+    d.appendChild(r);
+    _backBtn(_home);
   }
 
   function _fitCheck(tp){
@@ -4186,77 +4187,279 @@ if ('serviceWorker' in navigator) {
     var tpx=tp*A4H;
     _clear();
     var cur=_getPages(out);
-    if(cur<=tp){
-      _msg('<span class="aig-ok">✓ Already fits on '+tp+' page'+(tp>1?'s':'')+'!</span>');
-      _backBtn(_home); return;
-    }
-    _msg('Currently <b>'+cur+'pp</b> → target <b>'+tp+'pp</b>. How would you like to proceed?');
-    var d=_msg(''); var r=_row();
-    var ab=document.createElement('button'); ab.className='aig-opt aig-primary'; ab.textContent='✨ Auto-fit everything';
+    if(cur<=tp){ _msg('<span class="aig-ok">✓ Already fits on '+tp+' page'+(tp>1?'s':'')+'!</span>'); _backBtn(_home); return; }
+
+    /* Diagnostic: overshoot + quick wins estimate */
+    var el=out.querySelector('.resume-a4-page')||out;
+    var overPx=el.scrollHeight-(tp*A4H);
+    var overPct=Math.round(overPx/A4H*100);
+    var jobs=0, bullets=0;
+    out.querySelectorAll('.r-exp').forEach(function(job){
+      jobs++;
+      bullets+=Array.from(job.querySelectorAll('.r-ul li')).filter(function(li){return li.style.display!=='none';}).length;
+    });
+    var sumEl=out.querySelector('.r-sum'); var sumWords=(sumEl?sumEl.textContent.trim().split(/\s+/).length:0);
+    var tips=[];
+    if(jobs>0&&bullets>jobs*3) tips.push('Trim to 3 bullets/job → saves ~'+(Math.round((bullets-jobs*3)*14))+'px');
+    if(sumWords>60) tips.push('Shorten summary ('+sumWords+' words) → ~70px');
+    if(overPct>20) tips.push('Compact spacing → ~100px');
+    var diagHtml='Currently <b>'+cur+'pp</b> → target <b>'+tp+'pp</b> <span style="color:#d97706;font-size:0.78rem">(~'+overPct+'% over)</span>'
+      +(tips.length?'<div style="margin-top:5px;font-size:0.75rem;color:var(--muted)">Quick wins: '+tips.join(' · ')+'</div>':''
+    );
+    _msg(diagHtml);
+
+    var r=_row();
+    var ab=document.createElement('button'); ab.className='aig-opt aig-primary'; ab.textContent='⚡ Auto-fit';
     ab.addEventListener('click',function(){ ab.disabled=true; _autoFit(tp,tpx); });
-    var gb=document.createElement('button'); gb.className='aig-opt'; gb.textContent='🎛️ Fine-tune manually';
-    gb.addEventListener('click',function(){ _clear(); _manualFit(tp,tpx); });
-    r.appendChild(ab); r.appendChild(gb); d.appendChild(r); _backBtn(_home);
+    var mb=document.createElement('button'); mb.className='aig-opt'; mb.textContent='🎛️ Fine-tune';
+    mb.addEventListener('click',function(){ _clear(); _manualFit(tp,tpx); });
+    var ib=document.createElement('button'); ib.className='aig-opt'; ib.textContent='🧠 AI Tips';
+    ib.addEventListener('click',function(){ ib.disabled=true; ib.textContent='⏳ Analysing…'; _aiTips(out,tp,ib); });
+    r.appendChild(ab); r.appendChild(mb); r.appendChild(ib);
+    var d=_msg(''); d.appendChild(r);
+    _backBtn(_home);
   }
 
+  /* Progressive auto-fit cascade — each step only if still over */
   function _autoFit(tp,tpx){
     var out=document.getElementById('resumeOutput');
-    var pg=out&&out.querySelector('.resume-a4-page'); var el=pg||out;
-    _clear(); var changes=[];
-    if(el.scrollHeight>tpx){
-      var fs=parseFloat(getComputedStyle(out).fontSize)||11; var orig=fs; var min=fs-2.5;
-      while(el.scrollHeight>tpx&&fs>min){ fs-=0.25; out.style.fontSize=fs.toFixed(2)+'px'; }
-      if(fs<orig-0.1) changes.push('font → '+fs.toFixed(1)+'px');
+    var el=out.querySelector('.resume-a4-page')||out;
+    _clear(); var steps=[];
+    function fits(){ return el.scrollHeight<=tpx; }
+    if(!out.dataset.baseFontSize) out.dataset.baseFontSize=parseFloat(getComputedStyle(out).fontSize)||11;
+    var origFs=parseFloat(out.dataset.baseFontSize);
+
+    /* 1. Compact line-height + section margins */
+    if(!fits()){
+      out.style.lineHeight='1.35';
+      out.querySelectorAll('.r-sec').forEach(function(s){s.style.marginBottom='9px';});
+      steps.push('Spacing → Compact');
     }
-    if(el.scrollHeight>tpx){
+    /* 2. Reduce font size up to -0.75px */
+    if(!fits()){
+      var fs=parseFloat(out.style.fontSize)||origFs; var min=origFs-0.75;
+      while(!fits()&&fs>min){ fs-=0.25; out.style.fontSize=fs.toFixed(2)+'px'; }
+      if(fs<origFs-0.05) steps.push('Font → '+fs.toFixed(1)+'px');
+    }
+    /* 3. Trim bullets to max 3 per job */
+    if(!fits()){
       var trimmed=0;
-      Array.from(out.querySelectorAll('.r-exp')).forEach(function(job){
+      out.querySelectorAll('.r-exp').forEach(function(job){
         var vis=Array.from(job.querySelectorAll('.r-ul li')).filter(function(li){return li.style.display!=='none';});
-        if(vis.length>2){ vis.slice(2).forEach(function(li){li.style.display='none';}); trimmed++; }
+        if(vis.length>3){ vis.slice(3).forEach(function(li){li.style.display='none';}); trimmed++; }
       });
-      if(trimmed) changes.push('bullets → 2 per job');
+      if(trimmed) steps.push('Bullets → max 3/job');
     }
-    if(el.scrollHeight>tpx){
+    /* 4. Tight spacing */
+    if(!fits()){
+      out.style.lineHeight='1.22';
+      out.querySelectorAll('.r-sec').forEach(function(s){s.style.marginBottom='5px';});
+      steps.push('Spacing → Tight');
+    }
+    /* 5. Further font reduction up to -2px total */
+    if(!fits()){
+      var fs2=parseFloat(out.style.fontSize)||origFs; var min2=origFs-2;
+      while(!fits()&&fs2>min2){ fs2-=0.25; out.style.fontSize=fs2.toFixed(2)+'px'; }
+      if(fs2<(parseFloat(out.style.fontSize)||origFs)+0.05) steps.push('Font → '+fs2.toFixed(1)+'px');
+    }
+    /* 6. Trim bullets to max 2 per job */
+    if(!fits()){
+      out.querySelectorAll('.r-exp').forEach(function(job){
+        var vis=Array.from(job.querySelectorAll('.r-ul li')).filter(function(li){return li.style.display!=='none';});
+        if(vis.length>2) vis.slice(2).forEach(function(li){li.style.display='none';});
+      });
+      steps.push('Bullets → max 2/job');
+    }
+    /* 7. Condense summary to 40 words */
+    if(!fits()){
       var sumEl=out.querySelector('.r-sum');
-      if(sumEl&&sumEl.textContent.trim().length>90){ sumEl.textContent=sumEl.textContent.slice(0,110).replace(/\s+\S*$/,'…'); changes.push('summary shortened'); }
+      if(sumEl){ var wds=sumEl.textContent.trim().split(/\s+/); if(wds.length>40){ sumEl.textContent=wds.slice(0,38).join(' ')+'…'; steps.push('Summary condensed'); } }
     }
-    if(changes.length) _markEdited();
+
+    if(steps.length) _markEdited();
     var nowPp=_getPages(out);
-    if(el.scrollHeight<=tpx){
+
+    if(fits()){
       var ok='<span class="aig-ok">✓ Fits on '+tp+' page'+(tp>1?'s':'')+'!</span>';
-      if(changes.length) ok+='<br><span style="font-size:0.76rem;color:var(--muted)">'+changes.join(' · ')+'</span>';
+      if(steps.length) ok+='<br><span style="font-size:0.74rem;color:var(--muted);line-height:1.9">'+steps.map(function(s){return '✓ '+s;}).join('<br>')+'</span>';
       _msg(ok);
     } else {
-      _msg('<span class="aig-ok">✓ Closer now ('+nowPp+'pp).</span> Try a compact template:');
+      var part='<b style="color:#d97706">'+nowPp+' pages</b> — reduced, but not all the way.';
+      if(steps.length) part+='<br><span style="font-size:0.74rem;color:var(--muted);line-height:1.9">'+steps.map(function(s){return '✓ '+s;}).join('<br>')+'</span>';
+      _msg(part);
+      var ftBtn=document.createElement('button'); ftBtn.className='aig-opt'; ftBtn.style.marginTop='8px';
+      ftBtn.textContent='🎛️ Fine-tune further';
+      ftBtn.addEventListener('click',function(){ _clear(); _manualFit(tp,tpx); });
+      var fw=$m(); if(fw) fw.appendChild(ftBtn);
       _showCompactTemplates();
     }
     _backBtn(_home);
   }
 
-  /* Manual fine-tune panel — section picker, AI polish, font, bullets, spacing */
+  /* Ask AI for personalized trim recommendations */
+  function _aiTips(out,tp,triggerBtn){
+    var text=(out.innerText||out.textContent||'').slice(0,2800);
+    var pages=_getPages(out);
+    var prompt='This resume is '+pages+' page'+(pages>1?'s':'')+' but the target is '+tp+' page'+(tp>1?'s':'')+'. Analyse what is taking the most space and give exactly 3 specific, actionable recommendations to reduce it. Each should be concrete and mention an estimated space saving (e.g. "Trim Experience bullets to 3 per role — saves ~0.4pp" or "Remove the Certifications section — saves ~0.2pp"). Output ONLY 3 bullet lines starting with •. No intro.
+
+Resume:
+'+text;
+    fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
+      .then(function(result){
+        var raw=result.content;
+        var txt=((Array.isArray(raw)?(raw[0]&&raw[0].text||''): (raw||''))||result.text||'').trim();
+        if(!txt) throw new Error();
+        var ls=txt.split('\n').map(function(l){return l.replace(/^[•\-\*\d.\s]+/,'').trim();}).filter(Boolean).slice(0,3);
+        if(triggerBtn) triggerBtn.style.display='none';
+        _msg('<b>🧠 AI Recommendations</b><div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">'+
+          ls.map(function(l){return '<div style="display:flex;gap:7px;align-items:flex-start"><span style="color:var(--accent);font-weight:700;flex-shrink:0">→</span><span style="font-size:0.8rem;color:var(--text);line-height:1.5">'+l+'</span></div>';}).join('')
+          +'</div>');
+        _scroll();
+      })
+      .catch(function(){
+        if(triggerBtn){ triggerBtn.disabled=false; triggerBtn.textContent='🧠 AI Tips'; }
+        _msg('<span class="aig-warn">Could not reach AI — try again.</span>');
+      });
+  }
+
+  /* Manual fine-tune panel */
   function _manualFit(tp,tpx){
     var out=document.getElementById('resumeOutput');
     var m=$m(); if(!m) return;
 
-    _msg('<b>🎛️ Fine-tune controls</b><br><span style="font-size:0.76rem;color:var(--muted)">All changes apply instantly to your resume.</span>');
+    _msg('<b>🎛️ Fine-tune Controls</b><br><span style="font-size:0.74rem;color:var(--muted)">All changes apply instantly. Target: '+tp+' page'+(tp>1?'s':'')+'.</span>');
 
-    var pageBadge=document.createElement('div');
-    pageBadge.style.cssText='display:inline-block;font-size:0.72rem;font-weight:700;color:#fff;background:var(--accent,#7c3aed);padding:4px 10px;border-radius:20px;margin:4px 0 10px';
-    function _updPageBadge(){ var n=_getPages(out); pageBadge.textContent='📄 '+n+' page'+(n!==1?'s':'')+' currently'; }
-    _updPageBadge();
-    m.appendChild(pageBadge);
+    /* ── Live overflow meter ── */
+    var meterWrap=document.createElement('div'); meterWrap.style.cssText='margin:4px 0 14px';
+    var meterLabel=document.createElement('div'); meterLabel.style.cssText='font-size:0.72rem;font-weight:700;display:flex;justify-content:space-between;margin-bottom:5px';
+    var meterTrack=document.createElement('div'); meterTrack.style.cssText='height:8px;border-radius:4px;background:var(--surface);overflow:hidden;border:1px solid var(--border)';
+    var meterFill=document.createElement('div'); meterFill.style.cssText='height:100%;border-radius:4px;transition:width .3s,background .3s;width:0%';
+    meterTrack.appendChild(meterFill); meterWrap.appendChild(meterLabel); meterWrap.appendChild(meterTrack);
+    m.appendChild(meterWrap);
+    function _updMeter(){
+      var el2=out.querySelector('.resume-a4-page')||out;
+      var ratio=el2.scrollHeight/(tp*A4H);
+      var color=ratio<=1?'#059669':(ratio<=1.12?'#d97706':'#dc2626');
+      meterFill.style.width=Math.min(100,Math.round(ratio*100))+'%';
+      meterFill.style.background=color;
+      var n=_getPages(out);
+      meterLabel.innerHTML='<span style="color:var(--muted)">Page usage</span><span style="color:'+color+';font-weight:800">'+n+' / '+tp+' page'+(tp>1?'s':'')+( ratio<=1?' ✓':'')+'</span>';
+    }
+    _updMeter();
 
     var secs=Array.from(out.querySelectorAll('.r-sec'));
+    if(!out.dataset.baseFontSize) out.dataset.baseFontSize=parseFloat(getComputedStyle(out).fontSize)||11;
+    var fsBase=parseFloat(out.dataset.baseFontSize);
+
+    /* ── 1. Global Typography ── */
+    var typoHd=_msg('<b>Typography</b>');
+
+    /* Font size slider */
+    var fsWrap=document.createElement('div'); fsWrap.style.cssText='margin-top:8px';
+    var fsLblRow=document.createElement('div'); fsLblRow.style.cssText='font-size:0.74rem;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px';
+    var fsSzBadge=document.createElement('span'); fsSzBadge.id='_rpc_fsLbl'; fsSzBadge.textContent=(parseFloat(out.style.fontSize)||fsBase).toFixed(1)+'px';
+    fsLblRow.innerHTML='<span>Font size</span>'; fsLblRow.appendChild(fsSzBadge);
+    var fsSlider=document.createElement('input'); fsSlider.type='range';
+    fsSlider.min=(fsBase-2.5).toFixed(2); fsSlider.max=(fsBase+0.5).toFixed(2); fsSlider.step='0.25';
+    fsSlider.value=(parseFloat(out.style.fontSize)||fsBase).toFixed(2);
+    fsSlider.style.cssText='width:100%;accent-color:var(--accent);margin:0';
+    fsSlider.addEventListener('input',function(){
+      out.style.fontSize=parseFloat(fsSlider.value).toFixed(2)+'px';
+      fsSzBadge.textContent=parseFloat(fsSlider.value).toFixed(1)+'px';
+      _updMeter(); _markEdited();
+    });
+    fsWrap.appendChild(fsLblRow); fsWrap.appendChild(fsSlider); typoHd.appendChild(fsWrap);
+
+    /* Line-height slider */
+    var lhWrap=document.createElement('div'); lhWrap.style.cssText='margin-top:10px';
+    var lhLblRow=document.createElement('div'); lhLblRow.style.cssText='font-size:0.74rem;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px';
+    var curLh=parseFloat(out.style.lineHeight)||1.5;
+    var lhBadge=document.createElement('span'); lhBadge.id='_rpc_lhLbl'; lhBadge.textContent=curLh.toFixed(2);
+    lhLblRow.innerHTML='<span>Line height</span>'; lhLblRow.appendChild(lhBadge);
+    var lhSlider=document.createElement('input'); lhSlider.type='range';
+    lhSlider.min='115'; lhSlider.max='160'; lhSlider.step='5';
+    lhSlider.value=Math.round(curLh*100);
+    lhSlider.style.cssText='width:100%;accent-color:var(--accent);margin:0';
+    lhSlider.addEventListener('input',function(){
+      var v=(parseInt(lhSlider.value)/100).toFixed(2);
+      out.style.lineHeight=v; lhBadge.textContent=v;
+      _updMeter(); _markEdited();
+    });
+    lhWrap.appendChild(lhLblRow); lhWrap.appendChild(lhSlider); typoHd.appendChild(lhWrap);
+
+    /* ── 2. Section spacing presets ── */
+    var spHd=_msg('<b>Section spacing</b>');
+    var spRow=_row();
+    [{label:'Normal',ls:'1.50',ss:'14px'},{label:'Compact',ls:'1.35',ss:'9px'},{label:'Tight',ls:'1.22',ss:'5px'}].forEach(function(sp){
+      var b=document.createElement('button'); b.className='aig-sz-btn'; b.textContent=sp.label;
+      b.addEventListener('click',function(){
+        spRow.querySelectorAll('.aig-sz-btn').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel');
+        out.style.lineHeight=sp.ls;
+        out.querySelectorAll('.r-sec').forEach(function(s){s.style.marginBottom=sp.ss;});
+        lhSlider.value=Math.round(parseFloat(sp.ls)*100);
+        lhBadge.textContent=parseFloat(sp.ls).toFixed(2);
+        _updMeter(); _markEdited();
+      });
+      spRow.appendChild(b);
+    });
+    spHd.appendChild(spRow);
+
+    /* ── 3. Show / hide sections ── */
+    var secVisHd=_msg('<b>Show / hide sections</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— remove low-priority sections entirely</span>');
+    var secVisWrap=document.createElement('div'); secVisWrap.style.cssText='display:flex;flex-direction:column;gap:6px;margin-top:6px';
+    secs.forEach(function(sec){
+      var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
+      var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:8px';
+      var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sec.style.display!=='none'; cb.style.cssText='cursor:pointer;flex-shrink:0;accent-color:var(--accent)';
+      cb.addEventListener('change',function(){ sec.style.display=cb.checked?'':'none'; _updMeter(); _markEdited(); });
+      var lbl2=document.createElement('label'); lbl2.style.cssText='font-size:0.8rem;color:var(--text);cursor:pointer;flex:1';
+      lbl2.textContent=label;
+      lbl2.addEventListener('click',function(){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); });
+      row.appendChild(cb); row.appendChild(lbl2); secVisWrap.appendChild(row);
+    });
+    secVisHd.appendChild(secVisWrap);
+
+    /* ── 4. Per-section font size ── */
+    var fsSecHd=_msg('<b>Font size by section</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— reduce up to 3px</span>');
+    var secChipRow=_row(); var fsCtrlRow=document.createElement('div'); fsCtrlRow.className='aig-row'; fsCtrlRow.style.marginTop='4px';
+    secs.forEach(function(sec){
+      var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
+      var btn=document.createElement('button'); btn.className='aig-chip'; btn.textContent=label.slice(0,12);
+      btn.addEventListener('click',function(){
+        secChipRow.querySelectorAll('.aig-chip').forEach(function(b){b.classList.remove('sel');}); btn.classList.add('sel');
+        fsCtrlRow.innerHTML='';
+        if(!sec.dataset.origFs) sec.dataset.origFs=parseFloat(window.getComputedStyle(sec).fontSize)||11;
+        var origFs2=parseFloat(sec.dataset.origFs);
+        var curFs2=parseFloat(sec.style.fontSize)||origFs2;
+        var curRed=Math.round((origFs2-curFs2)*2)/2;
+        [0,0.5,1,1.5,2,2.5,3].forEach(function(red){
+          var sb=document.createElement('button'); sb.className='aig-sz-btn';
+          if(Math.abs(curRed-red)<0.1) sb.classList.add('sel');
+          sb.textContent=red===0?'Original':('-'+red+'px');
+          sb.addEventListener('click',function(){
+            fsCtrlRow.querySelectorAll('.aig-sz-btn').forEach(function(x){x.classList.remove('sel');}); sb.classList.add('sel');
+            sec.style.fontSize=(origFs2-red)+'px';
+            _updMeter(); _markEdited();
+          });
+          fsCtrlRow.appendChild(sb);
+        });
+        _scroll();
+      });
+      secChipRow.appendChild(btn);
+    });
+    fsSecHd.appendChild(secChipRow);
+    var m2=$m(); if(m2) m2.appendChild(fsCtrlRow);
+
+    /* ── 5. Polish with AI ── */
     var polishable=secs.filter(function(sec){
       var t=sec.querySelector('.r-sec-t'); var label=(t?t.textContent:'').toLowerCase();
       return label.indexOf('experience')>=0||label.indexOf('summary')>=0||label.indexOf('profile')>=0||
              (label.indexOf('skill')<0&&label.indexOf('education')<0&&label.indexOf('award')<0&&
               label.indexOf('certif')<0&&!!sec.querySelector('li,.r-ul'));
     });
-
-    /* ── 1. Polish with AI ── */
     if(polishable.length){
-      var polHd=_msg('<b>✦ Polish with AI</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— makes bullets shorter & impactful</span>');
+      var polHd=_msg('<b>✦ Polish with AI</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— rewrites bullets shorter & more impactful</span>');
       var polRow=_row();
       polishable.forEach(function(sec){
         var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
@@ -4267,19 +4470,17 @@ if ('serviceWorker' in navigator) {
           _polishSection(sec).then(function(ok){
             if(resultBox){ resultBox.remove(); resultBox=null; }
             if(ok){
-              btn.textContent='✓ Done'; _updPageBadge(); _markEdited();
+              btn.textContent='✓ Done'; _updMeter(); _markEdited();
               resultBox=document.createElement('div'); resultBox.style.cssText='margin-top:8px';
               resultBox.innerHTML='<span class="aig-ok">✓ '+label.slice(0,20)+' polished!</span>';
               var sumEl=sec.querySelector('.r-sum,.r-desc');
               if(sumEl){
-                var cap=document.createElement('div');
-                cap.style.cssText='font-size:0.76rem;color:var(--muted);margin-top:4px';
-                cap.textContent='Want to tweak it further? Edit below — changes apply instantly.';
+                var cap=document.createElement('div'); cap.style.cssText='font-size:0.76rem;color:var(--muted);margin-top:4px';
+                cap.textContent='Want to tweak further? Edit below — changes apply instantly.';
                 resultBox.appendChild(cap);
-                var ta=document.createElement('textarea');
-                ta.value=sumEl.textContent;
+                var ta=document.createElement('textarea'); ta.value=sumEl.textContent;
                 ta.style.cssText='width:100%;min-height:70px;margin-top:6px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;font-family:inherit;color:var(--text);background:var(--input-bg,#fff);resize:vertical;box-sizing:border-box';
-                ta.addEventListener('input',function(){ sumEl.textContent=ta.value; _updPageBadge(); _markEdited(); });
+                ta.addEventListener('input',function(){ sumEl.textContent=ta.value; _updMeter(); _markEdited(); });
                 resultBox.appendChild(ta);
               }
               polHd.appendChild(resultBox);
@@ -4297,40 +4498,28 @@ if ('serviceWorker' in navigator) {
       polHd.appendChild(polRow);
     }
 
-    /* ── 2. Font size by section ── */
-    var fsHd=_msg('<b>Font size by section</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— reduce up to 3px</span>');
-    var secRow=_row(); var fsCtrlRow=document.createElement('div'); fsCtrlRow.className='aig-row'; fsCtrlRow.style.marginTop='4px';
-    secs.forEach(function(sec){
-      var t=sec.querySelector('.r-sec-t'); var label=t?t.textContent.trim():'Section';
-      var btn=document.createElement('button'); btn.className='aig-chip'; btn.textContent=label.slice(0,12);
-      btn.addEventListener('click',function(){
-        secRow.querySelectorAll('.aig-chip').forEach(function(b){b.classList.remove('sel');}); btn.classList.add('sel');
-        fsCtrlRow.innerHTML='';
-        if(!sec.dataset.origFs) sec.dataset.origFs=parseFloat(window.getComputedStyle(sec).fontSize)||11;
-        var origFs=parseFloat(sec.dataset.origFs);
-        var curFs=parseFloat(sec.style.fontSize)||origFs;
-        var curReduction=Math.round((origFs-curFs)*2)/2;
-        [0,0.5,1,1.5,2,2.5,3].forEach(function(red){
-          var sb=document.createElement('button'); sb.className='aig-sz-btn';
-          if(Math.abs(curReduction-red)<0.1) sb.classList.add('sel');
-          sb.textContent=red===0?'Original':('-'+red+'px');
-          sb.addEventListener('click',function(){
-            fsCtrlRow.querySelectorAll('.aig-sz-btn').forEach(function(x){x.classList.remove('sel');}); sb.classList.add('sel');
-            sec.style.fontSize=(origFs-red)+'px';
-            _updPageBadge();
-            _markEdited();
-          });
-          fsCtrlRow.appendChild(sb);
-        });
-        _scroll();
-      });
-      secRow.appendChild(btn);
-    });
-    fsHd.appendChild(secRow);
-    var m2=$m(); if(m2) m2.appendChild(fsCtrlRow);
+    /* ── 6. Bullets per experience ── */
+    var blHd=_msg('<b>Bullets per experience</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— fine-tune or compact with AI</span>');
 
-    /* ── 3. Bullet count ── */
-    var blHd=_msg('<b>Bullets per experience</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— remove specific bullets, or compact with AI</span>');
+    /* Quick trim-all row */
+    var qtWrap=document.createElement('div'); qtWrap.style.cssText='display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:4px;margin-bottom:6px';
+    var qtLbl=document.createElement('span'); qtLbl.style.cssText='font-size:0.74rem;color:var(--muted);white-space:nowrap'; qtLbl.textContent='Trim all to max:';
+    qtWrap.appendChild(qtLbl);
+    [2,3,4,5].forEach(function(n){
+      var qb=document.createElement('button'); qb.className='aig-sz-btn'; qb.textContent=n+' bullet'+(n>1?'s':'');
+      qb.addEventListener('click',function(){
+        out.querySelectorAll('.r-exp').forEach(function(job){
+          var vis=Array.from(job.querySelectorAll('.r-ul li')).filter(function(li){return li.style.display!=='none';});
+          if(vis.length>n) vis.slice(n).forEach(function(li){li.style.display='none';});
+        });
+        _updMeter(); _markEdited();
+        _msg('<span class="aig-ok">✓ All jobs trimmed to max '+n+' bullet'+(n>1?'s':'')+'.</span>');
+      });
+      qtWrap.appendChild(qb);
+    });
+    blHd.appendChild(qtWrap);
+
+    /* Per-job fine control */
     var blChipRow=_row(); var blCtrlRow=document.createElement('div'); blCtrlRow.className='aig-row'; blCtrlRow.style.marginTop='4px';
     Array.from(out.querySelectorAll('.r-exp')).forEach(function(job){
       var roleEl=job.querySelector('.r-role'); var coEl=job.querySelector('.r-co');
@@ -4342,31 +4531,27 @@ if ('serviceWorker' in navigator) {
           blCtrlRow.innerHTML='';
           var lis=Array.from(job.querySelectorAll('.r-ul li,ul li'));
           var editHint=document.createElement('div'); editHint.style.cssText='font-size:0.72rem;color:var(--muted);width:100%;margin-bottom:6px;display:flex;align-items:center;gap:5px';
-          editHint.innerHTML='<span style="font-size:0.85rem">✏️</span> Tap any bullet to edit its text · untick to hide it';
+          editHint.innerHTML='<span style="font-size:0.85rem">✏️</span> Tap a bullet to edit · untick to hide';
           blCtrlRow.appendChild(editHint);
           var listWrap=document.createElement('div'); listWrap.style.cssText='display:flex;flex-direction:column;gap:6px;width:100%';
           lis.forEach(function(li){
             var row=document.createElement('div'); row.style.cssText='display:flex;align-items:flex-start;gap:6px';
             var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=li.style.display!=='none'; cb.style.cssText='margin-top:7px;flex-shrink:0;cursor:pointer';
-            cb.addEventListener('change',function(){ li.style.display=cb.checked?'':'none'; txt.style.opacity=cb.checked?'1':'0.4'; _updPageBadge(); _markEdited(); });
-            /* Editable pill — styled to clearly look like an input field so users
-               know bullets are editable (item: bullet-per-experience affordance). */
+            cb.addEventListener('change',function(){ li.style.display=cb.checked?'':'none'; txt.style.opacity=cb.checked?'1':'0.4'; _updMeter(); _markEdited(); });
             var txt=document.createElement('span'); txt.contentEditable='true'; txt.spellcheck=false;
             txt.style.cssText='font-size:0.78rem;color:var(--text);flex:1;line-height:1.4;outline:none;border:1px solid var(--border,#d1d5db);border-radius:6px;padding:5px 26px 5px 8px;background:var(--input-bg,#fff);white-space:pre-wrap;word-break:break-word;cursor:text;transition:border-color .15s,box-shadow .15s;position:relative;';
             txt.textContent=li.textContent.trim();
             if(li.style.display==='none') txt.style.opacity='0.4';
             txt.title='Click to edit this bullet';
-            /* pencil badge sits on the right edge of the field */
             var pencil=document.createElement('span'); pencil.textContent='✏️'; pencil.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:0.72rem;opacity:0.5;pointer-events:none';
             var cell=document.createElement('div'); cell.style.cssText='position:relative;flex:1;display:flex'; cell.appendChild(txt); cell.appendChild(pencil);
             txt.addEventListener('focus',function(){ txt.style.borderColor='var(--accent,#d97706)'; txt.style.boxShadow='0 0 0 2px rgba(245,158,11,0.15)'; pencil.style.opacity='0'; });
-            txt.addEventListener('blur',function(){ txt.style.borderColor='var(--border,#d1d5db)'; txt.style.boxShadow='none'; pencil.style.opacity='0.5'; var v=txt.textContent.trim(); if(v){ li.textContent=v; } else { txt.textContent=li.textContent.trim(); } _updPageBadge(); _markEdited(); });
+            txt.addEventListener('blur',function(){ txt.style.borderColor='var(--border,#d1d5db)'; txt.style.boxShadow='none'; pencil.style.opacity='0.5'; var v=txt.textContent.trim(); if(v){ li.textContent=v; } else { txt.textContent=li.textContent.trim(); } _updMeter(); _markEdited(); });
             txt.addEventListener('input',function(){ var v=txt.textContent.trim(); if(v) li.textContent=v; });
             txt.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); txt.blur(); } });
             row.appendChild(cb); row.appendChild(cell); listWrap.appendChild(row);
           });
           blCtrlRow.appendChild(listWrap);
-
           var compactLbl=document.createElement('div'); compactLbl.style.cssText='font-size:0.72rem;font-weight:600;color:var(--muted);width:100%;margin-top:8px';
           compactLbl.textContent='Or compact with AI to:';
           blCtrlRow.appendChild(compactLbl);
@@ -4378,48 +4563,30 @@ if ('serviceWorker' in navigator) {
               if(!visLis.length) return;
               cbtn.disabled=true; cbtn.textContent='⏳';
               _compactBullets(visLis,n).then(function(ok){
-                if(ok){
-                  _msg('<span class="aig-ok">✓ Compacted to '+n+' bullet'+(n>1?'s':'')+'.</span>');
-                  render();
-                  _updPageBadge();
-                  _markEdited();
-                } else {
-                  cbtn.disabled=false; cbtn.textContent=n;
-                  _msg('<span class="aig-warn">Could not reach AI. Try again.</span>');
-                }
+                if(ok){ _msg('<span class="aig-ok">✓ Compacted to '+n+' bullet'+(n>1?'s':'')+'.</span>'); render(); _updMeter(); _markEdited(); }
+                else { cbtn.disabled=false; cbtn.textContent=n; _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); }
               });
             });
             compactRow.appendChild(cbtn);
           });
           blCtrlRow.appendChild(compactRow);
         }
-        render();
-        _scroll();
+        render(); _scroll();
       });
       blChipRow.appendChild(btn);
     });
     blHd.appendChild(blChipRow);
     var m3=$m(); if(m3) m3.appendChild(blCtrlRow);
 
-    /* ── 4. Spacing ── */
-    var spHd=_msg('<b>Spacing</b>');
-    var spRow=_row();
-    [{label:'Normal',ls:'1.5',ss:'14px'},{label:'Compact',ls:'1.35',ss:'9px'},{label:'Tight',ls:'1.2',ss:'5px'}].forEach(function(sp){
-      var b=document.createElement('button'); b.className='aig-sz-btn'; b.textContent=sp.label;
-      b.addEventListener('click',function(){
-        spRow.querySelectorAll('.aig-sz-btn').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel');
-        out.style.lineHeight=sp.ls;
-        out.querySelectorAll('.r-sec').forEach(function(s){s.style.marginBottom=sp.ss;});
-        _updPageBadge();
-        _markEdited();
-      });
-      spRow.appendChild(b);
-    });
-    spHd.appendChild(spRow);
+    /* ── 7. AI Smart Tips ── */
+    var aiHd=_msg('<b>🧠 AI Smart Tips</b> <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">— personalised recommendations</span>');
+    var aiBtn=document.createElement('button'); aiBtn.className='aig-opt'; aiBtn.textContent='Get AI recommendations';
+    aiBtn.addEventListener('click',function(){ aiBtn.disabled=true; aiBtn.textContent='⏳ Analysing…'; _aiTips(out,tp,aiBtn); });
+    aiHd.appendChild(aiBtn);
 
-    /* Back */
     _backBtn(_home);
   }
+
 
   /* Polish section via AI */
   function _polishSection(sec){
