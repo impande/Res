@@ -5656,6 +5656,19 @@ if ('serviceWorker' in navigator) {
             }catch(e){}
           }, 300);
         }
+      } else {
+        /* No resume yet — the user just logged in with an empty account. orig already
+           moves them to the START of the wizard (step 1); we guard against a LATE reset
+           back to the marketing landing (step 0) for a short window, mirroring the
+           resume→step 7 guard. The interval only corrects a bounce to landing — it never
+           pulls a user who is deliberately working elsewhere in the wizard (steps 1–6). */
+        if(typeof goToStep==='function'){
+          try{ if(typeof currentStep!=='undefined' && currentStep===0) goToStep(1); }catch(e){}
+          var _sn=0, _siv=setInterval(function(){
+            if(++_sn>8){ clearInterval(_siv); return; }
+            try{ if(typeof currentStep!=='undefined' && currentStep===0){ goToStep(1); } }catch(e){}
+          }, 300);
+        }
       }
     }catch(e){}
     return r;
