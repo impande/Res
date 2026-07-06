@@ -5334,7 +5334,13 @@ if ('serviceWorker' in navigator) {
      straight up against the preceding section's content. Space them via margin-bottom so
      the fit-to-page density system (which drives .r-sec margin-bottom) can still compress
      it when trimming to a page. The header supplies its own gap, so first section stays flush. */
-  [class*="tpl-meridian-"] .r-sec,[class*="tpl-oxford-"] .r-sec,[class*="tpl-chronicle-"] .r-sec,[class*="tpl-monoline-"] .r-sec,[class*="tpl-ledger-"] .r-sec,[class*="tpl-cascade-"] .r-sec,[class*="tpl-executive-"] .r-sec,[class*="tpl-vertex-"] .r-sec,[class*="tpl-aria-"] .r-sec,[class*="tpl-spine-"] .r-sec{margin-bottom:22px;}
+  [class*="tpl-meridian-"] .r-sec,[class*="tpl-oxford-"] .r-sec,[class*="tpl-chronicle-"] .r-sec,[class*="tpl-monoline-"] .r-sec,[class*="tpl-ledger-"] .r-sec,[class*="tpl-cascade-"] .r-sec,[class*="tpl-executive-"] .r-sec,[class*="tpl-vertex-"] .r-sec,[class*="tpl-aria-"] .r-sec,[class*="tpl-spine-"] .r-sec{margin-bottom:18px;}
+  /* Spacing BETWEEN experience/entry blocks — these families set no .r-exp margin either,
+     so consecutive roles ran together and each new job title butted against the previous
+     entry's last bullet. Match the classic-template standard (~14px). Chronicle keeps its
+     own timeline spacing (declared later, so it overrides this). */
+  [class*="tpl-meridian-"] .r-exp,[class*="tpl-oxford-"] .r-exp,[class*="tpl-monoline-"] .r-exp,[class*="tpl-ledger-"] .r-exp,[class*="tpl-cascade-"] .r-exp,[class*="tpl-executive-"] .r-exp,[class*="tpl-vertex-"] .r-exp,[class*="tpl-aria-"] .r-exp,[class*="tpl-spine-"] .r-exp{margin-bottom:14px;}
+  [class*="tpl-meridian-"] .r-exp:last-child,[class*="tpl-oxford-"] .r-exp:last-child,[class*="tpl-monoline-"] .r-exp:last-child,[class*="tpl-ledger-"] .r-exp:last-child,[class*="tpl-cascade-"] .r-exp:last-child,[class*="tpl-executive-"] .r-exp:last-child,[class*="tpl-vertex-"] .r-exp:last-child,[class*="tpl-aria-"] .r-exp:last-child,[class*="tpl-spine-"] .r-exp:last-child{margin-bottom:0;}
   /* A touch more air above section titles beyond the section gap, so headers read as
      clear dividers rather than crowding the block above. */
   [class*="tpl-meridian-"] .r-sec>.r-sec-t,[class*="tpl-oxford-"] .r-sec>.r-sec-t,[class*="tpl-chronicle-"] .r-sec>.r-sec-t,[class*="tpl-monoline-"] .r-sec>.r-sec-t,[class*="tpl-ledger-"] .r-sec>.r-sec-t,[class*="tpl-cascade-"] .r-sec>.r-sec-t,[class*="tpl-executive-"] .r-sec>.r-sec-t,[class*="tpl-vertex-"] .r-sec>.r-sec-t,[class*="tpl-aria-"] .r-sec>.r-sec-t,[class*="tpl-spine-"] .r-sec>.r-sec-t{margin-top:2px;}
