@@ -384,7 +384,12 @@
     :root { --bg:#fafaf7;--sidebar-bg:#ffffff;--card-bg:#ffffff;--border:#e5e5e0;--text:#1a1a1a;--muted:#6b7280;--accent:#d97706;--accent-btn:#b45309;--input-bg:#ffffff;--input-border:#d5d5cf;--white:#ffffff;--surface:#f4f4ef; }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;display:flex;cursor:default;user-select:none;-webkit-user-select:none;line-height:1.6;overscroll-behavior:none;}
-    html{overscroll-behavior:none;}
+    /* Paint the root the app background too. The tablet/desktop shell pins body to
+       position:fixed at height:100dvh; on iPad Safari (landscape) dvh can resolve
+       shorter than the visible area, leaving a strip below the fixed body. html's
+       default (transparent) let the browser's white canvas show through as a thick
+       white strip — giving html the app bg makes any such gap blend in instead. */
+    html{overscroll-behavior:none;background:var(--bg);}
     #sidebar{width:260px;min-width:260px;background:var(--sidebar-bg);border-right:1px solid var(--border);box-shadow:2px 0 8px rgba(0,0,0,0.04);display:flex;flex-direction:column;padding:24px 18px;position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;}
     .logo{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid var(--border);margin-bottom:22px;}
     .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(217,119,6,0.3),0 1px 4px rgba(0,0,0,0.08);}
@@ -2238,7 +2243,7 @@
     .preview-fab{animation:fabPulse 2s ease-in-out infinite;}
     @media(max-width:768px){.preview-fab{display:none!important;}.mob-preview-btn{display:flex!important;}}
     /* Preview modal */
-    .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9800;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+    .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9800;display:none;align-items:flex-end;justify-content:center;}
     .preview-modal-overlay.open{display:flex;}
     .preview-modal{background:#12121e;border-radius:24px 24px 0 0;border:1px solid #25253a;border-bottom:none;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.6);animation:slideUpModal .3s cubic-bezier(.34,1.1,.64,1);}
     @keyframes slideUpModal{from{transform:translateY(100%);}to{transform:translateY(0);}}
