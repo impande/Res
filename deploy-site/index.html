@@ -5328,7 +5328,16 @@ if ('serviceWorker' in navigator) {
      especially) doesn't butt up against the title's underline / bar. The
      new families set no margin-bottom of their own, so without this the
      gap is 0 and chips overlap the section line. */
-  [class*="tpl-meridian-"] .r-sec-t,[class*="tpl-oxford-"] .r-sec-t,[class*="tpl-chronicle-"] .r-sec-t,[class*="tpl-monoline-"] .r-sec-t,[class*="tpl-ledger-"] .r-sec-t,[class*="tpl-cascade-"] .r-sec-t,[class*="tpl-executive-"] .r-sec-t,[class*="tpl-vertex-"] .r-sec-t,[class*="tpl-aria-"] .r-sec-t,[class*="tpl-spine-"] .r-sec-t{margin-bottom:10px!important;}
+  [class*="tpl-meridian-"] .r-sec-t,[class*="tpl-oxford-"] .r-sec-t,[class*="tpl-chronicle-"] .r-sec-t,[class*="tpl-monoline-"] .r-sec-t,[class*="tpl-ledger-"] .r-sec-t,[class*="tpl-cascade-"] .r-sec-t,[class*="tpl-executive-"] .r-sec-t,[class*="tpl-vertex-"] .r-sec-t,[class*="tpl-aria-"] .r-sec-t,[class*="tpl-spine-"] .r-sec-t{margin-bottom:11px!important;}
+  /* Vertical rhythm BETWEEN sections. These families set no .r-sec margin of their
+     own, so sections ran together — e.g. "Experience"/"Awards"/"Projects" titles butting
+     straight up against the preceding section's content. Space them via margin-bottom so
+     the fit-to-page density system (which drives .r-sec margin-bottom) can still compress
+     it when trimming to a page. The header supplies its own gap, so first section stays flush. */
+  [class*="tpl-meridian-"] .r-sec,[class*="tpl-oxford-"] .r-sec,[class*="tpl-chronicle-"] .r-sec,[class*="tpl-monoline-"] .r-sec,[class*="tpl-ledger-"] .r-sec,[class*="tpl-cascade-"] .r-sec,[class*="tpl-executive-"] .r-sec,[class*="tpl-vertex-"] .r-sec,[class*="tpl-aria-"] .r-sec,[class*="tpl-spine-"] .r-sec{margin-bottom:22px;}
+  /* A touch more air above section titles beyond the section gap, so headers read as
+     clear dividers rather than crowding the block above. */
+  [class*="tpl-meridian-"] .r-sec>.r-sec-t,[class*="tpl-oxford-"] .r-sec>.r-sec-t,[class*="tpl-chronicle-"] .r-sec>.r-sec-t,[class*="tpl-monoline-"] .r-sec>.r-sec-t,[class*="tpl-ledger-"] .r-sec>.r-sec-t,[class*="tpl-cascade-"] .r-sec>.r-sec-t,[class*="tpl-executive-"] .r-sec>.r-sec-t,[class*="tpl-vertex-"] .r-sec>.r-sec-t,[class*="tpl-aria-"] .r-sec>.r-sec-t,[class*="tpl-spine-"] .r-sec>.r-sec-t{margin-top:2px;}
 
   /* ---------- Family: Meridian — bold accent header card (dark) ---------- */
   [class*="tpl-meridian-"]{color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
