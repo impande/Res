@@ -5621,6 +5621,10 @@ if ('serviceWorker' in navigator) {
   var orig=window._applyCloudDoc;
   window._applyCloudDoc=function(uid,data,portfolio){
     var r=orig.apply(this,arguments);
+    /* Data-loaded signal: a cloud doc has now applied, so the "loading your account /
+       restoring your resume" loader can come down. Hiding here (on the real signal)
+       is what lets us drop the old blind timeout that hid the loader mid-load. */
+    try{ if(typeof _hideCloudLoader==='function') _hideCloudLoader(); }catch(e){}
     try{
       if(data && (data.summary || (data.experience && data.experience.length))){
         var ro=document.getElementById('resumeOutput');
@@ -5632,6 +5636,26 @@ if ('serviceWorker' in navigator) {
         if(typeof renderATSScore==='function') renderATSScore(data);
         var dl=document.getElementById('dlActions'); if(dl) dl.style.display='';
         var st=document.getElementById('resumeStatus'); if(st) st.textContent='Generated';
+        /* A restored version that carries a real resume should land the user ON their
+           resume (step 7), not the marketing landing (step 0) or the first form step.
+           Without this the cloud restore rendered the resume into step 7's output but
+           left the user stranded on the landing page, unable to see what just loaded. */
+        if(typeof goToStep==='function' && typeof currentStep!=='undefined' && currentStep!==7){
+          try{ goToStep(7); }catch(e){}
+          /* The async account load can be followed by a late landing/init reset that
+             drops the user back to step 0. For a short window, re-assert step 7 — but
+             ONLY when they're on the landing (step 0), so we never fight a user who
+             deliberately steps back into the wizard (steps 1–6). */
+          var _rn=0, _riv=setInterval(function(){
+            if(++_rn>8){ clearInterval(_riv); return; }
+            try{
+              var _ro=document.getElementById('resumeOutput');
+              if(typeof currentStep!=='undefined' && currentStep===0 && _ro && _ro.querySelector('.resume-a4-page')){
+                goToStep(7);
+              }
+            }catch(e){}
+          }, 300);
+        }
       }
     }catch(e){}
     return r;
@@ -5800,7 +5824,12 @@ if ('serviceWorker' in navigator) {
     // redirect-sign-in path still refines the message to "Signing you in…" on the
     // same reused _cloudLoader.
     try{ _showCloudLoader('Loading your account…'); }catch(e){}
-    setTimeout(function(){ try{ if(typeof _hideCloudLoader==='function') _hideCloudLoader(); }catch(e){} }, 12000);
+    /* The loader is dismissed on the ACTUAL data-loaded signal (the _applyCloudDoc
+       wrapper) or when auth resolves to signed-out (below). This timer is only a
+       last-resort backstop so a genuinely hung load can't spin forever — set just
+       past the "please allow up to 2 minutes" the restore loader promises, so it
+       never cuts a slow-but-valid load short the way the old 12s timeout did. */
+    setTimeout(function(){ try{ if(typeof _hideCloudLoader==='function') _hideCloudLoader(); }catch(e){} }, 125000);
   }
   // Keep the flag in sync via our own auth listener (Firebase allows several),
   // so the next load knows whether to pre-show the loader. Also dismiss a
