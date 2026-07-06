@@ -607,6 +607,12 @@
     #_authDropdown .drop-ver-item:hover .drop-ver-menu{opacity:1;}
     #_authDropdown .drop-savenow{display:flex!important;align-items:center;gap:8px;color:var(--accent)!important;font-weight:600!important;padding:10px 16px!important;}
     #_authDropdown .drop-savenow:hover{background:rgba(217,119,6,0.06)!important;}
+    /* Pin the action buttons to the bottom of the dropdown so a long saved-versions
+       list can never push "Save now & sign out" / "Sign out" off-screen. The list
+       scrolls above them; both stay visible at any version count. */
+    #_authDropdown .drop-savenow,#_authDropdown .drop-signout{position:sticky;background:#fff;z-index:3;}
+    #_authDropdown .drop-signout{bottom:0;}
+    #_authDropdown .drop-savenow{bottom:35px;border-top:1px solid rgba(0,0,0,0.07);}
     .pg-break{position:absolute;left:0;right:0;height:0;border-top:2px dashed rgba(120,160,190,0.65);pointer-events:none;z-index:3;}
     .pg-break::before{display:none;}
     .pg-break::after{display:none;}
