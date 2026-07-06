@@ -4727,104 +4727,90 @@ Resume:
     pickSection();
   }
 
-  /* ── CTA patch: restyle #aiChatCta once it appears in DOM ── */
-  function _patchCta(){
-    var cta=document.getElementById('aiChatCta'); if(!cta||cta._v3patched) return;
-    cta._v3patched=true;
-    cta.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Refine with AI</span>';
-    /* Move out of the scrollable #main/#step7 ancestry — some mobile browsers mis-render
-       position:fixed descendants of an overflow:auto container, making them drift with
-       the scrolled content instead of staying pinned to the viewport. */
-    if(cta.parentElement!==document.body) document.body.appendChild(cta);
-    /* Sync visibility with step 7 — always show on step 7, hide on other steps */
-    function _syncCta(){
-      var step7=document.getElementById('step7');
-      /* classList.contains('active') is the wizard's own toggle (see .step-content.active CSS);
-         offsetParent fallback catches edge-cases where the class hasn't propagated yet */
-      var onStep7=step7&&(step7.classList.contains('active')||step7.offsetParent!==null);
-      var previewOpen=document.getElementById('previewModalOverlay');
-      previewOpen=!!previewOpen&&previewOpen.classList.contains('open');
-      var _pf=document.getElementById('pfOverlay');
-      var pfOpen=!!_pf&&getComputedStyle(_pf).display!=='none';
-      var _pay=document.getElementById('payOverlay');
-      var payOpen=!!_pay&&getComputedStyle(_pay).display!=='none';
-      var _tips=document.getElementById('resumeTips');
-      var tipsOpen=!!_tips&&!_tips.classList.contains('tips-hidden')&&getComputedStyle(_tips).display!=='none';
-      if(onStep7&&!previewOpen&&!pfOpen&&!payOpen&&!tipsOpen) cta.classList.add('ai-cta-visible');
-      else cta.classList.remove('ai-cta-visible');
-      _positionMobileCta();
+  /* ── CTA: unconditional polling — no closure, no race condition ──
+     Every tick: get-or-create #aiChatCta, patch its look once, then sync
+     show/hide and position.  Because we call getElementById each tick we
+     never miss the element regardless of when the obfuscated code creates it. */
+  var _CTA_SVG='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+  var _CTA_WAITED=0;
+  function _ensureCta(){
+    var cta=document.getElementById('aiChatCta');
+    if(!cta){
+      /* Give obfuscated code up to 2 s to create it; after that, create ourselves */
+      if(!_CTA_WAITED) _CTA_WAITED=Date.now();
+      if(Date.now()-_CTA_WAITED<2000) return null;
+      cta=document.createElement('button');
+      cta.id='aiChatCta';
+      document.body.appendChild(cta);
     }
-    /* On mobile, pin the CTA inline beside the actual measured Preview Resume button
-       rect instead of a hardcoded breakpoint offset — keeps the two pills aligned
-       on the same row across every phone width, not just the ones tested by hand. */
-    function _positionMobileCta(){
-      if(window.innerWidth>768){
-        cta.style.removeProperty('top');
-        cta.style.removeProperty('left');
-        return;
-      }
-      function _visible(el){ return !!el && getComputedStyle(el).display!=='none' && el.getBoundingClientRect().width>0; }
-      var cw=cta.offsetWidth||0,gap=10;
-      /* Under ~520px the compact mob-preview-btn sits in the sticky header —
-         pair the CTA beside it on the same row. */
-      var mobBtn=document.getElementById('mobPreviewBtn');
-      if(_visible(mobBtn)){
-        var br=mobBtn.getBoundingClientRect();
-        var chh=cta.getBoundingClientRect().height||cta.offsetHeight||0;
-        /* Pin to the right edge (mirror the 16px header padding), aligned on
-           the same row as Preview Resume. Never overlap the button on very
-           narrow phones — clamp to just-right-of-it if the screen is too tight. */
-        var left=window.innerWidth-cw-16;
-        var minLeft=br.right+gap;
-        if(left<minLeft) left=minLeft;
-        var top=br.top+(br.height-chh)/2;
-        cta.style.setProperty('left',left+'px','important');
-        cta.style.setProperty('top',top+'px','important');
-        return;
-      }
-      /* 521-768px: mob-preview-btn is hidden here and previewFab is fixed to the
-         bottom-left, which can collide with in-page action buttons that scroll
-         into its footprint on short viewports. Pair with the always-present
-         "Save progress" header button instead — it's pinned in the sticky
-         header, clear of any scrollable content. */
-      var saveBtn=document.getElementById('mhdrSaveBtn');
-      if(_visible(saveBtn)){
-        var sr=saveBtn.getBoundingClientRect();
-        var left2=Math.max(8,sr.left-gap-cw);
-        var top2=sr.top+(sr.height-cta.offsetHeight)/2;
-        cta.style.setProperty('left',left2+'px','important');
-        cta.style.setProperty('top',top2+'px','important');
-        return;
-      }
-      /* Signed-in users: "Save progress" is replaced by the round avatar
-         button (#mhdrAvatar). Pair beside that instead so the CTA never
-         freezes at a stale position once saveBtn disappears. */
-      var avatar=document.getElementById('mhdrAvatar');
-      if(_visible(avatar)){
-        var ar=avatar.getBoundingClientRect();
-        var left3=Math.max(8,ar.left-gap-cw);
-        var top3=ar.top+(ar.height-cta.offsetHeight)/2;
-        cta.style.setProperty('left',left3+'px','important');
-        cta.style.setProperty('top',top3+'px','important');
-      }
-    }
-    window.addEventListener('resize',_positionMobileCta);
-    window.addEventListener('orientationchange',_positionMobileCta);
-    setInterval(_syncCta,300);
-    _syncCta();
-  }
-  var _ctaObs=new MutationObserver(function(muts){
-    muts.forEach(function(m){
-      Array.from(m.addedNodes).forEach(function(n){
-        if(!n||n.nodeType!==1) return;
-        if(n.id==='aiChatCta') _patchCta();
-        else if(n.querySelector) { var c=n.querySelector('#aiChatCta'); if(c) _patchCta(); }
+    /* One-time patch: replace obfuscated innerHTML with our pill label and move
+       to document.body so position:fixed renders relative to the viewport on mobile */
+    if(!cta._rfaPatch){
+      cta._rfaPatch=true;
+      cta.innerHTML=_CTA_SVG+'<span>Refine with AI</span>';
+      cta.addEventListener('click',function(){
+        var p=document.getElementById('aiChatPanel');
+        if(p){ p.classList.add('ai-panel-open'); document.body.style.overflow='hidden'; }
       });
-    });
-  });
-  _ctaObs.observe(document.documentElement,{childList:true,subtree:true});
-  setTimeout(_patchCta,800);
-  setTimeout(_patchCta,2500);
+      if(cta.parentElement!==document.body) document.body.appendChild(cta);
+    }
+    return cta;
+  }
+  function _ctaMobilePos(cta){
+    if(window.innerWidth>768){
+      cta.style.removeProperty('top'); cta.style.removeProperty('left'); return;
+    }
+    function _vis(el){ return !!el&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().width>0; }
+    var gap=10;
+    /* Use the measured width now that the element is display:flex */
+    var cw=cta.getBoundingClientRect().width||cta.offsetWidth||90;
+    var mobBtn=document.getElementById('mobPreviewBtn');
+    if(_vis(mobBtn)){
+      var br=mobBtn.getBoundingClientRect();
+      var ch=cta.getBoundingClientRect().height||cta.offsetHeight||32;
+      var left=Math.max(br.right+gap, window.innerWidth-cw-16);
+      cta.style.setProperty('left',left+'px','important');
+      cta.style.setProperty('top',(br.top+(br.height-ch)/2)+'px','important');
+      return;
+    }
+    var saveBtn=document.getElementById('mhdrSaveBtn');
+    if(_vis(saveBtn)){
+      var sr=saveBtn.getBoundingClientRect();
+      cta.style.setProperty('left',Math.max(8,sr.left-gap-cw)+'px','important');
+      cta.style.setProperty('top',(sr.top+(sr.height-cta.offsetHeight)/2)+'px','important');
+      return;
+    }
+    var avatar=document.getElementById('mhdrAvatar');
+    if(_vis(avatar)){
+      var ar=avatar.getBoundingClientRect();
+      cta.style.setProperty('left',Math.max(8,ar.left-gap-cw)+'px','important');
+      cta.style.setProperty('top',(ar.top+(ar.height-cta.offsetHeight)/2)+'px','important');
+      return;
+    }
+    /* Last resort: bottom-right so it's always reachable */
+    cta.style.setProperty('bottom','80px','important');
+    cta.style.setProperty('right','16px','important');
+    cta.style.removeProperty('top'); cta.style.removeProperty('left');
+  }
+  function _ctaTick(){
+    var step7=document.getElementById('step7');
+    /* step-content gets class 'active' when visible — the authoritative toggle */
+    var onStep7=step7&&step7.classList.contains('active');
+    var panelOpen=(function(){ var p=document.getElementById('aiChatPanel'); return p&&p.classList.contains('ai-panel-open'); })();
+    var previewOpen=(function(){ var p=document.getElementById('previewModalOverlay'); return p&&p.classList.contains('open'); })();
+    var show=onStep7&&!panelOpen&&!previewOpen;
+    var cta=show?_ensureCta():document.getElementById('aiChatCta');
+    if(!cta) return;
+    if(show){
+      cta.classList.add('ai-cta-visible');
+      _ctaMobilePos(cta);
+    } else {
+      cta.classList.remove('ai-cta-visible');
+    }
+  }
+  setInterval(_ctaTick,300);
+  window.addEventListener('resize',_ctaTick);
+  window.addEventListener('orientationchange',_ctaTick);
 
   /* ── Wire panel ── */
   function _bindPanel(panel){
