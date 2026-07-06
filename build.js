@@ -2,6 +2,14 @@ const fs = require('fs');
 
 let html = fs.readFileSync('deploy-site/index.html', 'utf8');
 
+// Stamp the build id (git commit + UTC build time) so the deployed page can show
+// which build is live — invaluable for telling "latest" from "browser-cached".
+// Netlify exposes the commit SHA via COMMIT_REF.
+const buildId = ((process.env.COMMIT_REF || '').slice(0, 7) || 'local') +
+                ' · ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
+html = html.replace(/__BUILD_ID__/g, buildId);
+console.log('✅ Build id: ' + buildId);
+
 try {
   const JavaScriptObfuscator = require('javascript-obfuscator');
   let count = 0;

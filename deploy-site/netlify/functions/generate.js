@@ -71,12 +71,12 @@ exports.handler = async function(event) {
     // imageBase64: single image (backward compat)
     const images = imageBase64Array || (imageBase64 ? [imageBase64] : []);
     if (!prompt && !images.length) {
-      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Missing prompt' }) };
+      return { statusCode: 400, headers: CORS, body: JSON.stringify({ text: '', error: 'Missing prompt' }) };
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Add ANTHROPIC_API_KEY to your Netlify environment variables, then redeploy' }) };
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: 'Add ANTHROPIC_API_KEY to your Netlify environment variables, then redeploy' }) };
     }
 
     // Vision path: use Sonnet for better image reading accuracy
@@ -121,12 +121,18 @@ exports.handler = async function(event) {
 
     const data = await response.json();
     if (!response.ok) {
-      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ error: data.error?.message || 'API error' }) };
+      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ text: '', error: data.error?.message || 'API error' }) };
     }
 
     const text = data.content?.[0]?.text;
+    // Return only `text` (a plain string). Every client reader falls back to `text`,
+    // so this one shape works for all of them. Do NOT also return a `content` field:
+    // some callers read `(content || text).trim()` / `_extractJSON(content || text)`
+    // (which throw on a non-string) while others read `content[0].text` (which needs an
+    // array) — no single `content` shape satisfies both, so we omit it entirely and let
+    // every caller use `text`.
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
   } catch (err) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: err.message }) };
   }
 }

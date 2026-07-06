@@ -6209,11 +6209,9 @@ function _stopGhostRotation() {
   }
 }
 var _signInInProgress = false;
-var _signInTimer = null;
 var _signingOut = sessionStorage.getItem('_signingOutReload') === '1';
 function _resetSignIn() {
   _signInInProgress = false;
-  if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _hideCloudLoader();
   _renderAuthBtn(_fbUser || null);
 }
@@ -6221,46 +6219,43 @@ function signInWithGoogle() {
   if (!_fbAuth) { showToast('Firebase not configured — see setup instructions in code'); return; }
   if (_signInInProgress) return;
   _signInInProgress = true;
-  _showCloudLoader('Redirecting to Google…');
+  _showCloudLoader('Signing in…');
   var btn = document.getElementById('_authBtn');
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.8';
     btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;"></div><span class="auth-lbl">Signing in…</span>';
   }
-  // Safety: reset after 30s if neither success nor error fires (e.g. popup hung in some browsers)
-  _signInTimer = setTimeout(_resetSignIn, 30000);
   var provider = new firebase.auth.GoogleAuthProvider();
-  var _iosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (_iosDevice) {
-    // On iOS, signInWithPopup opens a new tab; after auth that tab closes and
-    // focus lands on whichever tab was last visible (often the portfolio tab).
-    // Skip popup entirely — redirect keeps the user in the same tab throughout.
+  var _ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var _done = false;
+  var _doRedirect = function() {
+    if (_done) return; _done = true;
     localStorage.setItem('_pendingSignIn', Date.now().toString());
+    _showCloudLoader('Redirecting to Google…');
     _fbAuth.signInWithRedirect(provider);
-  } else {
-    _fbAuth.signInWithPopup(provider).then(function() {
-      if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
-      _showCloudLoader('Signing you in…');
-    }).catch(function(e) {
-      _resetSignIn();
-      if (e.code === 'auth/popup-closed-by-user') return;
-      if (e.code === 'auth/popup-blocked') {
-        localStorage.setItem('_pendingSignIn', Date.now().toString());
-        _fbAuth.signInWithRedirect(provider);
-      } else {
-        showToast('Sign-in error: ' + e.message);
-      }
-    });
-  }
+  };
+  if (_ios) { _doRedirect(); return; }
+  // Desktop: try popup (works in most browsers). Falls back to redirect after 4s
+  // if the popup is blocked, hangs, or throws (e.g. incognito / web-storage-unavailable).
+  var _timer = setTimeout(_doRedirect, 4000);
+  _fbAuth.signInWithPopup(provider).then(function() {
+    if (_done) return; _done = true;
+    clearTimeout(_timer);
+    _showCloudLoader('Signing you in…');
+  }).catch(function(e) {
+    clearTimeout(_timer);
+    if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+      _resetSignIn(); return;
+    }
+    _doRedirect(); // any other error (blocked, web-storage-unavailable, etc.) → redirect
+  });
 }
 function signOutUser() {
   _signingOut = true;
   sessionStorage.setItem('_signingOutReload', '1');
   _pfSavedSlug = null;
   _signInInProgress = false;
-  if (_signInTimer) { clearTimeout(_signInTimer); _signInTimer = null; }
   _showCloudLoader('Signing out…');
   if (_fbAuth) _fbAuth.signOut().then(function() {
     window.location.reload();
@@ -6305,7 +6300,7 @@ function _showCloudLoader(msg) {
   var el = document.createElement('div');
   el.id = '_cloudLoader';
   el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.94);z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .3s;';
-  el.innerHTML = '<div style="width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#16a34a;border-radius:50%;animation:spin .7s linear infinite;"></div><div data-lt style="font-size:0.9rem;color:#374151;font-weight:500;font-family:\'Segoe UI\',system-ui,sans-serif;">' + (msg || 'Restoring your resume…') + '</div>';
+  el.innerHTML = '<div style="width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#16a34a;border-radius:50%;animation:spin .7s linear infinite;"></div><div data-lt style="font-size:0.9rem;color:#374151;font-weight:500;font-family:\'Segoe UI\',system-ui,sans-serif;">' + (msg || 'Restoring your resume — please allow up to 2 minutes') + '</div>';
   document.body.appendChild(el);
 }
 function _hideCloudLoader() {
@@ -6316,9 +6311,17 @@ function _hideCloudLoader() {
 }
 function _loadFromCloud(uid) {
   if (!_fbDb || !uid) return;
-  _showCloudLoader('Restoring your resume…');
+  _showCloudLoader('Restoring your resume — please allow up to 2 minutes');
   _fbDb.collection('users').doc(uid).get().then(function(doc) {
-    if (!doc.exists || !doc.data().resume) { _hideCloudLoader(); goToStep(1, true); return; }
+    if (!doc.exists || !doc.data().resume) {
+      _showCloudLoader('Setting up your account…');
+      _fbDb.collection('users').doc(uid).set(
+        { resume: _collectCloudData(), portfolio: _collectPortfolioData() },
+        { merge: true }
+      ).then(function() { _hideCloudLoader(); goToStep(1, true); })
+       .catch(function() { _hideCloudLoader(); goToStep(1, true); });
+      return;
+    }
     var d = doc.data().resume;
     var pf = doc.data().portfolio;
     if (pf) {
