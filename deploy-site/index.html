@@ -463,6 +463,12 @@
     /* The landing hero/upload bar belongs to the intro (step0) only. Hide on all
        form steps on every viewport — mobile included. */
     #main:has(.step-content.active:not(#step0)) #top-sticky-bar{display:none!important;}
+    /* CSS-only fallback: show CTA on step 7 regardless of JS/class state.
+       Supported: Chrome 105+, Safari 15.4+, Firefox 121+, all modern iOS/Android.
+       Base style duplicated here so it works even before the IIFE injects its CSS. */
+    #aiChatCta{position:fixed;display:none;align-items:center;gap:7px;white-space:nowrap;border-radius:99px;padding:7px 16px 7px 12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 4px 20px rgba(109,40,217,0.55);cursor:pointer;border:none;color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:0.3px;font-family:inherit;z-index:9600;bottom:22px;right:22px;}
+    body:has(#step7.active) #aiChatCta{display:flex!important;position:fixed!important;z-index:9600!important;bottom:22px!important;right:22px!important;top:auto!important;left:auto!important;}
+    @media(max-width:768px){body:has(#step7.active) #aiChatCta{bottom:80px!important;right:16px!important;}}
     #top-sticky-bar .top-cta-row{margin-top:4px;width:100%;justify-content:center;}
     #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
@@ -4736,9 +4742,9 @@ Resume:
   function _ensureCta(){
     var cta=document.getElementById('aiChatCta');
     if(!cta){
-      /* Give obfuscated code up to 2 s to create it; after that, create ourselves */
+      /* Give obfuscated code up to 1 s to create it; after that, create ourselves */
       if(!_CTA_WAITED) _CTA_WAITED=Date.now();
-      if(Date.now()-_CTA_WAITED<2000) return null;
+      if(Date.now()-_CTA_WAITED<1000) return null;
       cta=document.createElement('button');
       cta.id='aiChatCta';
       document.body.appendChild(cta);
@@ -4803,14 +4809,24 @@ Resume:
     if(!cta) return;
     if(show){
       cta.classList.add('ai-cta-visible');
+      /* setProperty with 'important' beats any CSS display:none!important that
+         obfuscated code might have applied via el.style.setProperty(...,'important') */
+      cta.style.setProperty('display','flex','important');
       _ctaMobilePos(cta);
     } else {
       cta.classList.remove('ai-cta-visible');
+      cta.style.removeProperty('display');
     }
   }
   setInterval(_ctaTick,300);
+  _ctaTick(); /* run once immediately */
   window.addEventListener('resize',_ctaTick);
   window.addEventListener('orientationchange',_ctaTick);
+  /* Fire instantly on step class changes rather than waiting for next poll tick */
+  (function(){
+    var s7=document.getElementById('step7');
+    if(s7) new MutationObserver(_ctaTick).observe(s7,{attributes:true,attributeFilter:['class']});
+  })();
 
   /* ── Wire panel ── */
   function _bindPanel(panel){
