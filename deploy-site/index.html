@@ -463,12 +463,6 @@
     /* The landing hero/upload bar belongs to the intro (step0) only. Hide on all
        form steps on every viewport — mobile included. */
     #main:has(.step-content.active:not(#step0)) #top-sticky-bar{display:none!important;}
-    /* CSS-only fallback: show CTA on step 7 regardless of JS/class state.
-       Supported: Chrome 105+, Safari 15.4+, Firefox 121+, all modern iOS/Android.
-       Base style duplicated here so it works even before the IIFE injects its CSS. */
-    #aiChatCta{position:fixed;display:none;align-items:center;gap:7px;white-space:nowrap;border-radius:99px;padding:7px 16px 7px 12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 4px 20px rgba(109,40,217,0.55);cursor:pointer;border:none;color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:0.3px;font-family:inherit;z-index:9600;bottom:22px;right:22px;}
-    body:has(#step7.active) #aiChatCta{display:flex!important;position:fixed!important;z-index:9600!important;bottom:22px!important;right:22px!important;top:auto!important;left:auto!important;}
-    @media(max-width:768px){body:has(#step7.active) #aiChatCta{bottom:80px!important;right:16px!important;}}
     #top-sticky-bar .top-cta-row{margin-top:4px;width:100%;justify-content:center;}
     #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
@@ -4306,10 +4300,7 @@ if ('serviceWorker' in navigator) {
   function _aiTips(out,tp,triggerBtn){
     var text=(out.innerText||out.textContent||'').slice(0,2800);
     var pages=_getPages(out);
-    var prompt='This resume is '+pages+' page'+(pages>1?'s':'')+' but the target is '+tp+' page'+(tp>1?'s':'')+'. Analyse what is taking the most space and give exactly 3 specific, actionable recommendations to reduce it. Each should be concrete and mention an estimated space saving (e.g. "Trim Experience bullets to 3 per role — saves ~0.4pp" or "Remove the Certifications section — saves ~0.2pp"). Output ONLY 3 bullet lines starting with •. No intro.
-
-Resume:
-'+text;
+    var prompt='This resume is '+pages+' page'+(pages>1?'s':'')+' but the target is '+tp+' page'+(tp>1?'s':'')+'. Analyse what is taking the most space and give exactly 3 specific, actionable recommendations to reduce it. Each should be concrete and mention an estimated space saving (e.g. "Trim Experience bullets to 3 per role — saves ~0.4pp" or "Remove the Certifications section — saves ~0.2pp"). Output ONLY 3 bullet lines starting with •. No intro.\n\nResume:\n'+text;
     fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
       .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
       .then(function(result){
@@ -4733,100 +4724,103 @@ Resume:
     pickSection();
   }
 
-  /* ── CTA: unconditional polling — no closure, no race condition ──
-     Every tick: get-or-create #aiChatCta, patch its look once, then sync
-     show/hide and position.  Because we call getElementById each tick we
-     never miss the element regardless of when the obfuscated code creates it. */
-  var _CTA_SVG='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
-  var _CTA_WAITED=0;
-  function _ensureCta(){
-    var cta=document.getElementById('aiChatCta');
-    if(!cta){
-      /* Give obfuscated code up to 1 s to create it; after that, create ourselves */
-      if(!_CTA_WAITED) _CTA_WAITED=Date.now();
-      if(Date.now()-_CTA_WAITED<1000) return null;
-      cta=document.createElement('button');
-      cta.id='aiChatCta';
-      document.body.appendChild(cta);
+  /* ── CTA patch: restyle #aiChatCta once it appears in DOM ── */
+  function _patchCta(){
+    var cta=document.getElementById('aiChatCta'); if(!cta||cta._v3patched) return;
+    cta._v3patched=true;
+    cta.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Refine with AI</span>';
+    /* Move out of the scrollable #main/#step7 ancestry — some mobile browsers mis-render
+       position:fixed descendants of an overflow:auto container, making them drift with
+       the scrolled content instead of staying pinned to the viewport. */
+    if(cta.parentElement!==document.body) document.body.appendChild(cta);
+    /* Sync visibility with step 7 — always show on step 7, hide on other steps */
+    function _syncCta(){
+      var step7=document.getElementById('step7');
+      /* offsetParent===null means hidden (display:none anywhere in ancestor chain) */
+      var onStep7=step7&&step7.offsetParent!==null;
+      var previewOpen=document.getElementById('previewModalOverlay');
+      previewOpen=!!previewOpen&&previewOpen.classList.contains('open');
+      var _pf=document.getElementById('pfOverlay');
+      var pfOpen=!!_pf&&getComputedStyle(_pf).display!=='none';
+      var _pay=document.getElementById('payOverlay');
+      var payOpen=!!_pay&&getComputedStyle(_pay).display!=='none';
+      var _tips=document.getElementById('resumeTips');
+      var tipsOpen=!!_tips&&!_tips.classList.contains('tips-hidden')&&getComputedStyle(_tips).display!=='none';
+      if(onStep7&&!previewOpen&&!pfOpen&&!payOpen&&!tipsOpen) cta.classList.add('ai-cta-visible');
+      else cta.classList.remove('ai-cta-visible');
+      _positionMobileCta();
     }
-    /* One-time patch: replace obfuscated innerHTML with our pill label and move
-       to document.body so position:fixed renders relative to the viewport on mobile */
-    if(!cta._rfaPatch){
-      cta._rfaPatch=true;
-      cta.innerHTML=_CTA_SVG+'<span>Refine with AI</span>';
-      cta.addEventListener('click',function(){
-        var p=document.getElementById('aiChatPanel');
-        if(p){ p.classList.add('ai-panel-open'); document.body.style.overflow='hidden'; }
+    /* On mobile, pin the CTA inline beside the actual measured Preview Resume button
+       rect instead of a hardcoded breakpoint offset — keeps the two pills aligned
+       on the same row across every phone width, not just the ones tested by hand. */
+    function _positionMobileCta(){
+      if(window.innerWidth>768){
+        cta.style.removeProperty('top');
+        cta.style.removeProperty('left');
+        return;
+      }
+      function _visible(el){ return !!el && getComputedStyle(el).display!=='none' && el.getBoundingClientRect().width>0; }
+      var cw=cta.offsetWidth||0,gap=10;
+      /* Under ~520px the compact mob-preview-btn sits in the sticky header —
+         pair the CTA beside it on the same row. */
+      var mobBtn=document.getElementById('mobPreviewBtn');
+      if(_visible(mobBtn)){
+        var br=mobBtn.getBoundingClientRect();
+        var chh=cta.getBoundingClientRect().height||cta.offsetHeight||0;
+        /* Pin to the right edge (mirror the 16px header padding), aligned on
+           the same row as Preview Resume. Never overlap the button on very
+           narrow phones — clamp to just-right-of-it if the screen is too tight. */
+        var left=window.innerWidth-cw-16;
+        var minLeft=br.right+gap;
+        if(left<minLeft) left=minLeft;
+        var top=br.top+(br.height-chh)/2;
+        cta.style.setProperty('left',left+'px','important');
+        cta.style.setProperty('top',top+'px','important');
+        return;
+      }
+      /* 521-768px: mob-preview-btn is hidden here and previewFab is fixed to the
+         bottom-left, which can collide with in-page action buttons that scroll
+         into its footprint on short viewports. Pair with the always-present
+         "Save progress" header button instead — it's pinned in the sticky
+         header, clear of any scrollable content. */
+      var saveBtn=document.getElementById('mhdrSaveBtn');
+      if(_visible(saveBtn)){
+        var sr=saveBtn.getBoundingClientRect();
+        var left2=Math.max(8,sr.left-gap-cw);
+        var top2=sr.top+(sr.height-cta.offsetHeight)/2;
+        cta.style.setProperty('left',left2+'px','important');
+        cta.style.setProperty('top',top2+'px','important');
+        return;
+      }
+      /* Signed-in users: "Save progress" is replaced by the round avatar
+         button (#mhdrAvatar). Pair beside that instead so the CTA never
+         freezes at a stale position once saveBtn disappears. */
+      var avatar=document.getElementById('mhdrAvatar');
+      if(_visible(avatar)){
+        var ar=avatar.getBoundingClientRect();
+        var left3=Math.max(8,ar.left-gap-cw);
+        var top3=ar.top+(ar.height-cta.offsetHeight)/2;
+        cta.style.setProperty('left',left3+'px','important');
+        cta.style.setProperty('top',top3+'px','important');
+      }
+    }
+    window.addEventListener('resize',_positionMobileCta);
+    window.addEventListener('orientationchange',_positionMobileCta);
+    setInterval(_syncCta,300);
+    _syncCta();
+  }
+  var _ctaObs=new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      Array.from(m.addedNodes).forEach(function(n){
+        if(!n||n.nodeType!==1) return;
+        if(n.id==='aiChatCta') _patchCta();
+        else if(n.querySelector) { var c=n.querySelector('#aiChatCta'); if(c) _patchCta(); }
       });
-      if(cta.parentElement!==document.body) document.body.appendChild(cta);
-    }
-    return cta;
-  }
-  function _ctaMobilePos(cta){
-    if(window.innerWidth>768){
-      cta.style.removeProperty('top'); cta.style.removeProperty('left'); return;
-    }
-    function _vis(el){ return !!el&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().width>0; }
-    var gap=10;
-    /* Use the measured width now that the element is display:flex */
-    var cw=cta.getBoundingClientRect().width||cta.offsetWidth||90;
-    var mobBtn=document.getElementById('mobPreviewBtn');
-    if(_vis(mobBtn)){
-      var br=mobBtn.getBoundingClientRect();
-      var ch=cta.getBoundingClientRect().height||cta.offsetHeight||32;
-      var left=Math.max(br.right+gap, window.innerWidth-cw-16);
-      cta.style.setProperty('left',left+'px','important');
-      cta.style.setProperty('top',(br.top+(br.height-ch)/2)+'px','important');
-      return;
-    }
-    var saveBtn=document.getElementById('mhdrSaveBtn');
-    if(_vis(saveBtn)){
-      var sr=saveBtn.getBoundingClientRect();
-      cta.style.setProperty('left',Math.max(8,sr.left-gap-cw)+'px','important');
-      cta.style.setProperty('top',(sr.top+(sr.height-cta.offsetHeight)/2)+'px','important');
-      return;
-    }
-    var avatar=document.getElementById('mhdrAvatar');
-    if(_vis(avatar)){
-      var ar=avatar.getBoundingClientRect();
-      cta.style.setProperty('left',Math.max(8,ar.left-gap-cw)+'px','important');
-      cta.style.setProperty('top',(ar.top+(ar.height-cta.offsetHeight)/2)+'px','important');
-      return;
-    }
-    /* Last resort: bottom-right so it's always reachable */
-    cta.style.setProperty('bottom','80px','important');
-    cta.style.setProperty('right','16px','important');
-    cta.style.removeProperty('top'); cta.style.removeProperty('left');
-  }
-  function _ctaTick(){
-    var step7=document.getElementById('step7');
-    /* step-content gets class 'active' when visible — the authoritative toggle */
-    var onStep7=step7&&step7.classList.contains('active');
-    var panelOpen=(function(){ var p=document.getElementById('aiChatPanel'); return p&&p.classList.contains('ai-panel-open'); })();
-    var previewOpen=(function(){ var p=document.getElementById('previewModalOverlay'); return p&&p.classList.contains('open'); })();
-    var show=onStep7&&!panelOpen&&!previewOpen;
-    var cta=show?_ensureCta():document.getElementById('aiChatCta');
-    if(!cta) return;
-    if(show){
-      cta.classList.add('ai-cta-visible');
-      /* setProperty with 'important' beats any CSS display:none!important that
-         obfuscated code might have applied via el.style.setProperty(...,'important') */
-      cta.style.setProperty('display','flex','important');
-      _ctaMobilePos(cta);
-    } else {
-      cta.classList.remove('ai-cta-visible');
-      cta.style.removeProperty('display');
-    }
-  }
-  setInterval(_ctaTick,300);
-  _ctaTick(); /* run once immediately */
-  window.addEventListener('resize',_ctaTick);
-  window.addEventListener('orientationchange',_ctaTick);
-  /* Fire instantly on step class changes rather than waiting for next poll tick */
-  (function(){
-    var s7=document.getElementById('step7');
-    if(s7) new MutationObserver(_ctaTick).observe(s7,{attributes:true,attributeFilter:['class']});
-  })();
+    });
+  });
+  _ctaObs.observe(document.documentElement,{childList:true,subtree:true});
+  setTimeout(_patchCta,800);
+  setTimeout(_patchCta,2500);
 
   /* ── Wire panel ── */
   function _bindPanel(panel){
