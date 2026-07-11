@@ -623,9 +623,12 @@
     #_authDropdown .drop-savenow,#_authDropdown .drop-signout{position:sticky;background:#fff;z-index:3;}
     #_authDropdown .drop-signout{bottom:0;}
     #_authDropdown .drop-savenow{bottom:35px;border-top:1px solid rgba(0,0,0,0.07);}
-    .pg-break{position:absolute;left:0;right:0;height:0;border-top:2px dashed rgba(120,160,190,0.65);pointer-events:none;z-index:3;}
+    /* Number each page break in the preview: counter resets at 1 on the modal body and
+       increments per break, so the first break (start of page 2) shows 2, next 3, etc. */
+    #previewModalBody{counter-reset:r4uPg 1;}
+    .pg-break{position:absolute;left:0;right:0;height:0;border-top:2px dashed rgba(120,160,190,0.65);pointer-events:none;z-index:3;counter-increment:r4uPg;}
     .pg-break::before{display:none;}
-    .pg-break::after{display:none;}
+    .pg-break::after{content:counter(r4uPg);position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#7a92a8;color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:11px;font-weight:700;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,0.25);}
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
