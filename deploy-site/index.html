@@ -597,7 +597,11 @@
        toolbar-hidden height). vh is the fallback for browsers without svh. */
     #_authDropdown{position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:9999;min-width:240px;max-width:300px;max-height:calc(100vh - 80px);max-height:calc(100svh - 80px);display:flex;flex-direction:column;overflow:hidden;}
     #_authDropdown>*{flex:0 0 auto;}
-    #_authDropdown #_versionListItems{flex:1 1 auto;min-height:44px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    /* The versions live in their own bounded, scrollable "folder": it never grows past
+       ~(screen − room for header/CTAs), so Save now / Sign out always sit below it and
+       stay visible. Explicit max-height (svh, with vh fallback) means this holds even if
+       the dropdown's own height cap misbehaves on iOS. */
+    #_authDropdown #_versionListItems{flex:1 1 auto;min-height:90px;max-height:calc(100vh - 340px);max-height:calc(100svh - 340px);overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(0,0,0,0.05);border-bottom:1px solid rgba(0,0,0,0.05);}
     #_authDropdown button{display:block;width:100%;padding:10px 16px;border:none;background:none;text-align:left;font-size:0.84rem;cursor:pointer;font-family:inherit;color:var(--text);transition:background .15s;}
     #_authDropdown button:hover{background:#f5f5f3;}
     #_authDropdown .drop-signout{color:#dc2626!important;font-weight:500;}
