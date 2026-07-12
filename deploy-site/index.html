@@ -591,7 +591,17 @@
     .btn-dl-pdf{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);}
     .btn-dl-pdf:hover{background:linear-gradient(135deg,#d97706,#dc2626);transform:translateY(-1px);box-shadow:0 5px 16px rgba(245,158,11,0.38);}
     .resume-output-card{background:var(--white);color:#111;border-radius:4px;padding:0;min-height:200px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-top:14px;margin-bottom:36px;overflow:hidden;scroll-margin-top:20px;position:relative;}
-    #_authDropdown{position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:9999;overflow:hidden;min-width:240px;max-width:300px;max-height:calc(100vh - 80px);overflow-y:auto;}
+    /* Flex column so the version list is the ONLY scrolling region and the header +
+       Save/Sign-out stay fixed and always visible. Cap with svh (smallest viewport) so
+       it can never exceed the visible screen on iOS (where 100vh is the taller
+       toolbar-hidden height). vh is the fallback for browsers without svh. */
+    #_authDropdown{position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:9999;min-width:240px;max-width:300px;max-height:calc(100vh - 80px);max-height:calc(100svh - 80px);display:flex;flex-direction:column;overflow:hidden;}
+    #_authDropdown>*{flex:0 0 auto;}
+    /* The versions live in their own bounded, scrollable "folder": it never grows past
+       ~(screen − room for header/CTAs), so Save now / Sign out always sit below it and
+       stay visible. Explicit max-height (svh, with vh fallback) means this holds even if
+       the dropdown's own height cap misbehaves on iOS. */
+    #_authDropdown #_versionListItems{flex:1 1 auto;min-height:90px;max-height:calc(100vh - 340px);max-height:calc(100svh - 340px);overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(0,0,0,0.05);border-bottom:1px solid rgba(0,0,0,0.05);}
     #_authDropdown button{display:block;width:100%;padding:10px 16px;border:none;background:none;text-align:left;font-size:0.84rem;cursor:pointer;font-family:inherit;color:var(--text);transition:background .15s;}
     #_authDropdown button:hover{background:#f5f5f3;}
     #_authDropdown .drop-signout{color:#dc2626!important;font-weight:500;}
@@ -607,9 +617,18 @@
     #_authDropdown .drop-ver-item:hover .drop-ver-menu{opacity:1;}
     #_authDropdown .drop-savenow{display:flex!important;align-items:center;gap:8px;color:var(--accent)!important;font-weight:600!important;padding:10px 16px!important;}
     #_authDropdown .drop-savenow:hover{background:rgba(217,119,6,0.06)!important;}
-    .pg-break{position:absolute;left:0;right:0;height:0;border-top:2px dashed rgba(120,160,190,0.65);pointer-events:none;z-index:3;}
+    /* Pin the action buttons to the bottom of the dropdown so a long saved-versions
+       list can never push "Save now & sign out" / "Sign out" off-screen. The list
+       scrolls above them; both stay visible at any version count. */
+    #_authDropdown .drop-savenow,#_authDropdown .drop-signout{position:sticky;background:#fff;z-index:3;}
+    #_authDropdown .drop-signout{bottom:0;}
+    #_authDropdown .drop-savenow{bottom:35px;border-top:1px solid rgba(0,0,0,0.07);}
+    /* Number each page break in the preview: counter resets at 1 on the modal body and
+       increments per break, so the first break (start of page 2) shows 2, next 3, etc. */
+    #previewModalBody{counter-reset:r4uPg 1;}
+    .pg-break{position:absolute;left:0;right:0;height:0;border-top:2px dashed rgba(120,160,190,0.65);pointer-events:none;z-index:3;counter-increment:r4uPg;}
     .pg-break::before{display:none;}
-    .pg-break::after{display:none;}
+    .pg-break::after{content:counter(r4uPg);position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#7a92a8;color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:11px;font-weight:700;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,0.25);}
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
