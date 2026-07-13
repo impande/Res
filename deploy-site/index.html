@@ -5808,6 +5808,31 @@ if ('serviceWorker' in navigator) {
     }catch(e){}
   }
   setTimeout(_restoreLocalDraft,3500);
+  /* Mark the resume dirty on ANY change to the output card — inline text edits,
+     template swaps, and Refine-with-AI tweaks (font/spacing/bullets) — so the
+     auto-save interval backs them up. Independent of markNeedsRegen so it does not
+     depend on the touch-scroll / regen-badge guards. Skipped while a saved version
+     is being applied, and only after a real resume exists. */
+  function _watchResumeDirty(){
+    var ro=document.getElementById('resumeOutput');
+    if(!ro){ setTimeout(_watchResumeDirty,600); return; }
+    try{
+      new MutationObserver(function(){
+        if(!window._applyingVersion && window.lastResumeData) window._versionDirty=true;
+      }).observe(ro,{childList:true,subtree:true,characterData:true,attributes:true});
+    }catch(e){}
+  }
+  _watchResumeDirty();
+  /* selectTemplate changes only currentTemplate (no card mutation), so the observer
+     can't see it — wrap it so a template-only change still queues an auto-save. */
+  function _hookTemplateDirty(){
+    var f=window.selectTemplate;
+    if(typeof f==='function'&&!f._r4uDirty){
+      window.selectTemplate=function(){ try{ if(!window._applyingVersion&&window.lastResumeData) window._versionDirty=true; }catch(e){} return f.apply(this,arguments); };
+      window.selectTemplate._r4uDirty=true;
+    }
+  }
+  _hookTemplateDirty(); setTimeout(_hookTemplateDirty,2000);
 })();
 </script>
 <script>
