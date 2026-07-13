@@ -6,6 +6,17 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+
+  <!-- ── Resource hints: warm up the origins the app connects to (Firebase SDK
+       host + auth/firestore APIs) so the deferred SDKs and returning-user
+       account restore aren't waiting on cold DNS/TLS. ─────────────────────── -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <link rel="dns-prefetch" href="https://securetoken.googleapis.com">
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
   <title>Resume For You – Free AI Resume &amp; Portfolio Builder | resume4u.help</title>
 
   <!-- ── SEO Core ──────────────────────────────────────────────────────── -->
