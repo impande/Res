@@ -5766,7 +5766,11 @@ if ('serviceWorker' in navigator) {
         }
       }
       var ro=document.getElementById('resumeOutput');
-      if(ro){ var a4=ro.querySelector('.resume-a4-page'); if(a4&&a4.innerHTML.trim()){ localStorage.setItem('_lastResumeOutput',a4.outerHTML); localStorage.setItem('_r4uSnapTime',''+Date.now()); } }
+      if(ro){ var a4=ro.querySelector('.resume-a4-page'); if(a4&&a4.innerHTML.trim()){ localStorage.setItem('_lastResumeOutput',a4.outerHTML); localStorage.setItem('_r4uSnapTime',''+Date.now());
+        /* Also snapshot the full resume DATA (summary/bullets/etc.) so a reload can restore
+           the app's real lastResumeData — needed for the ATS score and Refine-with-AI to work. */
+        try{ if(typeof window._collectCloudData==='function'){ var _rd=window._collectCloudData(); if(_rd&&(_rd.summary||(_rd.experience&&_rd.experience.length))) localStorage.setItem('_r4uResumeData',JSON.stringify(_rd)); } }catch(_e3){}
+      } }
     }catch(e){}
     /* Signed-in: best-effort push the latest to the cloud on unload so a quick reload
        doesn't lose edits made since the last auto-save tick. localStorage above is the
@@ -5796,12 +5800,18 @@ if ('serviceWorker' in navigator) {
       if(!t||(Date.now()-t)>1800000) return;              /* ignore drafts older than 30 min */
       var ro=document.getElementById('resumeOutput');
       if(!ro||ro.querySelector('.resume-a4-page')) return; /* a resume already loaded — leave it */
+      /* Prefer restoring the full resume DATA through _applyCloudDoc: it sets the app's real
+         (closure) lastResumeData, re-renders and recomputes the ATS score, so both the score
+         and Refine-with-AI (which read lastResumeData) work. Falls back to card HTML + form. */
+      var rd=localStorage.getItem('_r4uResumeData');
+      if(rd&&typeof window._applyCloudDoc==='function'){
+        try{ var data=JSON.parse(rd); if(data&&(data.summary||(data.experience&&data.experience.length))){ window._applyCloudDoc(null,data,{template:data.template}); if(typeof goToStep==='function'){ try{ goToStep(7); }catch(e){} } return; } }catch(e){}
+      }
       var draft=localStorage.getItem('_preSignInDraft');
       var cardHtml=localStorage.getItem('_lastResumeOutput');
       if(!draft&&!cardHtml) return;
-      if(draft&&typeof populateFormFromParsed==='function'){ try{ var d=JSON.parse(draft); populateFormFromParsed(d); window.lastResumeData=d; }catch(e){} }
+      if(draft&&typeof populateFormFromParsed==='function'){ try{ var d=JSON.parse(draft); populateFormFromParsed(d); }catch(e){} }
       if(cardHtml){ ro.className='resume-output-card'; ro.innerHTML=cardHtml; }
-      else if(window.lastResumeData&&typeof renderOutput==='function'){ renderOutput(window.lastResumeData); }
       if(typeof goToStep==='function'){ try{ goToStep(7); }catch(e){} }
       var dl=document.getElementById('dlActions'); if(dl) dl.style.display='';
       if(typeof _triggerOffscreenPageCount==='function'){ try{ _triggerOffscreenPageCount(); }catch(e){} }
