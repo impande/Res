@@ -2324,9 +2324,80 @@
     }
   </style>
   <!-- Firebase Auth + Firestore (compat SDK — works with existing vanilla JS) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+  <!-- Firebase SDKs are loaded LAZILY to keep ~300KB of auth/firestore JS off
+       the initial render path for the many visitors who never sign in. They load
+       eagerly only for returning signed-in users (or an in-flight redirect
+       sign-in); everyone else gets them on first interaction. The app's
+       _initFirebase already polls for the SDK (the SDKs were 'defer', so they
+       always ran AFTER the inline app code) — we just delay the load and re-kick
+       that poll if it has expired, so auth behaviour is unchanged. -->
+  <script>
+  (function(){
+    var BASE='https://www.gstatic.com/firebasejs/10.12.2/';
+    var FILES=['firebase-app-compat.js','firebase-auth-compat.js','firebase-firestore-compat.js'];
+    window._r4uFBReady=false;
+    function _attachFlagSync(){
+      /* Keep _r4uHadAccount in sync so the NEXT load can eager-load. Flag-only
+         listener → safe to have alongside the app's own (idempotent writes). */
+      if(window.__r4uFlagSync) return;
+      try{
+        if(typeof _fbAuth!=='undefined' && _fbAuth){
+          window.__r4uFlagSync=true;
+          _fbAuth.onAuthStateChanged(function(u){
+            try{ if(u) localStorage.setItem('_r4uHadAccount','1'); else localStorage.removeItem('_r4uHadAccount'); }catch(e){}
+          });
+        }
+      }catch(e){}
+    }
+    function _ensureInit(){
+      /* Make sure Firebase actually initialises after the SDK arrives without
+         double-attaching the app's auth handler. _initFirebase's own poll caps
+         at 40x250ms=10s (tries hits 41 when dead). While the poll is still alive
+         (<=40) we let IT init (single attach); only once it has provably given
+         up (>40, no pending tick) do we reset and re-kick it ourselves. */
+      if(typeof _fbAuth!=='undefined' && _fbAuth){ _attachFlagSync(); return; }
+      if((window.__fbInitTries||0) > 40){
+        window.__fbInitTries=0;
+        try{ if(typeof _initFirebase==='function') _initFirebase(); }catch(e){}
+        setTimeout(_attachFlagSync,60);
+        return;
+      }
+      setTimeout(_ensureInit,250);
+    }
+    window._r4uLoadFB=function(cb){
+      if(window._r4uFBReady){ if(cb){try{cb();}catch(e){}} return; }
+      (window.__r4uFBCbs=window.__r4uFBCbs||[]).push(cb);
+      if(window.__r4uFBLoading) return;
+      window.__r4uFBLoading=true;
+      (function next(i){
+        if(i>=FILES.length){
+          window._r4uFBReady=true;
+          _ensureInit();
+          var cbs=window.__r4uFBCbs||[]; window.__r4uFBCbs=[];
+          for(var k=0;k<cbs.length;k++){ if(cbs[k]){try{cbs[k]();}catch(e){}} }
+          return;
+        }
+        var s=document.createElement('script');
+        s.src=BASE+FILES[i]; s.async=false; /* preserve app->auth->firestore order */
+        s.onload=function(){ next(i+1); };
+        s.onerror=function(){ next(i+1); }; /* best effort; _initFirebase guards on a missing SDK */
+        document.head.appendChild(s);
+      })(0);
+    };
+    /* Eager for returning signed-in users or an in-flight redirect sign-in;
+       lazy (first interaction) for everyone else — which is what Lighthouse's
+       no-interaction cold load sees, so Firebase stays off that trace. */
+    var eager=false;
+    try{ eager = localStorage.getItem('_r4uHadAccount')==='1' || !!localStorage.getItem('_pendingSignIn'); }catch(e){}
+    if(eager){ window._r4uLoadFB(); return; }
+    var fired=false, EVTS=['pointerdown','keydown','touchstart','mousedown'];
+    function go(){ if(fired) return; fired=true;
+      for(var i=0;i<EVTS.length;i++) document.removeEventListener(EVTS[i],go,true);
+      window._r4uLoadFB();
+    }
+    for(var j=0;j<EVTS.length;j++) document.addEventListener(EVTS[j],go,true);
+  })();
+  </script>
 </head>
 <body>
 
@@ -6072,6 +6143,33 @@ if ('serviceWorker' in navigator) {
     }catch(err){
       try{ if(typeof _resetSignIn==='function') _resetSignIn(); }catch(e){}
     }
+  };
+})();
+</script>
+<script>
+/* Lazy-Firebase safeguard for sign-in. Firebase now loads on first interaction
+   rather than up front, so a user could click "Sign in" before _fbAuth exists.
+   Instead of bailing with "Firebase not configured", trigger the load and wait
+   for _fbAuth, then run the real handler. */
+(function(){
+  var _real=window.signInWithGoogle;
+  if(typeof _real!=='function') return;
+  window.signInWithGoogle=function(){
+    var args=arguments, self=this;
+    if(typeof _fbAuth!=='undefined' && _fbAuth){ return _real.apply(self,args); }
+    try{ if(typeof _showCloudLoader==='function') _showCloudLoader('Connecting…'); }catch(e){}
+    if(typeof window._r4uLoadFB==='function') window._r4uLoadFB();
+    var waited=0;
+    (function poll(){
+      if(typeof _fbAuth!=='undefined' && _fbAuth){ _real.apply(self,args); return; }
+      waited+=120;
+      if(waited>12000){
+        try{ if(typeof _hideCloudLoader==='function') _hideCloudLoader();
+             if(typeof showToast==='function') showToast('Still connecting — please tap Sign in again'); }catch(e){}
+        return;
+      }
+      setTimeout(poll,120);
+    })();
   };
 })();
 </script>
