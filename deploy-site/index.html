@@ -4395,11 +4395,17 @@ if ('serviceWorker' in navigator) {
     function _updMeter(){
       var el2=out.querySelector('.resume-a4-page')||out;
       var ratio=el2.scrollHeight/(tp*A4H);
-      var color=ratio<=1?'#059669':(ratio<=1.12?'#d97706':'#dc2626');
+      /* Colour/✓ must agree with the printed page count (_getPages → _measurePages,
+         normalised to 794px A4 width), NOT the on-screen card height. The on-screen
+         card shrinks below 794px (max-width:100%) so it renders taller, which used to
+         flip the meter to amber/red even when the resume already fit the target page
+         count. Drive the state off n<=tp so "2 / 2 pages ✓" is always green. */
+      var n=_getPages(out);
+      var within=n<=tp;
+      var color=within?'#059669':(ratio<=1.12?'#d97706':'#dc2626');
       meterFill.style.width=Math.min(100,Math.round(ratio*100))+'%';
       meterFill.style.background=color;
-      var n=_getPages(out);
-      meterLabel.innerHTML='<span style="color:var(--muted)">Page usage</span><span style="color:'+color+';font-weight:800">'+n+' / '+tp+' page'+(tp>1?'s':'')+( ratio<=1?' ✓':'')+'</span>';
+      meterLabel.innerHTML='<span style="color:var(--muted)">Page usage</span><span style="color:'+color+';font-weight:800">'+n+' / '+tp+' page'+(tp>1?'s':'')+(within?' ✓':'')+'</span>';
     }
     _updMeter();
 
