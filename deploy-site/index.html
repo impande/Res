@@ -5766,7 +5766,7 @@ if ('serviceWorker' in navigator) {
         }
       }
       var ro=document.getElementById('resumeOutput');
-      if(ro){ var a4=ro.querySelector('.resume-a4-page'); if(a4&&a4.innerHTML.trim()) localStorage.setItem('_lastResumeOutput',a4.outerHTML); }
+      if(ro){ var a4=ro.querySelector('.resume-a4-page'); if(a4&&a4.innerHTML.trim()){ localStorage.setItem('_lastResumeOutput',a4.outerHTML); localStorage.setItem('_r4uSnapTime',''+Date.now()); } }
     }catch(e){}
     /* Signed-in: best-effort push the latest to the cloud on unload so a quick reload
        doesn't lose edits made since the last auto-save tick. localStorage above is the
@@ -5785,6 +5785,29 @@ if ('serviceWorker' in navigator) {
     window._applyCloudDoc._snapWrapped=true;
   }
   _wrapSnap();
+  /* Reliable reload recovery: if the app comes up with NO resume on screen — a
+     signed-in user whose latest edits never reached the cloud, or an empty cloud
+     for a brand-new account — restore the last resume _snap captured to
+     localStorage so a reload doesn't lose it. Runs after cloud load has had time
+     to settle and only fills an empty resume area; never overrides one that loaded. */
+  function _restoreLocalDraft(){
+    try{
+      var t=parseInt(localStorage.getItem('_r4uSnapTime')||'0',10);
+      if(!t||(Date.now()-t)>1800000) return;              /* ignore drafts older than 30 min */
+      var ro=document.getElementById('resumeOutput');
+      if(!ro||ro.querySelector('.resume-a4-page')) return; /* a resume already loaded — leave it */
+      var draft=localStorage.getItem('_preSignInDraft');
+      var cardHtml=localStorage.getItem('_lastResumeOutput');
+      if(!draft&&!cardHtml) return;
+      if(draft&&typeof populateFormFromParsed==='function'){ try{ var d=JSON.parse(draft); populateFormFromParsed(d); window.lastResumeData=d; }catch(e){} }
+      if(cardHtml){ ro.className='resume-output-card'; ro.innerHTML=cardHtml; }
+      else if(window.lastResumeData&&typeof renderOutput==='function'){ renderOutput(window.lastResumeData); }
+      if(typeof goToStep==='function'){ try{ goToStep(7); }catch(e){} }
+      var dl=document.getElementById('dlActions'); if(dl) dl.style.display='';
+      if(typeof _triggerOffscreenPageCount==='function'){ try{ _triggerOffscreenPageCount(); }catch(e){} }
+    }catch(e){}
+  }
+  setTimeout(_restoreLocalDraft,3500);
 })();
 </script>
 <script>
