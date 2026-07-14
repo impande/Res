@@ -6198,53 +6198,89 @@ if ('serviceWorker' in navigator) {
   var REVKEY='_r4uRev';
   window.__r4uRev = (typeof window.__r4uRev==='number') ? window.__r4uRev : null; // base rev this device holds
   window.__r4uConflict = false;
+  window.__r4uEdited = window.__r4uEdited || false;   // did the USER change something on THIS device since the last save?
+
+  /* Arm the edit flag on genuine user input only. An IDLE device (one that just
+     loaded the resume and sits there) never arms it, so its 15s autosave writes
+     nothing — it can't advance the shared revision or clobber the other device's
+     edit. Load-time re-renders aren't user input, so they don't arm it. */
+  function _armEdit(){ window.__r4uEdited=!![]; }
+  ['input','change'].forEach(function(ev){ document.addEventListener(ev,function(e){ try{ var t=e&&e.target; if(!t) return; var tag=t.tagName; if(t.isContentEditable||tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') _armEdit(); }catch(_e){} },!![]); });
+  /* Template switch changes content without firing input → arm it too. */
+  (function wrapTpl(tries){ var f=window.selectTemplate; if(typeof f==='function'&&!f.__r4uEd){ window.selectTemplate=function(){ _armEdit(); return f.apply(this,arguments); }; window.selectTemplate.__r4uEd=!![]; return; } if(tries<100) setTimeout(function(){ wrapTpl(tries+1); },100); })(0);
 
   function _uid(){ try{ return (window._fbUser&&window._fbUser.uid)||null; }catch(e){ return null; } }
-  function _mainRef(){ try{ var u=_uid(); return (window._fbDb&&u)?_fbDb.collection('users').doc(u):null; }catch(e){ return null; } }
-  function _readRev(){
-    var r=_mainRef(); if(!r) return Promise.resolve(null);
-    try{ return r.get().then(function(s){ var d=s&&s.exists?s.data():null; return (d&&typeof d[REVKEY]==='number')?d[REVKEY]:0; }).catch(function(){ return null; }); }
-    catch(e){ return Promise.resolve(null); }
-  }
-  function _stampRev(rev){ var r=_mainRef(); if(!r) return; try{ var o={}; o[REVKEY]=rev; r.set(o,{merge:!![]}); }catch(e){} }
+  function _userRef(){ try{ var u=_uid(); return (window._fbDb&&u)?_fbDb.collection('users').doc(u):null; }catch(e){ return null; } }
+  function _stampRev(rev){ var r=_userRef(); if(!r) return; try{ var o={}; o[REVKEY]=rev; r.set(o,{merge:!![]}); }catch(e){} }
   function _warnOnce(){
-    if(window.__r4uConflictShown) return; window.__r4uConflictShown=true;
+    if(window.__r4uConflictShown) return; window.__r4uConflictShown=!![];
     try{ if(typeof showToast==='function') showToast('⚠️ This resume was updated on another device — reload to get the latest','info'); }catch(e){}
   }
-  function _refresh(){ try{ var u=_uid(); if(u&&typeof window._loadFromCloud==='function') window._loadFromCloud(u); }catch(e){} }
 
-  /* Initialise the base rev from the cloud once auth resolves, so the first
-     autosave doesn't mistake pre-existing cloud data for a remote change. */
+  /* Read the account's current revision from the main doc. Best-effort:
+     resolves {rev:null} on any failure so a save is never blocked. */
+  function _readState(){
+    var r=_userRef(); if(!r) return Promise.resolve(null);
+    try{
+      return r.get().then(function(s){ var d=s&&s.exists?s.data():null; return {rev:(d&&typeof d[REVKEY]==='number')?d[REVKEY]:0}; })['catch'](function(){ return null; });
+    }catch(e){ return Promise.resolve(null); }
+  }
+
+  /* Seed the base rev from the cloud shortly after auth, so the conflict check
+     compares against the rev this device actually loaded at. */
   (function initRev(tries){
     if(window.__r4uRev!==null) return;
-    if(_uid()){ _readRev().then(function(rev){ if(window.__r4uRev===null) window.__r4uRev=(rev==null?0:rev); }); return; }
+    var r=_userRef();
+    if(r){ r.get().then(function(s){ var d=s&&s.exists?s.data():null; if(window.__r4uRev===null) window.__r4uRev=(d&&typeof d[REVKEY]==='number')?d[REVKEY]:0; })['catch'](function(){}); return; }
     if(tries<200) setTimeout(function(){ initRev(tries+1); },100);
   })(0);
 
-  function _guard(name){
-    var orig=window[name];
+  /* Per tick the autosave calls _saveToCloud (main doc) then _saveCurrentVersion
+     (version doc) for the SAME change. The main-doc save makes ONE decision for
+     the tick — 'write' (we changed something, no remote conflict), 'skip' (our
+     content already matches the cloud → idle device, don't touch anything), or
+     'conflict' (another device advanced the account). The version save then just
+     FOLLOWS that decision. This is what makes it safe: the two writes never race
+     on the shared revision, an idle device writes nothing (so it can't advance
+     the rev or clobber the editor), and a real remote change is caught once. */
+  function _guardMain(){
+    var orig=window._saveToCloud;
     if(typeof orig!=='function'||orig.__r4uGuarded) return false;
-    window[name]=function(){
+    window._saveToCloud=function(){
       var args=arguments, self=this;
-      if(window.__r4uConflict) return;                              // paused after a real conflict — wait for reload
-      if(window.__r4uRev===null || !_mainRef()) return orig.apply(self,args); // not ready to guard → behave as before
-      _readRev().then(function(cloudRev){
-        if(cloudRev==null){ orig.apply(self,args); return; }        // couldn't read → don't block saving
-        if(cloudRev > window.__r4uRev){                             // cloud advanced under us
-          if(window._versionDirty){ window.__r4uConflict=!![]; _warnOnce(); return; } // keep local edits, pause
-          window.__r4uRev=cloudRev; _refresh(); return;             // no local edits → adopt newer
-        }
-        var newRev=Math.max(window.__r4uRev,cloudRev)+1;
+      if(window.__r4uConflict){ window.__r4uGate=Promise.resolve('conflict'); return; } // paused after a real conflict
+      if(!window.__r4uEdited){ window.__r4uGate=Promise.resolve('skip'); return; }       // idle device → write nothing
+      window.__r4uGate=_readState(null).then(function(st){
+        if(st==null){ orig.apply(self,args); window.__r4uEdited=![]; return 'write'; }   // couldn't read → save anyway
+        if(window.__r4uRev===null) window.__r4uRev=st.rev;          // late base init from cloud
+        if(st.rev > window.__r4uRev){ window.__r4uConflict=!![]; _warnOnce(); return 'conflict'; } // another device advanced → keep our edits, warn, pause
+        var newRev=Math.max(window.__r4uRev,st.rev)+1;
         window.__r4uRev=newRev;
-        orig.apply(self,args);                                      // perform the real write
-        _stampRev(newRev);                                          // publish our rev for other devices
-      })['catch'](function(){ orig.apply(self,args); });            // any error → don't block saving
+        orig.apply(self,args);                                      // write the main doc
+        _stampRev(newRev);                                          // publish our rev
+        window.__r4uEdited=![];                                     // our edits are saved
+        return 'write';
+      })['catch'](function(){ orig.apply(self,args); window.__r4uEdited=![]; return 'write'; });
     };
-    window[name].__r4uGuarded=!![];
+    window._saveToCloud.__r4uGuarded=!![];
+    return true;
+  }
+  function _guardVersion(){
+    var orig=window._saveCurrentVersion;
+    if(typeof orig!=='function'||orig.__r4uGuarded) return false;
+    window._saveCurrentVersion=function(){
+      var args=arguments, self=this;
+      if(window.__r4uConflict) return;
+      var gate=window.__r4uGate;                                    // this tick's decision from _saveToCloud
+      function run(decision){ if(window.__r4uConflict) return; if(decision==='write') orig.apply(self,args); } // follow main's call
+      if(gate&&typeof gate.then==='function') gate.then(run)['catch'](function(){ run('write'); });
+      else run('write');                                           // no gate (shouldn't happen) → best effort
+    };
+    window._saveCurrentVersion.__r4uGuarded=!![];
     return true;
   }
   (function wrapAll(tries){
-    var a=_guard('_saveToCloud'), b=_guard('_saveCurrentVersion');
+    var a=_guardMain(), b=_guardVersion();
     if((a&&b)||tries>100) return;
     setTimeout(function(){ wrapAll(tries+1); },100);
   })(0);
