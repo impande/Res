@@ -6181,6 +6181,75 @@ if ('serviceWorker' in navigator) {
   };
 })();
 </script>
+<script>
+/* ── Multi-device safety: optimistic-concurrency guard ──────────────────────
+   Two devices signed into one account share the same cloud docs and each
+   autosaves every 15s with last-write-wins — so an idle/stale device can
+   overwrite a fresh edit made on the other device. Stamp every account write
+   with a monotonically increasing _r4uRev on the user's main doc, and before
+   any overwrite refuse to write when the cloud is newer than what THIS device
+   last synced:
+     • no local edits → silently pull the newer copy (refresh)
+     • local edits    → keep them, warn once, and pause autosave until reload
+   so a concurrent edit is never silently clobbered. Reads/writes are best
+   effort: if anything is unavailable we fall back to the original save (never
+   block a legitimate save). */
+(function(){
+  var REVKEY='_r4uRev';
+  window.__r4uRev = (typeof window.__r4uRev==='number') ? window.__r4uRev : null; // base rev this device holds
+  window.__r4uConflict = false;
+
+  function _uid(){ try{ return (window._fbUser&&window._fbUser.uid)||null; }catch(e){ return null; } }
+  function _mainRef(){ try{ var u=_uid(); return (window._fbDb&&u)?_fbDb.collection('users').doc(u):null; }catch(e){ return null; } }
+  function _readRev(){
+    var r=_mainRef(); if(!r) return Promise.resolve(null);
+    try{ return r.get().then(function(s){ var d=s&&s.exists?s.data():null; return (d&&typeof d[REVKEY]==='number')?d[REVKEY]:0; }).catch(function(){ return null; }); }
+    catch(e){ return Promise.resolve(null); }
+  }
+  function _stampRev(rev){ var r=_mainRef(); if(!r) return; try{ var o={}; o[REVKEY]=rev; r.set(o,{merge:!![]}); }catch(e){} }
+  function _warnOnce(){
+    if(window.__r4uConflictShown) return; window.__r4uConflictShown=true;
+    try{ if(typeof showToast==='function') showToast('⚠️ This resume was updated on another device — reload to get the latest','info'); }catch(e){}
+  }
+  function _refresh(){ try{ var u=_uid(); if(u&&typeof window._loadFromCloud==='function') window._loadFromCloud(u); }catch(e){} }
+
+  /* Initialise the base rev from the cloud once auth resolves, so the first
+     autosave doesn't mistake pre-existing cloud data for a remote change. */
+  (function initRev(tries){
+    if(window.__r4uRev!==null) return;
+    if(_uid()){ _readRev().then(function(rev){ if(window.__r4uRev===null) window.__r4uRev=(rev==null?0:rev); }); return; }
+    if(tries<200) setTimeout(function(){ initRev(tries+1); },100);
+  })(0);
+
+  function _guard(name){
+    var orig=window[name];
+    if(typeof orig!=='function'||orig.__r4uGuarded) return false;
+    window[name]=function(){
+      var args=arguments, self=this;
+      if(window.__r4uConflict) return;                              // paused after a real conflict — wait for reload
+      if(window.__r4uRev===null || !_mainRef()) return orig.apply(self,args); // not ready to guard → behave as before
+      _readRev().then(function(cloudRev){
+        if(cloudRev==null){ orig.apply(self,args); return; }        // couldn't read → don't block saving
+        if(cloudRev > window.__r4uRev){                             // cloud advanced under us
+          if(window._versionDirty){ window.__r4uConflict=!![]; _warnOnce(); return; } // keep local edits, pause
+          window.__r4uRev=cloudRev; _refresh(); return;             // no local edits → adopt newer
+        }
+        var newRev=Math.max(window.__r4uRev,cloudRev)+1;
+        window.__r4uRev=newRev;
+        orig.apply(self,args);                                      // perform the real write
+        _stampRev(newRev);                                          // publish our rev for other devices
+      })['catch'](function(){ orig.apply(self,args); });            // any error → don't block saving
+    };
+    window[name].__r4uGuarded=!![];
+    return true;
+  }
+  (function wrapAll(tries){
+    var a=_guard('_saveToCloud'), b=_guard('_saveCurrentVersion');
+    if((a&&b)||tries>100) return;
+    setTimeout(function(){ wrapAll(tries+1); },100);
+  })(0);
+})();
+</script>
 <!-- Step-1 profile photo crop editor -->
 <script>
 (function(){
