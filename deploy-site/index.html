@@ -2384,26 +2384,15 @@
         document.head.appendChild(s);
       })(0);
     };
-    /* Eager whenever the visitor has anything to protect — a prior sign-in, an
-       in-flight redirect sign-in, or ANY saved resume/draft in localStorage — so
-       the signed-in cloud load (_loadFromCloud) resolves up front, BEFORE the
-       user starts editing. If it loaded lazily on first interaction, that load
-       would land in the middle of an edit and overwrite the user's in-progress
-       work with the cloud copy. A genuine cold visitor (empty localStorage — the
-       Lighthouse case) has none of these, so Firebase stays off that trace. */
-    var eager=false;
-    try{ eager = localStorage.getItem('_r4uHadAccount')==='1'
-              || !!localStorage.getItem('_pendingSignIn')
-              || !!localStorage.getItem('_r4uResumeData')
-              || !!localStorage.getItem('_lastResumeOutput')
-              || !!localStorage.getItem('_preSignInDraft'); }catch(e){}
-    if(eager){ window._r4uLoadFB(); return; }
-    var fired=false, EVTS=['pointerdown','keydown','touchstart','mousedown'];
-    function go(){ if(fired) return; fired=true;
-      for(var i=0;i<EVTS.length;i++) document.removeEventListener(EVTS[i],go,true);
-      window._r4uLoadFB();
-    }
-    for(var j=0;j<EVTS.length;j++) document.addEventListener(EVTS[j],go,true);
+    /* Load Firebase immediately (async-injected, non-blocking — same effect the
+       old `defer` <script> tags had). Deferring it until first interaction saved
+       a little cold-load JS, but it made the SDK unavailable exactly when the
+       auth/cloud flows need it: it broke first-click sign-in (the click gesture
+       is spent by the async load, so the popup is blocked/cancelled) and the
+       signed-in cloud restore. For an auth-critical app that reliability matters
+       more than the Lighthouse delta, so we load up front but still off the
+       critical render path. */
+    window._r4uLoadFB();
   })();
   </script>
 </head>
@@ -6157,21 +6146,37 @@ if ('serviceWorker' in navigator) {
 <script>
 /* Lazy-Firebase safeguard for sign-in. Firebase now loads on first interaction
    rather than up front, so a user could click "Sign in" before _fbAuth exists.
-   Instead of bailing with "Firebase not configured", trigger the load and wait
-   for _fbAuth, then run the real handler. */
+   If Firebase is already loaded we run the normal handler (which can open a
+   popup synchronously within this click). If it isn't, we must load it
+   asynchronously — which consumes the click gesture, so a popup would be blocked
+   and rejected as auth/cancelled-popup-request (the first-click-fails bug,
+   especially in incognito). In that case we use REDIRECT instead, which works
+   after an async load and is the most reliable path in incognito / blocked-
+   storage browsers. */
 (function(){
   var _real=window.signInWithGoogle;
   if(typeof _real!=='function') return;
+  function _saveDraft(){ try{ if(typeof collectData==='function'){ var d=collectData(); var hc=!!(d.firstName||d.lastName||d.jobTitle||d.email||(d.experience&&d.experience.length)); if(hc){ if(typeof currentTemplate!=='undefined') d.template=currentTemplate; localStorage.setItem('_preSignInDraft',JSON.stringify(d)); } } }catch(e){} }
   window.signInWithGoogle=function(){
     var args=arguments, self=this;
-    if(typeof _fbAuth!=='undefined' && _fbAuth){ return _real.apply(self,args); }
+    if(typeof _fbAuth!=='undefined' && _fbAuth){ return _real.apply(self,args); } // Firebase ready → normal (popup) path
+    if(window.__r4uSigningIn) return; window.__r4uSigningIn=!![];               // guard against double taps during load
+    _saveDraft();                                                              // preserve the pre-sign-in draft across the redirect
     try{ if(typeof _showCloudLoader==='function') _showCloudLoader('Connecting…'); }catch(e){}
     if(typeof window._r4uLoadFB==='function') window._r4uLoadFB();
     var waited=0;
     (function poll(){
-      if(typeof _fbAuth!=='undefined' && _fbAuth){ _real.apply(self,args); return; }
+      if(typeof _fbAuth!=='undefined' && _fbAuth){
+        try{
+          try{ localStorage.setItem('_pendingSignIn', Date.now().toString()); }catch(e){}
+          if(typeof _showCloudLoader==='function') _showCloudLoader('Redirecting to Google…');
+          _fbAuth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());   // redirect, not popup (gesture already spent)
+        }catch(e){ window.__r4uSigningIn=![]; try{ _real.apply(self,args); }catch(e2){} }
+        return;
+      }
       waited+=120;
-      if(waited>12000){
+      if(waited>15000){
+        window.__r4uSigningIn=![];
         try{ if(typeof _hideCloudLoader==='function') _hideCloudLoader();
              if(typeof showToast==='function') showToast('Still connecting — please tap Sign in again'); }catch(e){}
         return;
