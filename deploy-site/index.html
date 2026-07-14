@@ -6295,8 +6295,11 @@ if ('serviceWorker' in navigator) {
         return;
       }
       // MANUAL save (e.g. the "Save now" button calls _saveCurrentVersion directly).
-      // An explicit user action must ALWAYS persist — never skipped by the autosave
-      // gate or a conflict pause. Save the current content and publish a new rev.
+      // An explicit user action must ALWAYS persist AND confirm — never skipped by
+      // the autosave gate/conflict pause, and never a silent "dead click". We show
+      // our own toast and mark the throttle so the save's own (throttled) toast
+      // doesn't also fire (no double toast).
+      function _manualDone(){ try{ window.__verToastLast=Date.now(); if(typeof showToast==='function') showToast('☁️ Saved to your account','success'); }catch(e){} }
       _readState(null).then(function(st){
         var base=(st&&typeof st.rev==='number')?st.rev:(window.__r4uRev||0);
         var newRev=Math.max(window.__r4uRev||0, base)+1;
@@ -6305,7 +6308,8 @@ if ('serviceWorker' in navigator) {
         orig.apply(self,args);                                      // write the version
         _stampRev(newRev);                                          // publish our rev for other devices
         window.__r4uEdited=![];
-      })['catch'](function(){ try{ orig.apply(self,args); }catch(e){} });
+        _manualDone();                                              // confirm to the user
+      })['catch'](function(){ try{ orig.apply(self,args); }catch(e){} _manualDone(); });
     };
     window._saveCurrentVersion.__r4uGuarded=!![];
     return true;
