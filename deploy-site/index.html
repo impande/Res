@@ -2384,11 +2384,19 @@
         document.head.appendChild(s);
       })(0);
     };
-    /* Eager for returning signed-in users or an in-flight redirect sign-in;
-       lazy (first interaction) for everyone else — which is what Lighthouse's
-       no-interaction cold load sees, so Firebase stays off that trace. */
+    /* Eager whenever the visitor has anything to protect — a prior sign-in, an
+       in-flight redirect sign-in, or ANY saved resume/draft in localStorage — so
+       the signed-in cloud load (_loadFromCloud) resolves up front, BEFORE the
+       user starts editing. If it loaded lazily on first interaction, that load
+       would land in the middle of an edit and overwrite the user's in-progress
+       work with the cloud copy. A genuine cold visitor (empty localStorage — the
+       Lighthouse case) has none of these, so Firebase stays off that trace. */
     var eager=false;
-    try{ eager = localStorage.getItem('_r4uHadAccount')==='1' || !!localStorage.getItem('_pendingSignIn'); }catch(e){}
+    try{ eager = localStorage.getItem('_r4uHadAccount')==='1'
+              || !!localStorage.getItem('_pendingSignIn')
+              || !!localStorage.getItem('_r4uResumeData')
+              || !!localStorage.getItem('_lastResumeOutput')
+              || !!localStorage.getItem('_preSignInDraft'); }catch(e){}
     if(eager){ window._r4uLoadFB(); return; }
     var fired=false, EVTS=['pointerdown','keydown','touchstart','mousedown'];
     function go(){ if(fired) return; fired=true;
