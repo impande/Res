@@ -6261,6 +6261,7 @@ if ('serviceWorker' in navigator) {
     if(typeof orig!=='function'||orig.__r4uGuarded) return false;
     window._saveToCloud=function(){
       var args=arguments, self=this;
+      window.__r4uInTick=!![]; setTimeout(function(){ window.__r4uInTick=![]; },0); // mark this autosave tick so a manual (Save-now) version save is distinguishable
       if(window.__r4uConflict){ window.__r4uGate=Promise.resolve('conflict'); return; } // paused after a real conflict
       if(!window.__r4uEdited){ window.__r4uGate=Promise.resolve('skip'); return; }       // idle device → write nothing
       window.__r4uGate=_readState(null).then(function(st){
@@ -6283,11 +6284,28 @@ if ('serviceWorker' in navigator) {
     if(typeof orig!=='function'||orig.__r4uGuarded) return false;
     window._saveCurrentVersion=function(){
       var args=arguments, self=this;
-      if(window.__r4uConflict) return;
-      var gate=window.__r4uGate;                                    // this tick's decision from _saveToCloud
-      function run(decision){ if(window.__r4uConflict) return; if(decision==='write') orig.apply(self,args); } // follow main's call
-      if(gate&&typeof gate.then==='function') gate.then(run)['catch'](function(){ run('write'); });
-      else run('write');                                           // no gate (shouldn't happen) → best effort
+      if(window.__r4uInTick){
+        // Autosave tick: the version save FOLLOWS the main-doc decision so the two
+        // writes don't race, and an idle device writes nothing.
+        if(window.__r4uConflict) return;
+        var gate=window.__r4uGate;
+        function run(decision){ if(window.__r4uConflict) return; if(decision==='write') orig.apply(self,args); }
+        if(gate&&typeof gate.then==='function') gate.then(run)['catch'](function(){ run('write'); });
+        else run('write');
+        return;
+      }
+      // MANUAL save (e.g. the "Save now" button calls _saveCurrentVersion directly).
+      // An explicit user action must ALWAYS persist — never skipped by the autosave
+      // gate or a conflict pause. Save the current content and publish a new rev.
+      _readState(null).then(function(st){
+        var base=(st&&typeof st.rev==='number')?st.rev:(window.__r4uRev||0);
+        var newRev=Math.max(window.__r4uRev||0, base)+1;
+        window.__r4uRev=newRev;
+        window.__r4uConflict=![];                                   // user chose to save their version → clear any conflict pause
+        orig.apply(self,args);                                      // write the version
+        _stampRev(newRev);                                          // publish our rev for other devices
+        window.__r4uEdited=![];
+      })['catch'](function(){ try{ orig.apply(self,args); }catch(e){} });
     };
     window._saveCurrentVersion.__r4uGuarded=!![];
     return true;
