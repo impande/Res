@@ -6209,7 +6209,15 @@ if ('serviceWorker' in navigator) {
      loaded the resume and sits there) never arms it, so its 15s autosave writes
      nothing — it can't advance the shared revision or clobber the other device's
      edit. Load-time re-renders aren't user input, so they don't arm it. */
-  function _armEdit(){ window.__r4uEdited=!![]; }
+  /* A genuine user edit: arm the multi-device flag, and also mark the resume
+     dirty + clear any stuck _applyingVersion. The app gates the VERSION autosave
+     on _versionDirty, which is set by a mutation observer that is suppressed
+     while _applyingVersion is true — and _applyingVersion can get stuck true
+     across repeated load/restore cycles, which silently stops version saves
+     (the main doc still saves, but reload restores from the stale version).
+     Forcing both here on real input keeps version saves working. User typing
+     means we are not mid-load, so clearing _applyingVersion is safe. */
+  function _armEdit(){ window.__r4uEdited=!![]; try{ window._applyingVersion=![]; window._versionDirty=!![]; }catch(_e){} }
   ['input','change'].forEach(function(ev){ document.addEventListener(ev,function(e){ try{ var t=e&&e.target; if(!t) return; var tag=t.tagName; if(t.isContentEditable||tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') _armEdit(); }catch(_e){} },!![]); });
   /* Template switch changes content without firing input → arm it too. */
   (function wrapTpl(tries){ var f=window.selectTemplate; if(typeof f==='function'&&!f.__r4uEd){ window.selectTemplate=function(){ _armEdit(); return f.apply(this,arguments); }; window.selectTemplate.__r4uEd=!![]; return; } if(tries<100) setTimeout(function(){ wrapTpl(tries+1); },100); })(0);
