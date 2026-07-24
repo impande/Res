@@ -143,6 +143,20 @@ exports.handler = async function (event) {
         return { statusCode: 200, headers: CORS, body: JSON.stringify(await save(state)) };
       }
 
+      if (action === 'addMany') {
+        // Merge discovered candidates: add only ids not already present, so a
+        // discovery run never overwrites a target you've edited or marked done.
+        const have = new Set(state.targets.map(x => x.id));
+        let added = 0;
+        for (const t of (body.targets || [])) {
+          if (!t || !t.id || have.has(t.id)) continue;
+          state.targets.push({ status: 'todo', submittedUrl: '', draft: null, care: 'low', authority: 'med', ...t });
+          have.add(t.id); added++;
+        }
+        const saved = await save(state);
+        return { statusCode: 200, headers: CORS, body: JSON.stringify({ ...saved, added }) };
+      }
+
       if (action === 'reseed') {
         // Add any seed targets not already present (by id); never overwrite user edits.
         const have = new Set(state.targets.map(x => x.id));

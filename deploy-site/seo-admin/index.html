@@ -76,6 +76,7 @@
     <h1>SEO Submissions</h1>
     <span class="sub">semi-automated · resume4u.help</span>
     <span style="flex:1"></span>
+    <button class="small primary" id="discoverBtn" onclick="discover(this)">🔎 Discover targets</button>
     <button class="small" onclick="reseed()">+ Restore seed list</button>
     <button class="small" onclick="lock()">Lock</button>
   </header>
@@ -161,6 +162,22 @@ async function reseed(){
   STATE = await api('/seo-submissions', {method:'POST', body:JSON.stringify({action:'reseed'})});
   render(); toast('Seed list restored');
 }
+
+// Auto-discover new targets for the current tab, then merge (dedup) into the list.
+// Directories → Semrush competitor backlinks. Quora → question search. Bookmarking is curated.
+async function discover(btn){
+  const ch = TAB==='all' ? 'directory' : TAB;
+  if(ch==='bookmarking'){ toast('Bookmarking is a curated list — nothing to auto-discover'); return; }
+  const old=btn.textContent; btn.disabled=true; btn.textContent='Discovering…';
+  try{
+    const {candidates=[], note} = await api('/seo-discover', {method:'POST', body:JSON.stringify({channel:ch})});
+    if(!candidates.length){ toast(note || 'No new targets found'); return; }
+    const res = await api('/seo-submissions', {method:'POST', body:JSON.stringify({action:'addMany', targets:candidates})});
+    STATE = res; render();
+    toast('Added '+(res.added||0)+' new '+ch+' target'+((res.added===1)?'':'s'));
+  }catch(e){ toast(e.message); }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
 async function addTarget(){
   const name=document.getElementById('a_name').value.trim();
   const url=document.getElementById('a_url').value.trim();
@@ -245,6 +262,7 @@ function render(){
           <div class="name">${esc(t.name)}
             <span class="chip ${t.authority==='high'?'hi':''}">${esc(t.authority)} authority</span>
             ${t.care==='high'?'<span class="chip care-high">read rules first</span>':''}
+            ${t.source && t.source!=='seed' ? `<span class="chip" style="color:#a9e6c0">auto · ${esc(t.source)}</span>` : ''}
           </div>
           <div class="notes">${esc(t.notes)}</div>
           <div class="notes"><a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.url)}</a></div>
