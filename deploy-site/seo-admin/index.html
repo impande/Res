@@ -20,6 +20,8 @@
   button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:7px 12px}
   button:hover{border-color:var(--accent)}
   button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+  button.submit{background:var(--good);border-color:var(--good);color:#08130c;font-weight:600}
+  button.submit:hover{filter:brightness(1.08)}
   button.small{padding:4px 9px;font-size:13px}
   input,select,textarea{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
   a{color:var(--accent)}
@@ -215,6 +217,25 @@ function copy(text, label){
   navigator.clipboard.writeText(text).then(()=>toast((label||'Copied')+' copied'));
 }
 
+// One-click assisted submit: copy the best prepared content, open the submission
+// page, and mark the row Submitted. True hands-off posting to Quora/directories
+// isn't done here on purpose — those platforms ban automation and it risks a
+// Google penalty on resume4u.help. This makes it "click → paste → done".
+function primaryContent(t){
+  const d=t.draft; if(!d) return '';
+  if(t.channel==='quora') return [d.answer, d.disclosure].filter(Boolean).join('\n\n');
+  return d.long || d.medium || d.short || d.tagline || d.raw || '';
+}
+async function submitTarget(id){
+  const t = STATE.targets.find(x=>x.id===id); if(!t) return;
+  const content = primaryContent(t);
+  if(content){ try{ await navigator.clipboard.writeText(content); }catch{} }
+  window.open(t.url, '_blank', 'noopener');
+  if(t.status==='todo' || t.status==='drafted'){ t.status='submitted'; await save(t); }
+  else render();
+  toast(content ? 'Copied + opened — paste on the site & submit' : 'Opened — generate copy first for one-paste submit');
+}
+
 function copyLine(label, value){
   if(value==null||value==='') return '';
   const id='c'+Math.random().toString(36).slice(2,8);
@@ -272,8 +293,8 @@ function render(){
         </select>
       </div>
       <div class="actions">
+        <button class="small submit" onclick="submitTarget('${t.id}')" title="Copies the prepared content and opens the submission page, then marks this Submitted">Submit ↗</button>
         <button class="small primary" onclick="generate('${t.id}', this)">${t.draft?'Regenerate copy':'Generate copy'}</button>
-        <a class="small" href="${esc(t.url)}" target="_blank" rel="noopener"><button class="small">Open site ↗</button></a>
         ${t.draft?`<button class="small" onclick="document.querySelector('[data-draft=\\'${t.id}\\']').classList.toggle('show')">Show / hide draft</button>`:''}
         <button class="small" onclick="del('${t.id}')">Delete</button>
       </div>
