@@ -22,6 +22,14 @@
   button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
   button.submit{background:var(--good);border-color:var(--good);color:#08130c;font-weight:600}
   button.submit:hover{filter:brightness(1.08)}
+  .bm{display:inline-block;background:linear-gradient(180deg,#6f8cff,#3f6fe0);color:#fff;border-radius:8px;padding:9px 16px;font-weight:700;text-decoration:none;border:1px solid #2a2f3a;cursor:grab;user-select:none}
+  .bm:hover{filter:brightness(1.06)}
+  .help ol{margin:8px 0 0;padding-left:20px}
+  .help li{margin:4px 0}
+  details.help>summary{cursor:pointer;font-weight:600;list-style:none}
+  details.help>summary::-webkit-details-marker{display:none}
+  details.help>summary::before{content:'▸ ';color:var(--accent)}
+  details.help[open]>summary::before{content:'▾ '}
   button.small{padding:4px 9px;font-size:13px}
   input,select,textarea{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
   a{color:var(--accent)}
@@ -86,8 +94,29 @@
     <div class="banner">
       This tool prepares and tracks submissions — you click the final <b>Submit</b> on each site.
       That keeps resume4u.help clear of link-spam penalties and your accounts unbanned.
-      For every target: <b>Generate copy → Copy → Open site → paste & submit → set status to Submitted</b>.
     </div>
+
+    <div class="card help">
+      <div class="name">🪄 Auto-fill helper (prefills the forms for you)</div>
+      <p class="notes">Set-up once: <b>drag this button up to your browser's bookmarks bar.</b> Then on any
+      directory's submit page, click it and it fills the common fields (name, website, tagline, description, tags)
+      with your resume4u details. Review, add anything site-specific (email, logo, category), and submit.</p>
+      <p style="margin:10px 0"><a id="bm" class="bm" href="#" onclick="return false">🪄 resume4u Auto-Fill</a>
+        &nbsp;<button class="small" onclick="copyBookmarklet()">Copy code instead</button></p>
+      <p class="notes">Works on most simple forms. Some big sites block bookmarklets, and CAPTCHAs / file uploads /
+      dropdowns are always manual — that's normal.</p>
+    </div>
+
+    <details class="card help">
+      <summary>How do I actually submit? (3 steps)</summary>
+      <ol>
+        <li><b>Prepare:</b> on a row, click <b>Generate copy</b> — that writes the title/description for you.</li>
+        <li><b>Go:</b> click the green <b>Submit ↗</b> — it copies the description and opens the site in a new tab.</li>
+        <li><b>Fill &amp; send:</b> click your <b>🪄 Auto-Fill</b> bookmark (or paste with ⌘/Ctrl-V), review, and hit the site's own Submit. Back here, the row is already marked <b>Submitted</b>.</li>
+      </ol>
+      <p class="notes">Feeling swamped by the list? Don't do all of them. Start with 3–5 high-authority
+      directories (the ones marked <span class="chip hi">high authority</span>) and ignore the rest for now.</p>
+    </details>
 
     <div class="stats" id="stats"></div>
     <div class="tabs" id="tabs"></div>
@@ -233,6 +262,56 @@ function copy(text, label){
   navigator.clipboard.writeText(text).then(()=>toast((label||'Copied')+' copied'));
 }
 
+// ── Auto-fill bookmarklet ────────────────────────────────────────────────────
+// Self-contained: this runs on OTHER sites' submission pages (via a bookmark), so
+// it must not reference anything on this page. It matches form fields by their
+// label/name/placeholder and fills the common ones with resume4u's details.
+function __resume4uAutofill(){
+  var D={
+    name:'resume4u',
+    url:'https://resume4u.help',
+    tagline:'Free AI resume builder that beats the ATS',
+    short:'Build an ATS-friendly resume and cover letter in minutes — free, AI-assisted, export to PDF.',
+    long:'resume4u.help is a free, AI-powered resume builder. It creates ATS-friendly resumes and cover letters, includes a portfolio website builder, and works for first-time job seekers and experienced professionals alike. Clean templates, AI writing help for bullet points, and free PDF export with no paywall.',
+    tags:'resume, ats, resume builder, cover letter, career, job search, ai'
+  };
+  function setVal(el,val){
+    try{
+      var proto=el.tagName==='TEXTAREA'?window.HTMLTextAreaElement.prototype:window.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto,'value').set.call(el,val);
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+      el.style.outline='2px solid #38b36b';
+    }catch(e){ el.value=val; }
+  }
+  function lab(el){
+    var s=(el.name||'')+' '+(el.id||'')+' '+(el.placeholder||'')+' '+(el.getAttribute('aria-label')||'');
+    if(el.labels){ for(var i=0;i<el.labels.length;i++) s+=' '+(el.labels[i].innerText||''); }
+    return s.toLowerCase();
+  }
+  var n=0;
+  [].slice.call(document.querySelectorAll('input,textarea')).forEach(function(el){
+    var t=(el.type||'').toLowerCase();
+    if(['hidden','password','file','checkbox','radio','submit','button','range','color','number'].indexOf(t)>=0) return;
+    if(el.value && el.value.trim()) return;               // never overwrite what you typed
+    var L=lab(el), v=null;
+    if(/url|website|web site|link|homepage/.test(L)) v=D.url;
+    else if(/e-?mail|twitter|handle|social|categor|price/.test(L)) v=null;   // yours / dropdowns → skip
+    else if(/tag|keyword/.test(L)) v=D.tags;
+    else if(el.tagName==='TEXTAREA') v=(el.maxLength>0&&el.maxLength<=160)?D.short:D.long;
+    else if(/tagline|slogan|headline|one[ -]?liner|pitch/.test(L)) v=D.tagline;
+    else if(/descript|about|detail|bio|overview|summary/.test(L)) v=D.short;
+    else if(/name|title|product|company|app|tool|startup|project/.test(L)) v=D.name;
+    if(v){ setVal(el,v); n++; }
+  });
+  alert('resume4u Auto-Fill: filled '+n+' field(s). Review, add email/logo/category, then submit. (If nothing filled, the site blocks bookmarklets or uses custom fields — fill manually.)');
+}
+function bookmarkletHref(){ return 'javascript:(' + __resume4uAutofill.toString() + ')();void 0'; }
+function copyBookmarklet(){
+  navigator.clipboard.writeText(bookmarkletHref())
+    .then(()=>toast('Bookmarklet code copied — make a new bookmark and paste it as the URL'));
+}
+
 // One-click assisted submit: copy the best prepared content, open the submission
 // page, and mark the row Submitted. True hands-off posting to Quora/directories
 // isn't done here on purpose — those platforms ban automation and it risks a
@@ -319,6 +398,9 @@ function render(){
       <div class="draft ${t.draft?'':''}" data-draft="${t.id}">${draftHtml(t)}</div>
     </div>`).join('') : `<p class="muted">No targets in this tab.</p>`;
 }
+
+// Wire the draggable bookmarklet's real href (onclick blocks it running on THIS page).
+(function(){ var a=document.getElementById('bm'); if(a) a.href=bookmarkletHref(); })();
 
 // auto-unlock if token remembered
 if(TOKEN){ document.getElementById('tokenInput')&&(document.getElementById('tokenInput').value=TOKEN); unlock(); }
