@@ -7,6 +7,10 @@
 
 const SITE = 'https://resume4u.help';
 
+// TEMP UAT login (see seo-submissions.js). The SEO_ADMIN_TOKEN env var wins when
+// set; remove this before production.
+const UAT_FALLBACK = 'uat-resume4u-Kq7Zp9Xm2L';
+
 // A compact, reusable description of the product so drafts are accurate.
 const PRODUCT = `resume4u.help is a free, AI-powered resume builder. It creates ATS-friendly
 resumes and cover letters, offers a portfolio website builder, and works for students building a
@@ -63,8 +67,7 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
 
-  const expected = process.env.SEO_ADMIN_TOKEN;
-  if (!expected) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Add SEO_ADMIN_TOKEN to your Netlify environment variables, then redeploy.' }) };
+  const expected = process.env.SEO_ADMIN_TOKEN || UAT_FALLBACK;
   const token = event.headers['x-seo-token'] || event.headers['X-Seo-Token'] || '';
   if (token !== expected) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
 
