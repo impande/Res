@@ -119,6 +119,9 @@ let TOKEN = localStorage.getItem('seoToken') || '';
 let STATE = { targets: [] };
 let TAB = 'directory';
 const CHANNELS = [['directory','Directories'],['quora','Quora'],['bookmarking','Bookmarking'],['all','All']];
+const LS_STATE = 'seoState_v1';  // working state lives in the browser (no server store needed)
+function persist(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(STATE)); }catch(e){} }
+function slugify(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60); }
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -138,8 +141,11 @@ async function unlock(){
   TOKEN = document.getElementById('tokenInput').value.trim();
   if(!TOKEN) return;
   try{
-    STATE = await api('/seo-submissions');
+    const seed = await api('/seo-submissions');           // validates the token + returns the curated seed
     localStorage.setItem('seoToken', TOKEN);
+    const saved = localStorage.getItem(LS_STATE);          // resume prior work if any
+    STATE = saved ? JSON.parse(saved) : seed;
+    if(!saved) persist();
     document.getElementById('gate').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     render();
@@ -149,20 +155,28 @@ async function unlock(){
 }
 function lock(){ localStorage.removeItem('seoToken'); location.reload(); }
 
-async function refresh(){ STATE = await api('/seo-submissions'); render(); }
-
-async function save(target){
-  STATE = await api('/seo-submissions', {method:'POST', body:JSON.stringify({action:'update', target})});
-  render();
+// All mutations operate on the in-browser STATE and persist to localStorage —
+// no server round-trip, so nothing depends on Netlify Blobs.
+function save(target){
+  if(!target.id) target.id = slugify((target.channel||'custom')+'-'+(target.name||Date.now()));
+  const i = STATE.targets.findIndex(x=>x.id===target.id);
+  if(i>=0) STATE.targets[i] = {...STATE.targets[i], ...target};
+  else STATE.targets.push({status:'todo',submittedUrl:'',draft:null,care:'low',authority:'med',...target});
+  persist(); render();
 }
-async function del(id){
+function del(id){
   if(!confirm('Remove this target?')) return;
-  STATE = await api('/seo-submissions', {method:'POST', body:JSON.stringify({action:'delete', id})});
-  render();
+  STATE.targets = STATE.targets.filter(x=>x.id!==id);
+  persist(); render();
 }
 async function reseed(){
-  STATE = await api('/seo-submissions', {method:'POST', body:JSON.stringify({action:'reseed'})});
-  render(); toast('Seed list restored');
+  try{
+    const seed = await api('/seo-submissions');
+    const have = new Set(STATE.targets.map(x=>x.id));
+    let added=0; for(const s of seed.targets){ if(!have.has(s.id)){ STATE.targets.push(s); added++; } }
+    persist(); render();
+    toast(added ? ('Restored '+added+' seed target'+(added===1?'':'s')) : 'Seed list already present');
+  }catch(e){ toast(e.message); }
 }
 
 // Auto-discover new targets for the current tab, then merge (dedup) into the list.
@@ -174,28 +188,30 @@ async function discover(btn){
   try{
     const {candidates=[], note} = await api('/seo-discover', {method:'POST', body:JSON.stringify({channel:ch})});
     if(!candidates.length){ toast(note || 'No new targets found'); return; }
-    const res = await api('/seo-submissions', {method:'POST', body:JSON.stringify({action:'addMany', targets:candidates})});
-    STATE = res; render();
-    toast('Added '+(res.added||0)+' new '+ch+' target'+((res.added===1)?'':'s'));
+    const have = new Set(STATE.targets.map(x=>x.id));
+    let added=0;
+    for(const c of candidates){ if(c.id && !have.has(c.id)){ STATE.targets.push({status:'todo',submittedUrl:'',draft:null,care:'low',authority:'med',...c}); have.add(c.id); added++; } }
+    persist(); render();
+    toast('Added '+added+' new '+ch+' target'+((added===1)?'':'s'));
   }catch(e){ toast(e.message); }
   finally{ btn.disabled=false; btn.textContent=old; }
 }
-async function addTarget(){
+function addTarget(){
   const name=document.getElementById('a_name').value.trim();
   const url=document.getElementById('a_url').value.trim();
   if(!name||!url){toast('Name and URL required');return;}
-  await save({name, url, channel:document.getElementById('a_channel').value, notes:document.getElementById('a_notes').value.trim()});
+  save({name, url, channel:document.getElementById('a_channel').value, notes:document.getElementById('a_notes').value.trim()});
   document.getElementById('a_name').value=document.getElementById('a_url').value=document.getElementById('a_notes').value='';
   toast('Added');
 }
 
-async function setStatus(id, status){
+function setStatus(id, status){
   const t = STATE.targets.find(x=>x.id===id); if(!t) return;
-  t.status = status; await save(t);
+  t.status = status; save(t);
 }
-async function setSubmittedUrl(id, url){
+function setSubmittedUrl(id, url){
   const t = STATE.targets.find(x=>x.id===id); if(!t) return;
-  t.submittedUrl = url; await save(t);
+  t.submittedUrl = url; save(t);
 }
 
 async function generate(id, btn){

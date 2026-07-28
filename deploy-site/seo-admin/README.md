@@ -25,8 +25,10 @@ penalties and the accounts avoid automation bans.
 | `SEMRUSH_API_KEY` | Optional | Directory auto-discovery (Semrush Analytics API). Without it that button shows a clear message; the curated list still works. |
 | `SERPAPI_KEY` | Optional | Better Quora question discovery. Without it a keyless DuckDuckGo fallback is used (works but can be rate-limited). |
 
-Netlify Blobs needs no setup — it's available to functions automatically in the
-Netlify runtime (including Deploy Previews and branch deploys).
+Working state (statuses, custom targets, cached drafts) is stored **in the
+browser (localStorage)**, so no server-side data store is needed. State is
+per-browser; if you later want it shared across devices, swap the client
+persistence for a server store (Netlify Blobs or Firestore) in `seo-submissions.js`.
 
 ## Testing (UAT)
 

@@ -10,11 +10,6 @@
 // Auth: every request must carry `x-seo-token` matching the SEO_ADMIN_TOKEN
 // Netlify env var. Client-side UI gating isn't a security boundary; this token is.
 
-const { getStore } = require('@netlify/blobs');
-
-const STORE = 'seo-submissions';
-const KEY = 'state';
-
 // TEMP UAT login. Lets the dashboard be tested on the branch deploy without
 // setting a Netlify env var. The real SEO_ADMIN_TOKEN env var always wins when
 // present. Remove this (or set the env var) before any production promotion.
@@ -99,76 +94,15 @@ exports.handler = async function (event) {
     return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
-  let store;
-  try {
-    store = getStore(STORE);
-  } catch (e) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Blobs unavailable: ' + e.message }) };
-  }
-
-  async function load() {
-    let state = await store.get(KEY, { type: 'json' });
-    if (!state || !Array.isArray(state.targets)) {
-      state = { targets: seedTargets(), updatedAt: new Date().toISOString() };
-      await store.setJSON(KEY, state);
-    }
-    return state;
-  }
-  async function save(state) {
-    state.updatedAt = new Date().toISOString();
-    await store.setJSON(KEY, state);
-    return state;
-  }
-
+  // Stateless: this function validates the token and returns the curated seed
+  // list. All working state (statuses, custom targets, cached drafts) is persisted
+  // client-side in the browser (localStorage), so the dashboard needs no server
+  // storage — no Netlify Blobs setup required. If you later want state shared
+  // across devices, this is where a server store (Blobs/Firestore) would slot back in.
   try {
     if (event.httpMethod === 'GET') {
-      return { statusCode: 200, headers: CORS, body: JSON.stringify(await load()) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ targets: seedTargets(), updatedAt: new Date().toISOString() }) };
     }
-
-    if (event.httpMethod === 'POST') {
-      const body = JSON.parse(event.body || '{}');
-      const action = body.action;
-      const state = await load();
-
-      if (action === 'update') {
-        const t = body.target || {};
-        if (!t.id) t.id = slug((t.channel || 'custom') + '-' + (t.name || Date.now()));
-        t.updatedAt = new Date().toISOString();
-        const i = state.targets.findIndex(x => x.id === t.id);
-        if (i >= 0) state.targets[i] = { ...state.targets[i], ...t };
-        else state.targets.push({ status: 'todo', submittedUrl: '', draft: null, care: 'low', authority: 'med', ...t });
-        return { statusCode: 200, headers: CORS, body: JSON.stringify(await save(state)) };
-      }
-
-      if (action === 'delete') {
-        state.targets = state.targets.filter(x => x.id !== body.id);
-        return { statusCode: 200, headers: CORS, body: JSON.stringify(await save(state)) };
-      }
-
-      if (action === 'addMany') {
-        // Merge discovered candidates: add only ids not already present, so a
-        // discovery run never overwrites a target you've edited or marked done.
-        const have = new Set(state.targets.map(x => x.id));
-        let added = 0;
-        for (const t of (body.targets || [])) {
-          if (!t || !t.id || have.has(t.id)) continue;
-          state.targets.push({ status: 'todo', submittedUrl: '', draft: null, care: 'low', authority: 'med', ...t });
-          have.add(t.id); added++;
-        }
-        const saved = await save(state);
-        return { statusCode: 200, headers: CORS, body: JSON.stringify({ ...saved, added }) };
-      }
-
-      if (action === 'reseed') {
-        // Add any seed targets not already present (by id); never overwrite user edits.
-        const have = new Set(state.targets.map(x => x.id));
-        for (const s of seedTargets()) if (!have.has(s.id)) state.targets.push(s);
-        return { statusCode: 200, headers: CORS, body: JSON.stringify(await save(state)) };
-      }
-
-      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown action' }) };
-    }
-
     return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
   } catch (err) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
