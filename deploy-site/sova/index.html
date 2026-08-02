@@ -40,7 +40,7 @@
     cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 14px;transition:.15s;white-space:nowrap}
   .addimg:hover{border-color:var(--ink);color:var(--ink)}
   .addimg svg{width:17px;height:17px}
-  .btn{flex:1;text-align:center;font:inherit;font-weight:650;font-size:16px;letter-spacing:-.01em;cursor:pointer;
+  .btn{flex:1;white-space:nowrap;text-align:center;font:inherit;font-weight:650;font-size:16px;letter-spacing:-.01em;cursor:pointer;
     background:var(--accent);color:var(--accent-ink);border:none;border-radius:11px;padding:13px;transition:filter .15s}
   .btn:hover{filter:brightness(1.06)} .btn:disabled{opacity:.55;cursor:default}
   .btn.full{width:100%;flex:none}
@@ -142,8 +142,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
         Add photo
       </button>
-      <button class="btn" id="goBtn" onclick="run()">Create prompt</button>
     </div>
+    <button class="btn full" id="goBtn" onclick="run()" style="margin-top:10px">Create prompt</button>
     <input type="file" id="file" accept="image/*" style="display:none">
     <div class="photochip" id="photochip"></div>
     <div class="try">Try: <span id="examples"></span></div>
@@ -214,7 +214,7 @@
     </div>
   </div>
 
-  <div class="foot">Sova · a resume4u.help tool · UAT</div>
+  <div class="foot">Sova · a resume4u.help tool</div>
 </div>
 <div class="toast" id="toast"></div>
 
