@@ -249,22 +249,28 @@ function role(t){t=t.toLowerCase();
   if(/cook|recipe|meal|food/.test(t))return'a professional chef';
   return'a clear, knowledgeable expert';}
 let styleIdx=0,extras=[];
+// Recover the real question if a generated prompt was pasted back in (prevents nesting).
+function cleanQ(q){q=String(q||'').trim();
+  const quoted=q.match(/:\s*[“"']([^“”"']{6,})[”"']/);   // pasted-back prompt → recover the quoted topic
+  if(quoted)return quoted[1].replace(/\s+/g,' ').trim();
+  const t=q.match(/TASK:\s*([^\n]+)/i);if(t)q=t[1].trim();
+  q=q.split('\n')[0].replace(/^(you are|act as)\b[^.:]*[.:]\s*/i,'');
+  return q.replace(/[“”"']/g,'').replace(/\s+/g,' ').trim();}
 function fmt(t){t=(t||'').toLowerCase();
-  if(/hour|through the day|timeline|schedule/.test(t))return'Lay it out hour by hour (a simple timeline).';
-  if(/how to|step|guide|process/.test(t))return'Give clear, numbered steps.';
-  if(/compare|vs |versus|difference/.test(t))return'Compare the options side by side.';
-  if(/list|ideas|tips|ways|examples/.test(t))return'Use a tight, scannable bulleted list.';
-  return'Use short paragraphs with small sub-headings where useful.';}
-function buildPrompt(q){const topic=q.trim().replace(/\s+/g,' ');const r=role(topic),f=fmt(topic);
-  const img=photoImg?'\n- Use the attached image as important context.':'';
+  if(/hour|through the day|timeline|schedule/.test(t))return' Lay it out as a simple hour-by-hour timeline.';
+  if(/how to|step|guide|process/.test(t))return' Use clear, numbered steps.';
+  if(/compare|vs |versus|difference/.test(t))return' Compare the options side by side.';
+  if(/list|ideas|tips|ways|examples/.test(t))return' Use a short, scannable list.';
+  return'';}
+function buildPrompt(q){const topic=cleanQ(q);const r=role(topic),f=fmt(topic);
+  const img=photoImg?' Use the attached image as key context.':'';
+  const extra=extras.length?(' Also: '+extras.join(' ').replace(/\s*\.?\s*$/,'')+'.'):'';
   const V=[
-    `You are ${r}, known for accurate, practical, no-fluff answers.\n\nTASK: ${topic}\n\nWrite the answer so it:\n- Opens with the single most important point.\n- Backs each claim with specifics — numbers, examples, concrete steps.\n- ${f}\n- Flags key caveats, assumptions, or common mistakes.\n- Ends with a one-line bottom line.${img}\n\nTone: clear, confident, plain language. No filler.`,
-    `Act as ${r} with deep, up-to-date expertise.\n\nAnswer thoroughly: "${topic}"\n\n1. One-sentence summary.\n2. The full answer, with reasoning and evidence.\n3. ${f}\n4. Two or three practical takeaways.${img}\n\nIf anything is uncertain, say so — never invent facts.`,
-    `You are ${r}. Give a sharp, genuinely useful answer to: "${topic}".\n\n- Essentials only, cut the fluff.\n- Keep the specific numbers, names and examples.\n- ${f}${img}`
+    `You are ${r}. Answer this clearly and practically: "${topic}".${f} Back your points with specific detail, flag any important caveats, and end with a one-line takeaway. Use plain, confident language — no filler.${img}${extra}`,
+    `You are ${r} with deep expertise. Answer in depth: "${topic}". Open with a one-sentence summary, then explain with reasoning and concrete examples.${f} Finish with 2–3 practical takeaways, and be honest about anything uncertain.${img}${extra}`,
+    `You are ${r}. Give a concise, genuinely useful answer to: "${topic}".${f} Keep only the essentials and the specific details — no fluff.${img}${extra}`
   ];
-  let p=V[styleIdx%V.length];
-  if(extras.length) p+='\n\nAlso apply:\n'+extras.map(e=>'- '+e).join('\n');
-  return p;}
+  return V[styleIdx%V.length];}
 function refreshPrompt(){PROMPT=buildPrompt(lastQ);$('promptBox').textContent=PROMPT;renderCard();}
 function recreate(){styleIdx++;refreshPrompt();toast('Another style');}
 const CANNED={
