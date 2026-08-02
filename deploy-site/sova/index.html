@@ -186,6 +186,13 @@
         <button data-s="1" class="on">Medium</button>
         <button data-s="1.18">Large</button>
       </div>
+      <div class="lab mt">Style</div>
+      <div class="seg" id="cstyle">
+        <button data-c="gradient" class="on">Gradient</button>
+        <button data-c="solid">Solid</button>
+        <button data-c="frame">Frame</button>
+        <button data-c="dots">Dots</button>
+      </div>
       <div class="lab mt">Colour</div>
       <div class="themes" id="themes"></div>
       <div class="colors" style="margin-top:12px">Custom
@@ -288,12 +295,21 @@ const THEMES={
   ocean:{bg:['#0ea5e9','#2563eb'],ink:'#ffffff',accent:'#e6f2ff'},
   forest:{bg:['#dcfce7','#86efac'],ink:'#052e16',accent:'#166534'},
   rose:{bg:['#ffe4e6','#fda4af'],ink:'#4c0519',accent:'#9f1239'},
+  grape:{bg:['#a78bfa','#7c3aed'],ink:'#ffffff',accent:'#ede9fe'},
+  indigo:{bg:['#818cf8','#4338ca'],ink:'#ffffff',accent:'#e0e7ff'},
+  teal:{bg:['#5eead4','#0d9488'],ink:'#04302b',accent:'#f0fdfa'},
+  sunset:{bg:['#fbbf24','#f97316'],ink:'#3a1505',accent:'#7c2d12'},
+  sky:{bg:['#e0f2fe','#7dd3fc'],ink:'#0c4a6e',accent:'#0369a1'},
+  lavender:{bg:['#ede9fe','#c4b5fd'],ink:'#3b0764',accent:'#6d28d9'},
+  charcoal:{bg:['#374151','#111827'],ink:'#ffffff',accent:'#cbd5e1'},
+  cream:{bg:['#fffbeb','#fde68a'],ink:'#422006',accent:'#92400e'},
 };
-let theme='slate',custom=null,photoImg=null,imgContent='',textScale=1,aspect='portrait',overlay=0.8;
+let theme='slate',cardStyle='gradient',custom=null,photoImg=null,imgContent='',textScale=1,aspect='portrait',overlay=0.8;
 const SHAPES={portrait:[1080,1350],square:[1080,1080],story:[1080,1920]};
 $('themes').innerHTML=Object.keys(THEMES).map(k=>`<span class="theme ${k===theme?'sel':''}" data-t="${k}" title="${k}" style="background:linear-gradient(135deg,${THEMES[k].bg[0]},${THEMES[k].bg[1]})"></span>`).join('');
 $('themes').addEventListener('click',e=>{const c=e.target.closest('[data-t]');if(c){theme=c.getAttribute('data-t');custom=null;[...document.querySelectorAll('.theme')].forEach(x=>x.classList.toggle('sel',x===c));renderCard();}});
 $('aspect').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b){aspect=b.getAttribute('data-a');[...$('aspect').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
+$('cstyle').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b){cardStyle=b.getAttribute('data-c');[...$('cstyle').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
 $('tsize').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){textScale=+b.getAttribute('data-s');[...$('tsize').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
 function lum(hex){const n=parseInt(hex.slice(1),16);return (0.2126*(n>>16&255)+0.7152*(n>>8&255)+0.0722*(n&255))/255;}
 function useCustom(){const a=$('c1').value,b=$('c2').value;const dark=(lum(a)+lum(b))/2<0.55;
@@ -384,7 +400,11 @@ function renderCard(){
   canvas.width=W;canvas.height=H;
   // ── background ──
   let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
-  const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  if(cardStyle==='solid'){ctx.fillStyle=t.bg[1];ctx.fillRect(0,0,W,H);}
+  else if(cardStyle==='frame'){ctx.fillStyle=t.bg[0];ctx.fillRect(0,0,W,H);}
+  else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  if(cardStyle==='dots'){ctx.fillStyle=t.ink;ctx.globalAlpha=.06;const gap=56*s;for(let yy=gap;yy<H;yy+=gap)for(let xx=gap;xx<W;xx+=gap){ctx.beginPath();ctx.arc(xx,yy,3.2*s,0,7);ctx.fill();}ctx.globalAlpha=1;}
+  if(cardStyle==='frame'){ctx.strokeStyle=t.accent;ctx.globalAlpha=.85;ctx.lineWidth=4*s;const m=34*s;roundRect(m,m,W-2*m,H-2*m,26*s);ctx.stroke();ctx.globalAlpha=1;}
   ctx.textBaseline='alphabetic';
   // ── header: wordmark + small PROMPT label ──
   ctx.fillStyle=t.accent;roundRect(pad,74*s-22*s,26*s,26*s,7*s);ctx.fill();
