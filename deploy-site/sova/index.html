@@ -340,6 +340,15 @@ function wrap(text,x,y,maxW,lh,maxLines){const words=String(text).split(/\s+/);l
       if(lines>=maxLines-1){let rest=words.slice(i).join(' ');while(ctx.measureText(rest+'…').width>maxW&&rest.length)rest=rest.slice(0,-1);ctx.fillText(rest+'…',x,y);return y+lh;}}
     else line=test;}
   if(line){ctx.fillText(line,x,y);y+=lh;}return y;}
+// Turn the AI's markdown into clean plain text for the card.
+function stripMd(s){return String(s)
+  .replace(/```[\s\S]*?```/g,'')
+  .replace(/^#{1,6}\s*/gm,'')
+  .replace(/\*\*(.*?)\*\*/g,'$1')
+  .replace(/`([^`]+)`/g,'$1')
+  .replace(/^\s*[-*]\s+/gm,'• ')
+  .replace(/\n{3,}/g,'\n\n')
+  .trim();}
 function renderCard(){
   const [W,H]=SHAPES[aspect];canvas.width=W;canvas.height=H;const s=W/1080;
   let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
@@ -353,13 +362,19 @@ function renderCard(){
   // small square mark + wordmark
   ctx.fillStyle=t.accent;roundRect(pad,72*s-22*s,26*s,26*s,7*s);ctx.fill();
   ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+38*s,72*s);
-  const q=lastQ||'Ask anything…',a=ANSWER||'Your answer appears here.';
+  const q=lastQ||'Ask anything…',a=stripMd(ANSWER||'Your answer appears here.');
   ctx.fillStyle=t.ink;ctx.font=`700 ${56*s}px ${F}`;let y=wrap(q,pad,206*s,W-pad*2,66*s,4);
   y+=14*s;ctx.strokeStyle=t.accent;ctx.globalAlpha=.55;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+110*s,y);ctx.stroke();ctx.globalAlpha=1;y+=52*s;
-  const aFont=39*s*textScale,aLh=56*s*textScale,footTop=H-150*s,maxLines=Math.max(3,Math.floor((footTop-y)/aLh));
-  ctx.fillStyle=t.ink;ctx.font=`400 ${aFont}px ${F}`;let cy=y,used=0;
-  for(const p of a.split('\n')){if(used>=maxLines)break;if(!p.trim()){cy+=aLh*0.5;continue;}
-    const before=cy;cy=wrap(p,pad,cy,W-pad*2,aLh,maxLines-used);used+=Math.max(1,Math.round((cy-before)/aLh));}
+  const aFont=39*s*textScale,aLh=56*s*textScale,footTop=H-150*s;
+  ctx.fillStyle=t.ink;ctx.font=`400 ${aFont}px ${F}`;let cy=y;
+  const paras=a.split('\n');
+  for(let i=0;i<paras.length;i++){
+    if(cy>footTop-aLh){ctx.fillText('…',pad,cy);break;}   // hard stop before the footer
+    const p=paras[i];
+    if(!p.trim()){cy+=aLh*0.45;continue;}
+    const room=Math.max(1,Math.floor((footTop-cy)/aLh));
+    cy=wrap(p,pad,cy,W-pad*2,aLh,room);
+  }
   const fy=H-88*s;ctx.globalAlpha=.75;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,fy);ctx.globalAlpha=1;
 }
 
