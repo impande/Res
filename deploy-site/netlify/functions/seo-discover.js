@@ -15,9 +15,6 @@
 const SITE = 'https://resume4u.help';
 const PRODUCT = 'resume4u.help — a free, AI-powered resume builder (ATS-friendly resumes, cover letters, and a portfolio website builder) for students and professionals.';
 
-// TEMP UAT login (see seo-submissions.js). The SEO_ADMIN_TOKEN env var wins when
-// set; remove this before production.
-const UAT_FALLBACK = 'uat-resume4u-Kq7Zp9Xm2L';
 
 function cors(origin) {
   return {
@@ -64,7 +61,8 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
 
-  const expected = process.env.SEO_ADMIN_TOKEN || UAT_FALLBACK;
+  const expected = process.env.SEO_ADMIN_TOKEN;
+  if (!expected) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Add SEO_ADMIN_TOKEN to your Netlify environment variables, then redeploy.' }) };
   const token = event.headers['x-seo-token'] || event.headers['X-Seo-Token'] || '';
   if (token !== expected) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
 

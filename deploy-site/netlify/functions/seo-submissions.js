@@ -11,11 +11,6 @@
 // Auth: every request must carry `x-seo-token` matching the SEO_ADMIN_TOKEN
 // Netlify env var. Client-side UI gating isn't a security boundary; this token is.
 
-// TEMP UAT login. Lets the dashboard be tested on the branch deploy without
-// setting a Netlify env var. The real SEO_ADMIN_TOKEN env var always wins when
-// present. Remove this (or set the env var) before any production promotion.
-const UAT_FALLBACK = 'uat-resume4u-Kq7Zp9Xm2L';
-
 // ── Curated seed targets ────────────────────────────────────────────────────
 // High-authority, legitimately relevant places for a resume/career SaaS tool.
 // No link farms. "care: high" = read the platform's self-promo rules before you
@@ -107,7 +102,8 @@ exports.handler = async function (event) {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
 
-  const expected = process.env.SEO_ADMIN_TOKEN || UAT_FALLBACK;
+  const expected = process.env.SEO_ADMIN_TOKEN;
+  if (!expected) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Add SEO_ADMIN_TOKEN to your Netlify environment variables, then redeploy.' }) };
   const token = event.headers['x-seo-token'] || event.headers['X-Seo-Token'] || '';
   if (token !== expected) {
     return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
