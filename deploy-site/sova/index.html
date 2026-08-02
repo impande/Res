@@ -317,24 +317,32 @@ function useCustom(){const a=$('c1').value,b=$('c2').value;const dark=(lum(a)+lu
   [...document.querySelectorAll('.theme')].forEach(x=>x.classList.remove('sel'));renderCard();toast('Custom colours applied');}
 
 // Read the photo's content (text + subject) via the site's vision function.
-async function readPhoto(b64,mime){
+// generate.js reads the image from `imageBase64Array` (not `images`).
+async function readPhoto(b64){
   const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({prompt:'Extract the content of this image as plain text. Transcribe any visible text exactly, and briefly note the key objects or subject. Output only the extracted content — no preamble.',images:[b64],imageMimeType:mime})});
+    body:JSON.stringify({prompt:'Extract the content of this image as plain text. Transcribe any visible text exactly, and briefly note the key objects or subject. Output only the extracted content — no preamble.',imageBase64Array:[b64],imageMimeType:'image/jpeg'})});
   const j=await r.json().catch(()=>({}));
   if(!r.ok||!j.text) throw new Error(j.error||'read failed');
   return String(j.text).trim();
 }
 $('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
-  const fr=new FileReader();
-  fr.onload=async()=>{const b64=String(fr.result).split(',')[1],mime=f.type||'image/jpeg';
+  const img=new Image();
+  img.onload=async()=>{
+    // downscale so the upload stays small and under the function's size limit
+    const max=1400;let w=img.width,h=img.height;
+    if(Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k);}
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+    const b64=c.toDataURL('image/jpeg',0.85).split(',')[1];
+    URL.revokeObjectURL(img.src);
     $('photochip').classList.add('on');$('photochip').innerHTML='<b>Reading the photo…</b>';
-    try{imgContent=await readPhoto(b64,mime);
+    try{imgContent=await readPhoto(b64);
       const peek=imgContent.length>90?imgContent.slice(0,90)+'…':imgContent;
       $('photochip').innerHTML='<b>Photo read ✓</b> — added to your prompt: “'+peek.replace(/[<>]/g,'')+'” · <a onclick="clearPhoto()">remove</a>';
       refreshPrompt();toast('Photo content added');}
-    catch(err){imgContent='';$('photochip').innerHTML='<b>Couldn’t read that photo</b> — try another · <a onclick="clearPhoto()">remove</a>';toast('Could not read the image');}
+    catch(err){imgContent='';$('photochip').innerHTML='<b>Couldn’t read that photo</b> — try again · <a onclick="clearPhoto()">remove</a>';toast('Could not read the image');}
   };
-  fr.readAsDataURL(f);e.target.value='';});
+  img.onerror=()=>{toast('Could not open that image');};
+  img.src=URL.createObjectURL(f);e.target.value='';});
 function clearPhoto(r){imgContent='';$('photochip').classList.remove('on');$('photochip').innerHTML='';if(r!==false)refreshPrompt();}
 
 const CHIPS=['More detailed','More concise','Add examples','Numbered list','Expert role'];
