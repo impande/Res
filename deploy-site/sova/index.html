@@ -32,7 +32,9 @@
   .ask{padding:8px 16px 16px}
   textarea{width:100%;background:transparent;color:var(--ink);border:none;font:inherit;font-size:19px;line-height:1.5;resize:none;min-height:70px;outline:none;padding:16px 4px 8px}
   textarea::placeholder{color:var(--faint)}
-  .askbar{display:flex;align-items:center;gap:10px}
+  .askbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .addimg.rec{border-color:#c0392b;color:#c0392b;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.45}}
   .addimg{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
     cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 14px;transition:.15s;white-space:nowrap}
   .addimg:hover{border-color:var(--ink);color:var(--ink)}
@@ -130,6 +132,10 @@
   <div class="card ask">
     <textarea id="q" rows="2" placeholder="Ask anything…"></textarea>
     <div class="askbar">
+      <button class="addimg" id="micBtn" onclick="toggleVoice()" title="Speak your question">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22.5"/></svg>
+        <span id="micLabel">Voice</span>
+      </button>
       <button class="addimg" onclick="document.getElementById('file').click()" title="Add a photo to your card">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
         Add photo
@@ -336,33 +342,44 @@ function stripMd(s){return String(s)
   .replace(/^\s*[-*]\s+/gm,'• ')
   .replace(/\n{3,}/g,'\n\n')
   .trim();}
+// Break text into wrapped lines for the current ctx.font (blank string = spacer).
+function wrapLines(text,maxW){const out=[];
+  for(const para of String(text).split('\n')){
+    if(!para.trim()){out.push('');continue;}
+    let line='';for(const w of para.split(/\s+/)){const test=line?line+' '+w:w;
+      if(ctx.measureText(test).width>maxW&&line){out.push(line);line=w;}else line=test;}
+    if(line)out.push(line);}
+  return out;}
 function renderCard(){
-  const [W,H]=SHAPES[aspect];canvas.width=W;canvas.height=H;const s=W/1080;
+  const W=SHAPES[aspect][0],baseH=SHAPES[aspect][1],s=W/1080,pad=90*s,F="'Segoe UI',system-ui,Arial";
+  const q=lastQ||'Ask anything…',a=stripMd(PROMPT||'Your prompt appears here.');
+  const titleLh=66*s,aFont=39*s*textScale,aLh=54*s*textScale;
+  // ── measure first, so the card can grow to fit the whole prompt ──
+  ctx.font=`700 ${56*s}px ${F}`;const qLines=wrapLines(q,W-pad*2);
+  ctx.font=`400 ${aFont}px ${F}`;const bLines=wrapLines(a,W-pad*2);
+  const headTop=200*s, divY=headTop+(qLines.length-1)*titleLh+42*s, bodyTop=divY+50*s;
+  let bodyH=0;for(const l of bLines)bodyH+=(l===''?aLh*0.45:aLh);
+  const H=Math.max(baseH,Math.ceil(bodyTop+bodyH+150*s));
+  canvas.width=W;canvas.height=H;
+  // ── background ──
   let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
   if(photoImg){const ir=photoImg.width/photoImg.height,cr=W/H;let dw,dh,dx,dy;
     if(ir>cr){dh=H;dw=H*ir;dx=(W-dw)/2;dy=0;}else{dw=W;dh=W/ir;dx=0;dy=(H-dh)/2;}
     ctx.drawImage(photoImg,dx,dy,dw,dh);const ov=ctx.createLinearGradient(0,0,0,H);ov.addColorStop(0,'rgba(10,10,12,'+(overlay*.45)+')');ov.addColorStop(1,'rgba(10,10,12,'+overlay+')');ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);t={ink:'#ffffff',accent:'rgba(255,255,255,.82)'};}
   else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-  const pad=90*s,F="'Segoe UI',system-ui,Arial";
-  ctx.fillStyle=t.accent;ctx.font=`600 30px ${F}`;ctx.font=`600 ${30*s}px ${F}`;
   ctx.textBaseline='alphabetic';
-  // small square mark + wordmark
+  // ── wordmark ──
   ctx.fillStyle=t.accent;roundRect(pad,72*s-22*s,26*s,26*s,7*s);ctx.fill();
   ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+38*s,72*s);
-  const q=lastQ||'Ask anything…',a=stripMd(PROMPT||'Your prompt appears here.');
-  ctx.fillStyle=t.ink;ctx.font=`700 ${56*s}px ${F}`;let y=wrap(q,pad,206*s,W-pad*2,66*s,4);
-  y+=14*s;ctx.strokeStyle=t.accent;ctx.globalAlpha=.55;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+110*s,y);ctx.stroke();ctx.globalAlpha=1;y+=52*s;
-  const aFont=39*s*textScale,aLh=56*s*textScale,footTop=H-150*s;
-  ctx.fillStyle=t.ink;ctx.font=`400 ${aFont}px ${F}`;let cy=y;
-  const paras=a.split('\n');
-  for(let i=0;i<paras.length;i++){
-    if(cy>footTop-aLh){ctx.fillText('…',pad,cy);break;}   // hard stop before the footer
-    const p=paras[i];
-    if(!p.trim()){cy+=aLh*0.45;continue;}
-    const room=Math.max(1,Math.floor((footTop-cy)/aLh));
-    cy=wrap(p,pad,cy,W-pad*2,aLh,room);
-  }
-  const fy=H-88*s;ctx.globalAlpha=.75;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,fy);ctx.globalAlpha=1;
+  // ── question heading ──
+  ctx.fillStyle=t.ink;ctx.font=`700 ${56*s}px ${F}`;let y=headTop;for(const l of qLines){ctx.fillText(l,pad,y);y+=titleLh;}
+  // ── divider ──
+  ctx.strokeStyle=t.accent;ctx.globalAlpha=.55;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,divY);ctx.lineTo(pad+110*s,divY);ctx.stroke();ctx.globalAlpha=1;
+  // ── prompt body (all of it) ──
+  ctx.fillStyle=t.ink;ctx.font=`400 ${aFont}px ${F}`;let by=bodyTop;
+  for(const l of bLines){if(l===''){by+=aLh*0.45;continue;}ctx.fillText(l,pad,by);by+=aLh;}
+  // ── footer ──
+  ctx.globalAlpha=.75;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,H-54*s);ctx.globalAlpha=1;
 }
 
 function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
@@ -370,6 +387,23 @@ function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to s
     else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}}
   catch(err){if(!(err&&err.code==='declined')){try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();}catch(e){toast('Save not available here');}}}
 },'image/png');}
+
+// ── Voice input (speech-to-text) ─────────────────────────────────────────────
+let recog=null,listening=false;
+function toggleVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice input isn’t supported in this browser');return;}
+  if(listening){recog&&recog.stop();return;}
+  recog=new SR();recog.lang='en-US';recog.interimResults=true;recog.continuous=false;
+  const base=$('q').value.trim();
+  recog.onstart=()=>{listening=true;$('micBtn').classList.add('rec');$('micLabel').textContent='Listening…';};
+  recog.onresult=e=>{let txt='';for(let i=0;i<e.results.length;i++)txt+=e.results[i][0].transcript;
+    $('q').value=(base?base+' ':'')+txt;};
+  recog.onerror=ev=>{toast(ev.error==='not-allowed'?'Allow microphone access to use voice':'Mic error — try again');};
+  recog.onend=()=>{listening=false;$('micBtn').classList.remove('rec');$('micLabel').textContent='Voice';};
+  try{recog.start();}catch(e){}
+}
+if(!(window.SpeechRecognition||window.webkitSpeechRecognition)) $('micBtn').style.display='none';
 
 // Show a live sample on load so the landing feels alive (input stays inviting).
 lastQ=EXAMPLES[0]; extras=[]; PROMPT=buildPrompt(lastQ); $('promptBox').textContent=PROMPT; resetChat(); renderCard(); $('result').classList.add('show');
