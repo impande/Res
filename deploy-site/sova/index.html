@@ -373,7 +373,7 @@ function renderCard(){
   const bodyTop=200*s;
   let h=bodyTop;
   for(const b of blocks){ if(!b){h+=paraGap*0.55;continue;} h+=b.lines.length*lh+(b.bullet?bullGap:paraGap); }
-  const H=Math.max(baseH,Math.ceil(h+120*s));
+  const H=Math.max(baseH,Math.ceil(h+150*s));
   canvas.width=W;canvas.height=H;
   // ── background ──
   let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
@@ -398,8 +398,15 @@ function renderCard(){
     }
     by+=b.bullet?bullGap:paraGap;
   }
-  // ── footer ──
-  ctx.globalAlpha=.7;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,H-56*s);ctx.globalAlpha=1;
+  // ── footer: hairline rule + branded "Powered by resume4u.help" ──
+  ctx.strokeStyle=t.accent;ctx.globalAlpha=.28;ctx.lineWidth=2*s;
+  ctx.beginPath();ctx.moveTo(pad,H-118*s);ctx.lineTo(W-pad,H-118*s);ctx.stroke();ctx.globalAlpha=1;
+  const fy=H-58*s;
+  ctx.fillStyle=t.accent;roundRect(pad,fy-24*s,24*s,24*s,6*s);ctx.fill();          // small brand tile
+  ctx.textBaseline='alphabetic';
+  ctx.fillStyle=t.ink;ctx.globalAlpha=.5;ctx.font=`500 ${26*s}px ${F}`;
+  const pre='Powered by ';ctx.fillText(pre,pad+38*s,fy);const pw=ctx.measureText(pre).width;
+  ctx.globalAlpha=1;ctx.font=`700 ${26*s}px ${F}`;ctx.fillText('resume4u.help',pad+38*s+pw,fy);
 }
 
 function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
