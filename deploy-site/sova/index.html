@@ -151,7 +151,7 @@
       <div class="ailinks">Open in <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a> · <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · <a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini</a></div>
     </div>
 
-    <div class="section-lab">Bonus — share the answer as an image</div>
+    <div class="section-lab">Share your prompt as an image</div>
     <div class="card">
       <div class="stage"><div class="preview"><canvas id="card" width="1080" height="1350"></canvas></div></div>
       <div class="brandline">Every image is marked <a href="https://resume4u.help" target="_blank" rel="noopener">Powered by resume4u.help</a></div>
@@ -204,11 +204,11 @@
 
     <!-- REFINE -->
     <div class="card drawer" id="drawerChat">
-      <div class="lab">Refine the answer — tell it what to change</div>
+      <div class="lab">Refine your prompt — add detail, a format, or a role</div>
       <div class="chatlog" id="chatlog"></div>
       <div class="chips" id="chatchips"></div>
       <div class="chatin">
-        <input id="chatin" placeholder="e.g. make it shorter, add an example…" onkeydown="if(event.key==='Enter')sendChat()">
+        <input id="chatin" placeholder="e.g. add a role, set a format, add a constraint…" onkeydown="if(event.key==='Enter')sendChat()">
         <button onclick="sendChat()">Send</button>
       </div>
     </div>
@@ -242,18 +242,25 @@ function role(t){t=t.toLowerCase();
   if(/money|invest|finance|budget|save/.test(t))return'a personal-finance advisor';
   if(/cook|recipe|meal|food/.test(t))return'a professional chef';
   return'a clear, knowledgeable expert';}
-let styleIdx=0;
-function buildPrompt(q){const topic=q.trim().replace(/\s+/g,' ');
-  const img=photoImg?"\nI'm also attaching an image — use it as important context.":'';
+let styleIdx=0,extras=[];
+function fmt(t){t=(t||'').toLowerCase();
+  if(/hour|through the day|timeline|schedule/.test(t))return'Lay it out hour by hour (a simple timeline).';
+  if(/how to|step|guide|process/.test(t))return'Give clear, numbered steps.';
+  if(/compare|vs |versus|difference/.test(t))return'Compare the options side by side.';
+  if(/list|ideas|tips|ways|examples/.test(t))return'Use a tight, scannable bulleted list.';
+  return'Use short paragraphs with small sub-headings where useful.';}
+function buildPrompt(q){const topic=q.trim().replace(/\s+/g,' ');const r=role(topic),f=fmt(topic);
+  const img=photoImg?'\n- Use the attached image as important context.':'';
   const V=[
-    `Act as ${role(topic)}.\n\nQuestion: "${topic}"${img}\n\nAnswer clearly and practically with specific details. Keep it easy to skim, and note any caveats.`,
-    `You are ${role(topic)}. ${photoImg?'Look at the attached image, then answer':'Answer'} thoroughly: "${topic}"\n\nStart with a one-line summary, explain with reasoning, and end with 2–3 practical takeaways.`,
-    `Act as ${role(topic)}. Give a concise, useful answer to: "${topic}".${img}\nOnly the essentials — no fluff — but keep the specifics. Prefer short bullet points.`
+    `You are ${r}, known for accurate, practical, no-fluff answers.\n\nTASK: ${topic}\n\nWrite the answer so it:\n- Opens with the single most important point.\n- Backs each claim with specifics — numbers, examples, concrete steps.\n- ${f}\n- Flags key caveats, assumptions, or common mistakes.\n- Ends with a one-line bottom line.${img}\n\nTone: clear, confident, plain language. No filler.`,
+    `Act as ${r} with deep, up-to-date expertise.\n\nAnswer thoroughly: "${topic}"\n\n1. One-sentence summary.\n2. The full answer, with reasoning and evidence.\n3. ${f}\n4. Two or three practical takeaways.${img}\n\nIf anything is uncertain, say so — never invent facts.`,
+    `You are ${r}. Give a sharp, genuinely useful answer to: "${topic}".\n\n- Essentials only, cut the fluff.\n- Keep the specific numbers, names and examples.\n- ${f}${img}`
   ];
-  return V[styleIdx%V.length];}
-async function recreate(){styleIdx++;const prompt=buildPrompt(lastQ);$('promptBox').textContent=prompt;toast('Rewriting…');
-  ANSWER='Writing your answer…';renderCard();
-  try{ANSWER=await askAI(prompt);}catch(e){ANSWER=demoAnswer(lastQ);}renderCard();}
+  let p=V[styleIdx%V.length];
+  if(extras.length) p+='\n\nAlso apply:\n'+extras.map(e=>'- '+e).join('\n');
+  return p;}
+function refreshPrompt(){PROMPT=buildPrompt(lastQ);$('promptBox').textContent=PROMPT;renderCard();}
+function recreate(){styleIdx++;refreshPrompt();toast('Another style');}
 const CANNED={
   tired:'Energy follows your body clock. For a typical 9–6 worker:\n\n• 6–8am: Groggy — energy still low.\n• 9–11am: Peak focus — best for hard tasks.\n• 1–3pm: The biggest dip — most tired here.\n• 3–5pm: A small second wind.\n• 6–9pm: Winding down; fatigue climbs.\n\nMost people feel most exhausted around 1–3pm.',
   interview:'Keep it to 60–90 seconds, in three parts:\n\n1) Present: your current role and one strength.\n2) Past: a quick highlight that proves it, with a number.\n3) Future: why you’re excited about this role.\n\nSkip your life story — match your answer to the job.',
@@ -265,24 +272,13 @@ function demoAnswer(q){const t=q.toLowerCase();
   if(/morning|routine|energetic/.test(t))return CANNED.morning;
   return `Here’s a clear take on “${q.trim()}”.\n\n• Start with the single most useful point.\n• Add two or three specific, practical details.\n• Keep it short and honest.\n\n(Sample — on resume4u.help the real AI writes a full answer.)`;}
 
-let lastQ='',ANSWER='';
-// Calls the site's existing AI function (generate). Falls back to a sample when
-// unavailable — e.g. opened outside the deployed site, or the API key isn't set.
-async function askAI(prompt){
-  const body=photoB64?{prompt,images:[photoB64],imageMimeType:photoMime}:{prompt};
-  const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok||!j.text) throw new Error(j.error||'no answer');
-  return String(j.text).trim();
-}
-async function run(){let q=$('q').value.trim();
+let lastQ='',PROMPT='';
+function run(){let q=$('q').value.trim();
   if(!q&&photoImg) q='Describe and analyse the image I am attaching, in detail.';
   if(!q){toast('Type a question or add an image');return;}
-  lastQ=q;styleIdx=0;const b=$('goBtn');b.disabled=true;b.textContent='Thinking…';
-  const prompt=buildPrompt(q);$('promptBox').textContent=prompt;
-  ANSWER='Writing your answer…';resetChat();renderCard();$('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});
-  try{ANSWER=await askAI(prompt);}catch(e){ANSWER=demoAnswer(q);}
-  renderCard();b.disabled=false;b.textContent='Create prompt';}
+  lastQ=q;styleIdx=0;extras=[];resetChat();
+  PROMPT=buildPrompt(q);$('promptBox').textContent=PROMPT;renderCard();
+  $('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});}
 function copyPrompt(){navigator.clipboard.writeText($('promptBox').textContent).then(()=>toast('Prompt copied'));}
 function startOver(){$('q').value='';$('result').classList.remove('show');DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});clearPhoto(false);window.scrollTo({top:0,behavior:'smooth'});$('q').focus();}
 
@@ -316,21 +312,12 @@ async function startSelfie(){try{stream=await navigator.mediaDevices.getUserMedi
 function stopSelfie(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('cam').style.display='none';$('camrow').classList.add('hidden');}
 function capture(){const v=$('cam'),c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const url=c.toDataURL('image/png');photoB64=url.split(',')[1];photoMime='image/png';const img=new Image();img.onload=()=>{photoImg=img;$('ovlwrap').classList.remove('hidden');$('photochip').classList.add('on');renderCard();toast('Captured');};img.src=url;stopSelfie();}
 
-const CHIPS=['Shorter','Simpler','Add an example','More formal','Add emojis'];
+const CHIPS=['More detailed','More concise','Add examples','Numbered list','Expert role'];
+const CHIPMAP={'more detailed':'Go deeper with step-by-step detail.','more concise':'Keep the answer short and to the point.','add examples':'Include 2–3 concrete examples.','numbered list':'Format the answer as a clean numbered list.','expert role':'Answer from the perspective of a seasoned expert.'};
 function resetChat(){$('chatlog').innerHTML='';$('chatchips').innerHTML=CHIPS.map(c=>`<button onclick="sendChat('${c}')">${c}</button>`).join('');}
 function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('chatlog').appendChild(d);$('chatlog').scrollTop=$('chatlog').scrollHeight;}
-function refineLocal(cmd){const c=cmd.toLowerCase();let lines=ANSWER.split('\n');
-  if(/short|brief|less/.test(c)){lines=lines.filter(l=>l.trim());ANSWER=lines.slice(0,Math.max(3,Math.ceil(lines.length/2))).join('\n');return;}
-  if(/example/.test(c)){ANSWER=ANSWER+'\n\nExample: a quick, concrete case that shows this in action.';return;}
-  if(/emoji/.test(c)){ANSWER=ANSWER.replace(/^•/gm,'✅').replace(/^(\d)\)/gm,'$1️⃣');return;}
-  if(/simpl|easy/.test(c)){ANSWER='In simple words:\n\n'+ANSWER;return;}
-  if(/long|detail|more/.test(c)){ANSWER=ANSWER+'\n• One extra useful detail worth knowing.';return;}}
-async function sendChat(preset){const txt=preset||$('chatin').value.trim();if(!txt)return;$('chatin').value='';addMsg('you',txt);addMsg('bot','…');
-  const bots=()=>$('chatlog').querySelectorAll('.msg.bot');
-  const p=`Here is an answer:\n\n${ANSWER}\n\nRevise it based on this instruction: "${txt}". Keep the same topic. Return ONLY the revised answer.`;
-  try{ANSWER=await askAI(p);bots()[bots().length-1].textContent='Updated ✓';}
-  catch(e){refineLocal(txt);bots()[bots().length-1].textContent='Updated';}
-  renderCard();}
+function sendChat(preset){const txt=preset||$('chatin').value.trim();if(!txt)return;$('chatin').value='';addMsg('you',txt);
+  extras.push(CHIPMAP[txt.toLowerCase()]||txt);refreshPrompt();addMsg('bot','Prompt updated ✓');}
 
 const canvas=$('card'),ctx=canvas.getContext('2d');
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
@@ -362,7 +349,7 @@ function renderCard(){
   // small square mark + wordmark
   ctx.fillStyle=t.accent;roundRect(pad,72*s-22*s,26*s,26*s,7*s);ctx.fill();
   ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+38*s,72*s);
-  const q=lastQ||'Ask anything…',a=stripMd(ANSWER||'Your answer appears here.');
+  const q=lastQ||'Ask anything…',a=stripMd(PROMPT||'Your prompt appears here.');
   ctx.fillStyle=t.ink;ctx.font=`700 ${56*s}px ${F}`;let y=wrap(q,pad,206*s,W-pad*2,66*s,4);
   y+=14*s;ctx.strokeStyle=t.accent;ctx.globalAlpha=.55;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+110*s,y);ctx.stroke();ctx.globalAlpha=1;y+=52*s;
   const aFont=39*s*textScale,aLh=56*s*textScale,footTop=H-150*s;
@@ -385,7 +372,7 @@ function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to s
 },'image/png');}
 
 // Show a live sample on load so the landing feels alive (input stays inviting).
-lastQ=EXAMPLES[0]; $('promptBox').textContent=buildPrompt(lastQ); ANSWER=demoAnswer(lastQ); resetChat(); renderCard(); $('result').classList.add('show');
+lastQ=EXAMPLES[0]; extras=[]; PROMPT=buildPrompt(lastQ); $('promptBox').textContent=PROMPT; resetChat(); renderCard(); $('result').classList.add('show');
 </script>
 </body>
 </html>
