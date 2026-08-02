@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SEO Submissions — resume4u</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --text:#e6e9ef; --muted:#9aa3b2; --accent:#5b8cff; --accent2:#3f6fe0;
+    --good:#38b36b; --warn:#e0a63f; --bad:#e05d5d; --chip:#232834;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:650}
+  .sub{color:var(--muted);font-size:13px}
+  main{max-width:1100px;margin:0 auto;padding:22px}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:7px 12px}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+  button.submit{background:var(--good);border-color:var(--good);color:#08130c;font-weight:600}
+  button.submit:hover{filter:brightness(1.08)}
+  .help ol{margin:8px 0 0;padding-left:20px}
+  .help li{margin:4px 0}
+  details.help>summary{cursor:pointer;font-weight:600;list-style:none}
+  details.help>summary::-webkit-details-marker{display:none}
+  details.help>summary::before{content:'▸ ';color:var(--accent)}
+  details.help[open]>summary::before{content:'▾ '}
+  button.small{padding:4px 9px;font-size:13px}
+  input,select,textarea{font:inherit;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+  a{color:var(--accent)}
+  .tabs{display:flex;gap:6px;margin:6px 0 18px;flex-wrap:wrap}
+  .tab{padding:7px 14px;border-radius:999px;background:var(--chip);border:1px solid transparent;color:var(--muted)}
+  .tab.active{color:#fff;border-color:var(--accent);background:var(--panel2)}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:96px}
+  .stat b{font-size:20px;display:block}
+  .stat span{color:var(--muted);font-size:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .row .grow{flex:1;min-width:220px}
+  .name{font-weight:600}
+  .chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--muted);margin-left:6px;vertical-align:middle}
+  .chip.high{color:#ffd7a6}.chip.hi{color:#a9c6ff}
+  .care-high{color:var(--warn)}
+  .notes{color:var(--muted);font-size:13px;margin-top:3px}
+  .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  select.status{width:auto}
+  .status-todo{color:var(--muted)} .status-drafted{color:var(--accent)}
+  .status-submitted{color:var(--warn)} .status-live{color:var(--good)}
+  .status-rejected,.status-skipped{color:var(--bad)}
+  .draft{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;display:none}
+  .draft.show{display:block}
+  .field{margin-bottom:9px}
+  .field label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+  .copyline{display:flex;gap:8px;align-items:flex-start}
+  .copyline .val{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;font-size:13px}
+  .gate{max-width:420px;margin:12vh auto;text-align:center}
+  .muted{color:var(--muted)} .hidden{display:none}
+  .banner{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);margin-bottom:18px}
+  .add{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .add .full{grid-column:1/3}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);color:#fff;padding:9px 16px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none}
+  .toast.show{opacity:1}
+  @media(max-width:600px){.add{grid-template-columns:1fr}.add .full{grid-column:1}}
+</style>
+</head>
+<body>
+
+<!-- Token gate -->
+<div id="gate" class="gate">
+  <h1>SEO Submissions</h1>
+  <p class="muted">Enter your admin token to continue.</p>
+  <div class="field"><input id="tokenInput" type="password" placeholder="SEO_ADMIN_TOKEN" autocomplete="off"></div>
+  <button class="primary" onclick="unlock()">Unlock</button>
+  <p id="gateErr" class="muted" style="color:var(--bad)"></p>
+</div>
+
+<!-- App -->
+<div id="app" class="hidden">
+  <header>
+    <h1>SEO Submissions</h1>
+    <span class="sub">semi-automated · resume4u.help</span>
+    <span style="flex:1"></span>
+    <button class="small primary" id="discoverBtn" onclick="discover(this)">🔎 Discover targets</button>
+    <button class="small" onclick="reseed()">+ Restore seed list</button>
+    <button class="small" onclick="lock()">Lock</button>
+  </header>
+  <main>
+    <div class="banner">
+      This tool prepares and tracks submissions — you click the final <b>Submit</b> on each site.
+      That keeps resume4u.help clear of link-spam penalties and your accounts unbanned.
+    </div>
+
+    <details class="card help" open>
+      <summary>How do I submit? (3 simple steps)</summary>
+      <ol>
+        <li><b>Write the copy:</b> on a row, click <b>Generate copy</b>. Claude writes your title and description.</li>
+        <li><b>Open the site:</b> click green <b>Submit ↗</b>. It copies your description and opens the site in a new tab.</li>
+        <li><b>Paste &amp; send:</b> on the site's form, click the description box and press <b>⌘V / Ctrl-V</b> to paste. For the other boxes (name, website, tagline), come back here, click <b>Show / hide draft</b> on the row, and use the little <b>Copy</b> buttons. Then hit the site's own Submit — the row here is already marked <b>Submitted</b>.</li>
+      </ol>
+      <p class="notes">Feeling swamped? Don't do them all. Start with 3–5 targets marked
+      <span class="chip hi">high authority</span> and ignore the rest for now. Click <b>🔎 Discover targets</b>
+      any time to have Claude suggest a fresh batch.</p>
+    </details>
+
+    <div class="stats" id="stats"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="list"></div>
+
+    <div class="card">
+      <div class="name">Add a custom target</div>
+      <p class="notes">Great for Quora: paste a specific <em>question</em> URL, pick channel “quora”, then Generate an answer draft.</p>
+      <div class="add">
+        <input id="a_name" placeholder="Name (e.g. Quora — how to list skills)">
+        <input id="a_url" placeholder="https://…">
+        <select id="a_channel">
+          <option value="directory">directory</option>
+          <option value="bookmarking">bookmarking</option>
+          <option value="quora">quora</option>
+        </select>
+        <input id="a_notes" placeholder="Notes (optional)">
+        <button class="primary full" onclick="addTarget()">Add target</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const FN = '/.netlify/functions';
+let TOKEN = localStorage.getItem('seoToken') || '';
+let STATE = { targets: [] };
+let TAB = 'directory';
+const CHANNELS = [['directory','Directories'],['quora','Quora'],['bookmarking','Bookmarking'],['all','All']];
+const LS_STATE = 'seoState_v1';  // working state lives in the browser (no server store needed)
+function persist(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(STATE)); }catch(e){} }
+function slugify(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60); }
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+async function api(path, opts={}){
+  const r = await fetch(FN+path, {
+    ...opts,
+    headers: {'Content-Type':'application/json','x-seo-token':TOKEN, ...(opts.headers||{})}
+  });
+  if(r.status===401) throw new Error('unauthorized');
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error||('HTTP '+r.status));
+  return j;
+}
+
+async function unlock(){
+  TOKEN = document.getElementById('tokenInput').value.trim();
+  if(!TOKEN) return;
+  try{
+    const seed = await api('/seo-submissions');           // validates the token + returns the curated seed
+    localStorage.setItem('seoToken', TOKEN);
+    const saved = localStorage.getItem(LS_STATE);          // resume prior work if any
+    STATE = saved ? JSON.parse(saved) : seed;
+    if(!saved) persist();
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    render();
+  }catch(e){
+    document.getElementById('gateErr').textContent = e.message==='unauthorized' ? 'Wrong token.' : e.message;
+  }
+}
+function lock(){ localStorage.removeItem('seoToken'); location.reload(); }
+
+// All mutations operate on the in-browser STATE and persist to localStorage —
+// no server round-trip, so nothing depends on Netlify Blobs.
+function save(target){
+  if(!target.id) target.id = slugify((target.channel||'custom')+'-'+(target.name||Date.now()));
+  const i = STATE.targets.findIndex(x=>x.id===target.id);
+  if(i>=0) STATE.targets[i] = {...STATE.targets[i], ...target};
+  else STATE.targets.push({status:'todo',submittedUrl:'',draft:null,care:'low',authority:'med',...target});
+  persist(); render();
+}
+function del(id){
+  if(!confirm('Remove this target?')) return;
+  STATE.targets = STATE.targets.filter(x=>x.id!==id);
+  persist(); render();
+}
+async function reseed(){
+  try{
+    const seed = await api('/seo-submissions');
+    const have = new Set(STATE.targets.map(x=>x.id));
+    let added=0; for(const s of seed.targets){ if(!have.has(s.id)){ STATE.targets.push(s); added++; } }
+    persist(); render();
+    toast(added ? ('Restored '+added+' seed target'+(added===1?'':'s')) : 'Seed list already present');
+  }catch(e){ toast(e.message); }
+}
+
+// Auto-discover new targets for the current tab, then merge (dedup) into the list.
+// Directories → Semrush competitor backlinks. Quora → question search. Bookmarking is curated.
+async function discover(btn){
+  const ch = TAB==='all' ? 'directory' : TAB;
+  if(ch==='bookmarking'){ toast('Bookmarking is a curated list — nothing to auto-discover'); return; }
+  const old=btn.textContent; btn.disabled=true; btn.textContent='Finding more…';
+  try{
+    const exclude = STATE.targets.filter(t=>t.channel===ch).map(t=>t.name);   // so we get NEW ones
+    const {candidates=[], note} = await api('/seo-discover', {method:'POST', body:JSON.stringify({channel:ch, exclude})});
+    if(!candidates.length){ toast(note || 'No new targets found'); return; }
+    const have = new Set(STATE.targets.map(x=>x.id));
+    let added=0;
+    for(const c of candidates){ if(c.id && !have.has(c.id)){ STATE.targets.push({status:'todo',submittedUrl:'',draft:null,care:'low',authority:'med',...c}); have.add(c.id); added++; } }
+    persist(); render();
+    toast('Added '+added+' new '+ch+' target'+((added===1)?'':'s'));
+  }catch(e){ toast(e.message); }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
+function addTarget(){
+  const name=document.getElementById('a_name').value.trim();
+  const url=document.getElementById('a_url').value.trim();
+  if(!name||!url){toast('Name and URL required');return;}
+  save({name, url, channel:document.getElementById('a_channel').value, notes:document.getElementById('a_notes').value.trim()});
+  document.getElementById('a_name').value=document.getElementById('a_url').value=document.getElementById('a_notes').value='';
+  toast('Added');
+}
+
+function setStatus(id, status){
+  const t = STATE.targets.find(x=>x.id===id); if(!t) return;
+  t.status = status; save(t);
+}
+function setSubmittedUrl(id, url){
+  const t = STATE.targets.find(x=>x.id===id); if(!t) return;
+  t.submittedUrl = url; save(t);
+}
+
+async function generate(id, btn){
+  const t = STATE.targets.find(x=>x.id===id); if(!t) return;
+  btn.disabled=true; const old=btn.textContent; btn.textContent='Generating…';
+  try{
+    const {draft} = await api('/seo-draft', {method:'POST', body:JSON.stringify({target:t})});
+    t.draft = draft;
+    if(t.status==='todo') t.status='drafted';
+    await save(t);
+    // auto-open the draft
+    const d=document.querySelector('[data-draft="'+id+'"]'); if(d) d.classList.add('show');
+    toast('Draft ready');
+  }catch(e){ toast(e.message); }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
+
+function copy(text, label){
+  navigator.clipboard.writeText(text).then(()=>toast((label||'Copied')+' copied'));
+}
+
+
+// One-click assisted submit: copy the best prepared content, open the submission
+// page, and mark the row Submitted. True hands-off posting to Quora/directories
+// isn't done here on purpose — those platforms ban automation and it risks a
+// Google penalty on resume4u.help. This makes it "click → paste → done".
+function primaryContent(t){
+  const d=t.draft; if(!d) return '';
+  if(t.channel==='quora') return [d.answer, d.disclosure].filter(Boolean).join('\n\n');
+  return d.long || d.medium || d.short || d.tagline || d.raw || '';
+}
+async function submitTarget(id){
+  const t = STATE.targets.find(x=>x.id===id); if(!t) return;
+  const content = primaryContent(t);
+  if(content){ try{ await navigator.clipboard.writeText(content); }catch{} }
+  window.open(t.url, '_blank', 'noopener');
+  if(t.status==='todo' || t.status==='drafted'){ t.status='submitted'; await save(t); }
+  else render();
+  toast(content ? 'Copied + opened — paste on the site & submit' : 'Opened — generate copy first for one-paste submit');
+}
+
+function copyLine(label, value){
+  if(value==null||value==='') return '';
+  const id='c'+Math.random().toString(36).slice(2,8);
+  window['__'+id]=value;
+  return `<div class="field"><label>${esc(label)}</label><div class="copyline">
+    <div class="val">${esc(value)}</div>
+    <button class="small" onclick="copy(window['__${id}'],'${esc(label)}')">Copy</button></div></div>`;
+}
+
+function draftHtml(t){
+  const d=t.draft; if(!d) return '';
+  if(d.raw) return copyLine('Draft', d.raw);
+  if(t.channel==='quora'){
+    return copyLine('Answer', d.answer) + copyLine('Disclosure line', d.disclosure);
+  }
+  return copyLine('Tagline', d.tagline)
+    + copyLine('Short (~140)', d.short)
+    + copyLine('Medium (~250)', d.medium)
+    + copyLine('Long (~600)', d.long)
+    + copyLine('Tags', Array.isArray(d.tags)? d.tags.join(', ') : d.tags)
+    + copyLine('Category', d.category);
+}
+
+function render(){
+  // tabs
+  document.getElementById('tabs').innerHTML = CHANNELS.map(([k,label])=>{
+    const n = k==='all'? STATE.targets.length : STATE.targets.filter(t=>t.channel===k).length;
+    return `<div class="tab ${TAB===k?'active':''}" onclick="TAB='${k}';render()">${label} <span class="muted">${n}</span></div>`;
+  }).join('');
+
+  // stats
+  const s = {todo:0,drafted:0,submitted:0,live:0};
+  STATE.targets.forEach(t=>{ if(s[t.status]!=null) s[t.status]++; });
+  document.getElementById('stats').innerHTML =
+    [['Targets',STATE.targets.length],['To do',s.todo],['Drafted',s.drafted],['Submitted',s.submitted],['Live links',s.live]]
+    .map(([l,v])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  // list
+  const items = STATE.targets.filter(t=> TAB==='all' || t.channel===TAB);
+  const statuses=['todo','drafted','submitted','live','rejected','skipped'];
+  document.getElementById('list').innerHTML = items.length ? items.map(t=>`
+    <div class="card">
+      <div class="row">
+        <div class="grow">
+          <div class="name">${esc(t.name)}
+            <span class="chip ${t.authority==='high'?'hi':''}">${esc(t.authority)} authority</span>
+            ${t.care==='high'?'<span class="chip care-high">read rules first</span>':''}
+            ${t.source && t.source!=='seed' ? `<span class="chip" style="color:#a9e6c0">auto · ${esc(t.source)}</span>` : ''}
+          </div>
+          <div class="notes">${esc(t.notes)}</div>
+          <div class="notes"><a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.url)}</a></div>
+        </div>
+        <select class="status status-${t.status}" onchange="setStatus('${t.id}', this.value)">
+          ${statuses.map(x=>`<option value="${x}" ${t.status===x?'selected':''}>${x}</option>`).join('')}
+        </select>
+      </div>
+      <div class="actions">
+        <button class="small submit" onclick="submitTarget('${t.id}')" title="Copies the prepared content and opens the submission page, then marks this Submitted">Submit ↗</button>
+        <button class="small primary" onclick="generate('${t.id}', this)">${t.draft?'Regenerate copy':'Generate copy'}</button>
+        ${t.draft?`<button class="small" onclick="document.querySelector('[data-draft=\\'${t.id}\\']').classList.toggle('show')">Show / hide draft</button>`:''}
+        <button class="small" onclick="del('${t.id}')">Delete</button>
+      </div>
+      ${(t.status==='submitted'||t.status==='live')?`<div class="field" style="margin-top:10px"><label>Resulting backlink URL (for tracking)</label>
+        <input value="${esc(t.submittedUrl||'')}" placeholder="https://…" onchange="setSubmittedUrl('${t.id}', this.value)"></div>`:''}
+      <div class="draft ${t.draft?'':''}" data-draft="${t.id}">${draftHtml(t)}</div>
+    </div>`).join('') : `<p class="muted">No targets in this tab.</p>`;
+}
+
+// auto-unlock if token remembered
+if(TOKEN){ document.getElementById('tokenInput')&&(document.getElementById('tokenInput').value=TOKEN); unlock(); }
+</script>
+</body>
+</html>
