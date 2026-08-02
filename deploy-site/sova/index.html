@@ -91,7 +91,8 @@
   .mini-btn{font:inherit;font-size:13.5px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:7px 12px}
 
   .promptbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.6;
-    white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#3a352d}
+    white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#3a352d;transition:background .25s,border-color .25s}
+  .promptbox.flash{background:var(--tint);border-color:var(--accent)}
   .pcard{padding:16px}
   .prow{display:flex;gap:8px;margin-top:12px}
   .prow .btn{flex:1}
@@ -328,8 +329,18 @@ const CHIPS=['More detailed','More concise','Add examples','Numbered list','Expe
 const CHIPMAP={'more detailed':'Go deeper with step-by-step detail.','more concise':'Keep the answer short and to the point.','add examples':'Include 2–3 concrete examples.','numbered list':'Format the answer as a clean numbered list.','expert role':'Answer from the perspective of a seasoned expert.'};
 function resetChat(){$('chatlog').innerHTML='';$('chatchips').innerHTML=CHIPS.map(c=>`<button onclick="sendChat('${c}')">${c}</button>`).join('');}
 function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('chatlog').appendChild(d);$('chatlog').scrollTop=$('chatlog').scrollHeight;}
-function sendChat(preset){const txt=preset||$('chatin').value.trim();if(!txt)return;$('chatin').value='';addMsg('you',txt);
-  extras.push(CHIPMAP[txt.toLowerCase()]||txt);refreshPrompt();addMsg('bot','Prompt updated ✓');}
+function flashPrompt(){const el=$('promptBox');el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),600);}
+function sendChat(preset){
+  const txt=(preset||$('chatin').value).trim();
+  if(!txt){$('chatin').focus();return;}
+  $('chatin').value='';$('chatin').focus();
+  addMsg('you',txt);
+  const dir=CHIPMAP[txt.toLowerCase()]||txt;
+  extras.push(dir);
+  refreshPrompt();flashPrompt();
+  addMsg('bot','Added to your prompt: “'+dir.replace(/\.$/,'')+'”. See it updated above ↑');
+  toast('Prompt updated ✓');
+}
 
 const canvas=$('card'),ctx=canvas.getContext('2d');
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
