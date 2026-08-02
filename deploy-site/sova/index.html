@@ -137,13 +137,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22.5"/></svg>
         <span id="micLabel">Voice</span>
       </button>
-      <button class="addimg" onclick="document.getElementById('file').click()" title="Add a photo to your card">
+      <button class="addimg" onclick="document.getElementById('file').click()" title="Read a photo’s content into your prompt">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
         Add photo
       </button>
       <button class="btn" id="goBtn" onclick="run()">Create prompt</button>
     </div>
-    <div class="photochip" id="photochip"><b>Photo added</b> — it’ll be your card background · <a onclick="clearPhoto()">remove</a></div>
+    <input type="file" id="file" accept="image/*" style="display:none">
+    <div class="photochip" id="photochip"></div>
     <div class="try">Try: <span id="examples"></span></div>
   </div>
 
@@ -190,22 +191,6 @@
       <div class="colors" style="margin-top:12px">Custom
         <input type="color" id="c1" value="#1b1a17"> <input type="color" id="c2" value="#b45309">
         <button class="mini-btn" onclick="useCustom()">Use these</button>
-      </div>
-      <div class="lab mt">Your photo (optional)</div>
-      <div class="row">
-        <button onclick="document.getElementById('file').click()">Upload photo</button>
-        <button onclick="startSelfie()">Selfie</button>
-        <button onclick="clearPhoto()">Remove</button>
-        <input type="file" id="file" accept="image/*" style="display:none">
-      </div>
-      <video id="cam" playsinline></video>
-      <div class="row hidden" id="camrow" style="margin-top:10px">
-        <button class="solid" onclick="capture()">Capture</button>
-        <button onclick="stopSelfie()">Cancel</button>
-      </div>
-      <div id="ovlwrap" class="hidden" style="margin-top:16px">
-        <div class="lab">Photo darkness</div>
-        <input type="range" id="ovl" min="0.25" max="0.9" step="0.05" value="0.8">
       </div>
     </div>
 
@@ -263,13 +248,15 @@ function fmt(t){t=(t||'').toLowerCase();
   if(/compare|vs |versus|difference/.test(t))return' Compare the options side by side.';
   if(/list|ideas|tips|ways|examples/.test(t))return' Use a short, scannable list.';
   return'';}
-function buildPrompt(q){const topic=cleanQ(q);const r=role(topic),f=fmt(topic);
-  const img=photoImg?' Use the attached image as key context.':'';
+function buildPrompt(q){const topic=cleanQ(q);const r=role(topic||imgContent);const f=fmt(topic);
+  const ctx=imgContent?`\n\nUse this content from an attached image as context:\n"""\n${imgContent}\n"""`:'';
+  const ask=topic?`Answer this clearly and practically: "${topic}".`
+                 :`Read the image content below, then give the most useful response — explain it, solve it, or summarise it, whichever fits best.`;
   const extra=extras.length?(' Also: '+extras.join(' ').replace(/\s*\.?\s*$/,'')+'.'):'';
   const V=[
-    `You are ${r}. Answer this clearly and practically: "${topic}".${f} Back your points with specific detail, flag any important caveats, and end with a one-line takeaway. Use plain, confident language — no filler.${img}${extra}`,
-    `You are ${r} with deep expertise. Answer in depth: "${topic}". Open with a one-sentence summary, then explain with reasoning and concrete examples.${f} Finish with 2–3 practical takeaways, and be honest about anything uncertain.${img}${extra}`,
-    `You are ${r}. Give a concise, genuinely useful answer to: "${topic}".${f} Keep only the essentials and the specific details — no fluff.${img}${extra}`
+    `You are ${r}. ${ask}${f} Back your points with specific detail, flag any important caveats, and end with a one-line takeaway. Use plain, confident language — no filler.${extra}${ctx}`,
+    `You are ${r} with deep expertise. ${topic?`Answer in depth: "${topic}".`:'Study the image content below and respond in depth.'} Open with a one-sentence summary, then explain with reasoning and concrete examples.${f} Finish with 2–3 practical takeaways, and be honest about anything uncertain.${extra}${ctx}`,
+    `You are ${r}. ${topic?`Give a concise, genuinely useful answer to: "${topic}".`:'Give a concise, useful response to the image content below.'}${f} Keep only the essentials and the specific details — no fluff.${extra}${ctx}`
   ];
   return V[styleIdx%V.length];}
 function refreshPrompt(){PROMPT=buildPrompt(lastQ);$('promptBox').textContent=PROMPT;renderCard();}
@@ -287,8 +274,7 @@ function demoAnswer(q){const t=q.toLowerCase();
 
 let lastQ='',PROMPT='';
 function run(){let q=$('q').value.trim();
-  if(!q&&photoImg) q='Describe and analyse the image I am attaching, in detail.';
-  if(!q){toast('Type a question or add an image');return;}
+  if(!q&&!imgContent){toast('Type a question or add a photo');return;}
   lastQ=q;styleIdx=0;extras=[];resetChat();
   PROMPT=buildPrompt(q);$('promptBox').textContent=PROMPT;renderCard();
   $('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});}
@@ -303,27 +289,37 @@ const THEMES={
   forest:{bg:['#dcfce7','#86efac'],ink:'#052e16',accent:'#166534'},
   rose:{bg:['#ffe4e6','#fda4af'],ink:'#4c0519',accent:'#9f1239'},
 };
-let theme='slate',custom=null,photoImg=null,photoB64=null,photoMime='',textScale=1,aspect='portrait',overlay=0.8;
+let theme='slate',custom=null,photoImg=null,imgContent='',textScale=1,aspect='portrait',overlay=0.8;
 const SHAPES={portrait:[1080,1350],square:[1080,1080],story:[1080,1920]};
 $('themes').innerHTML=Object.keys(THEMES).map(k=>`<span class="theme ${k===theme?'sel':''}" data-t="${k}" title="${k}" style="background:linear-gradient(135deg,${THEMES[k].bg[0]},${THEMES[k].bg[1]})"></span>`).join('');
 $('themes').addEventListener('click',e=>{const c=e.target.closest('[data-t]');if(c){theme=c.getAttribute('data-t');custom=null;[...document.querySelectorAll('.theme')].forEach(x=>x.classList.toggle('sel',x===c));renderCard();}});
 $('aspect').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b){aspect=b.getAttribute('data-a');[...$('aspect').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
 $('tsize').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){textScale=+b.getAttribute('data-s');[...$('tsize').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
-$('ovl').addEventListener('input',e=>{overlay=+e.target.value;renderCard();});
 function lum(hex){const n=parseInt(hex.slice(1),16);return (0.2126*(n>>16&255)+0.7152*(n>>8&255)+0.0722*(n&255))/255;}
 function useCustom(){const a=$('c1').value,b=$('c2').value;const dark=(lum(a)+lum(b))/2<0.55;
   custom={bg:[a,b],ink:dark?'#ffffff':'#161616',accent:dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.55)'};theme='__custom';
   [...document.querySelectorAll('.theme')].forEach(x=>x.classList.remove('sel'));renderCard();toast('Custom colours applied');}
 
+// Read the photo's content (text + subject) via the site's vision function.
+async function readPhoto(b64,mime){
+  const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt:'Extract the content of this image as plain text. Transcribe any visible text exactly, and briefly note the key objects or subject. Output only the extracted content — no preamble.',images:[b64],imageMimeType:mime})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.text) throw new Error(j.error||'read failed');
+  return String(j.text).trim();
+}
 $('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
-  const fr=new FileReader();fr.onload=()=>{photoB64=String(fr.result).split(',')[1];photoMime=f.type||'image/jpeg';
-    const img=new Image();img.onload=()=>{photoImg=img;$('ovlwrap').classList.remove('hidden');$('photochip').classList.add('on');renderCard();toast('Photo added');};img.src=fr.result;};
-  fr.readAsDataURL(f);});
-function clearPhoto(r){photoImg=null;photoB64=null;photoMime='';$('ovlwrap').classList.add('hidden');$('photochip').classList.remove('on');if(r!==false)renderCard();}
-let stream=null;
-async function startSelfie(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});const v=$('cam');v.srcObject=stream;await v.play();v.style.display='block';$('camrow').classList.remove('hidden');}catch(e){toast('Camera blocked here — use Upload instead');}}
-function stopSelfie(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('cam').style.display='none';$('camrow').classList.add('hidden');}
-function capture(){const v=$('cam'),c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const url=c.toDataURL('image/png');photoB64=url.split(',')[1];photoMime='image/png';const img=new Image();img.onload=()=>{photoImg=img;$('ovlwrap').classList.remove('hidden');$('photochip').classList.add('on');renderCard();toast('Captured');};img.src=url;stopSelfie();}
+  const fr=new FileReader();
+  fr.onload=async()=>{const b64=String(fr.result).split(',')[1],mime=f.type||'image/jpeg';
+    $('photochip').classList.add('on');$('photochip').innerHTML='<b>Reading the photo…</b>';
+    try{imgContent=await readPhoto(b64,mime);
+      const peek=imgContent.length>90?imgContent.slice(0,90)+'…':imgContent;
+      $('photochip').innerHTML='<b>Photo read ✓</b> — added to your prompt: “'+peek.replace(/[<>]/g,'')+'” · <a onclick="clearPhoto()">remove</a>';
+      refreshPrompt();toast('Photo content added');}
+    catch(err){imgContent='';$('photochip').innerHTML='<b>Couldn’t read that photo</b> — try another · <a onclick="clearPhoto()">remove</a>';toast('Could not read the image');}
+  };
+  fr.readAsDataURL(f);e.target.value='';});
+function clearPhoto(r){imgContent='';$('photochip').classList.remove('on');$('photochip').innerHTML='';if(r!==false)refreshPrompt();}
 
 const CHIPS=['More detailed','More concise','Add examples','Numbered list','Expert role'];
 const CHIPMAP={'more detailed':'Go deeper with step-by-step detail.','more concise':'Keep the answer short and to the point.','add examples':'Include 2–3 concrete examples.','numbered list':'Format the answer as a clean numbered list.','expert role':'Answer from the perspective of a seasoned expert.'};
@@ -388,10 +384,7 @@ function renderCard(){
   canvas.width=W;canvas.height=H;
   // ── background ──
   let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
-  if(photoImg){const ir=photoImg.width/photoImg.height,cr=W/H;let dw,dh,dx,dy;
-    if(ir>cr){dh=H;dw=H*ir;dx=(W-dw)/2;dy=0;}else{dw=W;dh=W/ir;dx=0;dy=(H-dh)/2;}
-    ctx.drawImage(photoImg,dx,dy,dw,dh);const ov=ctx.createLinearGradient(0,0,0,H);ov.addColorStop(0,'rgba(10,10,12,'+(overlay*.5)+')');ov.addColorStop(1,'rgba(10,10,12,'+overlay+')');ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);t={ink:'#ffffff',accent:'rgba(255,255,255,.72)'};}
-  else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
   ctx.textBaseline='alphabetic';
   // ── header: wordmark + small PROMPT label ──
   ctx.fillStyle=t.accent;roundRect(pad,74*s-22*s,26*s,26*s,7*s);ctx.fill();
