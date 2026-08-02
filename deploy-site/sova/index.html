@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Sova — Create the perfect prompt for anything</title>
+<style>
+  /* Professional, authentic, light. Warm-neutral paper, hairline rules,
+     one restrained deep-amber accent (the resume4u note). No emoji chrome. */
+  :root{
+    --paper:#faf9f7; --panel:#ffffff; --ink:#1b1a17; --muted:#6f6a61; --faint:#98928a;
+    --line:#e7e2da; --line-soft:#efeae2;
+    --accent:#b45309; --accent-ink:#ffffff; --tint:#f6efe3;
+    --radius:14px;
+    --shadow:0 1px 1px rgba(30,24,12,.03), 0 6px 22px rgba(30,24,12,.05);
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.62 var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:552px;margin:0 auto;padding:40px 20px 96px}
+
+  .head{text-align:center;margin-bottom:20px}
+  .mark{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
+  .mark .sq{width:22px;height:22px;border-radius:6px;background:var(--accent);position:relative}
+  .mark .sq::after{content:"";position:absolute;inset:6px 6px auto auto;width:6px;height:6px;border-radius:2px;background:var(--paper)}
+  .mark .nm{font-weight:700;font-size:17px;letter-spacing:-.01em}
+  h1{font-size:31px;line-height:1.14;letter-spacing:-.03em;font-weight:700;margin:18px 0 8px;text-wrap:balance}
+  .sub{color:var(--muted);margin:0 auto;max-width:34ch;font-size:16px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .ask{padding:8px 16px 16px}
+  textarea{width:100%;background:transparent;color:var(--ink);border:none;font:inherit;font-size:19px;line-height:1.5;resize:none;min-height:70px;outline:none;padding:16px 4px 8px}
+  textarea::placeholder{color:var(--faint)}
+  .askbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .addimg.rec{border-color:#c0392b;color:#c0392b;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.45}}
+  .addimg{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
+    cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 14px;transition:.15s;white-space:nowrap}
+  .addimg:hover{border-color:var(--ink);color:var(--ink)}
+  .addimg svg{width:17px;height:17px}
+  .btn{flex:1;text-align:center;font:inherit;font-weight:650;font-size:16px;letter-spacing:-.01em;cursor:pointer;
+    background:var(--accent);color:var(--accent-ink);border:none;border-radius:11px;padding:13px;transition:filter .15s}
+  .btn:hover{filter:brightness(1.06)} .btn:disabled{opacity:.55;cursor:default}
+  .btn.full{width:100%;flex:none}
+  .photochip{display:none;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+  .photochip.on{display:flex}
+  .photochip b{color:var(--ink);font-weight:600}
+  .photochip a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600}
+  .try{margin:14px 2px 0;font-size:13.5px;color:var(--faint);text-align:center}
+  .try a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);cursor:pointer;display:inline-block;margin:3px 6px;padding-bottom:1px}
+  .try a:hover{border-color:var(--accent);color:var(--accent)}
+
+  .result{margin-top:20px;display:none}
+  .result.show{display:block;animation:fade .45s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .stage{position:relative;display:grid;place-items:center;padding:26px 20px 10px}
+  .stage::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%, var(--tint), transparent 62%);border-radius:var(--radius)}
+  .preview{position:relative;display:grid;place-items:center}
+  canvas#card{width:100%;max-width:300px;height:auto;border-radius:16px;box-shadow:0 10px 34px rgba(30,24,12,.16)}
+  .brandline{text-align:center;margin:6px 0 18px;font-size:13.5px;color:var(--muted)}
+  .brandline a{color:var(--accent);font-weight:600;text-decoration:none}
+  .brandline a:hover{text-decoration:underline}
+  .dlwrap{padding:0 18px 18px}
+
+  .tabs{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .tabs a{color:var(--ink);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 15px;transition:.15s}
+  .tabs a:hover{border-color:var(--ink)}
+  .tabs a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .drawer{display:none;margin-top:12px;padding:18px}
+  .drawer.show{display:block}
+  .lab{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 9px}
+  .lab.mt{margin-top:18px}
+  .seg{display:flex;gap:7px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:80px;font:inherit;font-size:14px;cursor:pointer;border:1px solid var(--line);
+    background:var(--paper);color:var(--ink);border-radius:9px;padding:9px 8px;transition:.15s}
+  .seg button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+  .themes{display:flex;gap:9px;flex-wrap:wrap}
+  .theme{width:36px;height:36px;border-radius:9px;cursor:pointer;border:1.5px solid var(--line-soft)}
+  .theme.sel{outline:2px solid var(--ink);outline-offset:1px;border-color:transparent}
+  .colors{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+  input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer;padding:2px}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row button{font:inherit;font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:9px;padding:9px 13px;transition:.15s}
+  .row button:hover{border-color:var(--ink)}
+  .row button.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+  video#cam{width:100%;max-width:280px;border-radius:11px;display:none;margin:12px auto 0}
+  .mini-btn{font:inherit;font-size:13.5px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:7px 12px}
+
+  .promptbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.6;
+    white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#3a352d;transition:background .25s,border-color .25s}
+  .promptbox.flash{background:var(--tint);border-color:var(--accent)}
+  .pcard{padding:16px}
+  .prow{display:flex;gap:8px;margin-top:12px}
+  .prow .btn{flex:1}
+  .prow .ghost{font:inherit;font-weight:600;font-size:15px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:11px;padding:0 18px;white-space:nowrap}
+  .prow .ghost:hover{border-color:var(--ink)}
+  .ailinks{margin-top:12px;text-align:center;font-size:13.5px;color:var(--muted)}
+  .ailinks a{color:var(--accent);text-decoration:none;font-weight:600;margin:0 5px}
+  .ailinks a:hover{text-decoration:underline}
+  .section-lab{text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:26px 0 12px}
+
+  .chatlog{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:210px;overflow-y:auto}
+  .msg{padding:9px 13px;border-radius:12px;font-size:14.5px;max-width:86%;line-height:1.45}
+  .msg.you{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+  .chips button{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:99px;padding:6px 13px;transition:.15s}
+  .chips button:hover{border-color:var(--accent);color:var(--accent)}
+  .chatin{display:flex;gap:8px}
+  .chatin input{flex:1;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit;font-size:15px;outline:none}
+  .chatin input:focus{border-color:var(--ink)}
+  .chatin button{font:inherit;font-weight:650;cursor:pointer;border:none;background:var(--accent);color:#fff;border-radius:10px;padding:0 18px}
+
+  .foot{text-align:center;color:var(--faint);font-size:12.5px;margin-top:26px;line-height:1.5}
+  .hidden{display:none}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);opacity:0;
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;transition:.2s;pointer-events:none;z-index:9}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <a class="mark" href="https://resume4u.help" target="_blank" rel="noopener"><span class="sq"></span><span class="nm">Sova</span></a>
+    <h1>Create the perfect prompt<br>for anything.</h1>
+    <p class="sub">Type it or add an image — get a ready-to-use prompt for any AI.</p>
+  </div>
+
+  <div class="card ask">
+    <textarea id="q" rows="2" placeholder="Ask anything…"></textarea>
+    <div class="askbar">
+      <button class="addimg" id="micBtn" onclick="toggleVoice()" title="Speak your question">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22.5"/></svg>
+        <span id="micLabel">Voice</span>
+      </button>
+      <button class="addimg" onclick="document.getElementById('file').click()" title="Read a photo’s content into your prompt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Add photo
+      </button>
+      <button class="btn" id="goBtn" onclick="run()">Create prompt</button>
+    </div>
+    <input type="file" id="file" accept="image/*" style="display:none">
+    <div class="photochip" id="photochip"></div>
+    <div class="try">Try: <span id="examples"></span></div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="card pcard">
+      <div class="lab">Your prompt — copy into any AI</div>
+      <div class="promptbox" id="promptBox"></div>
+      <div class="prow">
+        <button class="btn" onclick="copyPrompt()">Copy prompt</button>
+        <button class="ghost" onclick="recreate()">Try another</button>
+      </div>
+      <div class="ailinks">Open in <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a> · <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · <a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini</a></div>
+    </div>
+
+    <div class="section-lab">Share your prompt as an image</div>
+    <div class="card">
+      <div class="stage"><div class="preview"><canvas id="card" width="1080" height="1350"></canvas></div></div>
+      <div class="brandline">Every image is marked <a href="https://resume4u.help" target="_blank" rel="noopener">Powered by resume4u.help</a></div>
+      <div class="dlwrap"><button class="btn full" onclick="downloadCard()">Download image</button></div>
+    </div>
+
+    <div class="tabs">
+      <a id="tabLook" onclick="only('drawerLook')">Edit image</a>
+      <a id="tabChat" onclick="only('drawerChat')">Refine</a>
+      <a onclick="startOver()">New question</a>
+    </div>
+
+    <!-- EDIT -->
+    <div class="card drawer" id="drawerLook">
+      <div class="lab">Shape</div>
+      <div class="seg" id="aspect">
+        <button data-a="portrait" class="on">Portrait</button>
+        <button data-a="square">Square</button>
+        <button data-a="story">Story</button>
+      </div>
+      <div class="lab mt">Text size</div>
+      <div class="seg" id="tsize">
+        <button data-s="0.85">Small</button>
+        <button data-s="1" class="on">Medium</button>
+        <button data-s="1.18">Large</button>
+      </div>
+      <div class="lab mt">Style</div>
+      <div class="seg" id="cstyle">
+        <button data-c="gradient" class="on">Gradient</button>
+        <button data-c="solid">Solid</button>
+        <button data-c="frame">Frame</button>
+        <button data-c="dots">Dots</button>
+      </div>
+      <div class="lab mt">Colour</div>
+      <div class="themes" id="themes"></div>
+      <div class="colors" style="margin-top:12px">Custom
+        <input type="color" id="c1" value="#1b1a17"> <input type="color" id="c2" value="#b45309">
+        <button class="mini-btn" onclick="useCustom()">Use these</button>
+      </div>
+    </div>
+
+    <!-- REFINE -->
+    <div class="card drawer" id="drawerChat">
+      <div class="lab">Refine your prompt — add detail, a format, or a role</div>
+      <div class="chatlog" id="chatlog"></div>
+      <div class="chips" id="chatchips"></div>
+      <div class="chatin">
+        <input id="chatin" placeholder="e.g. add a role, set a format, add a constraint…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">Sova · a resume4u.help tool · UAT</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1500);}
+const DRAWERS=['drawerLook','drawerChat'],TABS={drawerLook:'tabLook',drawerChat:'tabChat'};
+function only(id){const open=$(id).classList.contains('show');
+  DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});
+  if(!open){$(id).classList.add('show');$(TABS[id]).classList.add('on');}}
+
+const EXAMPLES=[
+  'When do working people feel most tired during the day?',
+  'How do I answer “tell me about yourself” in an interview?',
+  'A simple morning routine to feel more energetic',
+];
+$('examples').innerHTML=EXAMPLES.map((e,i)=>`<a data-i="${i}">${e.length>28?e.slice(0,28)+'…':e}</a>`).join('');
+$('examples').addEventListener('click',e=>{const a=e.target.closest('[data-i]');if(a){$('q').value=EXAMPLES[+a.getAttribute('data-i')];run();}});
+
+function role(t){t=t.toLowerCase();
+  if(/resume|cv|cover letter|job|career|interview/.test(t))return'an expert career coach';
+  if(/sleep|tired|energy|health|stress|focus|productiv/.test(t))return'a health & productivity expert';
+  if(/code|program|python|bug|software/.test(t))return'a senior software engineer';
+  if(/market|seo|business|startup|sales/.test(t))return'a marketing strategist';
+  if(/money|invest|finance|budget|save/.test(t))return'a personal-finance advisor';
+  if(/cook|recipe|meal|food/.test(t))return'a professional chef';
+  return'a clear, knowledgeable expert';}
+let styleIdx=0,extras=[];
+// Recover the real question if a generated prompt was pasted back in (prevents nesting).
+function cleanQ(q){q=String(q||'').trim();
+  const quoted=q.match(/:\s*[“"']([^“”"']{6,})[”"']/);   // pasted-back prompt → recover the quoted topic
+  if(quoted)return quoted[1].replace(/\s+/g,' ').trim();
+  const t=q.match(/TASK:\s*([^\n]+)/i);if(t)q=t[1].trim();
+  q=q.split('\n')[0].replace(/^(you are|act as)\b[^.:]*[.:]\s*/i,'');
+  return q.replace(/[“”"']/g,'').replace(/\s+/g,' ').trim();}
+function fmt(t){t=(t||'').toLowerCase();
+  if(/hour|through the day|timeline|schedule/.test(t))return' Lay it out as a simple hour-by-hour timeline.';
+  if(/how to|step|guide|process/.test(t))return' Use clear, numbered steps.';
+  if(/compare|vs |versus|difference/.test(t))return' Compare the options side by side.';
+  if(/list|ideas|tips|ways|examples/.test(t))return' Use a short, scannable list.';
+  return'';}
+function buildPrompt(q){const topic=cleanQ(q);const r=role(topic||imgContent);const f=fmt(topic);
+  const ctx=imgContent?`\n\nUse this content from an attached image as context:\n"""\n${imgContent}\n"""`:'';
+  const ask=topic?`Answer this clearly and practically: "${topic}".`
+                 :`Read the image content below, then give the most useful response — explain it, solve it, or summarise it, whichever fits best.`;
+  const extra=extras.length?(' Also: '+extras.join(' ').replace(/\s*\.?\s*$/,'')+'.'):'';
+  const V=[
+    `You are ${r}. ${ask}${f} Back your points with specific detail, flag any important caveats, and end with a one-line takeaway. Use plain, confident language — no filler.${extra}${ctx}`,
+    `You are ${r} with deep expertise. ${topic?`Answer in depth: "${topic}".`:'Study the image content below and respond in depth.'} Open with a one-sentence summary, then explain with reasoning and concrete examples.${f} Finish with 2–3 practical takeaways, and be honest about anything uncertain.${extra}${ctx}`,
+    `You are ${r}. ${topic?`Give a concise, genuinely useful answer to: "${topic}".`:'Give a concise, useful response to the image content below.'}${f} Keep only the essentials and the specific details — no fluff.${extra}${ctx}`
+  ];
+  return V[styleIdx%V.length];}
+function refreshPrompt(){PROMPT=buildPrompt(lastQ);$('promptBox').textContent=PROMPT;renderCard();}
+function recreate(){styleIdx++;refreshPrompt();toast('Another style');}
+const CANNED={
+  tired:'Energy follows your body clock. For a typical 9–6 worker:\n\n• 6–8am: Groggy — energy still low.\n• 9–11am: Peak focus — best for hard tasks.\n• 1–3pm: The biggest dip — most tired here.\n• 3–5pm: A small second wind.\n• 6–9pm: Winding down; fatigue climbs.\n\nMost people feel most exhausted around 1–3pm.',
+  interview:'Keep it to 60–90 seconds, in three parts:\n\n1) Present: your current role and one strength.\n2) Past: a quick highlight that proves it, with a number.\n3) Future: why you’re excited about this role.\n\nSkip your life story — match your answer to the job.',
+  morning:'A simple 20-minute energy routine:\n\n• Sunlight within 30 minutes of waking.\n• A big glass of water.\n• 5 minutes of light movement or a short walk.\n• 5 slow, deep breaths.\n• Write your single top task for the day.\n\nSmall and consistent beats long and rare.'
+};
+function demoAnswer(q){const t=q.toLowerCase();
+  if(/tired|exhaust|energy|sleep/.test(t))return CANNED.tired;
+  if(/interview|tell me about yourself/.test(t))return CANNED.interview;
+  if(/morning|routine|energetic/.test(t))return CANNED.morning;
+  return `Here’s a clear take on “${q.trim()}”.\n\n• Start with the single most useful point.\n• Add two or three specific, practical details.\n• Keep it short and honest.\n\n(Sample — on resume4u.help the real AI writes a full answer.)`;}
+
+let lastQ='',PROMPT='';
+function run(){let q=$('q').value.trim();
+  if(!q&&!imgContent){toast('Type a question or add a photo');return;}
+  lastQ=q;styleIdx=0;extras=[];resetChat();
+  PROMPT=buildPrompt(q);$('promptBox').textContent=PROMPT;renderCard();
+  $('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});}
+function copyPrompt(){navigator.clipboard.writeText($('promptBox').textContent).then(()=>toast('Prompt copied'));}
+function startOver(){$('q').value='';$('result').classList.remove('show');DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});clearPhoto(false);window.scrollTo({top:0,behavior:'smooth'});$('q').focus();}
+
+const THEMES={
+  slate:{bg:['#ffffff','#eef2f7'],ink:'#111827',accent:'#64748b'},
+  ink:{bg:['#1f2430','#0f1116'],ink:'#ffffff',accent:'#c9cdd6'},
+  amber:{bg:['#fef3c7','#fbbf24'],ink:'#3a2205',accent:'#7a4a08'},
+  ocean:{bg:['#0ea5e9','#2563eb'],ink:'#ffffff',accent:'#e6f2ff'},
+  forest:{bg:['#dcfce7','#86efac'],ink:'#052e16',accent:'#166534'},
+  rose:{bg:['#ffe4e6','#fda4af'],ink:'#4c0519',accent:'#9f1239'},
+  grape:{bg:['#a78bfa','#7c3aed'],ink:'#ffffff',accent:'#ede9fe'},
+  indigo:{bg:['#818cf8','#4338ca'],ink:'#ffffff',accent:'#e0e7ff'},
+  teal:{bg:['#5eead4','#0d9488'],ink:'#04302b',accent:'#f0fdfa'},
+  sunset:{bg:['#fbbf24','#f97316'],ink:'#3a1505',accent:'#7c2d12'},
+  sky:{bg:['#e0f2fe','#7dd3fc'],ink:'#0c4a6e',accent:'#0369a1'},
+  lavender:{bg:['#ede9fe','#c4b5fd'],ink:'#3b0764',accent:'#6d28d9'},
+  charcoal:{bg:['#374151','#111827'],ink:'#ffffff',accent:'#cbd5e1'},
+  cream:{bg:['#fffbeb','#fde68a'],ink:'#422006',accent:'#92400e'},
+};
+let theme='slate',cardStyle='gradient',custom=null,photoImg=null,imgContent='',textScale=1,aspect='portrait',overlay=0.8;
+const SHAPES={portrait:[1080,1350],square:[1080,1080],story:[1080,1920]};
+$('themes').innerHTML=Object.keys(THEMES).map(k=>`<span class="theme ${k===theme?'sel':''}" data-t="${k}" title="${k}" style="background:linear-gradient(135deg,${THEMES[k].bg[0]},${THEMES[k].bg[1]})"></span>`).join('');
+$('themes').addEventListener('click',e=>{const c=e.target.closest('[data-t]');if(c){theme=c.getAttribute('data-t');custom=null;[...document.querySelectorAll('.theme')].forEach(x=>x.classList.toggle('sel',x===c));renderCard();}});
+$('aspect').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b){aspect=b.getAttribute('data-a');[...$('aspect').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
+$('cstyle').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b){cardStyle=b.getAttribute('data-c');[...$('cstyle').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
+$('tsize').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){textScale=+b.getAttribute('data-s');[...$('tsize').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
+function lum(hex){const n=parseInt(hex.slice(1),16);return (0.2126*(n>>16&255)+0.7152*(n>>8&255)+0.0722*(n&255))/255;}
+function useCustom(){const a=$('c1').value,b=$('c2').value;const dark=(lum(a)+lum(b))/2<0.55;
+  custom={bg:[a,b],ink:dark?'#ffffff':'#161616',accent:dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.55)'};theme='__custom';
+  [...document.querySelectorAll('.theme')].forEach(x=>x.classList.remove('sel'));renderCard();toast('Custom colours applied');}
+
+// Read the photo's content (text + subject) via the site's vision function.
+// generate.js reads the image from `imageBase64Array` (not `images`).
+async function readPhoto(b64){
+  const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt:'Extract the content of this image as plain text. Transcribe any visible text exactly, and briefly note the key objects or subject. Output only the extracted content — no preamble.',imageBase64Array:[b64],imageMimeType:'image/jpeg'})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.text) throw new Error(j.error||'read failed');
+  return String(j.text).trim();
+}
+$('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+  const img=new Image();
+  img.onload=async()=>{
+    // downscale so the upload stays small and under the function's size limit
+    const max=1400;let w=img.width,h=img.height;
+    if(Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k);}
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+    const b64=c.toDataURL('image/jpeg',0.85).split(',')[1];
+    URL.revokeObjectURL(img.src);
+    $('photochip').classList.add('on');$('photochip').innerHTML='<b>Reading the photo…</b>';
+    try{imgContent=await readPhoto(b64);
+      const peek=imgContent.length>90?imgContent.slice(0,90)+'…':imgContent;
+      $('photochip').innerHTML='<b>Photo read ✓</b> — added to your prompt: “'+peek.replace(/[<>]/g,'')+'” · <a onclick="clearPhoto()">remove</a>';
+      refreshPrompt();toast('Photo content added');}
+    catch(err){imgContent='';$('photochip').innerHTML='<b>Couldn’t read that photo</b> — try again · <a onclick="clearPhoto()">remove</a>';toast('Could not read the image');}
+  };
+  img.onerror=()=>{toast('Could not open that image');};
+  img.src=URL.createObjectURL(f);e.target.value='';});
+function clearPhoto(r){imgContent='';$('photochip').classList.remove('on');$('photochip').innerHTML='';if(r!==false)refreshPrompt();}
+
+const CHIPS=['More detailed','More concise','Add examples','Numbered list','Expert role'];
+const CHIPMAP={'more detailed':'Go deeper with step-by-step detail.','more concise':'Keep the answer short and to the point.','add examples':'Include 2–3 concrete examples.','numbered list':'Format the answer as a clean numbered list.','expert role':'Answer from the perspective of a seasoned expert.'};
+function resetChat(){$('chatlog').innerHTML='';$('chatchips').innerHTML=CHIPS.map(c=>`<button onclick="sendChat('${c}')">${c}</button>`).join('');}
+function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('chatlog').appendChild(d);$('chatlog').scrollTop=$('chatlog').scrollHeight;}
+function flashPrompt(){const el=$('promptBox');el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),600);}
+function sendChat(preset){
+  const txt=(preset||$('chatin').value).trim();
+  if(!txt){$('chatin').focus();return;}
+  $('chatin').value='';$('chatin').focus();
+  addMsg('you',txt);
+  const dir=CHIPMAP[txt.toLowerCase()]||txt;
+  extras.push(dir);
+  refreshPrompt();flashPrompt();
+  addMsg('bot','Added to your prompt: “'+dir.replace(/\.$/,'')+'”. See it updated above ↑');
+  toast('Prompt updated ✓');
+}
+
+const canvas=$('card'),ctx=canvas.getContext('2d');
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function wrap(text,x,y,maxW,lh,maxLines){const words=String(text).split(/\s+/);let line='',lines=0;
+  for(let i=0;i<words.length;i++){const test=line?line+' '+words[i]:words[i];
+    if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);y+=lh;line=words[i];lines++;
+      if(lines>=maxLines-1){let rest=words.slice(i).join(' ');while(ctx.measureText(rest+'…').width>maxW&&rest.length)rest=rest.slice(0,-1);ctx.fillText(rest+'…',x,y);return y+lh;}}
+    else line=test;}
+  if(line){ctx.fillText(line,x,y);y+=lh;}return y;}
+// Turn the AI's markdown into clean plain text for the card.
+function stripMd(s){return String(s)
+  .replace(/```[\s\S]*?```/g,'')
+  .replace(/^#{1,6}\s*/gm,'')
+  .replace(/\*\*(.*?)\*\*/g,'$1')
+  .replace(/`([^`]+)`/g,'$1')
+  .replace(/^\s*[-*]\s+/gm,'• ')
+  .replace(/\n{3,}/g,'\n\n')
+  .trim();}
+// Break text into wrapped lines for the current ctx.font (blank string = spacer).
+function wrapLines(text,maxW){const out=[];
+  for(const para of String(text).split('\n')){
+    if(!para.trim()){out.push('');continue;}
+    let line='';for(const w of para.split(/\s+/)){const test=line?line+' '+w:w;
+      if(ctx.measureText(test).width>maxW&&line){out.push(line);line=w;}else line=test;}
+    if(line)out.push(line);}
+  return out;}
+function renderCard(){
+  const W=SHAPES[aspect][0],baseH=SHAPES[aspect][1],s=W/1080,pad=96*s,F="'Segoe UI',system-ui,Arial";
+  const a=stripMd(PROMPT||'Your prompt appears here.');
+  const bFont=42*s*textScale, lh=60*s*textScale, paraGap=30*s*textScale, bullGap=12*s*textScale;
+  // ── build blocks (paragraphs + bullets), measured so the card fits it all ──
+  ctx.font=`400 ${bFont}px ${F}`; const bulletIndent=ctx.measureText('•   ').width;
+  const blocks=[];
+  for(const raw of a.split('\n')){
+    const line=raw.trim();
+    if(!line){blocks.push(null);continue;}
+    const bullet=/^•/.test(line);
+    const content=bullet?line.replace(/^•\s*/,''):line;
+    blocks.push({bullet,lines:wrapLines(content, W-pad*2-(bullet?bulletIndent:0))});
+  }
+  // "ask anything" question as a short headline (max 2 lines)
+  const qtext=(lastQ||'').trim(), qFont=48*s, qLh=58*s, qGap=34*s;
+  ctx.font=`700 ${qFont}px ${F}`;let qLines=[];
+  if(qtext){qLines=wrapLines(qtext,W-pad*2);
+    if(qLines.length>2){qLines=qLines.slice(0,2);let l=qLines[1];while(ctx.measureText(l+'…').width>W-pad*2&&l.length)l=l.slice(0,-1);qLines[1]=l+'…';}}
+  const qBlockH=qLines.length?((qLines.length-1)*qLh+84*s):0;
+  let bodyH=0;
+  for(const b of blocks){ if(!b){bodyH+=paraGap*0.55;continue;} bodyH+=b.lines.length*lh+(b.bullet?bullGap:paraGap); }
+  const contentH=qBlockH+bodyH;
+  const headerBottom=205*s, footRes=205*s;
+  const H=Math.max(baseH,Math.ceil(headerBottom+contentH+footRes));
+  canvas.width=W;canvas.height=H;
+  const footerTop=H-footRes+45*s, avail=footerTop-headerBottom;
+  const centered=contentH<avail-30*s, startY=centered?headerBottom+(avail-contentH)/2:headerBottom;
+  // ── background ──
+  let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
+  if(cardStyle==='solid'){ctx.fillStyle=t.bg[1];ctx.fillRect(0,0,W,H);}
+  else if(cardStyle==='frame'){ctx.fillStyle=t.bg[0];ctx.fillRect(0,0,W,H);}
+  else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  // soft top sheen for depth
+  const sh=ctx.createRadialGradient(W*.5,-H*.05,0,W*.5,-H*.05,H*.95);sh.addColorStop(0,'rgba(255,255,255,.12)');sh.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=sh;ctx.fillRect(0,0,W,H);
+  if(cardStyle==='dots'){ctx.fillStyle=t.ink;ctx.globalAlpha=.05;const gap=56*s;for(let yy=gap;yy<H;yy+=gap)for(let xx=gap;xx<W;xx+=gap){ctx.beginPath();ctx.arc(xx,yy,3.2*s,0,7);ctx.fill();}ctx.globalAlpha=1;}
+  if(cardStyle==='frame'){ctx.strokeStyle=t.accent;ctx.globalAlpha=.85;ctx.lineWidth=4*s;const m=34*s;roundRect(m,m,W-2*m,H-2*m,26*s);ctx.stroke();ctx.globalAlpha=1;}
+  ctx.textBaseline='alphabetic';
+  // ── faint quotation motif (sits just above the question) ──
+  if(centered&&startY>360*s){ctx.globalAlpha=.08;ctx.fillStyle=t.ink;ctx.font=`700 ${150*s}px Georgia,'Times New Roman',serif`;ctx.fillText('“',pad-8*s,startY-16*s);ctx.globalAlpha=1;}
+  // ── header: Sova mark + PROMPT pill ──
+  ctx.fillStyle=t.accent;roundRect(pad,74*s-22*s,27*s,27*s,7*s);ctx.fill();
+  ctx.fillStyle=t.bg[0];ctx.globalAlpha=.85;roundRect(pad+17*s,74*s-16*s,6*s,6*s,2*s);ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+40*s,74*s);
+  ctx.font=`700 ${20*s}px ${F}`;const plbl='PROMPT',plw=ctx.measureText(plbl).width,phh=42*s,ppx=20*s,p2w=plw+ppx*2,plx=W-pad-p2w,ply=74*s-phh+9*s;
+  ctx.globalAlpha=.12;ctx.fillStyle=t.ink;roundRect(plx,ply,p2w,phh,phh/2);ctx.fill();
+  ctx.globalAlpha=.72;ctx.fillText(plbl,plx+ppx,ply+phh/2+7*s);ctx.globalAlpha=1;
+  // ── question headline (short) → divider → prompt body ──
+  let by=startY;
+  if(qLines.length){
+    ctx.fillStyle=t.ink;ctx.font=`700 ${qFont}px ${F}`;
+    const lastBase=startY+(qLines.length-1)*qLh;
+    for(const l of qLines){ctx.fillText(l,pad,by);by+=qLh;}
+    const divY=lastBase+28*s;   // just below the question
+    ctx.strokeStyle=t.accent;ctx.globalAlpha=.6;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,divY);ctx.lineTo(pad+92*s,divY);ctx.stroke();ctx.globalAlpha=1;
+    by=divY+56*s;               // comfortable gap before the prompt body
+  }
+  ctx.fillStyle=t.ink;ctx.font=`400 ${bFont}px ${F}`;
+  for(const b of blocks){
+    if(!b){by+=paraGap*0.55;continue;}
+    const x=pad+(b.bullet?bulletIndent:0);
+    for(let i=0;i<b.lines.length;i++){
+      if(b.bullet&&i===0){ctx.fillStyle=t.accent;ctx.fillText('•',pad,by);ctx.fillStyle=t.ink;}
+      ctx.fillText(b.lines[i],x,by);by+=lh;
+    }
+    by+=b.bullet?bullGap:paraGap;
+  }
+  // ── footer: a polished "Powered by" badge ──
+  const pre='Powered by ',brand='resume4u.help',bf=25*s;
+  ctx.font=`500 ${bf}px ${F}`;const pw=ctx.measureText(pre).width;
+  ctx.font=`700 ${bf}px ${F}`;const bw=ctx.measureText(brand).width;
+  const mk=24*s,gp=13*s,px=26*s,pillH=60*s,pillW=px*2+mk+gp+pw+bw,pillX=pad,pillY=H-pillH-40*s,rr=pillH/2;
+  // soft glow + pill
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.14)';ctx.shadowBlur=18*s;ctx.shadowOffsetY=4*s;
+  ctx.fillStyle=t.ink;ctx.globalAlpha=.09;roundRect(pillX,pillY,pillW,pillH,rr);ctx.fill();ctx.restore();
+  ctx.globalAlpha=.18;ctx.lineWidth=1.5*s;ctx.strokeStyle=t.ink;roundRect(pillX,pillY,pillW,pillH,rr);ctx.stroke();ctx.globalAlpha=1;
+  // brand mark (accent tile with a light notch, echoing the header)
+  const my=pillY+(pillH-mk)/2;ctx.fillStyle=t.accent;roundRect(pillX+px,my,mk,mk,7*s);ctx.fill();
+  ctx.fillStyle=t.bg[0];ctx.globalAlpha=.9;roundRect(pillX+px+mk-9*s,my+5*s,6*s,6*s,2*s);ctx.fill();ctx.globalAlpha=1;
+  // text, vertically centred in the pill
+  const ty=pillY+pillH/2+bf*0.34,tx=pillX+px+mk+gp;
+  ctx.textBaseline='alphabetic';
+  ctx.globalAlpha=.62;ctx.fillStyle=t.ink;ctx.font=`500 ${bf}px ${F}`;ctx.fillText(pre,tx,ty);
+  ctx.globalAlpha=1;ctx.fillStyle=t.ink;ctx.font=`700 ${bf}px ${F}`;ctx.fillText(brand,tx+pw,ty);
+}
+
+function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
+  try{if(window.claude&&window.claude.downloads){await window.claude.downloads.save({filename,data:blob});toast('Saved');}
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}}
+  catch(err){if(!(err&&err.code==='declined')){try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();}catch(e){toast('Save not available here');}}}
+},'image/png');}
+
+// ── Voice input (speech-to-text) ─────────────────────────────────────────────
+let recog=null,listening=false;
+function toggleVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice input isn’t supported in this browser');return;}
+  if(listening){recog&&recog.stop();return;}
+  recog=new SR();recog.lang='en-US';recog.interimResults=true;recog.continuous=false;
+  const base=$('q').value.trim();
+  recog.onstart=()=>{listening=true;$('micBtn').classList.add('rec');$('micLabel').textContent='Listening…';};
+  recog.onresult=e=>{let txt='';for(let i=0;i<e.results.length;i++)txt+=e.results[i][0].transcript;
+    $('q').value=(base?base+' ':'')+txt;};
+  recog.onerror=ev=>{toast(ev.error==='not-allowed'?'Allow microphone access to use voice':'Mic error — try again');};
+  recog.onend=()=>{listening=false;$('micBtn').classList.remove('rec');$('micLabel').textContent='Voice';};
+  try{recog.start();}catch(e){}
+}
+if(!(window.SpeechRecognition||window.webkitSpeechRecognition)) $('micBtn').style.display='none';
+
+// Show a live sample on load so the landing feels alive (input stays inviting).
+lastQ=EXAMPLES[0]; extras=[]; PROMPT=buildPrompt(lastQ); $('promptBox').textContent=PROMPT; resetChat(); renderCard(); $('result').classList.add('show');
+</script>
+</body>
+</html>
