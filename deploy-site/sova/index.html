@@ -289,7 +289,7 @@ function copyPrompt(){navigator.clipboard.writeText($('promptBox').textContent).
 function startOver(){$('q').value='';$('result').classList.remove('show');DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});clearPhoto(false);window.scrollTo({top:0,behavior:'smooth'});$('q').focus();}
 
 const THEMES={
-  slate:{bg:['#f8fafc','#e2e8f0'],ink:'#0f172a',accent:'#475569'},
+  slate:{bg:['#ffffff','#eef2f7'],ink:'#111827',accent:'#64748b'},
   ink:{bg:['#1f2430','#0f1116'],ink:'#ffffff',accent:'#c9cdd6'},
   amber:{bg:['#fef3c7','#fbbf24'],ink:'#3a2205',accent:'#7a4a08'},
   ocean:{bg:['#0ea5e9','#2563eb'],ink:'#ffffff',accent:'#e6f2ff'},
@@ -351,35 +351,49 @@ function wrapLines(text,maxW){const out=[];
     if(line)out.push(line);}
   return out;}
 function renderCard(){
-  const W=SHAPES[aspect][0],baseH=SHAPES[aspect][1],s=W/1080,pad=90*s,F="'Segoe UI',system-ui,Arial";
-  const q=lastQ||'Ask anything…',a=stripMd(PROMPT||'Your prompt appears here.');
-  const titleLh=66*s,aFont=39*s*textScale,aLh=54*s*textScale;
-  // ── measure first, so the card can grow to fit the whole prompt ──
-  ctx.font=`700 ${56*s}px ${F}`;const qLines=wrapLines(q,W-pad*2);
-  ctx.font=`400 ${aFont}px ${F}`;const bLines=wrapLines(a,W-pad*2);
-  const headTop=200*s, divY=headTop+(qLines.length-1)*titleLh+42*s, bodyTop=divY+50*s;
-  let bodyH=0;for(const l of bLines)bodyH+=(l===''?aLh*0.45:aLh);
-  const H=Math.max(baseH,Math.ceil(bodyTop+bodyH+150*s));
+  const W=SHAPES[aspect][0],baseH=SHAPES[aspect][1],s=W/1080,pad=96*s,F="'Segoe UI',system-ui,Arial";
+  const a=stripMd(PROMPT||'Your prompt appears here.');
+  const bFont=42*s*textScale, lh=60*s*textScale, paraGap=30*s*textScale, bullGap=12*s*textScale;
+  // ── build blocks (paragraphs + bullets), measured so the card fits it all ──
+  ctx.font=`400 ${bFont}px ${F}`; const bulletIndent=ctx.measureText('•   ').width;
+  const blocks=[];
+  for(const raw of a.split('\n')){
+    const line=raw.trim();
+    if(!line){blocks.push(null);continue;}
+    const bullet=/^•/.test(line);
+    const content=bullet?line.replace(/^•\s*/,''):line;
+    blocks.push({bullet,lines:wrapLines(content, W-pad*2-(bullet?bulletIndent:0))});
+  }
+  const bodyTop=200*s;
+  let h=bodyTop;
+  for(const b of blocks){ if(!b){h+=paraGap*0.55;continue;} h+=b.lines.length*lh+(b.bullet?bullGap:paraGap); }
+  const H=Math.max(baseH,Math.ceil(h+120*s));
   canvas.width=W;canvas.height=H;
   // ── background ──
   let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
   if(photoImg){const ir=photoImg.width/photoImg.height,cr=W/H;let dw,dh,dx,dy;
     if(ir>cr){dh=H;dw=H*ir;dx=(W-dw)/2;dy=0;}else{dw=W;dh=W/ir;dx=0;dy=(H-dh)/2;}
-    ctx.drawImage(photoImg,dx,dy,dw,dh);const ov=ctx.createLinearGradient(0,0,0,H);ov.addColorStop(0,'rgba(10,10,12,'+(overlay*.45)+')');ov.addColorStop(1,'rgba(10,10,12,'+overlay+')');ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);t={ink:'#ffffff',accent:'rgba(255,255,255,.82)'};}
+    ctx.drawImage(photoImg,dx,dy,dw,dh);const ov=ctx.createLinearGradient(0,0,0,H);ov.addColorStop(0,'rgba(10,10,12,'+(overlay*.5)+')');ov.addColorStop(1,'rgba(10,10,12,'+overlay+')');ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);t={ink:'#ffffff',accent:'rgba(255,255,255,.72)'};}
   else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
   ctx.textBaseline='alphabetic';
-  // ── wordmark ──
-  ctx.fillStyle=t.accent;roundRect(pad,72*s-22*s,26*s,26*s,7*s);ctx.fill();
-  ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+38*s,72*s);
-  // ── question heading ──
-  ctx.fillStyle=t.ink;ctx.font=`700 ${56*s}px ${F}`;let y=headTop;for(const l of qLines){ctx.fillText(l,pad,y);y+=titleLh;}
-  // ── divider ──
-  ctx.strokeStyle=t.accent;ctx.globalAlpha=.55;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,divY);ctx.lineTo(pad+110*s,divY);ctx.stroke();ctx.globalAlpha=1;
-  // ── prompt body (all of it) ──
-  ctx.fillStyle=t.ink;ctx.font=`400 ${aFont}px ${F}`;let by=bodyTop;
-  for(const l of bLines){if(l===''){by+=aLh*0.45;continue;}ctx.fillText(l,pad,by);by+=aLh;}
+  // ── header: wordmark + small PROMPT label ──
+  ctx.fillStyle=t.accent;roundRect(pad,74*s-22*s,26*s,26*s,7*s);ctx.fill();
+  ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+38*s,74*s);
+  ctx.fillStyle=t.accent;ctx.font=`700 ${21*s}px ${F}`;try{ctx.letterSpacing=(3*s)+'px';}catch(e){}
+  ctx.fillText('PROMPT',W-pad-ctx.measureText('PROMPT').width,74*s);try{ctx.letterSpacing='0px';}catch(e){}
+  // ── prompt body: clean spacing, hanging-indent bullets ──
+  ctx.fillStyle=t.ink;ctx.font=`400 ${bFont}px ${F}`;let by=bodyTop;
+  for(const b of blocks){
+    if(!b){by+=paraGap*0.55;continue;}
+    const x=pad+(b.bullet?bulletIndent:0);
+    for(let i=0;i<b.lines.length;i++){
+      if(b.bullet&&i===0){ctx.fillText('•',pad,by);}
+      ctx.fillText(b.lines[i],x,by);by+=lh;
+    }
+    by+=b.bullet?bullGap:paraGap;
+  }
   // ── footer ──
-  ctx.globalAlpha=.75;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,H-54*s);ctx.globalAlpha=1;
+  ctx.globalAlpha=.7;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,H-56*s);ctx.globalAlpha=1;
 }
 
 function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
