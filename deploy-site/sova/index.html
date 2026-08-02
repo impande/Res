@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Sova — Create the perfect prompt for anything</title>
+<style>
+  /* Professional, authentic, light. Warm-neutral paper, hairline rules,
+     one restrained deep-amber accent (the resume4u note). No emoji chrome. */
+  :root{
+    --paper:#faf9f7; --panel:#ffffff; --ink:#1b1a17; --muted:#6f6a61; --faint:#98928a;
+    --line:#e7e2da; --line-soft:#efeae2;
+    --accent:#b45309; --accent-ink:#ffffff; --tint:#f6efe3;
+    --radius:14px;
+    --shadow:0 1px 1px rgba(30,24,12,.03), 0 6px 22px rgba(30,24,12,.05);
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.62 var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:552px;margin:0 auto;padding:40px 20px 96px}
+
+  .head{text-align:center;margin-bottom:20px}
+  .mark{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
+  .mark .sq{width:22px;height:22px;border-radius:6px;background:var(--accent);position:relative}
+  .mark .sq::after{content:"";position:absolute;inset:6px 6px auto auto;width:6px;height:6px;border-radius:2px;background:var(--paper)}
+  .mark .nm{font-weight:700;font-size:17px;letter-spacing:-.01em}
+  h1{font-size:31px;line-height:1.14;letter-spacing:-.03em;font-weight:700;margin:18px 0 8px;text-wrap:balance}
+  .sub{color:var(--muted);margin:0 auto;max-width:34ch;font-size:16px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .ask{padding:8px 16px 16px}
+  textarea{width:100%;background:transparent;color:var(--ink);border:none;font:inherit;font-size:19px;line-height:1.5;resize:none;min-height:70px;outline:none;padding:16px 4px 8px}
+  textarea::placeholder{color:var(--faint)}
+  .askbar{display:flex;align-items:center;gap:10px}
+  .addimg{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
+    cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 14px;transition:.15s;white-space:nowrap}
+  .addimg:hover{border-color:var(--ink);color:var(--ink)}
+  .addimg svg{width:17px;height:17px}
+  .btn{flex:1;text-align:center;font:inherit;font-weight:650;font-size:16px;letter-spacing:-.01em;cursor:pointer;
+    background:var(--accent);color:var(--accent-ink);border:none;border-radius:11px;padding:13px;transition:filter .15s}
+  .btn:hover{filter:brightness(1.06)} .btn:disabled{opacity:.55;cursor:default}
+  .btn.full{width:100%;flex:none}
+  .photochip{display:none;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+  .photochip.on{display:flex}
+  .photochip b{color:var(--ink);font-weight:600}
+  .photochip a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600}
+  .try{margin:14px 2px 0;font-size:13.5px;color:var(--faint);text-align:center}
+  .try a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);cursor:pointer;display:inline-block;margin:3px 6px;padding-bottom:1px}
+  .try a:hover{border-color:var(--accent);color:var(--accent)}
+
+  .result{margin-top:20px;display:none}
+  .result.show{display:block;animation:fade .45s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .stage{position:relative;display:grid;place-items:center;padding:26px 20px 10px}
+  .stage::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%, var(--tint), transparent 62%);border-radius:var(--radius)}
+  .preview{position:relative;display:grid;place-items:center}
+  canvas#card{width:100%;max-width:300px;height:auto;border-radius:16px;box-shadow:0 10px 34px rgba(30,24,12,.16)}
+  .brandline{text-align:center;margin:6px 0 18px;font-size:13.5px;color:var(--muted)}
+  .brandline a{color:var(--accent);font-weight:600;text-decoration:none}
+  .brandline a:hover{text-decoration:underline}
+  .dlwrap{padding:0 18px 18px}
+
+  .tabs{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .tabs a{color:var(--ink);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 15px;transition:.15s}
+  .tabs a:hover{border-color:var(--ink)}
+  .tabs a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .drawer{display:none;margin-top:12px;padding:18px}
+  .drawer.show{display:block}
+  .lab{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 9px}
+  .lab.mt{margin-top:18px}
+  .seg{display:flex;gap:7px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:80px;font:inherit;font-size:14px;cursor:pointer;border:1px solid var(--line);
+    background:var(--paper);color:var(--ink);border-radius:9px;padding:9px 8px;transition:.15s}
+  .seg button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+  .themes{display:flex;gap:9px;flex-wrap:wrap}
+  .theme{width:36px;height:36px;border-radius:9px;cursor:pointer;border:1.5px solid var(--line-soft)}
+  .theme.sel{outline:2px solid var(--ink);outline-offset:1px;border-color:transparent}
+  .colors{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+  input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer;padding:2px}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row button{font:inherit;font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:9px;padding:9px 13px;transition:.15s}
+  .row button:hover{border-color:var(--ink)}
+  .row button.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+  video#cam{width:100%;max-width:280px;border-radius:11px;display:none;margin:12px auto 0}
+  .mini-btn{font:inherit;font-size:13.5px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:7px 12px}
+
+  .promptbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.6;
+    white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#3a352d}
+  .pcard{padding:16px}
+  .prow{display:flex;gap:8px;margin-top:12px}
+  .prow .btn{flex:1}
+  .prow .ghost{font:inherit;font-weight:600;font-size:15px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:11px;padding:0 18px;white-space:nowrap}
+  .prow .ghost:hover{border-color:var(--ink)}
+  .ailinks{margin-top:12px;text-align:center;font-size:13.5px;color:var(--muted)}
+  .ailinks a{color:var(--accent);text-decoration:none;font-weight:600;margin:0 5px}
+  .ailinks a:hover{text-decoration:underline}
+  .section-lab{text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:26px 0 12px}
+
+  .chatlog{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:210px;overflow-y:auto}
+  .msg{padding:9px 13px;border-radius:12px;font-size:14.5px;max-width:86%;line-height:1.45}
+  .msg.you{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+  .chips button{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:99px;padding:6px 13px;transition:.15s}
+  .chips button:hover{border-color:var(--accent);color:var(--accent)}
+  .chatin{display:flex;gap:8px}
+  .chatin input{flex:1;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit;font-size:15px;outline:none}
+  .chatin input:focus{border-color:var(--ink)}
+  .chatin button{font:inherit;font-weight:650;cursor:pointer;border:none;background:var(--accent);color:#fff;border-radius:10px;padding:0 18px}
+
+  .foot{text-align:center;color:var(--faint);font-size:12.5px;margin-top:26px;line-height:1.5}
+  .hidden{display:none}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);opacity:0;
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;transition:.2s;pointer-events:none;z-index:9}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <a class="mark" href="https://resume4u.help" target="_blank" rel="noopener"><span class="sq"></span><span class="nm">Sova</span></a>
+    <h1>Create the perfect prompt<br>for anything.</h1>
+    <p class="sub">Type it or add an image — get a ready-to-use prompt for any AI.</p>
+  </div>
+
+  <div class="card ask">
+    <textarea id="q" rows="2" placeholder="Ask anything…"></textarea>
+    <div class="askbar">
+      <button class="addimg" onclick="document.getElementById('file').click()" title="Add a photo to your card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Add photo
+      </button>
+      <button class="btn" id="goBtn" onclick="run()">Create prompt</button>
+    </div>
+    <div class="photochip" id="photochip"><b>Photo added</b> — it’ll be your card background · <a onclick="clearPhoto()">remove</a></div>
+    <div class="try">Try: <span id="examples"></span></div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="card pcard">
+      <div class="lab">Your prompt — copy into any AI</div>
+      <div class="promptbox" id="promptBox"></div>
+      <div class="prow">
+        <button class="btn" onclick="copyPrompt()">Copy prompt</button>
+        <button class="ghost" onclick="recreate()">Try another</button>
+      </div>
+      <div class="ailinks">Open in <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a> · <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · <a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini</a></div>
+    </div>
+
+    <div class="section-lab">Bonus — share the answer as an image</div>
+    <div class="card">
+      <div class="stage"><div class="preview"><canvas id="card" width="1080" height="1350"></canvas></div></div>
+      <div class="brandline">Every image is marked <a href="https://resume4u.help" target="_blank" rel="noopener">Powered by resume4u.help</a></div>
+      <div class="dlwrap"><button class="btn full" onclick="downloadCard()">Download image</button></div>
+    </div>
+
+    <div class="tabs">
+      <a id="tabLook" onclick="only('drawerLook')">Edit image</a>
+      <a id="tabChat" onclick="only('drawerChat')">Refine</a>
+      <a onclick="startOver()">New question</a>
+    </div>
+
+    <!-- EDIT -->
+    <div class="card drawer" id="drawerLook">
+      <div class="lab">Shape</div>
+      <div class="seg" id="aspect">
+        <button data-a="portrait" class="on">Portrait</button>
+        <button data-a="square">Square</button>
+        <button data-a="story">Story</button>
+      </div>
+      <div class="lab mt">Text size</div>
+      <div class="seg" id="tsize">
+        <button data-s="0.85">Small</button>
+        <button data-s="1" class="on">Medium</button>
+        <button data-s="1.18">Large</button>
+      </div>
+      <div class="lab mt">Colour</div>
+      <div class="themes" id="themes"></div>
+      <div class="colors" style="margin-top:12px">Custom
+        <input type="color" id="c1" value="#1b1a17"> <input type="color" id="c2" value="#b45309">
+        <button class="mini-btn" onclick="useCustom()">Use these</button>
+      </div>
+      <div class="lab mt">Your photo (optional)</div>
+      <div class="row">
+        <button onclick="document.getElementById('file').click()">Upload photo</button>
+        <button onclick="startSelfie()">Selfie</button>
+        <button onclick="clearPhoto()">Remove</button>
+        <input type="file" id="file" accept="image/*" style="display:none">
+      </div>
+      <video id="cam" playsinline></video>
+      <div class="row hidden" id="camrow" style="margin-top:10px">
+        <button class="solid" onclick="capture()">Capture</button>
+        <button onclick="stopSelfie()">Cancel</button>
+      </div>
+      <div id="ovlwrap" class="hidden" style="margin-top:16px">
+        <div class="lab">Photo darkness</div>
+        <input type="range" id="ovl" min="0.25" max="0.9" step="0.05" value="0.8">
+      </div>
+    </div>
+
+    <!-- REFINE -->
+    <div class="card drawer" id="drawerChat">
+      <div class="lab">Refine the answer — tell it what to change</div>
+      <div class="chatlog" id="chatlog"></div>
+      <div class="chips" id="chatchips"></div>
+      <div class="chatin">
+        <input id="chatin" placeholder="e.g. make it shorter, add an example…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">Sova · a resume4u.help tool · UAT</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1500);}
+const DRAWERS=['drawerLook','drawerChat'],TABS={drawerLook:'tabLook',drawerChat:'tabChat'};
+function only(id){const open=$(id).classList.contains('show');
+  DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});
+  if(!open){$(id).classList.add('show');$(TABS[id]).classList.add('on');}}
+
+const EXAMPLES=[
+  'When do working people feel most tired during the day?',
+  'How do I answer “tell me about yourself” in an interview?',
+  'A simple morning routine to feel more energetic',
+];
+$('examples').innerHTML=EXAMPLES.map((e,i)=>`<a data-i="${i}">${e.length>28?e.slice(0,28)+'…':e}</a>`).join('');
+$('examples').addEventListener('click',e=>{const a=e.target.closest('[data-i]');if(a){$('q').value=EXAMPLES[+a.getAttribute('data-i')];run();}});
+
+function role(t){t=t.toLowerCase();
+  if(/resume|cv|cover letter|job|career|interview/.test(t))return'an expert career coach';
+  if(/sleep|tired|energy|health|stress|focus|productiv/.test(t))return'a health & productivity expert';
+  if(/code|program|python|bug|software/.test(t))return'a senior software engineer';
+  if(/market|seo|business|startup|sales/.test(t))return'a marketing strategist';
+  if(/money|invest|finance|budget|save/.test(t))return'a personal-finance advisor';
+  if(/cook|recipe|meal|food/.test(t))return'a professional chef';
+  return'a clear, knowledgeable expert';}
+let styleIdx=0;
+function buildPrompt(q){const topic=q.trim().replace(/\s+/g,' ');
+  const img=photoImg?"\nI'm also attaching an image — use it as important context.":'';
+  const V=[
+    `Act as ${role(topic)}.\n\nQuestion: "${topic}"${img}\n\nAnswer clearly and practically with specific details. Keep it easy to skim, and note any caveats.`,
+    `You are ${role(topic)}. ${photoImg?'Look at the attached image, then answer':'Answer'} thoroughly: "${topic}"\n\nStart with a one-line summary, explain with reasoning, and end with 2–3 practical takeaways.`,
+    `Act as ${role(topic)}. Give a concise, useful answer to: "${topic}".${img}\nOnly the essentials — no fluff — but keep the specifics. Prefer short bullet points.`
+  ];
+  return V[styleIdx%V.length];}
+async function recreate(){styleIdx++;const prompt=buildPrompt(lastQ);$('promptBox').textContent=prompt;toast('Rewriting…');
+  ANSWER='Writing your answer…';renderCard();
+  try{ANSWER=await askAI(prompt);}catch(e){ANSWER=demoAnswer(lastQ);}renderCard();}
+const CANNED={
+  tired:'Energy follows your body clock. For a typical 9–6 worker:\n\n• 6–8am: Groggy — energy still low.\n• 9–11am: Peak focus — best for hard tasks.\n• 1–3pm: The biggest dip — most tired here.\n• 3–5pm: A small second wind.\n• 6–9pm: Winding down; fatigue climbs.\n\nMost people feel most exhausted around 1–3pm.',
+  interview:'Keep it to 60–90 seconds, in three parts:\n\n1) Present: your current role and one strength.\n2) Past: a quick highlight that proves it, with a number.\n3) Future: why you’re excited about this role.\n\nSkip your life story — match your answer to the job.',
+  morning:'A simple 20-minute energy routine:\n\n• Sunlight within 30 minutes of waking.\n• A big glass of water.\n• 5 minutes of light movement or a short walk.\n• 5 slow, deep breaths.\n• Write your single top task for the day.\n\nSmall and consistent beats long and rare.'
+};
+function demoAnswer(q){const t=q.toLowerCase();
+  if(/tired|exhaust|energy|sleep/.test(t))return CANNED.tired;
+  if(/interview|tell me about yourself/.test(t))return CANNED.interview;
+  if(/morning|routine|energetic/.test(t))return CANNED.morning;
+  return `Here’s a clear take on “${q.trim()}”.\n\n• Start with the single most useful point.\n• Add two or three specific, practical details.\n• Keep it short and honest.\n\n(Sample — on resume4u.help the real AI writes a full answer.)`;}
+
+let lastQ='',ANSWER='';
+// Calls the site's existing AI function (generate). Falls back to a sample when
+// unavailable — e.g. opened outside the deployed site, or the API key isn't set.
+async function askAI(prompt){
+  const body=photoB64?{prompt,images:[photoB64],imageMimeType:photoMime}:{prompt};
+  const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.text) throw new Error(j.error||'no answer');
+  return String(j.text).trim();
+}
+async function run(){let q=$('q').value.trim();
+  if(!q&&photoImg) q='Describe and analyse the image I am attaching, in detail.';
+  if(!q){toast('Type a question or add an image');return;}
+  lastQ=q;styleIdx=0;const b=$('goBtn');b.disabled=true;b.textContent='Thinking…';
+  const prompt=buildPrompt(q);$('promptBox').textContent=prompt;
+  ANSWER='Writing your answer…';resetChat();renderCard();$('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});
+  try{ANSWER=await askAI(prompt);}catch(e){ANSWER=demoAnswer(q);}
+  renderCard();b.disabled=false;b.textContent='Create prompt';}
+function copyPrompt(){navigator.clipboard.writeText($('promptBox').textContent).then(()=>toast('Prompt copied'));}
+function startOver(){$('q').value='';$('result').classList.remove('show');DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});clearPhoto(false);window.scrollTo({top:0,behavior:'smooth'});$('q').focus();}
+
+const THEMES={
+  slate:{bg:['#f8fafc','#e2e8f0'],ink:'#0f172a',accent:'#475569'},
+  ink:{bg:['#1f2430','#0f1116'],ink:'#ffffff',accent:'#c9cdd6'},
+  amber:{bg:['#fef3c7','#fbbf24'],ink:'#3a2205',accent:'#7a4a08'},
+  ocean:{bg:['#0ea5e9','#2563eb'],ink:'#ffffff',accent:'#e6f2ff'},
+  forest:{bg:['#dcfce7','#86efac'],ink:'#052e16',accent:'#166534'},
+  rose:{bg:['#ffe4e6','#fda4af'],ink:'#4c0519',accent:'#9f1239'},
+};
+let theme='slate',custom=null,photoImg=null,photoB64=null,photoMime='',textScale=1,aspect='portrait',overlay=0.8;
+const SHAPES={portrait:[1080,1350],square:[1080,1080],story:[1080,1920]};
+$('themes').innerHTML=Object.keys(THEMES).map(k=>`<span class="theme ${k===theme?'sel':''}" data-t="${k}" title="${k}" style="background:linear-gradient(135deg,${THEMES[k].bg[0]},${THEMES[k].bg[1]})"></span>`).join('');
+$('themes').addEventListener('click',e=>{const c=e.target.closest('[data-t]');if(c){theme=c.getAttribute('data-t');custom=null;[...document.querySelectorAll('.theme')].forEach(x=>x.classList.toggle('sel',x===c));renderCard();}});
+$('aspect').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b){aspect=b.getAttribute('data-a');[...$('aspect').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
+$('tsize').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){textScale=+b.getAttribute('data-s');[...$('tsize').children].forEach(x=>x.classList.toggle('on',x===b));renderCard();}});
+$('ovl').addEventListener('input',e=>{overlay=+e.target.value;renderCard();});
+function lum(hex){const n=parseInt(hex.slice(1),16);return (0.2126*(n>>16&255)+0.7152*(n>>8&255)+0.0722*(n&255))/255;}
+function useCustom(){const a=$('c1').value,b=$('c2').value;const dark=(lum(a)+lum(b))/2<0.55;
+  custom={bg:[a,b],ink:dark?'#ffffff':'#161616',accent:dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.55)'};theme='__custom';
+  [...document.querySelectorAll('.theme')].forEach(x=>x.classList.remove('sel'));renderCard();toast('Custom colours applied');}
+
+$('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+  const fr=new FileReader();fr.onload=()=>{photoB64=String(fr.result).split(',')[1];photoMime=f.type||'image/jpeg';
+    const img=new Image();img.onload=()=>{photoImg=img;$('ovlwrap').classList.remove('hidden');$('photochip').classList.add('on');renderCard();toast('Photo added');};img.src=fr.result;};
+  fr.readAsDataURL(f);});
+function clearPhoto(r){photoImg=null;photoB64=null;photoMime='';$('ovlwrap').classList.add('hidden');$('photochip').classList.remove('on');if(r!==false)renderCard();}
+let stream=null;
+async function startSelfie(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});const v=$('cam');v.srcObject=stream;await v.play();v.style.display='block';$('camrow').classList.remove('hidden');}catch(e){toast('Camera blocked here — use Upload instead');}}
+function stopSelfie(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('cam').style.display='none';$('camrow').classList.add('hidden');}
+function capture(){const v=$('cam'),c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const url=c.toDataURL('image/png');photoB64=url.split(',')[1];photoMime='image/png';const img=new Image();img.onload=()=>{photoImg=img;$('ovlwrap').classList.remove('hidden');$('photochip').classList.add('on');renderCard();toast('Captured');};img.src=url;stopSelfie();}
+
+const CHIPS=['Shorter','Simpler','Add an example','More formal','Add emojis'];
+function resetChat(){$('chatlog').innerHTML='';$('chatchips').innerHTML=CHIPS.map(c=>`<button onclick="sendChat('${c}')">${c}</button>`).join('');}
+function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('chatlog').appendChild(d);$('chatlog').scrollTop=$('chatlog').scrollHeight;}
+function refineLocal(cmd){const c=cmd.toLowerCase();let lines=ANSWER.split('\n');
+  if(/short|brief|less/.test(c)){lines=lines.filter(l=>l.trim());ANSWER=lines.slice(0,Math.max(3,Math.ceil(lines.length/2))).join('\n');return;}
+  if(/example/.test(c)){ANSWER=ANSWER+'\n\nExample: a quick, concrete case that shows this in action.';return;}
+  if(/emoji/.test(c)){ANSWER=ANSWER.replace(/^•/gm,'✅').replace(/^(\d)\)/gm,'$1️⃣');return;}
+  if(/simpl|easy/.test(c)){ANSWER='In simple words:\n\n'+ANSWER;return;}
+  if(/long|detail|more/.test(c)){ANSWER=ANSWER+'\n• One extra useful detail worth knowing.';return;}}
+async function sendChat(preset){const txt=preset||$('chatin').value.trim();if(!txt)return;$('chatin').value='';addMsg('you',txt);addMsg('bot','…');
+  const bots=()=>$('chatlog').querySelectorAll('.msg.bot');
+  const p=`Here is an answer:\n\n${ANSWER}\n\nRevise it based on this instruction: "${txt}". Keep the same topic. Return ONLY the revised answer.`;
+  try{ANSWER=await askAI(p);bots()[bots().length-1].textContent='Updated ✓';}
+  catch(e){refineLocal(txt);bots()[bots().length-1].textContent='Updated';}
+  renderCard();}
+
+const canvas=$('card'),ctx=canvas.getContext('2d');
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function wrap(text,x,y,maxW,lh,maxLines){const words=String(text).split(/\s+/);let line='',lines=0;
+  for(let i=0;i<words.length;i++){const test=line?line+' '+words[i]:words[i];
+    if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);y+=lh;line=words[i];lines++;
+      if(lines>=maxLines-1){let rest=words.slice(i).join(' ');while(ctx.measureText(rest+'…').width>maxW&&rest.length)rest=rest.slice(0,-1);ctx.fillText(rest+'…',x,y);return y+lh;}}
+    else line=test;}
+  if(line){ctx.fillText(line,x,y);y+=lh;}return y;}
+function renderCard(){
+  const [W,H]=SHAPES[aspect];canvas.width=W;canvas.height=H;const s=W/1080;
+  let t=(theme==='__custom'&&custom)?custom:THEMES[theme];ctx.clearRect(0,0,W,H);
+  if(photoImg){const ir=photoImg.width/photoImg.height,cr=W/H;let dw,dh,dx,dy;
+    if(ir>cr){dh=H;dw=H*ir;dx=(W-dw)/2;dy=0;}else{dw=W;dh=W/ir;dx=0;dy=(H-dh)/2;}
+    ctx.drawImage(photoImg,dx,dy,dw,dh);const ov=ctx.createLinearGradient(0,0,0,H);ov.addColorStop(0,'rgba(10,10,12,'+(overlay*.45)+')');ov.addColorStop(1,'rgba(10,10,12,'+overlay+')');ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);t={ink:'#ffffff',accent:'rgba(255,255,255,.82)'};}
+  else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,t.bg[0]);g.addColorStop(1,t.bg[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  const pad=90*s,F="'Segoe UI',system-ui,Arial";
+  ctx.fillStyle=t.accent;ctx.font=`600 30px ${F}`;ctx.font=`600 ${30*s}px ${F}`;
+  ctx.textBaseline='alphabetic';
+  // small square mark + wordmark
+  ctx.fillStyle=t.accent;roundRect(pad,72*s-22*s,26*s,26*s,7*s);ctx.fill();
+  ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+38*s,72*s);
+  const q=lastQ||'Ask anything…',a=ANSWER||'Your answer appears here.';
+  ctx.fillStyle=t.ink;ctx.font=`700 ${56*s}px ${F}`;let y=wrap(q,pad,206*s,W-pad*2,66*s,4);
+  y+=14*s;ctx.strokeStyle=t.accent;ctx.globalAlpha=.55;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+110*s,y);ctx.stroke();ctx.globalAlpha=1;y+=52*s;
+  const aFont=39*s*textScale,aLh=56*s*textScale,footTop=H-150*s,maxLines=Math.max(3,Math.floor((footTop-y)/aLh));
+  ctx.fillStyle=t.ink;ctx.font=`400 ${aFont}px ${F}`;let cy=y,used=0;
+  for(const p of a.split('\n')){if(used>=maxLines)break;if(!p.trim()){cy+=aLh*0.5;continue;}
+    const before=cy;cy=wrap(p,pad,cy,W-pad*2,aLh,maxLines-used);used+=Math.max(1,Math.round((cy-before)/aLh));}
+  const fy=H-88*s;ctx.globalAlpha=.75;ctx.fillStyle=t.ink;ctx.font=`600 ${27*s}px ${F}`;ctx.fillText('Powered by resume4u.help',pad,fy);ctx.globalAlpha=1;
+}
+
+function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
+  try{if(window.claude&&window.claude.downloads){await window.claude.downloads.save({filename,data:blob});toast('Saved');}
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}}
+  catch(err){if(!(err&&err.code==='declined')){try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();}catch(e){toast('Save not available here');}}}
+},'image/png');}
+
+// Show a live sample on load so the landing feels alive (input stays inviting).
+lastQ=EXAMPLES[0]; $('promptBox').textContent=buildPrompt(lastQ); ANSWER=demoAnswer(lastQ); resetChat(); renderCard(); $('result').classList.add('show');
+</script>
+</body>
+</html>
