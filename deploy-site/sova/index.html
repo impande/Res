@@ -393,8 +393,15 @@ function renderCard(){
     const content=bullet?line.replace(/^•\s*/,''):line;
     blocks.push({bullet,lines:wrapLines(content, W-pad*2-(bullet?bulletIndent:0))});
   }
-  let contentH=0;
-  for(const b of blocks){ if(!b){contentH+=paraGap*0.55;continue;} contentH+=b.lines.length*lh+(b.bullet?bullGap:paraGap); }
+  // "ask anything" question as a short headline (max 2 lines)
+  const qtext=(lastQ||'').trim(), qFont=48*s, qLh=58*s, qGap=34*s;
+  ctx.font=`700 ${qFont}px ${F}`;let qLines=[];
+  if(qtext){qLines=wrapLines(qtext,W-pad*2);
+    if(qLines.length>2){qLines=qLines.slice(0,2);let l=qLines[1];while(ctx.measureText(l+'…').width>W-pad*2&&l.length)l=l.slice(0,-1);qLines[1]=l+'…';}}
+  const qBlockH=qLines.length?(qLines.length*qLh+qGap):0;
+  let bodyH=0;
+  for(const b of blocks){ if(!b){bodyH+=paraGap*0.55;continue;} bodyH+=b.lines.length*lh+(b.bullet?bullGap:paraGap); }
+  const contentH=qBlockH+bodyH;
   const headerBottom=205*s, footRes=205*s;
   const H=Math.max(baseH,Math.ceil(headerBottom+contentH+footRes));
   canvas.width=W;canvas.height=H;
@@ -410,8 +417,8 @@ function renderCard(){
   if(cardStyle==='dots'){ctx.fillStyle=t.ink;ctx.globalAlpha=.05;const gap=56*s;for(let yy=gap;yy<H;yy+=gap)for(let xx=gap;xx<W;xx+=gap){ctx.beginPath();ctx.arc(xx,yy,3.2*s,0,7);ctx.fill();}ctx.globalAlpha=1;}
   if(cardStyle==='frame'){ctx.strokeStyle=t.accent;ctx.globalAlpha=.85;ctx.lineWidth=4*s;const m=34*s;roundRect(m,m,W-2*m,H-2*m,26*s);ctx.stroke();ctx.globalAlpha=1;}
   ctx.textBaseline='alphabetic';
-  // ── faint quotation motif behind the text (only when there's room) ──
-  if(centered&&startY>350*s){ctx.globalAlpha=.08;ctx.fillStyle=t.ink;ctx.font=`700 ${170*s}px Georgia,'Times New Roman',serif`;ctx.fillText('“',pad-8*s,startY-4*s);ctx.globalAlpha=1;}
+  // ── faint quotation motif (sits just above the question) ──
+  if(centered&&startY>360*s){ctx.globalAlpha=.08;ctx.fillStyle=t.ink;ctx.font=`700 ${150*s}px Georgia,'Times New Roman',serif`;ctx.fillText('“',pad-8*s,startY-16*s);ctx.globalAlpha=1;}
   // ── header: Sova mark + PROMPT pill ──
   ctx.fillStyle=t.accent;roundRect(pad,74*s-22*s,27*s,27*s,7*s);ctx.fill();
   ctx.fillStyle=t.bg[0];ctx.globalAlpha=.85;roundRect(pad+17*s,74*s-16*s,6*s,6*s,2*s);ctx.fill();ctx.globalAlpha=1;
@@ -419,8 +426,15 @@ function renderCard(){
   ctx.font=`700 ${20*s}px ${F}`;const plbl='PROMPT',plw=ctx.measureText(plbl).width,phh=42*s,ppx=20*s,p2w=plw+ppx*2,plx=W-pad-p2w,ply=74*s-phh+9*s;
   ctx.globalAlpha=.12;ctx.fillStyle=t.ink;roundRect(plx,ply,p2w,phh,phh/2);ctx.fill();
   ctx.globalAlpha=.72;ctx.fillText(plbl,plx+ppx,ply+phh/2+7*s);ctx.globalAlpha=1;
-  // ── prompt body: centred, clean spacing, accent bullets ──
-  ctx.fillStyle=t.ink;ctx.font=`400 ${bFont}px ${F}`;let by=startY;
+  // ── question headline (short) → divider → prompt body ──
+  let by=startY;
+  if(qLines.length){
+    ctx.fillStyle=t.ink;ctx.font=`700 ${qFont}px ${F}`;
+    for(const l of qLines){ctx.fillText(l,pad,by);by+=qLh;}
+    by+=6*s;ctx.strokeStyle=t.accent;ctx.globalAlpha=.6;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,by);ctx.lineTo(pad+92*s,by);ctx.stroke();ctx.globalAlpha=1;
+    by+=qGap-6*s;
+  }
+  ctx.fillStyle=t.ink;ctx.font=`400 ${bFont}px ${F}`;
   for(const b of blocks){
     if(!b){by+=paraGap*0.55;continue;}
     const x=pad+(b.bullet?bulletIndent:0);
