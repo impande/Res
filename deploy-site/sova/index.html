@@ -422,15 +422,23 @@ function renderCard(){
     }
     by+=b.bullet?bullGap:paraGap;
   }
-  // ── footer: hairline rule + branded "Powered by resume4u.help" ──
-  ctx.strokeStyle=t.accent;ctx.globalAlpha=.28;ctx.lineWidth=2*s;
-  ctx.beginPath();ctx.moveTo(pad,H-118*s);ctx.lineTo(W-pad,H-118*s);ctx.stroke();ctx.globalAlpha=1;
-  const fy=H-58*s;
-  ctx.fillStyle=t.accent;roundRect(pad,fy-24*s,24*s,24*s,6*s);ctx.fill();          // small brand tile
+  // ── footer: a polished "Powered by" badge ──
+  const pre='Powered by ',brand='resume4u.help',bf=25*s;
+  ctx.font=`500 ${bf}px ${F}`;const pw=ctx.measureText(pre).width;
+  ctx.font=`700 ${bf}px ${F}`;const bw=ctx.measureText(brand).width;
+  const mk=24*s,gp=13*s,px=26*s,pillH=60*s,pillW=px*2+mk+gp+pw+bw,pillX=pad,pillY=H-pillH-40*s,rr=pillH/2;
+  // soft glow + pill
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.14)';ctx.shadowBlur=18*s;ctx.shadowOffsetY=4*s;
+  ctx.fillStyle=t.ink;ctx.globalAlpha=.09;roundRect(pillX,pillY,pillW,pillH,rr);ctx.fill();ctx.restore();
+  ctx.globalAlpha=.18;ctx.lineWidth=1.5*s;ctx.strokeStyle=t.ink;roundRect(pillX,pillY,pillW,pillH,rr);ctx.stroke();ctx.globalAlpha=1;
+  // brand mark (accent tile with a light notch, echoing the header)
+  const my=pillY+(pillH-mk)/2;ctx.fillStyle=t.accent;roundRect(pillX+px,my,mk,mk,7*s);ctx.fill();
+  ctx.fillStyle=t.bg[0];ctx.globalAlpha=.9;roundRect(pillX+px+mk-9*s,my+5*s,6*s,6*s,2*s);ctx.fill();ctx.globalAlpha=1;
+  // text, vertically centred in the pill
+  const ty=pillY+pillH/2+bf*0.34,tx=pillX+px+mk+gp;
   ctx.textBaseline='alphabetic';
-  ctx.fillStyle=t.ink;ctx.globalAlpha=.5;ctx.font=`500 ${26*s}px ${F}`;
-  const pre='Powered by ';ctx.fillText(pre,pad+38*s,fy);const pw=ctx.measureText(pre).width;
-  ctx.globalAlpha=1;ctx.font=`700 ${26*s}px ${F}`;ctx.fillText('resume4u.help',pad+38*s+pw,fy);
+  ctx.globalAlpha=.62;ctx.fillStyle=t.ink;ctx.font=`500 ${bf}px ${F}`;ctx.fillText(pre,tx,ty);
+  ctx.globalAlpha=1;ctx.fillStyle=t.ink;ctx.font=`700 ${bf}px ${F}`;ctx.fillText(brand,tx+pw,ty);
 }
 
 function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
