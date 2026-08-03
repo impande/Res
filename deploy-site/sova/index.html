@@ -94,6 +94,12 @@
   .promptbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.6;
     white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#3a352d;transition:background .25s,border-color .25s}
   .promptbox.flash{background:var(--tint);border-color:var(--accent)}
+  .promptbox.pulsing{animation:pulse 1.1s ease-in-out infinite}
+  .needs{display:none;margin-top:12px;padding:11px 13px 12px;border-radius:10px;background:var(--tint);
+    border:1px solid var(--accent);border-left-width:4px;font-size:13.5px;line-height:1.55;color:#5a3608}
+  .needs.show{display:block;animation:fade .3s ease}
+  .needs::before{content:"Add this for a sharper answer";display:block;font-size:10.5px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
   .pcard{padding:16px}
   .prow{display:flex;gap:8px;margin-top:12px}
   .prow .btn{flex:1}
@@ -153,6 +159,7 @@
     <div class="card pcard">
       <div class="lab">Your prompt — copy into any AI</div>
       <div class="promptbox" id="promptBox"></div>
+      <div class="needs" id="needs"></div>
       <div class="prow">
         <button class="btn" onclick="copyPrompt()">Copy prompt</button>
         <button class="ghost" onclick="recreate()">Try another</button>
@@ -267,8 +274,38 @@ function buildPrompt(q){const topic=cleanQ(q);const r=role(topic||imgContent);co
     `You are ${r}. ${topic?`Give a concise, genuinely useful answer to: "${topic}".`:'Give a concise, useful response to the image content below.'}${f} Keep only the essentials and the specific details — no fluff.${extra}${ctx}`
   ];
   return V[styleIdx%V.length];}
-function refreshPrompt(){PROMPT=buildPrompt(lastQ);$('promptBox').textContent=PROMPT;renderCard();}
-function recreate(){styleIdx++;refreshPrompt();toast('Another style');}
+// ── Smart prompt generation ─────────────────────────────────────────────────
+// The real work now happens server-side in the sova-prompt function: a prompt
+// engineer that reads the user's plain request, matches the prompt's complexity
+// to the task, keeps the user's content verbatim, and flags anything missing.
+// buildPrompt() below stays as an instant, offline fallback.
+let busy=false;
+function shapeNote(){const parts=[];
+  if(extras.length)parts.push('Also apply these refinements from the user: '+extras.join('; ')+'.');
+  if(styleIdx>0)parts.push('Produce a distinctly different alternative of the prompt (variation '+(styleIdx+1)+') — same intent and content, but a different structure or wording.');
+  return parts.join(' ');}
+function setLoading(on){const b=$('goBtn');
+  if(b){b.disabled=on;b.textContent=on?'Thinking…':'Create prompt';}
+  $('promptBox').classList.toggle('pulsing',on);}
+function renderNeeds(){const el=$('needs');if(!el)return;
+  if(NEEDS){el.textContent=NEEDS;el.classList.add('show');}
+  else{el.textContent='';el.classList.remove('show');}}
+async function generatePrompt(){
+  if(busy)return;busy=true;setLoading(true);
+  try{
+    const r=await fetch('/.netlify/functions/sova-prompt',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({input:(lastQ||'').trim(),imageContent:imgContent,note:shapeNote()})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.prompt)throw new Error(j.error||'failed');
+    PROMPT=String(j.prompt).trim();NEEDS=String(j.needs||'').trim();
+  }catch(err){
+    PROMPT=buildPrompt(lastQ);NEEDS='';   // graceful offline fallback
+    toast('Using a quick prompt — try again in a moment');
+  }finally{busy=false;setLoading(false);}
+  $('promptBox').textContent=PROMPT;renderNeeds();renderCard();
+}
+function refreshPrompt(){generatePrompt();}
+function recreate(){if(busy)return;styleIdx++;generatePrompt();}
 const CANNED={
   tired:'Energy follows your body clock. For a typical 9–6 worker:\n\n• 6–8am: Groggy — energy still low.\n• 9–11am: Peak focus — best for hard tasks.\n• 1–3pm: The biggest dip — most tired here.\n• 3–5pm: A small second wind.\n• 6–9pm: Winding down; fatigue climbs.\n\nMost people feel most exhausted around 1–3pm.',
   interview:'Keep it to 60–90 seconds, in three parts:\n\n1) Present: your current role and one strength.\n2) Past: a quick highlight that proves it, with a number.\n3) Future: why you’re excited about this role.\n\nSkip your life story — match your answer to the job.',
@@ -280,12 +317,12 @@ function demoAnswer(q){const t=q.toLowerCase();
   if(/morning|routine|energetic/.test(t))return CANNED.morning;
   return `Here’s a clear take on “${q.trim()}”.\n\n• Start with the single most useful point.\n• Add two or three specific, practical details.\n• Keep it short and honest.\n\n(Sample — on resume4u.help the real AI writes a full answer.)`;}
 
-let lastQ='',PROMPT='';
+let lastQ='',PROMPT='',NEEDS='';
 function run(){let q=$('q').value.trim();
   if(!q&&!imgContent){toast('Type a question or add a photo');return;}
-  lastQ=q;styleIdx=0;extras=[];resetChat();
-  PROMPT=buildPrompt(q);$('promptBox').textContent=PROMPT;renderCard();
-  $('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});}
+  lastQ=q;styleIdx=0;extras=[];NEEDS='';renderNeeds();resetChat();
+  $('result').classList.add('show');$('result').scrollIntoView({behavior:'smooth',block:'start'});
+  generatePrompt();}
 function copyPrompt(){navigator.clipboard.writeText($('promptBox').textContent).then(()=>toast('Prompt copied'));}
 function startOver(){$('q').value='';$('result').classList.remove('show');DRAWERS.forEach(d=>{$(d).classList.remove('show');$(TABS[d]).classList.remove('on');});clearPhoto(false);window.scrollTo({top:0,behavior:'smooth'});$('q').focus();}
 
@@ -352,15 +389,16 @@ function resetChat(){$('chatlog').innerHTML='';$('chatchips').innerHTML=CHIPS.ma
 function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('chatlog').appendChild(d);$('chatlog').scrollTop=$('chatlog').scrollHeight;}
 function flashPrompt(){const el=$('promptBox');el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),600);}
 function sendChat(preset){
+  if(busy)return;
   const txt=(preset||$('chatin').value).trim();
   if(!txt){$('chatin').focus();return;}
   $('chatin').value='';$('chatin').focus();
   addMsg('you',txt);
   const dir=CHIPMAP[txt.toLowerCase()]||txt;
   extras.push(dir);
-  refreshPrompt();flashPrompt();
-  addMsg('bot','Added to your prompt: “'+dir.replace(/\.$/,'')+'”. See it updated above ↑');
-  toast('Prompt updated ✓');
+  generatePrompt().then(()=>{flashPrompt();
+    addMsg('bot','Updated your prompt with: “'+dir.replace(/\.$/,'')+'”. See it above ↑');
+    toast('Prompt updated ✓');});
 }
 
 const canvas=$('card'),ctx=canvas.getContext('2d');
@@ -403,7 +441,7 @@ function renderCard(){
     blocks.push({bullet,lines:wrapLines(content, W-pad*2-(bullet?bulletIndent:0))});
   }
   // "ask anything" question as a short headline (max 2 lines)
-  const qtext=(lastQ||'').trim(), qFont=48*s, qLh=58*s, qGap=34*s;
+  const qtext=(cleanQ(lastQ)||lastQ||'').trim(), qFont=48*s, qLh=58*s, qGap=34*s;
   ctx.font=`700 ${qFont}px ${F}`;let qLines=[];
   if(qtext){qLines=wrapLines(qtext,W-pad*2);
     if(qLines.length>2){qLines=qLines.slice(0,2);let l=qLines[1];while(ctx.measureText(l+'…').width>W-pad*2&&l.length)l=l.slice(0,-1);qLines[1]=l+'…';}}
