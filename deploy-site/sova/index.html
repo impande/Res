@@ -427,8 +427,14 @@ function wrapLines(text,maxW){const out=[];
     if(line)out.push(line);}
   return out;}
 function renderCard(){
-  const DPR=2,W=SHAPES[aspect][0]*DPR,baseH=SHAPES[aspect][1]*DPR,s=W/1080,pad=96*s,F="'Segoe UI',system-ui,Arial";
+  const DPR=2,F="'Segoe UI',system-ui,Arial";
   const a=stripMd(PROMPT||'Your prompt appears here.');
+  // Adaptive width — a long prompt gets a wider card so lines stay readable and
+  // the image doesn't become a tall, skinny column. Story keeps its phone shape.
+  const plen=a.length;
+  let LW=SHAPES[aspect][0];
+  if(aspect!=='story'){ if(plen>1050)LW=1560; else if(plen>680)LW=1400; else if(plen>400)LW=1240; }
+  const W=LW*DPR,baseH=SHAPES[aspect][1]*DPR,s=DPR,pad=Math.round(LW*0.09)*s;
   const bFont=42*s*textScale, lh=60*s*textScale, paraGap=30*s*textScale, bullGap=12*s*textScale;
   // ── build blocks (paragraphs + bullets), measured so the card fits it all ──
   ctx.font=`400 ${bFont}px ${F}`; const bulletIndent=ctx.measureText('•   ').width;
@@ -473,15 +479,17 @@ function renderCard(){
   ctx.font=`700 ${20*s}px ${F}`;const plbl='PROMPT',plw=ctx.measureText(plbl).width,phh=42*s,ppx=20*s,p2w=plw+ppx*2,plx=W-pad-p2w,ply=74*s-phh+9*s;
   ctx.globalAlpha=.12;ctx.fillStyle=t.ink;roundRect(plx,ply,p2w,phh,phh/2);ctx.fill();
   ctx.globalAlpha=.72;ctx.fillText(plbl,plx+ppx,ply+phh/2+7*s);ctx.globalAlpha=1;
+  // hairline under the brand row — quietly separates header from content
+  ctx.globalAlpha=.09;ctx.strokeStyle=t.ink;ctx.lineWidth=1.5*s;ctx.beginPath();ctx.moveTo(pad,120*s);ctx.lineTo(W-pad,120*s);ctx.stroke();ctx.globalAlpha=1;
   // ── question headline (short) → divider → prompt body ──
   let by=startY;
   if(qLines.length){
     ctx.fillStyle=t.ink;ctx.font=`700 ${qFont}px ${F}`;
     const lastBase=startY+(qLines.length-1)*qLh;
     for(const l of qLines){ctx.fillText(l,pad,by);by+=qLh;}
-    const divY=lastBase+28*s;   // just below the question
-    ctx.strokeStyle=t.accent;ctx.globalAlpha=.6;ctx.lineWidth=3*s;ctx.beginPath();ctx.moveTo(pad,divY);ctx.lineTo(pad+92*s,divY);ctx.stroke();ctx.globalAlpha=1;
-    by=divY+56*s;               // comfortable gap before the prompt body
+    const divY=lastBase+30*s;   // just below the question
+    ctx.fillStyle=t.accent;ctx.globalAlpha=.9;roundRect(pad,divY-4*s,74*s,7*s,3.5*s);ctx.fill();ctx.globalAlpha=1;
+    by=divY+58*s;               // comfortable gap before the prompt body
   }
   ctx.fillStyle=t.ink;ctx.font=`400 ${bFont}px ${F}`;
   for(const b of blocks){
@@ -510,6 +518,9 @@ function renderCard(){
   ctx.textBaseline='alphabetic';
   ctx.globalAlpha=.62;ctx.fillStyle=t.ink;ctx.font=`500 ${bf}px ${F}`;ctx.fillText(pre,tx,ty);
   ctx.globalAlpha=1;ctx.fillStyle=t.ink;ctx.font=`700 ${bf}px ${F}`;ctx.fillText(brand,tx+pw,ty);
+  // subtle call-to-action on the right — invites the viewer to make their own
+  const cta='Create yours free →';ctx.font=`600 ${23*s}px ${F}`;const cw=ctx.measureText(cta).width;
+  if(pillX+pillW+40*s < W-pad-cw){ctx.globalAlpha=.58;ctx.fillStyle=t.ink;ctx.fillText(cta,W-pad-cw,ty);ctx.globalAlpha=1;}
 }
 
 function downloadCard(){canvas.toBlob(async blob=>{if(!blob){toast('Nothing to save');return;}const filename='promptpix-'+Date.now()+'.png';
