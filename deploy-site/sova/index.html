@@ -389,7 +389,7 @@ function wrapLines(text,maxW){const out=[];
     if(line)out.push(line);}
   return out;}
 function renderCard(){
-  const W=SHAPES[aspect][0],baseH=SHAPES[aspect][1],s=W/1080,pad=96*s,F="'Segoe UI',system-ui,Arial";
+  const DPR=2,W=SHAPES[aspect][0]*DPR,baseH=SHAPES[aspect][1]*DPR,s=W/1080,pad=96*s,F="'Segoe UI',system-ui,Arial";
   const a=stripMd(PROMPT||'Your prompt appears here.');
   const bFont=42*s*textScale, lh=60*s*textScale, paraGap=30*s*textScale, bullGap=12*s*textScale;
   // ── build blocks (paragraphs + bullets), measured so the card fits it all ──
