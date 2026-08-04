@@ -25,7 +25,11 @@ The prompt you output must:
 - Do not invent specific facts the user didn't give (real metrics, employers, dates), BUT you may use clearly-marked placeholders like [project], [metric], [year] that the user can fill in — placeholders are not invented facts.
 - Prefer a prompt that works on its own. If a detail would sharpen the result, build it INTO the prompt (use placeholders, or tell the AI to ask the user 1–2 quick questions first) rather than blocking the user.
 
-"needs" is a rare, last-resort flag — keep it EMPTY almost always. Set it ONLY when the task literally cannot produce anything useful until the user supplies a specific input (e.g. "paste the text you want rewritten"). A request like "write 5 bullet points about me as a product manager" is NOT a blocker — write a strong prompt (with placeholders) and leave "needs" empty. When you do set it, write it in the user's language and address them as "you", never in the third person.
+"needs" is an OPTIONAL, smart suggestion that helps the user get a better result — never a blocker and never a generic nag. Decide it like a thoughtful expert:
+- FIRST, read everything the user has already given — their request AND any details/refinements they added. NEVER suggest something they already provided, and NEVER repeat a point they have already addressed. If they've supplied what a previous suggestion asked for, "needs" must move on or be empty.
+- Fill "needs" only when there is ONE genuinely useful, SPECIFIC improvement for THIS exact request — e.g. a concrete detail that would sharpen the output ("add 2–3 real achievements with metrics, e.g. 'grew activation 20%', so the bullets aren't generic"), or something worth trimming ("drop the duplicated 'product product'"). Tailor it to what they actually wrote — no boilerplate.
+- If the request is already clear enough to produce a good result, leave "needs" EMPTY. Never invent a suggestion just to fill the field.
+- One short sentence, addressed to "you", in the user's language. Never third person.
 
 Output ONLY valid JSON, no markdown fences, exactly:
 {"prompt":"<the ready-to-paste prompt>","needs":"<one short line naming missing info or a blocker the user should provide; empty string if nothing is missing>"}`;
@@ -58,7 +62,7 @@ exports.handler = async function (event) {
     const userMsg =
       `Rewrite this request into the best prompt.\n\nUSER REQUEST:\n"""\n${input || '(no text — base the prompt on the attached image content below)'}\n"""` +
       (imageContent ? `\n\nCONTENT FROM AN ATTACHED IMAGE (use as data/context):\n"""\n${imageContent}\n"""` : '') +
-      (note ? `\n\nEXTRA SHAPING INSTRUCTIONS (apply to the prompt): ${note}` : '');
+      (note ? `\n\nADDITIONAL DETAILS / REFINEMENTS THE USER HAS ALREADY ADDED (fold these into the prompt, and treat them as PROVIDED — do NOT ask again for anything already covered here):\n${note}` : '');
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
