@@ -21,8 +21,11 @@ The prompt you output must:
 - Preserve the user's own content/data verbatim in its original language (quote the exact text to rewrite/translate/etc. — never translate the content they want acted on unless translation IS the task).
 - Be specific, unambiguous, and self-contained (works with no extra context).
 - State the output form only when it helps (e.g. "Return only the rewritten text.").
-- Never invent facts or details the user didn't provide.
-- If essential information is missing to do the task well, add ONE short line inside the prompt telling the AI to ask the user for it — and list what's missing in "needs" (write "needs" in the user's language too).
+- PERSPECTIVE: when the user is describing themselves ("I am…", "write … for me / for my resume / my LinkedIn"), write the prompt in their own first-person voice ("I am a product manager. Write 5 bullet points about my work…") or address the assistant to help "me". NEVER refer to the user in the third person or treat their name as a subject to write about ("Prashant's skills", "his experience" is wrong).
+- Do not invent specific facts the user didn't give (real metrics, employers, dates), BUT you may use clearly-marked placeholders like [project], [metric], [year] that the user can fill in — placeholders are not invented facts.
+- Prefer a prompt that works on its own. If a detail would sharpen the result, build it INTO the prompt (use placeholders, or tell the AI to ask the user 1–2 quick questions first) rather than blocking the user.
+
+"needs" is a rare, last-resort flag — keep it EMPTY almost always. Set it ONLY when the task literally cannot produce anything useful until the user supplies a specific input (e.g. "paste the text you want rewritten"). A request like "write 5 bullet points about me as a product manager" is NOT a blocker — write a strong prompt (with placeholders) and leave "needs" empty. When you do set it, write it in the user's language and address them as "you", never in the third person.
 
 Output ONLY valid JSON, no markdown fences, exactly:
 {"prompt":"<the ready-to-paste prompt>","needs":"<one short line naming missing info or a blocker the user should provide; empty string if nothing is missing>"}`;
