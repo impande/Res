@@ -6,6 +6,7 @@
 <title>Sova — Create the perfect prompt for anything</title>
 <meta name="description" content="Turn any question into a ready-to-use AI prompt with Sova. Type it or add a photo, get an expert prompt for ChatGPT, Claude or Gemini, plus a shareable answer card. Free, by resume4u.help.">
 <link rel="canonical" href="https://resume4u.help/sova/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2048%2048'%3E%3Cpath%20d='M9%205%20h30%20a5%205%200%200%201%205%205%20v20%20a5%205%200%200%201%20-5%205%20h-19%20l-9%207%20v-7%20h-2%20a5%205%200%200%201%20-5%20-5%20v-20%20a5%205%200%200%201%205%20-5%20z'%20fill='%23b45309'/%3E%3Ccircle%20cx='18'%20cy='19'%20r='5.6'%20fill='%23fff'/%3E%3Ccircle%20cx='30'%20cy='19'%20r='5.6'%20fill='%23fff'/%3E%3Ccircle%20cx='18'%20cy='19'%20r='2.2'%20fill='%23b45309'/%3E%3Ccircle%20cx='30'%20cy='19'%20r='2.2'%20fill='%23b45309'/%3E%3Cpath%20d='M24%2023%20l-2.4%202.8%20h4.8%20z'%20fill='%23fbe4cd'/%3E%3C/svg%3E">
 <style>
   /* Professional, authentic, light. Warm-neutral paper, hairline rules,
      one restrained deep-amber accent (the resume4u note). No emoji chrome. */
@@ -23,8 +24,7 @@
 
   .head{text-align:center;margin-bottom:20px}
   .mark{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
-  .mark .sq{width:22px;height:22px;border-radius:6px;background:var(--accent);position:relative}
-  .mark .sq::after{content:"";position:absolute;inset:6px 6px auto auto;width:6px;height:6px;border-radius:2px;background:var(--paper)}
+  .mark .logo{width:24px;height:24px;display:block}
   .mark .nm{font-weight:700;font-size:17px;letter-spacing:-.01em}
   h1{font-size:31px;line-height:1.14;letter-spacing:-.03em;font-weight:700;margin:18px 0 8px;text-wrap:balance}
   .sub{color:var(--muted);margin:0 auto;max-width:34ch;font-size:16px}
@@ -132,7 +132,7 @@
 <body>
 <div class="wrap">
   <div class="head">
-    <a class="mark" href="https://resume4u.help" target="_blank" rel="noopener"><span class="sq"></span><span class="nm">Sova</span></a>
+    <a class="mark" href="https://resume4u.help" target="_blank" rel="noopener"><svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5 h30 a5 5 0 0 1 5 5 v20 a5 5 0 0 1 -5 5 h-19 l-9 7 v-7 h-2 a5 5 0 0 1 -5 -5 v-20 a5 5 0 0 1 5 -5 z" fill="#b45309"/><circle cx="18" cy="19" r="5.6" fill="#fff"/><circle cx="30" cy="19" r="5.6" fill="#fff"/><circle cx="18" cy="19" r="2.2" fill="#b45309"/><circle cx="30" cy="19" r="2.2" fill="#b45309"/><path d="M24 23 l-2.4 2.8 h4.8 z" fill="#fbe4cd"/></svg><span class="nm">Sova</span></a>
     <h1>Create the perfect prompt<br>for anything.</h1>
     <p class="sub">Type it or add an image — get a ready-to-use prompt for any AI.</p>
   </div>
@@ -403,6 +403,16 @@ function sendChat(preset){
 
 const canvas=$('card'),ctx=canvas.getContext('2d');
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+// Sova mark — an owl in a speech bubble. `tail` adds the bubble tail (header);
+// off for tiny badges. fill = bubble colour, eye = eye colour.
+function owlMark(x,y,sz,fill,eye,tail){
+  const bh=sz*0.82,r=sz*0.24;
+  ctx.fillStyle=fill;roundRect(x,y,sz,bh,r);ctx.fill();
+  if(tail){ctx.beginPath();ctx.moveTo(x+sz*0.22,y+bh-sz*0.05);ctx.lineTo(x+sz*0.14,y+bh+sz*0.22);ctx.lineTo(x+sz*0.46,y+bh-sz*0.02);ctx.closePath();ctx.fill();}
+  const ey=y+bh*0.46,er=sz*0.17;
+  ctx.fillStyle=eye;ctx.beginPath();ctx.arc(x+sz*0.34,ey,er,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+sz*0.66,ey,er,0,7);ctx.fill();
+  ctx.fillStyle=fill;ctx.beginPath();ctx.arc(x+sz*0.34,ey,er*0.42,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+sz*0.66,ey,er*0.42,0,7);ctx.fill();
+}
 function wrap(text,x,y,maxW,lh,maxLines){const words=String(text).split(/\s+/);let line='',lines=0;
   for(let i=0;i<words.length;i++){const test=line?line+' '+words[i]:words[i];
     if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);y+=lh;line=words[i];lines++;
@@ -472,10 +482,9 @@ function renderCard(){
   ctx.textBaseline='alphabetic';
   // ── faint quotation motif (sits just above the question) ──
   if(centered&&startY>360*s){ctx.globalAlpha=.08;ctx.fillStyle=t.ink;ctx.font=`700 ${150*s}px Georgia,'Times New Roman',serif`;ctx.fillText('“',pad-8*s,startY-16*s);ctx.globalAlpha=1;}
-  // ── header: Sova mark + PROMPT pill ──
-  ctx.fillStyle=t.accent;roundRect(pad,74*s-22*s,27*s,27*s,7*s);ctx.fill();
-  ctx.fillStyle=t.bg[0];ctx.globalAlpha=.85;roundRect(pad+17*s,74*s-16*s,6*s,6*s,2*s);ctx.fill();ctx.globalAlpha=1;
-  ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+40*s,74*s);
+  // ── header: Sova owl mark + PROMPT pill ──
+  owlMark(pad,74*s-25*s,30*s,t.accent,t.bg[0],true);
+  ctx.fillStyle=t.ink;ctx.font=`700 ${30*s}px ${F}`;ctx.fillText('Sova',pad+42*s,74*s);
   ctx.font=`700 ${20*s}px ${F}`;const plbl='PROMPT',plw=ctx.measureText(plbl).width,phh=42*s,ppx=20*s,p2w=plw+ppx*2,plx=W-pad-p2w,ply=74*s-phh+9*s;
   ctx.globalAlpha=.12;ctx.fillStyle=t.ink;roundRect(plx,ply,p2w,phh,phh/2);ctx.fill();
   ctx.globalAlpha=.72;ctx.fillText(plbl,plx+ppx,ply+phh/2+7*s);ctx.globalAlpha=1;
@@ -510,9 +519,8 @@ function renderCard(){
   ctx.save();ctx.shadowColor='rgba(0,0,0,.14)';ctx.shadowBlur=18*s;ctx.shadowOffsetY=4*s;
   ctx.fillStyle=t.ink;ctx.globalAlpha=.09;roundRect(pillX,pillY,pillW,pillH,rr);ctx.fill();ctx.restore();
   ctx.globalAlpha=.18;ctx.lineWidth=1.5*s;ctx.strokeStyle=t.ink;roundRect(pillX,pillY,pillW,pillH,rr);ctx.stroke();ctx.globalAlpha=1;
-  // brand mark (accent tile with a light notch, echoing the header)
-  const my=pillY+(pillH-mk)/2;ctx.fillStyle=t.accent;roundRect(pillX+px,my,mk,mk,7*s);ctx.fill();
-  ctx.fillStyle=t.bg[0];ctx.globalAlpha=.9;roundRect(pillX+px+mk-9*s,my+5*s,6*s,6*s,2*s);ctx.fill();ctx.globalAlpha=1;
+  // brand mark (owl bubble, echoing the header — no tail at this tiny size)
+  const my=pillY+(pillH-mk)/2;owlMark(pillX+px,my,mk,t.accent,t.bg[0],false);
   // text, vertically centred in the pill
   const ty=pillY+pillH/2+bf*0.34,tx=pillX+px+mk+gp;
   ctx.textBaseline='alphabetic';
