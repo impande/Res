@@ -21,8 +21,16 @@ The prompt you output must:
 - Preserve the user's own content/data verbatim in its original language (quote the exact text to rewrite/translate/etc. — never translate the content they want acted on unless translation IS the task).
 - Be specific, unambiguous, and self-contained (works with no extra context).
 - State the output form only when it helps (e.g. "Return only the rewritten text.").
-- Never invent facts or details the user didn't provide.
-- If essential information is missing to do the task well, add ONE short line inside the prompt telling the AI to ask the user for it — and list what's missing in "needs" (write "needs" in the user's language too).
+- PERSPECTIVE: when the user is describing themselves ("I am…", "write … for me / for my resume / my LinkedIn"), write the prompt in their own first-person voice ("I am a product manager. Write 5 bullet points about my work…") or address the assistant to help "me". NEVER refer to the user in the third person or treat their name as a subject to write about ("Prashant's skills", "his experience" is wrong).
+- Do not invent specific facts the user didn't give (real metrics, employers, dates), BUT you may use clearly-marked placeholders like [project], [metric], [year] that the user can fill in — placeholders are not invented facts.
+- The prompt must be a CLEAN, finished instruction. If a specific detail is unknown, use a clearly-marked placeholder like [product], [metric, e.g. +20% conversion], [year] the user can fill in. Do NOT put meta-lines such as "ask the user for…" inside the prompt — those pollute the prompt when copied.
+- ECHO GUARD: the user's request may contain your OWN earlier output pasted back in — the previous prompt, or suggestion lines like "Ask the user for…" or "Specific products/features the user worked on…". These are NOT user data and NOT new requirements. Ignore and strip them, never nest them into the new prompt, and never re-issue them as a tip.
+
+"needs" is an OPTIONAL, smart suggestion that helps the user get a better result — never a blocker and never a generic nag. Decide it like a thoughtful expert:
+- FIRST, read everything the user has already given — their request AND any details/refinements they added. NEVER suggest something they already provided, and NEVER repeat a point they have already addressed. If the thing you'd suggest ALREADY APPEARS anywhere in the request (including your own tip pasted back in), set "needs" to EMPTY — do not ask again.
+- Fill "needs" only when there is ONE genuinely useful, SPECIFIC improvement for THIS exact request — e.g. a concrete detail that would sharpen the output ("add 2–3 real achievements with metrics, e.g. 'grew activation 20%', so the bullets aren't generic"), or something worth trimming ("drop the duplicated 'product product'"). Tailor it to what they actually wrote — no boilerplate.
+- If the request is already clear enough to produce a good result, leave "needs" EMPTY. Never invent a suggestion just to fill the field.
+- One short sentence, addressed to "you", in the user's language. Never third person.
 
 Output ONLY valid JSON, no markdown fences, exactly:
 {"prompt":"<the ready-to-paste prompt>","needs":"<one short line naming missing info or a blocker the user should provide; empty string if nothing is missing>"}`;
@@ -55,7 +63,7 @@ exports.handler = async function (event) {
     const userMsg =
       `Rewrite this request into the best prompt.\n\nUSER REQUEST:\n"""\n${input || '(no text — base the prompt on the attached image content below)'}\n"""` +
       (imageContent ? `\n\nCONTENT FROM AN ATTACHED IMAGE (use as data/context):\n"""\n${imageContent}\n"""` : '') +
-      (note ? `\n\nEXTRA SHAPING INSTRUCTIONS (apply to the prompt): ${note}` : '');
+      (note ? `\n\nADDITIONAL DETAILS / REFINEMENTS THE USER HAS ALREADY ADDED (fold these into the prompt, and treat them as PROVIDED — do NOT ask again for anything already covered here):\n${note}` : '');
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
