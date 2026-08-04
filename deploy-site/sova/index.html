@@ -287,8 +287,19 @@ function shapeNote(){const parts=[];
 function setLoading(on){const b=$('goBtn');
   if(b){b.disabled=on;b.textContent=on?'Thinking…':'Create prompt';}
   $('promptBox').classList.toggle('pulsing',on);}
+// Guard against the "same tip forever" loop: if most of the tip's distinctive
+// words are already sitting in what the user typed (e.g. they pasted the tip
+// back in), the user has effectively already seen/added it — don't show it again.
+function tipEchoed(tip){
+  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ');
+  const inp=norm(lastQ+' '+extras.join(' '));
+  const words=[...new Set(norm(tip).split(' ').filter(w=>w.length>4))];
+  if(words.length<3)return false;
+  const hit=words.filter(w=>inp.includes(w)).length;
+  return hit/words.length>=0.6;
+}
 function renderNeeds(){const el=$('needs');if(!el)return;
-  if(NEEDS){el.textContent=NEEDS;el.classList.add('show');}
+  if(NEEDS && !tipEchoed(NEEDS)){el.textContent=NEEDS;el.classList.add('show');}
   else{el.textContent='';el.classList.remove('show');}}
 async function generatePrompt(){
   if(busy)return;busy=true;setLoading(true);
