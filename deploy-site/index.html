@@ -10,6 +10,24 @@
   <link rel="preconnect" href="https://apis.google.com" crossorigin>
   <link rel="preconnect" href="https://accounts.google.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.googleapis.com">
+  <script>
+  /* Bug 2 — page-count parity: bundle Inter (sans) + Source Serif 4 (serif) so the
+     on-screen preview and PDFShift's server (headless Linux Chrome, which has no
+     Segoe UI / Calibri / Georgia and falls back to wider fonts → an extra page)
+     paginate identically. Injected with an ABSOLUTE origin URL so this same
+     @font-face travels into the PDFShift payload (which concatenates <style> blocks)
+     and PDFShift can fetch the files (served with CORS from /fonts/). The aliases map
+     the templates' existing named fonts to the bundled webfonts — no per-template edits. */
+  (function(){
+    try{
+      var o=location.origin, I=o+"/fonts/inter.woff2", S=o+"/fonts/sourceserif.woff2";
+      function ff(n,u){return "@font-face{font-family:'"+n+"';font-style:normal;font-weight:400 700;font-display:swap;src:url('"+u+"') format('woff2');}";}
+      var s=document.createElement('style'); s.id='_r4uFonts';
+      s.textContent=ff('Inter',I)+ff('Source Serif 4',S)+ff('Segoe UI',I)+ff('Calibri',I)+ff('Georgia',S);
+      (document.head||document.documentElement).appendChild(s);
+    }catch(e){}
+  })();
+  </script>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
