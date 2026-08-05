@@ -42,6 +42,10 @@ exports.handler = async function(event) {
           margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
           use_print: false,
           sandbox: false,
+          // Wait for the bundled @font-face webfonts to fetch + apply before PDFShift
+          // captures, so server-side pagination matches the on-screen preview (Bug 2).
+          // Without this, font-display:swap can capture the fallback and spill a page.
+          delay: 2000,
         }),
       });
 
