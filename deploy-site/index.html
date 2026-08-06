@@ -6643,5 +6643,277 @@ if ('serviceWorker' in navigator) {
   setTimeout(function(){ clearInterval(_iv); }, 20000);
 })();
 </script>
+<script>
+/* ── Bug 2 — deterministic page-break parity (preview modal ⇄ downloaded PDF) ──────
+   Root cause: the preview modal counted/drew page breaks with a naive height/1123
+   heuristic (with a -50 fudge that under-counted), while PDFShift re-flowed the real
+   HTML through headless Chrome. Near a page boundary the two diverged — the strip
+   said "2 pages" while the PDF spilled to 3, and the dashed break lines fell in
+   different places. This block makes ONE engine drive BOTH surfaces:
+
+     1. Render the EXACT bytes we send to PDFShift into a hidden iframe (same width,
+        same fonts, same print-override CSS) → its layout == what PDFShift produces.
+     2. Paginate greedily at whole content rows (never split a row; keep a section
+        heading with the row that follows it). This yields the page count + the
+        element that starts each page.
+     3. PDF path: intercept the generate-pdf fetch and stamp `break-before:page` on
+        exactly those elements (+ `break-inside:avoid` on the rows) so Chrome can no
+        longer re-flow — it breaks where we say. Preview path: draw the dashed lines
+        and set the page-count chip from the SAME computation.
+
+   Because the count and the break elements come from one pass over one rendering,
+   the strip, the modal lines, and the PDF are guaranteed to agree. ── */
+(function(){
+  var A4 = Math.round(297 * 3.7795);          /* A4 content height in px @96dpi ≈ 1123 */
+  var GEN_RE = /functions\/generate/;
+  var _lastOverrideCSS = 'html,body{display:block!important;min-height:0!important;height:auto!important;position:static!important;overflow:visible!important;inset:auto!important;margin:0!important;padding:0!important;background:#fff!important;}.resume-a4-page{width:210mm!important;max-width:none!important;min-height:0!important;height:auto!important;box-shadow:none!important;margin:0!important;border-radius:0!important;padding:18mm 16mm!important;}.r-head{margin:0!important;border-radius:0!important;}.r-head-accent{margin:0!important;}.r-2col{margin:0!important;min-height:0!important;align-items:flex-start!important;}.tpl-modern>.r-head,.tpl-corporate>.r-head,.tpl-executive>.r-head{width:100%!important;}.tpl-modern>.r-2col,.tpl-corporate>.r-2col,.tpl-executive>.r-2col{width:100%!important;}.tpl-classic>.r-head,.tpl-minimal>.r-head,.tpl-creative>.r-head,.tpl-fresh>.r-head,.tpl-academic>.r-head,.tpl-simple>.r-head,.tpl-coral>.r-head,.tpl-sage>.r-head,.tpl-lime>.r-head,.tpl-mono>.r-head,.tpl-retro>.r-head,.tpl-paper>.r-head{padding:13mm 14mm 0!important;}[class*=”tpl-”]>.r-sec{padding-left:14mm!important;padding-right:14mm!important;margin-top:8px!important;}[class*=”tpl-”]>.r-div{margin-left:14mm!important;margin-right:14mm!important;}[class*=”tpl-”]{padding-bottom:10mm!important;}.r-aside{padding-left:18px!important;}.r-main-col{padding-right:18px!important;padding-bottom:0!important;}[class*=”tpl-”] .r-exp{margin-bottom:8px!important;}*,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;forced-color-adjust:none!important;}';  /* default = exact PDFShift print-override CSS; re-captured on first PDF */
+
+  /* Reused offscreen iframe that renders the payload for measurement. */
+  var _frame = null;
+  function _iframe(){
+    if(_frame && _frame.isConnected) return _frame;
+    _frame = document.createElement('iframe');
+    _frame.setAttribute('aria-hidden','true');
+    _frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;height:1200px;border:0;visibility:hidden;pointer-events:none;z-index:-1;';
+    document.body.appendChild(_frame);
+    return _frame;
+  }
+  function _writeDoc(html){
+    var f = _iframe(), d = f.contentDocument;
+    d.open(); d.write(html); d.close();
+    return d;
+  }
+
+  /* All inline <style> text, joined — mirrors how _doPrintPDF_server builds the head. */
+  function _inlineStyles(){
+    return Array.prototype.map.call(document.querySelectorAll('style'), function(s){ return s.textContent; }).join('\n');
+  }
+  /* Build the same standalone document PDFShift receives, for a given .resume-a4-page. */
+  function _buildDoc(pageEl){
+    return '<!DOCTYPE html><html><head><meta charset="utf-8">'
+      + '<meta name="viewport" content="width=794px"><style>'
+      + _inlineStyles() + _lastOverrideCSS + '</style></head><body>'
+      + pageEl.outerHTML + '</body></html>';
+  }
+
+  function _isHeading(el){
+    if(!el || !el.tagName) return false;
+    if(/^H[1-6]$/.test(el.tagName)) return true;
+    var c = (el.className || '') + '';
+    return /(^|[\s-])(r-sec-t|sec-t|section-title)([\s-]|$)/.test(c);
+  }
+
+  /* Laid-out block children of an element (skips inline / zero-height / hidden). */
+  function _blockKids(el, view){
+    var out = [], kids = el.children;
+    for(var j=0;j<kids.length;j++){
+      var k = kids[j], cs = view.getComputedStyle(k);
+      if(cs.display === 'inline' || cs.display === 'none') continue;
+      if(k.getBoundingClientRect().height <= 0) continue;
+      out.push(k);
+    }
+    return out;
+  }
+
+  /* Break the page into the coarsest units that still fit on a page: an element is a
+     unit if it already fits within A4 (keep it whole — e.g. an experience entry, the
+     skills block, an award) OR it has no block children to descend into. Anything
+     taller than a page is opened up so we can break between its rows. This keeps
+     entries/skills/sections intact instead of stranding a lone chip on its own page. */
+  function _collectUnits(el, view, out){
+    var h = el.getBoundingClientRect().height;
+    var kids = _blockKids(el, view);
+    if(h <= A4 || kids.length === 0){ out.push(el); return; }
+    kids.forEach(function(k){ _collectUnits(k, view, out); });
+  }
+
+  /* Flat list of pagination units, sorted by visual top (so 2-column layouts — where
+     a short aside precedes a long main column in the DOM — paginate top-to-bottom the
+     way headless Chrome fragments them). */
+  function _rows(doc){
+    var page = doc.querySelector('.resume-a4-page');
+    if(!page) return {page:null, rows:[], boxH:0};
+    var view = doc.defaultView, pageTop = page.getBoundingClientRect().top;
+    var roots = _blockKids(page, view), els = [];
+    if(!roots.length) roots = [page];
+    roots.forEach(function(r){ _collectUnits(r, view, els); });
+    var rows = els.map(function(el){
+      var r = el.getBoundingClientRect();
+      return { el: el, top: r.top - pageTop, bottom: r.bottom - pageTop };
+    });
+    rows.sort(function(a,b){ return (a.top - b.top) || (a.bottom - b.bottom); });
+    return { page: page, rows: rows, boxH: page.getBoundingClientRect().height };
+  }
+
+  /* Layout-independent address of an element within the .resume-a4-page box: the chain
+     of child indices from the box down. The measured iframe doc is a serialization of
+     the live page, so the same path resolves to the corresponding element in either
+     tree regardless of how differently each is laid out. */
+  function _pathOf(el, root){
+    var path = [];
+    while(el && el !== root){
+      var p = el.parentNode;
+      if(!p) return null;
+      path.unshift(Array.prototype.indexOf.call(p.children, el));
+      el = p;
+    }
+    return (el === root) ? path : null;
+  }
+  function _resolvePath(root, path){
+    var el = root;
+    for(var i=0;i<path.length;i++){ if(!el || !el.children) return null; el = el.children[path[i]]; }
+    return el || null;
+  }
+
+  /* Greedy pagination over rows. Returns { count, breaks:[row,...] } where each
+     break row is the element that should START a new page. Keeps a heading with the
+     row beneath it, and folds the bottom padding into the last page so a few stray
+     pixels of padding never spill a near-empty extra page. */
+  function _paginate(doc){
+    var info = _rows(doc);
+    var rows = info.rows;
+    if(!rows.length) return { count: 1, breaks: [], info: info };
+    var breaks = [], start = 0;
+    for(var i=0;i<rows.length;i++){
+      var b = rows[i];
+      if(b.bottom - start > A4 + 1){
+        var idx = i;
+        /* pull a lone heading down with its content */
+        if(i > 0 && _isHeading(rows[i-1].el) && (b.bottom - rows[i-1].top) <= A4) idx = i - 1;
+        var brk = rows[idx];
+        if(brk.top <= start + 1){            /* single row taller than a page — let it ride */
+          start = b.bottom - A4;
+          continue;
+        }
+        brk.path = _pathOf(brk.el, info.page);
+        breaks.push(brk);
+        start = brk.top;
+        if(idx < i) i = idx;                 /* re-evaluate the pulled-down heading's page */
+      }
+    }
+    /* bottom padding of the box: does the tail (incl. padding) overflow the last page? */
+    var tail = info.boxH - start;
+    if(rows.length && tail > A4 + 1){
+      /* padding pushed us over — but only add a page if real content is on it,
+         otherwise trim padding on the PDF side (handled by caller). */
+    }
+    return { count: breaks.length + 1, breaks: breaks, info: info };
+  }
+
+  /* PDF side: stamp forced breaks into the rendered iframe doc and hand back the new
+     HTML string plus the page count. */
+  function _forceBreaks(html){
+    var doc = _writeDoc(html);
+    var res = _paginate(doc);
+    /* every row: keep it whole */
+    res.info.rows.forEach(function(r){
+      r.el.style.breakInside = 'avoid';
+      r.el.style.pageBreakInside = 'avoid';
+    });
+    /* chosen rows: start a new page */
+    res.breaks.forEach(function(r){
+      r.el.style.breakBefore = 'page';
+      r.el.style.pageBreakBefore = 'always';
+    });
+    /* neutralise the box bottom padding so its trailing whitespace can't spill a
+       blank final page (interior page edges already carry no padding). A later
+       same-specificity !important rule beats the earlier padding shorthand. */
+    if(res.info.page){
+      res.info.page.style.height = 'auto';
+      res.info.page.style.minHeight = '0';
+      var trim = doc.createElement('style');
+      trim.textContent = '.resume-a4-page{padding-bottom:0!important;height:auto!important;min-height:0!important;}';
+      doc.head.appendChild(trim);
+    }
+    var out = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+    return { html: out, count: res.count };
+  }
+
+  /* ── intercept the generate-pdf request and inject forced breaks ── */
+  var _origFetch = window.fetch;
+  window.fetch = function(input, init){
+    try{
+      var url = (typeof input === 'string') ? input : (input && input.url) || '';
+      if(GEN_RE.test(url) && init && typeof init.body === 'string'){
+        var payload = JSON.parse(init.body);
+        if(payload && payload.action === 'generate-pdf' && payload.html){
+          /* capture the print-override CSS once, so the preview can render identically */
+          if(!_lastOverrideCSS){
+            var m = payload.html.indexOf('html,body{display:block!important');
+            var e = payload.html.indexOf('</style>', m);
+            if(m > -1 && e > -1) _lastOverrideCSS = payload.html.slice(m, e);
+          }
+          var forced = _forceBreaks(payload.html);
+          payload.html = forced.html;
+          init = Object.assign({}, init, { body: JSON.stringify(payload) });
+        }
+      }
+    }catch(e){ /* fall through to the untouched request */ }
+    return _origFetch.call(this, input, init);
+  };
+
+  /* ── preview modal + page-count strip, driven by the SAME engine ── */
+  var _memoKey = null, _memoRes = null;
+  function _computeFor(pageEl){
+    if(!pageEl) return { count: 1, breaks: [] };
+    /* memo: the measurer is called on every debounced edit — skip the iframe re-layout
+       when the content + template are unchanged. */
+    var key = ((pageEl.firstElementChild && pageEl.firstElementChild.className) || '') + '::' + pageEl.innerHTML;
+    if(key === _memoKey && _memoRes) return _memoRes;
+    var doc = _writeDoc(_buildDoc(pageEl));
+    _memoRes = _paginate(doc);
+    _memoKey = key;
+    return _memoRes;
+  }
+
+  /* Override the modal's break renderer. Same visual contract as before
+     (.pg-pagemark for page 1, .pg-break for each new page) but positions + count
+     come from the shared engine. */
+  window._injectPreviewPageBreaks = function(){
+    try{
+      var body = document.getElementById('previewModalBody');
+      if(!body) return;
+      var wrap = body.querySelector('.resume-output-card') || body.querySelector('.preview-scale-inner');
+      var page = body.querySelector('.resume-a4-page');
+      if(!wrap || !page) return;
+      Array.prototype.forEach.call(page.querySelectorAll('.pg-break, .pg-pagemark'), function(n){ n.remove(); });
+
+      var res = _computeFor(page);
+      if(typeof window._updatePageChip === 'function') window._updatePageChip(res.count);
+      if(res.count <= 1) return;
+
+      /* geometry of the visible (scaled) page */
+      var pr = page.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
+      var scale = page.offsetWidth > 0 ? pr.width / page.offsetWidth : 1;
+      var base = (pr.top - wr.top) / scale;
+
+      var pm = document.createElement('div');
+      pm.className = 'pg-pagemark';
+      pm.setAttribute('data-pglabel', 'Page 1 / ' + res.count);
+      pm.style.top = Math.round(base) + 'px';
+      wrap.appendChild(pm);
+
+      /* resolve each break's DOM path (from the measured doc) against the LIVE page, so
+         the dashed line sits at exactly the element that starts the next PDF page —
+         independent of any layout drift between the two renders. */
+      res.breaks.forEach(function(b, n){
+        var el = b.path ? _resolvePath(page, b.path) : null;
+        if(!el) return;
+        var y = (el.getBoundingClientRect().top - pr.top) / scale;
+        var d = document.createElement('div');
+        d.className = 'pg-break';
+        d.setAttribute('data-pglabel', 'Page ' + (n + 2) + ' / ' + res.count);
+        d.style.top = Math.round(base + y) + 'px';
+        wrap.appendChild(d);
+      });
+    }catch(e){ /* leave the modal unbroken on any failure */ }
+  };
+
+  /* Override the strip's measurer so #resumeOutput's chip agrees with the modal + PDF. */
+  window._measurePages = function(pageEl){
+    try{ return _computeFor(pageEl).count; }catch(e){ return 1; }
+  };
+})();
+</script>
 </body>
 </html>
