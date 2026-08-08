@@ -6806,11 +6806,11 @@ if ('serviceWorker' in navigator) {
     var info = _rows(doc);
     var rows = info.rows;
     if(!rows.length) return { count: 1, breaks: [], info: info };
-    /* Chrome fits ~1124px of border-box content per A4 page; -6 is just rounding slack.
-       The real overflow risk — a last row's margin-bottom rendering past the page edge
-       — is removed on the PDF side by zeroing trailing margins at each break, so we can
-       pack right up to the page and still avoid a phantom extra break. */
-    var BUDGET = A4 - 6;
+    /* Chrome fits ~1124px of border-box content per A4 page. Trailing margins are
+       zeroed on the PDF side, but some templates add a little per-fragment chrome
+       (section padding/borders) when a section spans a page, so keep a small slack
+       so a page never renders past the edge and spills a phantom extra break. */
+    var BUDGET = A4 - (window.__R4U_SLACK || 24);
     var breaks = [], start = 0;
     for(var i=0;i<rows.length;i++){
       var b = rows[i];
@@ -6848,17 +6848,26 @@ if ('serviceWorker' in navigator) {
       r.el.style.breakInside = 'avoid';
       r.el.style.pageBreakInside = 'avoid';
     });
-    /* chosen rows: start a new page, and zero the margin-bottom of the row that ENDS
-       the previous page — a rendered trailing margin is what pushes a page a few px
-       past the edge and makes Chrome insert its own (unplanned) break. */
-    var sorted = res.info.rows;
+    /* chosen rows: start a new page, and zero every trailing margin/padding that would
+       render at the BOTTOM of the previous page. It's not just the last row's margin —
+       the section that closes there also contributes its own margin-bottom, so walk
+       from the last row up to the page box zeroing bottom spacing on each ancestor.
+       A rendered trailing margin is what pushes a page past the edge and makes Chrome
+       insert its own (unplanned) break. */
+    var sorted = res.info.rows, pageEl = res.info.page;
+    function _zeroTrailing(el){
+      while(el && el !== pageEl){
+        el.style.marginBottom = '0'; el.style.paddingBottom = '0';
+        el = el.parentElement;
+      }
+    }
     res.breaks.forEach(function(r){
       r.el.style.breakBefore = 'page';
       r.el.style.pageBreakBefore = 'always';
       var k = sorted.indexOf(r);
-      if(k > 0){ sorted[k-1].el.style.marginBottom = '0'; sorted[k-1].el.style.paddingBottom = '0'; }
+      if(k > 0) _zeroTrailing(sorted[k-1].el);
     });
-    if(sorted.length){ sorted[sorted.length-1].el.style.marginBottom = '0'; }
+    if(sorted.length) _zeroTrailing(sorted[sorted.length-1].el);
     /* neutralise the box bottom padding so its trailing whitespace can't spill a
        blank final page (interior page edges already carry no padding). A later
        same-specificity !important rule beats the earlier padding shorthand. */
