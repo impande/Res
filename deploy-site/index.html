@@ -6882,27 +6882,45 @@ if ('serviceWorker' in navigator) {
     return { html: out, count: res.count };
   }
 
-  /* ── intercept the generate-pdf request and inject forced breaks ── */
+  /* ── intercept the generate-pdf request and inject forced breaks ──
+     FAIL-SAFE CONTRACT: generating the PDF must NEVER depend on this working. The
+     forced-break rewrite is best-effort; on ANY doubt (timeout, error, output that
+     doesn't look like a sane full document) we send the ORIGINAL payload untouched so
+     the resume always downloads — at worst with the old pagination. A paid user must
+     always get their PDF. */
   var _origFetch = window.fetch;
+  function _looksSane(orig, out){
+    return typeof out === 'string'
+      && out.indexOf('resume-a4-page') > -1
+      && out.indexOf('</html>') > -1
+      && out.length > orig.length * 0.5
+      && out.length < orig.length * 3;
+  }
   window.fetch = async function(input, init){
+    var newInit = init;
     try{
       var url = (typeof input === 'string') ? input : (input && input.url) || '';
       if(GEN_RE.test(url) && init && typeof init.body === 'string'){
         var payload = JSON.parse(init.body);
         if(payload && payload.action === 'generate-pdf' && payload.html){
-          /* capture the print-override CSS once, so the preview can render identically */
           if(!_lastOverrideCSS){
             var m = payload.html.indexOf('html,body{display:block!important');
             var e = payload.html.indexOf('</style>', m);
             if(m > -1 && e > -1) _lastOverrideCSS = payload.html.slice(m, e);
           }
-          var forced = await _forceBreaks(payload.html);
-          payload.html = forced.html;
-          init = Object.assign({}, init, { body: JSON.stringify(payload) });
+          /* race the rewrite against a hard timeout so it can never stall the download */
+          var forced = await Promise.race([
+            _forceBreaks(payload.html).catch(function(){ return null; }),
+            new Promise(function(res){ setTimeout(function(){ res(null); }, 3500); })
+          ]);
+          if(forced && _looksSane(payload.html, forced.html)){
+            payload.html = forced.html;
+            newInit = Object.assign({}, init, { body: JSON.stringify(payload) });
+          }
         }
       }
-    }catch(e){ /* fall through to the untouched request */ }
-    return _origFetch.call(this, input, init);
+    }catch(e){ newInit = init; /* any failure → original request */ }
+    return _origFetch.call(this, input, newInit);
   };
 
   /* ── preview modal + page-count strip, driven by the SAME engine ── */
