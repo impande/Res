@@ -16,6 +16,43 @@ exports.handler = async function(event) {
   try {
     const body = JSON.parse(event.body || '{}');
 
+    // ── Razorpay order creation ───────────────────────────────────────────────
+    // UPI payments (incl. the desktop QR) only confirm — and only fire the checkout
+    // success handler — when the checkout is opened with a server-created order_id.
+    // Without this, a UPI/QR payment is taken but the handler never runs, so the PDF
+    // never downloads. Card payments work either way; this makes UPI/QR work too.
+    if (body.action === 'create-order') {
+      const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_live_Sy3fGr4R5rMKtx';
+      const secret = process.env.RAZORPAY_KEY_SECRET;
+      if (!secret) {
+        // No secret configured — signal the client to fall back to the keyless flow
+        // (card still works) rather than block the payment.
+        return { statusCode: 501, headers: CORS, body: JSON.stringify({ error: 'RAZORPAY_KEY_SECRET not set' }) };
+      }
+      const amount = parseInt(body.amount, 10);
+      const currency = (body.currency || 'INR').toUpperCase();
+      if (!amount || amount < 1) {
+        return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Invalid amount' }) };
+      }
+      const orderRes = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(keyId + ':' + secret).toString('base64'),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount, currency, payment_capture: 1 }),
+      });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        return { statusCode: orderRes.status, headers: CORS, body: JSON.stringify({ error: (orderData.error && orderData.error.description) || 'Order creation failed' }) };
+      }
+      return {
+        statusCode: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: orderData.id, amount: orderData.amount, currency: orderData.currency }),
+      };
+    }
+
     // ── PDF generation ────────────────────────────────────────────────────────
     if (body.action === 'generate-pdf') {
       const { html, filename } = body;

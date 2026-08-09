@@ -6643,5 +6643,107 @@ if ('serviceWorker' in navigator) {
   setTimeout(function(){ clearInterval(_iv); }, 20000);
 })();
 </script>
+<script>
+/* ── ₹9 payment: create a Razorpay order so UPI / the desktop QR actually confirms ──
+   Razorpay only fires the checkout success handler for UPI/QR payments when the
+   checkout was opened with a server-created order_id. The app opened checkout without
+   one, so a UPI/QR payment was taken but the handler never ran — money charged, no PDF.
+
+   This wraps the launch WITHOUT touching the existing success handler: it fetches an
+   order_id first, then injects it into the options the app passes to `new Razorpay(...)`.
+   FAIL-SAFE: if the order can't be created (secret not set, network, timeout), it opens
+   the checkout exactly as before (card payments keep working). ── */
+(function(){
+  var GEN = '/.netlify/functions/generate';
+  var _origStart = window.startRazorpayPayment;
+  if(typeof _origStart !== 'function') return;
+
+  function _createOrder(amount, currency){
+    return new Promise(function(resolve){
+      var done = false;
+      var to = setTimeout(function(){ if(!done){ done = true; resolve(null); } }, 7000);
+      try{
+        fetch(GEN, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create-order', amount: amount, currency: currency })
+        }).then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(o){ if(done) return; done = true; clearTimeout(to); resolve(o && o.id ? o.id : null); })
+          .catch(function(){ if(done) return; done = true; clearTimeout(to); resolve(null); });
+      }catch(e){ if(!done){ done = true; clearTimeout(to); resolve(null); } }
+    });
+  }
+
+  /* Wrap the (real, post-checkout.js) Razorpay constructor once so it injects the
+     pre-fetched order_id into whatever options the app builds. checkout.js defines
+     window.Razorpay, so we only wrap after it exists. */
+  function _wrapRazorpay(){
+    var R = window.Razorpay;
+    if(typeof R !== 'function' || R.__r4uWrapped) return;
+    var Wrapped = function(options){
+      try{
+        if(options && !options.order_id && window.__r4uOrderId){ options.order_id = window.__r4uOrderId; }
+        /* Harden the success handler so a paid user ALWAYS gets their download:
+           - mark the session active so the stale-tab auto-reload can't fire between
+             payment success and the download (root cause of "page reloaded instead of
+             downloading" on a long-open/just-logged-in tab);
+           - persist the paid state up front (so 24h access sticks even if the page is
+             reloaded right after);
+           - if the app's own handler throws before it starts the download (e.g. the
+             post-pay version snapshot fails on a fresh login), trigger it ourselves. */
+        if(options && typeof options.handler === 'function' && !options.handler.__r4uHardened){
+          var _orig = options.handler;
+          var hardened = function(resp){
+            try{ window.__r4uEdited = true; }catch(e){}
+            try{ if(typeof markPaid === 'function') markPaid(); }catch(e){}
+            var ok = false;
+            try{ _orig.call(this, resp); ok = true; }catch(e){}
+            if(!ok){ try{ if(typeof _doPrintPDF === 'function') _doPrintPDF(); }catch(e){} }
+          };
+          hardened.__r4uHardened = true;
+          options.handler = hardened;
+        }
+      }catch(e){}
+      return new R(options);
+    };
+    Wrapped.prototype = R.prototype;
+    try{ Object.keys(R).forEach(function(k){ try{ Wrapped[k] = R[k]; }catch(e){} }); }catch(e){}
+    Wrapped.__r4uWrapped = true;
+    window.Razorpay = Wrapped;
+  }
+
+  function _ensureRzp(cb){
+    if(typeof window.Razorpay === 'function'){ cb(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload = cb;
+    s.onerror = cb;   /* let the app's own path surface the load error */
+    document.head.appendChild(s);
+  }
+
+  window.startRazorpayPayment = function(){
+    var amt;
+    try{ amt = (typeof _getPayAmount === 'function') ? _getPayAmount() : null; }catch(e){ amt = null; }
+    if(!amt){ return _origStart.apply(this, arguments); }   /* can't read amount → old flow */
+
+    var btn = document.getElementById('payNowBtn');
+    if(btn){ btn.disabled = true; btn.textContent = 'Processing…'; }
+
+    _createOrder(amt.amount, amt.currency).then(function(orderId){
+      window.__r4uOrderId = orderId || null;   /* null → keyless checkout (card still works) */
+      _ensureRzp(function(){
+        try{ _wrapRazorpay(); }catch(e){}
+        try{
+          if(typeof _launchRazorpay === 'function'){ _launchRazorpay(amt.amount, amt.currency, amt.display); }
+          else { _origStart.call(window); }
+        }catch(e){
+          if(btn){ btn.disabled = false; }
+          try{ _origStart.call(window); }catch(e2){}
+        }
+      });
+    });
+  };
+})();
+</script>
 </body>
 </html>
