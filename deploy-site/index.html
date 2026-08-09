@@ -6745,5 +6745,107 @@ if ('serviceWorker' in navigator) {
   };
 })();
 </script>
+<script>
+/* ── Text-size control (Small / Medium / Large), reflected in the downloaded PDF ──
+   Resume text is ~rem-based, but scaling the document root would also resize the app
+   UI, and the earlier "font size" control set the size on a wrapper the PDF never sees.
+   Instead we set an explicit font-size on each resume text element (base × scale). That
+   is equivalent to root-scaling within the fixed A4 width (text scales, lines reflow the
+   same way), and — because the PDF payload is a *clone* of the on-screen resume — the
+   scaled sizes travel into the PDF automatically, no payload rewrite. Medium (1.0) is
+   the default and clears all overrides, so it's a no-op unless the user opts in. ── */
+(function(){
+  var KEY = 'r4uFontScale';
+  var SIZES = [ {k:'S', label:'S', scale:0.90, title:'Small text'},
+                {k:'M', label:'M', scale:1.00, title:'Medium (default)'},
+                {k:'L', label:'L', scale:1.10, title:'Large text'} ];
+  function _scale(){ try{ return parseFloat(localStorage.getItem(KEY)) || 1; }catch(e){ return 1; } }
+  function _setScale(s){ try{ localStorage.setItem(KEY, String(s)); }catch(e){} window.__r4uFontScale = s; }
+  window.__r4uFontScale = _scale();
+
+  /* Apply base×scale to every element under a .resume-a4-page. Captures each element's
+     unscaled size once (data-r4ufs); scale 1 clears the override entirely. */
+  function _applyTo(page, scale){
+    if(!page) return;
+    /* Scale ONE structural wrapper with `zoom`, never the content elements. The earlier
+       per-element approach wrote style/data attributes onto the <b>/<i> tags INSIDE the
+       summary & bullets, and the app's edit-capture round-trips those fields' HTML back
+       into the resume data — so our attributes leaked in and got escaped into visible
+       "<b …>" text. Zooming the template wrapper (above the editable fields) scales all
+       text + spacing, keeps the A4 box fixed, reflows like a real page, and leaves the
+       content DOM completely untouched — so nothing can pollute the saved resume. It
+       also rides into the PDF via the existing clone. */
+    var wrap = page.querySelector('[class*="tpl-"]') || page.firstElementChild || page;
+    if(!wrap) return;
+    if(scale === 1) wrap.style.removeProperty('zoom');
+    else wrap.style.zoom = String(scale);
+  }
+  function _applyAll(){
+    var s = window.__r4uFontScale || 1;
+    _applyTo(document.querySelector('#resumeOutput .resume-a4-page'), s);
+    _applyTo(document.querySelector('#previewModalBody .resume-a4-page'), s);
+  }
+  /* re-apply after the resume re-renders (generate, template switch, edits) */
+  function _hook(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig.__r4uFsHooked) return;
+    var wrapped = function(){ var r = orig.apply(this, arguments); try{ setTimeout(_applyAll, 0); }catch(e){} return r; };
+    wrapped.__r4uFsHooked = true; window[name] = wrapped;
+  }
+  ['renderOutput','openPreviewModal','renderPreviewWithTemplate','refreshPreviewTemplate'].forEach(_hook);
+
+  /* the S/M/L control — its OWN row just below the "Resume length" strip, so it never
+     crowds the page-count chip (which wrapped the label on mobile). */
+  function _paint(grp, s){
+    Array.prototype.forEach.call(grp.children, function(b){
+      var on = Math.abs(parseFloat(b.getAttribute('data-scale')) - s) < 0.001;
+      b.style.background = on ? 'var(--card-bg,#fff)' : 'transparent';
+      b.style.color = on ? 'var(--accent-btn,#b45309)' : 'var(--muted,#6b7280)';
+      b.style.boxShadow = on ? '0 1px 2px rgba(0,0,0,0.10)' : 'none';
+      b.style.fontWeight = on ? '800' : '600';
+    });
+  }
+  function _buildControl(){
+    var strip = document.getElementById('pageCountStrip');
+    if(!strip || document.getElementById('r4uFsRow')) return;
+    /* mirror the "Resume length" strip: label left, control right, same padding/rule */
+    var row = document.createElement('div');
+    row.id = 'r4uFsRow';
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border,#e5e5e0);background:rgba(245,158,11,.03);';
+    var lbl = document.createElement('span');
+    lbl.className = 'pcs-label';           /* reuse the app's own label style */
+    lbl.textContent = 'Text size';
+    row.appendChild(lbl);
+    /* iOS-style segmented control: subtle track, active segment lifts to white */
+    var grp = document.createElement('div');
+    grp.id = 'r4uFsCtl';
+    grp.title = 'Adjust resume text size — also applied to the downloaded PDF';
+    grp.style.cssText = 'display:inline-flex;gap:2px;background:var(--surface,#f4f4ef);border:1px solid var(--border,#e5e5e0);border-radius:9px;padding:2px;';
+    var cur = window.__r4uFontScale || 1;
+    SIZES.forEach(function(sz){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = sz.label;
+      btn.title = sz.title;
+      btn.setAttribute('data-scale', sz.scale);
+      btn.style.cssText = 'border:0;background:transparent;min-width:34px;padding:4px 0;font-size:0.72rem;font-weight:600;line-height:1.3;border-radius:7px;cursor:pointer;color:var(--muted,#6b7280);transition:background .12s,color .12s,box-shadow .12s;';
+      btn.addEventListener('click', function(){
+        var s = parseFloat(sz.scale);
+        _setScale(s); _paint(grp, s); _applyAll();
+      });
+      grp.appendChild(btn);
+    });
+    _paint(grp, cur);
+    row.appendChild(grp);
+    if(strip.parentNode) strip.parentNode.insertBefore(row, strip.nextSibling);
+  }
+
+  function _init(){ _buildControl(); if((window.__r4uFontScale||1) !== 1) setTimeout(_applyAll, 300); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _init);
+  else _init();
+  /* the strip is created with the app; retry briefly in case it mounts late */
+  var tries = 0, iv = setInterval(function(){ _buildControl(); if(document.getElementById('r4uFsCtl') || ++tries > 20) clearInterval(iv); }, 500);
+})();
+</script>
 </body>
 </html>
