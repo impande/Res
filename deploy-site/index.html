@@ -6997,15 +6997,22 @@ if ('serviceWorker' in navigator) {
       btn.parentNode.insertBefore(sep, btn.nextSibling);
     } else { dd.appendChild(btn); }
   }
-  function _scan(node){
-    if(!node || node.nodeType!==1) return;
-    if(node.id==='_authDropdown') _inject(node);
-    else if(node.querySelector){ var d=node.querySelector('#_authDropdown'); if(d) _inject(d); }
+  // Inject by wrapping the dropdown's own open function — fires only when the
+  // dropdown opens, avoiding a global document-wide MutationObserver.
+  function _hook(){
+    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uWrapped){
+      var orig=window._authDropdown;
+      window._authDropdown=function(){
+        var r=orig.apply(this,arguments);
+        try{ var dd=document.getElementById('_authDropdown'); if(dd) _inject(dd); }catch(e){}
+        return r;
+      };
+      window._authDropdown.__r4uWrapped=true;
+      return true;
+    }
+    return false;
   }
-  var obs=new MutationObserver(function(muts){
-    muts.forEach(function(m){ Array.prototype.forEach.call(m.addedNodes, _scan); });
-  });
-  obs.observe(document.documentElement,{childList:true,subtree:true});
+  if(!_hook()){ var n=0, iv=setInterval(function(){ if(_hook()||++n>25) clearInterval(iv); },200); }
   var existing=document.getElementById('_authDropdown'); if(existing) _inject(existing);
 })();
 </script>
