@@ -2237,6 +2237,12 @@
     .r-2col{display:flex;gap:0;margin:-6px -36px 0;min-height:160px;}
     .r-aside{width:185px;min-width:185px;padding:18px 16px;box-sizing:border-box;flex-shrink:0;}
     .r-main-col{flex:1;padding:4px 26px 8px 20px;min-width:0;}
+    /* When a section (e.g. Awards) is moved into the narrow sidebar via Refine with AI,
+       stack the entry's date under the title instead of forcing it onto the same row —
+       a right-aligned, non-shrinking year like "2026 – Currently Pursuing" would
+       otherwise overflow or collide in the 185px column. Mirrors .r-aside .r-edu. */
+    .r-aside .r-award{flex-direction:column;align-items:flex-start;}
+    .r-aside .r-award-year{text-align:left!important;margin-left:0!important;margin-top:1px;}
     .tpl-modern .r-aside{background:#f8fafc;border-right:1px solid #e5e7eb;}
     .tpl-modern .r-aside .r-sec-t{font-size:0.62rem!important;}
     .tpl-modern .r-aside .r-sec-t::after{display:none;}
@@ -3129,6 +3135,12 @@ window.__iosPdfSave = function(blobUrl, filename){
         <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Choose Template
       </label>
+      <style>
+        /* Windows renders the native dropdown popup on a white system background, so the
+           select's near-white color:#e8e8ff made every option invisible except the one
+           highlighted blue. Force readable dark-bg/light-text options across platforms. */
+        #previewTplSelect option{background-color:#0c0c1a;color:#f5f5ff;}
+      </style>
       <select id="previewTplSelect" onchange="refreshPreviewTemplate(this.value)" style="width:100%;background:#0c0c1a;border:1.5px solid rgba(245,158,11,0.35);color:#e8e8ff;border-radius:10px;padding:9px 12px;font-size:0.85rem;font-family:inherit;font-weight:600;box-shadow:0 0 0 3px rgba(245,158,11,0.06);outline:none;">
         <option value="modern">Modern</option><option value="classic">Classic</option><option value="minimal">Minimal</option><option value="corporate">Corporate</option><option value="creative">Creative</option><option value="executive">Executive</option><option value="fresh">Fresh</option><option value="elegant">Elegant</option><option value="bold">Bold</option><option value="tech">Tech</option><option value="academic">Academic</option><option value="simple">Simple</option><option value="sky">Sky</option><option value="purple">Purple</option><option value="warm">Warm</option><option value="slate">Slate</option><option value="pink">Pink</option><option value="indigo">Indigo</option><option value="forest">Forest</option><option value="graphite">Graphite</option><option value="midnight">Midnight</option><option value="copper">Copper</option><option value="noir">Noir</option><option value="emerald">Emerald</option><option value="denim">Denim</option><option value="ruby">Ruby</option><option value="stone">Stone</option><option value="sunset">Sunset</option><option value="ocean">Ocean</option><option value="coral">Coral</option><option value="sage">Sage</option><option value="lime">Lime</option><option value="mono">Mono</option><option value="retro">Retro</option><option value="paper">Paper</option>
       </select>
@@ -4890,9 +4902,13 @@ if ('serviceWorker' in navigator) {
 
     function applyMove(afterIdx){
       var el=secs[movingIdx];
-      if(afterIdx===null) secParent.insertBefore(el,secs[0]);
-      else{ var anchor=secs[afterIdx]; secParent.insertBefore(el,anchor.nextSibling||null); }
-      secs=Array.from(secParent.querySelectorAll('.r-sec'));
+      // Two-column templates split .r-sec across .r-aside (sidebar) and .r-main-col.
+      // Insert relative to the ANCHOR's real parent so a moved section stays in the
+      // column it was dropped into — never forced into the narrow sidebar, which used
+      // to crush long entries (e.g. an award dated "2026 – Currently Pursuing").
+      if(afterIdx===null){ var first=secs[0]; first.parentElement.insertBefore(el,first); }
+      else{ var anchor=secs[afterIdx]; anchor.parentElement.insertBefore(el,anchor.nextSibling||null); }
+      secs=Array.from(out.querySelectorAll('.r-sec'));
       var _movedTitle=secTitle(el);
       movingIdx=null;
       _markEdited();
