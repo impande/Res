@@ -6884,22 +6884,34 @@ if ('serviceWorker' in navigator) {
    Capture the DOM order into the saved data (via _collectCloudData) and re-apply it
    after every renderOutput so a restored/re-rendered resume keeps the user's order. */
 (function(){
+  function _curTpl(){ try{ return (typeof currentTemplate!=='undefined' && currentTemplate) ? currentTemplate : ''; }catch(e){ return ''; } }
   function _cap(){
     try{
       var out=document.getElementById('resumeOutput'); if(!out) return null;
       var page=out.querySelector('.resume-a4-page'); if(!page) return null;
       var secs=Array.prototype.slice.call(page.querySelectorAll('.r-sec'));
       if(secs.length<2) return null;
-      return secs.map(function(s){
+      // Tag the order with the template it was captured on: a reorder is relative
+      // to that template's layout, so it must not be re-applied to a different one.
+      return { tpl:_curTpl(), secs: secs.map(function(s){
         var t=s.querySelector('.r-sec-t');
         return { title:(t?t.textContent:'').trim(),
                  col: s.closest('.r-aside')?'aside':(s.closest('.r-main-col')?'main':'single') };
-      });
+      }) };
     }catch(e){ return null; }
   }
   function _apply(order){
     try{
-      if(!order||!order.length) return;
+      if(!order) return;
+      // Legacy array shape (saved briefly before this guard existed) carries no
+      // template, so re-applying it across a template change is exactly what pushed
+      // sidebar sections to the top. Without template info we skip it entirely.
+      if(Array.isArray(order)) return;
+      var secsArr=order.secs, tpl=order.tpl;
+      if(!secsArr || !secsArr.length) return;
+      // Only re-apply when the current template matches the captured one; otherwise
+      // let the new template render in its own default order.
+      if(!tpl || tpl !== _curTpl()) return;
       var out=document.getElementById('resumeOutput'); if(!out) return;
       var page=out.querySelector('.resume-a4-page'); if(!page) return;
       var aside=page.querySelector('.r-aside'), main=page.querySelector('.r-main-col');
@@ -6908,7 +6920,7 @@ if ('serviceWorker' in navigator) {
         var t=s.querySelector('.r-sec-t'); var k=(t?t.textContent:'').trim();
         if(k && !(k in byTitle)) byTitle[k]=s;
       });
-      order.forEach(function(o){
+      secsArr.forEach(function(o){
         var el=byTitle[o.title]; if(!el) return;
         // Restore into the same column when it exists; fall back to the current
         // parent for single-column templates that have no aside/main split.
