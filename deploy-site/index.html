@@ -1280,6 +1280,10 @@
     .seo-faq details[open] summary{color:var(--accent);}
     .seo-faq .faq-answer{padding:0 16px 14px;font-size:0.8rem;color:var(--muted);line-height:1.65;}
     @media(max-width:400px){.seo-features-grid{grid-template-columns:1fr;}}
+    /* Odd number of feature cards leaves the last one orphaned in the left column
+       of the 2-col grid. Center it across the row at the same width as the others.
+       Scoped to the 2-col range so the single-column mobile layout is unaffected. */
+    @media(min-width:401px){.seo-features-grid>.seo-feat-card:last-child:nth-child(odd){grid-column:1 / -1;justify-self:center;width:calc(50% - 6px);}}
   </style>
 
   <style id="tplStyles">
