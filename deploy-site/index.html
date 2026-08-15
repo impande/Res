@@ -6919,9 +6919,40 @@ if ('serviceWorker' in navigator) {
   }
   window._r4uCaptureSecOrder=_cap;
   window._r4uApplySecOrder=_apply;
+
+  /* One-time repair for resumes saved before the bullet-dedup fix. That fix's
+     predecessor copied the first same-titled role's bullets onto every other
+     same-titled role, so a restored resume showed identical bullets under
+     different companies. Signature: same title, DIFFERENT company, byte-identical
+     bullets. For each such duplicate we drop the copied bullets so the renderer
+     rebuilds from that entry's own description (which survived intact). It's
+     idempotent (a cleared entry no longer matches) and cannot affect fresh AI
+     output, which never produces byte-identical bullets across different companies. */
+  function _repairDupBullets(data){
+    try{
+      if(!data || !Array.isArray(data.experience) || data.experience.length<2) return false;
+      var canon={}, changed=false;
+      for(var i=0;i<data.experience.length;i++){
+        var e=data.experience[i]; if(!e) continue;
+        var title=((e.title||e.role||'')+'').trim().toLowerCase(); if(!title) continue;
+        var co=((e.co||e.company||'')+'').trim().toLowerCase();
+        var bl=Array.isArray(e.bullets)?e.bullets:null;
+        if(!(title in canon)){ canon[title]={co:co, bl:bl}; continue; }
+        var c=canon[title];
+        if(bl && c.bl && co!==c.co && JSON.stringify(bl)===JSON.stringify(c.bl)){
+          delete e.bullets;   // renderer falls back to this entry's own desc
+          changed=true;
+        }
+      }
+      return changed;
+    }catch(err){ return false; }
+  }
+  window._r4uRepairDupBullets=_repairDupBullets;
+
   if(typeof window.renderOutput==='function'){
     var _orig=window.renderOutput;
     window.renderOutput=function(data){
+      try{ _repairDupBullets(data); }catch(e){}
       var r=_orig.apply(this,arguments);
       try{ if(data && data.sectionOrder) _apply(data.sectionOrder); }catch(e){}
       return r;
