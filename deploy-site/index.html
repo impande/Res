@@ -629,7 +629,7 @@
        ~(screen − room for header/CTAs), so Save now / Sign out always sit below it and
        stay visible. Explicit max-height (svh, with vh fallback) means this holds even if
        the dropdown's own height cap misbehaves on iOS. */
-    #_authDropdown #_versionListItems{flex:1 1 auto;min-height:90px;max-height:calc(100vh - 340px);max-height:calc(100svh - 340px);overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(0,0,0,0.05);border-bottom:1px solid rgba(0,0,0,0.05);}
+    #_authDropdown #_versionListItems{flex:1 1 auto;min-height:80px;max-height:calc(100vh - 410px);max-height:calc(100svh - 410px);overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(0,0,0,0.05);border-bottom:1px solid rgba(0,0,0,0.05);}
     #_authDropdown button{display:block;width:100%;padding:10px 16px;border:none;background:none;text-align:left;font-size:0.84rem;cursor:pointer;font-family:inherit;color:var(--text);transition:background .15s;}
     #_authDropdown button:hover{background:#f5f5f3;}
     #_authDropdown .drop-signout{color:#dc2626!important;font-weight:500;}
@@ -7000,17 +7000,28 @@ if ('serviceWorker' in navigator) {
       +'</span>'
       +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;color:var(--muted);opacity:0.55;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>';
     btn.addEventListener('click',function(){ try{ window.open(WA,'_blank','noopener'); }catch(e){ location.href=WA; } });
-    // Place at the BOTTOM of the menu, just above Sign out — which puts it below
-    // "Save now" when that's present (signed-in versions list). Add a divider only
-    // when one isn't already there, so we never stack two separators.
-    var anchor=dd.querySelector('.drop-signout')||dd.querySelector('.drop-savenow');
-    if(anchor && anchor.parentNode){
-      var prev=anchor.previousElementSibling;
-      if(!(prev && prev.classList && prev.classList.contains('drop-divider'))){
-        var sep=document.createElement('div'); sep.className='drop-divider';
-        anchor.parentNode.insertBefore(sep, anchor);
+    // Place at the BOTTOM. In the signed-in versions menu the footer is a pinned
+    // stack (Save now / Sign out) sitting below a scrollable list. Make Contact us a
+    // third PINNED row between them, so it reads as "below Save now" AND Sign out can
+    // never be pushed off-screen by a long list. Offsets are measured from the real
+    // rendered heights so they survive font/zoom differences across devices.
+    var signout=dd.querySelector('.drop-signout');
+    var savenow=dd.querySelector('.drop-savenow');
+    if(signout && signout.parentNode){
+      signout.parentNode.insertBefore(btn, signout);
+      if(savenow){
+        var soH=signout.offsetHeight||36;
+        btn.style.position='sticky'; btn.style.bottom=soH+'px'; btn.style.zIndex='3';
+        btn.style.background='#fff'; btn.style.borderTop='1px solid rgba(0,0,0,0.07)';
+        var cH=btn.offsetHeight||52;
+        savenow.style.bottom=(soH+cH)+'px';
+      } else {
+        var prev=btn.previousElementSibling;
+        if(!(prev && prev.classList && prev.classList.contains('drop-divider'))){
+          var sep=document.createElement('div'); sep.className='drop-divider';
+          signout.parentNode.insertBefore(sep, btn);
+        }
       }
-      anchor.parentNode.insertBefore(btn, anchor);
     } else {
       var sep2=document.createElement('div'); sep2.className='drop-divider';
       dd.appendChild(sep2); dd.appendChild(btn);
