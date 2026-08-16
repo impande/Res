@@ -67,6 +67,14 @@ exports.handler = async function(event) {
         };
       }
 
+      // Text-size (Small / Medium / Large) is applied on-screen with CSS `zoom` on the
+      // resume wrapper, which PDFShift's renderer ignores — so the downloaded PDF always
+      // came out at the default size regardless of the user's choice. PDFShift's native
+      // `zoom` option DOES scale the render, so honour the client's chosen scale here.
+      // Clamp to the S/M/L range so a malformed value can never distort the document.
+      let pdfZoom = Number(body.zoom);
+      if (!Number.isFinite(pdfZoom) || pdfZoom < 0.5 || pdfZoom > 1.5) pdfZoom = 1;
+
       const pdfRes = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
         method: 'POST',
         headers: {
@@ -79,6 +87,7 @@ exports.handler = async function(event) {
           margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
           use_print: false,
           sandbox: false,
+          zoom: pdfZoom,
           // Wait for the bundled @font-face webfonts to fetch + apply before PDFShift
           // captures, so server-side pagination matches the on-screen preview (Bug 2).
           // Without this, font-display:swap can capture the fallback and spill a page.
