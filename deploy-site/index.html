@@ -7394,5 +7394,41 @@ if ('serviceWorker' in navigator) {
   setTimeout(maybeOffer, 2500);   /* let the app + any cloud restore settle first */
 })();
 </script>
+<script>
+/* ── Keep the ATS score + page length in sync everywhere ────────────────────────
+   The step-7 "ATS Compatibility Score" card only recomputed on renderOutput
+   (generate / template switch / restore) — so after inline edits it went stale
+   versus the Refine-with-AI panel, which recomputes live (with edit-capture) each
+   tick. And the card's "Length (N pages)" line reads the Resume-length chip
+   (#pageCountChip) at render time, before the async page measurement settles — so
+   it could disagree with the Resume-length card. Both computeATSScore (used by
+   step 7 AND Refine) read the same chip, so the cure is simply to re-render the
+   step-7 card at the right moments:
+     • after any inline edit to the resume (capture edits first, like Refine does)
+     • whenever the Resume-length chip changes (async measurement settled)
+   Uses input events (not a resume MutationObserver) so re-rendering the ATS card
+   can never loop. Fail-open. */
+(function(){
+  function refresh(){
+    try{
+      if(!document.getElementById('atsScoreCard') || typeof renderATSScore!=='function') return;
+      if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits();
+      var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:null;
+      if(d) renderATSScore(d);
+    }catch(e){}
+  }
+  var deb=null; function soon(){ clearTimeout(deb); deb=setTimeout(refresh,300); }
+  /* (1) inline edits → keep step-7 score in step with Refine */
+  document.addEventListener('input',function(e){
+    try{ if(e.target && e.target.closest && e.target.closest('#resumeOutput')) soon(); }catch(_e){}
+  }, true);
+  /* (2) Resume-length chip settles → re-read it into the ATS length line + score */
+  (function watchChip(){
+    var chip=document.getElementById('pageCountChip');
+    if(!chip){ setTimeout(watchChip,600); return; }
+    try{ new MutationObserver(soon).observe(chip,{childList:true,characterData:true,subtree:true}); }catch(e){}
+  })();
+})();
+</script>
 </body>
 </html>
