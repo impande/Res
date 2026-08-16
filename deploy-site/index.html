@@ -3816,13 +3816,13 @@ if ('serviceWorker' in navigator) {
     if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
     var d=(typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:{};
     var r=(typeof computeATSScore==='function')?computeATSScore(d):{score:0,items:[]};
-    _msg('<b>ATS Score — '+r.score+'/100</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Green is good. Tap any highlighted amber/red item to jump straight to the fix.</div>');
+    _msg('<b>ATS Score — '+r.score+'/100</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Readiness for applicant-tracking systems: parseable contact + sections, strong content, single-column, right length. Tap any amber/red item to fix it. For a match against a specific job, use <b>ATS match to a job</b>.</div>');
     function _fixFor(label){
       if(/^Skills/.test(label)) return {fn:_aiSuggestSkills, cta:'Suggest skills'};
       if(/^Length/.test(label)) return {fn:_fitFlow, cta:'Fit to page'};
       if(label==='Professional summary') return {fn:_aiRewriteSummary, cta:'Rewrite'};
       if(label==='Quantified achievements') return {fn:function(){_bulletIssuesFlow('metrics');}, cta:'Add metrics'};
-      if(label==='Action-verb bullets') return {fn:_polishHome, cta:'Polish'};
+      if(label==='Action-verb bullets'||/^Bullet length/.test(label)||/^Language/.test(label)) return {fn:_polishHome, cta:'Polish'};
       return null;
     }
     var wrap=document.createElement('div'); wrap.className='aig-wrap';
@@ -5196,34 +5196,73 @@ if ('serviceWorker' in navigator) {
      closer to how real ATS/recruiter screening rates a resume. */
   var _STRONGV=/^(led|built|drove|delivered|launched|reduced|increased|improved|designed|created|managed|achieved|cut|grew|scaled|streamlined|automated|developed|owned|spearheaded|boosted|generated|implemented|optimi[sz]ed|architected|established|directed|orchestrated|accelerated|transformed|mentored|coordinated|shipped|enabled|negotiated|secured|expanded|championed|founded|revamped|analy[sz]ed|drove)\b/i;
   function _atsPages(){ try{ var chip=document.getElementById('pageCountChip'); if(chip){ var mm=(chip.textContent||'').match(/\d+/); if(mm) return parseInt(mm[0]); } }catch(e){} return 1; }
+  /* Real-world ATS scoring. Models how ATS resume checkers (Jobscan / Resume
+     Worded / Enhancv-style) grade a resume WITHOUT a target job posting: can the
+     software PARSE it (contact + standard sections), is it COMPLETE, and is the
+     content STRONG (metrics, action verbs, clean recruiter-ready language, right
+     length, single-column). For a TRUE job-specific match rate — keyword overlap
+     against a pasted posting — the "ATS match to a job" tool does that JD-relative
+     part; this standalone number is the JD-independent ATS readiness. Weights sum
+     to 100: contact/parse 18 · sections 15 · experience quality 30 · skills 12 ·
+     summary 8 · formatting & language 10 · length 7. */
+  var _FILLER=/\b(responsible for|duties includ|hard[- ]?working|team player|detail[- ]?oriented|go[- ]?getter|think outside the box|synergy|results?[- ]?driven|proven track record|self[- ]?starter|works? well (with|under)|passionate about)\b/i;
+  var _PRON=/\b(i|me|my|myself|we|our)\b/i;
   window.computeATSScore=function(d){
     d=d||{}; var items=[], score=0;
     function it(l,s){ items.push({label:l,status:s}); }
+
+    /* 1 · Contact & parseability (18) — the fields an ATS must extract */
     var email=(d.email||'').trim(); var okEmail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
-    if(okEmail){ score+=8; it('Email address','pass'); } else it('Email address', email?'warn':'fail');
-    if(String(d.phone||'').trim()){ score+=5; it('Phone number','pass'); } else it('Phone number','warn');
-    if(String(d.location||'').trim()){ score+=4; it('Location / City','pass'); } else it('Location / City','warn');
-    var sum=String(d.summary||'').trim();
-    if(sum.length>=40){ score+=8; it('Professional summary', sum.length>=90?'pass':'warn'); } else it('Professional summary','fail');
-    var exp=d.experience||[]; var hasExp=exp.length>=1&&!!(exp[0].title||exp[0].co);
-    if(hasExp){ score+=12; it('Work experience','pass'); } else it('Work experience','fail');
+    if(okEmail){ score+=6; it('Email address','pass'); } else it('Email address', email?'warn':'fail');
+    if(String(d.phone||'').trim()){ score+=4; it('Phone number','pass'); } else it('Phone number','warn');
+    if(String(d.location||'').trim()){ score+=3; it('Location / City','pass'); } else it('Location / City','warn');
+    var title=String(d.jobTitle||d.currentRole||'').trim();
+    if(title){ score+=5; it('Target job title','pass'); } else it('Target job title','warn');
+
+    /* 2 · Core sections present (15) — ATS keys off standard section headings */
+    var exp=d.experience||[]; var hasExp=exp.length>=1&&!!(exp[0].title||exp[0].co||exp[0].role||exp[0].company);
+    if(hasExp){ score+=7; it('Work experience section','pass'); } else it('Work experience section','fail');
+    var edu=d.education||[]; if(edu.length&&(edu[0].deg||edu[0].sch||edu[0].degree||edu[0].school)){ score+=4; it('Education section','pass'); } else it('Education section','warn');
+    var sk=(d.skills||[]).length;
+    if(sk>=1){ score+=4; it('Skills section','pass'); } else it('Skills section','fail');
+
+    /* 3 · Experience quality (30) */
     var hasDates=exp.some(function(e){ return String(e.dates||e.period||e.start||'').trim(); });
-    if(hasDates){ score+=5; it('Employment dates','pass'); } else it('Employment dates','warn');
-    var bullets=[]; exp.forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b) bullets.push(String(b)); }); });
+    if(hasDates){ score+=6; it('Employment dates','pass'); } else it('Employment dates', hasExp?'warn':'fail');
+    var bullets=[]; exp.forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b) bullets.push(String(b).trim()); }); });
     if(bullets.length){
       var qn=bullets.filter(function(b){ return /\d/.test(b); }).length; var qp=qn/bullets.length;
-      score+=Math.round(qp*18); it('Quantified achievements', qp>=0.4?'pass':(qp>=0.15?'warn':'fail'));
-      var av=bullets.filter(function(b){ return _STRONGV.test(b.trim()); }).length; var ap=av/bullets.length;
-      score+=Math.round(ap*10); it('Action-verb bullets', ap>=0.6?'pass':(ap>=0.3?'warn':'fail'));
-    } else { it('Quantified achievements','fail'); it('Action-verb bullets','fail'); }
-    var sk=(d.skills||[]).length;
-    score+=sk>=5?8:0; score+=sk>=8?4:0;
+      score+=Math.round(qp*12); it('Quantified achievements', qp>=0.4?'pass':(qp>=0.15?'warn':'fail'));
+      var av=bullets.filter(function(b){ return _STRONGV.test(b); }).length; var ap=av/bullets.length;
+      score+=Math.round(ap*8); it('Action-verb bullets', ap>=0.6?'pass':(ap>=0.3?'warn':'fail'));
+      var wellLen=bullets.filter(function(b){ var w=b.split(/\s+/).length; return w>=6&&w<=32; }).length; var lp=wellLen/bullets.length;
+      score+=Math.round(lp*4); it('Bullet length & clarity', lp>=0.7?'pass':(lp>=0.4?'warn':'fail'));
+    } else { it('Quantified achievements','fail'); it('Action-verb bullets','fail'); it('Bullet length & clarity','fail'); }
+
+    /* 4 · Skills depth (12) */
+    score += sk>=12?12 : sk>=8?10 : sk>=5?7 : sk>=3?3 : 0;
     it('Skills ('+sk+' listed)', sk>=8?'pass':(sk>=5?'warn':'fail'));
-    var edu=d.education||[]; if(edu.length&&(edu[0].deg||edu[0].sch)){ score+=8; it('Education section','pass'); } else it('Education section','warn');
+
+    /* 5 · Professional summary (8) */
+    var sum=String(d.summary||'').trim();
+    if(sum.length>=90){ score+=8; it('Professional summary','pass'); }
+    else if(sum.length>=40){ score+=4; it('Professional summary','warn'); }
+    else it('Professional summary','fail');
+
+    /* 6 · ATS-friendly formatting & language (10) */
+    var twoCol=false; try{ twoCol=!!document.querySelector('#resumeOutput .r-2col, #resumeOutput .r-main-col'); }catch(e){}
+    if(!twoCol){ score+=4; it('Single-column layout','pass'); } else { score+=2; it('Layout (single-column parses best)','warn'); }
+    var corpus=(sum+' '+bullets.join(' ')).toLowerCase().trim();
+    if(!corpus){ it('Clear, recruiter-ready language','fail'); }
+    else if(!_FILLER.test(corpus) && !_PRON.test(corpus)){ score+=6; it('Clear, recruiter-ready language','pass'); }
+    else { score+=2; it('Language (drop filler & "I / we")','warn'); }
+
+    /* 7 · Length appropriate (7) */
     var pg=_atsPages();
-    if(pg<=2){ score+=10; it('Length ('+pg+' page'+(pg>1?'s':'')+')','pass'); }
-    else if(pg===3){ score+=4; it('Length (3 pages — trim)','warn'); }
+    if(pg<=2){ score+=7; it('Length ('+pg+' page'+(pg>1?'s':'')+')','pass'); }
+    else if(pg===3){ score+=3; it('Length (3 pages — trim)','warn'); }
     else it('Length ('+pg+' pages — too long)','fail');
+
     return { score: Math.max(0, Math.min(100, Math.round(score))), items: items };
   };
 
