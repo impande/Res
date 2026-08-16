@@ -5710,6 +5710,12 @@ if ('serviceWorker' in navigator) {
   [class*="tpl-spine-"] .r-co{color:var(--acc)!important;font-style:normal;font-weight:600;}
   [class*="tpl-spine-"] .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
   [class*="tpl-spine-"] .r-div{display:none;}
+    /* chronicle & spine run slightly taller than the other families, so a ~1-page
+       résumé can spill a single trailing skill chip to page 2. Tighten their section
+       and header spacing just enough to reclaim that and keep it on one page. */
+    [class*="tpl-chronicle-"] .r-sec,[class*="tpl-spine-"] .r-sec{margin-bottom:12px!important;}
+    [class*="tpl-chronicle-"] .r-sec-t,[class*="tpl-spine-"] .r-sec-t{margin-bottom:8px!important;}
+    [class*="tpl-chronicle-"] .r-head,[class*="tpl-spine-"] .r-head{margin-bottom:4mm!important;padding-bottom:3mm!important;}
   .tpl-spine-blue{--acc:#2563eb;} .tpl-spine-red{--acc:#dc2626;} .tpl-spine-green{--acc:#16a34a;}
   .tpl-spine-gray{--acc:#4b5563;} .tpl-spine-purple{--acc:#7c3aed;}
 </style>
