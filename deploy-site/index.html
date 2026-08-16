@@ -37,7 +37,7 @@
   <title>Free AI Resume Builder – ATS-Optimised, No Sign-Up | resume4u.help</title>
 
   <!-- ── SEO Core ──────────────────────────────────────────────────────── -->
-  <meta name="description" content="Free AI resume builder — create an ATS-optimised resume in minutes with 50+ templates and AI bullet points. No sign-up. Download PDF from ₹9 / $0.99.">
+  <meta name="description" content="Resume For You is a free AI resume builder. Create an ATS-optimised resume in minutes with 50+ templates, AI-generated bullet points, and a free portfolio website. No sign-up required. Download PDF from ₹9 / $0.99.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="Resume For You">
   <link rel="canonical" href="https://resume4u.help/">
@@ -6971,9 +6971,28 @@ if ('serviceWorker' in navigator) {
   }
   window._r4uRepairDupBullets=_repairDupBullets;
 
+  /* Normalise stray non-breaking spaces. Inline edits (and pasted text) capture a
+     hard space as the literal entity "&nbsp;" into the saved data; the renderer then
+     prints those six characters verbatim — the "platform.&nbsp;Established" the user
+     saw in their summary. Replace the entity (and the raw U+00A0 char) with a normal
+     space across every string field before rendering, so the fix also cleans the
+     saved data on the next save. Deep-walks arrays/objects; ignores non-strings. */
+  function _sanitizeNbsp(node){
+    try{
+      if(typeof node==='string'){
+        return node.replace(/&nbsp;|&#0*160;|&#x0*a0;/gi,' ').replace(/\u00a0/g,' ');
+      }
+      if(Array.isArray(node)){ for(var i=0;i<node.length;i++) node[i]=_sanitizeNbsp(node[i]); return node; }
+      if(node && typeof node==='object'){ for(var k in node){ if(Object.prototype.hasOwnProperty.call(node,k)) node[k]=_sanitizeNbsp(node[k]); } return node; }
+    }catch(e){}
+    return node;
+  }
+  window._r4uSanitizeNbsp=_sanitizeNbsp;
+
   if(typeof window.renderOutput==='function'){
     var _orig=window.renderOutput;
     window.renderOutput=function(data){
+      try{ _sanitizeNbsp(data); }catch(e){}
       try{ _repairDupBullets(data); }catch(e){}
       var r=_orig.apply(this,arguments);
       try{ if(data && data.sectionOrder) _apply(data.sectionOrder); }catch(e){}
@@ -7099,6 +7118,157 @@ if ('serviceWorker' in navigator) {
     };
   }
   ['downloadPDF','downloadDoc'].forEach(function(n){ if(typeof window[n]==='function') window[n]=_guard(window[n]); });
+})();
+</script>
+<script>
+/* ── Text size → downloaded PDF ──────────────────────────────────────────────
+   The S/M/L control scales the on-screen resume with CSS `zoom`, which PDFShift
+   (the PDF renderer) ignores — so the downloaded PDF always came out at the
+   default size no matter what the user picked. PDFShift's *native* zoom option
+   does scale the render, so forward the chosen scale in the generate-pdf payload,
+   and strip the now-redundant CSS zoom from the cloned HTML so the two can never
+   double-apply. Only the generate-pdf request is touched; everything else passes
+   straight through. Fail-open (any error → original request). */
+(function(){
+  var origFetch = window.fetch;
+  if(!origFetch || origFetch.__r4uZoomWrapped) return;
+  function wrapped(input, init){
+    try{
+      var url = (typeof input==='string') ? input : (input && input.url) || '';
+      var body = init && init.body;
+      if(url.indexOf('/functions/generate')!==-1 && typeof body==='string' && body.indexOf('generate-pdf')!==-1){
+        var payload = JSON.parse(body);
+        if(payload && payload.action==='generate-pdf'){
+          var scale = parseFloat(window.__r4uFontScale);
+          if(!(scale>0)) scale = 1;
+          payload.zoom = scale;
+          if(typeof payload.html==='string' && scale!==1){
+            payload.html = payload.html.replace(/zoom\s*:\s*[0-9.]+\s*;?/gi, '');
+          }
+          var newInit = {};
+          for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k]=init[k]; }
+          newInit.body = JSON.stringify(payload);
+          return origFetch.call(this, input, newInit);
+        }
+      }
+    }catch(e){}
+    return origFetch.apply(this, arguments);
+  }
+  wrapped.__r4uZoomWrapped = true;
+  window.fetch = wrapped;
+})();
+</script>
+<script>
+/* ── Refine-with-AI: keep the live card in sync + add Undo to the tool menu ─────
+   Two things users hit while refining:
+   1) After a Refine-with-AI change the résumé card could sit in a state that only
+      a manual "Generate resume" click would correct — confusing, since it isn't
+      obvious when to click Generate. Fix: when the Refine panel CLOSES, re-render
+      the card from the (edit-captured) résumé data — exactly what Generate does —
+      so closing the panel always leaves a correct, final card.
+   2) The tool menu (Reorder sections, Rewrite summary, …) had no Undo — only the
+      free-text chat did, and even that only restored the DOM, leaving the saved
+      data stale. Reuse the existing Undo button, but snapshot the PRIOR state on
+      every real change during a refine session and restore BOTH the DOM and the
+      underlying résumé data + styles. All defensive / fail-open. */
+(function(){
+  function panel(){ return document.getElementById('aiChatPanel'); }
+  function out(){ return document.getElementById('resumeOutput'); }
+  function isOpen(){ var p=panel(); return !!p && p.classList.contains('ai-panel-open'); }
+  function clone(o){ try{ return o?JSON.parse(JSON.stringify(o)):null; }catch(e){ return null; } }
+  function stack(){ if(!Array.isArray(window._aiUndoStack)) window._aiUndoStack=[]; return window._aiUndoStack; }
+  function refreshBtn(){ try{ if(typeof _aiUpdateUndoBtn==='function') _aiUpdateUndoBtn(); }catch(e){} }
+
+  var suppress=false, baseline=null, obs=null, debTimer=null;
+
+  function snapshot(){
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    var o=out();
+    return { html:o?o.innerHTML:'',
+             data:(typeof lastResumeData!=='undefined')?clone(lastResumeData):null,
+             styles:(window._snapResumeStyles?window._snapResumeStyles():null) };
+  }
+
+  /* Robust Undo: restore DOM + résumé data + styles from the most recent snapshot. */
+  function robustUndo(){
+    var st=stack(); if(!st.length) return;
+    var snap=st.pop();
+    suppress=true;
+    try{
+      var o=out();
+      if(o && typeof snap.html==='string') o.innerHTML=snap.html;
+      if(snap.data && typeof lastResumeData!=='undefined'){
+        lastResumeData=snap.data;                 /* bare global — shared script scope */
+        try{ if(typeof skills!=='undefined' && Array.isArray(lastResumeData.skills)){ skills.length=0; lastResumeData.skills.forEach(function(s){skills.push(s);}); } }catch(e){}
+      }
+      try{ if(snap.styles && window._applyResumeStyles) window._applyResumeStyles(snap.styles); }catch(e){}
+      baseline=snapshot();
+    }catch(e){}
+    suppress=false;
+    refreshBtn();
+    try{ if(typeof _aiAppendMsg==='function') _aiAppendMsg('ai','↩ Reverted your last change.'); }catch(e){}
+  }
+  /* Route both the tool-menu Undo button and any legacy call through the robust one,
+     and neutralise the built-in snapshot so changes aren't double-recorded (the
+     MutationObserver below is the single source of truth). */
+  window._aiUndo=robustUndo;
+  window._aiSnapshotUndo=function(){};
+
+  function onMutate(){
+    if(suppress || !isOpen()) return;
+    clearTimeout(debTimer);
+    debTimer=setTimeout(function(){
+      if(suppress) return;
+      var o=out(); if(!o) return;
+      if(!baseline){ baseline=snapshot(); return; }
+      if(o.innerHTML===baseline.html) return;      /* no real change */
+      stack().push(baseline);
+      refreshBtn();
+      baseline=snapshot();
+    },500);
+  }
+  function startObs(){
+    if(obs) return; var o=out(); if(!o) return;
+    obs=new MutationObserver(onMutate);
+    obs.observe(o,{subtree:true,childList:true,characterData:true,attributes:true});
+  }
+  function stopObs(){ if(obs){ try{obs.disconnect();}catch(e){} obs=null; } clearTimeout(debTimer); }
+
+  /* Panel-close: re-render from data so the card matches what Generate would build. */
+  function syncOnClose(){
+    var o=out();
+    if(!o || !o.querySelector('.resume-a4-page')) return;
+    if(typeof lastResumeData==='undefined' || !lastResumeData) return;
+    suppress=true;
+    try{
+      if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits();
+      var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
+      if(typeof renderOutput==='function') renderOutput(lastResumeData);
+      if(snap && window._applyResumeStyles) window._applyResumeStyles(snap);
+    }catch(e){}
+    suppress=false;
+  }
+
+  function onOpen(){
+    window._aiUndoStack=[]; baseline=null; refreshBtn();
+    /* let any open-time auto-renders (e.g. skill smart-casing) settle before we
+       start recording, so they don't become a spurious first Undo entry */
+    setTimeout(function(){ if(isOpen()){ baseline=snapshot(); startObs(); } },800);
+  }
+
+  function watchPanel(){
+    var p=panel(); if(!p || p.__r4uRefineWatched) return; p.__r4uRefineWatched=true;
+    var wasOpen=isOpen();
+    if(wasOpen) onOpen();
+    new MutationObserver(function(){
+      var now=isOpen();
+      if(now && !wasOpen) onOpen();
+      else if(!now && wasOpen){ stopObs(); syncOnClose(); }
+      wasOpen=now;
+    }).observe(p,{attributes:true,attributeFilter:['class']});
+  }
+
+  var tries=0, iv=setInterval(function(){ if(panel()){ watchPanel(); clearInterval(iv); } else if(++tries>40) clearInterval(iv); },300);
 })();
 </script>
 </body>
