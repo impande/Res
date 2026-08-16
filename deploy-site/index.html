@@ -7000,10 +7000,10 @@ if ('serviceWorker' in navigator) {
       +'</span>'
       +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;color:var(--muted);opacity:0.55;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>';
     btn.addEventListener('click',function(){ try{ window.open(WA,'_blank','noopener'); }catch(e){ location.href=WA; } });
-    // Place at the BOTTOM of the menu, just above Sign out (or above the sticky
-    // Save-now/Sign-out footer for the signed-in versions list). Add a divider only
+    // Place at the BOTTOM of the menu, just above Sign out — which puts it below
+    // "Save now" when that's present (signed-in versions list). Add a divider only
     // when one isn't already there, so we never stack two separators.
-    var anchor=dd.querySelector('.drop-savenow')||dd.querySelector('.drop-signout');
+    var anchor=dd.querySelector('.drop-signout')||dd.querySelector('.drop-savenow');
     if(anchor && anchor.parentNode){
       var prev=anchor.previousElementSibling;
       if(!(prev && prev.classList && prev.classList.contains('drop-divider'))){
