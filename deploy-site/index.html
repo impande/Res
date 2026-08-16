@@ -7271,5 +7271,128 @@ if ('serviceWorker' in navigator) {
   var tries=0, iv=setInterval(function(){ if(panel()){ watchPanel(); clearInterval(iv); } else if(++tries>40) clearInterval(iv); },300);
 })();
 </script>
+<script>
+/* ── "Continue where you left off?" — restore the exact resume session ──────────
+   Persists the full resume-building session to localStorage (exact step, template,
+   resume data, rendered card, colour/spacing + text size, and every step field)
+   and, on return, OFFERS to restore it — the user taps Continue or Start fresh, so
+   it never silently overrides a fresh start. Purely additive: ignore the prompt and
+   the app behaves exactly as before. Resume DATA is taken from lastResumeData (the
+   on-screen truth) so nothing the AI produced is dropped the way a form-only capture
+   could. Portfolio-builder mid-progress is a separate follow-up. */
+(function(){
+  var KEY='_r4uSession', MAX_AGE=7*24*3600*1000;   /* offer to resume for 7 days */
+  function clone(o){ try{ return o?JSON.parse(JSON.stringify(o)):null; }catch(e){ return null; } }
+
+  /* Best resume data = what's rendered (lastResumeData), topped up with any personal
+     fields only the form holds. Using the render data avoids the form-only capture
+     dropping AI-generated skills/education/awards. */
+  function bestData(){
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    var lrd=(typeof lastResumeData!=='undefined'&&lastResumeData)?clone(lastResumeData):null;
+    var cloud=null; try{ if(typeof window._collectCloudData==='function') cloud=window._collectCloudData(); }catch(e){}
+    var d=lrd||clone(cloud)||null;
+    if(d&&cloud){ ['firstName','lastName','jobTitle','email','phone','location','linkedin','website','template'].forEach(function(k){ if(d[k]==null&&cloud[k]!=null) d[k]=cloud[k]; }); }
+    return d;
+  }
+  function hasContent(d,form){
+    var f=form||{};
+    return !!(d&&(d.summary||(d.experience&&d.experience.length)))
+        || !!(f.firstName||f.lastName||f.jobTitle||f.email||(f.experience&&f.experience.length));
+  }
+
+  function save(){
+    try{
+      var form=(typeof collectData==='function')?collectData():null;
+      var d=bestData();
+      if(!hasContent(d,form)) return;
+      var ro=document.getElementById('resumeOutput');
+      var a4=ro?ro.querySelector('.resume-a4-page'):null;
+      var sess={
+        v:1, t:Date.now(),
+        step:(typeof currentStep!=='undefined')?currentStep:0,
+        template:(typeof currentTemplate!=='undefined')?currentTemplate:null,
+        data:d,
+        cardHtml:a4?a4.outerHTML:null,
+        styles:(window._snapResumeStyles?window._snapResumeStyles():null),
+        textScale:(typeof window.__r4uFontScale!=='undefined')?window.__r4uFontScale:1,
+        form:form,
+        skills:(typeof skills!=='undefined'&&Array.isArray(skills))?skills.slice():null,
+        photo:(typeof userPhoto!=='undefined')?userPhoto:null
+      };
+      localStorage.setItem(KEY,JSON.stringify(sess));
+    }catch(e){}
+  }
+  var deb=null; function saveSoon(){ clearTimeout(deb); deb=setTimeout(save,1200); }
+  window.addEventListener('beforeunload',save);
+  window.addEventListener('pagehide',save);
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') save(); });
+  (function watchDirty(){
+    var ro=document.getElementById('resumeOutput');
+    if(!ro){ setTimeout(watchDirty,700); return; }
+    try{ new MutationObserver(saveSoon).observe(ro,{subtree:true,childList:true,characterData:true,attributes:true}); }catch(e){}
+  })();
+  window._r4uSaveSession=save;
+
+  var restoring=false;
+  function applySession(s){
+    if(!s||restoring) return; restoring=true;
+    try{
+      if(s.form && typeof populateFormFromParsed==='function'){ try{ populateFormFromParsed(s.form); }catch(e){} }
+      if(s.skills && typeof skills!=='undefined'){ try{ skills.length=0; s.skills.forEach(function(x){skills.push(x);}); }catch(e){} }
+      if(s.photo && typeof userPhoto!=='undefined'){ try{ userPhoto=s.photo; }catch(e){} }
+      if(typeof s.textScale!=='undefined'){ try{ window.__r4uFontScale=s.textScale; localStorage.setItem('r4uFontScale',String(s.textScale)); }catch(e){} }
+      if(s.data){
+        try{ lastResumeData=s.data; }catch(e){}
+        if(s.template && typeof selectTemplate==='function'){ try{ selectTemplate(s.template); }catch(e){ try{ renderOutput(s.data); }catch(e2){} } }
+        else if(typeof renderOutput==='function'){ try{ renderOutput(s.data); }catch(e){} }
+        try{ if(s.styles && window._applyResumeStyles) window._applyResumeStyles(s.styles); }catch(e){}
+      } else if(s.cardHtml){
+        var ro=document.getElementById('resumeOutput'); if(ro){ ro.className='resume-output-card'; ro.innerHTML=s.cardHtml; }
+      }
+      var dl=document.getElementById('dlActions'); if(dl) dl.style.display='';
+      var step=(typeof s.step==='number'&&s.step>=1)?s.step:7;
+      if(typeof goToStep==='function'){ try{ goToStep(step,true); }catch(e){} }
+      /* land the user on their resume */
+      setTimeout(function(){ try{ var el=document.getElementById('resumeOutput'); if(el&&el.querySelector('.resume-a4-page')&&step===7) el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} },200);
+    }catch(e){}
+    restoring=false;
+  }
+
+  function showPrompt(s){
+    if(document.getElementById('_r4uResumePrompt')) return;
+    var when=''; try{ var mins=Math.round((Date.now()-s.t)/60000); when = mins<1?'just now' : mins<60?(mins+'m ago') : mins<1440?(Math.round(mins/60)+'h ago') : (Math.round(mins/1440)+'d ago'); }catch(e){}
+    var bar=document.createElement('div'); bar.id='_r4uResumePrompt';
+    bar.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:2147483001;background:#111827;color:#fff;border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.30);padding:13px 15px;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 28px);font:500 14px/1.35 -apple-system,Inter,system-ui,sans-serif;';
+    var txt=document.createElement('span'); txt.style.cssText='display:flex;flex-direction:column;min-width:0;';
+    txt.innerHTML='<span style="font-weight:700;">Continue where you left off?</span><span style="font-size:12px;color:#9ca3af;">Your resume from '+(when||'earlier')+' is saved on this device.</span>';
+    var fresh=document.createElement('button'); fresh.textContent='Start fresh';
+    fresh.style.cssText='background:transparent;color:#9ca3af;border:0;font:600 13px/1 inherit;cursor:pointer;padding:9px 10px;border-radius:9px;';
+    var cont=document.createElement('button'); cont.textContent='Continue';
+    cont.style.cssText='background:#f59e0b;color:#111827;border:0;font:800 13px/1 inherit;cursor:pointer;padding:10px 16px;border-radius:9px;white-space:nowrap;';
+    fresh.addEventListener('click',function(){ try{ localStorage.removeItem(KEY); }catch(e){} bar.remove(); });
+    cont.addEventListener('click',function(){ bar.remove(); applySession(s); });
+    bar.appendChild(txt); bar.appendChild(fresh); bar.appendChild(cont);
+    document.body.appendChild(bar);
+    setTimeout(function(){ if(bar.parentNode) bar.remove(); }, 30000);   /* hide UI; keeps the saved session */
+  }
+
+  function maybeOffer(){
+    try{
+      var raw=localStorage.getItem(KEY); if(!raw) return;
+      var s=JSON.parse(raw);
+      if(!s||!s.t||(Date.now()-s.t)>MAX_AGE){ try{ localStorage.removeItem(KEY); }catch(e){} return; }
+      if(!hasContent(s.data,s.form)) return;
+      /* Never interrupt a session that already has a resume on screen (e.g. a
+         signed-in user whose cloud resume already loaded) — only offer when the
+         work area is empty, so Continue clearly restores rather than replaces. */
+      var ro=document.getElementById('resumeOutput');
+      if(ro&&ro.querySelector('.resume-a4-page')) return;
+      showPrompt(s);
+    }catch(e){}
+  }
+  setTimeout(maybeOffer, 2500);   /* let the app + any cloud restore settle first */
+})();
+</script>
 </body>
 </html>
