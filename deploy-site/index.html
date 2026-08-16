@@ -7052,5 +7052,54 @@ if ('serviceWorker' in navigator) {
   var existing=document.getElementById('_authDropdown'); if(existing) _inject(existing);
 })();
 </script>
+<script>
+/* Stale-tab export guard.
+   Problem: a tab opened BEFORE a deploy keeps running old in-memory CSS/JS, so a
+   PDF/DOC download from it is built with stale styles → a "broken" export even
+   though prod is fixed. HTML is no-store, so any RELOAD gets the latest; the gap is
+   only for a tab that never reloads.
+   Approach (deliberately conservative):
+     • Passively detect a newer build in the background — this NEVER reloads on its
+       own (no reload-storm risk); it only sets a flag.
+     • Only when the user actually clicks Download, if a newer build is live, refresh
+       once (autosave + sessionStorage persist across it) so the export uses the
+       latest CSS. Fail-open everywhere: any error just proceeds with the download. */
+(function(){
+  function _runningBuild(){
+    var el=document.getElementById('_buildStamp'); if(!el) return '';
+    var m=(el.textContent||'').match(/build\s+([^\s·]+)/i); return m?m[1]:'';
+  }
+  var CUR=_runningBuild();
+  window.__r4uNewBuild=false;
+  var _busy=false;
+  function _check(){
+    // Stop once a new build is confirmed, and never block/loop on errors.
+    if(_busy || window.__r4uNewBuild || !CUR || CUR==='local') return;
+    _busy=true;
+    fetch(location.pathname+'?_v='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return (r&&r.ok)?r.text():''; })
+      .then(function(t){ _busy=false;
+        var m=t.match(/build\s+([0-9a-f]{7,}|local)/i);
+        if(m && m[1]!=='local' && m[1]!==CUR) window.__r4uNewBuild=true;
+      })
+      .catch(function(){ _busy=false; });
+  }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') _check(); });
+  window.addEventListener('focus',_check);
+  setTimeout(_check,4000);
+  setInterval(_check,5*60*1000);
+  function _guard(orig){
+    return function(){
+      if(window.__r4uNewBuild){
+        try{ if(typeof showToast==='function') showToast('Updating to the latest version — please tap Download again.','info'); }catch(e){}
+        setTimeout(function(){ try{ location.replace(location.pathname+'?_r='+Date.now()); }catch(e){ location.reload(); } },700);
+        return;
+      }
+      return orig.apply(this,arguments);
+    };
+  }
+  ['downloadPDF','downloadDoc'].forEach(function(n){ if(typeof window[n]==='function') window[n]=_guard(window[n]); });
+})();
+</script>
 </body>
 </html>
