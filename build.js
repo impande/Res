@@ -48,5 +48,31 @@ try {
   console.log('⚠️  javascript-obfuscator not available, deploying as-is:', e.message);
 }
 
+// ── Externalise all inline JS into one deferred, cacheable app.js ──────────────
+// The page ships a large amount of inline JS the browser must parse before first
+// paint. Moving it (after obfuscation) into a single deferred external file shrinks
+// the HTML (faster FCP), moves JS download/compile off the critical path, and lets
+// it be cached across visits. Only attribute-less <script> blocks are moved — the
+// JSON-LD (<script type="application/ld+json">) and any typed scripts stay inline.
+// Order is preserved and the blocks still share global scope, so behaviour is
+// unchanged; only timing shifts to after HTML parse (safe: no document.write, no
+// "use strict", DOMContentLoaded handlers still fire after defer).
+try {
+  const crypto = require('crypto');
+  const scripts = [];
+  html = html.replace(/<script>([\s\S]*?)<\/script>/g, (m, js) => { scripts.push(js); return ''; });
+  if (scripts.length) {
+    const appJs = scripts.join('\n;\n');
+    fs.writeFileSync('deploy-site/app.js', appJs);
+    const hash = crypto.createHash('sha1').update(appJs).digest('hex').slice(0, 10);
+    const tag = `<script defer src="/app.js?v=${hash}"></script>\n`;
+    const bi = html.lastIndexOf('</body>');
+    html = (bi >= 0) ? html.slice(0, bi) + tag + html.slice(bi) : html + tag;
+    console.log(`✅ Externalised ${scripts.length} script block(s) → app.js (${(appJs.length / 1024).toFixed(0)}KB, v=${hash})`);
+  }
+} catch (e) {
+  console.log('⚠️  JS externalisation skipped (deploying inline):', e.message);
+}
+
 fs.writeFileSync('deploy-site/index.html', html);
 console.log('✅ Build complete');
