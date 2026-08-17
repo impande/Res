@@ -26,6 +26,17 @@ try {
         debugProtection: false,
         disableConsoleOutput: false,
         identifierNamesGenerator: 'hexadecimal',
+        // Each <script> block is obfuscated INDEPENDENTLY, so each one generates its
+        // own hex-named string-array + decoder helpers (e.g. _0x39d2). All blocks are
+        // then concatenated into app.js sharing one global scope — so if two blocks
+        // happen to generate the SAME helper name, the second's declaration clobbers
+        // the first's string array and its lookups return undefined → a runtime
+        // "reading 'charAt'" crash that kills every block after it. Because the
+        // generator is unseeded this collided only on some builds, randomly breaking
+        // features (text size, reorder, undo, restore-to-step-7, the CTA count…) on
+        // whichever deploy lost the dice roll. A per-block prefix makes every block's
+        // generated identifiers unique, so cross-block collisions are impossible.
+        identifiersPrefix: 'b' + count + '_',
         renameGlobals: false,
         selfDefending: false,
         stringArray: true,
