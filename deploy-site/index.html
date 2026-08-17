@@ -7469,5 +7469,56 @@ if ('serviceWorker' in navigator) {
   })();
 })();
 </script>
+<script>
+/* ── Portfolio: reflect in-builder edits (esp. projects) in preview + download ───
+   Two gaps made edits made INSIDE the portfolio builder not show up:
+   1) getPfData() built the Projects list from the Step-6 custom section and kept
+      only `tech` from the in-portfolio edits — so a project title/description edited
+      in the builder was discarded on preview/download. Fix: when the builder's own
+      project entries (pfWzData.projects) have content, use THEM (title/desc/tech).
+   2) Wizard fields only committed on "Next" and never refreshed the preview (Step-6
+      fields do). Fix: on any input in the wizard card, commit (pfWzSave — which only
+      reads fields into pfWzData, no re-render) and rebuild the preview. Additive and
+      fail-open. */
+(function(){
+  function preview(){ try{ if(typeof window.buildPfPreview==='function') window.buildPfPreview(); }catch(e){} }
+
+  function install(){
+    /* (1) in-portfolio project edits win over the Step-6 seed */
+    var gpd=window.getPfData;
+    if(typeof gpd==='function' && !gpd.__r4uProjWrapped){
+      var wrapped=function(){
+        var d=gpd.apply(this,arguments);
+        try{
+          if(d && typeof pfWzData!=='undefined' && pfWzData && Array.isArray(pfWzData.projects)){
+            var wz=pfWzData.projects.filter(function(p){ return p && (String(p.title||'').trim() || String(p.desc||'').trim()); });
+            if(wz.length) d.projects=wz.map(function(p){ return { title:p.title||'', desc:p.desc||'', tech:p.tech||'' }; });
+          }
+        }catch(e){}
+        return d;
+      };
+      wrapped.__r4uProjWrapped=true; try{ window.getPfData=wrapped; }catch(e){}
+    }
+    /* (2) live commit + preview on any edit inside the wizard card */
+    if(!window.__r4uPfWzInputWired){
+      window.__r4uPfWzInputWired=true;
+      var deb=null;
+      document.addEventListener('input',function(e){
+        try{
+          var card=document.getElementById('pfWzCard');
+          if(card && e.target && card.contains(e.target)){
+            clearTimeout(deb);
+            deb=setTimeout(function(){ try{ if(typeof window.pfWzSave==='function') window.pfWzSave(); }catch(_){}; preview(); }, 300);
+          }
+        }catch(_){}
+      }, true);
+    }
+  }
+  var t=0, iv=setInterval(function(){
+    if(typeof window.getPfData==='function'){ install(); clearInterval(iv); }
+    else if(++t>60) clearInterval(iv);
+  },200);
+})();
+</script>
 </body>
 </html>
