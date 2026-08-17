@@ -7426,11 +7426,13 @@ if ('serviceWorker' in navigator) {
       var s=JSON.parse(raw);
       if(!s||!s.t||(Date.now()-s.t)>MAX_AGE){ try{ localStorage.removeItem(KEY); }catch(e){} return; }
       if(!hasContent(s.data,s.form)) return;
-      /* Never interrupt a session that already has a resume on screen (e.g. a
-         signed-in user whose cloud resume already loaded) — only offer when the
-         work area is empty, so Continue clearly restores rather than replaces. */
-      var ro=document.getElementById('resumeOutput');
-      if(ro&&ro.querySelector('.resume-a4-page')) return;
+      /* Offer on every reopen when a recent session exists on this device —
+         including signed-in users, whose cloud restores the résumé DATA but not
+         the exact step / scroll / text-size / style tweaks. Continue restores that
+         exact state; Start fresh clears the local session. The prompt is a small,
+         auto-dismissing bottom card, so showing it over an already-loaded résumé
+         is fine. (Previously this returned early when a résumé was already on
+         screen, which hid it from signed-in users entirely.) */
       showPrompt(s);
     }catch(e){}
   }
