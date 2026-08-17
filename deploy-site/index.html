@@ -7564,22 +7564,52 @@ if ('serviceWorker' in navigator) {
     });
   }
 
+  /* ── Match the on-screen preview for two-column templates ──────────────────────
+     _doPrintPDF injects the app's `body.pdf-printing` overrides into the payload
+     (prefix stripped). Those flatten the two-column full-bleed sidebar: they zero
+     the `.r-2col` negative margin and inset the coloured aside 16mm, so the PDF got
+     wide balanced margins with a floating sidebar — visibly different from the
+     preview, whose sidebar bleeds toward the page edge with ~5-6% side margins.
+     This corrective stylesheet is injected LAST in <head> (so it wins the cascade)
+     and restores the preview's screen values. It also drops the trailing
+     `padding-bottom:10mm` that pushed content a few px past the last page and spawned
+     a near-empty extra PDF page. Single-column templates have no `.r-2col`, so only
+     the harmless bottom-padding reset touches them. */
+  var PDF_FIX_CSS = '<style id="_r4uPdfFix">'
+    + '.r-2col{margin:-6px -36px 0 !important;width:auto !important;min-height:160px !important;align-items:stretch !important;overflow:visible !important;}'
+    + '.tpl-corporate>.r-2col,.tpl-modern>.r-2col,.tpl-executive>.r-2col{width:auto !important;}'
+    + '.r-aside,.r-main-col{overflow:visible !important;}'
+    + '[class*="tpl-"]{padding-bottom:0 !important;}'
+    + '.r-main-col{padding-bottom:0 !important;}'
+    + '</style>';
+  function injectPdfFix(html){
+    try{
+      var i = html.lastIndexOf('</head>');
+      if(i === -1) return html;
+      return html.slice(0, i) + PDF_FIX_CSS + html.slice(i);
+    }catch(e){ return html; }
+  }
+
   window.fetch = function(input, init){
     try{
-      var scale = window.__r4uFontScale || 1;
-      var body = init && init.body;
-      var payload = (scale !== 1) ? isGenPdf(body) : null;
+      var payload = isGenPdf(init && init.body);
       if(payload){
-        return bakeFontScale(payload.html, scale).then(function(baked){
-          if(baked){
-            payload.html = baked;
-            var newInit = {};
-            for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k] = init[k]; }
-            newInit.body = JSON.stringify(payload);
-            return origFetch.call(this, input, newInit);
-          }
-          return origFetch.call(this, input, init);   /* fall back cleanly */
-        }.bind(this)).catch(function(){ return origFetch.call(this, input, init); }.bind(this));
+        var scale = window.__r4uFontScale || 1;
+        var fixed = injectPdfFix(payload.html);   /* always: margins + blank-page fix */
+        var self = this;
+        var send = function(finalHtml){
+          payload.html = finalHtml;
+          var newInit = {};
+          for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k] = init[k]; }
+          newInit.body = JSON.stringify(payload);
+          return origFetch.call(self, input, newInit);
+        };
+        /* S/L only: bake the font scale into the (already CSS-fixed) HTML. */
+        if(scale !== 1){
+          return bakeFontScale(fixed, scale).then(function(baked){ return send(baked || fixed); })
+                                            .catch(function(){ return send(fixed); });
+        }
+        return send(fixed);
       }
     }catch(e){}
     return origFetch.call(this, input, init);
