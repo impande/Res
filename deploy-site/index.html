@@ -7402,16 +7402,20 @@ if ('serviceWorker' in navigator) {
     if(document.getElementById('_r4uResumePrompt')) return;
     var when=''; try{ var mins=Math.round((Date.now()-s.t)/60000); when = mins<1?'just now' : mins<60?(mins+'m ago') : mins<1440?(Math.round(mins/60)+'h ago') : (Math.round(mins/1440)+'d ago'); }catch(e){}
     var bar=document.createElement('div'); bar.id='_r4uResumePrompt';
-    bar.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:2147483001;background:#111827;color:#fff;border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.30);padding:13px 15px;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 28px);font:500 14px/1.35 -apple-system,Inter,system-ui,sans-serif;';
-    var txt=document.createElement('span'); txt.style.cssText='display:flex;flex-direction:column;min-width:0;';
-    txt.innerHTML='<span style="font-weight:700;">Continue where you left off?</span><span style="font-size:12px;color:#9ca3af;">Your resume from '+(when||'earlier')+' is saved on this device.</span>';
+    /* Stacked, responsive card: copy on top, actions in a row below — so it never
+       collapses into a tall sliver on narrow phones. */
+    bar.style.cssText='position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483001;background:#111827;color:#fff;border-radius:16px;box-shadow:0 12px 44px rgba(0,0,0,.32);padding:16px 18px;display:flex;flex-direction:column;gap:14px;width:min(380px,calc(100vw - 24px));box-sizing:border-box;font:500 14px/1.4 -apple-system,Inter,system-ui,sans-serif;';
+    var txt=document.createElement('div'); txt.style.cssText='display:flex;flex-direction:column;gap:3px;';
+    txt.innerHTML='<span style="font-weight:800;font-size:16px;">Continue where you left off?</span><span style="font-size:12.5px;color:#9ca3af;">Your resume from '+(when||'earlier')+' is saved on this device.</span>';
+    var row=document.createElement('div'); row.style.cssText='display:flex;gap:10px;align-items:center;justify-content:flex-end;';
     var fresh=document.createElement('button'); fresh.textContent='Start fresh';
-    fresh.style.cssText='background:transparent;color:#9ca3af;border:0;font:600 13px/1 inherit;cursor:pointer;padding:9px 10px;border-radius:9px;';
+    fresh.style.cssText='background:transparent;color:#9ca3af;border:0;font:600 14px/1 inherit;cursor:pointer;padding:11px 12px;border-radius:10px;white-space:nowrap;';
     var cont=document.createElement('button'); cont.textContent='Continue';
-    cont.style.cssText='background:#f59e0b;color:#111827;border:0;font:800 13px/1 inherit;cursor:pointer;padding:10px 16px;border-radius:9px;white-space:nowrap;';
+    cont.style.cssText='background:#f59e0b;color:#111827;border:0;font:800 14px/1 inherit;cursor:pointer;padding:11px 22px;border-radius:10px;white-space:nowrap;';
     fresh.addEventListener('click',function(){ try{ localStorage.removeItem(KEY); }catch(e){} bar.remove(); });
     cont.addEventListener('click',function(){ bar.remove(); applySession(s); });
-    bar.appendChild(txt); bar.appendChild(fresh); bar.appendChild(cont);
+    row.appendChild(fresh); row.appendChild(cont);
+    bar.appendChild(txt); bar.appendChild(row);
     document.body.appendChild(bar);
     setTimeout(function(){ if(bar.parentNode) bar.remove(); }, 30000);   /* hide UI; keeps the saved session */
   }
