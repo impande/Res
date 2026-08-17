@@ -7191,7 +7191,21 @@ if ('serviceWorker' in navigator) {
     if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uNewResWrapped){
       var orig=window._authDropdown;
       window._authDropdown=function(){
-        var r=orig.apply(this,arguments);
+        /* The dropdown only builds the SAVED VERSIONS section when _hasMinimumData()
+           is true — so after "New resume" (blank form) the whole section, and every
+           saved version with it, disappeared even though the versions still exist in
+           the cloud. Force it true for signed-in users just for the duration of the
+           build so their versions always render (and they can switch back from a
+           blank new résumé). Restored immediately after, so nothing else is affected. */
+        var _hmd=null, _forced=false;
+        try{
+          if(_uid() && typeof window._hasMinimumData==='function'){
+            _hmd=window._hasMinimumData; window._hasMinimumData=function(){ return true; }; _forced=true;
+          }
+        }catch(e){}
+        var r;
+        try{ r=orig.apply(this,arguments); }
+        finally{ if(_forced){ try{ window._hasMinimumData=_hmd; }catch(e){} } }
         try{ var dd=document.getElementById('_authDropdown'); if(dd) _inject(dd); }catch(e){}
         return r;
       };
