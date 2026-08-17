@@ -7576,6 +7576,13 @@ if ('serviceWorker' in navigator) {
      a near-empty extra PDF page. Single-column templates have no `.r-2col`, so only
      the harmless bottom-padding reset touches them. */
   var PDF_FIX_CSS = '<style id="_r4uPdfFix">'
+    /* Kill Chrome's text-autosizing ("font boosting"). PDFShift's headless Chrome
+       inflates wide body paragraphs ~1.4x (but leaves short headings alone), which
+       made the downloaded resume render ~40% taller than the preview and spill an
+       extra page. It is a paint-time inflation invisible to getComputedStyle, so it
+       only shows in the final PDF. Pinning text-size-adjust to 100% disables it, so
+       the PDF renders at the true (baked) font sizes and paginates like the preview. */
+    + 'html,body,[class*="tpl-"],.resume-a4-page,.resume-a4-page *{-webkit-text-size-adjust:100% !important;text-size-adjust:100% !important;}'
     + '.r-2col{margin:-6px -36px 0 !important;width:auto !important;min-height:160px !important;align-items:stretch !important;overflow:visible !important;}'
     + '.tpl-corporate>.r-2col,.tpl-modern>.r-2col,.tpl-executive>.r-2col{width:auto !important;}'
     + '.r-aside,.r-main-col{overflow:visible !important;}'
