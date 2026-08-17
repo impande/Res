@@ -7480,5 +7480,111 @@ if ('serviceWorker' in navigator) {
   },200);
 })();
 </script>
+<script>
+/* ── Text size → downloaded PDF (real, not best-effort) ────────────────────────
+   The S/M/L control scales the résumé by putting CSS `zoom` on the template
+   wrapper. The on-screen preview honours `zoom`, so S/M/L look right there. But
+   the PDF is rendered by PDFShift, whose engine IGNORES the CSS `zoom` property —
+   so the size choice silently dropped out of the download.
+
+   We can't fix that with PDFShift's own viewport `zoom` param: that scales the
+   whole page from the top-left corner and re-introduces the lopsided margins we
+   just removed. Instead we BAKE the size in: intercept the generate-pdf request,
+   render the outgoing HTML in a hidden iframe (so its own CSS resolves), read
+   each element's *computed* font-size / px line-height, and re-write them inline
+   as literal `px` × scale — which PDFShift always honours. The A4 page itself
+   stays full size, so the side margins stay balanced on every template.
+
+   Scale 1 (M / default) is a pure pass-through — no iframe, no cost. ── */
+(function(){
+  if(window.__r4uPdfScaleWrapped) return;
+  window.__r4uPdfScaleWrapped = true;
+  var origFetch = window.fetch;
+  if(typeof origFetch !== 'function') return;
+
+  function isGenPdf(body){
+    if(typeof body !== 'string') return null;
+    if(body.indexOf('generate-pdf') === -1) return null;   // cheap pre-check
+    try{ var j = JSON.parse(body); return (j && j.action === 'generate-pdf' && typeof j.html === 'string') ? j : null; }
+    catch(e){ return null; }
+  }
+
+  /* Render `html` off-screen, bake computed font metrics × scale inline, return
+     the serialized document. Resolves to null on any failure so the caller can
+     fall back to the untouched payload. */
+  function bakeFontScale(html, scale){
+    return new Promise(function(resolve){
+      var ifr = document.createElement('iframe');
+      ifr.setAttribute('aria-hidden','true');
+      ifr.style.cssText = 'position:fixed;left:-99999px;top:0;width:820px;height:1160px;border:0;visibility:hidden;';
+      var done = false;
+      function finish(val){ if(done) return; done = true; try{ ifr.parentNode && ifr.parentNode.removeChild(ifr); }catch(e){} resolve(val); }
+      ifr.onload = function(){
+        try{
+          var d = ifr.contentDocument;
+          if(!d || !d.body) return;                       /* not ready yet */
+          /* Appending an empty iframe fires an about:blank `onload` BEFORE the
+             srcdoc content loads. Ignore any load that doesn't yet contain the
+             résumé — the real content load fires right after. */
+          if(!d.querySelector('.resume-a4-page')) return;
+          /* strip the CSS zoom that PDFShift ignores, so computed sizes are the
+             true un-zoomed base before we multiply. */
+          Array.prototype.forEach.call(d.querySelectorAll('[style*="zoom"]'), function(w){
+            try{ w.style.removeProperty('zoom'); }catch(e){}
+          });
+          void d.body.offsetHeight; /* force reflow */
+          var els = d.querySelectorAll('.resume-a4-page, .resume-a4-page *');
+          var win = ifr.contentWindow;
+          /* TWO PASSES. Font-sizes given in `em`/`%` resolve against the parent's
+             size, so if we mutated a parent then read its child in one pass the
+             child's computed value would already include the parent's new (scaled)
+             size and we'd scale it a second time. Read every element's size against
+             the untouched layout FIRST, then write — so each gets scaled exactly once. */
+          var m = [];
+          Array.prototype.forEach.call(els, function(el){
+            var cs = win.getComputedStyle(el);
+            var fs = parseFloat(cs.fontSize);
+            var lh = cs.lineHeight;
+            m.push({ el: el, fs: fs, lhpx: (lh && lh.slice(-2) === 'px') ? parseFloat(lh) : 0 });
+          });
+          m.forEach(function(o){
+            /* `important` so we also beat template rules that set the name/heading
+               size with !important (a plain inline value would lose to those). */
+            if(o.fs > 0) o.el.style.setProperty('font-size', (o.fs * scale).toFixed(2) + 'px', 'important');
+            if(o.lhpx > 0) o.el.style.setProperty('line-height', (o.lhpx * scale).toFixed(2) + 'px', 'important');  /* unitless line-heights ride font-size */
+          });
+          var out = '<!DOCTYPE html>' + d.documentElement.outerHTML;
+          finish(out);
+        }catch(e){ finish(null); }
+      };
+      /* safety timeout in case onload never fires */
+      setTimeout(function(){ finish(null); }, 4000);
+      document.body.appendChild(ifr);
+      try{ ifr.srcdoc = html; }catch(e){ finish(null); }
+    });
+  }
+
+  window.fetch = function(input, init){
+    try{
+      var scale = window.__r4uFontScale || 1;
+      var body = init && init.body;
+      var payload = (scale !== 1) ? isGenPdf(body) : null;
+      if(payload){
+        return bakeFontScale(payload.html, scale).then(function(baked){
+          if(baked){
+            payload.html = baked;
+            var newInit = {};
+            for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k] = init[k]; }
+            newInit.body = JSON.stringify(payload);
+            return origFetch.call(this, input, newInit);
+          }
+          return origFetch.call(this, input, init);   /* fall back cleanly */
+        }.bind(this)).catch(function(){ return origFetch.call(this, input, init); }.bind(this));
+      }
+    }catch(e){}
+    return origFetch.call(this, input, init);
+  };
+})();
+</script>
 </body>
 </html>
