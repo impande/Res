@@ -7118,23 +7118,12 @@ if ('serviceWorker' in navigator) {
    users (the account variant, which has Save now / Sign out). */
 (function(){
   function _uid(){ try{ return (window._fbUser&&window._fbUser.uid)||(typeof _fbUser!=='undefined'&&_fbUser&&_fbUser.uid)||null; }catch(e){ return null; } }
-  function _hasVer(){ try{ return !!_currentVersionId; }catch(e){ try{ return !!window._currentVersionId; }catch(e2){ return false; } } }
-  function _curHasContent(){
-    try{
-      var d=(typeof collectData==='function')?collectData():{};
-      if(d && (d.firstName||d.lastName||d.jobTitle||(d.experience&&d.experience.length))) return true;
-      if(typeof lastResumeData!=='undefined'&&lastResumeData&&(lastResumeData.summary||(lastResumeData.experience&&lastResumeData.experience.length))) return true;
-    }catch(e){}
-    return false;
-  }
-  /* Blank the form + résumé and detach from the current version so the fresh résumé
-     is saved as a NEW version (the app creates one whenever _currentVersionId is null)
-     rather than overwriting anything. */
-  function _startBlank(){
-    try{ _currentVersionId=null; }catch(e){}
-    try{ window._currentVersionId=null; }catch(e){}
-    try{ _versionDirty=false; }catch(e){}
-    try{ window._versionDirty=false; }catch(e){}
+  /* Blank the form + résumé for a fresh start. `detach` (signed-out only) clears the
+     version pointer; when signed in we keep it pointing at the NEW version we just
+     created so the blank saves into that new version — never the old one. */
+  function _blankForm(detach){
+    if(detach){ try{ _currentVersionId=null; }catch(e){} try{ window._currentVersionId=null; }catch(e){} }
+    try{ _versionDirty=false; }catch(e){} try{ window._versionDirty=false; }catch(e){}
     try{ if(typeof populateFormFromParsed==='function') populateFormFromParsed({}); }catch(e){}
     try{ lastResumeData=null; }catch(e){}
     try{ if(typeof skills!=='undefined') skills.length=0; }catch(e){}
@@ -7150,19 +7139,22 @@ if ('serviceWorker' in navigator) {
     try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
     try{ if(typeof _closeAuthDropdown==='function') _closeAuthDropdown(); }catch(e){}
     var uid=_uid();
-    /* If the current résumé isn't a saved version yet (no _currentVersionId — the
-       reason "previous versions" was empty), explicitly SAVE it to the cloud as a
-       version first via the app's own _saveVersionSnapshot; only once that's written
-       (its callback) do we start the blank résumé — so the old one is preserved and
-       listed, and the new one becomes its own version on the next save. If it's
-       already a version, it's already listed — just detach + blank. */
-    if(uid && !_hasVer() && _curHasContent() && typeof window._saveVersionSnapshot==='function'){
-      var lbl=null; try{ lbl=(typeof _getVersionLabel==='function')?_getVersionLabel():null; }catch(e){}
-      var done=false, go=function(){ if(done) return; done=true; _startBlank(); };
-      try{ window._saveVersionSnapshot(uid, lbl, null, go); }catch(e){ go(); }
-      setTimeout(go, 2500);   /* fallback if the callback never fires (offline etc.) */
+    /* Versions model (learned from the app): _currentVersionId always points at a
+       version once any exist, and _renderVersionList re-attaches it to versions[0]
+       whenever it's null — so DETACHING doesn't work (it snaps back and the list
+       flickered away). Instead do what the app does to add a version: call
+       _saveVersionSnapshot, which writes a NEW version to the cloud (from the current
+       data) and makes IT the current one, leaving the old version intact in the list.
+       Then, in its callback (after the new version id is assigned), blank the form so
+       the fresh résumé fills that new version. Net result: old résumé stays as its own
+       version, a new version is added and selected, and nothing is overwritten. */
+    if(uid && typeof window._saveVersionSnapshot==='function'){
+      var lbl='New resume'; try{ if(typeof _getUniqueVersionLabel==='function') lbl=_getUniqueVersionLabel('New resume'); }catch(e){}
+      var done=false, go=function(){ if(done) return; done=true; _blankForm(false); };
+      try{ window._saveVersionSnapshot(uid, lbl, '✨ New', go); }catch(e){ _blankForm(true); }
+      setTimeout(function(){ if(!done){ done=true; _blankForm(true); } }, 3000); /* offline fallback */
     } else {
-      _startBlank();
+      _blankForm(true);   /* signed out: no cloud versions — just start blank */
     }
   }
   window._r4uNewResume=_newResume;
