@@ -7495,6 +7495,10 @@ if ('serviceWorker' in navigator) {
             if(wz.length) d.projects=wz.map(function(p){ return { title:p.title||'', desc:p.desc||'', tech:p.tech||'' }; });
           }
         }catch(e){}
+        /* Strip stray non-breaking-space entities ("&nbsp;" / U+00A0) captured from
+           inline edits, so the portfolio preview + downloaded site don't show the raw
+           entity the way the résumé card used to. */
+        try{ if(d && typeof window._r4uSanitizeNbsp==='function') window._r4uSanitizeNbsp(d); }catch(e){}
         return d;
       };
       wrapped.__r4uProjWrapped=true; try{ window.getPfData=wrapped; }catch(e){}
