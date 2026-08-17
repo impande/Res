@@ -7277,44 +7277,6 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>
-/* ── Text size → downloaded PDF ──────────────────────────────────────────────
-   The S/M/L control scales the on-screen resume with CSS `zoom`, which PDFShift
-   (the PDF renderer) ignores — so the downloaded PDF always came out at the
-   default size no matter what the user picked. PDFShift's *native* zoom option
-   does scale the render, so forward the chosen scale in the generate-pdf payload,
-   and strip the now-redundant CSS zoom from the cloned HTML so the two can never
-   double-apply. Only the generate-pdf request is touched; everything else passes
-   straight through. Fail-open (any error → original request). */
-(function(){
-  var origFetch = window.fetch;
-  if(!origFetch || origFetch.__r4uZoomWrapped) return;
-  function wrapped(input, init){
-    try{
-      var url = (typeof input==='string') ? input : (input && input.url) || '';
-      var body = init && init.body;
-      if(url.indexOf('/functions/generate')!==-1 && typeof body==='string' && body.indexOf('generate-pdf')!==-1){
-        var payload = JSON.parse(body);
-        if(payload && payload.action==='generate-pdf'){
-          var scale = parseFloat(window.__r4uFontScale);
-          if(!(scale>0)) scale = 1;
-          payload.zoom = scale;
-          if(typeof payload.html==='string' && scale!==1){
-            payload.html = payload.html.replace(/zoom\s*:\s*[0-9.]+\s*;?/gi, '');
-          }
-          var newInit = {};
-          for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k]=init[k]; }
-          newInit.body = JSON.stringify(payload);
-          return origFetch.call(this, input, newInit);
-        }
-      }
-    }catch(e){}
-    return origFetch.apply(this, arguments);
-  }
-  wrapped.__r4uZoomWrapped = true;
-  window.fetch = wrapped;
-})();
-</script>
-<script>
 /* ── Refine-with-AI: keep the live card in sync + add Undo to the tool menu ─────
    Two things users hit while refining:
    1) After a Refine-with-AI change the résumé card could sit in a state that only
