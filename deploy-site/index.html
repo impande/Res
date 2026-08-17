@@ -7150,7 +7150,16 @@ if ('serviceWorker' in navigator) {
        version, a new version is added and selected, and nothing is overwritten. */
     if(uid && typeof window._saveVersionSnapshot==='function'){
       var lbl='New resume'; try{ if(typeof _getUniqueVersionLabel==='function') lbl=_getUniqueVersionLabel('New resume'); }catch(e){}
-      var done=false, go=function(){ if(done) return; done=true; _blankForm(false); };
+      /* _saveVersionSnapshot creates the new version as a COPY of the current résumé
+         (it snapshots current data). So after it's created and selected, blank the
+         form AND persist that blank into the new version (_saveCurrentVersion updates
+         the now-current version) — otherwise switching to the new version showed the
+         old data. The old version keeps its own data (never touched). */
+      var done=false, go=function(){
+        if(done) return; done=true;
+        _blankForm(false);
+        try{ if(typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(uid); }catch(e){}
+      };
       try{ window._saveVersionSnapshot(uid, lbl, '✨ New', go); }catch(e){ _blankForm(true); }
       setTimeout(function(){ if(!done){ done=true; _blankForm(true); } }, 3000); /* offline fallback */
     } else {
