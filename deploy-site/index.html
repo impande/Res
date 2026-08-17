@@ -7119,25 +7119,30 @@ if ('serviceWorker' in navigator) {
 (function(){
   function _newResume(){
     try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
-    /* preserve the current résumé as a saved version first — recoverable from the
-       versions list — so starting fresh never loses the user's work */
-    var had=false; try{ had=(typeof lastResumeData!=='undefined' && !!lastResumeData); }catch(e){}
-    if(had){ try{ if(typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(); }catch(e){} }
-    /* blank after a short beat so the version snapshot captures the current state
-       before we clear it */
-    setTimeout(function(){
-      try{ if(typeof populateFormFromParsed==='function') populateFormFromParsed({}); }catch(e){}
-      try{ lastResumeData=null; }catch(e){}
-      try{ if(typeof skills!=='undefined') skills.length=0; }catch(e){}
-      try{ if(typeof userPhoto!=='undefined') userPhoto=null; }catch(e){}
-      try{ if(typeof manuallyEdited!=='undefined') manuallyEdited=false; }catch(e){}
-      try{ var ro=document.getElementById('resumeOutput'); if(ro) ro.innerHTML=''; }catch(e){}
-      try{ var dl=document.getElementById('dlActions'); if(dl) dl.style.display='none'; }catch(e){}
-      try{ if(typeof goToStep==='function') goToStep(1,true); }catch(e){}
-      try{ window.scrollTo(0,0); }catch(e){}
-      try{ if(typeof showToast==='function') showToast('Started a new résumé — your previous one is saved in your versions.','success'); }catch(e){}
-    }, had?350:0);
+    /* DETACH from the current version. The current résumé is already its own saved
+       version (kept current by the periodic auto-save); by clearing _currentVersionId
+       BEFORE we blank anything, nothing we do can overwrite it — it stays in the
+       versions list and is switchable — and because the app CREATES a new version
+       whenever _currentVersionId is null, the fresh résumé the user now builds is
+       saved as a brand-new version instead of clobbering the old one.
+       (The earlier build called _saveCurrentVersion() with no uid — a no-op — and
+       never detached, so the blank overwrote the current version. This is the fix.) */
+    try{ _currentVersionId=null; }catch(e){}
+    try{ window._currentVersionId=null; }catch(e){}
+    try{ _versionDirty=false; }catch(e){}
+    try{ window._versionDirty=false; }catch(e){}
+    /* blank the form + résumé for the new, unsaved résumé */
+    try{ if(typeof populateFormFromParsed==='function') populateFormFromParsed({}); }catch(e){}
+    try{ lastResumeData=null; }catch(e){}
+    try{ if(typeof skills!=='undefined') skills.length=0; }catch(e){}
+    try{ if(typeof userPhoto!=='undefined') userPhoto=null; }catch(e){}
+    try{ if(typeof manuallyEdited!=='undefined') manuallyEdited=false; }catch(e){}
+    try{ var ro=document.getElementById('resumeOutput'); if(ro) ro.innerHTML=''; }catch(e){}
+    try{ var dl=document.getElementById('dlActions'); if(dl) dl.style.display='none'; }catch(e){}
+    try{ if(typeof goToStep==='function') goToStep(1,true); }catch(e){}
+    try{ window.scrollTo(0,0); }catch(e){}
     try{ if(typeof _closeAuthDropdown==='function') _closeAuthDropdown(); }catch(e){}
+    try{ if(typeof showToast==='function') showToast('Started a new résumé — your previous one is saved in your versions.','success'); }catch(e){}
   }
   window._r4uNewResume=_newResume;
 
