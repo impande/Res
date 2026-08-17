@@ -7117,21 +7117,24 @@ if ('serviceWorker' in navigator) {
    dropdown opens, idempotent, styled to match the menu. Only shows for signed-in
    users (the account variant, which has Save now / Sign out). */
 (function(){
-  function _newResume(){
-    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
-    /* DETACH from the current version. The current résumé is already its own saved
-       version (kept current by the periodic auto-save); by clearing _currentVersionId
-       BEFORE we blank anything, nothing we do can overwrite it — it stays in the
-       versions list and is switchable — and because the app CREATES a new version
-       whenever _currentVersionId is null, the fresh résumé the user now builds is
-       saved as a brand-new version instead of clobbering the old one.
-       (The earlier build called _saveCurrentVersion() with no uid — a no-op — and
-       never detached, so the blank overwrote the current version. This is the fix.) */
+  function _uid(){ try{ return (window._fbUser&&window._fbUser.uid)||(typeof _fbUser!=='undefined'&&_fbUser&&_fbUser.uid)||null; }catch(e){ return null; } }
+  function _hasVer(){ try{ return !!_currentVersionId; }catch(e){ try{ return !!window._currentVersionId; }catch(e2){ return false; } } }
+  function _curHasContent(){
+    try{
+      var d=(typeof collectData==='function')?collectData():{};
+      if(d && (d.firstName||d.lastName||d.jobTitle||(d.experience&&d.experience.length))) return true;
+      if(typeof lastResumeData!=='undefined'&&lastResumeData&&(lastResumeData.summary||(lastResumeData.experience&&lastResumeData.experience.length))) return true;
+    }catch(e){}
+    return false;
+  }
+  /* Blank the form + résumé and detach from the current version so the fresh résumé
+     is saved as a NEW version (the app creates one whenever _currentVersionId is null)
+     rather than overwriting anything. */
+  function _startBlank(){
     try{ _currentVersionId=null; }catch(e){}
     try{ window._currentVersionId=null; }catch(e){}
     try{ _versionDirty=false; }catch(e){}
     try{ window._versionDirty=false; }catch(e){}
-    /* blank the form + résumé for the new, unsaved résumé */
     try{ if(typeof populateFormFromParsed==='function') populateFormFromParsed({}); }catch(e){}
     try{ lastResumeData=null; }catch(e){}
     try{ if(typeof skills!=='undefined') skills.length=0; }catch(e){}
@@ -7141,8 +7144,26 @@ if ('serviceWorker' in navigator) {
     try{ var dl=document.getElementById('dlActions'); if(dl) dl.style.display='none'; }catch(e){}
     try{ if(typeof goToStep==='function') goToStep(1,true); }catch(e){}
     try{ window.scrollTo(0,0); }catch(e){}
-    try{ if(typeof _closeAuthDropdown==='function') _closeAuthDropdown(); }catch(e){}
     try{ if(typeof showToast==='function') showToast('Started a new resume — your previous one is saved in your versions.','success'); }catch(e){}
+  }
+  function _newResume(){
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    try{ if(typeof _closeAuthDropdown==='function') _closeAuthDropdown(); }catch(e){}
+    var uid=_uid();
+    /* If the current résumé isn't a saved version yet (no _currentVersionId — the
+       reason "previous versions" was empty), explicitly SAVE it to the cloud as a
+       version first via the app's own _saveVersionSnapshot; only once that's written
+       (its callback) do we start the blank résumé — so the old one is preserved and
+       listed, and the new one becomes its own version on the next save. If it's
+       already a version, it's already listed — just detach + blank. */
+    if(uid && !_hasVer() && _curHasContent() && typeof window._saveVersionSnapshot==='function'){
+      var lbl=null; try{ lbl=(typeof _getVersionLabel==='function')?_getVersionLabel():null; }catch(e){}
+      var done=false, go=function(){ if(done) return; done=true; _startBlank(); };
+      try{ window._saveVersionSnapshot(uid, lbl, null, go); }catch(e){ go(); }
+      setTimeout(go, 2500);   /* fallback if the callback never fires (offline etc.) */
+    } else {
+      _startBlank();
+    }
   }
   window._r4uNewResume=_newResume;
 
