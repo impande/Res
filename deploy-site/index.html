@@ -7111,6 +7111,82 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>
+/* Add "New résumé" to the signed-in account dropdown (#_authDropdown). Snapshots
+   the current résumé into the user's saved versions first (so nothing is lost),
+   then opens a fresh empty form at step 1 — staying signed in. Injected when the
+   dropdown opens, idempotent, styled to match the menu. Only shows for signed-in
+   users (the account variant, which has Save now / Sign out). */
+(function(){
+  function _newResume(){
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    /* preserve the current résumé as a saved version first — recoverable from the
+       versions list — so starting fresh never loses the user's work */
+    var had=false; try{ had=(typeof lastResumeData!=='undefined' && !!lastResumeData); }catch(e){}
+    if(had){ try{ if(typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(); }catch(e){} }
+    /* blank after a short beat so the version snapshot captures the current state
+       before we clear it */
+    setTimeout(function(){
+      try{ if(typeof populateFormFromParsed==='function') populateFormFromParsed({}); }catch(e){}
+      try{ lastResumeData=null; }catch(e){}
+      try{ if(typeof skills!=='undefined') skills.length=0; }catch(e){}
+      try{ if(typeof userPhoto!=='undefined') userPhoto=null; }catch(e){}
+      try{ if(typeof manuallyEdited!=='undefined') manuallyEdited=false; }catch(e){}
+      try{ var ro=document.getElementById('resumeOutput'); if(ro) ro.innerHTML=''; }catch(e){}
+      try{ var dl=document.getElementById('dlActions'); if(dl) dl.style.display='none'; }catch(e){}
+      try{ if(typeof goToStep==='function') goToStep(1,true); }catch(e){}
+      try{ window.scrollTo(0,0); }catch(e){}
+      try{ if(typeof showToast==='function') showToast('Started a new résumé — your previous one is saved in your versions.','success'); }catch(e){}
+    }, had?350:0);
+    try{ if(typeof _closeAuthDropdown==='function') _closeAuthDropdown(); }catch(e){}
+  }
+  window._r4uNewResume=_newResume;
+
+  function _inject(dd){
+    if(!dd || dd.querySelector('.drop-newresume')) return;
+    /* signed-in only: the account dropdown has Save now / Sign out; the signed-out
+       one (just a Sign-in CTA) does not — skip there */
+    if(!dd.querySelector('.drop-signout') && !dd.querySelector('.drop-savenow')) return;
+    var btn=document.createElement('button');
+    btn.type='button'; btn.className='drop-newresume';
+    btn.setAttribute('aria-label','Create a new résumé');
+    btn.style.cssText='display:flex;align-items:center;gap:11px;padding:11px 16px;width:100%;background:transparent;border:0;cursor:pointer;text-align:left;font:inherit;';
+    btn.innerHTML=
+      '<span style="width:30px;height:30px;border-radius:9px;background:rgba(245,158,11,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#d97706)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      +'</span>'
+      +'<span style="display:flex;flex-direction:column;line-height:1.3;min-width:0;">'
+        +'<span style="font-size:0.83rem;font-weight:600;color:var(--text);">New résumé</span>'
+        +'<span style="font-size:0.68rem;color:var(--muted);">Start fresh — current one is saved in your versions</span>'
+      +'</span>';
+    btn.addEventListener('click', _newResume);
+    /* place right after the account header (first block), above the versions list */
+    var header=dd.firstElementChild;
+    if(header && header.nextSibling){ dd.insertBefore(btn, header.nextSibling); }
+    else { dd.appendChild(btn); }
+    var sep=document.createElement('div'); sep.className='drop-divider';
+    if(btn.nextSibling) dd.insertBefore(sep, btn.nextSibling); else dd.appendChild(sep);
+  }
+
+  window._r4uNewResumeInject=_inject;
+
+  function _hook(){
+    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uNewResWrapped){
+      var orig=window._authDropdown;
+      window._authDropdown=function(){
+        var r=orig.apply(this,arguments);
+        try{ var dd=document.getElementById('_authDropdown'); if(dd) _inject(dd); }catch(e){}
+        return r;
+      };
+      window._authDropdown.__r4uNewResWrapped=true;
+      return true;
+    }
+    return false;
+  }
+  if(!_hook()){ var n=0, iv=setInterval(function(){ if(_hook()||++n>25) clearInterval(iv); },200); }
+  var existing=document.getElementById('_authDropdown'); if(existing) _inject(existing);
+})();
+</script>
+<script>
 /* Stale-tab export guard.
    Problem: a tab opened BEFORE a deploy keeps running old in-memory CSS/JS, so a
    PDF/DOC download from it is built with stale styles → a "broken" export even
