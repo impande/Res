@@ -7481,6 +7481,76 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>
+/* ── Preview pagination calibrated to the actual PDF (WYSIWYG page breaks) ──────
+   The on-screen preview computes page count + draws the dashed page-break line
+   using an A4 content height of 297mm ≈ 1123px. But the downloaded PDF is rendered
+   by PDFShift, whose engine packs ~12% LESS content per page than any browser, so
+   the PDF broke one block earlier than the preview showed (e.g. after Senior
+   Manager instead of after Quality Manager). We can't change PDFShift's packing,
+   so instead we make the preview HONEST: shrink the effective page height it uses
+   by PACK so its count + break line land where the PDF actually breaks.
+
+   PACK is the single calibration knob (fraction of a page PDFShift actually fits).
+   0.88 was derived from a real download; tune via window.__r4uPagePack if needed.
+
+   We faithfully re-implement the two app functions (_measurePages drives the
+   page-count chip; _injectPreviewPageBreaks draws the modal's dashed line),
+   changing ONLY the page-height constant. They're global function declarations, so
+   reassigning window.<name> overrides the calls the app makes. ── */
+(function(){
+  function PACK(){ var v = parseFloat(window.__r4uPagePack); return (v>0 && v<=1.2) ? v : 0.83; }
+  function PAGE_H(){ return Math.round(297 * 3.7795 * PACK()); }   /* calibrated A4 content height (px) */
+
+  window._measurePages = function(pg){
+    try{
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;font-size:0.9rem;';
+      var clone = pg.cloneNode(true);
+      clone.style.cssText = 'width:794px!important;max-width:none!important;min-height:0!important;box-sizing:border-box!important;';
+      wrap.appendChild(clone); document.body.appendChild(wrap);
+      void clone.offsetHeight;
+      var pages = Math.max(1, Math.ceil(clone.scrollHeight / PAGE_H()));
+      document.body.removeChild(wrap);
+      return pages;
+    }catch(e){ return 1; }
+  };
+
+  window._injectPreviewPageBreaks = function(){
+    try{
+      var body = document.getElementById('previewModalBody'); if(!body) return;
+      var container = body.querySelector('.resume-output-card');
+      var content = body.querySelector('.resume-a4-page');
+      if(!container || !content) return;
+      container.querySelectorAll('.pg-break,.pg-pagemark').forEach(function(m){ m.remove(); });
+      var pageH = PAGE_H();
+      var contentH = content.scrollHeight;
+      var count = Math.max(1, Math.ceil((contentH - 50) / pageH));
+      if(typeof _updatePageChip === 'function') _updatePageChip(count);
+      if(count <= 1) return;
+      var cRect = content.getBoundingClientRect(), boxRect = container.getBoundingClientRect();
+      var scale = content.offsetWidth > 0 ? cRect.width / content.offsetWidth : 1;
+      var topOffset = (cRect.top - boxRect.top) / scale;
+      var pm = document.createElement('div'); pm.className = 'pg-pagemark';
+      pm.setAttribute('data-pglabel', 'Page 1 / ' + count);
+      pm.style.top = Math.round(topOffset) + 'px'; container.appendChild(pm);
+      for(var k = 1; k < count; k++){
+        var boundary = k * pageH, brk = boundary;
+        if(boundary >= contentH) break;
+        Array.prototype.forEach.call(content.querySelectorAll('p,li,h1,h2,h3,h4,h5,h6,td,th,span,a,b,strong,em'), function(el){
+          var r = el.getBoundingClientRect(), h = r.height / scale;
+          if(h < 2 || h > 80) return;
+          var top = (r.top - cRect.top) / scale, bot = top + h;
+          if(top < boundary && bot > boundary && bot > brk) brk = bot;   /* keep a straddling line on the current page */
+        });
+        var d = document.createElement('div'); d.className = 'pg-break';
+        d.setAttribute('data-pglabel', 'Page ' + (k + 1) + ' / ' + count);
+        d.style.top = Math.round(topOffset + brk) + 'px'; container.appendChild(d);
+      }
+    }catch(e){}
+  };
+})();
+</script>
+<script>
 /* ── Text size → downloaded PDF (real, not best-effort) ────────────────────────
    The S/M/L control scales the résumé by putting CSS `zoom` on the template
    wrapper. The on-screen preview honours `zoom`, so S/M/L look right there. But
