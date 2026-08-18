@@ -7490,16 +7490,31 @@ if ('serviceWorker' in navigator) {
    so instead we make the preview HONEST: shrink the effective page height it uses
    by PACK so its count + break line land where the PDF actually breaks.
 
-   PACK is the single calibration knob (fraction of a page PDFShift actually fits).
-   0.88 was derived from a real download; tune via window.__r4uPagePack if needed.
+   PACK is the calibration knob (the fraction of an A4 page PDFShift actually
+   fits). It's PER-LAYOUT because the packing gap differs by column density:
+   two-column templates (corporate/modern/executive — a `.r-2col` sidebar) pack
+   differently from single-column ones. We detect the layout from the DOM at
+   measure time and apply the matching factor. Defaults: two-column 0.83 (derived
+   from a real corporate download), single-column 0.85 (its own confirmation
+   download can tune it). Override at runtime via window.__r4uPagePack2col /
+   window.__r4uPagePack1col, or window.__r4uPagePack to force both.
 
    We faithfully re-implement the two app functions (_measurePages drives the
    page-count chip; _injectPreviewPageBreaks draws the modal's dashed line),
    changing ONLY the page-height constant. They're global function declarations, so
    reassigning window.<name> overrides the calls the app makes. ── */
 (function(){
-  function PACK(){ var v = parseFloat(window.__r4uPagePack); return (v>0 && v<=1.2) ? v : 0.83; }
-  function PAGE_H(){ return Math.round(297 * 3.7795 * PACK()); }   /* calibrated A4 content height (px) */
+  function _clamp(v){ return (v > 0 && v <= 1.2) ? v : null; }
+  /* twoCol: boolean — is the resume a two-column layout (has a `.r-aside` sidebar)? */
+  function PACK(twoCol){
+    var forced = _clamp(parseFloat(window.__r4uPagePack));                       /* force both layouts */
+    if(forced) return forced;
+    var perLayout = _clamp(parseFloat(window[twoCol ? '__r4uPagePack2col' : '__r4uPagePack1col']));
+    if(perLayout) return perLayout;
+    return twoCol ? 0.83 : 0.85;                                                 /* calibrated defaults */
+  }
+  function PAGE_H(twoCol){ return Math.round(297 * 3.7795 * PACK(twoCol)); }     /* calibrated A4 content height (px) */
+  function isTwoCol(el){ try{ return !!(el && el.querySelector('.r-2col, .r-aside')); }catch(e){ return false; } }
 
   window._measurePages = function(pg){
     try{
@@ -7509,7 +7524,7 @@ if ('serviceWorker' in navigator) {
       clone.style.cssText = 'width:794px!important;max-width:none!important;min-height:0!important;box-sizing:border-box!important;';
       wrap.appendChild(clone); document.body.appendChild(wrap);
       void clone.offsetHeight;
-      var pages = Math.max(1, Math.ceil(clone.scrollHeight / PAGE_H()));
+      var pages = Math.max(1, Math.ceil(clone.scrollHeight / PAGE_H(isTwoCol(clone))));
       document.body.removeChild(wrap);
       return pages;
     }catch(e){ return 1; }
@@ -7522,7 +7537,7 @@ if ('serviceWorker' in navigator) {
       var content = body.querySelector('.resume-a4-page');
       if(!container || !content) return;
       container.querySelectorAll('.pg-break,.pg-pagemark').forEach(function(m){ m.remove(); });
-      var pageH = PAGE_H();
+      var pageH = PAGE_H(isTwoCol(content));
       var contentH = content.scrollHeight;
       var count = Math.max(1, Math.ceil((contentH - 50) / pageH));
       if(typeof _updatePageChip === 'function') _updatePageChip(count);
