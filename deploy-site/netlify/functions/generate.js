@@ -67,13 +67,12 @@ exports.handler = async function(event) {
         };
       }
 
-      // Text-size (Small / Medium / Large) is applied on-screen with CSS `zoom` on the
-      // resume wrapper, which PDFShift's renderer ignores — so the downloaded PDF always
-      // came out at the default size regardless of the user's choice. PDFShift's native
-      // `zoom` option DOES scale the render, so honour the client's chosen scale here.
-      // Clamp to the S/M/L range so a malformed value can never distort the document.
-      let pdfZoom = Number(body.zoom);
-      if (!Number.isFinite(pdfZoom) || pdfZoom < 0.5 || pdfZoom > 1.5) pdfZoom = 1;
+      // NOTE: we deliberately do NOT pass PDFShift's viewport `zoom`. It scales the
+      // whole page and anchors top-left, which shrinks the résumé into the corner and
+      // leaves lopsided margins (big right/bottom gap) — visibly different from the
+      // preview. Text size is instead carried by the CSS `zoom` on the résumé wrapper
+      // inside the cloned HTML (exactly what the on-screen preview uses), so the A4
+      // page stays full and the side margins stay balanced and identical to the preview.
 
       const pdfRes = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
         method: 'POST',
@@ -87,7 +86,6 @@ exports.handler = async function(event) {
           margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
           use_print: false,
           sandbox: false,
-          zoom: pdfZoom,
           // Wait for the bundled @font-face webfonts to fetch + apply before PDFShift
           // captures, so server-side pagination matches the on-screen preview (Bug 2).
           // Without this, font-display:swap can capture the fallback and spill a page.

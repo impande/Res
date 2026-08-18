@@ -7111,6 +7111,123 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>
+/* Add "New résumé" to the signed-in account dropdown (#_authDropdown). Snapshots
+   the current résumé into the user's saved versions first (so nothing is lost),
+   then opens a fresh empty form at step 1 — staying signed in. Injected when the
+   dropdown opens, idempotent, styled to match the menu. Only shows for signed-in
+   users (the account variant, which has Save now / Sign out). */
+(function(){
+  function _uid(){ try{ return (window._fbUser&&window._fbUser.uid)||(typeof _fbUser!=='undefined'&&_fbUser&&_fbUser.uid)||null; }catch(e){ return null; } }
+  /* Blank the form + résumé for a fresh start. `detach` (signed-out only) clears the
+     version pointer; when signed in we keep it pointing at the NEW version we just
+     created so the blank saves into that new version — never the old one. */
+  function _blankForm(detach){
+    if(detach){ try{ _currentVersionId=null; }catch(e){} try{ window._currentVersionId=null; }catch(e){} }
+    try{ _versionDirty=false; }catch(e){} try{ window._versionDirty=false; }catch(e){}
+    try{ if(typeof populateFormFromParsed==='function') populateFormFromParsed({}); }catch(e){}
+    try{ lastResumeData=null; }catch(e){}
+    try{ if(typeof skills!=='undefined') skills.length=0; }catch(e){}
+    try{ if(typeof userPhoto!=='undefined') userPhoto=null; }catch(e){}
+    try{ if(typeof manuallyEdited!=='undefined') manuallyEdited=false; }catch(e){}
+    try{ var ro=document.getElementById('resumeOutput'); if(ro) ro.innerHTML=''; }catch(e){}
+    try{ var dl=document.getElementById('dlActions'); if(dl) dl.style.display='none'; }catch(e){}
+    try{ if(typeof goToStep==='function') goToStep(1,true); }catch(e){}
+    try{ window.scrollTo(0,0); }catch(e){}
+    try{ if(typeof showToast==='function') showToast('Started a new resume — your previous one is saved in your versions.','success'); }catch(e){}
+  }
+  function _newResume(){
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    try{ if(typeof _closeAuthDropdown==='function') _closeAuthDropdown(); }catch(e){}
+    var uid=_uid();
+    /* Versions model (learned from the app): _currentVersionId always points at a
+       version once any exist, and _renderVersionList re-attaches it to versions[0]
+       whenever it's null — so DETACHING doesn't work (it snaps back and the list
+       flickered away). Instead do what the app does to add a version: call
+       _saveVersionSnapshot, which writes a NEW version to the cloud (from the current
+       data) and makes IT the current one, leaving the old version intact in the list.
+       Then, in its callback (after the new version id is assigned), blank the form so
+       the fresh résumé fills that new version. Net result: old résumé stays as its own
+       version, a new version is added and selected, and nothing is overwritten. */
+    if(uid && typeof window._saveVersionSnapshot==='function'){
+      var lbl='New resume'; try{ if(typeof _getUniqueVersionLabel==='function') lbl=_getUniqueVersionLabel('New resume'); }catch(e){}
+      /* _saveVersionSnapshot creates the new version as a COPY of the current résumé
+         (it snapshots current data). So after it's created and selected, blank the
+         form AND persist that blank into the new version (_saveCurrentVersion updates
+         the now-current version) — otherwise switching to the new version showed the
+         old data. The old version keeps its own data (never touched). */
+      var done=false, go=function(){
+        if(done) return; done=true;
+        _blankForm(false);
+        try{ if(typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(uid); }catch(e){}
+      };
+      try{ window._saveVersionSnapshot(uid, lbl, '✨ New', go); }catch(e){ _blankForm(true); }
+      setTimeout(function(){ if(!done){ done=true; _blankForm(true); } }, 3000); /* offline fallback */
+    } else {
+      _blankForm(true);   /* signed out: no cloud versions — just start blank */
+    }
+  }
+  window._r4uNewResume=_newResume;
+
+  function _inject(dd){
+    if(!dd || dd.querySelector('.drop-newresume')) return;
+    /* signed-in only: the account dropdown has Save now / Sign out; the signed-out
+       one (just a Sign-in CTA) does not — skip there */
+    if(!dd.querySelector('.drop-signout') && !dd.querySelector('.drop-savenow')) return;
+    var btn=document.createElement('button');
+    btn.type='button'; btn.className='drop-newresume';
+    btn.setAttribute('aria-label','Create a new resume');
+    btn.style.cssText='display:flex;align-items:center;gap:11px;padding:11px 16px;width:100%;background:transparent;border:0;cursor:pointer;text-align:left;font:inherit;';
+    btn.innerHTML=
+      '<span style="width:30px;height:30px;border-radius:9px;background:rgba(245,158,11,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent,#d97706)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      +'</span>'
+      +'<span style="display:flex;flex-direction:column;line-height:1.3;min-width:0;">'
+        +'<span style="font-size:0.83rem;font-weight:600;color:var(--text);">New resume</span>'
+        +'<span style="font-size:0.68rem;color:var(--muted);">Start fresh — current one is saved in your versions</span>'
+      +'</span>';
+    btn.addEventListener('click', _newResume);
+    /* place right after the account header (first block), above the versions list */
+    var header=dd.firstElementChild;
+    if(header && header.nextSibling){ dd.insertBefore(btn, header.nextSibling); }
+    else { dd.appendChild(btn); }
+    var sep=document.createElement('div'); sep.className='drop-divider';
+    if(btn.nextSibling) dd.insertBefore(sep, btn.nextSibling); else dd.appendChild(sep);
+  }
+
+  window._r4uNewResumeInject=_inject;
+
+  function _hook(){
+    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uNewResWrapped){
+      var orig=window._authDropdown;
+      window._authDropdown=function(){
+        /* The dropdown only builds the SAVED VERSIONS section when _hasMinimumData()
+           is true — so after "New resume" (blank form) the whole section, and every
+           saved version with it, disappeared even though the versions still exist in
+           the cloud. Force it true for signed-in users just for the duration of the
+           build so their versions always render (and they can switch back from a
+           blank new résumé). Restored immediately after, so nothing else is affected. */
+        var _hmd=null, _forced=false;
+        try{
+          if(_uid() && typeof window._hasMinimumData==='function'){
+            _hmd=window._hasMinimumData; window._hasMinimumData=function(){ return true; }; _forced=true;
+          }
+        }catch(e){}
+        var r;
+        try{ r=orig.apply(this,arguments); }
+        finally{ if(_forced){ try{ window._hasMinimumData=_hmd; }catch(e){} } }
+        try{ var dd=document.getElementById('_authDropdown'); if(dd) _inject(dd); }catch(e){}
+        return r;
+      };
+      window._authDropdown.__r4uNewResWrapped=true;
+      return true;
+    }
+    return false;
+  }
+  if(!_hook()){ var n=0, iv=setInterval(function(){ if(_hook()||++n>25) clearInterval(iv); },200); }
+  var existing=document.getElementById('_authDropdown'); if(existing) _inject(existing);
+})();
+</script>
+<script>
 /* Stale-tab export guard.
    Problem: a tab opened BEFORE a deploy keeps running old in-memory CSS/JS, so a
    PDF/DOC download from it is built with stale styles → a "broken" export even
@@ -7157,44 +7274,6 @@ if ('serviceWorker' in navigator) {
     };
   }
   ['downloadPDF','downloadDoc'].forEach(function(n){ if(typeof window[n]==='function') window[n]=_guard(window[n]); });
-})();
-</script>
-<script>
-/* ── Text size → downloaded PDF ──────────────────────────────────────────────
-   The S/M/L control scales the on-screen resume with CSS `zoom`, which PDFShift
-   (the PDF renderer) ignores — so the downloaded PDF always came out at the
-   default size no matter what the user picked. PDFShift's *native* zoom option
-   does scale the render, so forward the chosen scale in the generate-pdf payload,
-   and strip the now-redundant CSS zoom from the cloned HTML so the two can never
-   double-apply. Only the generate-pdf request is touched; everything else passes
-   straight through. Fail-open (any error → original request). */
-(function(){
-  var origFetch = window.fetch;
-  if(!origFetch || origFetch.__r4uZoomWrapped) return;
-  function wrapped(input, init){
-    try{
-      var url = (typeof input==='string') ? input : (input && input.url) || '';
-      var body = init && init.body;
-      if(url.indexOf('/functions/generate')!==-1 && typeof body==='string' && body.indexOf('generate-pdf')!==-1){
-        var payload = JSON.parse(body);
-        if(payload && payload.action==='generate-pdf'){
-          var scale = parseFloat(window.__r4uFontScale);
-          if(!(scale>0)) scale = 1;
-          payload.zoom = scale;
-          if(typeof payload.html==='string' && scale!==1){
-            payload.html = payload.html.replace(/zoom\s*:\s*[0-9.]+\s*;?/gi, '');
-          }
-          var newInit = {};
-          for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k]=init[k]; }
-          newInit.body = JSON.stringify(payload);
-          return origFetch.call(this, input, newInit);
-        }
-      }
-    }catch(e){}
-    return origFetch.apply(this, arguments);
-  }
-  wrapped.__r4uZoomWrapped = true;
-  window.fetch = wrapped;
 })();
 </script>
 <script>
@@ -7399,6 +7478,234 @@ if ('serviceWorker' in navigator) {
     if(typeof window.getPfData==='function'){ install(); clearInterval(iv); }
     else if(++t>60) clearInterval(iv);
   },200);
+})();
+</script>
+<script>
+/* ── Preview pagination calibrated to the actual PDF (WYSIWYG page breaks) ──────
+   The on-screen preview computes page count + draws the dashed page-break line
+   using an A4 content height of 297mm ≈ 1123px. But the downloaded PDF is rendered
+   by PDFShift, whose engine packs ~12% LESS content per page than any browser, so
+   the PDF broke one block earlier than the preview showed (e.g. after Senior
+   Manager instead of after Quality Manager). We can't change PDFShift's packing,
+   so instead we make the preview HONEST: shrink the effective page height it uses
+   by PACK so its count + break line land where the PDF actually breaks.
+
+   PACK is the calibration knob (the fraction of an A4 page PDFShift actually
+   fits). It's PER-LAYOUT because the packing gap differs by column density:
+   two-column templates (corporate/modern/executive — a `.r-2col` sidebar) pack
+   differently from single-column ones. We detect the layout from the DOM at
+   measure time and apply the matching factor. Defaults: two-column 0.83 (derived
+   from a real corporate download), single-column 0.85 (its own confirmation
+   download can tune it). Override at runtime via window.__r4uPagePack2col /
+   window.__r4uPagePack1col, or window.__r4uPagePack to force both.
+
+   We faithfully re-implement the two app functions (_measurePages drives the
+   page-count chip; _injectPreviewPageBreaks draws the modal's dashed line),
+   changing ONLY the page-height constant. They're global function declarations, so
+   reassigning window.<name> overrides the calls the app makes. ── */
+(function(){
+  function _clamp(v){ return (v > 0 && v <= 1.2) ? v : null; }
+  /* twoCol: boolean — is the resume a two-column layout (has a `.r-aside` sidebar)? */
+  function PACK(twoCol){
+    var forced = _clamp(parseFloat(window.__r4uPagePack));                       /* force both layouts */
+    if(forced) return forced;
+    var perLayout = _clamp(parseFloat(window[twoCol ? '__r4uPagePack2col' : '__r4uPagePack1col']));
+    if(perLayout) return perLayout;
+    return twoCol ? 0.83 : 0.85;                                                 /* calibrated defaults */
+  }
+  function PAGE_H(twoCol){ return Math.round(297 * 3.7795 * PACK(twoCol)); }     /* calibrated A4 content height (px) */
+  function isTwoCol(el){ try{ return !!(el && el.querySelector('.r-2col, .r-aside')); }catch(e){ return false; } }
+
+  window._measurePages = function(pg){
+    try{
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;overflow:visible;visibility:hidden;pointer-events:none;z-index:-1;font-size:0.9rem;';
+      var clone = pg.cloneNode(true);
+      clone.style.cssText = 'width:794px!important;max-width:none!important;min-height:0!important;box-sizing:border-box!important;';
+      wrap.appendChild(clone); document.body.appendChild(wrap);
+      void clone.offsetHeight;
+      var pages = Math.max(1, Math.ceil(clone.scrollHeight / PAGE_H(isTwoCol(clone))));
+      document.body.removeChild(wrap);
+      return pages;
+    }catch(e){ return 1; }
+  };
+
+  window._injectPreviewPageBreaks = function(){
+    try{
+      var body = document.getElementById('previewModalBody'); if(!body) return;
+      var container = body.querySelector('.resume-output-card');
+      var content = body.querySelector('.resume-a4-page');
+      if(!container || !content) return;
+      container.querySelectorAll('.pg-break,.pg-pagemark').forEach(function(m){ m.remove(); });
+      var pageH = PAGE_H(isTwoCol(content));
+      var contentH = content.scrollHeight;
+      var count = Math.max(1, Math.ceil((contentH - 50) / pageH));
+      if(typeof _updatePageChip === 'function') _updatePageChip(count);
+      if(count <= 1) return;
+      var cRect = content.getBoundingClientRect(), boxRect = container.getBoundingClientRect();
+      var scale = content.offsetWidth > 0 ? cRect.width / content.offsetWidth : 1;
+      var topOffset = (cRect.top - boxRect.top) / scale;
+      var pm = document.createElement('div'); pm.className = 'pg-pagemark';
+      pm.setAttribute('data-pglabel', 'Page 1 / ' + count);
+      pm.style.top = Math.round(topOffset) + 'px'; container.appendChild(pm);
+      for(var k = 1; k < count; k++){
+        var boundary = k * pageH, brk = boundary;
+        if(boundary >= contentH) break;
+        Array.prototype.forEach.call(content.querySelectorAll('p,li,h1,h2,h3,h4,h5,h6,td,th,span,a,b,strong,em'), function(el){
+          var r = el.getBoundingClientRect(), h = r.height / scale;
+          if(h < 2 || h > 80) return;
+          var top = (r.top - cRect.top) / scale, bot = top + h;
+          if(top < boundary && bot > boundary && bot > brk) brk = bot;   /* keep a straddling line on the current page */
+        });
+        var d = document.createElement('div'); d.className = 'pg-break';
+        d.setAttribute('data-pglabel', 'Page ' + (k + 1) + ' / ' + count);
+        d.style.top = Math.round(topOffset + brk) + 'px'; container.appendChild(d);
+      }
+    }catch(e){}
+  };
+})();
+</script>
+<script>
+/* ── Text size → downloaded PDF (real, not best-effort) ────────────────────────
+   The S/M/L control scales the résumé by putting CSS `zoom` on the template
+   wrapper. The on-screen preview honours `zoom`, so S/M/L look right there. But
+   the PDF is rendered by PDFShift, whose engine IGNORES the CSS `zoom` property —
+   so the size choice silently dropped out of the download.
+
+   We can't fix that with PDFShift's own viewport `zoom` param: that scales the
+   whole page from the top-left corner and re-introduces the lopsided margins we
+   just removed. Instead we BAKE the size in: intercept the generate-pdf request,
+   render the outgoing HTML in a hidden iframe (so its own CSS resolves), read
+   each element's *computed* font-size / px line-height, and re-write them inline
+   as literal `px` × scale — which PDFShift always honours. The A4 page itself
+   stays full size, so the side margins stay balanced on every template.
+
+   Scale 1 (M / default) is a pure pass-through — no iframe, no cost. ── */
+(function(){
+  if(window.__r4uPdfScaleWrapped) return;
+  window.__r4uPdfScaleWrapped = true;
+  var origFetch = window.fetch;
+  if(typeof origFetch !== 'function') return;
+
+  function isGenPdf(body){
+    if(typeof body !== 'string') return null;
+    if(body.indexOf('generate-pdf') === -1) return null;   // cheap pre-check
+    try{ var j = JSON.parse(body); return (j && j.action === 'generate-pdf' && typeof j.html === 'string') ? j : null; }
+    catch(e){ return null; }
+  }
+
+  /* Render `html` off-screen, bake computed font metrics × scale inline, return
+     the serialized document. Resolves to null on any failure so the caller can
+     fall back to the untouched payload. */
+  function bakeFontScale(html, scale){
+    return new Promise(function(resolve){
+      var ifr = document.createElement('iframe');
+      ifr.setAttribute('aria-hidden','true');
+      ifr.style.cssText = 'position:fixed;left:-99999px;top:0;width:820px;height:1160px;border:0;visibility:hidden;';
+      var done = false;
+      function finish(val){ if(done) return; done = true; try{ ifr.parentNode && ifr.parentNode.removeChild(ifr); }catch(e){} resolve(val); }
+      ifr.onload = function(){
+        try{
+          var d = ifr.contentDocument;
+          if(!d || !d.body) return;                       /* not ready yet */
+          /* Appending an empty iframe fires an about:blank `onload` BEFORE the
+             srcdoc content loads. Ignore any load that doesn't yet contain the
+             résumé — the real content load fires right after. */
+          if(!d.querySelector('.resume-a4-page')) return;
+          /* strip the CSS zoom that PDFShift ignores, so computed sizes are the
+             true un-zoomed base before we multiply. */
+          Array.prototype.forEach.call(d.querySelectorAll('[style*="zoom"]'), function(w){
+            try{ w.style.removeProperty('zoom'); }catch(e){}
+          });
+          void d.body.offsetHeight; /* force reflow */
+          var els = d.querySelectorAll('.resume-a4-page, .resume-a4-page *');
+          var win = ifr.contentWindow;
+          /* TWO PASSES. Font-sizes given in `em`/`%` resolve against the parent's
+             size, so if we mutated a parent then read its child in one pass the
+             child's computed value would already include the parent's new (scaled)
+             size and we'd scale it a second time. Read every element's size against
+             the untouched layout FIRST, then write — so each gets scaled exactly once. */
+          var m = [];
+          Array.prototype.forEach.call(els, function(el){
+            var cs = win.getComputedStyle(el);
+            var fs = parseFloat(cs.fontSize);
+            var lh = cs.lineHeight;
+            m.push({ el: el, fs: fs, lhpx: (lh && lh.slice(-2) === 'px') ? parseFloat(lh) : 0 });
+          });
+          m.forEach(function(o){
+            /* `important` so we also beat template rules that set the name/heading
+               size with !important (a plain inline value would lose to those). */
+            if(o.fs > 0) o.el.style.setProperty('font-size', (o.fs * scale).toFixed(2) + 'px', 'important');
+            if(o.lhpx > 0) o.el.style.setProperty('line-height', (o.lhpx * scale).toFixed(2) + 'px', 'important');  /* unitless line-heights ride font-size */
+          });
+          var out = '<!DOCTYPE html>' + d.documentElement.outerHTML;
+          finish(out);
+        }catch(e){ finish(null); }
+      };
+      /* safety timeout in case onload never fires */
+      setTimeout(function(){ finish(null); }, 4000);
+      document.body.appendChild(ifr);
+      try{ ifr.srcdoc = html; }catch(e){ finish(null); }
+    });
+  }
+
+  /* ── Match the on-screen preview for two-column templates ──────────────────────
+     _doPrintPDF injects the app's `body.pdf-printing` overrides into the payload
+     (prefix stripped). Those flatten the two-column full-bleed sidebar: they zero
+     the `.r-2col` negative margin and inset the coloured aside 16mm, so the PDF got
+     wide balanced margins with a floating sidebar — visibly different from the
+     preview, whose sidebar bleeds toward the page edge with ~5-6% side margins.
+     This corrective stylesheet is injected LAST in <head> (so it wins the cascade)
+     and restores the preview's screen values. It also drops the trailing
+     `padding-bottom:10mm` that pushed content a few px past the last page and spawned
+     a near-empty extra PDF page. Single-column templates have no `.r-2col`, so only
+     the harmless bottom-padding reset touches them. */
+  var PDF_FIX_CSS = '<style id="_r4uPdfFix">'
+    /* Kill Chrome's text-autosizing ("font boosting"). PDFShift's headless Chrome
+       inflates wide body paragraphs ~1.4x (but leaves short headings alone), which
+       made the downloaded resume render ~40% taller than the preview and spill an
+       extra page. It is a paint-time inflation invisible to getComputedStyle, so it
+       only shows in the final PDF. Pinning text-size-adjust to 100% disables it, so
+       the PDF renders at the true (baked) font sizes and paginates like the preview. */
+    + 'html,body,[class*="tpl-"],.resume-a4-page,.resume-a4-page *{-webkit-text-size-adjust:100% !important;text-size-adjust:100% !important;}'
+    + '.r-2col{margin:-6px -36px 0 !important;width:auto !important;min-height:160px !important;align-items:stretch !important;overflow:visible !important;}'
+    + '.tpl-corporate>.r-2col,.tpl-modern>.r-2col,.tpl-executive>.r-2col{width:auto !important;}'
+    + '.r-aside,.r-main-col{overflow:visible !important;}'
+    + '[class*="tpl-"]{padding-bottom:0 !important;}'
+    + '.r-main-col{padding-bottom:0 !important;}'
+    + '</style>';
+  function injectPdfFix(html){
+    try{
+      var i = html.lastIndexOf('</head>');
+      if(i === -1) return html;
+      return html.slice(0, i) + PDF_FIX_CSS + html.slice(i);
+    }catch(e){ return html; }
+  }
+
+  window.fetch = function(input, init){
+    try{
+      var payload = isGenPdf(init && init.body);
+      if(payload){
+        var scale = window.__r4uFontScale || 1;
+        var fixed = injectPdfFix(payload.html);   /* always: margins + blank-page fix */
+        var self = this;
+        var send = function(finalHtml){
+          payload.html = finalHtml;
+          var newInit = {};
+          for(var k in init){ if(Object.prototype.hasOwnProperty.call(init,k)) newInit[k] = init[k]; }
+          newInit.body = JSON.stringify(payload);
+          return origFetch.call(self, input, newInit);
+        };
+        /* S/L only: bake the font scale into the (already CSS-fixed) HTML. */
+        if(scale !== 1){
+          return bakeFontScale(fixed, scale).then(function(baked){ return send(baked || fixed); })
+                                            .catch(function(){ return send(fixed); });
+        }
+        return send(fixed);
+      }
+    }catch(e){}
+    return origFetch.call(this, input, init);
+  };
 })();
 </script>
 </body>
