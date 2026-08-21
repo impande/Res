@@ -7709,50 +7709,51 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <style id="_r4uAcctRedesign">
-/* ── Account menu — professional redesign (overrides the base #_authDropdown rules) ── */
-#_authDropdown{border:1px solid rgba(15,23,42,0.08)!important;border-radius:18px!important;box-shadow:0 16px 50px -12px rgba(15,23,42,0.30),0 3px 10px rgba(15,23,42,0.05)!important;min-width:306px!important;max-width:340px!important;}
+/* ── Account menu — premium redesign v2 (overrides the base #_authDropdown rules) ── */
+#_authDropdown{border:1px solid rgba(15,23,42,0.10)!important;border-radius:22px!important;box-shadow:0 24px 64px -16px rgba(15,23,42,0.38),0 6px 16px rgba(15,23,42,0.07)!important;min-width:320px!important;max-width:348px!important;overflow:hidden!important;background:#fff!important;}
 
-/* Header: bigger gradient avatar, tighter name/email hierarchy */
-#_authDropdown>div:first-child{padding:18px 18px 15px!important;gap:13px!important;border-bottom:1px solid rgba(15,23,42,0.07);}
-#_authDropdown>div:first-child>div:first-child{width:44px!important;height:44px!important;font-size:0.98rem!important;background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%)!important;box-shadow:0 3px 8px rgba(180,83,9,0.30)!important;letter-spacing:0.3px;}
-#_authDropdown>div:first-child>div:nth-child(2)>div:first-child{font-size:0.96rem!important;color:#0f172a!important;letter-spacing:-0.01em;}
-#_authDropdown>div:first-child>div:nth-child(2)>div:nth-child(2){font-size:0.78rem!important;color:#64748b!important;margin-top:2px;}
+/* Header — branded tinted band with a ringed gradient avatar */
+#_authDropdown>div:first-child{padding:22px 18px 18px!important;gap:14px!important;background:linear-gradient(180deg,rgba(245,158,11,0.13) 0%,rgba(245,158,11,0.03) 100%)!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;}
+#_authDropdown>div:first-child>div:first-child{width:48px!important;height:48px!important;font-size:1.05rem!important;background:linear-gradient(135deg,#fbbf24 0%,#b45309 100%)!important;box-shadow:0 5px 14px -2px rgba(180,83,9,0.45),inset 0 1px 0 rgba(255,255,255,0.30)!important;border:2.5px solid #fff!important;letter-spacing:0.4px;}
+#_authDropdown>div:first-child>div:nth-child(2)>div:first-child{font-size:1.02rem!important;font-weight:800!important;color:#1c1917!important;letter-spacing:-0.02em;}
+#_authDropdown>div:first-child>div:nth-child(2)>div:nth-child(2){font-size:0.78rem!important;color:#78716c!important;margin-top:2px;}
 
-/* New resume action */
-#_authDropdown .drop-newresume{padding:13px 18px!important;gap:13px!important;}
-#_authDropdown .drop-newresume:hover{background:rgba(245,158,11,0.07)!important;}
+/* New resume — a distinct dashed "add" tile */
+#_authDropdown .drop-newresume{margin:13px 13px 5px!important;padding:13px 14px!important;gap:13px!important;width:auto!important;border:1.5px dashed rgba(217,119,6,0.40)!important;border-radius:14px!important;background:rgba(245,158,11,0.05)!important;}
+#_authDropdown .drop-newresume:hover{background:rgba(245,158,11,0.12)!important;border-color:rgba(217,119,6,0.60)!important;}
 
 /* Section title */
-#_authDropdown .drop-section-title{padding:15px 18px 8px!important;font-size:0.68rem!important;letter-spacing:1.4px!important;color:#94a3b8!important;}
+#_authDropdown .drop-section-title{padding:15px 18px 6px!important;font-size:0.66rem!important;letter-spacing:1.7px!important;color:#a8a29e!important;font-weight:800!important;}
 
-/* Versions list container */
-#_authDropdown #_versionListItems{border-top:1px solid rgba(15,23,42,0.06)!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;padding:3px 0 5px!important;}
+/* Versions list — recessed tray so the white cards pop */
+#_authDropdown #_versionListItems{border-top:none!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;padding:3px 0 9px!important;background:#faf9f7!important;}
 
-/* Version rows: clearer active state (soft amber + accent left-bar), roomier hit area */
-#_authDropdown .drop-ver-item{padding:10px 16px 10px 18px!important;gap:10px!important;font-size:0.865rem!important;color:#374151!important;}
-#_authDropdown .drop-ver-item:hover{background:#f6f6f4!important;}
-#_authDropdown .drop-ver-item.is-current{background:rgba(245,158,11,0.09)!important;color:#0f172a!important;font-weight:600!important;}
-#_authDropdown .drop-ver-item.is-current::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(#f59e0b,#b45309);}
+/* Version rows rendered as elevated cards */
+#_authDropdown .drop-ver-item{margin:7px 13px!important;padding:12px 12px 12px 14px!important;gap:11px!important;font-size:0.86rem!important;color:#44403c!important;background:#fff!important;border:1px solid rgba(15,23,42,0.09)!important;border-radius:13px!important;box-shadow:0 1px 2px rgba(15,23,42,0.05)!important;transition:box-shadow .15s,border-color .15s!important;}
+#_authDropdown .drop-ver-item:hover{border-color:rgba(15,23,42,0.18)!important;box-shadow:0 6px 16px -4px rgba(15,23,42,0.16)!important;}
+#_authDropdown .drop-ver-item.is-current{background:linear-gradient(180deg,rgba(245,158,11,0.14) 0%,rgba(245,158,11,0.05) 100%)!important;border-color:rgba(217,119,6,0.45)!important;color:#1c1917!important;font-weight:700!important;box-shadow:0 3px 10px -2px rgba(217,119,6,0.30)!important;}
+#_authDropdown .drop-ver-item.is-current::before{display:none!important;}
+#_authDropdown .drop-ver-item>span:first-child{width:16px!important;text-align:center!important;flex-shrink:0!important;}
 
-/* Badges: "New" = accent chip, everything else (Auto-saved) = neutral status chip */
-#_authDropdown .drop-ver-badge{font-size:0.63rem!important;padding:2.5px 9px!important;border-radius:20px!important;letter-spacing:0.3px;background:#eef1f5!important;color:#64748b!important;border:1px solid rgba(100,116,139,0.18)!important;}
-#_authDropdown .drop-ver-badge.r4u-new{background:rgba(245,158,11,0.14)!important;color:#b45309!important;border:1px solid rgba(217,119,6,0.24)!important;}
+/* Badges — bold "New" gradient pill vs neutral "Auto-saved" tag */
+#_authDropdown .drop-ver-badge{font-size:0.6rem!important;padding:3px 9px!important;border-radius:7px!important;letter-spacing:0.5px!important;font-weight:800!important;text-transform:uppercase;background:#f1f5f9!important;color:#64748b!important;border:1px solid rgba(100,116,139,0.20)!important;}
+#_authDropdown .drop-ver-badge.r4u-new{background:linear-gradient(135deg,#fbbf24,#f59e0b)!important;color:#7c2d12!important;border:1px solid rgba(180,83,9,0.35)!important;box-shadow:0 1px 3px rgba(217,119,6,0.30)!important;}
 
-/* Row overflow menu (⋮): a real, discoverable hover target */
-#_authDropdown .drop-ver-menu{color:#94a3b8!important;font-size:1.05rem!important;padding:4px 6px!important;border-radius:7px!important;opacity:.5!important;}
+/* Row overflow menu (⋮) */
+#_authDropdown .drop-ver-menu{color:#a8a29e!important;font-size:1.05rem!important;padding:4px 6px!important;border-radius:8px!important;opacity:.6!important;}
 #_authDropdown .drop-ver-item:hover .drop-ver-menu{opacity:1!important;}
-#_authDropdown .drop-ver-menu:hover{background:rgba(15,23,42,0.07)!important;color:#334155!important;}
+#_authDropdown .drop-ver-menu:hover{background:rgba(15,23,42,0.08)!important;color:#44403c!important;}
 
-/* Hint: soften the heavy amber callout into a quiet neutral helper line */
-#_authDropdown #_versionListItems>div:first-child[style*="217,119,6"]{background:#f8fafc!important;border:1px solid rgba(15,23,42,0.06)!important;color:#94a3b8!important;font-size:0.68rem!important;margin:5px 14px 7px!important;padding:7px 10px!important;}
+/* Hint — dissolve the heavy callout into a quiet one-liner */
+#_authDropdown #_versionListItems>div:first-child[style*="217,119,6"]{background:transparent!important;border:none!important;color:#a8a29e!important;font-size:0.68rem!important;margin:3px 16px 1px!important;padding:3px 2px!important;}
 
-/* Footer actions: consistent rhythm */
-#_authDropdown .drop-savenow{padding:12px 18px!important;gap:9px!important;color:#b45309!important;}
-#_authDropdown .drop-savenow:hover{background:rgba(217,119,6,0.07)!important;}
+/* Footer actions */
+#_authDropdown .drop-savenow{padding:13px 18px!important;gap:9px!important;color:#b45309!important;font-weight:700!important;}
+#_authDropdown .drop-savenow:hover{background:rgba(217,119,6,0.08)!important;}
 #_authDropdown .drop-contact{padding:12px 18px!important;}
-#_authDropdown .drop-signout{padding:12px 18px!important;font-weight:600!important;}
+#_authDropdown .drop-signout{padding:13px 18px!important;font-weight:700!important;}
 #_authDropdown .drop-signout:hover{background:#fef2f2!important;}
-#_authDropdown .drop-divider{background:rgba(15,23,42,0.07)!important;}
+#_authDropdown .drop-divider{background:rgba(15,23,42,0.06)!important;}
 </style>
 <script>
 /* Classify saved-version badges so "New" reads as an accent chip and "Auto-saved"
