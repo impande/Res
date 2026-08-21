@@ -7708,5 +7708,87 @@ if ('serviceWorker' in navigator) {
   };
 })();
 </script>
+<style id="_r4uAcctRedesign">
+/* ── Account menu — professional redesign (overrides the base #_authDropdown rules) ── */
+#_authDropdown{border:1px solid rgba(15,23,42,0.08)!important;border-radius:18px!important;box-shadow:0 16px 50px -12px rgba(15,23,42,0.30),0 3px 10px rgba(15,23,42,0.05)!important;min-width:306px!important;max-width:340px!important;}
+
+/* Header: bigger gradient avatar, tighter name/email hierarchy */
+#_authDropdown>div:first-child{padding:18px 18px 15px!important;gap:13px!important;border-bottom:1px solid rgba(15,23,42,0.07);}
+#_authDropdown>div:first-child>div:first-child{width:44px!important;height:44px!important;font-size:0.98rem!important;background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%)!important;box-shadow:0 3px 8px rgba(180,83,9,0.30)!important;letter-spacing:0.3px;}
+#_authDropdown>div:first-child>div:nth-child(2)>div:first-child{font-size:0.96rem!important;color:#0f172a!important;letter-spacing:-0.01em;}
+#_authDropdown>div:first-child>div:nth-child(2)>div:nth-child(2){font-size:0.78rem!important;color:#64748b!important;margin-top:2px;}
+
+/* New resume action */
+#_authDropdown .drop-newresume{padding:13px 18px!important;gap:13px!important;}
+#_authDropdown .drop-newresume:hover{background:rgba(245,158,11,0.07)!important;}
+
+/* Section title */
+#_authDropdown .drop-section-title{padding:15px 18px 8px!important;font-size:0.68rem!important;letter-spacing:1.4px!important;color:#94a3b8!important;}
+
+/* Versions list container */
+#_authDropdown #_versionListItems{border-top:1px solid rgba(15,23,42,0.06)!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;padding:3px 0 5px!important;}
+
+/* Version rows: clearer active state (soft amber + accent left-bar), roomier hit area */
+#_authDropdown .drop-ver-item{padding:10px 16px 10px 18px!important;gap:10px!important;font-size:0.865rem!important;color:#374151!important;}
+#_authDropdown .drop-ver-item:hover{background:#f6f6f4!important;}
+#_authDropdown .drop-ver-item.is-current{background:rgba(245,158,11,0.09)!important;color:#0f172a!important;font-weight:600!important;}
+#_authDropdown .drop-ver-item.is-current::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(#f59e0b,#b45309);}
+
+/* Badges: "New" = accent chip, everything else (Auto-saved) = neutral status chip */
+#_authDropdown .drop-ver-badge{font-size:0.63rem!important;padding:2.5px 9px!important;border-radius:20px!important;letter-spacing:0.3px;background:#eef1f5!important;color:#64748b!important;border:1px solid rgba(100,116,139,0.18)!important;}
+#_authDropdown .drop-ver-badge.r4u-new{background:rgba(245,158,11,0.14)!important;color:#b45309!important;border:1px solid rgba(217,119,6,0.24)!important;}
+
+/* Row overflow menu (⋮): a real, discoverable hover target */
+#_authDropdown .drop-ver-menu{color:#94a3b8!important;font-size:1.05rem!important;padding:4px 6px!important;border-radius:7px!important;opacity:.5!important;}
+#_authDropdown .drop-ver-item:hover .drop-ver-menu{opacity:1!important;}
+#_authDropdown .drop-ver-menu:hover{background:rgba(15,23,42,0.07)!important;color:#334155!important;}
+
+/* Hint: soften the heavy amber callout into a quiet neutral helper line */
+#_authDropdown #_versionListItems>div:first-child[style*="217,119,6"]{background:#f8fafc!important;border:1px solid rgba(15,23,42,0.06)!important;color:#94a3b8!important;font-size:0.68rem!important;margin:5px 14px 7px!important;padding:7px 10px!important;}
+
+/* Footer actions: consistent rhythm */
+#_authDropdown .drop-savenow{padding:12px 18px!important;gap:9px!important;color:#b45309!important;}
+#_authDropdown .drop-savenow:hover{background:rgba(217,119,6,0.07)!important;}
+#_authDropdown .drop-contact{padding:12px 18px!important;}
+#_authDropdown .drop-signout{padding:12px 18px!important;font-weight:600!important;}
+#_authDropdown .drop-signout:hover{background:#fef2f2!important;}
+#_authDropdown .drop-divider{background:rgba(15,23,42,0.07)!important;}
+</style>
+<script>
+/* Classify saved-version badges so "New" reads as an accent chip and "Auto-saved"
+   as a neutral status chip. Runs whenever the account dropdown opens (wraps
+   _authDropdown, idempotent) and re-runs after the async version list renders. */
+(function(){
+  function classify(dd){
+    try{
+      dd.querySelectorAll('.drop-ver-badge').forEach(function(b){
+        var t=(b.textContent||'').toLowerCase();
+        if(t.indexOf('new')>=0) b.classList.add('r4u-new'); else b.classList.remove('r4u-new');
+      });
+    }catch(e){}
+  }
+  function hook(){
+    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uBadgeWrapped){
+      var orig=window._authDropdown;
+      window._authDropdown=function(){
+        var r=orig.apply(this,arguments);
+        try{
+          var dd=document.getElementById('_authDropdown');
+          if(dd){
+            classify(dd);
+            var list=dd.querySelector('#_versionListItems');
+            if(list){ var mo=new MutationObserver(function(){ classify(dd); }); mo.observe(list,{childList:true,subtree:true}); }
+          }
+        }catch(e){}
+        return r;
+      };
+      window._authDropdown.__r4uBadgeWrapped=true;
+      return true;
+    }
+    return false;
+  }
+  if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>25) clearInterval(iv); },200); }
+})();
+</script>
 </body>
 </html>
