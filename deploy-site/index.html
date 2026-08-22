@@ -7811,42 +7811,94 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <style id="_r4uPastelThemes">
-/* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure (two-column) ────────
-   Fresh soft-colour two-column resumes with a full-bleed pastel sidebar, a pastel
-   header, and a timeline (line + dots) running down the Experience column. They
-   reuse the standard two-column render (.r-head + .r-2col > .r-aside + .r-main-col);
-   these rules only set each theme's palette and add the timeline. ── */
+/* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure ─────────────────────
+   Reference-matched layout: the NAME lives inside a full-bleed pastel sidebar
+   (top-left), Skills/Certifications below it; the white main column starts at the
+   top-right with Summary, then Education & Experience with a timeline.
+
+   The standard two-column render gives us `.r-head` (name/contact) + `.r-2col`
+   (`.r-aside` + `.r-main-col`) stacked. We re-flow them with CSS grid +
+   `display:contents` so `.r-head` sits ABOVE `.r-aside` in the left column (both
+   pastel → one continuous sidebar) and `.r-main-col` spans the right full-height.
+   Education is moved into the main column by a small render hook (below). ── */
 .tpl-blush   {--pt-side:#fbe4e0;--pt-acc:#b0473c;--pt-ink:#3a231f;}
 .tpl-verdant {--pt-side:#e6efe7;--pt-acc:#3f6b52;--pt-ink:#22302a;}
 .tpl-lilac   {--pt-side:#eae4f5;--pt-acc:#6d4aa3;--pt-ink:#2c2540;}
 .tpl-azure   {--pt-side:#e1ecf7;--pt-acc:#2e6da4;--pt-ink:#1f2d3a;}
 
-/* Header — soft pastel band, dark ink, accent role */
-.tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{
-  background:var(--pt-side)!important;color:var(--pt-ink)!important;border-radius:0!important;padding:22px 22px 20px!important;border:none!important;}
-.tpl-blush>.r-head .r-name,.tpl-verdant>.r-head .r-name,.tpl-lilac>.r-head .r-name,.tpl-azure>.r-head .r-name{color:var(--pt-ink)!important;}
-.tpl-blush>.r-head .r-title,.tpl-verdant>.r-head .r-title,.tpl-lilac>.r-head .r-title,.tpl-azure>.r-head .r-title{color:var(--pt-acc)!important;font-weight:600!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-size:0.72rem!important;}
-.tpl-blush>.r-head .r-contact,.tpl-verdant>.r-head .r-contact,.tpl-lilac>.r-head .r-contact,.tpl-azure>.r-head .r-contact{color:var(--pt-ink)!important;}
-.tpl-blush>.r-head .r-ci svg,.tpl-verdant>.r-head .r-ci svg,.tpl-lilac>.r-head .r-ci svg,.tpl-azure>.r-head .r-ci svg{color:var(--pt-acc)!important;stroke:var(--pt-acc)!important;}
+/* full-bleed: remove the page padding; the columns supply their own */
+.resume-a4-page:has(>.tpl-blush),.resume-a4-page:has(>.tpl-verdant),.resume-a4-page:has(>.tpl-lilac),.resume-a4-page:has(>.tpl-azure){padding:0!important;}
 
-/* Sidebar — matching pastel, accent section titles */
-.tpl-blush .r-aside,.tpl-verdant .r-aside,.tpl-lilac .r-aside,.tpl-azure .r-aside{background:var(--pt-side)!important;border-right:none!important;}
+/* grid: head top-left, aside bottom-left, main spans the right full height */
+.tpl-blush,.tpl-verdant,.tpl-lilac,.tpl-azure{display:grid!important;grid-template-columns:34% 1fr!important;grid-template-rows:auto 1fr!important;grid-template-areas:'head main' 'aside main'!important;align-items:stretch!important;}
+.tpl-blush>.r-2col,.tpl-verdant>.r-2col,.tpl-lilac>.r-2col,.tpl-azure>.r-2col{display:contents!important;}
+
+/* head → sidebar top (name + contact) */
+.tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{grid-area:head!important;background:var(--pt-side)!important;color:var(--pt-ink)!important;margin:0!important;padding:26px 22px 10px!important;border:none!important;border-radius:0!important;display:block!important;}
+.tpl-blush>.r-head .r-name,.tpl-verdant>.r-head .r-name,.tpl-lilac>.r-head .r-name,.tpl-azure>.r-head .r-name{color:var(--pt-ink)!important;font-size:1.7rem!important;line-height:1.08!important;font-weight:700!important;}
+.tpl-blush>.r-head .r-title,.tpl-verdant>.r-head .r-title,.tpl-lilac>.r-head .r-title,.tpl-azure>.r-head .r-title{color:var(--pt-acc)!important;font-weight:600!important;letter-spacing:.1em!important;text-transform:uppercase!important;font-size:0.7rem!important;margin-top:4px!important;}
+.tpl-blush>.r-head .r-contact,.tpl-verdant>.r-head .r-contact,.tpl-lilac>.r-head .r-contact,.tpl-azure>.r-head .r-contact{color:var(--pt-ink)!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:7px!important;margin-top:14px!important;}
+.tpl-blush>.r-head .r-ci,.tpl-verdant>.r-head .r-ci,.tpl-lilac>.r-head .r-ci,.tpl-azure>.r-head .r-ci{display:flex!important;align-items:center!important;gap:8px!important;color:var(--pt-ink)!important;}
+.tpl-blush>.r-head .r-ci svg,.tpl-verdant>.r-head .r-ci svg,.tpl-lilac>.r-head .r-ci svg,.tpl-azure>.r-head .r-ci svg{width:11px!important;height:11px!important;color:var(--pt-acc)!important;stroke:var(--pt-acc)!important;background:#fff!important;padding:5px!important;border-radius:50%!important;box-sizing:content-box!important;box-shadow:0 1px 2px rgba(0,0,0,.12)!important;flex-shrink:0!important;}
+.tpl-blush>.r-head .r-contact a,.tpl-verdant>.r-head .r-contact a,.tpl-lilac>.r-head .r-contact a,.tpl-azure>.r-head .r-contact a{color:var(--pt-ink)!important;text-decoration:none!important;}
+
+/* aside → sidebar body (Skills / Certifications) */
+.tpl-blush .r-aside,.tpl-verdant .r-aside,.tpl-lilac .r-aside,.tpl-azure .r-aside{grid-area:aside!important;background:var(--pt-side)!important;width:auto!important;min-width:0!important;padding:8px 22px 28px!important;border-right:none!important;}
+/* main → right column */
+.tpl-blush .r-main-col,.tpl-verdant .r-main-col,.tpl-lilac .r-main-col,.tpl-azure .r-main-col{grid-area:main!important;background:#fff!important;min-width:0!important;padding:26px 26px 28px 26px!important;}
+
+/* accent section titles + skills column */
 .tpl-blush .r-sec-t,.tpl-verdant .r-sec-t,.tpl-lilac .r-sec-t,.tpl-azure .r-sec-t{color:var(--pt-acc)!important;border-color:color-mix(in srgb,var(--pt-acc) 30%,transparent)!important;}
 .tpl-blush .r-aside .r-skills,.tpl-verdant .r-aside .r-skills,.tpl-lilac .r-aside .r-skills,.tpl-azure .r-aside .r-skills{display:flex!important;flex-direction:column!important;gap:5px!important;align-items:stretch!important;}
 .tpl-blush .r-aside .r-sk,.tpl-verdant .r-aside .r-sk,.tpl-lilac .r-aside .r-sk,.tpl-azure .r-aside .r-sk{background:#fff!important;color:var(--pt-ink)!important;border:1px solid color-mix(in srgb,var(--pt-acc) 22%,transparent)!important;white-space:normal!important;text-align:left!important;width:auto!important;border-radius:5px!important;}
-.tpl-blush>.r-head .r-contact a,.tpl-verdant>.r-head .r-contact a,.tpl-lilac>.r-head .r-contact a,.tpl-azure>.r-head .r-contact a{color:var(--pt-ink)!important;text-decoration:none!important;}
 .tpl-blush .r-aside .r-yr,.tpl-verdant .r-aside .r-yr,.tpl-lilac .r-aside .r-yr,.tpl-azure .r-aside .r-yr{color:var(--pt-acc)!important;}
-
-/* Main column — accent roles */
 .tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role{color:var(--pt-acc)!important;}
 
-/* Timeline down the Experience column: connector line + a dot per entry */
-.tpl-blush .r-main-col .r-exp,.tpl-verdant .r-main-col .r-exp,.tpl-lilac .r-main-col .r-exp,.tpl-azure .r-main-col .r-exp{position:relative;padding-left:20px;}
-.tpl-blush .r-main-col .r-exp::before,.tpl-verdant .r-main-col .r-exp::before,.tpl-lilac .r-main-col .r-exp::before,.tpl-azure .r-main-col .r-exp::before{
+/* Timeline down Education & Experience in the main column: line + dot per entry */
+.tpl-blush .r-main-col .r-exp,.tpl-verdant .r-main-col .r-exp,.tpl-lilac .r-main-col .r-exp,.tpl-azure .r-main-col .r-exp,
+.tpl-blush .r-main-col .r-edu,.tpl-verdant .r-main-col .r-edu,.tpl-lilac .r-main-col .r-edu,.tpl-azure .r-main-col .r-edu{position:relative;padding-left:20px;}
+.tpl-blush .r-main-col .r-exp::before,.tpl-verdant .r-main-col .r-exp::before,.tpl-lilac .r-main-col .r-exp::before,.tpl-azure .r-main-col .r-exp::before,
+.tpl-blush .r-main-col .r-edu::before,.tpl-verdant .r-main-col .r-edu::before,.tpl-lilac .r-main-col .r-edu::before,.tpl-azure .r-main-col .r-edu::before{
   content:"";position:absolute;left:4px;top:6px;bottom:-14px;width:2px;background:color-mix(in srgb,var(--pt-acc) 28%,transparent);}
 .tpl-blush .r-main-col .r-exp:last-child::before,.tpl-verdant .r-main-col .r-exp:last-child::before,.tpl-lilac .r-main-col .r-exp:last-child::before,.tpl-azure .r-main-col .r-exp:last-child::before{bottom:auto;height:12px;}
-.tpl-blush .r-main-col .r-exp::after,.tpl-verdant .r-main-col .r-exp::after,.tpl-lilac .r-main-col .r-exp::after,.tpl-azure .r-main-col .r-exp::after{
+.tpl-blush .r-main-col .r-exp::after,.tpl-verdant .r-main-col .r-exp::after,.tpl-lilac .r-main-col .r-exp::after,.tpl-azure .r-main-col .r-exp::after,
+.tpl-blush .r-main-col .r-edu::after,.tpl-verdant .r-main-col .r-edu::after,.tpl-lilac .r-main-col .r-edu::after,.tpl-azure .r-main-col .r-edu::after{
   content:"";position:absolute;left:0;top:4px;width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid var(--pt-acc);}
 </style>
+<script>
+/* Pastel themes only: move the Education section out of the sidebar into the main
+   column (after Summary, before Experience) so it reads with a timeline like the
+   reference. Runs after each render (wraps renderOutput, idempotent). Non-pastel
+   templates are untouched. The PDF clone reads #resumeOutput after this runs, so
+   the download matches. */
+(function(){
+  var PT=['tpl-blush','tpl-verdant','tpl-lilac','tpl-azure'];
+  function moveEdu(out){
+    try{
+      var pg=out.querySelector('.resume-a4-page'); if(!pg) return;
+      var wrap=pg.querySelector('[class*="tpl-"]'); if(!wrap) return;
+      if(!PT.some(function(c){return wrap.classList.contains(c);})) return;
+      var aside=pg.querySelector('.r-aside'), main=pg.querySelector('.r-main-col');
+      if(!aside||!main) return;
+      var eduSec=null;
+      aside.querySelectorAll('.r-sec').forEach(function(s){ var t=s.querySelector('.r-sec-t'); if(t && /education/i.test(t.textContent||'')) eduSec=s; });
+      if(!eduSec || main.contains(eduSec)) return;
+      var expSec=null;
+      main.querySelectorAll('.r-sec').forEach(function(s){ var t=s.querySelector('.r-sec-t'); if(t && /experience/i.test(t.textContent||'')) expSec=s; });
+      if(expSec) main.insertBefore(eduSec, expSec); else main.appendChild(eduSec);
+    }catch(e){}
+  }
+  function hook(){
+    if(typeof window.renderOutput==='function' && !window.renderOutput.__r4uPastelEdu){
+      var orig=window.renderOutput;
+      window.renderOutput=function(){ var r=orig.apply(this,arguments); try{ var out=document.getElementById('resumeOutput'); if(out) setTimeout(function(){moveEdu(out);},0); }catch(e){} return r; };
+      window.renderOutput.__r4uPastelEdu=true; return true;
+    }
+    return false;
+  }
+  if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>40) clearInterval(iv); },150); }
+  try{ var out=document.getElementById('resumeOutput'); if(out) moveEdu(out); }catch(e){}
+})();
+</script>
 </body>
 </html>
