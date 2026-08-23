@@ -7849,6 +7849,8 @@ if ('serviceWorker' in navigator) {
 .tpl-blush>.r-head .r-ci,.tpl-verdant>.r-head .r-ci,.tpl-lilac>.r-head .r-ci,.tpl-azure>.r-head .r-ci{display:flex!important;align-items:center!important;gap:8px!important;color:var(--pt-ink)!important;}
 .tpl-blush>.r-head .r-ci svg,.tpl-verdant>.r-head .r-ci svg,.tpl-lilac>.r-head .r-ci svg,.tpl-azure>.r-head .r-ci svg{width:11px!important;height:11px!important;color:var(--pt-acc)!important;stroke:var(--pt-acc)!important;background:#fff!important;padding:5px!important;border-radius:50%!important;box-sizing:content-box!important;box-shadow:0 1px 2px rgba(0,0,0,.12)!important;flex-shrink:0!important;}
 .tpl-blush>.r-head .r-contact a,.tpl-verdant>.r-head .r-contact a,.tpl-lilac>.r-head .r-contact a,.tpl-azure>.r-head .r-contact a{color:var(--pt-ink)!important;text-decoration:none!important;}
+/* hide the inline "·" separators — the vertical contact column doesn't need them */
+.tpl-blush>.r-head .r-sep,.tpl-verdant>.r-head .r-sep,.tpl-lilac>.r-head .r-sep,.tpl-azure>.r-head .r-sep{display:none!important;}
 
 /* aside → sidebar body (Skills / Certifications) */
 .tpl-blush .r-aside,.tpl-verdant .r-aside,.tpl-lilac .r-aside,.tpl-azure .r-aside{grid-area:aside!important;background:var(--pt-side)!important;width:auto!important;min-width:0!important;padding:8px 22px 28px!important;border-right:none!important;}
@@ -7863,6 +7865,13 @@ if ('serviceWorker' in navigator) {
 .tpl-blush .r-aside .r-sk::before,.tpl-verdant .r-aside .r-sk::before,.tpl-lilac .r-aside .r-sk::before,.tpl-azure .r-aside .r-sk::before{content:"";position:absolute!important;left:2px!important;top:0.62em!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--pt-acc)!important;}
 .tpl-blush .r-aside .r-yr,.tpl-verdant .r-aside .r-yr,.tpl-lilac .r-aside .r-yr,.tpl-azure .r-aside .r-yr{color:var(--pt-acc)!important;}
 .tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role{color:var(--pt-acc)!important;}
+/* keep the date cleanly right-aligned, never butting against a long role/degree */
+.tpl-blush .r-main-col .r-exp-top,.tpl-verdant .r-main-col .r-exp-top,.tpl-lilac .r-main-col .r-exp-top,.tpl-azure .r-main-col .r-exp-top,
+.tpl-blush .r-main-col .r-edu,.tpl-verdant .r-main-col .r-edu,.tpl-lilac .r-main-col .r-edu,.tpl-azure .r-main-col .r-edu{display:flex!important;flex-wrap:nowrap!important;justify-content:space-between!important;gap:14px!important;align-items:flex-start!important;}
+.tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role,
+.tpl-blush .r-main-col .r-deg,.tpl-verdant .r-main-col .r-deg,.tpl-lilac .r-main-col .r-deg,.tpl-azure .r-main-col .r-deg{flex:1 1 auto!important;min-width:0!important;}
+.tpl-blush .r-main-col .r-period,.tpl-verdant .r-main-col .r-period,.tpl-lilac .r-main-col .r-period,.tpl-azure .r-main-col .r-period,
+.tpl-blush .r-main-col .r-yr,.tpl-verdant .r-main-col .r-yr,.tpl-lilac .r-main-col .r-yr,.tpl-azure .r-main-col .r-yr{flex:0 0 auto!important;white-space:nowrap!important;text-align:right!important;color:#8a8078!important;font-style:normal!important;}
 
 /* Timeline down Education & Experience in the main column: line + dot per entry */
 .tpl-blush .r-main-col .r-exp,.tpl-verdant .r-main-col .r-exp,.tpl-lilac .r-main-col .r-exp,.tpl-azure .r-main-col .r-exp,
