@@ -7841,8 +7841,10 @@ if ('serviceWorker' in navigator) {
 
 /* head → sidebar top (name + contact) */
 .tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{grid-area:head!important;background:var(--pt-side)!important;color:var(--pt-ink)!important;margin:0!important;padding:26px 22px 10px!important;border:none!important;border-radius:0!important;display:block!important;}
-.tpl-blush>.r-head .r-name,.tpl-verdant>.r-head .r-name,.tpl-lilac>.r-head .r-name,.tpl-azure>.r-head .r-name{color:var(--pt-ink)!important;font-size:1.7rem!important;line-height:1.08!important;font-weight:700!important;}
-.tpl-blush>.r-head .r-title,.tpl-verdant>.r-head .r-title,.tpl-lilac>.r-head .r-title,.tpl-azure>.r-head .r-title{color:var(--pt-acc)!important;font-weight:600!important;letter-spacing:.1em!important;text-transform:uppercase!important;font-size:0.7rem!important;margin-top:4px!important;}
+.tpl-blush>.r-head .r-name,.tpl-verdant>.r-head .r-name,.tpl-lilac>.r-head .r-name,.tpl-azure>.r-head .r-name{color:var(--pt-ink)!important;font-size:1.6rem!important;line-height:1.06!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.01em!important;}
+.tpl-blush>.r-head .r-title,.tpl-verdant>.r-head .r-title,.tpl-lilac>.r-head .r-title,.tpl-azure>.r-head .r-title{color:var(--pt-acc)!important;font-weight:600!important;letter-spacing:.14em!important;text-transform:uppercase!important;font-size:0.7rem!important;margin-top:5px!important;}
+/* short accent rule beneath the role, like the reference */
+.tpl-blush>.r-head .r-title::after,.tpl-verdant>.r-head .r-title::after,.tpl-lilac>.r-head .r-title::after,.tpl-azure>.r-head .r-title::after{content:"";display:block;width:58px;height:2px;border-radius:2px;background:var(--pt-acc);opacity:.65;margin-top:11px;}
 .tpl-blush>.r-head .r-contact,.tpl-verdant>.r-head .r-contact,.tpl-lilac>.r-head .r-contact,.tpl-azure>.r-head .r-contact{color:var(--pt-ink)!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:7px!important;margin-top:14px!important;}
 .tpl-blush>.r-head .r-ci,.tpl-verdant>.r-head .r-ci,.tpl-lilac>.r-head .r-ci,.tpl-azure>.r-head .r-ci{display:flex!important;align-items:center!important;gap:8px!important;color:var(--pt-ink)!important;}
 .tpl-blush>.r-head .r-ci svg,.tpl-verdant>.r-head .r-ci svg,.tpl-lilac>.r-head .r-ci svg,.tpl-azure>.r-head .r-ci svg{width:11px!important;height:11px!important;color:var(--pt-acc)!important;stroke:var(--pt-acc)!important;background:#fff!important;padding:5px!important;border-radius:50%!important;box-sizing:content-box!important;box-shadow:0 1px 2px rgba(0,0,0,.12)!important;flex-shrink:0!important;}
@@ -7856,7 +7858,9 @@ if ('serviceWorker' in navigator) {
 /* accent section titles + skills column */
 .tpl-blush .r-sec-t,.tpl-verdant .r-sec-t,.tpl-lilac .r-sec-t,.tpl-azure .r-sec-t{color:var(--pt-acc)!important;border-color:color-mix(in srgb,var(--pt-acc) 30%,transparent)!important;}
 .tpl-blush .r-aside .r-skills,.tpl-verdant .r-aside .r-skills,.tpl-lilac .r-aside .r-skills,.tpl-azure .r-aside .r-skills{display:flex!important;flex-direction:column!important;gap:5px!important;align-items:stretch!important;}
-.tpl-blush .r-aside .r-sk,.tpl-verdant .r-aside .r-sk,.tpl-lilac .r-aside .r-sk,.tpl-azure .r-aside .r-sk{background:#fff!important;color:var(--pt-ink)!important;border:1px solid color-mix(in srgb,var(--pt-acc) 22%,transparent)!important;white-space:normal!important;text-align:left!important;width:auto!important;border-radius:5px!important;}
+/* Skills as a bulleted list (dots), matching the reference — not boxed chips */
+.tpl-blush .r-aside .r-sk,.tpl-verdant .r-aside .r-sk,.tpl-lilac .r-aside .r-sk,.tpl-azure .r-aside .r-sk{background:none!important;border:none!important;box-shadow:none!important;color:var(--pt-ink)!important;white-space:normal!important;text-align:left!important;width:auto!important;border-radius:0!important;padding:1px 0 1px 15px!important;position:relative!important;font-size:0.86rem!important;}
+.tpl-blush .r-aside .r-sk::before,.tpl-verdant .r-aside .r-sk::before,.tpl-lilac .r-aside .r-sk::before,.tpl-azure .r-aside .r-sk::before{content:"";position:absolute!important;left:2px!important;top:0.62em!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--pt-acc)!important;}
 .tpl-blush .r-aside .r-yr,.tpl-verdant .r-aside .r-yr,.tpl-lilac .r-aside .r-yr,.tpl-azure .r-aside .r-yr{color:var(--pt-acc)!important;}
 .tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role{color:var(--pt-acc)!important;}
 
