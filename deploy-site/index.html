@@ -7883,6 +7883,32 @@ if ('serviceWorker' in navigator) {
 .tpl-blush .r-main-col .r-exp::after,.tpl-verdant .r-main-col .r-exp::after,.tpl-lilac .r-main-col .r-exp::after,.tpl-azure .r-main-col .r-exp::after,
 .tpl-blush .r-main-col .r-edu::after,.tpl-verdant .r-main-col .r-edu::after,.tpl-lilac .r-main-col .r-edu::after,.tpl-azure .r-main-col .r-edu::after{
   content:"";position:absolute;left:0;top:4px;width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid var(--pt-acc);}
+
+/* ── Polish pass: generous spacing, clearer hierarchy, refined bullets/timeline ── */
+.tpl-blush .r-main-col,.tpl-verdant .r-main-col,.tpl-lilac .r-main-col,.tpl-azure .r-main-col{padding:30px 30px 32px 26px!important;}
+.tpl-blush .r-main-col .r-sec,.tpl-verdant .r-main-col .r-sec,.tpl-lilac .r-main-col .r-sec,.tpl-azure .r-main-col .r-sec{margin-top:22px!important;}
+.tpl-blush .r-main-col>.r-sec:first-child,.tpl-verdant .r-main-col>.r-sec:first-child,.tpl-lilac .r-main-col>.r-sec:first-child,.tpl-azure .r-main-col>.r-sec:first-child{margin-top:0!important;}
+/* section headers: accent, spaced, thin underline for definition */
+.tpl-blush .r-sec-t,.tpl-verdant .r-sec-t,.tpl-lilac .r-sec-t,.tpl-azure .r-sec-t{font-size:0.78rem!important;font-weight:700!important;letter-spacing:1.6px!important;text-transform:uppercase!important;color:var(--pt-acc)!important;padding-bottom:6px!important;margin-bottom:12px!important;border-bottom:1.5px solid color-mix(in srgb,var(--pt-acc) 24%,transparent)!important;}
+/* aside section headers slightly tighter */
+.tpl-blush .r-aside .r-sec-t,.tpl-verdant .r-aside .r-sec-t,.tpl-lilac .r-aside .r-sec-t,.tpl-azure .r-aside .r-sec-t{margin-bottom:9px!important;}
+/* entries: breathing room */
+.tpl-blush .r-main-col .r-exp,.tpl-verdant .r-main-col .r-exp,.tpl-lilac .r-main-col .r-exp,.tpl-azure .r-main-col .r-exp,
+.tpl-blush .r-main-col .r-edu,.tpl-verdant .r-main-col .r-edu,.tpl-lilac .r-main-col .r-edu,.tpl-azure .r-main-col .r-edu{margin-bottom:18px!important;}
+/* role / company / date hierarchy */
+.tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role{font-weight:700!important;font-size:0.94rem!important;color:var(--pt-acc)!important;}
+.tpl-blush .r-main-col .r-co,.tpl-verdant .r-main-col .r-co,.tpl-lilac .r-main-col .r-co,.tpl-azure .r-main-col .r-co{color:#5b6470!important;font-style:normal!important;font-weight:500!important;font-size:0.83rem!important;margin:3px 0 8px!important;}
+/* bullets: regular weight, comfortable spacing, single accent dot marker */
+.tpl-blush .r-main-col .r-ul,.tpl-verdant .r-main-col .r-ul,.tpl-lilac .r-main-col .r-ul,.tpl-azure .r-main-col .r-ul{list-style:none!important;padding:0!important;margin:6px 0 0!important;}
+.tpl-blush .r-main-col .r-ul li,.tpl-verdant .r-main-col .r-ul li,.tpl-lilac .r-main-col .r-ul li,.tpl-azure .r-main-col .r-ul li{font-weight:400!important;font-size:0.85rem!important;line-height:1.6!important;color:#3a4048!important;margin-bottom:5px!important;padding:0 0 0 16px!important;position:relative!important;}
+.tpl-blush .r-main-col .r-ul li::before,.tpl-verdant .r-main-col .r-ul li::before,.tpl-lilac .r-main-col .r-ul li::before,.tpl-azure .r-main-col .r-ul li::before{content:""!important;position:absolute!important;left:1px!important;top:0.6em!important;width:5px!important;height:5px!important;border-radius:50%!important;background:var(--pt-acc)!important;border:none!important;}
+/* summary spacing */
+.tpl-blush .r-main-col .r-summary,.tpl-verdant .r-main-col .r-summary,.tpl-lilac .r-main-col .r-summary,.tpl-azure .r-main-col .r-summary{line-height:1.62!important;color:#3a4048!important;}
+/* timeline nodes: solid accent dot with a white ring (cleaner than hollow) */
+.tpl-blush .r-main-col .r-exp::after,.tpl-verdant .r-main-col .r-exp::after,.tpl-lilac .r-main-col .r-exp::after,.tpl-azure .r-main-col .r-exp::after,
+.tpl-blush .r-main-col .r-edu::after,.tpl-verdant .r-main-col .r-edu::after,.tpl-lilac .r-main-col .r-edu::after,.tpl-azure .r-main-col .r-edu::after{background:var(--pt-acc)!important;border:2px solid #fff!important;width:10px!important;height:10px!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--pt-acc) 45%,transparent)!important;top:5px!important;}
+/* sidebar name spacing */
+.tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{padding:28px 22px 12px!important;}
 </style>
 <script>
 /* Pastel themes only: move the Education section out of the sidebar into the main
