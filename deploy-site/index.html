@@ -7715,7 +7715,13 @@ if ('serviceWorker' in navigator) {
 </script>
 <style id="_r4uAcctRedesign">
 /* ── Account menu — refined redesign v3 (restrained; overrides base #_authDropdown) ── */
-#_authDropdown{border:1px solid rgba(15,23,42,0.09)!important;border-radius:16px!important;box-shadow:0 14px 40px -12px rgba(15,23,42,0.26),0 2px 8px rgba(15,23,42,0.05)!important;min-width:300px!important;max-width:332px!important;overflow:hidden!important;background:#fff!important;}
+#_authDropdown{border:1px solid rgba(15,23,42,0.09)!important;border-radius:16px!important;box-shadow:0 14px 40px -12px rgba(15,23,42,0.26),0 2px 8px rgba(15,23,42,0.05)!important;min-width:300px!important;max-width:332px!important;overflow:hidden!important;background:#fff!important;
+  /* Hard viewport cap so the pinned footer (Save now / Contact us / Sign out) is
+     ALWAYS visible, on every device, with no JS needed. The account button sits
+     near the top on all layouts (top ≲ 160px), so reserving 185px guarantees the
+     menu bottom stays on-screen; the version list (flex) shrinks and scrolls to
+     fit. Belt-and-suspenders with the fitHeight refinement in JS. */
+  max-height:calc(100vh - 185px)!important;max-height:calc(100svh - 185px)!important;}
 
 /* Header — clean, minimal tint; smaller avatar to reclaim vertical space */
 #_authDropdown>div:first-child{padding:15px 16px 13px!important;gap:12px!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;}
@@ -7782,7 +7788,7 @@ if ('serviceWorker' in navigator) {
     try{
       var top = dd.getBoundingClientRect().top;
       var avail = (window.innerHeight || document.documentElement.clientHeight) - top - 12;
-      if(avail > 220) dd.style.maxHeight = avail + 'px';
+      if(avail > 220) dd.style.setProperty('max-height', avail + 'px', 'important');
     }catch(e){}
   }
   function hook(){
