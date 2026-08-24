@@ -7914,6 +7914,14 @@ if ('serviceWorker' in navigator) {
 .tpl-blush>.r-head .r4u-pt-photo,.tpl-verdant>.r-head .r4u-pt-photo,.tpl-lilac>.r-head .r4u-pt-photo,.tpl-azure>.r-head .r4u-pt-photo{display:block!important;width:86px!important;height:86px!important;border-radius:50%!important;object-fit:cover!important;border:3px solid #fff!important;box-shadow:0 3px 9px rgba(0,0,0,.16)!important;margin:0 0 15px!important;padding:0!important;}
 /* professional summary: soft pastel card matching the sidebar */
 .tpl-blush .r-main-col .r-sum,.tpl-verdant .r-main-col .r-sum,.tpl-lilac .r-main-col .r-sum,.tpl-azure .r-main-col .r-sum{background:color-mix(in srgb,var(--pt-side) 60%,#fff)!important;padding:14px 16px!important;border-radius:10px!important;border-left:3px solid var(--pt-acc)!important;line-height:1.62!important;color:#3a4048!important;}
+/* Custom sections (e.g. Projects): the date is a float:right .r-yr inside the
+   section title, which collided with the title's underline in the narrow sidebar
+   (looked struck-through). Make the title a flex row so the date sits cleanly
+   (wraps below when narrow) and read as a muted date, not a header. */
+.tpl-blush .r-sec-t,.tpl-verdant .r-sec-t,.tpl-lilac .r-sec-t,.tpl-azure .r-sec-t{display:flex!important;justify-content:space-between!important;align-items:baseline!important;flex-wrap:wrap!important;gap:2px 10px!important;}
+.tpl-blush .r-sec-t .r-yr,.tpl-verdant .r-sec-t .r-yr,.tpl-lilac .r-sec-t .r-yr,.tpl-azure .r-sec-t .r-yr{float:none!important;text-transform:none!important;letter-spacing:normal!important;font-weight:400!important;font-size:0.72rem!important;color:#8a8078!important;margin-left:auto!important;}
+/* custom-section entries: keep the summary card styling from bleeding onto them */
+.tpl-blush .r-aside .r-sum,.tpl-verdant .r-aside .r-sum,.tpl-lilac .r-aside .r-sum,.tpl-azure .r-aside .r-sum{background:transparent!important;padding:0!important;border:none!important;border-radius:0!important;}
 </style>
 <script>
 /* Pastel themes only: place the profile photo at the TOP of the sidebar (above the
