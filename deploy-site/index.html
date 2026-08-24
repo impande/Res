@@ -7922,6 +7922,9 @@ if ('serviceWorker' in navigator) {
 .tpl-blush .r-sec-t .r-yr,.tpl-verdant .r-sec-t .r-yr,.tpl-lilac .r-sec-t .r-yr,.tpl-azure .r-sec-t .r-yr{float:none!important;text-transform:none!important;letter-spacing:normal!important;font-weight:400!important;font-size:0.72rem!important;color:#8a8078!important;margin-left:auto!important;}
 /* custom-section entries: keep the summary card styling from bleeding onto them */
 .tpl-blush .r-aside .r-sum,.tpl-verdant .r-aside .r-sum,.tpl-lilac .r-aside .r-sum,.tpl-azure .r-aside .r-sum{background:transparent!important;padding:0!important;border:none!important;border-radius:0!important;}
+/* sidebar: clear gap between sections (Skills → Education → Awards) */
+.tpl-blush .r-aside .r-sec,.tpl-verdant .r-aside .r-sec,.tpl-lilac .r-aside .r-sec,.tpl-azure .r-aside .r-sec{margin-top:20px!important;}
+.tpl-blush .r-aside .r-sec:first-child,.tpl-verdant .r-aside .r-sec:first-child,.tpl-lilac .r-aside .r-sec:first-child,.tpl-azure .r-aside .r-sec:first-child{margin-top:6px!important;}
 </style>
 <script>
 /* Pastel themes only: place the profile photo at the TOP of the sidebar (above the
@@ -7932,25 +7935,35 @@ if ('serviceWorker' in navigator) {
    the app places it, so reorder works normally. Non-pastel templates are untouched. */
 (function(){
   var PT=['tpl-blush','tpl-verdant','tpl-lilac','tpl-azure'];
-  function fixPhoto(out){
+  /* Move the photo to the top of the sidebar in EITHER the step-7 output or the
+     preview modal (they render separately, so both must be handled). */
+  function fixPhotoIn(rootId){
     try{
-      var pg=out.querySelector('.resume-a4-page'); if(!pg) return;
-      var wrap=pg.querySelector('[class*="tpl-"]'); if(!wrap) return;
-      if(!PT.some(function(c){return wrap.classList.contains(c);})) return;
-      var head=pg.querySelector('.r-head'); var img=pg.querySelector('img'); /* contact icons are inline SVG, so the only <img> is the photo */
-      if(head && img){ img.classList.add('r4u-pt-photo'); if(head.firstElementChild!==img) head.insertBefore(img, head.firstChild); }
+      var root=document.getElementById(rootId); if(!root) return;
+      root.querySelectorAll('.resume-a4-page').forEach(function(pg){
+        var wrap=pg.querySelector('[class*="tpl-"]'); if(!wrap) return;
+        if(!PT.some(function(c){return wrap.classList.contains(c);})) return;
+        var head=pg.querySelector('.r-head'); var img=pg.querySelector('img');
+        if(head && img){ img.classList.add('r4u-pt-photo'); if(head.firstElementChild!==img) head.insertBefore(img, head.firstChild); }
+      });
     }catch(e){}
   }
+  function wrapFn(name, rootId){
+    var orig=window[name];
+    if(typeof orig!=='function' || orig.__r4uPastelPhoto) return false;
+    window[name]=function(){ var r=orig.apply(this,arguments); try{ setTimeout(function(){fixPhotoIn(rootId);},0); }catch(e){} return r; };
+    window[name].__r4uPastelPhoto=true; return true;
+  }
   function hook(){
-    if(typeof window.renderOutput==='function' && !window.renderOutput.__r4uPastelPhoto){
-      var orig=window.renderOutput;
-      window.renderOutput=function(){ var r=orig.apply(this,arguments); try{ var out=document.getElementById('resumeOutput'); if(out) setTimeout(function(){fixPhoto(out);},0); }catch(e){} return r; };
-      window.renderOutput.__r4uPastelPhoto=true; return true;
-    }
-    return false;
+    var a=wrapFn('renderOutput','resumeOutput');
+    /* the preview modal renders its own copy into #previewModalBody */
+    wrapFn('openPreviewModal','previewModalBody');
+    wrapFn('renderPreviewWithTemplate','previewModalBody');
+    wrapFn('refreshPreviewTemplate','previewModalBody');
+    return a;
   }
   if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>40) clearInterval(iv); },150); }
-  try{ var out=document.getElementById('resumeOutput'); if(out) fixPhoto(out); }catch(e){}
+  try{ fixPhotoIn('resumeOutput'); fixPhotoIn('previewModalBody'); }catch(e){}
 })();
 </script>
 </body>
