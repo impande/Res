@@ -7908,41 +7908,40 @@ if ('serviceWorker' in navigator) {
 .tpl-blush .r-main-col .r-exp::after,.tpl-verdant .r-main-col .r-exp::after,.tpl-lilac .r-main-col .r-exp::after,.tpl-azure .r-main-col .r-exp::after,
 .tpl-blush .r-main-col .r-edu::after,.tpl-verdant .r-main-col .r-edu::after,.tpl-lilac .r-main-col .r-edu::after,.tpl-azure .r-main-col .r-edu::after{background:var(--pt-acc)!important;border:2px solid #fff!important;width:10px!important;height:10px!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--pt-acc) 45%,transparent)!important;top:5px!important;}
 /* sidebar name spacing */
-.tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{padding:28px 22px 12px!important;}
+.tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{padding:26px 22px 12px!important;}
+/* profile photo: circular, at the very top of the sidebar (above the name) */
+.tpl-blush>.r-head .r4u-pt-photo,.tpl-verdant>.r-head .r4u-pt-photo,.tpl-lilac>.r-head .r4u-pt-photo,.tpl-azure>.r-head .r4u-pt-photo{display:block!important;width:86px!important;height:86px!important;border-radius:50%!important;object-fit:cover!important;border:3px solid #fff!important;box-shadow:0 3px 9px rgba(0,0,0,.16)!important;margin:0 0 15px!important;padding:0!important;}
+/* professional summary: soft pastel card matching the sidebar */
+.tpl-blush .r-main-col .r-sum,.tpl-verdant .r-main-col .r-sum,.tpl-lilac .r-main-col .r-sum,.tpl-azure .r-main-col .r-sum{background:color-mix(in srgb,var(--pt-side) 60%,#fff)!important;padding:14px 16px!important;border-radius:10px!important;border-left:3px solid var(--pt-acc)!important;line-height:1.62!important;color:#3a4048!important;}
 </style>
 <script>
-/* Pastel themes only: move the Education section out of the sidebar into the main
-   column (after Summary, before Experience) so it reads with a timeline like the
-   reference. Runs after each render (wraps renderOutput, idempotent). Non-pastel
-   templates are untouched. The PDF clone reads #resumeOutput after this runs, so
-   the download matches. */
+/* Pastel themes only: place the profile photo at the TOP of the sidebar (above the
+   name), where a photo belongs — the render otherwise drops it between the contact
+   block and Skills. Runs after each render (wraps renderOutput, idempotent).
+   IMPORTANT: we no longer force the Education section into the main column — doing
+   so overrode the user's section reorder for Education. Education now stays wherever
+   the app places it, so reorder works normally. Non-pastel templates are untouched. */
 (function(){
   var PT=['tpl-blush','tpl-verdant','tpl-lilac','tpl-azure'];
-  function moveEdu(out){
+  function fixPhoto(out){
     try{
       var pg=out.querySelector('.resume-a4-page'); if(!pg) return;
       var wrap=pg.querySelector('[class*="tpl-"]'); if(!wrap) return;
       if(!PT.some(function(c){return wrap.classList.contains(c);})) return;
-      var aside=pg.querySelector('.r-aside'), main=pg.querySelector('.r-main-col');
-      if(!aside||!main) return;
-      var eduSec=null;
-      aside.querySelectorAll('.r-sec').forEach(function(s){ var t=s.querySelector('.r-sec-t'); if(t && /education/i.test(t.textContent||'')) eduSec=s; });
-      if(!eduSec || main.contains(eduSec)) return;
-      var expSec=null;
-      main.querySelectorAll('.r-sec').forEach(function(s){ var t=s.querySelector('.r-sec-t'); if(t && /experience/i.test(t.textContent||'')) expSec=s; });
-      if(expSec) main.insertBefore(eduSec, expSec); else main.appendChild(eduSec);
+      var head=pg.querySelector('.r-head'); var img=pg.querySelector('img'); /* contact icons are inline SVG, so the only <img> is the photo */
+      if(head && img){ img.classList.add('r4u-pt-photo'); if(head.firstElementChild!==img) head.insertBefore(img, head.firstChild); }
     }catch(e){}
   }
   function hook(){
-    if(typeof window.renderOutput==='function' && !window.renderOutput.__r4uPastelEdu){
+    if(typeof window.renderOutput==='function' && !window.renderOutput.__r4uPastelPhoto){
       var orig=window.renderOutput;
-      window.renderOutput=function(){ var r=orig.apply(this,arguments); try{ var out=document.getElementById('resumeOutput'); if(out) setTimeout(function(){moveEdu(out);},0); }catch(e){} return r; };
-      window.renderOutput.__r4uPastelEdu=true; return true;
+      window.renderOutput=function(){ var r=orig.apply(this,arguments); try{ var out=document.getElementById('resumeOutput'); if(out) setTimeout(function(){fixPhoto(out);},0); }catch(e){} return r; };
+      window.renderOutput.__r4uPastelPhoto=true; return true;
     }
     return false;
   }
   if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>40) clearInterval(iv); },150); }
-  try{ var out=document.getElementById('resumeOutput'); if(out) moveEdu(out); }catch(e){}
+  try{ var out=document.getElementById('resumeOutput'); if(out) fixPhoto(out); }catch(e){}
 })();
 </script>
 </body>
