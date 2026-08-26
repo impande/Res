@@ -7722,7 +7722,7 @@ if ('serviceWorker' in navigator) {
      near the top on all layouts (top ≲ 160px), so reserving 185px guarantees the
      menu bottom stays on-screen; the version list (flex) shrinks and scrolls to
      fit. Belt-and-suspenders with the fitHeight refinement in JS. */
-  max-height:calc(100vh - 185px)!important;max-height:calc(100svh - 185px)!important;}
+  max-height:calc(100vh - 172px)!important;max-height:calc(100svh - 172px)!important;}
 
 /* Header — clean, minimal tint; smaller avatar to reclaim vertical space */
 #_authDropdown>div:first-child{padding:15px 16px 13px!important;gap:12px!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;}
@@ -7738,7 +7738,7 @@ if ('serviceWorker' in navigator) {
 #_authDropdown .drop-section-title{padding:12px 16px 5px!important;font-size:0.65rem!important;letter-spacing:1.4px!important;color:#a8a29e!important;font-weight:700!important;}
 
 /* Versions list — light tray */
-#_authDropdown #_versionListItems{border-top:none!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;padding:2px 0 5px!important;background:#fbfaf9!important;min-height:48px!important;max-height:none!important;}
+#_authDropdown #_versionListItems{border-top:none!important;border-bottom:1px solid rgba(15,23,42,0.06)!important;padding:2px 0 5px!important;background:#fbfaf9!important;min-height:36px!important;max-height:none!important;}
 
 /* Version rows — light cards, quiet active state */
 #_authDropdown .drop-ver-item{margin:5px 12px!important;padding:9px 11px 9px 12px!important;gap:10px!important;font-size:0.85rem!important;color:#44403c!important;background:#fff!important;border:1px solid rgba(15,23,42,0.08)!important;border-radius:10px!important;box-shadow:none!important;transition:border-color .14s,background .14s!important;}
@@ -7759,12 +7759,44 @@ if ('serviceWorker' in navigator) {
 /* Hint — quiet one-liner */
 #_authDropdown #_versionListItems>div:first-child[style*="217,119,6"]{background:transparent!important;border:none!important;color:#a8a29e!important;font-size:0.67rem!important;margin:2px 14px 0!important;padding:3px 2px!important;}
 
-/* Footer actions — compact so Sign out always fits */
-#_authDropdown .drop-savenow{padding:11px 16px!important;gap:8px!important;color:#b45309!important;font-weight:600!important;}
-#_authDropdown .drop-savenow:hover{background:rgba(217,119,6,0.06)!important;}
-#_authDropdown .drop-contact{padding:10px 16px!important;}
-#_authDropdown .drop-signout{padding:11px 16px!important;font-weight:600!important;}
-#_authDropdown .drop-signout:hover{background:#fef2f2!important;}
+/* ── Footer actions — real CTAs with clear hierarchy ──────────────────────────
+   The dropdown is a flex column with the version list as the only scroll region
+   (flex:1; overflow:auto), so the footer buttons are naturally pinned at the
+   bottom as flex:0 children. We drop the old sticky+computed-offset hack (which
+   assumed bare text rows) and lay the actions out as spaced pill buttons. */
+#_authDropdown .drop-savenow,
+#_authDropdown .drop-contact,
+#_authDropdown .drop-signout{position:static!important;bottom:auto!important;}
+
+/* Save now — PRIMARY, filled accent pill */
+#_authDropdown .drop-savenow{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+  margin:10px 12px 7px!important;padding:10px 14px!important;width:auto!important;
+  background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%)!important;color:#fff!important;
+  font-weight:700!important;font-size:0.86rem!important;letter-spacing:0.01em!important;
+  border:none!important;border-radius:11px!important;
+  box-shadow:0 3px 10px -2px rgba(217,119,6,0.45)!important;
+  transition:filter .15s,box-shadow .15s,transform .06s!important;}
+#_authDropdown .drop-savenow:hover{filter:brightness(1.06)!important;box-shadow:0 6px 16px -3px rgba(217,119,6,0.55)!important;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%)!important;}
+#_authDropdown .drop-savenow:active{transform:translateY(1px)!important;box-shadow:0 2px 7px -2px rgba(217,119,6,0.45)!important;}
+#_authDropdown .drop-savenow svg{width:16px!important;height:16px!important;flex-shrink:0!important;}
+
+/* Contact us — SECONDARY, bordered tile (matches the version cards) */
+#_authDropdown .drop-contact{
+  margin:0 12px 7px!important;padding:9px 12px!important;
+  border:1px solid rgba(15,23,42,0.10)!important;border-radius:11px!important;background:#fff!important;
+  transition:border-color .15s,background .15s!important;}
+#_authDropdown .drop-contact:hover{border-color:rgba(37,211,102,0.5)!important;background:rgba(37,211,102,0.045)!important;}
+
+/* Sign out — TERTIARY, outlined danger button */
+#_authDropdown .drop-signout{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+  margin:0 12px 10px!important;padding:9px 14px!important;width:auto!important;
+  background:#fff!important;color:#dc2626!important;font-weight:600!important;font-size:0.85rem!important;
+  border:1px solid rgba(220,38,38,0.28)!important;border-radius:11px!important;
+  transition:background .15s,border-color .15s!important;}
+#_authDropdown .drop-signout:hover{background:#fef2f2!important;border-color:rgba(220,38,38,0.5)!important;}
+#_authDropdown .drop-signout svg{width:15px!important;height:15px!important;flex-shrink:0!important;}
 #_authDropdown .drop-divider{background:rgba(15,23,42,0.06)!important;}
 </style>
 <script>
@@ -7853,6 +7885,39 @@ if ('serviceWorker' in navigator) {
     if(window._fbUser) reenable(document.getElementById('_authBtn'));
     if(++n>120) clearInterval(iv);
   },500);
+})();
+</script>
+<script id="_r4uFooterCtaIcons">
+/* Give the account-menu footer CTAs proper icons (the base renders "💾 Save now"
+   and a bare "Sign out"). Runs on every dropdown open (wraps _authDropdown,
+   idempotent per element) and pairs with the CTA styling above. Contact us
+   already ships its own WhatsApp icon, so it's left untouched. */
+(function(){
+  var SAVE_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+  var OUT_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+  function enhance(dd){
+    try{
+      var s=dd.querySelector('.drop-savenow');
+      if(s && !s.__r4uCta){ s.__r4uCta=true; s.innerHTML=SAVE_SVG+'<span>Save now</span>'; }
+      var o=dd.querySelector('.drop-signout');
+      if(o && !o.__r4uCta){ o.__r4uCta=true; o.innerHTML=OUT_SVG+'<span>Sign out</span>'; }
+    }catch(e){}
+  }
+  function hook(){
+    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uCtaWrapped){
+      var orig=window._authDropdown;
+      window._authDropdown=function(){
+        var r=orig.apply(this,arguments);
+        try{ var dd=document.getElementById('_authDropdown'); if(dd) enhance(dd); }catch(e){}
+        return r;
+      };
+      window._authDropdown.__r4uCtaWrapped=true;
+      return true;
+    }
+    return false;
+  }
+  if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>25) clearInterval(iv); },200); }
+  var ex=document.getElementById('_authDropdown'); if(ex) enhance(ex);
 })();
 </script>
 <style id="_r4uPastelThemes">
