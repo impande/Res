@@ -7824,14 +7824,18 @@ if ('serviceWorker' in navigator) {
    button into the signed-in state and rebinds onclick → _authDropdown(user), but
    it never clears `disabled`/`opacity`. A disabled <button> ignores clicks, so
    the account menu won't open until a reload rebuilds the button fresh from HTML.
-   This re-enables the button the moment it enters the signed-in state. ── */
+   The same happens if a sign-in is cancelled. We re-enable the button whenever
+   it is NOT mid-sign-in — detected by the "Signing in…" spinner in its markup —
+   so the disabled/dimmed state is preserved only while a sign-in is in flight. ── */
 (function(){
+  function isSigningIn(b){
+    var h=b.innerHTML||'';
+    return /animation\s*:\s*spin/i.test(h) || /Signing\s*in/i.test(h);
+  }
   function reenable(b){
-    if(!b) return;
-    if(b.classList.contains('_signed-in')){
-      if(b.disabled) b.disabled=false;
-      if(b.style.opacity && b.style.opacity!=='1') b.style.opacity='';
-    }
+    if(!b || isSigningIn(b)) return;      /* keep spinner + disabled during active sign-in */
+    if(b.disabled) b.disabled=false;
+    if(b.style.opacity && b.style.opacity!=='1') b.style.opacity='';
   }
   function attach(){
     var b=document.getElementById('_authBtn');
@@ -7839,7 +7843,8 @@ if ('serviceWorker' in navigator) {
     reenable(b);
     try{
       var mo=new MutationObserver(function(){ reenable(b); });
-      mo.observe(b,{attributes:true,attributeFilter:['class','disabled','style']});
+      /* watch attrs AND markup: the spinner swap changes innerHTML (childList) */
+      mo.observe(b,{attributes:true,attributeFilter:['class','disabled','style'],childList:true,subtree:true});
     }catch(e){}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',attach); else attach();
