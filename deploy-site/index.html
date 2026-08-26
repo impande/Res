@@ -7817,6 +7817,39 @@ if ('serviceWorker' in navigator) {
   if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>25) clearInterval(iv); },200); }
 })();
 </script>
+<script id="_r4uAuthBtnReenable">
+/* ── Fix: account button stuck disabled after sign-in ──────────────────────────
+   signInWithGoogle() sets #_authBtn { disabled=true; opacity:0.8 } to show the
+   "Signing in…" spinner. When auth resolves, _renderAuthBtn(user) rewrites the
+   button into the signed-in state and rebinds onclick → _authDropdown(user), but
+   it never clears `disabled`/`opacity`. A disabled <button> ignores clicks, so
+   the account menu won't open until a reload rebuilds the button fresh from HTML.
+   This re-enables the button the moment it enters the signed-in state. ── */
+(function(){
+  function reenable(b){
+    if(!b) return;
+    if(b.classList.contains('_signed-in')){
+      if(b.disabled) b.disabled=false;
+      if(b.style.opacity && b.style.opacity!=='1') b.style.opacity='';
+    }
+  }
+  function attach(){
+    var b=document.getElementById('_authBtn');
+    if(!b){ setTimeout(attach,300); return; }
+    reenable(b);
+    try{
+      var mo=new MutationObserver(function(){ reenable(b); });
+      mo.observe(b,{attributes:true,attributeFilter:['class','disabled','style']});
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',attach); else attach();
+  /* Safety net: also re-check for a short window once a user is present. */
+  var n=0, iv=setInterval(function(){
+    if(window._fbUser) reenable(document.getElementById('_authBtn'));
+    if(++n>120) clearInterval(iv);
+  },500);
+})();
+</script>
 <style id="_r4uPastelThemes">
 /* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure ─────────────────────
    Reference-matched layout: the NAME lives inside a full-bleed pastel sidebar
