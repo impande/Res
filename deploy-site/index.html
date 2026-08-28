@@ -3423,8 +3423,8 @@ window.__iosPdfSave = function(blobUrl, filename){
           <div class="pf-toggle on" data-section="skills" onclick="togglePfSection(this)"><span class="pf-toggle-ico">⚡</span><span class="pf-toggle-lbl">Skills</span><div class="pf-toggle-switch"></div></div>
           <div class="pf-toggle on" data-section="education" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🎓</span><span class="pf-toggle-lbl">Education</span><div class="pf-toggle-switch"></div></div>
           <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
-          <div class="pf-toggle" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
-          <div class="pf-toggle" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
           <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
         </div>
       </div>
@@ -8464,6 +8464,13 @@ window.__novaPortfolioHTML=function(d,sections){
     var step=document.getElementById('pfStep2');
     if(!step || step.style.display==='none') return;
     var hero=ensureHero(); if(!hero) return;
+    /* All sections ON by default. Force every toggle on the first time step 2 is
+       shown (after the app's own setup), then never again — so a user turning any
+       off afterwards is respected. */
+    if(!window.__pfAllOnDone){ var g=document.getElementById('pfToggleGrid');
+      if(g){ var tg=g.querySelectorAll('.pf-toggle'); if(tg.length){
+        [].forEach.call(tg,function(t){ if(!t.classList.contains('on')) t.classList.add('on'); var sec=t.getAttribute('data-section'); if(sec && window.pfSections) window.pfSections[sec]=true; });
+        window.__pfAllOnDone=true; } } }
     var s=state();
     var keys=['photo','about','experience','skills','contact','links','extra'];
     var done=keys.filter(function(k){return s[k];}).length;
@@ -8518,6 +8525,7 @@ window.__novaPortfolioHTML=function(d,sections){
       window.pfGoStep.__pfHero=true;
     }
   }
+  hookOpen();
   var h=0, hv=setInterval(function(){ hookOpen(); if((window.openPortfolioBuilder&&window.openPortfolioBuilder.__pfHero&&window.pfGoStep&&window.pfGoStep.__pfHero)||++h>60) clearInterval(hv); },150);
 })();
 </script>
