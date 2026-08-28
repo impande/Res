@@ -3416,6 +3416,12 @@ window.__iosPdfSave = function(blobUrl, filename){
         </div>
         <div id="pfLinksList" style="display:flex;flex-direction:column;gap:7px;"></div>
       </div>
+      <div id="pfCustomEditor" style="margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
+        <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>➕</span>Custom sections</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add your own sections — testimonials, case studies, publications, speaking, volunteering… with text, images and a video (YouTube/Vimeo).</div>
+        <div id="pfCustomList"></div>
+        <button type="button" onclick="pfAddCustomSection()" style="width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:8px;background:var(--bg);color:var(--accent);font-weight:600;font-size:0.85rem;cursor:pointer;font-family:inherit;">＋ Add a section</button>
+      </div>
       <div class="pf-footer" style="margin-top:16px;border-top:1px solid var(--border);">
         <button class="btn-secondary" onclick="pfGoStep(1)">← Back</button>
         <div class="pf-footer-right">
@@ -7995,6 +8001,22 @@ window.__novaPortfolioHTML=function(d,sections){
 
   function logo(txt,cls){ return '<div class="logo '+(cls||'')+'">'+esc((txt||'?').charAt(0).toUpperCase())+'</div>'; }
   function card(id,titleTxt,body,action){ return '<section'+(id?' id="'+id+'"':'')+' class="card"><div class="card-h"><h2>'+esc(titleTxt)+'</h2>'+(action||'')+'</div>'+body+'</section>'; }
+  function renderBody(text){ text=String(text||'').trim(); if(!text) return '';
+    var lines=text.split(/\n/), html='', inList=false;
+    lines.forEach(function(ln){ ln=ln.trim();
+      if(!ln){ if(inList){html+='</ul>';inList=false;} return; }
+      if(/^[-•*]\s+/.test(ln)){ if(!inList){html+='<ul class="cs-ul">';inList=true;} html+='<li>'+linkify(ln.replace(/^[-•*]\s+/,''))+'</li>'; }
+      else { if(inList){html+='</ul>';inList=false;} html+='<p>'+linkify(ln)+'</p>'; } });
+    if(inList) html+='</ul>';
+    return '<div class="cs-body">'+html+'</div>';
+  }
+  function embedHTML(url){ url=String(url||'').trim(); if(!url) return '';
+    var yt=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/i);
+    var vm=url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+    var src = yt?('https://www.youtube.com/embed/'+yt[1]) : (vm?('https://player.vimeo.com/video/'+vm[1]):'');
+    if(src) return '<div class="cs-embed"><iframe src="'+esc(src)+'" loading="lazy" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div>';
+    return '<a class="cs-link" href="'+esc(lk(url))+'" target="_blank" rel="noopener">'+esc(url.replace(/^https?:\/\//,''))+' ↗</a>';
+  }
 
   // ---- profile action buttons ----
   var btns = '';
@@ -8102,6 +8124,18 @@ window.__novaPortfolioHTML=function(d,sections){
     out += card('awards','Honors & awards','<div class="ent-list">'+aitems+'</div>');
   }
 
+  // Custom sections (user-added content: text + images + embed)
+  var custom = A(d.customSections);
+  if(!custom.length && typeof window!=='undefined' && Array.isArray(window.__pfCustomSections)) custom = window.__pfCustomSections;
+  custom.forEach(function(cs){
+    if(!cs) return;
+    var t = cs.title || 'Section';
+    var imgs = A(cs.images).filter(Boolean);
+    var imgHTML = imgs.length ? '<div class="cs-imgs'+(imgs.length>1?' multi':'')+'">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t)+'" loading="lazy">';}).join('')+'</div>' : '';
+    var inner = renderBody(cs.body||'') + imgHTML + embedHTML(cs.embed||'');
+    if(inner.trim()) out += card('', t, inner);
+  });
+
   var CSS = ''
 + ':root{--bg:#f4f2ee;--card:#fff;--ink:rgba(0,0,0,0.9);--mut:rgba(0,0,0,0.6);--mut2:rgba(0,0,0,0.45);--line:rgba(0,0,0,0.09);--acc:#0a66c2;--acc-h:#004182;--band:linear-gradient(120deg,#1b4f8a,#2d6cb0 45%,#5b8fd0);}'
 + '*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}'
@@ -8158,6 +8192,17 @@ window.__novaPortfolioHTML=function(d,sections){
 /* skills */
 + '.sk-list{display:flex;flex-wrap:wrap;gap:8px}'
 + '.sk{font-size:0.9rem;font-weight:600;color:var(--ink);background:#eef3f8;border:1px solid var(--line);padding:7px 14px;border-radius:99px}'
+/* custom sections */
++ '.cs-body p{font-size:0.98rem;color:var(--ink);margin-bottom:8px}.cs-body p:last-child{margin-bottom:0}'
++ '.cs-ul{padding-left:18px;display:flex;flex-direction:column;gap:5px;margin:4px 0}'
++ '.cs-ul li{font-size:0.95rem;color:var(--mut)}'
++ '.cs-imgs{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}'
++ '.cs-imgs.multi{grid-template-columns:1fr 1fr}'
++ '.cs-imgs img{width:100%;border-radius:8px;border:1px solid var(--line);display:block}'
++ '.cs-embed{position:relative;padding-top:56.25%;margin-top:14px;border-radius:8px;overflow:hidden;background:#000}'
++ '.cs-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}'
++ '.cs-link{display:inline-block;margin-top:12px;color:var(--acc);font-weight:600}'
++ '@media(max-width:560px){.cs-imgs.multi{grid-template-columns:1fr}}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
 + '.foot a{color:var(--acc);font-weight:600}'
@@ -8215,12 +8260,13 @@ window.__novaPortfolioHTML=function(d,sections){
      the initial 'obsidian' to 'nova' exactly once (never override a user's choice). */
   var defaultSet=false;
   function makeDefault(){ if(defaultSet) return; if(typeof pfTemplate==='undefined') return; try{ if(pfTemplate==='obsidian') window.pfTemplate='nova'; }catch(e){} defaultSet=true; }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function refreshPreview(){ try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
 
-  /* ── Additional links: user-managed custom links shown on the portfolio ── */
+  /* ── Additional links ── */
   try{ window.__pfExtraLinks = JSON.parse(localStorage.getItem('_pfExtraLinks')||'[]'); }catch(e){ window.__pfExtraLinks=[]; }
   if(!Array.isArray(window.__pfExtraLinks)) window.__pfExtraLinks=[];
-  function pfSaveLinks(){ try{ localStorage.setItem('_pfExtraLinks', JSON.stringify(window.__pfExtraLinks)); }catch(e){} }
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function saveLinks(){ try{ localStorage.setItem('_pfExtraLinks', JSON.stringify(window.__pfExtraLinks)); }catch(e){} }
   window.pfRenderExtraLinks=function(){
     var box=document.getElementById('pfLinksList'); if(!box) return;
     var L=window.__pfExtraLinks||[];
@@ -8235,20 +8281,60 @@ window.__novaPortfolioHTML=function(d,sections){
   window.pfAddExtraLink=function(){
     var la=document.getElementById('pfLinkLabel'), ua=document.getElementById('pfLinkUrl'); if(!ua) return;
     var url=(ua.value||'').trim(); if(!url){ ua.focus(); return; }
-    var label=(la&&la.value||'').trim();
-    if(!label){ label=url.replace(/^https?:\/\//i,'').replace(/^www\./i,'').split('/')[0]; }
-    window.__pfExtraLinks.push({label:label,url:url}); pfSaveLinks();
-    if(la) la.value=''; if(ua) ua.value=''; if(la) la.focus();
-    window.pfRenderExtraLinks();
-    try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){}
+    var label=(la&&la.value||'').trim(); if(!label){ label=url.replace(/^https?:\/\//i,'').replace(/^www\./i,'').split('/')[0]; }
+    window.__pfExtraLinks.push({label:label,url:url}); saveLinks();
+    if(la) la.value=''; if(ua) ua.value=''; if(la) la.focus(); window.pfRenderExtraLinks(); refreshPreview();
   };
-  window.pfRemoveExtraLink=function(i){ window.__pfExtraLinks.splice(i,1); pfSaveLinks(); window.pfRenderExtraLinks();
-    try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} };
-  /* render the list whenever the builder opens */
+  window.pfRemoveExtraLink=function(i){ window.__pfExtraLinks.splice(i,1); saveLinks(); window.pfRenderExtraLinks(); refreshPreview(); };
+
+  /* ── Custom sections (title + text + images + embed) ── */
+  try{ window.__pfCustomSections = JSON.parse(localStorage.getItem('_pfCustomSections')||'[]'); }catch(e){ window.__pfCustomSections=[]; }
+  if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
+  function saveCustom(){ try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); return true; }catch(e){ alert('Could not save — images may be too large. Try fewer/smaller images.'); return false; } }
+  window.pfCsSet=function(i,field,val){ if(!window.__pfCustomSections[i]) return; window.__pfCustomSections[i][field]=val; saveCustom(); refreshPreview(); };
+  window.pfAddCustomSection=function(){ window.__pfCustomSections.push({title:'',body:'',images:[],embed:''}); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
+  window.pfRemoveCustomSection=function(i){ window.__pfCustomSections.splice(i,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
+  window.pfCsRemoveImage=function(i,j){ if(window.__pfCustomSections[i]&&window.__pfCustomSections[i].images){ window.__pfCustomSections[i].images.splice(j,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); } };
+  function compressImg(file, cb){
+    var r=new FileReader();
+    r.onload=function(){ var img=new Image(); img.onload=function(){
+      var max=1100, w=img.width, h=img.height; if(w>max){ h=Math.round(h*max/w); w=max; }
+      var cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h);
+      try{ cb(cv.toDataURL('image/jpeg',0.82)); }catch(e){ cb(r.result); } };
+      img.onerror=function(){ cb(r.result); }; img.src=r.result; };
+    r.onerror=function(){ cb(null); }; r.readAsDataURL(file);
+  }
+  window.pfCsAddImage=function(i,input){
+    var sec=window.__pfCustomSections[i]; if(!sec) return; if(!sec.images) sec.images=[];
+    var files=[].slice.call(input.files||[]); if(!files.length) return;
+    var pending=files.length;
+    files.forEach(function(f){ if(!/^image\//.test(f.type)){ pending--; return; } if(sec.images.length>=8){ pending--; return; }
+      compressImg(f,function(du){ if(du) sec.images.push(du); pending--; if(pending<=0){ if(saveCustom()){ window.pfRenderCustom(); refreshPreview(); } } });
+    });
+    input.value='';
+  };
+  window.pfRenderCustom=function(){
+    var box=document.getElementById('pfCustomList'); if(!box) return;
+    var C=window.__pfCustomSections||[];
+    box.innerHTML=C.map(function(s,i){
+      var imgs=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:54px;height:44px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:54px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);margin-bottom:10px;">'
+        +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
+        +'<input type="text" value="'+esc(s.title||'')+'" placeholder="Section title (e.g. Testimonials)" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.85rem;font-weight:600;font-family:inherit;">'
+        +'<button type="button" onclick="pfRemoveCustomSection('+i+')" style="background:none;border:none;color:#dc2626;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">Remove</button></div>'
+        +'<textarea placeholder="Text — one line per paragraph, start a line with - for a bullet" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:70px;padding:9px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.84rem;font-family:inherit;resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+imgs
+        +'<label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Image<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
+        +'<input type="text" value="'+esc(s.embed||'')+'" placeholder="YouTube / Vimeo URL (optional)" oninput="pfCsSet('+i+',\'embed\',this.value)" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.82rem;font-family:inherit;">'
+        +'</div>';
+    }).join('');
+  };
+
+  function renderEditors(){ try{ window.pfRenderExtraLinks(); }catch(e){} try{ window.pfRenderCustom(); }catch(e){} }
   function wrapOpen(){
     if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__novaLinks){
       var oo=window.openPortfolioBuilder;
-      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{ window.pfRenderExtraLinks(); }catch(e){} },60); return r; };
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(renderEditors,60); return r; };
       window.openPortfolioBuilder.__novaLinks=true; return true;
     }
     return false;
@@ -8258,7 +8344,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var a=wrapGen(), b=wrapPicker(); wrapOpen(); makeDefault();
     if((a&&b&&defaultSet)||++n>80) clearInterval(iv);
   },100);
-  if(document.getElementById('pfLinksList')) window.pfRenderExtraLinks();
+  renderEditors();
 })();
 
 </script>
