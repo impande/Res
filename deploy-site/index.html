@@ -8214,6 +8214,8 @@ if ('serviceWorker' in navigator) {
         if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
         if(Array.isArray(out.hide)) cz.hide=out.hide;
         if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
+        if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
+        if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
         window.__pfCustomize=cz; save(); rerender();
         log('a', out.reply||'Done — updated your site.');
       })
@@ -8478,6 +8480,22 @@ window.__novaPortfolioHTML=function(d,sections){
   if(CZ.accent){ var ac=String(CZ.accent).replace(/[^#0-9a-zA-Z(),.%\s-]/g,'').slice(0,40); if(ac) czCss+=':root{--acc:'+ac+';--acc-h:'+ac+';}'; }
   if(CZ.dark){ czCss+=':root{--bg:#0f1115;--card:#171a21;--ink:rgba(255,255,255,0.92);--mut:rgba(255,255,255,0.62);--mut2:rgba(255,255,255,0.45);--line:rgba(255,255,255,0.11);}.logo,.sk,.tags span,.link-ic{background:rgba(255,255,255,0.06)!important;}'; }
   if(CZ.css){ czCss += String(CZ.css).replace(/<\/?(style|script)[^>]*>/gi,''); }
+
+  // ── Interactive additions the AI can request (CSS can't create clickable elements) ──
+  // Strip active script/handlers so injected markup can't run JS, but keep links/markup.
+  function sanitizeHTML(s){ return String(s||'')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'')
+    .replace(/<\/?(script|iframe|object|embed|link|meta)\b[^>]*>/gi,'')
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,'')
+    .replace(/javascript:/gi,'')
+    .slice(0,4000); }
+  var topBarHTML='', hasTopBar=false;
+  if(CZ.topBar && (CZ.topBar.text)){
+    var tgt=String(CZ.topBar.target||'projects').replace(/[^a-z0-9_-]/gi,'')||'projects';
+    topBarHTML='<a class="pf-topbar" href="#'+tgt+'">'+esc(CZ.topBar.text)+'</a>'; hasTopBar=true;
+    czCss += '.pf-topbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--acc);color:#fff!important;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,0.18);}.pf-topbar:hover{filter:brightness(1.06)}.pf-topbar+.col{margin-top:52px}';
+  }
+  var injectHTML = CZ.injectHTML ? sanitizeHTML(CZ.injectHTML) : '';
   var customStyle = czCss ? '<style id="pf-custom">'+czCss+'</style>' : '';
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
@@ -8485,7 +8503,8 @@ window.__novaPortfolioHTML=function(d,sections){
 + '<title>'+esc(name)+(title?' — '+esc(title):'')+'</title>'
 + '<meta name="description" content="'+esc((summary||(name+' — '+title)).slice(0,155))+'">'
 + '<style>'+CSS+'</style>'+customStyle+'</head><body>'
-+ '<div class="col">'+profile+out
++ topBarHTML
++ '<div class="col">'+injectHTML+profile+out
 + '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>'
 + '</div></body></html>';
   return html;
