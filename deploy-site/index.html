@@ -8348,6 +8348,131 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 
 </script>
+<style id="_r4uPfStep2Redesign">
+/* ── Portfolio builder · Sections step redesign ─────────────────────────────
+   Make step 2 feel like you're actively building a site: a live progress meter
+   that fills as content is added, modern "building block" section cards with a
+   Ready state, and unified card styling for the wizard / links / custom editors. */
+#pfStep2 .pf-section-title{font-size:1.15rem!important;font-weight:800!important;}
+/* Build progress hero */
+#pfBuildHero{background:linear-gradient(135deg,rgba(217,119,6,0.10),rgba(217,119,6,0.02));border:1.5px solid rgba(217,119,6,0.22);border-radius:16px;padding:15px 17px;margin:2px 0 18px;}
+#pfBuildHero.done{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.03));border-color:rgba(34,197,94,0.32);}
+.pfbh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px;}
+.pfbh-title{font-weight:800;font-size:0.98rem;color:var(--text);display:flex;align-items:center;gap:8px;}
+.pfbh-title .e{font-size:1.15rem;}
+.pfbh-pct{font-weight:800;font-size:1.25rem;color:var(--accent);font-variant-numeric:tabular-nums;transition:color .3s;}
+#pfBuildHero.done .pfbh-pct{color:#16a34a;}
+.pfbh-track{height:11px;border-radius:99px;background:rgba(0,0,0,0.09);overflow:hidden;}
+.pfbh-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#f59e0b,#d97706);transition:width .7s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden;}
+#pfBuildHero.done .pfbh-fill{background:linear-gradient(90deg,#22c55e,#16a34a);}
+.pfbh-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent);transform:translateX(-100%);animation:pfbhSh 2.1s ease-in-out infinite;}
+@keyframes pfbhSh{0%{transform:translateX(-100%)}60%,100%{transform:translateX(200%)}}
+.pfbh-msg{margin-top:11px;font-size:0.83rem;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;}
+#pfBuildHero.done .pfbh-msg{color:#16a34a;font-weight:700;}
+.pfbh-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.pfbh-chip{font-size:0.68rem;font-weight:600;padding:3px 9px 3px 7px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.05);color:var(--muted);border:1px solid transparent;transition:all .2s;}
+.pfbh-chip.on{background:rgba(34,197,94,0.12);color:#16a34a;border-color:rgba(34,197,94,0.25);}
+.pfbh-chip .d{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;}
+.pfbh-chip.on .d{opacity:1;}
+/* Modern section toggles as building blocks */
+#pfStep2 .pf-toggle-grid{gap:9px!important;}
+#pfStep2 .pf-toggle{position:relative;padding:12px 13px!important;border-radius:12px!important;transition:transform .16s,box-shadow .16s,border-color .16s,background .16s!important;}
+#pfStep2 .pf-toggle:hover{transform:translateY(-1px);box-shadow:0 5px 16px -6px rgba(0,0,0,0.16);}
+#pfStep2 .pf-toggle.on{border-color:rgba(217,119,6,0.4)!important;background:rgba(217,119,6,0.05)!important;}
+#pfStep2 .pf-toggle-ico{font-size:1.05rem!important;width:32px!important;height:32px!important;display:flex!important;align-items:center;justify-content:center;background:rgba(0,0,0,0.05);border-radius:9px;transition:background .16s;}
+#pfStep2 .pf-toggle.on .pf-toggle-ico{background:rgba(217,119,6,0.14);}
+.pf-rdy{font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.05);color:var(--muted);}
+.pf-rdy.ready{background:rgba(34,197,94,0.14);color:#16a34a;}
+.pf-toggle:not(.on) .pf-rdy{display:none;}
+/* Unified modern cards for wizard / links / custom editors */
+#pfStep2 #pfWzCard,#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{border-radius:14px!important;box-shadow:0 2px 12px -6px rgba(0,0,0,0.12)!important;}
+#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{background:var(--card-bg)!important;}
+</style>
+<script id="_r4uPfStep2JS">
+/* Live "building your website" progress + Ready states for the Sections step. */
+(function(){
+  var HERO='<div id="pfBuildHero"><div class="pfbh-row"><div class="pfbh-title"><span class="e">🚀</span><span class="t">Building your website</span></div><div class="pfbh-pct">0%</div></div><div class="pfbh-track"><div class="pfbh-fill"></div></div><div class="pfbh-msg"></div><div class="pfbh-chips"></div></div>';
+  var CHIPS=[['photo','Photo'],['about','About'],['experience','Experience'],['skills','Skills'],['contact','Contact'],['links','Links'],['extra','Extras']];
+  function data(){ try{ return (typeof getPfData==='function')?getPfData():{}; }catch(e){ return {}; } }
+  function state(){
+    var d=data(), wd=(window.pfWzData||{});
+    function has(a){ return !!(a && a.length); }
+    var photo = !!(d.photo || window.pfPhoto || (wd&&wd.photo));
+    var links = has(window.__pfExtraLinks);
+    var extra = has(window.__pfCustomSections) || has(d.projects) || has(d.certifications) || has(d.awards);
+    return {
+      photo:photo, about:!!(d.summary&&String(d.summary).trim()), experience:has(d.experience),
+      skills:has(d.skills), education:has(d.education), contact:!!(d.email||d.phone), links:links, extra:extra,
+      // per-section readiness for toggle badges
+      sec:{about:!!(d.summary&&String(d.summary).trim()),experience:has(d.experience),skills:has(d.skills),education:has(d.education),awards:has(d.awards),projects:has(d.projects),certifications:has(d.certifications),contact:!!(d.email||d.phone)}
+    };
+  }
+  function msg(p){
+    if(p>=100) return '🎉 Your website is ready — hit Preview!';
+    if(p>=80) return 'Looking impressive — almost there!';
+    if(p>=55) return 'It’s really taking shape ✨';
+    if(p>=30) return 'Nice progress — keep adding to bring it to life';
+    if(p>0) return 'Great start! Every block makes your site stronger';
+    return 'Let’s build your site — add content and watch it grow';
+  }
+  function ensureHero(){
+    var step=document.getElementById('pfStep2'); if(!step) return null;
+    var hero=document.getElementById('pfBuildHero');
+    if(!hero){ var t=step.querySelector('.pf-section-title');
+      var wrap=document.createElement('div'); wrap.innerHTML=HERO; hero=wrap.firstChild;
+      if(t&&t.parentNode) t.parentNode.insertBefore(hero, t); else step.insertBefore(hero, step.firstChild);
+    }
+    return hero;
+  }
+  var lastPct=-1;
+  function refresh(){
+    var step=document.getElementById('pfStep2');
+    if(!step || step.style.display==='none') return;
+    var hero=ensureHero(); if(!hero) return;
+    var s=state();
+    var keys=['photo','about','experience','skills','contact','links','extra'];
+    var done=keys.filter(function(k){return s[k];}).length;
+    var pct=Math.round(done/keys.length*100);
+    if(pct!==lastPct){
+      lastPct=pct;
+      hero.querySelector('.pfbh-fill').style.width=pct+'%';
+      hero.querySelector('.pfbh-pct').textContent=pct+'%';
+      hero.querySelector('.pfbh-msg').textContent=msg(pct);
+      hero.classList.toggle('done', pct>=100);
+      hero.querySelector('.pfbh-chips').innerHTML=CHIPS.map(function(c){
+        return '<span class="pfbh-chip'+(s[c[0]]?' on':'')+'"><span class="d"></span>'+(s[c[0]]?'✓ ':'')+c[1]+'</span>';
+      }).join('');
+      // nudge the Preview button when complete
+      try{ var nb=step.querySelector('.pf-footer .btn-primary'); if(nb) nb.style.animation = pct>=100 ? 'authPulse 1.8s ease-in-out 3' : ''; }catch(e){}
+    }
+    // per-section Ready badges
+    try{
+      step.querySelectorAll('.pf-toggle').forEach(function(t){
+        var sec=t.getAttribute('data-section'); var sw=t.querySelector('.pf-toggle-switch'); if(!sw) return;
+        var b=t.querySelector('.pf-rdy'); if(!b){ b=document.createElement('span'); b.className='pf-rdy'; t.insertBefore(b, sw); }
+        var ready=s.sec[sec];
+        b.textContent = ready?'✓ Ready':'Add details';
+        b.classList.toggle('ready', !!ready);
+      });
+    }catch(e){}
+  }
+  var iv=setInterval(refresh,600);
+  // also refresh promptly on open / step change
+  function hookOpen(){
+    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__pfHero){
+      var oo=window.openPortfolioBuilder;
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){lastPct=-1;refresh();},80); return r; };
+      window.openPortfolioBuilder.__pfHero=true;
+    }
+    if(typeof window.pfGoStep==='function' && !window.pfGoStep.__pfHero){
+      var og=window.pfGoStep;
+      window.pfGoStep=function(){ var r=og.apply(this,arguments); setTimeout(function(){lastPct=-1;refresh();},60); return r; };
+      window.pfGoStep.__pfHero=true;
+    }
+  }
+  var h=0, hv=setInterval(function(){ hookOpen(); if((window.openPortfolioBuilder&&window.openPortfolioBuilder.__pfHero&&window.pfGoStep&&window.pfGoStep.__pfHero)||++h>60) clearInterval(hv); },150);
+})();
+</script>
 <style id="_r4uPastelThemes">
 /* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure ─────────────────────
    Reference-matched layout: the NAME lives inside a full-bleed pastel sidebar
