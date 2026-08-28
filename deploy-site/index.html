@@ -3386,8 +3386,9 @@ window.__iosPdfSave = function(blobUrl, filename){
           <div style="font-size:0.83rem;font-weight:600;color:var(--text);">Fill your portfolio details</div>
           <div id="pfWzProgress" style="font-size:0.75rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:2px 10px;"></div>
         </div>
+        <div id="pfWzTabs"></div>
         <div id="pfWzCard" style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;min-height:100px;"></div>
-        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <div id="pfWzNav" style="display:none;gap:8px;margin-top:10px;align-items:center;">
           <button id="pfWzBackBtn" onclick="pfWzNav(-1)" style="padding:7px 14px;font-size:0.82rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;display:none;">← Prev</button>
           <button id="pfWzNextBtn" onclick="pfWzNav(1)" style="padding:7px 16px;font-size:0.82rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;margin-left:auto;">Next →</button>
         </div>
@@ -8398,6 +8399,13 @@ window.__novaPortfolioHTML=function(d,sections){
 /* Unified modern cards for wizard / links / custom editors */
 #pfStep2 #pfWzCard,#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{border-radius:14px!important;box-shadow:0 2px 12px -6px rgba(0,0,0,0.12)!important;}
 #pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{background:var(--card-bg)!important;}
+/* Jump-to-section tabs (replaces Prev/Next) */
+#pfWzTabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:5px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#pfWzTabs::-webkit-scrollbar{height:0;}
+.pf-wztab{flex:0 0 auto;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s,border-color .15s,color .15s;position:relative;}
+.pf-wztab:hover{border-color:rgba(217,119,6,0.4);color:var(--text);}
+.pf-wztab.on{background:rgba(217,119,6,0.1);border-color:var(--accent);color:var(--accent);}
+.pf-wztab.rdy::after{content:"";position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:#16a34a;}
 </style>
 <script id="_r4uPfStep2JS">
 /* Live "building your website" progress + Ready states for the Sections step. */
@@ -8453,7 +8461,9 @@ window.__novaPortfolioHTML=function(d,sections){
       scrollToEl(box, '#pfCustomList input[type=text]'); return; }
     wzGoto(k);   /* photo / about / experience / skills / contact */
   };
-  var lastPct=-1;
+  /* jump the content wizard directly to a section (replaces Prev/Next) */
+  window.pfWzGo=function(i){ try{ window.pfWzIdx=i; if(typeof pfWzRender==='function') pfWzRender(); }catch(e){} lastTabKey=''; refresh(); };
+  var lastPct=-1, lastTabKey='';
   function refresh(){
     var step=document.getElementById('pfStep2');
     if(!step || step.style.display==='none') return;
@@ -8483,6 +8493,19 @@ window.__novaPortfolioHTML=function(d,sections){
         b.textContent = ready?'✓ Ready':'Add details';
         b.classList.toggle('ready', !!ready);
       });
+    }catch(e){}
+    // Jump-to-section tabs (replaces the removed Prev/Next buttons)
+    try{
+      var tabs=document.getElementById('pfWzTabs'), steps=window.pfWzSteps;
+      if(tabs && Array.isArray(steps)){
+        var cur=window.pfWzIdx||0;
+        function rdyOf(id){ return id==='photo'?s.photo:(id==='links'?s.links:!!(s.sec&&s.sec[id])); }
+        var sig=steps.map(function(st,i){ var id=(st&&st.id)||''; return id+(i===cur?'*':'')+(rdyOf(id)?'1':'0'); }).join(',');
+        if(sig!==lastTabKey){
+          lastTabKey=sig;
+          tabs.innerHTML=steps.map(function(st,i){ var id=(st&&st.id)||''; var lbl=((st&&st.icon)?st.icon+' ':'')+((st&&st.label)||id||('Step '+(i+1))); return '<button type="button" class="pf-wztab'+(i===cur?' on':'')+(rdyOf(id)?' rdy':'')+'" onclick="pfWzGo('+i+')">'+esc(lbl)+'</button>'; }).join('');
+        }
+      }
     }catch(e){}
   }
   var iv=setInterval(refresh,600);
