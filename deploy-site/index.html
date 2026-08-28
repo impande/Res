@@ -3487,6 +3487,22 @@ window.__iosPdfSave = function(blobUrl, filename){
         </div>
         <iframe class="pf-preview-frame" id="pfPreviewFrame" title="Portfolio Preview"></iframe>
       </div>
+      <div id="pfAiCustom" style="background:linear-gradient(135deg,rgba(124,58,237,0.07),rgba(124,58,237,0.02));border:1.5px solid rgba(124,58,237,0.22);border-radius:14px;padding:15px 16px;margin-bottom:14px;">
+        <div style="font-weight:800;font-size:0.92rem;color:var(--text);display:flex;align-items:center;gap:7px;"><span>✨</span>Customize with AI</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin:3px 0 11px;">Describe any change in plain words — colours, fonts, layout, section names, spacing. There's no limit.</div>
+        <div id="pfAiLog" style="display:none;flex-direction:column;gap:7px;max-height:150px;overflow-y:auto;margin-bottom:11px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="pfAiInput" type="text" placeholder="e.g. Make it dark with a purple accent" onkeydown="if(event.key==='Enter'){event.preventDefault();pfAiCustomize();}" style="flex:1;min-width:0;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-size:0.85rem;font-family:inherit;">
+          <button id="pfAiSend" type="button" onclick="pfAiCustomize()" style="padding:10px 18px;border:none;border-radius:9px;background:#7c3aed;color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:inherit;white-space:nowrap;">Send</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Switch to a sleek dark theme')">🌙 Dark mode</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Use a bold modern purple accent')">🎨 Purple accent</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Make my name bigger and bolder')">🔠 Bigger name</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Give it a clean minimal look with more spacing')">✨ Minimal</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiResetCustomize()">↺ Reset</button>
+        </div>
+      </div>
       <div class="pf-footer" style="margin-top:10px;">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
         <div style="font-size:0.74rem;color:var(--muted);text-align:right;">Free forever · no account needed · yours to host</div>
@@ -7975,6 +7991,186 @@ if ('serviceWorker' in navigator) {
   var ex=document.getElementById('_authDropdown'); if(ex) enhance(ex);
 })();
 </script>
+<style id="_r4uPfStep2Redesign">
+/* ── Portfolio builder · Sections step redesign ─────────────────────────────
+   Make step 2 feel like you're actively building a site: a live progress meter
+   that fills as content is added, modern "building block" section cards with a
+   Ready state, and unified card styling for the wizard / links / custom editors. */
+#pfStep2 .pf-section-title{font-size:1.15rem!important;font-weight:800!important;}
+/* Build progress hero */
+#pfBuildHero{background:linear-gradient(135deg,rgba(217,119,6,0.10),rgba(217,119,6,0.02));border:1.5px solid rgba(217,119,6,0.22);border-radius:16px;padding:15px 17px;margin:2px 0 18px;}
+#pfBuildHero.done{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.03));border-color:rgba(34,197,94,0.32);}
+.pfbh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px;}
+.pfbh-title{font-weight:800;font-size:0.98rem;color:var(--text);display:flex;align-items:center;gap:8px;}
+.pfbh-title .e{font-size:1.15rem;}
+.pfbh-pct{font-weight:800;font-size:1.25rem;color:var(--accent);font-variant-numeric:tabular-nums;transition:color .3s;}
+#pfBuildHero.done .pfbh-pct{color:#16a34a;}
+.pfbh-track{height:11px;border-radius:99px;background:rgba(0,0,0,0.09);overflow:hidden;}
+.pfbh-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#f59e0b,#d97706);transition:width .7s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden;}
+#pfBuildHero.done .pfbh-fill{background:linear-gradient(90deg,#22c55e,#16a34a);}
+.pfbh-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent);transform:translateX(-100%);animation:pfbhSh 2.1s ease-in-out infinite;}
+@keyframes pfbhSh{0%{transform:translateX(-100%)}60%,100%{transform:translateX(200%)}}
+.pfbh-msg{margin-top:11px;font-size:0.83rem;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;}
+#pfBuildHero.done .pfbh-msg{color:#16a34a;font-weight:700;}
+.pfbh-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.pfbh-chip{font-size:0.68rem;font-weight:600;padding:4px 10px 4px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.05);color:var(--muted);border:1px solid transparent;transition:transform .14s,filter .14s,background .2s,color .2s,border-color .2s;cursor:pointer;user-select:none;}
+.pfbh-chip:hover{transform:translateY(-1px);filter:brightness(0.96);border-color:rgba(0,0,0,0.12);}
+.pfbh-chip:active{transform:translateY(0);}
+.pfbh-chip::after{content:"→";margin-left:2px;opacity:0;max-width:0;transition:opacity .15s,max-width .15s;overflow:hidden;}
+.pfbh-chip:hover::after{opacity:.7;max-width:14px;}
+.pfbh-chip.on{background:rgba(34,197,94,0.12);color:#16a34a;border-color:rgba(34,197,94,0.25);}
+.pfbh-chip .d{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;}
+.pfbh-chip.on .d{opacity:1;}
+/* Modern section toggles as building blocks */
+#pfStep2 .pf-toggle-grid{gap:9px!important;}
+#pfStep2 .pf-toggle{position:relative;padding:12px 13px!important;border-radius:12px!important;transition:transform .16s,box-shadow .16s,border-color .16s,background .16s!important;}
+#pfStep2 .pf-toggle:hover{transform:translateY(-1px);box-shadow:0 5px 16px -6px rgba(0,0,0,0.16);}
+#pfStep2 .pf-toggle.on{border-color:rgba(217,119,6,0.4)!important;background:rgba(217,119,6,0.05)!important;}
+#pfStep2 .pf-toggle-ico{font-size:1.05rem!important;width:32px!important;height:32px!important;display:flex!important;align-items:center;justify-content:center;background:rgba(0,0,0,0.05);border-radius:9px;transition:background .16s;}
+#pfStep2 .pf-toggle.on .pf-toggle-ico{background:rgba(217,119,6,0.14);}
+.pf-rdy{font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.05);color:var(--muted);}
+.pf-rdy.ready{background:rgba(34,197,94,0.14);color:#16a34a;}
+.pf-toggle:not(.on) .pf-rdy{display:none;}
+/* Unified modern cards for wizard / links / custom editors */
+#pfStep2 #pfWzCard,#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{border-radius:14px!important;box-shadow:0 2px 12px -6px rgba(0,0,0,0.12)!important;}
+#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{background:var(--card-bg)!important;}
+/* Jump-to-section tabs (replaces Prev/Next); the old "X of Y" counter is redundant */
+#pfStep2 #pfWzProgress{display:none!important;}
+#pfWzTabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.pf-wztab{flex:0 0 auto;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s,border-color .15s,color .15s;position:relative;}
+.pf-wztab:hover{border-color:rgba(217,119,6,0.4);color:var(--text);}
+.pf-wztab.on{background:rgba(217,119,6,0.1);border-color:var(--accent);color:var(--accent);}
+.pf-wztab.rdy::after{content:"";position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:#16a34a;}
+</style>
+<script id="_r4uPfStep2JS">
+/* Live "building your website" progress + Ready states for the Sections step. */
+(function(){
+  var HERO='<div id="pfBuildHero"><div class="pfbh-row"><div class="pfbh-title"><span class="e">🚀</span><span class="t">Building your website</span></div><div class="pfbh-pct">0%</div></div><div class="pfbh-track"><div class="pfbh-fill"></div></div><div class="pfbh-msg"></div><div class="pfbh-chips"></div></div>';
+  var CHIPS=[['photo','Photo'],['about','About'],['experience','Experience'],['skills','Skills'],['contact','Contact'],['links','Links'],['extra','Extras']];
+  function data(){ try{ return (typeof getPfData==='function')?getPfData():{}; }catch(e){ return {}; } }
+  function state(){
+    var d=data(), wd=(window.pfWzData||{});
+    function has(a){ return !!(a && a.length); }
+    var photo = !!(d.photo || window.pfPhoto || (wd&&wd.photo));
+    var links = has(window.__pfExtraLinks);
+    var extra = has(window.__pfCustomSections) || has(d.projects) || has(d.certifications) || has(d.awards);
+    return {
+      photo:photo, about:!!(d.summary&&String(d.summary).trim()), experience:has(d.experience),
+      skills:has(d.skills), education:has(d.education), contact:!!(d.email||d.phone), links:links, extra:extra,
+      // per-section readiness for toggle badges
+      sec:{about:!!(d.summary&&String(d.summary).trim()),experience:has(d.experience),skills:has(d.skills),education:has(d.education),awards:has(d.awards),projects:has(d.projects),certifications:has(d.certifications),contact:!!(d.email||d.phone)}
+    };
+  }
+  function msg(p){
+    if(p>=100) return '🎉 Your website is ready — hit Preview!';
+    if(p>=80) return 'Looking impressive — almost there!';
+    if(p>=55) return 'It’s really taking shape ✨';
+    if(p>=30) return 'Nice progress — keep adding to bring it to life';
+    if(p>0) return 'Great start! Every block makes your site stronger';
+    return 'Let’s build your site — add content and watch it grow';
+  }
+  function ensureHero(){
+    var step=document.getElementById('pfStep2'); if(!step) return null;
+    var hero=document.getElementById('pfBuildHero');
+    if(!hero){ var wrap=document.createElement('div'); wrap.innerHTML=HERO; hero=wrap.firstChild;
+      step.insertBefore(hero, step.firstChild);
+    }
+    return hero;
+  }
+  function scrollToEl(el,focusSel){ if(!el) return; try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){ el.scrollIntoView(); }
+    if(focusSel) setTimeout(function(){ try{ var f=el.querySelector(focusSel)||document.querySelector(focusSel); if(f) f.focus({preventScroll:true}); }catch(e){} },420); }
+  function wzGoto(id){
+    try{ var steps=window.pfWzSteps;
+      if(Array.isArray(steps)){ var idx=-1;
+        for(var i=0;i<steps.length;i++){ var s=steps[i]; var sid=(s&&(s.id!=null?s.id:s))+''; if(sid===id){ idx=i; break; } }
+        if(idx>=0){ window.pfWzIdx=idx; if(typeof pfWzRender==='function') pfWzRender(); }
+      }
+    }catch(e){}
+    scrollToEl(document.getElementById('pfFillWizard'));
+  }
+  window.pfChipGo=function(k){
+    if(k==='links'){ scrollToEl(document.getElementById('pfLinksEditor'), '#pfLinkLabel'); return; }
+    if(k==='extra'){ var box=document.getElementById('pfCustomEditor');
+      try{ if((window.__pfCustomSections||[]).length===0 && typeof pfAddCustomSection==='function') pfAddCustomSection(); }catch(e){}
+      scrollToEl(box, '#pfCustomList input[type=text]'); return; }
+    wzGoto(k);   /* photo / about / experience / skills / contact */
+  };
+  /* jump the content wizard directly to a section (replaces Prev/Next) */
+  window.pfWzGo=function(i){ try{ window.pfWzIdx=i; if(typeof pfWzRender==='function') pfWzRender(); }catch(e){} lastTabKey=''; refresh(); };
+  var lastPct=-1, lastTabKey='';
+  function refresh(){
+    var step=document.getElementById('pfStep2');
+    if(!step || step.style.display==='none') return;
+    var hero=ensureHero(); if(!hero) return;
+    /* All sections ON by default. Force every toggle on the first time step 2 is
+       shown (after the app's own setup), then never again — so a user turning any
+       off afterwards is respected. */
+    if(!window.__pfAllOnDone){ var g=document.getElementById('pfToggleGrid');
+      if(g){ var tg=g.querySelectorAll('.pf-toggle'); if(tg.length){
+        var changed=false;
+        [].forEach.call(tg,function(t){ if(!t.classList.contains('on')) t.classList.add('on'); var sec=t.getAttribute('data-section'); if(sec && window.pfSections && !window.pfSections[sec]){ window.pfSections[sec]=true; changed=true; } });
+        window.__pfAllOnDone=true;
+        /* rebuild the content wizard so newly-enabled sections get their step/tab */
+        if(changed){ try{ if(typeof pfBuildWz==='function') pfBuildWz(); lastTabKey=''; }catch(e){} }
+      } } }
+    var s=state();
+    var keys=['photo','about','experience','skills','contact','links','extra'];
+    var done=keys.filter(function(k){return s[k];}).length;
+    var pct=Math.round(done/keys.length*100);
+    if(pct!==lastPct){
+      lastPct=pct;
+      hero.querySelector('.pfbh-fill').style.width=pct+'%';
+      hero.querySelector('.pfbh-pct').textContent=pct+'%';
+      hero.querySelector('.pfbh-msg').textContent=msg(pct);
+      hero.classList.toggle('done', pct>=100);
+      hero.querySelector('.pfbh-chips').innerHTML=CHIPS.map(function(c){
+        return '<span class="pfbh-chip'+(s[c[0]]?' on':'')+'" role="button" tabindex="0" title="Go to '+c[1]+'" onclick="pfChipGo(\''+c[0]+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();pfChipGo(\''+c[0]+'\');}"><span class="d"></span>'+(s[c[0]]?'✓ ':'')+c[1]+'</span>';
+      }).join('');
+      // nudge the Preview button when complete
+      try{ var nb=step.querySelector('.pf-footer .btn-primary'); if(nb) nb.style.animation = pct>=100 ? 'authPulse 1.8s ease-in-out 3' : ''; }catch(e){}
+    }
+    // per-section Ready badges
+    try{
+      step.querySelectorAll('.pf-toggle').forEach(function(t){
+        var sec=t.getAttribute('data-section'); var sw=t.querySelector('.pf-toggle-switch'); if(!sw) return;
+        var b=t.querySelector('.pf-rdy'); if(!b){ b=document.createElement('span'); b.className='pf-rdy'; t.insertBefore(b, sw); }
+        var ready=s.sec[sec];
+        b.textContent = ready?'✓ Ready':'Add details';
+        b.classList.toggle('ready', !!ready);
+      });
+    }catch(e){}
+    // Jump-to-section tabs (replaces the removed Prev/Next buttons)
+    try{
+      var tabs=document.getElementById('pfWzTabs'), steps=window.pfWzSteps;
+      if(tabs && Array.isArray(steps)){
+        var cur=window.pfWzIdx||0;
+        function rdyOf(id){ return id==='photo'?s.photo:(id==='links'?s.links:!!(s.sec&&s.sec[id])); }
+        var sig=steps.map(function(st,i){ var id=(st&&st.id)||''; return id+(i===cur?'*':'')+(rdyOf(id)?'1':'0'); }).join(',');
+        if(sig!==lastTabKey){
+          lastTabKey=sig;
+          tabs.innerHTML=steps.map(function(st,i){ var id=(st&&st.id)||''; var lbl=((st&&st.icon)?st.icon+' ':'')+((st&&st.label)||id||('Step '+(i+1))); return '<button type="button" class="pf-wztab'+(i===cur?' on':'')+(rdyOf(id)?' rdy':'')+'" onclick="pfWzGo('+i+')">'+esc(lbl)+'</button>'; }).join('');
+        }
+      }
+    }catch(e){}
+  }
+  var iv=setInterval(refresh,600);
+  // also refresh promptly on open / step change
+  function hookOpen(){
+    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__pfHero){
+      var oo=window.openPortfolioBuilder;
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){lastPct=-1;refresh();},80); return r; };
+      window.openPortfolioBuilder.__pfHero=true;
+    }
+    if(typeof window.pfGoStep==='function' && !window.pfGoStep.__pfHero){
+      var og=window.pfGoStep;
+      window.pfGoStep=function(){ var r=og.apply(this,arguments); setTimeout(function(){lastPct=-1;refresh();},60); return r; };
+      window.pfGoStep.__pfHero=true;
+    }
+  }
+  hookOpen();
+  var h=0, hv=setInterval(function(){ hookOpen(); if((window.openPortfolioBuilder&&window.openPortfolioBuilder.__pfHero&&window.pfGoStep&&window.pfGoStep.__pfHero)||++h>60) clearInterval(hv); },150);
+})();
+</script>
 <script id="_r4uNovaPortfolio">
 window.__novaPortfolioHTML=function(d,sections){
   d = d || {}; sections = sections || {};
@@ -8005,8 +8201,17 @@ window.__novaPortfolioHTML=function(d,sections){
   if(!extra.length && typeof window!=='undefined' && Array.isArray(window.__pfExtraLinks)) extra = window.__pfExtraLinks;
   extra = extra.filter(function(l){ return l && (l.url||l.href); }).map(function(l){ return {label:(l.label||l.name||host(l.url||l.href)), url:lk(l.url||l.href)}; });
 
+  // ── AI/chat-driven customization config ──────────────────────────────────
+  // { accent, dark, headings:{sectionId:"New title"}, hide:[sectionId], css:"..." }
+  var CZ = (d && d.customize) || (typeof window!=='undefined' && window.__pfCustomize) || {};
+  CZ = (CZ && typeof CZ==='object') ? CZ : {};
+  var CZhide = Array.isArray(CZ.hide) ? CZ.hide : [];
+  function czHidden(id){ return CZhide.indexOf(id)>=0; }
   function logo(txt,cls){ return '<div class="logo '+(cls||'')+'">'+esc((txt||'?').charAt(0).toUpperCase())+'</div>'; }
-  function card(id,titleTxt,body,action){ return '<section'+(id?' id="'+id+'"':'')+' class="card"><div class="card-h"><h2>'+esc(titleTxt)+'</h2>'+(action||'')+'</div>'+body+'</section>'; }
+  function card(id,titleTxt,body,action){
+    if(id && czHidden(id)) return '';
+    if(id && CZ.headings && CZ.headings[id]) titleTxt = CZ.headings[id];
+    return '<section'+(id?' id="'+id+'"':'')+' class="card"><div class="card-h"><h2>'+esc(titleTxt)+'</h2>'+(action||'')+'</div>'+body+'</section>'; }
   function renderBody(text){ text=String(text||'').trim(); if(!text) return '';
     var lines=text.split(/\n/), html='', inList=false;
     lines.forEach(function(ln){ ln=ln.trim();
@@ -8214,11 +8419,19 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.foot a{color:var(--acc);font-weight:600}'
 + '@media(max-width:560px){.avatar{width:104px;height:104px;margin-top:-58px}.avatar.mono span{font-size:2.3rem}.pmain h1{font-size:1.5rem}.banner{height:110px}}';
 
+  // Build the customization stylesheet — appended AFTER the base CSS so it wins.
+  // Structured fields for common asks + a free-form css block for anything else.
+  var czCss='';
+  if(CZ.accent){ var ac=String(CZ.accent).replace(/[^#0-9a-zA-Z(),.%\s-]/g,'').slice(0,40); if(ac) czCss+=':root{--acc:'+ac+';--acc-h:'+ac+';}'; }
+  if(CZ.dark){ czCss+=':root{--bg:#0f1115;--card:#171a21;--ink:rgba(255,255,255,0.92);--mut:rgba(255,255,255,0.62);--mut2:rgba(255,255,255,0.45);--line:rgba(255,255,255,0.11);}.logo,.sk,.tags span,.link-ic{background:rgba(255,255,255,0.06)!important;}'; }
+  if(CZ.css){ czCss += String(CZ.css).replace(/<\/?(style|script)[^>]*>/gi,''); }
+  var customStyle = czCss ? '<style id="pf-custom">'+czCss+'</style>' : '';
+
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
 + '<meta name="viewport" content="width=device-width,initial-scale=1">'
 + '<title>'+esc(name)+(title?' — '+esc(title):'')+'</title>'
 + '<meta name="description" content="'+esc((summary||(name+' — '+title)).slice(0,155))+'">'
-+ '<style>'+CSS+'</style></head><body>'
++ '<style>'+CSS+'</style>'+customStyle+'</head><body>'
 + '<div class="col">'+profile+out
 + '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>'
 + '</div></body></html>';
@@ -8354,184 +8567,63 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 
 </script>
-<style id="_r4uPfStep2Redesign">
-/* ── Portfolio builder · Sections step redesign ─────────────────────────────
-   Make step 2 feel like you're actively building a site: a live progress meter
-   that fills as content is added, modern "building block" section cards with a
-   Ready state, and unified card styling for the wizard / links / custom editors. */
-#pfStep2 .pf-section-title{font-size:1.15rem!important;font-weight:800!important;}
-/* Build progress hero */
-#pfBuildHero{background:linear-gradient(135deg,rgba(217,119,6,0.10),rgba(217,119,6,0.02));border:1.5px solid rgba(217,119,6,0.22);border-radius:16px;padding:15px 17px;margin:2px 0 18px;}
-#pfBuildHero.done{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.03));border-color:rgba(34,197,94,0.32);}
-.pfbh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px;}
-.pfbh-title{font-weight:800;font-size:0.98rem;color:var(--text);display:flex;align-items:center;gap:8px;}
-.pfbh-title .e{font-size:1.15rem;}
-.pfbh-pct{font-weight:800;font-size:1.25rem;color:var(--accent);font-variant-numeric:tabular-nums;transition:color .3s;}
-#pfBuildHero.done .pfbh-pct{color:#16a34a;}
-.pfbh-track{height:11px;border-radius:99px;background:rgba(0,0,0,0.09);overflow:hidden;}
-.pfbh-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#f59e0b,#d97706);transition:width .7s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden;}
-#pfBuildHero.done .pfbh-fill{background:linear-gradient(90deg,#22c55e,#16a34a);}
-.pfbh-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent);transform:translateX(-100%);animation:pfbhSh 2.1s ease-in-out infinite;}
-@keyframes pfbhSh{0%{transform:translateX(-100%)}60%,100%{transform:translateX(200%)}}
-.pfbh-msg{margin-top:11px;font-size:0.83rem;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;}
-#pfBuildHero.done .pfbh-msg{color:#16a34a;font-weight:700;}
-.pfbh-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
-.pfbh-chip{font-size:0.68rem;font-weight:600;padding:4px 10px 4px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.05);color:var(--muted);border:1px solid transparent;transition:transform .14s,filter .14s,background .2s,color .2s,border-color .2s;cursor:pointer;user-select:none;}
-.pfbh-chip:hover{transform:translateY(-1px);filter:brightness(0.96);border-color:rgba(0,0,0,0.12);}
-.pfbh-chip:active{transform:translateY(0);}
-.pfbh-chip::after{content:"→";margin-left:2px;opacity:0;max-width:0;transition:opacity .15s,max-width .15s;overflow:hidden;}
-.pfbh-chip:hover::after{opacity:.7;max-width:14px;}
-.pfbh-chip.on{background:rgba(34,197,94,0.12);color:#16a34a;border-color:rgba(34,197,94,0.25);}
-.pfbh-chip .d{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;}
-.pfbh-chip.on .d{opacity:1;}
-/* Modern section toggles as building blocks */
-#pfStep2 .pf-toggle-grid{gap:9px!important;}
-#pfStep2 .pf-toggle{position:relative;padding:12px 13px!important;border-radius:12px!important;transition:transform .16s,box-shadow .16s,border-color .16s,background .16s!important;}
-#pfStep2 .pf-toggle:hover{transform:translateY(-1px);box-shadow:0 5px 16px -6px rgba(0,0,0,0.16);}
-#pfStep2 .pf-toggle.on{border-color:rgba(217,119,6,0.4)!important;background:rgba(217,119,6,0.05)!important;}
-#pfStep2 .pf-toggle-ico{font-size:1.05rem!important;width:32px!important;height:32px!important;display:flex!important;align-items:center;justify-content:center;background:rgba(0,0,0,0.05);border-radius:9px;transition:background .16s;}
-#pfStep2 .pf-toggle.on .pf-toggle-ico{background:rgba(217,119,6,0.14);}
-.pf-rdy{font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.05);color:var(--muted);}
-.pf-rdy.ready{background:rgba(34,197,94,0.14);color:#16a34a;}
-.pf-toggle:not(.on) .pf-rdy{display:none;}
-/* Unified modern cards for wizard / links / custom editors */
-#pfStep2 #pfWzCard,#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{border-radius:14px!important;box-shadow:0 2px 12px -6px rgba(0,0,0,0.12)!important;}
-#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{background:var(--card-bg)!important;}
-/* Jump-to-section tabs (replaces Prev/Next); the old "X of Y" counter is redundant */
-#pfStep2 #pfWzProgress{display:none!important;}
-#pfWzTabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-.pf-wztab{flex:0 0 auto;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s,border-color .15s,color .15s;position:relative;}
-.pf-wztab:hover{border-color:rgba(217,119,6,0.4);color:var(--text);}
-.pf-wztab.on{background:rgba(217,119,6,0.1);border-color:var(--accent);color:var(--accent);}
-.pf-wztab.rdy::after{content:"";position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:#16a34a;}
+<style id="_r4uPfAiCustom">
+.pf-ai-chip{padding:6px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
+.pf-ai-chip:hover{border-color:rgba(124,58,237,0.5);color:#7c3aed;}
+.pf-ai-msg{font-size:0.8rem;line-height:1.45;padding:8px 11px;border-radius:10px;max-width:92%;word-wrap:break-word;}
+.pf-ai-msg.u{align-self:flex-end;background:#7c3aed;color:#fff;}
+.pf-ai-msg.a{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);}
+.pf-ai-msg.err{align-self:flex-start;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
 </style>
-<script id="_r4uPfStep2JS">
-/* Live "building your website" progress + Ready states for the Sections step. */
+<script id="_r4uPfAiCustomJS">
+/* Chat-driven portfolio customization: user describes changes → Claude returns a
+   customization config (accent/dark/headings/hide + free-form CSS) → applied to
+   the live preview via window.__pfCustomize and persisted. */
 (function(){
-  var HERO='<div id="pfBuildHero"><div class="pfbh-row"><div class="pfbh-title"><span class="e">🚀</span><span class="t">Building your website</span></div><div class="pfbh-pct">0%</div></div><div class="pfbh-track"><div class="pfbh-fill"></div></div><div class="pfbh-msg"></div><div class="pfbh-chips"></div></div>';
-  var CHIPS=[['photo','Photo'],['about','About'],['experience','Experience'],['skills','Skills'],['contact','Contact'],['links','Links'],['extra','Extras']];
-  function data(){ try{ return (typeof getPfData==='function')?getPfData():{}; }catch(e){ return {}; } }
-  function state(){
-    var d=data(), wd=(window.pfWzData||{});
-    function has(a){ return !!(a && a.length); }
-    var photo = !!(d.photo || window.pfPhoto || (wd&&wd.photo));
-    var links = has(window.__pfExtraLinks);
-    var extra = has(window.__pfCustomSections) || has(d.projects) || has(d.certifications) || has(d.awards);
-    return {
-      photo:photo, about:!!(d.summary&&String(d.summary).trim()), experience:has(d.experience),
-      skills:has(d.skills), education:has(d.education), contact:!!(d.email||d.phone), links:links, extra:extra,
-      // per-section readiness for toggle badges
-      sec:{about:!!(d.summary&&String(d.summary).trim()),experience:has(d.experience),skills:has(d.skills),education:has(d.education),awards:has(d.awards),projects:has(d.projects),certifications:has(d.certifications),contact:!!(d.email||d.phone)}
-    };
-  }
-  function msg(p){
-    if(p>=100) return '🎉 Your website is ready — hit Preview!';
-    if(p>=80) return 'Looking impressive — almost there!';
-    if(p>=55) return 'It’s really taking shape ✨';
-    if(p>=30) return 'Nice progress — keep adding to bring it to life';
-    if(p>0) return 'Great start! Every block makes your site stronger';
-    return 'Let’s build your site — add content and watch it grow';
-  }
-  function ensureHero(){
-    var step=document.getElementById('pfStep2'); if(!step) return null;
-    var hero=document.getElementById('pfBuildHero');
-    if(!hero){ var wrap=document.createElement('div'); wrap.innerHTML=HERO; hero=wrap.firstChild;
-      step.insertBefore(hero, step.firstChild);
-    }
-    return hero;
-  }
-  function scrollToEl(el,focusSel){ if(!el) return; try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){ el.scrollIntoView(); }
-    if(focusSel) setTimeout(function(){ try{ var f=el.querySelector(focusSel)||document.querySelector(focusSel); if(f) f.focus({preventScroll:true}); }catch(e){} },420); }
-  function wzGoto(id){
-    try{ var steps=window.pfWzSteps;
-      if(Array.isArray(steps)){ var idx=-1;
-        for(var i=0;i<steps.length;i++){ var s=steps[i]; var sid=(s&&(s.id!=null?s.id:s))+''; if(sid===id){ idx=i; break; } }
-        if(idx>=0){ window.pfWzIdx=idx; if(typeof pfWzRender==='function') pfWzRender(); }
-      }
-    }catch(e){}
-    scrollToEl(document.getElementById('pfFillWizard'));
-  }
-  window.pfChipGo=function(k){
-    if(k==='links'){ scrollToEl(document.getElementById('pfLinksEditor'), '#pfLinkLabel'); return; }
-    if(k==='extra'){ var box=document.getElementById('pfCustomEditor');
-      try{ if((window.__pfCustomSections||[]).length===0 && typeof pfAddCustomSection==='function') pfAddCustomSection(); }catch(e){}
-      scrollToEl(box, '#pfCustomList input[type=text]'); return; }
-    wzGoto(k);   /* photo / about / experience / skills / contact */
+  var EP='/.netlify/functions/generate';
+  try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; }
+  if(!window.__pfCustomize||typeof window.__pfCustomize!=='object') window.__pfCustomize={};
+  function save(){ try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize)); }catch(e){} }
+  function rerender(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
+  function log(cls,txt){ var box=document.getElementById('pfAiLog'); if(!box) return null; box.style.display='flex'; var d=document.createElement('div'); d.className='pf-ai-msg '+cls; d.textContent=txt; box.appendChild(d); box.scrollTop=box.scrollHeight; return d; }
+  function extractJSON(t){ if(!t) return null; try{ return JSON.parse(t); }catch(e){} var m=String(t).match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} } return null; }
+  function sanitizeCss(s){ return String(s||'').replace(/<\/?(style|script)[^>]*>/gi,'').slice(0,6000); }
+  window.pfAiResetCustomize=function(){ window.__pfCustomize={}; save(); rerender(); log('a','Reset to the original design.'); };
+  window.pfAiCustomize=function(preset){
+    var inp=document.getElementById('pfAiInput');
+    var msg=(typeof preset==='string'?preset:(inp&&inp.value||'')).trim();
+    if(!msg){ if(inp) inp.focus(); return; }
+    if(inp && typeof preset!=='string') inp.value='';
+    log('u',msg);
+    var btn=document.getElementById('pfAiSend'); if(btn){ btn.disabled=true; btn.textContent='…'; }
+    var thinking=log('a','Working on it…');
+    var cur=window.__pfCustomize||{};
+    var prompt='You customize a personal portfolio website by returning ONLY a JSON object (no prose, no markdown).\n'
+      +'Current customization JSON: '+JSON.stringify(cur)+'\n'
+      +'The site uses these CSS variables you can override: --bg (page background), --card (card background), --ink (main text), --mut (muted text), --line (borders), --acc (accent), --acc-h (accent hover).\n'
+      +'Section ids (for headings/hide): about, links, experience, education, projects, certs, skills, awards, contact.\n'
+      +'Useful selectors for the css field: .col (page width), .pcard (profile card), .banner (cover banner), .avatar, .pmain h1 (name), .headline (job title), .card (a section card), .card-h h2 (section heading), .sk (skill pill), .ent (an entry), .btn-p (primary button), .link-row.\n'
+      +'User request: "'+msg+'"\n'
+      +'Return JSON with keys: accent (hex string or null), dark (true or false), headings (object mapping sectionId to a new title), hide (array of section ids to hide), css (a string of extra CSS using the variables/selectors above for anything not covered by the other fields), reply (one short friendly past-tense sentence describing what you changed).\n'
+      +'IMPORTANT: MERGE the new request into the current customization (keep prior changes unless this request overrides them), and return the full cumulative css each time. Output valid JSON only.';
+    fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(thinking&&thinking.remove) thinking.remove();
+        var out=extractJSON(j&&j.text);
+        if(!out){ log('err','Sorry — I couldn’t apply that one. Try rephrasing it.'); return; }
+        var cz=window.__pfCustomize||{};
+        if(typeof out.accent==='string'&&out.accent) cz.accent=out.accent; else if(out.accent===null) delete cz.accent;
+        if(typeof out.dark==='boolean') cz.dark=out.dark;
+        if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
+        if(Array.isArray(out.hide)) cz.hide=out.hide;
+        if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
+        window.__pfCustomize=cz; save(); rerender();
+        log('a', out.reply||'Done — updated your site.');
+      })
+      .catch(function(){ if(thinking&&thinking.remove) thinking.remove(); log('err','Network error — please try again.'); })
+      .then(function(){ if(btn){ btn.disabled=false; btn.textContent='Send'; } });
   };
-  /* jump the content wizard directly to a section (replaces Prev/Next) */
-  window.pfWzGo=function(i){ try{ window.pfWzIdx=i; if(typeof pfWzRender==='function') pfWzRender(); }catch(e){} lastTabKey=''; refresh(); };
-  var lastPct=-1, lastTabKey='';
-  function refresh(){
-    var step=document.getElementById('pfStep2');
-    if(!step || step.style.display==='none') return;
-    var hero=ensureHero(); if(!hero) return;
-    /* All sections ON by default. Force every toggle on the first time step 2 is
-       shown (after the app's own setup), then never again — so a user turning any
-       off afterwards is respected. */
-    if(!window.__pfAllOnDone){ var g=document.getElementById('pfToggleGrid');
-      if(g){ var tg=g.querySelectorAll('.pf-toggle'); if(tg.length){
-        var changed=false;
-        [].forEach.call(tg,function(t){ if(!t.classList.contains('on')) t.classList.add('on'); var sec=t.getAttribute('data-section'); if(sec && window.pfSections && !window.pfSections[sec]){ window.pfSections[sec]=true; changed=true; } });
-        window.__pfAllOnDone=true;
-        /* rebuild the content wizard so newly-enabled sections get their step/tab */
-        if(changed){ try{ if(typeof pfBuildWz==='function') pfBuildWz(); lastTabKey=''; }catch(e){} }
-      } } }
-    var s=state();
-    var keys=['photo','about','experience','skills','contact','links','extra'];
-    var done=keys.filter(function(k){return s[k];}).length;
-    var pct=Math.round(done/keys.length*100);
-    if(pct!==lastPct){
-      lastPct=pct;
-      hero.querySelector('.pfbh-fill').style.width=pct+'%';
-      hero.querySelector('.pfbh-pct').textContent=pct+'%';
-      hero.querySelector('.pfbh-msg').textContent=msg(pct);
-      hero.classList.toggle('done', pct>=100);
-      hero.querySelector('.pfbh-chips').innerHTML=CHIPS.map(function(c){
-        return '<span class="pfbh-chip'+(s[c[0]]?' on':'')+'" role="button" tabindex="0" title="Go to '+c[1]+'" onclick="pfChipGo(\''+c[0]+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();pfChipGo(\''+c[0]+'\');}"><span class="d"></span>'+(s[c[0]]?'✓ ':'')+c[1]+'</span>';
-      }).join('');
-      // nudge the Preview button when complete
-      try{ var nb=step.querySelector('.pf-footer .btn-primary'); if(nb) nb.style.animation = pct>=100 ? 'authPulse 1.8s ease-in-out 3' : ''; }catch(e){}
-    }
-    // per-section Ready badges
-    try{
-      step.querySelectorAll('.pf-toggle').forEach(function(t){
-        var sec=t.getAttribute('data-section'); var sw=t.querySelector('.pf-toggle-switch'); if(!sw) return;
-        var b=t.querySelector('.pf-rdy'); if(!b){ b=document.createElement('span'); b.className='pf-rdy'; t.insertBefore(b, sw); }
-        var ready=s.sec[sec];
-        b.textContent = ready?'✓ Ready':'Add details';
-        b.classList.toggle('ready', !!ready);
-      });
-    }catch(e){}
-    // Jump-to-section tabs (replaces the removed Prev/Next buttons)
-    try{
-      var tabs=document.getElementById('pfWzTabs'), steps=window.pfWzSteps;
-      if(tabs && Array.isArray(steps)){
-        var cur=window.pfWzIdx||0;
-        function rdyOf(id){ return id==='photo'?s.photo:(id==='links'?s.links:!!(s.sec&&s.sec[id])); }
-        var sig=steps.map(function(st,i){ var id=(st&&st.id)||''; return id+(i===cur?'*':'')+(rdyOf(id)?'1':'0'); }).join(',');
-        if(sig!==lastTabKey){
-          lastTabKey=sig;
-          tabs.innerHTML=steps.map(function(st,i){ var id=(st&&st.id)||''; var lbl=((st&&st.icon)?st.icon+' ':'')+((st&&st.label)||id||('Step '+(i+1))); return '<button type="button" class="pf-wztab'+(i===cur?' on':'')+(rdyOf(id)?' rdy':'')+'" onclick="pfWzGo('+i+')">'+esc(lbl)+'</button>'; }).join('');
-        }
-      }
-    }catch(e){}
-  }
-  var iv=setInterval(refresh,600);
-  // also refresh promptly on open / step change
-  function hookOpen(){
-    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__pfHero){
-      var oo=window.openPortfolioBuilder;
-      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){lastPct=-1;refresh();},80); return r; };
-      window.openPortfolioBuilder.__pfHero=true;
-    }
-    if(typeof window.pfGoStep==='function' && !window.pfGoStep.__pfHero){
-      var og=window.pfGoStep;
-      window.pfGoStep=function(){ var r=og.apply(this,arguments); setTimeout(function(){lastPct=-1;refresh();},60); return r; };
-      window.pfGoStep.__pfHero=true;
-    }
-  }
-  hookOpen();
-  var h=0, hv=setInterval(function(){ hookOpen(); if((window.openPortfolioBuilder&&window.openPortfolioBuilder.__pfHero&&window.pfGoStep&&window.pfGoStep.__pfHero)||++h>60) clearInterval(hv); },150);
 })();
 </script>
 <style id="_r4uPastelThemes">
