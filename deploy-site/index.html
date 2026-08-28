@@ -3378,22 +3378,8 @@ window.__iosPdfSave = function(blobUrl, filename){
     </div>
     <!-- Step 2: Sections -->
     <div class="pf-body" id="pfStep2" style="display:none">
-      <div class="pf-section-title">Choose what to include</div>
-      <div class="pf-section-sub">Toggle sections on or off. All data is pulled from your resume automatically.</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <span style="font-size:0.8rem;color:var(--muted)">Tap a section to toggle it</span>
-        <button id="pfSelectAllBtn" onclick="pfToggleAll()" style="padding:5px 13px;font-size:0.8rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;">Deselect All</button>
-      </div>
-      <div class="pf-toggle-grid" id="pfToggleGrid">
-        <div class="pf-toggle on" data-section="about" onclick="togglePfSection(this)"><span class="pf-toggle-ico">👤</span><span class="pf-toggle-lbl">About Me</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle on" data-section="experience" onclick="togglePfSection(this)"><span class="pf-toggle-ico">💼</span><span class="pf-toggle-lbl">Experience</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle on" data-section="skills" onclick="togglePfSection(this)"><span class="pf-toggle-ico">⚡</span><span class="pf-toggle-lbl">Skills</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle on" data-section="education" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🎓</span><span class="pf-toggle-lbl">Education</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
-        <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
-      </div>
+      <div class="pf-section-title">Build your content</div>
+      <div class="pf-section-sub">Add your details, links and custom sections. When you're done, choose what to include below.</div>
       <!-- Section detail wizard -->
       <div id="pfFillWizard" style="margin-top:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -3421,6 +3407,27 @@ window.__iosPdfSave = function(blobUrl, filename){
         <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add your own sections — testimonials, case studies, publications, speaking, volunteering… with text, images and a video (YouTube/Vimeo).</div>
         <div id="pfCustomList"></div>
         <button type="button" onclick="pfAddCustomSection()" style="width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:8px;background:var(--bg);color:var(--accent);font-weight:600;font-size:0.85rem;cursor:pointer;font-family:inherit;">＋ Add a section</button>
+      </div>
+      <div id="pfIncludeStep" style="margin-top:24px;padding-top:20px;border-top:2px dashed var(--border);">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:4px;">
+          <span style="font-size:0.62rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;color:#fff;background:var(--accent);padding:3px 9px;border-radius:99px;">Final step</span>
+          <span class="pf-section-title" style="margin:0;">Choose what to include</span>
+        </div>
+        <div class="pf-section-sub">Pick which sections appear on your published site — toggle any off to hide it.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:0.8rem;color:var(--muted)">Tap a section to toggle it</span>
+          <button id="pfSelectAllBtn" onclick="pfToggleAll()" style="padding:5px 13px;font-size:0.8rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;">Deselect All</button>
+        </div>
+        <div class="pf-toggle-grid" id="pfToggleGrid">
+          <div class="pf-toggle on" data-section="about" onclick="togglePfSection(this)"><span class="pf-toggle-ico">👤</span><span class="pf-toggle-lbl">About Me</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="experience" onclick="togglePfSection(this)"><span class="pf-toggle-ico">💼</span><span class="pf-toggle-lbl">Experience</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="skills" onclick="togglePfSection(this)"><span class="pf-toggle-ico">⚡</span><span class="pf-toggle-lbl">Skills</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="education" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🎓</span><span class="pf-toggle-lbl">Education</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="awards" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🏆</span><span class="pf-toggle-lbl">Awards</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle" data-section="projects" onclick="togglePfSection(this)"><span class="pf-toggle-ico">🔧</span><span class="pf-toggle-lbl">Projects</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle" data-section="certifications" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📜</span><span class="pf-toggle-lbl">Certifications</span><div class="pf-toggle-switch"></div></div>
+          <div class="pf-toggle on" data-section="contact" onclick="togglePfSection(this)"><span class="pf-toggle-ico">📬</span><span class="pf-toggle-lbl">Contact</span><div class="pf-toggle-switch"></div></div>
+        </div>
       </div>
       <div class="pf-footer" style="margin-top:16px;border-top:1px solid var(--border);">
         <button class="btn-secondary" onclick="pfGoStep(1)">← Back</button>
