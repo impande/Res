@@ -8598,15 +8598,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var btn=document.getElementById('pfAiSend'); if(btn){ btn.disabled=true; btn.textContent='…'; }
     var thinking=log('a','Working on it…');
     var cur=window.__pfCustomize||{};
-    var prompt='You customize a personal portfolio website by returning ONLY a JSON object (no prose, no markdown).\n'
-      +'Current customization JSON: '+JSON.stringify(cur)+'\n'
-      +'The site uses these CSS variables you can override: --bg (page background), --card (card background), --ink (main text), --mut (muted text), --line (borders), --acc (accent), --acc-h (accent hover).\n'
-      +'Section ids (for headings/hide): about, links, experience, education, projects, certs, skills, awards, contact.\n'
-      +'Useful selectors for the css field: .col (page width), .pcard (profile card), .banner (cover banner), .avatar, .pmain h1 (name), .headline (job title), .card (a section card), .card-h h2 (section heading), .sk (skill pill), .ent (an entry), .btn-p (primary button), .link-row.\n'
-      +'User request: "'+msg+'"\n'
-      +'Return JSON with keys: accent (hex string or null), dark (true or false), headings (object mapping sectionId to a new title), hide (array of section ids to hide), css (a string of extra CSS using the variables/selectors above for anything not covered by the other fields), reply (one short friendly past-tense sentence describing what you changed).\n'
-      +'IMPORTANT: MERGE the new request into the current customization (keep prior changes unless this request overrides them), and return the full cumulative css each time. Output valid JSON only.';
-    fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+    fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customize',message:msg,current:cur})})
       .then(function(r){return r.json();})
       .then(function(j){
         if(thinking&&thinking.remove) thinking.remove();

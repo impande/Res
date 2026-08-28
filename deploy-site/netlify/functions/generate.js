@@ -113,6 +113,59 @@ exports.handler = async function(event) {
       };
     }
 
+    // ── Portfolio customization (chat-driven) ─────────────────────────────────
+    // Uses Sonnet (better reasoning + correct CSS) and returns a strict JSON config
+    // the client applies to the live portfolio. The system prompt encodes the exact
+    // DOM/variables + CSS recipes so even structural asks (two-column, recolour a
+    // section) produce CSS that actually takes effect.
+    if (body.action === 'customize') {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: 'ANTHROPIC_API_KEY not set' }) };
+      const current = body.current || {};
+      const message = String(body.message || '').slice(0, 1000);
+      const sys = [
+        'You are a portfolio-website customization engine. You receive the current customization JSON and a plain-language request, and you return ONLY a JSON object that fully implements the request.',
+        '',
+        'The portfolio is ONE self-contained HTML page. It exposes these CSS variables you can override:',
+        '--bg (page background), --card (card background), --ink (main text), --mut (muted text), --mut2 (faint text), --line (borders), --acc (accent/links/buttons), --acc-h (accent hover).',
+        'Section container ids: #about, #links, #experience, #education, #projects, #certs, #skills, #awards, #contact.',
+        'Key selectors: .col (the centered column; default max-width:720px; it is a vertical flex of cards), .pcard (profile header card), .banner (cover strip), .avatar, .pmain h1 (the name), .headline (job title), .card (every section card), .card-h h2 (a section heading), .sk (skill pill), .ent (an entry row), .btn-p (primary button), .link-row.',
+        '',
+        'Return a JSON object with keys:',
+        '- accent: hex string (or null to clear) — sets the main accent colour.',
+        '- dark: true/false — dark or light base.',
+        '- headings: object mapping a section id (without #) to a new title, e.g. {"experience":"Where I worked"}.',
+        '- hide: array of section ids to hide, e.g. ["awards"].',
+        '- css: a string of raw CSS that implements everything not covered by the fields above.',
+        '- reply: ONE short, past-tense sentence describing what you changed.',
+        '',
+        'CRITICAL rules for the css field so changes actually take effect:',
+        '1. Add !important to EVERY property (the base stylesheet is specific).',
+        '2. To recolour a whole section use: #ID, #ID *{color:VALUE!important} (target descendants too).',
+        '3. To change a section background use: #ID{background:VALUE!important}.',
+        '4. To recolour only a heading: #ID .card-h h2{color:VALUE!important}.',
+        '5. Two-column / side-by-side layout: @media(min-width:760px){.col{max-width:1060px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;align-items:start!important}.pcard{grid-column:1/-1!important}} then, to place specific sections, add #about{grid-column:1!important} #projects{grid-column:2!important} etc.',
+        '6. Fonts: html,body{font-family:FAMILY!important} (and import via @import url(...) at the very top of css if a Google font is needed).',
+        '7. Bigger name: .pmain h1{font-size:2.4rem!important}.',
+        '',
+        'ALWAYS merge with the current customization: keep prior changes unless this request overrides them, and return the FULL cumulative css every time (re-emit previous css plus the new rules). Output valid JSON only — no markdown, no prose outside the JSON.'
+      ].join('\n');
+      const reqBody = {
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: sys,
+        messages: [{ role: 'user', content: 'Current customization JSON:\n' + JSON.stringify(current) + '\n\nRequest: ' + message }]
+      };
+      const cr = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify(reqBody)
+      });
+      const cd = await cr.json();
+      if (!cr.ok) return { statusCode: cr.status, headers: CORS, body: JSON.stringify({ text: '', error: cd.error?.message || 'API error' }) };
+      return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: cd.content?.[0]?.text || '' }) };
+    }
+
     // ── Claude AI (resume generation / parsing) ───────────────────────────────
     const { prompt, imageBase64, imageBase64Array, imageMimeType } = body;
     // imageBase64Array: array of pages (multi-page scanned PDF)
