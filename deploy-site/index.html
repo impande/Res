@@ -8171,6 +8171,57 @@ if ('serviceWorker' in navigator) {
   var h=0, hv=setInterval(function(){ hookOpen(); if((window.openPortfolioBuilder&&window.openPortfolioBuilder.__pfHero&&window.pfGoStep&&window.pfGoStep.__pfHero)||++h>60) clearInterval(hv); },150);
 })();
 </script>
+<style id="_r4uPfAiCustom">
+.pf-ai-chip{padding:6px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
+.pf-ai-chip:hover{border-color:rgba(124,58,237,0.5);color:#7c3aed;}
+.pf-ai-msg{font-size:0.8rem;line-height:1.45;padding:8px 11px;border-radius:10px;max-width:92%;word-wrap:break-word;}
+.pf-ai-msg.u{align-self:flex-end;background:#7c3aed;color:#fff;}
+.pf-ai-msg.a{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);}
+.pf-ai-msg.err{align-self:flex-start;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
+</style>
+<script id="_r4uPfAiCustomJS">
+/* Chat-driven portfolio customization: user describes changes → Claude returns a
+   customization config (accent/dark/headings/hide + free-form CSS) → applied to
+   the live preview via window.__pfCustomize and persisted. */
+(function(){
+  var EP='/.netlify/functions/generate';
+  try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; }
+  if(!window.__pfCustomize||typeof window.__pfCustomize!=='object') window.__pfCustomize={};
+  function save(){ try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize)); }catch(e){} }
+  function rerender(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
+  function log(cls,txt){ var box=document.getElementById('pfAiLog'); if(!box) return null; box.style.display='flex'; var d=document.createElement('div'); d.className='pf-ai-msg '+cls; d.textContent=txt; box.appendChild(d); box.scrollTop=box.scrollHeight; return d; }
+  function extractJSON(t){ if(!t) return null; try{ return JSON.parse(t); }catch(e){} var m=String(t).match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} } return null; }
+  function sanitizeCss(s){ return String(s||'').replace(/<\/?(style|script)[^>]*>/gi,'').slice(0,6000); }
+  window.pfAiResetCustomize=function(){ window.__pfCustomize={}; save(); rerender(); log('a','Reset to the original design.'); };
+  window.pfAiCustomize=function(preset){
+    var inp=document.getElementById('pfAiInput');
+    var msg=(typeof preset==='string'?preset:(inp&&inp.value||'')).trim();
+    if(!msg){ if(inp) inp.focus(); return; }
+    if(inp && typeof preset!=='string') inp.value='';
+    log('u',msg);
+    var btn=document.getElementById('pfAiSend'); if(btn){ btn.disabled=true; btn.textContent='…'; }
+    var thinking=log('a','Working on it…');
+    var cur=window.__pfCustomize||{};
+    fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customize',message:msg,current:cur})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(thinking&&thinking.remove) thinking.remove();
+        var out=extractJSON(j&&j.text);
+        if(!out){ log('err','Sorry — I couldn’t apply that one. Try rephrasing it.'); return; }
+        var cz=window.__pfCustomize||{};
+        if(typeof out.accent==='string'&&out.accent) cz.accent=out.accent; else if(out.accent===null) delete cz.accent;
+        if(typeof out.dark==='boolean') cz.dark=out.dark;
+        if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
+        if(Array.isArray(out.hide)) cz.hide=out.hide;
+        if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
+        window.__pfCustomize=cz; save(); rerender();
+        log('a', out.reply||'Done — updated your site.');
+      })
+      .catch(function(){ if(thinking&&thinking.remove) thinking.remove(); log('err','Network error — please try again.'); })
+      .then(function(){ if(btn){ btn.disabled=false; btn.textContent='Send'; } });
+  };
+})();
+</script>
 <script id="_r4uNovaPortfolio">
 window.__novaPortfolioHTML=function(d,sections){
   d = d || {}; sections = sections || {};
@@ -8416,6 +8467,8 @@ window.__novaPortfolioHTML=function(d,sections){
 + '@media(max-width:560px){.cs-imgs.multi{grid-template-columns:1fr}}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
+/* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
++ '.pcard,.foot{grid-column:1/-1;}'
 + '.foot a{color:var(--acc);font-weight:600}'
 + '@media(max-width:560px){.avatar{width:104px;height:104px;margin-top:-58px}.avatar.mono span{font-size:2.3rem}.pmain h1{font-size:1.5rem}.banner{height:110px}}';
 
@@ -8566,57 +8619,6 @@ window.__novaPortfolioHTML=function(d,sections){
   renderEditors();
 })();
 
-</script>
-<style id="_r4uPfAiCustom">
-.pf-ai-chip{padding:6px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
-.pf-ai-chip:hover{border-color:rgba(124,58,237,0.5);color:#7c3aed;}
-.pf-ai-msg{font-size:0.8rem;line-height:1.45;padding:8px 11px;border-radius:10px;max-width:92%;word-wrap:break-word;}
-.pf-ai-msg.u{align-self:flex-end;background:#7c3aed;color:#fff;}
-.pf-ai-msg.a{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);}
-.pf-ai-msg.err{align-self:flex-start;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
-</style>
-<script id="_r4uPfAiCustomJS">
-/* Chat-driven portfolio customization: user describes changes → Claude returns a
-   customization config (accent/dark/headings/hide + free-form CSS) → applied to
-   the live preview via window.__pfCustomize and persisted. */
-(function(){
-  var EP='/.netlify/functions/generate';
-  try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; }
-  if(!window.__pfCustomize||typeof window.__pfCustomize!=='object') window.__pfCustomize={};
-  function save(){ try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize)); }catch(e){} }
-  function rerender(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
-  function log(cls,txt){ var box=document.getElementById('pfAiLog'); if(!box) return null; box.style.display='flex'; var d=document.createElement('div'); d.className='pf-ai-msg '+cls; d.textContent=txt; box.appendChild(d); box.scrollTop=box.scrollHeight; return d; }
-  function extractJSON(t){ if(!t) return null; try{ return JSON.parse(t); }catch(e){} var m=String(t).match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} } return null; }
-  function sanitizeCss(s){ return String(s||'').replace(/<\/?(style|script)[^>]*>/gi,'').slice(0,6000); }
-  window.pfAiResetCustomize=function(){ window.__pfCustomize={}; save(); rerender(); log('a','Reset to the original design.'); };
-  window.pfAiCustomize=function(preset){
-    var inp=document.getElementById('pfAiInput');
-    var msg=(typeof preset==='string'?preset:(inp&&inp.value||'')).trim();
-    if(!msg){ if(inp) inp.focus(); return; }
-    if(inp && typeof preset!=='string') inp.value='';
-    log('u',msg);
-    var btn=document.getElementById('pfAiSend'); if(btn){ btn.disabled=true; btn.textContent='…'; }
-    var thinking=log('a','Working on it…');
-    var cur=window.__pfCustomize||{};
-    fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customize',message:msg,current:cur})})
-      .then(function(r){return r.json();})
-      .then(function(j){
-        if(thinking&&thinking.remove) thinking.remove();
-        var out=extractJSON(j&&j.text);
-        if(!out){ log('err','Sorry — I couldn’t apply that one. Try rephrasing it.'); return; }
-        var cz=window.__pfCustomize||{};
-        if(typeof out.accent==='string'&&out.accent) cz.accent=out.accent; else if(out.accent===null) delete cz.accent;
-        if(typeof out.dark==='boolean') cz.dark=out.dark;
-        if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
-        if(Array.isArray(out.hide)) cz.hide=out.hide;
-        if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
-        window.__pfCustomize=cz; save(); rerender();
-        log('a', out.reply||'Done — updated your site.');
-      })
-      .catch(function(){ if(thinking&&thinking.remove) thinking.remove(); log('err','Network error — please try again.'); })
-      .then(function(){ if(btn){ btn.disabled=false; btn.textContent='Send'; } });
-  };
-})();
 </script>
 <style id="_r4uPastelThemes">
 /* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure ─────────────────────
