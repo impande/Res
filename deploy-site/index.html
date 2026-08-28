@@ -8397,7 +8397,8 @@ window.__novaPortfolioHTML=function(d,sections){
 /* Unified modern cards for wizard / links / custom editors */
 #pfStep2 #pfWzCard,#pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{border-radius:14px!important;box-shadow:0 2px 12px -6px rgba(0,0,0,0.12)!important;}
 #pfStep2 #pfLinksEditor,#pfStep2 #pfCustomEditor{background:var(--card-bg)!important;}
-/* Jump-to-section tabs (replaces Prev/Next) */
+/* Jump-to-section tabs (replaces Prev/Next); the old "X of Y" counter is redundant */
+#pfStep2 #pfWzProgress{display:none!important;}
 #pfWzTabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
 .pf-wztab{flex:0 0 auto;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s,border-color .15s,color .15s;position:relative;}
 .pf-wztab:hover{border-color:rgba(217,119,6,0.4);color:var(--text);}
@@ -8469,8 +8470,12 @@ window.__novaPortfolioHTML=function(d,sections){
        off afterwards is respected. */
     if(!window.__pfAllOnDone){ var g=document.getElementById('pfToggleGrid');
       if(g){ var tg=g.querySelectorAll('.pf-toggle'); if(tg.length){
-        [].forEach.call(tg,function(t){ if(!t.classList.contains('on')) t.classList.add('on'); var sec=t.getAttribute('data-section'); if(sec && window.pfSections) window.pfSections[sec]=true; });
-        window.__pfAllOnDone=true; } } }
+        var changed=false;
+        [].forEach.call(tg,function(t){ if(!t.classList.contains('on')) t.classList.add('on'); var sec=t.getAttribute('data-section'); if(sec && window.pfSections && !window.pfSections[sec]){ window.pfSections[sec]=true; changed=true; } });
+        window.__pfAllOnDone=true;
+        /* rebuild the content wizard so newly-enabled sections get their step/tab */
+        if(changed){ try{ if(typeof pfBuildWz==='function') pfBuildWz(); lastTabKey=''; }catch(e){} }
+      } } }
     var s=state();
     var keys=['photo','about','experience','skills','contact','links','extra'];
     var done=keys.filter(function(k){return s[k];}).length;
