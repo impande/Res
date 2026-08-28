@@ -3378,8 +3378,6 @@ window.__iosPdfSave = function(blobUrl, filename){
     </div>
     <!-- Step 2: Sections -->
     <div class="pf-body" id="pfStep2" style="display:none">
-      <div class="pf-section-title">Build your content</div>
-      <div class="pf-section-sub">Add your details, links and custom sections. When you're done, choose what to include below.</div>
       <!-- Section detail wizard -->
       <div id="pfFillWizard" style="margin-top:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -8437,9 +8435,8 @@ window.__novaPortfolioHTML=function(d,sections){
   function ensureHero(){
     var step=document.getElementById('pfStep2'); if(!step) return null;
     var hero=document.getElementById('pfBuildHero');
-    if(!hero){ var t=step.querySelector('.pf-section-title');
-      var wrap=document.createElement('div'); wrap.innerHTML=HERO; hero=wrap.firstChild;
-      if(t&&t.parentNode) t.parentNode.insertBefore(hero, t); else step.insertBefore(hero, step.firstChild);
+    if(!hero){ var wrap=document.createElement('div'); wrap.innerHTML=HERO; hero=wrap.firstChild;
+      step.insertBefore(hero, step.firstChild);
     }
     return hero;
   }
