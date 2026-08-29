@@ -8485,9 +8485,13 @@ window.__novaPortfolioHTML=function(d,sections){
   // Strip active script/handlers so injected markup can't run JS, but keep links/markup.
   function sanitizeHTML(s){ return String(s||'')
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'')
-    .replace(/<\/?(script|iframe|object|embed|link|meta)\b[^>]*>/gi,'')
+    .replace(/<\/?(script|iframe|object|embed|link|meta|base)\b[^>]*>/gi,'')
     .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,'')
     .replace(/javascript:/gi,'')
+    // Neutralise relative/empty/root anchor hrefs — inside the preview's srcdoc
+    // iframe these resolve against the PARENT page (resume4u.help) and navigate
+    // away on click. Keep only in-page (#…) and absolute/mailto/tel links.
+    .replace(/(<a\b[^>]*\shref\s*=\s*)("|')(?!#|https?:|mailto:|tel:)[^"']*\2/gi, '$1$2#$2')
     .slice(0,4000); }
   var topBarHTML='', hasTopBar=false;
   if(CZ.topBar && (CZ.topBar.text)){
