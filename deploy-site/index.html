@@ -8516,7 +8516,12 @@ window.__novaPortfolioHTML=function(d,sections){
   var customStyle = czCss ? '<style id="pf-custom">'+czCss+'</style>' : '';
   // Belt-and-suspenders: block navigation from any empty/relative/root anchor (which,
   // in the preview's srcdoc iframe, would otherwise load the parent site).
-  var guard = '<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;var h=a.getAttribute("href")||"";if(h===""||h==="#"||(h.charAt(0)!=="#"&&!/^(https?:|mailto:|tel:)/i.test(h))){e.preventDefault();}},true);<\/scr'+'ipt>';
+  // In-page (#…) links are handled manually with scrollIntoView. This is required
+  // because in the preview's srcdoc iframe the base URL is the PARENT page
+  // (resume4u.help), so a native "#projects" click navigates there instead of
+  // scrolling. Manual scrolling works both in the preview and the hosted site.
+  // Empty/relative/root links are blocked; external/mailto/tel pass through.
+  var guard = '<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;var h=a.getAttribute("href")||"";if(h.charAt(0)==="#"){e.preventDefault();var id=h.slice(1);var t=id?document.getElementById(id):null;if(t){t.scrollIntoView({behavior:"smooth",block:"start"});}else{window.scrollTo({top:0,behavior:"smooth"});}return;}if(!/^(https?:|mailto:|tel:)/i.test(h)){e.preventDefault();}},true);<\/scr'+'ipt>';
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
 + '<meta name="viewport" content="width=device-width,initial-scale=1">'
