@@ -3402,10 +3402,16 @@ window.__iosPdfSave = function(blobUrl, filename){
         <div id="pfLinksList" style="display:flex;flex-direction:column;gap:7px;"></div>
       </div>
       <div id="pfCustomEditor" style="margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
-        <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>➕</span>Custom sections</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add your own sections — testimonials, case studies, publications, speaking, volunteering… with text, images and a video (YouTube/Vimeo).</div>
+        <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>➕</span>Content blocks</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add your own blocks to build out a real website — text, stats, testimonials, a photo gallery, or a contact form.</div>
         <div id="pfCustomList"></div>
-        <button type="button" onclick="pfAddCustomSection()" style="width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:8px;background:var(--bg);color:var(--accent);font-weight:600;font-size:0.85rem;cursor:pointer;font-family:inherit;">＋ Add a section</button>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;">
+          <button type="button" onclick="pfAddCustomSection('text')" class="pf-addblk">📝 Text</button>
+          <button type="button" onclick="pfAddCustomSection('stats')" class="pf-addblk">📊 Stats</button>
+          <button type="button" onclick="pfAddCustomSection('testimonials')" class="pf-addblk">❝ Testimonials</button>
+          <button type="button" onclick="pfAddCustomSection('gallery')" class="pf-addblk">🖼️ Gallery</button>
+          <button type="button" onclick="pfAddCustomSection('contact')" class="pf-addblk">✉️ Contact form</button>
+        </div>
       </div>
       <div id="pfIncludeStep" style="margin-top:24px;padding-top:20px;border-top:2px dashed var(--border);">
         <div style="display:flex;align-items:center;gap:9px;margin-bottom:4px;">
@@ -8173,6 +8179,8 @@ if ('serviceWorker' in navigator) {
 </script>
 <style id="_r4uPfAiCustom">
 .pf-ai-chip{padding:6px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
+.pf-addblk{padding:9px 14px;border:1.5px dashed var(--border);border-radius:9px;background:var(--bg);color:var(--accent);font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;}
+.pf-addblk:hover{border-color:var(--accent);background:rgba(217,119,6,0.06);}
 .pf-ai-chip:hover{border-color:rgba(124,58,237,0.5);color:#7c3aed;}
 .pf-ai-msg{font-size:0.8rem;line-height:1.45;padding:8px 11px;border-radius:10px;max-width:92%;word-wrap:break-word;}
 .pf-ai-msg.u{align-self:flex-end;background:#7c3aed;color:#fff;}
@@ -8389,16 +8397,47 @@ window.__novaPortfolioHTML=function(d,sections){
     out += card('awards','Honors & awards','<div class="ent-list">'+aitems+'</div>');
   }
 
-  // Custom sections (user-added content: text + images + embed)
+  // Custom content blocks (user-added). Each block has a type: text / stats /
+  // testimonials / gallery / contact (+ back-compat: no type = text).
   var custom = A(d.customSections);
   if(!custom.length && typeof window!=='undefined' && Array.isArray(window.__pfCustomSections)) custom = window.__pfCustomSections;
   custom.forEach(function(cs){
     if(!cs) return;
-    var t = cs.title || 'Section';
+    var type = cs.type || 'text';
+    var t = cs.title || '';
+    var items = A(cs.items);
     var imgs = A(cs.images).filter(Boolean);
-    var imgHTML = imgs.length ? '<div class="cs-imgs'+(imgs.length>1?' multi':'')+'">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t)+'" loading="lazy">';}).join('')+'</div>' : '';
-    var inner = renderBody(cs.body||'') + imgHTML + embedHTML(cs.embed||'');
-    if(inner.trim()) out += card('', t, inner);
+    var inner = '';
+    if(type==='stats'){
+      var st = items.filter(function(i){return i&&(i.value||i.label);});
+      if(!st.length) return;
+      inner = '<div class="cs-stats">'+st.map(function(i){return '<div class="cs-stat"><div class="cs-stat-v">'+esc(i.value||'')+'</div><div class="cs-stat-l">'+esc(i.label||'')+'</div></div>';}).join('')+'</div>';
+      out += card('', t||'Highlights', inner);
+    } else if(type==='testimonials'){
+      var tm = items.filter(function(i){return i&&(i.quote||i.author);});
+      if(!tm.length) return;
+      inner = '<div class="cs-quotes">'+tm.map(function(i){return '<figure class="cs-quote"><blockquote>“'+esc(i.quote||'')+'”</blockquote>'+((i.author||i.role)?'<figcaption><b>'+esc(i.author||'')+'</b>'+(i.role?'<span> · '+esc(i.role)+'</span>':'')+'</figcaption>':'')+'</figure>';}).join('')+'</div>';
+      out += card('', t||'Testimonials', inner);
+    } else if(type==='gallery'){
+      if(!imgs.length) return;
+      inner = '<div class="cs-gallery">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t)+'" loading="lazy">';}).join('')+'</div>';
+      out += card('', t||'Gallery', inner);
+    } else if(type==='contact'){
+      var to = String(email||'').trim();
+      var intro = cs.body ? '<p class="cs-body" style="margin-bottom:14px">'+linkify(cs.body)+'</p>' : '';
+      // mailto form: works on any host with no backend (opens the visitor's mail app)
+      var formTo = to ? esc(to) : '';
+      inner = intro + '<form class="cs-form" data-to="'+formTo+'">'
+        + '<input name="from" type="text" placeholder="Your name" required>'
+        + '<input name="email" type="email" placeholder="Your email" required>'
+        + '<textarea name="msg" placeholder="Your message" rows="4" required></textarea>'
+        + '<button type="submit" class="cs-form-btn">Send message</button></form>';
+      out += card('', t||'Get in touch', inner);
+    } else { // text (default)
+      var imgHTML = imgs.length ? '<div class="cs-imgs'+(imgs.length>1?' multi':'')+'">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t||'')+'" loading="lazy">';}).join('')+'</div>' : '';
+      inner = renderBody(cs.body||'') + imgHTML + embedHTML(cs.embed||'');
+      if(inner.trim()) out += card('', t||'Section', inner);
+    }
   });
 
   var CSS = ''
@@ -8468,6 +8507,25 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.cs-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}'
 + '.cs-link{display:inline-block;margin-top:12px;color:var(--acc);font-weight:600}'
 + '@media(max-width:560px){.cs-imgs.multi{grid-template-columns:1fr}}'
+/* stats block */
++ '.cs-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}'
++ '.cs-stat{text-align:center;padding:18px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}'
++ '.cs-stat-v{font-size:clamp(1.4rem,5.5vw,1.9rem);font-weight:800;color:var(--acc);line-height:1.05;overflow-wrap:anywhere}'
++ '.cs-stat-l{font-size:0.85rem;color:var(--mut);margin-top:6px}'
+/* testimonials block */
++ '.cs-quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}'
++ '.cs-quote{margin:0;padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}'
++ '.cs-quote blockquote{margin:0;font-size:1rem;line-height:1.6;color:var(--ink)}'
++ '.cs-quote figcaption{margin-top:12px;font-size:0.88rem;color:var(--mut)}'
++ '.cs-quote figcaption b{color:var(--ink)}'
+/* gallery block */
++ '.cs-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}'
++ '.cs-gallery img{width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}'
+/* contact form block */
++ '.cs-form{display:flex;flex-direction:column;gap:10px}'
++ '.cs-form input,.cs-form textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:0.92rem;font-family:inherit}'
++ '.cs-form-btn{align-self:flex-start;padding:11px 24px;border:none;border-radius:99px;background:var(--acc);color:#fff;font-weight:700;font-size:0.92rem;cursor:pointer}'
++ '.cs-form-btn:hover{background:var(--acc-h)}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
 /* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
@@ -8521,7 +8579,10 @@ window.__novaPortfolioHTML=function(d,sections){
   // (resume4u.help), so a native "#projects" click navigates there instead of
   // scrolling. Manual scrolling works both in the preview and the hosted site.
   // Empty/relative/root links are blocked; external/mailto/tel pass through.
-  var guard = '<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;var h=a.getAttribute("href")||"";if(h.charAt(0)==="#"){e.preventDefault();var id=h.slice(1);var t=id?document.getElementById(id):null;if(t){t.scrollIntoView({behavior:"smooth",block:"start"});}else{window.scrollTo({top:0,behavior:"smooth"});}return;}if(!/^(https?:|mailto:|tel:)/i.test(h)){e.preventDefault();}},true);<\/scr'+'ipt>';
+  var guard = '<scr'+'ipt>'
+    + 'document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;var h=a.getAttribute("href")||"";if(h.charAt(0)==="#"){e.preventDefault();var id=h.slice(1);var t=id?document.getElementById(id):null;if(t){t.scrollIntoView({behavior:"smooth",block:"start"});}else{window.scrollTo({top:0,behavior:"smooth"});}return;}if(!/^(https?:|mailto:|tel:)/i.test(h)){e.preventDefault();}},true);'
+    + 'document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.classList||!f.classList.contains("cs-form"))return;e.preventDefault();var to=f.getAttribute("data-to")||"";var g=function(n){var el=f.querySelector("[name="+n+"]");return el?el.value:"";};if(!to){alert("No contact email is set on this site.");return;}var sub="Portfolio message from "+(g("from")||"a visitor");var body=g("msg")+"\\n\\n— "+g("from")+" ("+g("email")+")";window.location.href="mailto:"+to+"?subject="+encodeURIComponent(sub)+"&body="+encodeURIComponent(body);},true);'
+    + '<\/scr'+'ipt>';
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
 + '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -8607,10 +8668,20 @@ window.__novaPortfolioHTML=function(d,sections){
   try{ window.__pfCustomSections = JSON.parse(localStorage.getItem('_pfCustomSections')||'[]'); }catch(e){ window.__pfCustomSections=[]; }
   if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
   function saveCustom(){ try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); return true; }catch(e){ alert('Could not save — images may be too large. Try fewer/smaller images.'); return false; } }
+  var CS_LABELS={text:'📝 Text',stats:'📊 Stats',testimonials:'❝ Testimonials',gallery:'🖼️ Gallery',contact:'✉️ Contact form'};
   window.pfCsSet=function(i,field,val){ if(!window.__pfCustomSections[i]) return; window.__pfCustomSections[i][field]=val; saveCustom(); refreshPreview(); };
-  window.pfAddCustomSection=function(){ window.__pfCustomSections.push({title:'',body:'',images:[],embed:''}); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
+  window.pfAddCustomSection=function(type){ type=(typeof type==='string')?type:'text';
+    var s={type:type,title:''};
+    if(type==='text'){ s.body='';s.images=[];s.embed=''; }
+    else if(type==='stats'||type==='testimonials'){ s.items=[{}]; }
+    else if(type==='gallery'){ s.images=[]; }
+    else if(type==='contact'){ s.body=''; }
+    window.__pfCustomSections.push(s); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
   window.pfRemoveCustomSection=function(i){ window.__pfCustomSections.splice(i,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
   window.pfCsRemoveImage=function(i,j){ if(window.__pfCustomSections[i]&&window.__pfCustomSections[i].images){ window.__pfCustomSections[i].images.splice(j,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); } };
+  window.pfCsAddItem=function(i){ var s=window.__pfCustomSections[i]; if(!s) return; if(!s.items) s.items=[]; s.items.push({}); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
+  window.pfCsRemoveItem=function(i,j){ var s=window.__pfCustomSections[i]; if(s&&s.items){ s.items.splice(j,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); } };
+  window.pfCsSetItem=function(i,j,field,val){ var s=window.__pfCustomSections[i]; if(s&&s.items&&s.items[j]){ s.items[j][field]=val; saveCustom(); refreshPreview(); } };
   function compressImg(file, cb){
     var r=new FileReader();
     r.onload=function(){ var img=new Image(); img.onload=function(){
@@ -8632,17 +8703,34 @@ window.__novaPortfolioHTML=function(d,sections){
   window.pfRenderCustom=function(){
     var box=document.getElementById('pfCustomList'); if(!box) return;
     var C=window.__pfCustomSections||[];
+    var IN='padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.84rem;font-family:inherit;';
     box.innerHTML=C.map(function(s,i){
-      var imgs=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:54px;height:44px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:54px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
-      return '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);margin-bottom:10px;">'
-        +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
-        +'<input type="text" value="'+esc(s.title||'')+'" placeholder="Section title (e.g. Testimonials)" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.85rem;font-weight:600;font-family:inherit;">'
-        +'<button type="button" onclick="pfRemoveCustomSection('+i+')" style="background:none;border:none;color:#dc2626;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">Remove</button></div>'
-        +'<textarea placeholder="Text — one line per paragraph, start a line with - for a bullet" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:70px;padding:9px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.84rem;font-family:inherit;resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+imgs
-        +'<label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Image<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
-        +'<input type="text" value="'+esc(s.embed||'')+'" placeholder="YouTube / Vimeo URL (optional)" oninput="pfCsSet('+i+',\'embed\',this.value)" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.82rem;font-family:inherit;">'
-        +'</div>';
+      var type=s.type||'text';
+      var titlePH = type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
+      var head='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
+        +'<span style="font-size:0.68rem;font-weight:700;color:var(--accent);background:rgba(217,119,6,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;">'+(CS_LABELS[type]||'Block')+'</span>'
+        +'<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">'
+        +'<button type="button" onclick="pfRemoveCustomSection('+i+')" style="background:none;border:none;color:#dc2626;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">Remove</button></div>';
+      var body='';
+      if(type==='stats'){
+        body=(s.items||[]).map(function(it,j){ return '<div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" value="'+esc(it.value||'')+'" placeholder="Value (9+)" oninput="pfCsSetItem('+i+','+j+',\'value\',this.value)" style="width:110px;'+IN+'"><input type="text" value="'+esc(it.label||'')+'" placeholder="Label (Years experience)" oninput="pfCsSetItem('+i+','+j+',\'label\',this.value)" style="flex:1;'+IN+'"><button type="button" onclick="pfCsRemoveItem('+i+','+j+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1rem;">✕</button></div>'; }).join('')
+          +'<button type="button" onclick="pfCsAddItem('+i+')" style="padding:6px 12px;border:1px dashed var(--border);border-radius:7px;background:var(--surface);color:var(--accent);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;">＋ Add stat</button>';
+      } else if(type==='testimonials'){
+        body=(s.items||[]).map(function(it,j){ return '<div style="border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;"><textarea placeholder="Quote" oninput="pfCsSetItem('+i+','+j+',\'quote\',this.value)" style="width:100%;min-height:48px;'+IN+'resize:vertical;margin-bottom:6px;">'+esc(it.quote||'')+'</textarea><div style="display:flex;gap:6px;"><input type="text" value="'+esc(it.author||'')+'" placeholder="Name" oninput="pfCsSetItem('+i+','+j+',\'author\',this.value)" style="flex:1;'+IN+'"><input type="text" value="'+esc(it.role||'')+'" placeholder="Role / company" oninput="pfCsSetItem('+i+','+j+',\'role\',this.value)" style="flex:1;'+IN+'"><button type="button" onclick="pfCsRemoveItem('+i+','+j+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1rem;">✕</button></div></div>'; }).join('')
+          +'<button type="button" onclick="pfCsAddItem('+i+')" style="padding:6px 12px;border:1px dashed var(--border);border-radius:7px;background:var(--surface);color:var(--accent);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;">＋ Add testimonial</button>';
+      } else if(type==='gallery'){
+        var g=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:60px;height:60px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
+        body='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'+g+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Add images<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>';
+      } else if(type==='contact'){
+        body='<textarea placeholder="Intro line (optional) — e.g. I’d love to hear from you" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:44px;'+IN+'resize:vertical;">'+esc(s.body||'')+'</textarea>'
+          +'<div style="font-size:0.73rem;color:var(--muted);margin-top:6px;">A contact form that sends messages to your email (from Basic Info).</div>';
+      } else { // text
+        var imgs=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:54px;height:44px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:54px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
+        body='<textarea placeholder="Text — one line per paragraph, start a line with - for a bullet" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:70px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+imgs+'<label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Image<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
+          +'<input type="text" value="'+esc(s.embed||'')+'" placeholder="YouTube / Vimeo URL (optional)" oninput="pfCsSet('+i+',\'embed\',this.value)" style="width:100%;'+IN+'">';
+      }
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);margin-bottom:10px;">'+head+body+'</div>';
     }).join('');
   };
 
