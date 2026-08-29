@@ -8225,7 +8225,28 @@ if ('serviceWorker' in navigator) {
         if(out.cta===null) delete cz.cta; else if(out.cta&&typeof out.cta==='object'&&out.cta.text){ var C={text:String(out.cta.text).slice(0,90),target:String(out.cta.target||'projects'),position:String(out.cta.position||'top')}; if(out.cta.bg) C.bg=String(out.cta.bg).slice(0,40); if(out.cta.color) C.color=String(out.cta.color).slice(0,40); cz.cta=C; delete cz.topBar; }
         if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
         if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
-        window.__pfCustomize=cz; save(); rerender();
+        window.__pfCustomize=cz; save();
+        // AI can append content blocks (stats / testimonials / text / gallery / contact)
+        if(Array.isArray(out.addBlocks) && out.addBlocks.length){
+          try{
+            if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
+            var OKT=['text','stats','testimonials','gallery','contact'];
+            out.addBlocks.slice(0,8).forEach(function(bk){
+              if(!bk||typeof bk!=='object') return;
+              var t=OKT.indexOf(bk.type)>=0?bk.type:'text';
+              var nb={type:t,title:String(bk.title||'').slice(0,90)};
+              if(t==='stats') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {value:String(it.value||'').slice(0,40),label:String(it.label||'').slice(0,90)};});
+              else if(t==='testimonials') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {quote:String(it.quote||'').slice(0,700),author:String(it.author||'').slice(0,90),role:String(it.role||'').slice(0,90)};});
+              else if(t==='gallery') nb.images=[];
+              else if(t==='contact') nb.body=String(bk.body||'').slice(0,600);
+              else { nb.body=String(bk.body||'').slice(0,3000); nb.images=[]; nb.embed=''; }
+              window.__pfCustomSections.push(nb);
+            });
+            try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); }catch(e){}
+            try{ if(window.pfRenderCustom) window.pfRenderCustom(); }catch(e){}
+          }catch(e){}
+        }
+        rerender();
         log('a', out.reply||'Done — updated your site.');
       })
       .catch(function(){ if(thinking&&thinking.remove) thinking.remove(); log('err','Network error — please try again.'); })
