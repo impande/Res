@@ -8214,6 +8214,7 @@ if ('serviceWorker' in navigator) {
         if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
         if(Array.isArray(out.hide)) cz.hide=out.hide;
         if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
+        if(out.cta===null) delete cz.cta; else if(out.cta&&typeof out.cta==='object'&&out.cta.text){ var C={text:String(out.cta.text).slice(0,90),target:String(out.cta.target||'projects'),position:String(out.cta.position||'top')}; if(out.cta.bg) C.bg=String(out.cta.bg).slice(0,40); if(out.cta.color) C.color=String(out.cta.color).slice(0,40); cz.cta=C; delete cz.topBar; }
         if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
         if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
         window.__pfCustomize=cz; save(); rerender();
@@ -8493,24 +8494,39 @@ window.__novaPortfolioHTML=function(d,sections){
     // away on click. Keep only in-page (#…) and absolute/mailto/tel links.
     .replace(/(<a\b[^>]*\shref\s*=\s*)("|')(?!#|https?:|mailto:|tel:)[^"']*\2/gi, '$1$2#$2')
     .slice(0,4000); }
-  var topBarHTML='', hasTopBar=false;
-  if(CZ.topBar && (CZ.topBar.text)){
-    var tgt=String(CZ.topBar.target||'projects').replace(/[^a-z0-9_-]/gi,'')||'projects';
-    topBarHTML='<a class="pf-topbar" href="#'+tgt+'">'+esc(CZ.topBar.text)+'</a>'; hasTopBar=true;
-    czCss += '.pf-topbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--acc);color:#fff!important;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,0.18);}.pf-topbar:hover{filter:brightness(1.06)}.pf-topbar+.col{margin-top:52px}';
+  // ── Structured CTA (fully generator-controlled → href is always a safe #anchor) ──
+  // Accepts cta:{text,target,position,bg,color}; topBar is treated as a top-position cta.
+  var cta = CZ.cta || (CZ.topBar && CZ.topBar.text ? {text:CZ.topBar.text, target:CZ.topBar.target, position:'top'} : null);
+  var ctaTopEl='', ctaFloatEl='', ctaHeroEl='';
+  if(cta && cta.text){
+    function col40(v){ v=String(v||''); return /^(#|rgb|hsl)/i.test(v) ? v.replace(/[^#0-9a-zA-Z(),.%\s-]/g,'').slice(0,40) : ''; }
+    var ctgt=String(cta.target||'projects').replace(/[^a-z0-9_-]/gi,'')||'projects';
+    var sv=(function(){ var bg=col40(cta.bg), fg=col40(cta.color); return (bg?'--cta-bg:'+bg+';':'')+(fg?'--cta-fg:'+fg+';':''); })();
+    var pos=(cta.position==='float'||cta.position==='hero')?cta.position:'top';
+    var el='<a class="pf-cta pf-cta-'+pos+'"'+(sv?' style="'+sv+'"':'')+' href="#'+ctgt+'">'+esc(cta.text)+'</a>';
+    if(pos==='top') ctaTopEl=el; else if(pos==='float') ctaFloatEl=el; else ctaHeroEl=el;
+    czCss += '.pf-cta{--cta-bg:var(--acc);--cta-fg:#fff;background:var(--cta-bg)!important;color:var(--cta-fg)!important;text-decoration:none!important;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .12s;}'
+      + '.pf-cta:hover{filter:brightness(1.07)}.pf-cta:active{transform:translateY(1px)}'
+      + '.pf-cta-top{position:fixed;top:0;left:0;right:0;z-index:1000;padding:12px 16px;font-size:0.95rem;box-shadow:0 2px 12px rgba(0,0,0,0.18);}'
+      + 'body:has(.pf-cta-top) .col{margin-top:52px}'
+      + '.pf-cta-float{position:fixed;bottom:22px;right:22px;z-index:1000;padding:13px 22px;border-radius:99px;box-shadow:0 10px 26px rgba(0,0,0,0.28);}'
+      + '.pf-cta-hero{margin:2px 0 16px;padding:12px 22px;border-radius:10px;font-size:0.95rem;}';
   }
   var injectHTML = CZ.injectHTML ? sanitizeHTML(CZ.injectHTML) : '';
   var customStyle = czCss ? '<style id="pf-custom">'+czCss+'</style>' : '';
+  // Belt-and-suspenders: block navigation from any empty/relative/root anchor (which,
+  // in the preview's srcdoc iframe, would otherwise load the parent site).
+  var guard = '<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;var h=a.getAttribute("href")||"";if(h===""||h==="#"||(h.charAt(0)!=="#"&&!/^(https?:|mailto:|tel:)/i.test(h))){e.preventDefault();}},true);<\/scr'+'ipt>';
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
 + '<meta name="viewport" content="width=device-width,initial-scale=1">'
 + '<title>'+esc(name)+(title?' — '+esc(title):'')+'</title>'
 + '<meta name="description" content="'+esc((summary||(name+' — '+title)).slice(0,155))+'">'
 + '<style>'+CSS+'</style>'+customStyle+'</head><body>'
-+ topBarHTML
-+ '<div class="col">'+injectHTML+profile+out
++ ctaTopEl + ctaFloatEl
++ '<div class="col">'+injectHTML+profile+ctaHeroEl+out
 + '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>'
-+ '</div></body></html>';
++ '</div>'+guard+'</body></html>';
   return html;
 };
 
