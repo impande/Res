@@ -8345,6 +8345,10 @@ if ('serviceWorker' in navigator) {
 <style id="_r4uPfGuideCss">
   #pfStep1 .pf-tpl-grid{display:none!important;}
   #pfMiniSwitcher{display:none!important;}
+  /* Template step removed from the flow → hide its pill and the step-number circles
+     so the bar reads as clean labels (Sections · Preview · Upload). */
+  #pfPill1{display:none!important;}
+  .pf-steps-bar .pf-step-num{display:none!important;}
   #pfGuidePanel{background:linear-gradient(135deg,rgba(10,102,194,0.10),rgba(124,58,237,0.05));border:1.5px solid rgba(10,102,194,0.28);border-radius:16px;padding:16px 17px;margin-bottom:14px;}
   #pfGuidePanel .pfg-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem;color:var(--text);}
   #pfGuidePanel .pfg-sub{font-size:0.78rem;color:var(--muted);margin:3px 0 12px;line-height:1.5;}
@@ -8433,6 +8437,32 @@ if ('serviceWorker' in navigator) {
     }
     if((el('pfGuidePanel') && window.buildPfPreview && window.buildPfPreview.__guideWrap)||++n>150) clearInterval(iv);
   },150);
+})();
+</script>
+<script id="_r4uPfCollapseTemplateStep">
+/* The template-picker step is gone (we build from the résumé and guide instead),
+   so the old "Template" step is now empty. Collapse it out of the flow: open
+   straight on Sections, drop the Template pill, renumber the rest, move the
+   résumé auto-fill tip into Sections, and hide the dangling Back button. */
+(function(){
+  function apply(){
+    var p1=document.getElementById('pfPill1'); if(!p1) return false;
+    if(p1.__collapsed) return true;
+    p1.style.display='none';
+    var tip=document.getElementById('pfResumeHint'), s2=document.getElementById('pfStep2');
+    if(tip&&s2&&tip.parentNode!==s2){ s2.insertBefore(tip, s2.firstChild); tip.style.marginTop='4px'; }
+    if(s2){ var back=s2.querySelector('button[onclick="pfGoStep(1)"]'); if(back) back.style.display='none'; }
+    p1.__collapsed=true; return true;
+  }
+  function hookOpen(){
+    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__skip1){
+      var oo=window.openPortfolioBuilder;
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{ apply(); var s1=document.getElementById('pfStep1'); if(typeof window.pfGoStep==='function' && s1 && s1.style.display!=='none') window.pfGoStep(2); }catch(e){} },120); return r; };
+      window.openPortfolioBuilder.__skip1=true; return true;
+    }
+    return false;
+  }
+  var n=0, iv=setInterval(function(){ var a=apply(), b=hookOpen(); if((a&&b)||++n>90) clearInterval(iv); },150);
 })();
 </script>
 <script id="_r4uPfAccount">
