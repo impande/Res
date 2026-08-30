@@ -8254,6 +8254,137 @@ if ('serviceWorker' in navigator) {
   };
 })();
 </script>
+<script id="_r4uPfAccount">
+/* Account-tied builder state: save the editable portfolio config (template,
+   customizations, links, content blocks — images stripped to respect Firestore's
+   ~1MB doc limit) to pfState/{uid}, and restore it on a fresh device so users can
+   edit after publishing. Uses the signed-in user's ID token; secure via rules:
+     match /pfState/{uid} { allow read, write: if request.auth!=null && request.auth.uid==uid; }
+   Fully guarded — any failure silently falls back to the per-browser localStorage. */
+(function(){
+  var PROJ='resume-ai-2eda1', KEY='AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+  var BASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/pfState/';
+  function user(){ try{ return window._fbUser||null; }catch(e){ return null; } }
+  function token(u){ try{ return (u&&u.getIdToken)?u.getIdToken():Promise.reject(); }catch(e){ return Promise.reject(); } }
+  function stripImgs(bl){ return (bl||[]).map(function(b){ var c={}; for(var k in b){ c[k]=b[k]; } if(Array.isArray(c.images)) c.images=[]; return c; }); }
+  function collectState(){
+    return { v:1, template:(typeof pfTemplate!=='undefined'?pfTemplate:'nova'),
+      customize:(window.__pfCustomize||{}), links:(window.__pfExtraLinks||[]),
+      blocks:stripImgs(window.__pfCustomSections||[]),
+      sections:(typeof pfSections!=='undefined'?pfSections:null) };
+  }
+  var saveT=null, lastSaved='';
+  window.pfAcctSave=function(){ var u=user(); if(!u) return;
+    if(saveT) clearTimeout(saveT);
+    saveT=setTimeout(function(){
+      var json; try{ json=JSON.stringify(collectState()); }catch(e){ return; }
+      if(json===lastSaved || json.length>800000) return;
+      token(u).then(function(tok){
+        return fetch(BASE+encodeURIComponent(u.uid)+'?updateMask.fieldPaths=state&updateMask.fieldPaths=updatedAt&key='+KEY,{
+          method:'PATCH', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+          body:JSON.stringify({fields:{ state:{stringValue:json}, updatedAt:{timestampValue:new Date().toISOString()} }})
+        });
+      }).then(function(r){ if(r&&r.ok) lastSaved=json; }).catch(function(){});
+    },1500);
+  };
+  var loadedFor=null;
+  window.pfAcctLoad=function(){ var u=user(); if(!u||loadedFor===u.uid) return; loadedFor=u.uid;
+    var localHas = (window.__pfCustomSections&&window.__pfCustomSections.length) || (window.__pfExtraLinks&&window.__pfExtraLinks.length) || (window.__pfCustomize&&Object.keys(window.__pfCustomize).length);
+    token(u).then(function(tok){ return fetch(BASE+encodeURIComponent(u.uid)+'?key='+KEY,{headers:{'Authorization':'Bearer '+tok}}); })
+      .then(function(r){ return r&&r.ok?r.json():null; })
+      .then(function(doc){
+        if(!doc||!doc.fields||!doc.fields.state) return;
+        if(localHas) return; /* keep active local edits; they'll sync up */
+        var st; try{ st=JSON.parse(doc.fields.state.stringValue); }catch(e){ return; }
+        if(!st) return;
+        if(st.customize) window.__pfCustomize=st.customize;
+        if(Array.isArray(st.links)) window.__pfExtraLinks=st.links;
+        if(Array.isArray(st.blocks)) window.__pfCustomSections=st.blocks;
+        if(st.template) window.pfTemplate=st.template;
+        if(st.sections && typeof pfSections!=='undefined'){ try{ for(var k in st.sections) pfSections[k]=st.sections[k]; }catch(e){} }
+        try{ localStorage.setItem('_pfCustomize',JSON.stringify(window.__pfCustomize||{})); localStorage.setItem('_pfExtraLinks',JSON.stringify(window.__pfExtraLinks||[])); localStorage.setItem('_pfCustomSections',JSON.stringify(window.__pfCustomSections||[])); }catch(e){}
+        try{ if(window.pfRenderExtraLinks) window.pfRenderExtraLinks(); if(window.pfRenderCustom) window.pfRenderCustom(); }catch(e){}
+        try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){}
+      }).catch(function(){});
+  };
+  /* ── View-count badge in the Preview step (shows once a portfolio is published) ── */
+  var PBASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/';
+  window.pfShowViews=function(){
+    var slug; try{ slug=window._pfSavedSlug; }catch(e){}
+    var host=document.getElementById('pfStep3'); var badge=document.getElementById('pfViewsBadge');
+    if(!slug || !host){ if(badge) badge.style.display='none'; return; }
+    fetch(PBASE+encodeURIComponent(slug)+'?key='+KEY).then(function(r){ return r.ok?r.json():null; }).then(function(doc){
+      var v=doc&&doc.fields&&doc.fields.views&&doc.fields.views.integerValue; if(v==null) v='0';
+      if(!badge){ badge=document.createElement('div'); badge.id='pfViewsBadge';
+        badge.style.cssText='display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:0.84rem;color:var(--text);font-weight:600;';
+        var rc=document.getElementById('pfReadyCard'); if(rc&&rc.parentNode){ rc.parentNode.insertBefore(badge, rc.nextSibling); } else { host.insertBefore(badge, host.firstChild); }
+      }
+      badge.style.display='flex';
+      badge.innerHTML='👁 <span style="color:var(--accent);">'+String(v)+'</span> '+(String(v)==='1'?'view':'views')
+        +' · <a href="https://resume4u.help/p/'+encodeURIComponent(slug)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">View live ↗</a>';
+    }).catch(function(){});
+  };
+
+  /* ── Testimonial moderation (owner approves visitor submissions) ── */
+  var PDOC='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/';
+  var RUNQ='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents:runQuery?key='+KEY;
+  var stampedFor=null;
+  // Stamp the portfolio with ownerUid so security rules can authorise moderation.
+  function pfStampOwner(){ var u=user(); var slug=window._pfSavedSlug; if(!u||!slug||stampedFor===slug) return; stampedFor=slug;
+    token(u).then(function(tok){ return fetch(PDOC+encodeURIComponent(slug)+'?updateMask.fieldPaths=ownerUid&key='+KEY,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify({fields:{ownerUid:{stringValue:u.uid}}})}); }).catch(function(){});
+  }
+  function esc2(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  window.pfModAct=function(name,approve){
+    var u=user(); if(!u) return;
+    token(u).then(function(tok){
+      var url='https://firestore.googleapis.com/v1/'+name+'?key='+KEY;
+      var opt = approve
+        ? {method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify({fields:{status:{stringValue:'approved'}}}),u:url+'&updateMask.fieldPaths=status'}
+        : {method:'DELETE',headers:{'Authorization':'Bearer '+tok},u:url};
+      return fetch(opt.u,{method:opt.method,headers:opt.headers,body:opt.body});
+    }).then(function(){ setTimeout(window.pfLoadModeration,300); }).catch(function(){});
+  };
+  window.pfLoadModeration=function(){
+    var u=user(); var slug=window._pfSavedSlug; var host=document.getElementById('pfStep3');
+    var panel=document.getElementById('pfModPanel');
+    if(!u||!slug||!host){ if(panel) panel.style.display='none'; return; }
+    pfStampOwner();
+    token(u).then(function(tok){ return fetch(RUNQ,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify({structuredQuery:{from:[{collectionId:'testimonials'}],where:{fieldFilter:{field:{fieldPath:'slug'},op:'EQUAL',value:{stringValue:slug}}},limit:50}})}); })
+      .then(function(r){ return r.ok?r.json():[]; })
+      .then(function(rows){
+        var pend=(rows||[]).map(function(x){return x.document;}).filter(function(d){return d&&d.fields&&d.fields.status&&d.fields.status.stringValue==='pending';});
+        if(!panel){ panel=document.createElement('div'); panel.id='pfModPanel';
+          panel.style.cssText='margin-bottom:12px;padding:12px 14px;background:var(--surface);border:1.5px solid rgba(217,119,6,0.3);border-radius:12px;';
+          var rc=document.getElementById('pfViewsBadge')||document.getElementById('pfReadyCard');
+          if(rc&&rc.parentNode){ rc.parentNode.insertBefore(panel, rc.nextSibling); } else { host.insertBefore(panel, host.firstChild); }
+        }
+        if(!pend.length){ panel.style.display='none'; return; }
+        panel.style.display='block';
+        panel.innerHTML='<div style="font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:9px;">🕓 '+pend.length+' testimonial'+(pend.length>1?'s':'')+' awaiting your approval</div>'
+          + pend.map(function(d){ var f=d.fields; var q=esc2(f.quote&&f.quote.stringValue),n=esc2(f.name&&f.name.stringValue),ro=esc2(f.role&&f.role.stringValue);
+              return '<div style="border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;background:var(--bg);">'
+                +'<div style="font-size:0.86rem;color:var(--text);line-height:1.5;">“'+q+'”</div>'
+                +'<div style="font-size:0.76rem;color:var(--muted);margin-top:4px;">'+n+(ro?' · '+ro:'')+'</div>'
+                +'<div style="display:flex;gap:8px;margin-top:9px;"><button type="button" onclick="pfModAct(\''+d.name+'\',true)" style="padding:6px 14px;border:none;border-radius:7px;background:#16a34a;color:#fff;font-weight:600;font-size:0.78rem;cursor:pointer;">Approve</button>'
+                +'<button type="button" onclick="pfModAct(\''+d.name+'\',false)" style="padding:6px 14px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:#dc2626;font-weight:600;font-size:0.78rem;cursor:pointer;">Reject</button></div></div>';
+            }).join('');
+      }).catch(function(){});
+  };
+
+  function hookOpen(){
+    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__acct){
+      var oo=window.openPortfolioBuilder;
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{window.pfAcctLoad();}catch(e){} try{window.pfShowViews();}catch(e){} try{window.pfLoadModeration();}catch(e){} },250); return r; };
+      window.openPortfolioBuilder.__acct=true; return true;
+    }
+    return false;
+  }
+  var n=0, iv=setInterval(function(){ if(hookOpen()||++n>50) clearInterval(iv); },200);
+  /* autosave when signed in and changed; refresh views + moderation while published */
+  setInterval(function(){ try{ if(user()) window.pfAcctSave(); }catch(e){} },4000);
+  setInterval(function(){ try{ var s3=document.getElementById('pfStep3'); if(window._pfSavedSlug && s3 && s3.offsetParent!==null){ window.pfShowViews(); window.pfLoadModeration(); } }catch(e){} },15000);
+})();
+</script>
 <script id="_r4uNovaPortfolio">
 window.__novaPortfolioHTML=function(d,sections){
   d = d || {}; sections = sections || {};
@@ -8652,6 +8783,23 @@ window.__novaPortfolioHTML=function(d,sections){
     + 'window.addEventListener("scroll",function(){tb.classList.toggle("show",window.scrollY>400);});'
     + '})();<\/scr'+'ipt>';
 
+  // ── Live testimonials: on the published /p/{slug} page, fetch APPROVED
+  //    visitor-submitted testimonials for this slug and render them (append to an
+  //    existing testimonials block or create one). Only runs on the live URL. ──
+  var tScript = '<scr'+'ipt>(function(){'
+    + 'var m=location.pathname.match(/\\/p\\/([^\\/?#]+)/);if(!m)return;var slug=decodeURIComponent(m[1]);'
+    + 'var K="AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10";'
+    + 'fetch("https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents:runQuery?key="+K,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({structuredQuery:{from:[{collectionId:"testimonials"}],where:{fieldFilter:{field:{fieldPath:"slug"},op:"EQUAL",value:{stringValue:slug}}},limit:30}})})'
+    + '.then(function(r){return r.ok?r.json():[];}).then(function(rows){'
+    + 'var qs=(rows||[]).map(function(x){return x.document&&x.document.fields;}).filter(function(f){return f&&f.status&&f.status.stringValue==="approved";});'
+    + 'if(!qs.length)return;'
+    + 'function E(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}'
+    + 'var h=qs.map(function(f){var q=E(f.quote&&f.quote.stringValue),n=E(f.name&&f.name.stringValue),ro=E(f.role&&f.role.stringValue);return "<figure class=\\"cs-quote\\"><blockquote>\\u201c"+q+"\\u201d</blockquote>"+((n||ro)?"<figcaption><b>"+n+"</b>"+(ro?"<span> \\u00b7 "+ro+"</span>":"")+"</figcaption>":"")+"</figure>";}).join("");'
+    + 'var col=document.querySelector(".col");if(!col)return;var ex=col.querySelector(".cs-quotes");'
+    + 'if(ex){ex.insertAdjacentHTML("beforeend",h);}else{var s=document.createElement("section");s.className="card";s.id="testimonials";s.innerHTML="<div class=\\"card-h\\"><h2>Testimonials</h2></div><div class=\\"cs-quotes\\">"+h+"</div>";var ft=col.querySelector(".foot");if(ft){col.insertBefore(s,ft);}else{col.appendChild(s);}}'
+    + '}).catch(function(){});'
+    + '})();<\/scr'+'ipt>';
+
   // ── SEO / social sharing / favicon (professional link previews) ──
   var accHex = (CZ.accent && /^(#|rgb|hsl)/i.test(String(CZ.accent))) ? String(CZ.accent).replace(/[^#0-9a-zA-Z(),.%\s-]/g,'').slice(0,40) : '#0a66c2';
   var favicon = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="13" fill="'+accHex+'"/><text x="32" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="bold" fill="#ffffff" text-anchor="middle">'+esc(initials)+'</text></svg>');
@@ -8677,7 +8825,7 @@ window.__novaPortfolioHTML=function(d,sections){
 + ctaTopEl + ctaFloatEl
 + '<div class="col">'+injectHTML+profile+ctaHeroEl+out
 + '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>'
-+ '</div>'+guard+chrome+'</body></html>';
++ '</div>'+guard+chrome+tScript+'</body></html>';
   return html;
 };
 
@@ -8836,90 +8984,6 @@ window.__novaPortfolioHTML=function(d,sections){
   renderEditors();
 })();
 
-</script>
-<script id="_r4uPfAccount">
-/* Account-tied builder state: save the editable portfolio config (template,
-   customizations, links, content blocks — images stripped to respect Firestore's
-   ~1MB doc limit) to pfState/{uid}, and restore it on a fresh device so users can
-   edit after publishing. Uses the signed-in user's ID token; secure via rules:
-     match /pfState/{uid} { allow read, write: if request.auth!=null && request.auth.uid==uid; }
-   Fully guarded — any failure silently falls back to the per-browser localStorage. */
-(function(){
-  var PROJ='resume-ai-2eda1', KEY='AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
-  var BASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/pfState/';
-  function user(){ try{ return window._fbUser||null; }catch(e){ return null; } }
-  function token(u){ try{ return (u&&u.getIdToken)?u.getIdToken():Promise.reject(); }catch(e){ return Promise.reject(); } }
-  function stripImgs(bl){ return (bl||[]).map(function(b){ var c={}; for(var k in b){ c[k]=b[k]; } if(Array.isArray(c.images)) c.images=[]; return c; }); }
-  function collectState(){
-    return { v:1, template:(typeof pfTemplate!=='undefined'?pfTemplate:'nova'),
-      customize:(window.__pfCustomize||{}), links:(window.__pfExtraLinks||[]),
-      blocks:stripImgs(window.__pfCustomSections||[]),
-      sections:(typeof pfSections!=='undefined'?pfSections:null) };
-  }
-  var saveT=null, lastSaved='';
-  window.pfAcctSave=function(){ var u=user(); if(!u) return;
-    if(saveT) clearTimeout(saveT);
-    saveT=setTimeout(function(){
-      var json; try{ json=JSON.stringify(collectState()); }catch(e){ return; }
-      if(json===lastSaved || json.length>800000) return;
-      token(u).then(function(tok){
-        return fetch(BASE+encodeURIComponent(u.uid)+'?updateMask.fieldPaths=state&updateMask.fieldPaths=updatedAt&key='+KEY,{
-          method:'PATCH', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
-          body:JSON.stringify({fields:{ state:{stringValue:json}, updatedAt:{timestampValue:new Date().toISOString()} }})
-        });
-      }).then(function(r){ if(r&&r.ok) lastSaved=json; }).catch(function(){});
-    },1500);
-  };
-  var loadedFor=null;
-  window.pfAcctLoad=function(){ var u=user(); if(!u||loadedFor===u.uid) return; loadedFor=u.uid;
-    var localHas = (window.__pfCustomSections&&window.__pfCustomSections.length) || (window.__pfExtraLinks&&window.__pfExtraLinks.length) || (window.__pfCustomize&&Object.keys(window.__pfCustomize).length);
-    token(u).then(function(tok){ return fetch(BASE+encodeURIComponent(u.uid)+'?key='+KEY,{headers:{'Authorization':'Bearer '+tok}}); })
-      .then(function(r){ return r&&r.ok?r.json():null; })
-      .then(function(doc){
-        if(!doc||!doc.fields||!doc.fields.state) return;
-        if(localHas) return; /* keep active local edits; they'll sync up */
-        var st; try{ st=JSON.parse(doc.fields.state.stringValue); }catch(e){ return; }
-        if(!st) return;
-        if(st.customize) window.__pfCustomize=st.customize;
-        if(Array.isArray(st.links)) window.__pfExtraLinks=st.links;
-        if(Array.isArray(st.blocks)) window.__pfCustomSections=st.blocks;
-        if(st.template) window.pfTemplate=st.template;
-        if(st.sections && typeof pfSections!=='undefined'){ try{ for(var k in st.sections) pfSections[k]=st.sections[k]; }catch(e){} }
-        try{ localStorage.setItem('_pfCustomize',JSON.stringify(window.__pfCustomize||{})); localStorage.setItem('_pfExtraLinks',JSON.stringify(window.__pfExtraLinks||[])); localStorage.setItem('_pfCustomSections',JSON.stringify(window.__pfCustomSections||[])); }catch(e){}
-        try{ if(window.pfRenderExtraLinks) window.pfRenderExtraLinks(); if(window.pfRenderCustom) window.pfRenderCustom(); }catch(e){}
-        try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){}
-      }).catch(function(){});
-  };
-  /* ── View-count badge in the Preview step (shows once a portfolio is published) ── */
-  var PBASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/';
-  window.pfShowViews=function(){
-    var slug; try{ slug=window._pfSavedSlug; }catch(e){}
-    var host=document.getElementById('pfStep3'); var badge=document.getElementById('pfViewsBadge');
-    if(!slug || !host){ if(badge) badge.style.display='none'; return; }
-    fetch(PBASE+encodeURIComponent(slug)+'?key='+KEY).then(function(r){ return r.ok?r.json():null; }).then(function(doc){
-      var v=doc&&doc.fields&&doc.fields.views&&doc.fields.views.integerValue; if(v==null) v='0';
-      if(!badge){ badge=document.createElement('div'); badge.id='pfViewsBadge';
-        badge.style.cssText='display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:0.84rem;color:var(--text);font-weight:600;';
-        var rc=document.getElementById('pfReadyCard'); if(rc&&rc.parentNode){ rc.parentNode.insertBefore(badge, rc.nextSibling); } else { host.insertBefore(badge, host.firstChild); }
-      }
-      badge.style.display='flex';
-      badge.innerHTML='👁 <span style="color:var(--accent);">'+String(v)+'</span> '+(String(v)==='1'?'view':'views')
-        +' · <a href="https://resume4u.help/p/'+encodeURIComponent(slug)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">View live ↗</a>';
-    }).catch(function(){});
-  };
-  function hookOpen(){
-    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__acct){
-      var oo=window.openPortfolioBuilder;
-      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{window.pfAcctLoad();}catch(e){} try{window.pfShowViews();}catch(e){} },250); return r; };
-      window.openPortfolioBuilder.__acct=true; return true;
-    }
-    return false;
-  }
-  var n=0, iv=setInterval(function(){ if(hookOpen()||++n>50) clearInterval(iv); },200);
-  /* autosave when signed in and changed; refresh the views badge while published */
-  setInterval(function(){ try{ if(user()) window.pfAcctSave(); }catch(e){} },4000);
-  setInterval(function(){ try{ var s3=document.getElementById('pfStep3'); if(window._pfSavedSlug && s3 && s3.offsetParent!==null) window.pfShowViews(); }catch(e){} },15000);
-})();
 </script>
 <style id="_r4uPastelThemes">
 /* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure ─────────────────────
