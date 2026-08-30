@@ -3191,8 +3191,8 @@ window.__iosPdfSave = function(blobUrl, filename){
     </div>
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
-      <div class="pf-section-title">Choose a style for your portfolio</div>
-      <div class="pf-section-sub">Each template is fully responsive and works on all devices. You can download and host it for free.</div>
+      <div class="pf-section-title">Let’s build your website</div>
+      <div class="pf-section-sub">No template to pick — I’ll build a first draft from your résumé, then guide you section by section to make it yours. Fully responsive, free to host.</div>
       <div id="pfResumeHint" style="display:flex;align-items:flex-start;gap:10px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.22);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:0.8rem;color:var(--text);line-height:1.55;">
         <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">💡</span>
         <span><b>Auto-fill tip:</b> Upload your existing resume (PDF or Word) or paste your resume text in the <b>Build Your Resume</b> section first — your experience, education, skills, and awards will be pulled in automatically when you reach the details step.</span>
@@ -3468,7 +3468,7 @@ window.__iosPdfSave = function(blobUrl, filename){
         <input type="file" id="pfReviewCoverInput" accept="image/*" style="display:none" onchange="handlePfReviewCover(event)">
       </div>
       <!-- Template mini-switcher -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <div id="pfMiniSwitcher" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
         <span style="font-size:0.78rem;font-weight:600;color:var(--muted);white-space:nowrap;">Style:</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap;" id="pfMiniRow">
           <button class="pf-mini-tpl active" id="pfMiniNova" onclick="switchPfTemplate('nova')">Nova</button>
@@ -8230,6 +8230,45 @@ if ('serviceWorker' in navigator) {
   function extractJSON(t){ if(!t) return null; try{ return JSON.parse(t); }catch(e){} var m=String(t).match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} } return null; }
   function sanitizeCss(s){ return String(s||'').replace(/<\/?(style|script)[^>]*>/gi,'').slice(0,6000); }
   window.pfAiResetCustomize=function(){ window.__pfCustomize={}; save(); rerender(); log('a','Reset to the original design.'); };
+  /* Shared apply: turn a customize/guide JSON result into live changes. Returns the reply string. */
+  window.pfApplyCz=function(out){
+    if(!out||typeof out!=='object') return '';
+    var cz=window.__pfCustomize||{};
+    if(typeof out.accent==='string'&&out.accent) cz.accent=out.accent; else if(out.accent===null) delete cz.accent;
+    if(typeof out.dark==='boolean') cz.dark=out.dark;
+    if(out.fonts===null) delete cz.fonts; else if(out.fonts&&typeof out.fonts==='object'){ var F={}; if(out.fonts.heading) F.heading=String(out.fonts.heading).slice(0,40); if(out.fonts.body) F.body=String(out.fonts.body).slice(0,40); if(F.heading||F.body) cz.fonts=F; }
+    if(typeof out.density==='string'&&/^(compact|cozy|spacious)$/.test(out.density)) cz.density=out.density;
+    if(typeof out.width==='string'&&/^(narrow|default|wide)$/.test(out.width)) cz.width=out.width;
+    if(typeof out.radius==='string'&&/^(sharp|soft|round)$/.test(out.radius)) cz.radius=out.radius;
+    if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
+    if(Array.isArray(out.hide)) cz.hide=out.hide;
+    if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
+    if(out.cta===null) delete cz.cta; else if(out.cta&&typeof out.cta==='object'&&out.cta.text){ var C={text:String(out.cta.text).slice(0,90),target:String(out.cta.target||'projects'),position:String(out.cta.position||'top')}; if(out.cta.bg) C.bg=String(out.cta.bg).slice(0,40); if(out.cta.color) C.color=String(out.cta.color).slice(0,40); cz.cta=C; delete cz.topBar; }
+    if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
+    if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
+    window.__pfCustomize=cz; save();
+    if(Array.isArray(out.addBlocks) && out.addBlocks.length){
+      try{
+        if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
+        var OKT=['text','stats','testimonials','gallery','contact'];
+        out.addBlocks.slice(0,8).forEach(function(bk){
+          if(!bk||typeof bk!=='object') return;
+          var t=OKT.indexOf(bk.type)>=0?bk.type:'text';
+          var nb={type:t,title:String(bk.title||'').slice(0,90)};
+          if(t==='stats') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {value:String(it.value||'').slice(0,40),label:String(it.label||'').slice(0,90)};});
+          else if(t==='testimonials') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {quote:String(it.quote||'').slice(0,700),author:String(it.author||'').slice(0,90),role:String(it.role||'').slice(0,90)};});
+          else if(t==='gallery') nb.images=[];
+          else if(t==='contact') nb.body=String(bk.body||'').slice(0,600);
+          else { nb.body=String(bk.body||'').slice(0,3000); nb.images=[]; nb.embed=''; }
+          window.__pfCustomSections.push(nb);
+        });
+        try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); }catch(e){}
+        try{ if(window.pfRenderCustom) window.pfRenderCustom(); }catch(e){}
+      }catch(e){}
+    }
+    rerender();
+    return out.reply||'Done — updated your site.';
+  };
   window.pfAiCustomize=function(preset){
     var inp=document.getElementById('pfAiInput');
     var msg=(typeof preset==='string'?preset:(inp&&inp.value||'')).trim();
@@ -8245,42 +8284,8 @@ if ('serviceWorker' in navigator) {
         if(thinking&&thinking.remove) thinking.remove();
         var out=extractJSON(j&&j.text);
         if(!out){ log('err','Sorry — I couldn’t apply that one. Try rephrasing it.'); return; }
-        var cz=window.__pfCustomize||{};
-        if(typeof out.accent==='string'&&out.accent) cz.accent=out.accent; else if(out.accent===null) delete cz.accent;
-        if(typeof out.dark==='boolean') cz.dark=out.dark;
-        if(out.fonts===null) delete cz.fonts; else if(out.fonts&&typeof out.fonts==='object'){ var F={}; if(out.fonts.heading) F.heading=String(out.fonts.heading).slice(0,40); if(out.fonts.body) F.body=String(out.fonts.body).slice(0,40); if(F.heading||F.body) cz.fonts=F; }
-        if(typeof out.density==='string'&&/^(compact|cozy|spacious)$/.test(out.density)) cz.density=out.density;
-        if(typeof out.width==='string'&&/^(narrow|default|wide)$/.test(out.width)) cz.width=out.width;
-        if(typeof out.radius==='string'&&/^(sharp|soft|round)$/.test(out.radius)) cz.radius=out.radius;
-        if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
-        if(Array.isArray(out.hide)) cz.hide=out.hide;
-        if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
-        if(out.cta===null) delete cz.cta; else if(out.cta&&typeof out.cta==='object'&&out.cta.text){ var C={text:String(out.cta.text).slice(0,90),target:String(out.cta.target||'projects'),position:String(out.cta.position||'top')}; if(out.cta.bg) C.bg=String(out.cta.bg).slice(0,40); if(out.cta.color) C.color=String(out.cta.color).slice(0,40); cz.cta=C; delete cz.topBar; }
-        if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
-        if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
-        window.__pfCustomize=cz; save();
-        // AI can append content blocks (stats / testimonials / text / gallery / contact)
-        if(Array.isArray(out.addBlocks) && out.addBlocks.length){
-          try{
-            if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
-            var OKT=['text','stats','testimonials','gallery','contact'];
-            out.addBlocks.slice(0,8).forEach(function(bk){
-              if(!bk||typeof bk!=='object') return;
-              var t=OKT.indexOf(bk.type)>=0?bk.type:'text';
-              var nb={type:t,title:String(bk.title||'').slice(0,90)};
-              if(t==='stats') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {value:String(it.value||'').slice(0,40),label:String(it.label||'').slice(0,90)};});
-              else if(t==='testimonials') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {quote:String(it.quote||'').slice(0,700),author:String(it.author||'').slice(0,90),role:String(it.role||'').slice(0,90)};});
-              else if(t==='gallery') nb.images=[];
-              else if(t==='contact') nb.body=String(bk.body||'').slice(0,600);
-              else { nb.body=String(bk.body||'').slice(0,3000); nb.images=[]; nb.embed=''; }
-              window.__pfCustomSections.push(nb);
-            });
-            try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); }catch(e){}
-            try{ if(window.pfRenderCustom) window.pfRenderCustom(); }catch(e){}
-          }catch(e){}
-        }
-        rerender();
-        log('a', out.reply||'Done — updated your site.');
+        var reply=window.pfApplyCz(out);
+        log('a', reply);
       })
       .catch(function(){ if(thinking&&thinking.remove) thinking.remove(); log('err','Network error — please try again.'); })
       .then(function(){ if(btn){ btn.disabled=false; btn.textContent='Send'; } });
@@ -8334,6 +8339,99 @@ if ('serviceWorker' in navigator) {
     var ok=fill(); if(ok){ try{ pfStyleSync(); }catch(e){} }
     if(typeof window.buildPfPreview==='function' && !window.buildPfPreview.__ssWrap){ var _bp=window.buildPfPreview; window.buildPfPreview=function(){ var r=_bp.apply(this,arguments); try{ pfStyleSync(); }catch(e){} return r; }; window.buildPfPreview.__ssWrap=true; }
     if((ok && window.buildPfPreview && window.buildPfPreview.__ssWrap)||++n>120) clearInterval(iv);
+  },150);
+})();
+</script>
+<style id="_r4uPfGuideCss">
+  #pfStep1 .pf-tpl-grid{display:none!important;}
+  #pfMiniSwitcher{display:none!important;}
+  #pfGuidePanel{background:linear-gradient(135deg,rgba(10,102,194,0.10),rgba(124,58,237,0.05));border:1.5px solid rgba(10,102,194,0.28);border-radius:16px;padding:16px 17px;margin-bottom:14px;}
+  #pfGuidePanel .pfg-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem;color:var(--text);}
+  #pfGuidePanel .pfg-sub{font-size:0.78rem;color:var(--muted);margin:3px 0 12px;line-height:1.5;}
+  .pfg-road{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .pfg-road .pfg-pill{font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--bg);border:1px solid var(--border);color:var(--muted);}
+  .pfg-road .pfg-pill.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .pfg-road .pfg-pill.done{background:rgba(22,163,74,0.12);color:#16a34a;border-color:rgba(22,163,74,0.3);}
+  #pfGuideLog{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;margin-bottom:11px;}
+  .pfg-msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:0.85rem;line-height:1.5;}
+  .pfg-msg.g{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);}
+  .pfg-msg.u{align-self:flex-end;background:var(--accent);color:#fff;}
+  .pfg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .pfg-chip{padding:6px 12px;border:1px solid var(--border);border-radius:99px;background:var(--bg);color:var(--text);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;}
+  .pfg-chip:hover{border-color:var(--accent);color:var(--accent);}
+  .pfg-input-row{display:flex;gap:8px;}
+  #pfGuideInput{flex:1;min-width:0;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-size:0.85rem;font-family:inherit;}
+  #pfGuideSend{padding:10px 18px;border:none;border-radius:9px;background:var(--accent);color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  #pfGuideSend:disabled{opacity:.6;cursor:default;}
+</style>
+<script id="_r4uPfGuideJS">
+/* Conversational guide: seeds the site from the user's résumé, then walks them
+   through building it section by section. Each answer is applied through the same
+   customize action + window.pfApplyCz the manual panel uses. Replaces the
+   template-picker flow (the template grid is hidden via CSS above). */
+(function(){
+  var EP='/.netlify/functions/generate';
+  var STEPS=[
+    {key:'Vibe', q:"First, the overall feel. Describe a vibe, mood, or brand — I'll style your whole site to match.",
+      chips:{'✨ Minimal & elegant':'Make it minimal and elegant: lots of whitespace, a refined serif heading font, a muted palette','⚡ Bold & modern':'Bold modern look: strong geometric sans-serif fonts, a vivid accent colour, tighter spacing','🖤 Sleek dark':'Sleek dark theme with a neon accent and a clean modern font','☀️ Warm':'Warm and friendly: soft rounded corners, a warm accent colour, a humanist sans font'}},
+    {key:'Sections', q:"Now your sections — tell me what to feature, hide, or rename. E.g. 'put projects first', 'hide awards', 'rename Experience to Where I have worked'.",
+      chips:{'⭐ Feature projects':'Feature my projects section prominently near the top','🙈 Hide awards':'Hide the awards section','✍️ Rename Experience':'Rename the Experience section heading to Where I have worked'}},
+    {key:'Add', q:"Want to add anything? A testimonials section, a project gallery, a stats strip, or a contact form.",
+      chips:{'❝ Testimonials':'Add a testimonials section','✉️ Contact form':'Add a contact form so people can reach me','📊 Stats strip':'Add a stats strip highlighting key numbers','Skip →':'__skip'}},
+    {key:'Polish', q:"Last step — any final tweaks? Colours, fonts, spacing, or wording. When you're happy, you're done.",
+      chips:{'🔠 Bigger headings':'Make the headings a bit bigger and bolder','🌬️ More whitespace':'Add more whitespace and breathing room','🎨 Fresh accent':'Try a fresh accent colour that fits the vibe','✅ All done':'__done'}}
+  ];
+  var idx=0, started=false, busy=false;
+  function el(id){ return document.getElementById(id); }
+  function firstName(){ try{ if(window.lastResumeData&&lastResumeData.firstName) return lastResumeData.firstName; if(typeof collectData==='function'){ var d=collectData(); return d&&d.firstName||''; } }catch(e){} return ''; }
+  function road(){ var r=el('pfGuideRoad'); if(!r) return; r.innerHTML=STEPS.map(function(s,i){ var cls=i<idx?'done':(i===idx?'on':''); return '<span class="pfg-pill '+cls+'">'+(i<idx?'✓ ':'')+s.key+'</span>'; }).join(''); }
+  function msg(cls,txt){ var box=el('pfGuideLog'); if(!box) return; var d=document.createElement('div'); d.className='pfg-msg '+cls; d.textContent=txt; box.appendChild(d); box.scrollTop=box.scrollHeight; }
+  function chips(){ var c=el('pfGuideChips'); if(!c) return; if(idx>=STEPS.length){ c.innerHTML=''; return; } var C=STEPS[idx].chips||{}; c.innerHTML=Object.keys(C).map(function(label){ return '<button type="button" class="pfg-chip" data-val="'+encodeURIComponent(C[label])+'">'+label+'</button>'; }).join(''); [].forEach.call(c.querySelectorAll('.pfg-chip'),function(b){ b.onclick=function(){ send(decodeURIComponent(b.getAttribute('data-val')), b.textContent); }; }); }
+  function ask(){ if(idx>=STEPS.length){ road(); chips(); msg('g',"🎉 That's a wrap — your site is ready. Preview it below and publish when you're happy. You can fine-tune anything with the manual controls too."); return; } road(); msg('g', STEPS[idx].q); chips(); }
+  function advance(){ idx++; setTimeout(ask, 250); }
+  function send(val, label){
+    if(busy||idx>=STEPS.length) return;
+    if(val==='__skip'){ msg('u', label||'Skip'); msg('g','No problem — skipping that.'); advance(); return; }
+    if(val==='__done'){ msg('u', label||'All done'); idx=STEPS.length; ask(); return; }
+    var inp=el('pfGuideInput'); if(!label && inp){ val=(inp.value||'').trim(); if(!val){ inp.focus(); return; } inp.value=''; }
+    msg('u', label||val);
+    busy=true; var sb=el('pfGuideSend'); if(sb) sb.disabled=true;
+    var thinking=document.createElement('div'); thinking.className='pfg-msg g'; thinking.textContent='Working on it…'; var box=el('pfGuideLog'); if(box){ box.appendChild(thinking); box.scrollTop=box.scrollHeight; }
+    fetch(EP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customize',message:val,current:window.__pfCustomize||{}})})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(thinking.remove) thinking.remove();
+        var out=null; try{ out=JSON.parse(j&&j.text); }catch(e){ var m=(j&&j.text||'').match(/\{[\s\S]*\}/); if(m){ try{ out=JSON.parse(m[0]); }catch(e2){} } }
+        if(out && window.pfApplyCz){ msg('g', window.pfApplyCz(out)); }
+        else { msg('g','Hmm, I could not apply that — try rephrasing, or use the manual controls below.'); }
+        advance();
+      })
+      .catch(function(){ if(thinking.remove) thinking.remove(); msg('g','Network hiccup — please try that again.'); })
+      .then(function(){ busy=false; var s=el('pfGuideSend'); if(s) s.disabled=false; });
+  }
+  window.pfGuideSendInput=function(){ send('', ''); };
+  window.pfGuideRestart=function(){ idx=0; var box=el('pfGuideLog'); if(box) box.innerHTML=''; welcome(); };
+  function welcome(){ var nm=firstName(); msg('g', (nm?('Hi '+nm+' — '):'')+"I've built a first draft of your site from your résumé (see the preview). Let's make it yours, one step at a time."); idx=0; ask(); }
+  function build(){
+    if(el('pfGuidePanel')) return true;
+    var anchor=el('pfAiCustom'); if(!anchor||!anchor.parentNode) return false;
+    var p=document.createElement('div'); p.id='pfGuidePanel';
+    p.innerHTML='<div class="pfg-h"><span>🧭</span>Let’s build your site</div>'
+      +'<div class="pfg-sub">Seeded from your résumé — I’ll guide you section by section. Answer in your own words or tap a suggestion.</div>'
+      +'<div class="pfg-road" id="pfGuideRoad"></div>'
+      +'<div id="pfGuideLog"></div>'
+      +'<div class="pfg-chips" id="pfGuideChips"></div>'
+      +'<div class="pfg-input-row"><input id="pfGuideInput" type="text" placeholder="Type your answer…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pfGuideSendInput();}"><button id="pfGuideSend" type="button" onclick="pfGuideSendInput()">Send</button></div>';
+    anchor.parentNode.insertBefore(p, anchor);
+    return true;
+  }
+  function start(){ if(started) return; if(!build()) return; started=true; welcome(); }
+  window.pfGuideStart=start;
+  var n=0, iv=setInterval(function(){
+    build();
+    if(typeof window.buildPfPreview==='function' && !window.buildPfPreview.__guideWrap){
+      var _bp=window.buildPfPreview; window.buildPfPreview=function(){ var r=_bp.apply(this,arguments); try{ start(); }catch(e){} return r; }; window.buildPfPreview.__guideWrap=true;
+    }
+    if((el('pfGuidePanel') && window.buildPfPreview && window.buildPfPreview.__guideWrap)||++n>150) clearInterval(iv);
   },150);
 })();
 </script>
