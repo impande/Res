@@ -3406,6 +3406,7 @@ window.__iosPdfSave = function(blobUrl, filename){
         <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add, remove and reorder blocks to build a real website — case studies, text, stats, testimonials, a gallery, or a contact form. Use ↑ ↓ on any block to reorder.</div>
         <div id="pfCustomList"></div>
         <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;">
+          <button type="button" onclick="pfAddCustomSection('hero')" class="pf-addblk" style="border-color:var(--accent);color:var(--accent);font-weight:700;">⭐ Hero</button>
           <button type="button" onclick="pfAddCustomSection('project')" class="pf-addblk" style="border-color:var(--accent);color:var(--accent);font-weight:700;">🗂️ Case study</button>
           <button type="button" onclick="pfAddCustomSection('text')" class="pf-addblk">📝 Text</button>
           <button type="button" onclick="pfAddCustomSection('stats')" class="pf-addblk">📊 Stats</button>
@@ -8247,18 +8248,22 @@ if ('serviceWorker' in navigator) {
     if(out.cta===null) delete cz.cta; else if(out.cta&&typeof out.cta==='object'&&out.cta.text){ var C={text:String(out.cta.text).slice(0,90),target:String(out.cta.target||'projects'),position:String(out.cta.position||'top')}; if(out.cta.bg) C.bg=String(out.cta.bg).slice(0,40); if(out.cta.color) C.color=String(out.cta.color).slice(0,40); cz.cta=C; delete cz.topBar; }
     if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
     if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
+    if(Array.isArray(out.order)) cz.order=out.order.filter(function(k){return typeof k==='string';}).slice(0,12);
     window.__pfCustomize=cz; save();
+    try{ if(typeof window.pfArrangeSync==='function') window.pfArrangeSync(); }catch(e){}
     if(Array.isArray(out.addBlocks) && out.addBlocks.length){
       try{
         if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
-        var OKT=['project','text','stats','testimonials','gallery','contact'];
+        var OKT=['hero','project','text','stats','testimonials','gallery','contact'];
         out.addBlocks.slice(0,8).forEach(function(bk){
           if(!bk||typeof bk!=='object') return;
           var t=OKT.indexOf(bk.type)>=0?bk.type:'text';
           var nb={type:t,title:String(bk.title||'').slice(0,90)};
-          if(t==='stats') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {value:String(it.value||'').slice(0,40),label:String(it.label||'').slice(0,90)};});
+          if(typeof bk.layout==='string') nb.layout=String(bk.layout).slice(0,20);
+          if(t==='hero'){ nb.subtitle=String(bk.subtitle||'').slice(0,200); nb.align=(bk.align==='center'?'center':''); nb.ctaText=String(bk.ctaText||'').slice(0,60); nb.ctaLink=String(bk.ctaLink||bk.link||'').slice(0,300); nb.images=[]; }
+          else if(t==='stats') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {value:String(it.value||'').slice(0,40),label:String(it.label||'').slice(0,90)};});
           else if(t==='testimonials') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {quote:String(it.quote||'').slice(0,700),author:String(it.author||'').slice(0,90),role:String(it.role||'').slice(0,90)};});
-          else if(t==='project'){ nb.subtitle=String(bk.subtitle||'').slice(0,120); nb.body=String(bk.body||'').slice(0,3000); nb.tags=(Array.isArray(bk.tags)?bk.tags:[]).slice(0,8).map(function(x){return String(x).slice(0,40);}); nb.link=String(bk.link||bk.url||'').slice(0,300); nb.images=[]; }
+          else if(t==='project'){ nb.subtitle=String(bk.subtitle||'').slice(0,120); nb.body=String(bk.body||'').slice(0,3000); nb.tags=(Array.isArray(bk.tags)?bk.tags:[]).slice(0,8).map(function(x){return String(x).slice(0,40);}); nb.link=String(bk.link||bk.url||'').slice(0,300); nb.embed=String(bk.embed||'').slice(0,300); nb.images=[]; }
           else if(t==='gallery') nb.images=[];
           else if(t==='contact') nb.body=String(bk.body||'').slice(0,600);
           else { nb.body=String(bk.body||'').slice(0,3000); nb.images=[]; nb.embed=''; }
@@ -8465,6 +8470,45 @@ if ('serviceWorker' in navigator) {
     return false;
   }
   var n=0, iv=setInterval(function(){ var a=apply(), b=hookOpen(); if((a&&b)||++n>90) clearInterval(iv); },150);
+})();
+</script>
+<style id="_r4uPfArrangeCss">
+  #pfArrangePanel{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:15px 16px;margin-bottom:14px;}
+  #pfArrangePanel .pfa-h{font-weight:800;font-size:0.92rem;color:var(--text);display:flex;align-items:center;gap:7px;}
+  #pfArrangePanel .pfa-sub{font-size:0.78rem;color:var(--muted);margin:3px 0 12px;}
+  .pfa-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg);margin-bottom:7px;}
+  .pfa-lbl{font-size:0.84rem;font-weight:600;color:var(--text);}
+  .pfa-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:3px 9px;font-size:0.82rem;line-height:1;}
+  .pfa-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .pfa-btn:disabled{opacity:.35;cursor:default;}
+</style>
+<script id="_r4uPfArrangeJS">
+/* Arrange sections: reorder every section of the page (résumé-derived + the added
+   blocks group) via ↑/↓, written to window.__pfCustomize.order which the generator
+   consumes. Sits alongside the guide + Style Studio in the preview step. */
+(function(){
+  var LABELS={about:'About',links:'Links',experience:'Experience',education:'Education',projects:'Projects',certs:'Certifications',skills:'Skills',awards:'Awards',custom:'Added blocks (hero, case studies…)'};
+  var DEF=['about','links','experience','education','projects','certs','skills','awards','custom'];
+  function el(id){ return document.getElementById(id); }
+  function cz(){ if(!window.__pfCustomize||typeof window.__pfCustomize!=='object'){ try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; } } return window.__pfCustomize; }
+  function save(){ try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize||{})); }catch(e){} }
+  function rerender(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
+  function order(){ var c=cz(); var o=(Array.isArray(c.order)&&c.order.length)?c.order.slice():DEF.slice(); DEF.forEach(function(k){ if(o.indexOf(k)<0) o.push(k); }); return o; }
+  window.pfArrangeMove=function(idx,dir){ var c=cz(); var o=order(); var j=idx+dir; if(j<0||j>=o.length) return; var t=o[idx]; o[idx]=o[j]; o[j]=t; c.order=o; window.__pfCustomize=c; save(); rerender(); render(); };
+  function render(){ var box=el('pfArrangeList'); if(!box) return; var o=order(); box.innerHTML=o.map(function(k,idx){
+      return '<div class="pfa-row"><span class="pfa-lbl">'+(LABELS[k]||k)+'</span><span style="display:flex;gap:6px;">'
+        +'<button type="button" class="pfa-btn" onclick="pfArrangeMove('+idx+',-1)"'+(idx===0?' disabled':'')+' title="Move up">↑</button>'
+        +'<button type="button" class="pfa-btn" onclick="pfArrangeMove('+idx+',1)"'+(idx===o.length-1?' disabled':'')+' title="Move down">↓</button></span></div>';
+    }).join(''); }
+  window.pfArrangeSync=render;
+  function build(){ if(el('pfArrangePanel')) return true; var anchor=el('pfStyleStudio')||el('pfAiCustom'); if(!anchor||!anchor.parentNode) return false;
+    var p=document.createElement('div'); p.id='pfArrangePanel';
+    p.innerHTML='<div class="pfa-h"><span>🔀</span>Arrange sections</div><div class="pfa-sub">Set the flow of your page — move any section up or down. Reorder the added blocks themselves inside Content blocks.</div><div id="pfArrangeList"></div>';
+    anchor.parentNode.insertBefore(p, anchor); render(); return true; }
+  var n=0, iv=setInterval(function(){ var ok=build();
+    if(typeof window.buildPfPreview==='function' && !window.buildPfPreview.__arrWrap){ var _bp=window.buildPfPreview; window.buildPfPreview=function(){ var r=_bp.apply(this,arguments); try{ render(); }catch(e){} return r; }; window.buildPfPreview.__arrWrap=true; }
+    if((ok && window.buildPfPreview && window.buildPfPreview.__arrWrap)||++n>120) clearInterval(iv);
+  },150);
 })();
 </script>
 <script id="_r4uPfAccount">
@@ -8704,11 +8748,11 @@ window.__novaPortfolioHTML=function(d,sections){
     + (btns?'<div class="pactions">'+btns+'</div>':'')
     + '</div></div></section>';
 
-  var out = '';
+  var parts = {};
 
   // About
   if(S('about') && summary){
-    out += card('about','About','<p class="about">'+linkify(summary)+'</p>');
+    parts.about = card('about','About','<p class="about">'+linkify(summary)+'</p>');
   }
 
   // Featured links (custom additional links)
@@ -8719,7 +8763,7 @@ window.__novaPortfolioHTML=function(d,sections){
         + '<div class="link-tx"><div class="link-l">'+esc(l.label)+'</div><div class="link-u">'+esc(host(l.url))+'</div></div>'
         + '<svg class="link-ar" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a>';
     }).join('');
-    out += card('links','Links','<div class="link-list">'+lrows+'</div>');
+    parts.links = card('links','Links','<div class="link-list">'+lrows+'</div>');
   }
 
   // Experience
@@ -8736,7 +8780,7 @@ window.__novaPortfolioHTML=function(d,sections){
         + (co?'<div class="ent-c">'+co+'</div>':'')
         + (period?'<div class="ent-d">'+period+'</div>':'')+blHTML+'</div></div>';
     }).join('');
-    out += card('experience','Experience','<div class="ent-list">'+items+'</div>');
+    parts.experience = card('experience','Experience','<div class="ent-list">'+items+'</div>');
   }
 
   // Education
@@ -8746,7 +8790,7 @@ window.__novaPortfolioHTML=function(d,sections){
       return '<div class="ent">'+logo(sch)+'<div class="ent-m"><div class="ent-r">'+sch+'</div>'
         + (deg?'<div class="ent-c">'+deg+'</div>':'')+(yr?'<div class="ent-d">'+yr+'</div>':'')+'</div></div>';
     }).join('');
-    out += card('education','Education','<div class="ent-list">'+eitems+'</div>');
+    parts.education = card('education','Education','<div class="ent-list">'+eitems+'</div>');
   }
 
   // Projects
@@ -8757,7 +8801,7 @@ window.__novaPortfolioHTML=function(d,sections){
       var rr='<div class="ent-r">'+pt+(purl?' <a class="ln" href="'+esc(purl)+'" target="_blank" rel="noopener">↗</a>':'')+'</div>';
       return '<div class="ent">'+logo(pt,'sq')+'<div class="ent-m">'+rr+(pd?'<div class="ent-p">'+pd+'</div>':'')+(tags?'<div class="tags">'+tags+'</div>':'')+'</div></div>';
     }).join('');
-    out += card('projects','Projects','<div class="ent-list">'+pitems+'</div>');
+    parts.projects = card('projects','Projects','<div class="ent-list">'+pitems+'</div>');
   }
 
   // Licenses & certifications
@@ -8766,12 +8810,12 @@ window.__novaPortfolioHTML=function(d,sections){
       var t=esc(c.name||c.title||''); var iss=esc(c.issuer||c.org||''); var yr=esc(c.year||c.date||'');
       return '<div class="ent">'+logo(iss||t)+'<div class="ent-m"><div class="ent-r">'+t+'</div>'+(iss?'<div class="ent-c">'+iss+'</div>':'')+(yr?'<div class="ent-d">'+yr+'</div>':'')+'</div></div>';
     }).join('');
-    out += card('certs','Licenses & certifications','<div class="ent-list">'+citems+'</div>');
+    parts.certs = card('certs','Licenses & certifications','<div class="ent-list">'+citems+'</div>');
   }
 
   // Skills
   if(S('skills') && skills.length){
-    out += card('skills','Skills','<div class="sk-list">'+skills.map(function(s){return '<span class="sk">'+esc(s)+'</span>';}).join('')+'</div>');
+    parts.skills = card('skills','Skills','<div class="sk-list">'+skills.map(function(s){return '<span class="sk">'+esc(s)+'</span>';}).join('')+'</div>');
   }
 
   // Honors & awards
@@ -8780,63 +8824,85 @@ window.__novaPortfolioHTML=function(d,sections){
       var t=esc(a.name||a.title||''); var org=esc(a.org||a.issuer||''); var yr=esc(a.year||a.date||'');
       return '<div class="ent">'+logo(org||t)+'<div class="ent-m"><div class="ent-r">'+t+'</div>'+(org?'<div class="ent-c">'+org+'</div>':'')+(yr?'<div class="ent-d">'+yr+'</div>':'')+'</div></div>';
     }).join('');
-    out += card('awards','Honors & awards','<div class="ent-list">'+aitems+'</div>');
+    parts.awards = card('awards','Honors & awards','<div class="ent-list">'+aitems+'</div>');
   }
 
-  // Custom content blocks (user-added). Each block has a type: text / stats /
+  // Custom content blocks (user-added). Types: hero / project / text / stats /
   // testimonials / gallery / contact (+ back-compat: no type = text).
   var custom = A(d.customSections);
   if(!custom.length && typeof window!=='undefined' && Array.isArray(window.__pfCustomSections)) custom = window.__pfCustomSections;
-  var projIdx=0;
+  var projIdx=0, customHTML='';
   custom.forEach(function(cs){
     if(!cs) return;
     var type = cs.type || 'text';
     var t = cs.title || '';
     var items = A(cs.items);
     var imgs = A(cs.images).filter(Boolean);
+    var caps = A(cs.captions);
+    var lay = cs.layout || '';
     var inner = '';
-    if(type==='stats'){
+    if(type==='hero'){
+      if(!(t || cs.subtitle || imgs.length)) return;
+      var hraw=String(cs.ctaLink||'').trim();
+      var hhref = /^https?:\/\//i.test(hraw) ? hraw : (hraw ? ('#'+hraw.replace(/^#/,'')) : '');
+      var hext = /^https?:\/\//i.test(hhref);
+      var hcls = 'cs-hero'+(imgs[0]?' has-bg':'')+(cs.align==='center'?' center':'');
+      var hbg = imgs[0] ? ' style="background-image:linear-gradient(rgba(0,0,0,0.42),rgba(0,0,0,0.55)),url('+esc(imgs[0])+')"' : '';
+      var hsub = cs.subtitle ? '<p class="cs-hero-sub">'+esc(cs.subtitle)+'</p>' : '';
+      var hcta = (cs.ctaText&&hhref) ? '<a class="cs-hero-cta" href="'+esc(hhref)+'"'+(hext?' target="_blank" rel="noopener"':'')+'>'+esc(cs.ctaText)+'</a>' : '';
+      customHTML += '<section class="card '+hcls+'"'+hbg+'><div class="cs-hero-in"><h2 class="cs-hero-t">'+esc(t||'')+'</h2>'+hsub+hcta+'</div></section>';
+    } else if(type==='stats'){
       var st = items.filter(function(i){return i&&(i.value||i.label);});
       if(!st.length) return;
-      inner = '<div class="cs-stats">'+st.map(function(i){return '<div class="cs-stat"><div class="cs-stat-v">'+esc(i.value||'')+'</div><div class="cs-stat-l">'+esc(i.label||'')+'</div></div>';}).join('')+'</div>';
-      out += card('', t||'Highlights', inner);
+      inner = '<div class="cs-stats'+(lay==='center'?' center':'')+'">'+st.map(function(i){return '<div class="cs-stat"><div class="cs-stat-v">'+esc(i.value||'')+'</div><div class="cs-stat-l">'+esc(i.label||'')+'</div></div>';}).join('')+'</div>';
+      customHTML += card('', t||'Highlights', inner);
     } else if(type==='testimonials'){
       var tm = items.filter(function(i){return i&&(i.quote||i.author);});
       if(!tm.length) return;
-      inner = '<div class="cs-quotes">'+tm.map(function(i){return '<figure class="cs-quote"><blockquote>“'+esc(i.quote||'')+'”</blockquote>'+((i.author||i.role)?'<figcaption><b>'+esc(i.author||'')+'</b>'+(i.role?'<span> · '+esc(i.role)+'</span>':'')+'</figcaption>':'')+'</figure>';}).join('')+'</div>';
-      out += card('', t||'Testimonials', inner);
+      inner = '<div class="cs-quotes'+(lay==='center'?' center':'')+'">'+tm.map(function(i){return '<figure class="cs-quote"><blockquote>\u201c'+esc(i.quote||'')+'\u201d</blockquote>'+((i.author||i.role)?'<figcaption><b>'+esc(i.author||'')+'</b>'+(i.role?'<span> \u00b7 '+esc(i.role)+'</span>':'')+'</figcaption>':'')+'</figure>';}).join('')+'</div>';
+      customHTML += card('', t||'Testimonials', inner);
     } else if(type==='gallery'){
       if(!imgs.length) return;
-      inner = '<div class="cs-gallery">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t)+'" loading="lazy">';}).join('')+'</div>';
-      out += card('', t||'Gallery', inner);
+      inner = '<div class="cs-gallery'+(lay==='large'?' lg':'')+'">'+imgs.map(function(u,gj){var cap=esc(caps[gj]||'');return '<figure class="cs-gfig"><img src="'+esc(u)+'" alt="'+esc(cap||t)+'" loading="lazy">'+(cap?'<figcaption>'+cap+'</figcaption>':'')+'</figure>';}).join('')+'</div>';
+      customHTML += card('', t||'Gallery', inner);
     } else if(type==='contact'){
       var to = String(email||'').trim();
       var intro = cs.body ? '<p class="cs-body" style="margin-bottom:14px">'+linkify(cs.body)+'</p>' : '';
-      // mailto form: works on any host with no backend (opens the visitor's mail app)
       var formTo = to ? esc(to) : '';
       inner = intro + '<form class="cs-form" data-to="'+formTo+'">'
         + '<input name="from" type="text" placeholder="Your name" required>'
         + '<input name="email" type="email" placeholder="Your email" required>'
         + '<textarea name="msg" placeholder="Your message" rows="4" required></textarea>'
         + '<button type="submit" class="cs-form-btn">Send message</button></form>';
-      out += card('', t||'Get in touch', inner);
+      customHTML += card('', t||'Get in touch', inner);
     } else if(type==='project'){
-      // Image-led case study: title, subtitle, description, media, tags, link.
-      if(!(t || cs.body || imgs.length)) return;
+      if(!(t || cs.body || imgs.length || cs.embed)) return;
       var pMedia = imgs.length ? '<div class="cs-proj-media">'+imgs.slice(0,4).map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t||'')+'" loading="lazy">';}).join('')+'</div>' : '';
       var pSub = cs.subtitle ? '<div class="cs-proj-sub">'+esc(cs.subtitle)+'</div>' : '';
       var pDesc = cs.body ? '<div class="cs-proj-desc">'+renderBody(cs.body)+'</div>' : '';
+      var pEmbed = cs.embed ? embedHTML(cs.embed) : '';
       var pTags = A(cs.tags).filter(Boolean); var pTagsHTML = pTags.length ? '<div class="tags" style="margin-top:12px">'+pTags.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>' : '';
-      var pUrl = lk(cs.link||cs.url||''); var pLink = pUrl ? '<a class="cs-proj-link" href="'+esc(pUrl)+'" target="_blank" rel="noopener">View project ↗</a>' : '';
-      var flip = (projIdx % 2 === 1) ? ' flip' : ''; projIdx++;
-      inner = '<div class="cs-proj'+(pMedia?' has-media'+flip:'')+'">'+pMedia+'<div class="cs-proj-body"><h3 class="cs-proj-t">'+esc(t||'Project')+'</h3>'+pSub+pDesc+pTagsHTML+pLink+'</div></div>';
-      out += '<section class="card cs-proj-card">'+inner+'</section>';
+      var pUrl = lk(cs.link||cs.url||''); var pLink = pUrl ? '<a class="cs-proj-link" href="'+esc(pUrl)+'" target="_blank" rel="noopener">View project \u2197</a>' : '';
+      var stacked = (lay==='stacked');
+      var flip = (!stacked && projIdx % 2 === 1) ? ' flip' : ''; projIdx++;
+      var pcls = 'cs-proj'+(pMedia&&!stacked?' has-media'+flip:'')+(stacked?' stacked':'');
+      var pbody = '<div class="cs-proj-body"><h3 class="cs-proj-t">'+esc(t||'Project')+'</h3>'+pSub+pDesc+pEmbed+pTagsHTML+pLink+'</div>';
+      inner = '<div class="'+pcls+'">'+pMedia+pbody+'</div>';
+      customHTML += '<section class="card cs-proj-card">'+inner+'</section>';
     } else { // text (default)
       var imgHTML = imgs.length ? '<div class="cs-imgs'+(imgs.length>1?' multi':'')+'">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t||'')+'" loading="lazy">';}).join('')+'</div>' : '';
-      inner = renderBody(cs.body||'') + imgHTML + embedHTML(cs.embed||'');
-      if(inner.trim()) out += card('', t||'Section', inner);
+      var raw = renderBody(cs.body||'') + imgHTML + embedHTML(cs.embed||'');
+      if(raw.trim()){ inner = '<div'+(lay==='center'?' style="text-align:center"':'')+'>'+raw+'</div>'; customHTML += card('', t||'Section', inner); }
     }
   });
+  parts.custom = customHTML;
+
+  // ── Assemble sections in the user-chosen order (CZ.order); unknown/new keys
+  //    fall back to their default position, and 'custom' holds all added blocks. ──
+  var DEFAULT_ORDER=['about','links','experience','education','projects','certs','skills','awards','custom'];
+  var ORDER = (Array.isArray(CZ.order)&&CZ.order.length) ? CZ.order.slice() : DEFAULT_ORDER.slice();
+  DEFAULT_ORDER.forEach(function(k){ if(ORDER.indexOf(k)<0) ORDER.push(k); });
+  var out = ORDER.map(function(k){ return k==='custom' ? (parts.custom||'') : (parts[k]||''); }).join('');
 
   var CSS = ''
 + ':root{--bg:#f4f2ee;--card:#fff;--ink:rgba(0,0,0,0.9);--mut:rgba(0,0,0,0.6);--mut2:rgba(0,0,0,0.45);--line:rgba(0,0,0,0.09);--acc:#0a66c2;--acc-h:#004182;--band:linear-gradient(120deg,#1b4f8a,#2d6cb0 45%,#5b8fd0);}'
@@ -8935,6 +9001,26 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.cs-proj-sub{font-size:0.9rem;color:var(--mut);margin-bottom:13px}'
 + '.cs-proj-desc p{font-size:0.96rem;line-height:1.6;color:var(--ink);margin-bottom:8px}.cs-proj-desc p:last-child{margin-bottom:0}'
 + '.cs-proj-link{display:inline-block;margin-top:15px;color:var(--acc);font-weight:600}'
++ '.cs-proj-desc .cs-embed,.cs-proj-body .cs-embed{margin-top:14px}'
+/* project layout variant: stacked (image on top, full width) */
++ '.cs-proj.stacked{grid-template-columns:1fr!important}'
++ '.cs-proj.stacked .cs-proj-media img{max-height:360px}'
+/* hero block */
++ '.cs-hero{padding:0!important;overflow:hidden}'
++ '.cs-hero-in{padding:46px 32px}'
++ '.cs-hero.has-bg{background-size:cover;background-position:center}'
++ '.cs-hero.has-bg .cs-hero-in{color:#fff}.cs-hero.has-bg .cs-hero-t,.cs-hero.has-bg .cs-hero-sub{color:#fff}'
++ '.cs-hero.center{text-align:center}'
++ '.cs-hero-t{font-size:clamp(1.6rem,5vw,2.5rem);font-weight:800;line-height:1.1;margin:0}'
++ '.cs-hero-sub{font-size:1.05rem;color:var(--mut);margin-top:12px;max-width:640px;line-height:1.55}'
++ '.cs-hero.center .cs-hero-sub{margin-left:auto;margin-right:auto}'
++ '.cs-hero-cta{display:inline-block;margin-top:18px;padding:12px 26px;border-radius:99px;background:var(--acc);color:#fff!important;font-weight:700;text-decoration:none}'
++ '.cs-hero-cta:hover{background:var(--acc-h)}'
+/* gallery captions + large variant */
++ '.cs-gfig{margin:0}.cs-gfig figcaption{font-size:0.8rem;color:var(--mut);margin-top:6px;text-align:center}'
++ '.cs-gallery.lg{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}'
+/* centered layout variants */
++ '.cs-stats.center{justify-items:center}.cs-quotes.center{max-width:620px;margin:0 auto}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
 /* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
@@ -9178,14 +9264,17 @@ window.__novaPortfolioHTML=function(d,sections){
   try{ window.__pfCustomSections = JSON.parse(localStorage.getItem('_pfCustomSections')||'[]'); }catch(e){ window.__pfCustomSections=[]; }
   if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
   function saveCustom(){ try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); return true; }catch(e){ alert('Could not save — images may be too large. Try fewer/smaller images.'); return false; } }
-  var CS_LABELS={project:'🗂️ Case study',text:'📝 Text',stats:'📊 Stats',testimonials:'❝ Testimonials',gallery:'🖼️ Gallery',contact:'✉️ Contact form'};
+  var CS_LABELS={hero:'⭐ Hero',project:'🗂️ Case study',text:'📝 Text',stats:'📊 Stats',testimonials:'❝ Testimonials',gallery:'🖼️ Gallery',contact:'✉️ Contact form'};
+  var CS_LAYOUTS={project:[['','Split'],['stacked','Stacked']],gallery:[['','Grid'],['large','Large']],text:[['','Default'],['center','Centered']],stats:[['','Row'],['center','Centered']],testimonials:[['','Grid'],['center','Centered']]};
   window.pfCsSet=function(i,field,val){ if(!window.__pfCustomSections[i]) return; window.__pfCustomSections[i][field]=val; saveCustom(); refreshPreview(); };
   window.pfCsSetTags=function(i,val){ var s=window.__pfCustomSections[i]; if(!s) return; s.tags=String(val||'').split(',').map(function(x){return x.trim();}).filter(Boolean).slice(0,8); saveCustom(); refreshPreview(); };
+  window.pfCsSetCap=function(i,j,val){ var s=window.__pfCustomSections[i]; if(!s) return; if(!Array.isArray(s.captions)) s.captions=[]; s.captions[j]=val; saveCustom(); refreshPreview(); };
   window.pfCsMove=function(i,dir){ var C=window.__pfCustomSections; if(!C) return; var j=i+dir; if(j<0||j>=C.length) return; var tmp=C[i]; C[i]=C[j]; C[j]=tmp; saveCustom(); window.pfRenderCustom(); refreshPreview(); };
   window.pfAddCustomSection=function(type){ type=(typeof type==='string')?type:'text';
     var s={type:type,title:''};
     if(type==='text'){ s.body='';s.images=[];s.embed=''; }
-    else if(type==='project'){ s.subtitle='';s.body='';s.images=[];s.tags=[];s.link=''; }
+    else if(type==='hero'){ s.subtitle='';s.images=[];s.align='';s.ctaText='';s.ctaLink=''; }
+    else if(type==='project'){ s.subtitle='';s.body='';s.images=[];s.embed='';s.tags=[];s.link=''; }
     else if(type==='stats'||type==='testimonials'){ s.items=[{}]; }
     else if(type==='gallery'){ s.images=[]; }
     else if(type==='contact'){ s.body=''; }
@@ -9220,7 +9309,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var IN='padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.84rem;font-family:inherit;';
     box.innerHTML=C.map(function(s,i){
       var type=s.type||'text';
-      var titlePH = type==='project'?'Project / case-study title':type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
+      var titlePH = type==='hero'?'Headline — e.g. Designer & product thinker':type==='project'?'Project / case-study title':type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
       var head='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
         +'<span style="font-size:0.68rem;font-weight:700;color:var(--accent);background:rgba(217,119,6,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;">'+(CS_LABELS[type]||'Block')+'</span>'
         +'<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">'
@@ -9228,15 +9317,22 @@ window.__novaPortfolioHTML=function(d,sections){
         +'<button type="button" onclick="pfCsMove('+i+',1)" title="Move down" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;font-size:0.82rem;line-height:1;">↓</button>'
         +'<button type="button" onclick="pfRemoveCustomSection('+i+')" style="background:none;border:none;color:#dc2626;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">Remove</button></div>';
       var body='';
-      if(type==='stats'){
+      var layRow = (CS_LAYOUTS[type]) ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="font-size:0.74rem;color:var(--muted);">Layout</span><select onchange="pfCsSet('+i+',\'layout\',this.value)" style="'+IN+'">'+CS_LAYOUTS[type].map(function(o){return '<option value="'+o[0]+'"'+((s.layout||'')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>' : '';
+      if(type==='hero'){
+        var hImg=(s.images&&s.images[0])?'<div style="position:relative;width:80px;height:54px;flex-shrink:0;"><img src="'+esc(s.images[0])+'" style="width:80px;height:54px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+',0)" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>':'';
+        body='<textarea placeholder="Subheadline — a punchy line about you" oninput="pfCsSet('+i+',\'subtitle\',this.value)" style="width:100%;min-height:50px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.subtitle||'')+'</textarea>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+hImg+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Background image<input type="file" accept="image/*" onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
+          +'<div style="display:flex;gap:6px;margin-bottom:7px;"><input type="text" value="'+esc(s.ctaText||'')+'" placeholder="Button text (optional)" oninput="pfCsSet('+i+',\'ctaText\',this.value)" style="flex:1;'+IN+'"><input type="text" value="'+esc(s.ctaLink||'')+'" placeholder="Button link — URL or a section like projects" oninput="pfCsSet('+i+',\'ctaLink\',this.value)" style="flex:1;'+IN+'"></div>'
+          +'<label style="display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text);"><input type="checkbox"'+(s.align==='center'?' checked':'')+' onchange="pfCsSet('+i+',\'align\',this.checked?\'center\':\'\')"> Center-align</label>';
+      } else if(type==='stats'){
         body=(s.items||[]).map(function(it,j){ return '<div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" value="'+esc(it.value||'')+'" placeholder="Value (9+)" oninput="pfCsSetItem('+i+','+j+',\'value\',this.value)" style="width:110px;'+IN+'"><input type="text" value="'+esc(it.label||'')+'" placeholder="Label (Years experience)" oninput="pfCsSetItem('+i+','+j+',\'label\',this.value)" style="flex:1;'+IN+'"><button type="button" onclick="pfCsRemoveItem('+i+','+j+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1rem;">✕</button></div>'; }).join('')
           +'<button type="button" onclick="pfCsAddItem('+i+')" style="padding:6px 12px;border:1px dashed var(--border);border-radius:7px;background:var(--surface);color:var(--accent);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;">＋ Add stat</button>';
       } else if(type==='testimonials'){
         body=(s.items||[]).map(function(it,j){ return '<div style="border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;"><textarea placeholder="Quote" oninput="pfCsSetItem('+i+','+j+',\'quote\',this.value)" style="width:100%;min-height:48px;'+IN+'resize:vertical;margin-bottom:6px;">'+esc(it.quote||'')+'</textarea><div style="display:flex;gap:6px;"><input type="text" value="'+esc(it.author||'')+'" placeholder="Name" oninput="pfCsSetItem('+i+','+j+',\'author\',this.value)" style="flex:1;'+IN+'"><input type="text" value="'+esc(it.role||'')+'" placeholder="Role / company" oninput="pfCsSetItem('+i+','+j+',\'role\',this.value)" style="flex:1;'+IN+'"><button type="button" onclick="pfCsRemoveItem('+i+','+j+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1rem;">✕</button></div></div>'; }).join('')
           +'<button type="button" onclick="pfCsAddItem('+i+')" style="padding:6px 12px;border:1px dashed var(--border);border-radius:7px;background:var(--surface);color:var(--accent);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;">＋ Add testimonial</button>';
       } else if(type==='gallery'){
-        var g=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:60px;height:60px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
-        body='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'+g+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Add images<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>';
+        var g=(s.images||[]).map(function(u,j){ return '<div style="width:76px;flex-shrink:0;"><div style="position:relative;width:76px;height:60px;"><img src="'+esc(u)+'" style="width:76px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div><input type="text" value="'+esc((s.captions&&s.captions[j])||'')+'" placeholder="Caption" oninput="pfCsSetCap('+i+','+j+',this.value)" style="width:76px;margin-top:4px;padding:3px 5px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text);font-size:0.65rem;font-family:inherit;"></div>'; }).join('');
+        body='<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;">'+g+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Add images<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>';
       } else if(type==='contact'){
         body='<textarea placeholder="Intro line (optional) — e.g. I’d love to hear from you" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:44px;'+IN+'resize:vertical;">'+esc(s.body||'')+'</textarea>'
           +'<div style="font-size:0.73rem;color:var(--muted);margin-top:6px;">A contact form that sends messages to your email (from Basic Info).</div>';
@@ -9246,14 +9342,15 @@ window.__novaPortfolioHTML=function(d,sections){
           +'<textarea placeholder="The story — problem, what you did, the result. One line per paragraph, start a line with - for a bullet." oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:80px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+pj+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Add images<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
           +'<input type="text" value="'+esc((s.tags||[]).join(', '))+'" placeholder="Tags (comma separated) — e.g. Product, UX, Research" oninput="pfCsSetTags('+i+',this.value)" style="width:100%;'+IN+'margin-bottom:7px;">'
-          +'<input type="text" value="'+esc(s.link||'')+'" placeholder="Link (optional) — case study or live project URL" oninput="pfCsSet('+i+',\'link\',this.value)" style="width:100%;'+IN+'">';
+          +'<input type="text" value="'+esc(s.link||'')+'" placeholder="Link (optional) — case study or live project URL" oninput="pfCsSet('+i+',\'link\',this.value)" style="width:100%;'+IN+'margin-bottom:7px;">'
+          +'<input type="text" value="'+esc(s.embed||'')+'" placeholder="Video URL (optional) — YouTube / Vimeo" oninput="pfCsSet('+i+',\'embed\',this.value)" style="width:100%;'+IN+'">';
       } else { // text
         var imgs=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:54px;height:44px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:54px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
         body='<textarea placeholder="Text — one line per paragraph, start a line with - for a bullet" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:70px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+imgs+'<label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Image<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
           +'<input type="text" value="'+esc(s.embed||'')+'" placeholder="YouTube / Vimeo URL (optional)" oninput="pfCsSet('+i+',\'embed\',this.value)" style="width:100%;'+IN+'">';
       }
-      return '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);margin-bottom:10px;">'+head+body+'</div>';
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);margin-bottom:10px;">'+head+layRow+body+'</div>';
     }).join('');
   };
 
