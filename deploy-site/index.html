@@ -8321,8 +8321,20 @@ if ('serviceWorker' in navigator) {
       }
       badge.style.display='flex';
       badge.innerHTML='👁 <span style="color:var(--accent);">'+String(v)+'</span> '+(String(v)==='1'?'view':'views')
-        +' · <a href="https://resume4u.help/p/'+encodeURIComponent(slug)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">View live ↗</a>';
+        +' · <a href="https://resume4u.help/p/'+encodeURIComponent(slug)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">View live ↗</a>'
+        +' · <a href="#" onclick="return pfCopyTestiLink(\''+String(slug).replace(/'/g,"\\'")+'\')" style="color:var(--accent);text-decoration:none;" title="Share this link so clients can leave a testimonial">💬 Copy testimonial link</a>';
     }).catch(function(){});
+  };
+  /* ── Copy the public /t/{slug} link so the owner can request testimonials ── */
+  window.pfCopyTestiLink=function(slug){
+    var url='https://resume4u.help/t/'+slug;
+    function done(){ try{ if(typeof showToast==='function') showToast('Testimonial-request link copied — share it to collect testimonials','success'); }catch(e){} }
+    function fallback(){ try{ var ta=document.createElement('textarea'); ta.value=url; ta.style.cssText='position:fixed;top:-9999px;left:-9999px;'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){} }
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,function(){ fallback(); done(); }); }
+      else { fallback(); done(); }
+    }catch(e){ fallback(); done(); }
+    return false;
   };
 
   /* ── Testimonial moderation (owner approves visitor submissions) ── */
