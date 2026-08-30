@@ -8890,17 +8890,35 @@ window.__novaPortfolioHTML=function(d,sections){
         try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){}
       }).catch(function(){});
   };
+  /* ── View-count badge in the Preview step (shows once a portfolio is published) ── */
+  var PBASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/';
+  window.pfShowViews=function(){
+    var slug; try{ slug=window._pfSavedSlug; }catch(e){}
+    var host=document.getElementById('pfStep3'); var badge=document.getElementById('pfViewsBadge');
+    if(!slug || !host){ if(badge) badge.style.display='none'; return; }
+    fetch(PBASE+encodeURIComponent(slug)+'?key='+KEY).then(function(r){ return r.ok?r.json():null; }).then(function(doc){
+      var v=doc&&doc.fields&&doc.fields.views&&doc.fields.views.integerValue; if(v==null) v='0';
+      if(!badge){ badge=document.createElement('div'); badge.id='pfViewsBadge';
+        badge.style.cssText='display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:0.84rem;color:var(--text);font-weight:600;';
+        var rc=document.getElementById('pfReadyCard'); if(rc&&rc.parentNode){ rc.parentNode.insertBefore(badge, rc.nextSibling); } else { host.insertBefore(badge, host.firstChild); }
+      }
+      badge.style.display='flex';
+      badge.innerHTML='👁 <span style="color:var(--accent);">'+String(v)+'</span> '+(String(v)==='1'?'view':'views')
+        +' · <a href="https://resume4u.help/p/'+encodeURIComponent(slug)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">View live ↗</a>';
+    }).catch(function(){});
+  };
   function hookOpen(){
     if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__acct){
       var oo=window.openPortfolioBuilder;
-      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{window.pfAcctLoad();}catch(e){} },250); return r; };
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{window.pfAcctLoad();}catch(e){} try{window.pfShowViews();}catch(e){} },250); return r; };
       window.openPortfolioBuilder.__acct=true; return true;
     }
     return false;
   }
   var n=0, iv=setInterval(function(){ if(hookOpen()||++n>50) clearInterval(iv); },200);
-  /* autosave when signed in and the config actually changed (pfAcctSave no-ops otherwise) */
+  /* autosave when signed in and changed; refresh the views badge while published */
   setInterval(function(){ try{ if(user()) window.pfAcctSave(); }catch(e){} },4000);
+  setInterval(function(){ try{ var s3=document.getElementById('pfStep3'); if(window._pfSavedSlug && s3 && s3.offsetParent!==null) window.pfShowViews(); }catch(e){} },15000);
 })();
 </script>
 <style id="_r4uPastelThemes">
