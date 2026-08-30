@@ -3403,9 +3403,10 @@ window.__iosPdfSave = function(blobUrl, filename){
       </div>
       <div id="pfCustomEditor" style="margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
         <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>➕</span>Content blocks</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add your own blocks to build out a real website — text, stats, testimonials, a photo gallery, or a contact form.</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add, remove and reorder blocks to build a real website — case studies, text, stats, testimonials, a gallery, or a contact form. Use ↑ ↓ on any block to reorder.</div>
         <div id="pfCustomList"></div>
         <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;">
+          <button type="button" onclick="pfAddCustomSection('project')" class="pf-addblk" style="border-color:var(--accent);color:var(--accent);font-weight:700;">🗂️ Case study</button>
           <button type="button" onclick="pfAddCustomSection('text')" class="pf-addblk">📝 Text</button>
           <button type="button" onclick="pfAddCustomSection('stats')" class="pf-addblk">📊 Stats</button>
           <button type="button" onclick="pfAddCustomSection('testimonials')" class="pf-addblk">❝ Testimonials</button>
@@ -8250,13 +8251,14 @@ if ('serviceWorker' in navigator) {
     if(Array.isArray(out.addBlocks) && out.addBlocks.length){
       try{
         if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
-        var OKT=['text','stats','testimonials','gallery','contact'];
+        var OKT=['project','text','stats','testimonials','gallery','contact'];
         out.addBlocks.slice(0,8).forEach(function(bk){
           if(!bk||typeof bk!=='object') return;
           var t=OKT.indexOf(bk.type)>=0?bk.type:'text';
           var nb={type:t,title:String(bk.title||'').slice(0,90)};
           if(t==='stats') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {value:String(it.value||'').slice(0,40),label:String(it.label||'').slice(0,90)};});
           else if(t==='testimonials') nb.items=(Array.isArray(bk.items)?bk.items:[]).slice(0,12).map(function(it){it=it||{};return {quote:String(it.quote||'').slice(0,700),author:String(it.author||'').slice(0,90),role:String(it.role||'').slice(0,90)};});
+          else if(t==='project'){ nb.subtitle=String(bk.subtitle||'').slice(0,120); nb.body=String(bk.body||'').slice(0,3000); nb.tags=(Array.isArray(bk.tags)?bk.tags:[]).slice(0,8).map(function(x){return String(x).slice(0,40);}); nb.link=String(bk.link||bk.url||'').slice(0,300); nb.images=[]; }
           else if(t==='gallery') nb.images=[];
           else if(t==='contact') nb.body=String(bk.body||'').slice(0,600);
           else { nb.body=String(bk.body||'').slice(0,3000); nb.images=[]; nb.embed=''; }
@@ -8380,8 +8382,8 @@ if ('serviceWorker' in navigator) {
       chips:{'✨ Minimal & elegant':'Make it minimal and elegant: lots of whitespace, a refined serif heading font, a muted palette','⚡ Bold & modern':'Bold modern look: strong geometric sans-serif fonts, a vivid accent colour, tighter spacing','🖤 Sleek dark':'Sleek dark theme with a neon accent and a clean modern font','☀️ Warm':'Warm and friendly: soft rounded corners, a warm accent colour, a humanist sans font'}},
     {key:'Sections', q:"Now your sections — tell me what to feature, hide, or rename. E.g. 'put projects first', 'hide awards', 'rename Experience to Where I have worked'.",
       chips:{'⭐ Feature projects':'Feature my projects section prominently near the top','🙈 Hide awards':'Hide the awards section','✍️ Rename Experience':'Rename the Experience section heading to Where I have worked'}},
-    {key:'Add', q:"Want to add anything? A testimonials section, a project gallery, a stats strip, or a contact form.",
-      chips:{'❝ Testimonials':'Add a testimonials section','✉️ Contact form':'Add a contact form so people can reach me','📊 Stats strip':'Add a stats strip highlighting key numbers','Skip →':'__skip'}},
+    {key:'Add', q:"Want to add anything? A case study for a key project, testimonials, a stats strip, or a contact form.",
+      chips:{'🗂️ Case study':'Add an image-led case-study block for one of my projects','❝ Testimonials':'Add a testimonials section','📊 Stats strip':'Add a stats strip highlighting key numbers','✉️ Contact form':'Add a contact form so people can reach me','Skip →':'__skip'}},
     {key:'Polish', q:"Last step — any final tweaks? Colours, fonts, spacing, or wording. When you're happy, you're done.",
       chips:{'🔠 Bigger headings':'Make the headings a bit bigger and bolder','🌬️ More whitespace':'Add more whitespace and breathing room','🎨 Fresh accent':'Try a fresh accent colour that fits the vibe','✅ All done':'__done'}}
   ];
@@ -8785,6 +8787,7 @@ window.__novaPortfolioHTML=function(d,sections){
   // testimonials / gallery / contact (+ back-compat: no type = text).
   var custom = A(d.customSections);
   if(!custom.length && typeof window!=='undefined' && Array.isArray(window.__pfCustomSections)) custom = window.__pfCustomSections;
+  var projIdx=0;
   custom.forEach(function(cs){
     if(!cs) return;
     var type = cs.type || 'text';
@@ -8817,6 +8820,17 @@ window.__novaPortfolioHTML=function(d,sections){
         + '<textarea name="msg" placeholder="Your message" rows="4" required></textarea>'
         + '<button type="submit" class="cs-form-btn">Send message</button></form>';
       out += card('', t||'Get in touch', inner);
+    } else if(type==='project'){
+      // Image-led case study: title, subtitle, description, media, tags, link.
+      if(!(t || cs.body || imgs.length)) return;
+      var pMedia = imgs.length ? '<div class="cs-proj-media">'+imgs.slice(0,4).map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t||'')+'" loading="lazy">';}).join('')+'</div>' : '';
+      var pSub = cs.subtitle ? '<div class="cs-proj-sub">'+esc(cs.subtitle)+'</div>' : '';
+      var pDesc = cs.body ? '<div class="cs-proj-desc">'+renderBody(cs.body)+'</div>' : '';
+      var pTags = A(cs.tags).filter(Boolean); var pTagsHTML = pTags.length ? '<div class="tags" style="margin-top:12px">'+pTags.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>' : '';
+      var pUrl = lk(cs.link||cs.url||''); var pLink = pUrl ? '<a class="cs-proj-link" href="'+esc(pUrl)+'" target="_blank" rel="noopener">View project ↗</a>' : '';
+      var flip = (projIdx % 2 === 1) ? ' flip' : ''; projIdx++;
+      inner = '<div class="cs-proj'+(pMedia?' has-media'+flip:'')+'">'+pMedia+'<div class="cs-proj-body"><h3 class="cs-proj-t">'+esc(t||'Project')+'</h3>'+pSub+pDesc+pTagsHTML+pLink+'</div></div>';
+      out += '<section class="card cs-proj-card">'+inner+'</section>';
     } else { // text (default)
       var imgHTML = imgs.length ? '<div class="cs-imgs'+(imgs.length>1?' multi':'')+'">'+imgs.map(function(u){return '<img src="'+esc(u)+'" alt="'+esc(t||'')+'" loading="lazy">';}).join('')+'</div>' : '';
       inner = renderBody(cs.body||'') + imgHTML + embedHTML(cs.embed||'');
@@ -8910,6 +8924,17 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.cs-form input,.cs-form textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:0.92rem;font-family:inherit}'
 + '.cs-form-btn{align-self:flex-start;padding:11px 24px;border:none;border-radius:99px;background:var(--acc);color:#fff;font-weight:700;font-size:0.92rem;cursor:pointer}'
 + '.cs-form-btn:hover{background:var(--acc-h)}'
+/* project / case-study block — image-led */
++ '.cs-proj-card{padding:0!important;overflow:hidden}'
++ '.cs-proj{display:grid;grid-template-columns:1fr}'
++ '@media(min-width:640px){.cs-proj.has-media{grid-template-columns:1.05fr 1fr}.cs-proj.has-media.flip{grid-template-columns:1fr 1.05fr}.cs-proj.has-media.flip .cs-proj-media{order:2}}'
++ '.cs-proj-media{background:var(--bg);display:grid;grid-auto-rows:1fr;gap:2px}'
++ '.cs-proj-media img{width:100%;height:100%;object-fit:cover;display:block;min-height:200px}'
++ '.cs-proj-body{padding:26px}'
++ '.cs-proj-t{font-size:1.35rem;font-weight:800;line-height:1.2;margin:0 0 4px}'
++ '.cs-proj-sub{font-size:0.9rem;color:var(--mut);margin-bottom:13px}'
++ '.cs-proj-desc p{font-size:0.96rem;line-height:1.6;color:var(--ink);margin-bottom:8px}.cs-proj-desc p:last-child{margin-bottom:0}'
++ '.cs-proj-link{display:inline-block;margin-top:15px;color:var(--acc);font-weight:600}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
 /* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
@@ -9153,15 +9178,19 @@ window.__novaPortfolioHTML=function(d,sections){
   try{ window.__pfCustomSections = JSON.parse(localStorage.getItem('_pfCustomSections')||'[]'); }catch(e){ window.__pfCustomSections=[]; }
   if(!Array.isArray(window.__pfCustomSections)) window.__pfCustomSections=[];
   function saveCustom(){ try{ localStorage.setItem('_pfCustomSections', JSON.stringify(window.__pfCustomSections)); return true; }catch(e){ alert('Could not save — images may be too large. Try fewer/smaller images.'); return false; } }
-  var CS_LABELS={text:'📝 Text',stats:'📊 Stats',testimonials:'❝ Testimonials',gallery:'🖼️ Gallery',contact:'✉️ Contact form'};
+  var CS_LABELS={project:'🗂️ Case study',text:'📝 Text',stats:'📊 Stats',testimonials:'❝ Testimonials',gallery:'🖼️ Gallery',contact:'✉️ Contact form'};
   window.pfCsSet=function(i,field,val){ if(!window.__pfCustomSections[i]) return; window.__pfCustomSections[i][field]=val; saveCustom(); refreshPreview(); };
+  window.pfCsSetTags=function(i,val){ var s=window.__pfCustomSections[i]; if(!s) return; s.tags=String(val||'').split(',').map(function(x){return x.trim();}).filter(Boolean).slice(0,8); saveCustom(); refreshPreview(); };
+  window.pfCsMove=function(i,dir){ var C=window.__pfCustomSections; if(!C) return; var j=i+dir; if(j<0||j>=C.length) return; var tmp=C[i]; C[i]=C[j]; C[j]=tmp; saveCustom(); window.pfRenderCustom(); refreshPreview(); };
   window.pfAddCustomSection=function(type){ type=(typeof type==='string')?type:'text';
     var s={type:type,title:''};
     if(type==='text'){ s.body='';s.images=[];s.embed=''; }
+    else if(type==='project'){ s.subtitle='';s.body='';s.images=[];s.tags=[];s.link=''; }
     else if(type==='stats'||type==='testimonials'){ s.items=[{}]; }
     else if(type==='gallery'){ s.images=[]; }
     else if(type==='contact'){ s.body=''; }
-    window.__pfCustomSections.push(s); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
+    window.__pfCustomSections.push(s); saveCustom(); window.pfRenderCustom(); refreshPreview();
+    setTimeout(function(){ var b=document.getElementById('pfCustomList'); if(b){ var cards=b.children; var last=cards[cards.length-1]; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:'smooth',block:'center'}); } },60); };
   window.pfRemoveCustomSection=function(i){ window.__pfCustomSections.splice(i,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
   window.pfCsRemoveImage=function(i,j){ if(window.__pfCustomSections[i]&&window.__pfCustomSections[i].images){ window.__pfCustomSections[i].images.splice(j,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); } };
   window.pfCsAddItem=function(i){ var s=window.__pfCustomSections[i]; if(!s) return; if(!s.items) s.items=[]; s.items.push({}); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
@@ -9191,10 +9220,12 @@ window.__novaPortfolioHTML=function(d,sections){
     var IN='padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:0.84rem;font-family:inherit;';
     box.innerHTML=C.map(function(s,i){
       var type=s.type||'text';
-      var titlePH = type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
+      var titlePH = type==='project'?'Project / case-study title':type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
       var head='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
         +'<span style="font-size:0.68rem;font-weight:700;color:var(--accent);background:rgba(217,119,6,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;">'+(CS_LABELS[type]||'Block')+'</span>'
         +'<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">'
+        +'<button type="button" onclick="pfCsMove('+i+',-1)" title="Move up" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;font-size:0.82rem;line-height:1;">↑</button>'
+        +'<button type="button" onclick="pfCsMove('+i+',1)" title="Move down" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;font-size:0.82rem;line-height:1;">↓</button>'
         +'<button type="button" onclick="pfRemoveCustomSection('+i+')" style="background:none;border:none;color:#dc2626;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">Remove</button></div>';
       var body='';
       if(type==='stats'){
@@ -9209,6 +9240,13 @@ window.__novaPortfolioHTML=function(d,sections){
       } else if(type==='contact'){
         body='<textarea placeholder="Intro line (optional) — e.g. I’d love to hear from you" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:44px;'+IN+'resize:vertical;">'+esc(s.body||'')+'</textarea>'
           +'<div style="font-size:0.73rem;color:var(--muted);margin-top:6px;">A contact form that sends messages to your email (from Basic Info).</div>';
+      } else if(type==='project'){
+        var pj=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:60px;height:60px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
+        body='<input type="text" value="'+esc(s.subtitle||'')+'" placeholder="Subtitle — role · company · year" oninput="pfCsSet('+i+',\'subtitle\',this.value)" style="width:100%;'+IN+'margin-bottom:7px;">'
+          +'<textarea placeholder="The story — problem, what you did, the result. One line per paragraph, start a line with - for a bullet." oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:80px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+pj+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Add images<input type="file" accept="image/*" multiple onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
+          +'<input type="text" value="'+esc((s.tags||[]).join(', '))+'" placeholder="Tags (comma separated) — e.g. Product, UX, Research" oninput="pfCsSetTags('+i+',this.value)" style="width:100%;'+IN+'margin-bottom:7px;">'
+          +'<input type="text" value="'+esc(s.link||'')+'" placeholder="Link (optional) — case study or live project URL" oninput="pfCsSet('+i+',\'link\',this.value)" style="width:100%;'+IN+'">';
       } else { // text
         var imgs=(s.images||[]).map(function(u,j){ return '<div style="position:relative;width:54px;height:44px;flex-shrink:0;"><img src="'+esc(u)+'" style="width:54px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+','+j+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>'; }).join('');
         body='<textarea placeholder="Text — one line per paragraph, start a line with - for a bullet" oninput="pfCsSet('+i+',\'body\',this.value)" style="width:100%;min-height:70px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.body||'')+'</textarea>'
