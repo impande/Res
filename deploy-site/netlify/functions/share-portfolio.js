@@ -35,6 +35,16 @@ exports.handler = async function(event) {
       if (!html) {
         return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }, body: notFound() };
       }
+      // ── Analytics: increment the view counter (best-effort, awaited so it lands
+      //    on Lambda). Racy under heavy concurrency, which is fine for a counter. ──
+      try {
+        const cur = parseInt((doc.fields.views && doc.fields.views.integerValue) || '0', 10) || 0;
+        await fetch(`${FS_BASE}/${encodeURIComponent(id)}?key=${FS_KEY}&updateMask.fieldPaths=views`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: { views: { integerValue: String(cur + 1) } } }),
+        });
+      } catch (e) { /* never block serving on the counter */ }
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },

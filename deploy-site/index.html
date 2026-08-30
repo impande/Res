@@ -8837,6 +8837,72 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 
 </script>
+<script id="_r4uPfAccount">
+/* Account-tied builder state: save the editable portfolio config (template,
+   customizations, links, content blocks — images stripped to respect Firestore's
+   ~1MB doc limit) to pfState/{uid}, and restore it on a fresh device so users can
+   edit after publishing. Uses the signed-in user's ID token; secure via rules:
+     match /pfState/{uid} { allow read, write: if request.auth!=null && request.auth.uid==uid; }
+   Fully guarded — any failure silently falls back to the per-browser localStorage. */
+(function(){
+  var PROJ='resume-ai-2eda1', KEY='AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+  var BASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/pfState/';
+  function user(){ try{ return window._fbUser||null; }catch(e){ return null; } }
+  function token(u){ try{ return (u&&u.getIdToken)?u.getIdToken():Promise.reject(); }catch(e){ return Promise.reject(); } }
+  function stripImgs(bl){ return (bl||[]).map(function(b){ var c={}; for(var k in b){ c[k]=b[k]; } if(Array.isArray(c.images)) c.images=[]; return c; }); }
+  function collectState(){
+    return { v:1, template:(typeof pfTemplate!=='undefined'?pfTemplate:'nova'),
+      customize:(window.__pfCustomize||{}), links:(window.__pfExtraLinks||[]),
+      blocks:stripImgs(window.__pfCustomSections||[]),
+      sections:(typeof pfSections!=='undefined'?pfSections:null) };
+  }
+  var saveT=null, lastSaved='';
+  window.pfAcctSave=function(){ var u=user(); if(!u) return;
+    if(saveT) clearTimeout(saveT);
+    saveT=setTimeout(function(){
+      var json; try{ json=JSON.stringify(collectState()); }catch(e){ return; }
+      if(json===lastSaved || json.length>800000) return;
+      token(u).then(function(tok){
+        return fetch(BASE+encodeURIComponent(u.uid)+'?updateMask.fieldPaths=state&updateMask.fieldPaths=updatedAt&key='+KEY,{
+          method:'PATCH', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+          body:JSON.stringify({fields:{ state:{stringValue:json}, updatedAt:{timestampValue:new Date().toISOString()} }})
+        });
+      }).then(function(r){ if(r&&r.ok) lastSaved=json; }).catch(function(){});
+    },1500);
+  };
+  var loadedFor=null;
+  window.pfAcctLoad=function(){ var u=user(); if(!u||loadedFor===u.uid) return; loadedFor=u.uid;
+    var localHas = (window.__pfCustomSections&&window.__pfCustomSections.length) || (window.__pfExtraLinks&&window.__pfExtraLinks.length) || (window.__pfCustomize&&Object.keys(window.__pfCustomize).length);
+    token(u).then(function(tok){ return fetch(BASE+encodeURIComponent(u.uid)+'?key='+KEY,{headers:{'Authorization':'Bearer '+tok}}); })
+      .then(function(r){ return r&&r.ok?r.json():null; })
+      .then(function(doc){
+        if(!doc||!doc.fields||!doc.fields.state) return;
+        if(localHas) return; /* keep active local edits; they'll sync up */
+        var st; try{ st=JSON.parse(doc.fields.state.stringValue); }catch(e){ return; }
+        if(!st) return;
+        if(st.customize) window.__pfCustomize=st.customize;
+        if(Array.isArray(st.links)) window.__pfExtraLinks=st.links;
+        if(Array.isArray(st.blocks)) window.__pfCustomSections=st.blocks;
+        if(st.template) window.pfTemplate=st.template;
+        if(st.sections && typeof pfSections!=='undefined'){ try{ for(var k in st.sections) pfSections[k]=st.sections[k]; }catch(e){} }
+        try{ localStorage.setItem('_pfCustomize',JSON.stringify(window.__pfCustomize||{})); localStorage.setItem('_pfExtraLinks',JSON.stringify(window.__pfExtraLinks||[])); localStorage.setItem('_pfCustomSections',JSON.stringify(window.__pfCustomSections||[])); }catch(e){}
+        try{ if(window.pfRenderExtraLinks) window.pfRenderExtraLinks(); if(window.pfRenderCustom) window.pfRenderCustom(); }catch(e){}
+        try{ if(typeof pfCurrentStep!=='undefined' && pfCurrentStep===3 && typeof buildPfPreview==='function') buildPfPreview(); }catch(e){}
+      }).catch(function(){});
+  };
+  function hookOpen(){
+    if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__acct){
+      var oo=window.openPortfolioBuilder;
+      window.openPortfolioBuilder=function(){ var r=oo.apply(this,arguments); setTimeout(function(){ try{window.pfAcctLoad();}catch(e){} },250); return r; };
+      window.openPortfolioBuilder.__acct=true; return true;
+    }
+    return false;
+  }
+  var n=0, iv=setInterval(function(){ if(hookOpen()||++n>50) clearInterval(iv); },200);
+  /* autosave when signed in and the config actually changed (pfAcctSave no-ops otherwise) */
+  setInterval(function(){ try{ if(user()) window.pfAcctSave(); }catch(e){} },4000);
+})();
+</script>
 <style id="_r4uPastelThemes">
 /* ── Pastel timeline themes: Blush / Verdant / Lilac / Azure ─────────────────────
    Reference-matched layout: the NAME lives inside a full-bleed pastel sidebar
