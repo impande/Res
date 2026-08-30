@@ -8552,6 +8552,24 @@ window.__novaPortfolioHTML=function(d,sections){
 /* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
 + '.pcard,.foot{grid-column:1/-1;}'
 + '.foot a{color:var(--acc);font-weight:600}'
+/* professional-site chrome: sticky nav, reveal, back-to-top */
++ 'body.pf-hasnav{padding-top:54px}'
++ '.col>section[id],.pcard[id]{scroll-margin-top:70px}'
++ '.pf-nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;height:54px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}'
++ 'body:has(.pf-cta-top) .pf-nav{top:48px}'
++ '.pf-nav-brand{font-weight:800;font-size:0.98rem;color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50%}'
++ '.pf-nav-links{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}'
++ '.pf-nav-links a{font-size:0.86rem;font-weight:600;color:var(--mut);text-decoration:none;padding:7px 11px;border-radius:8px;white-space:nowrap}'
++ '.pf-nav-links a:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}'
++ '.pf-nav-links a.on{color:var(--acc)}'
++ '.pf-nav-cta{background:var(--acc)!important;color:#fff!important}'
++ '.pf-nav-toggle{display:none;background:none;border:none;color:var(--ink);font-size:1.4rem;cursor:pointer;padding:4px 8px;line-height:1}'
++ '@media(max-width:720px){.pf-nav-toggle{display:block}.pf-nav-links{position:fixed;top:54px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--bg);border-bottom:1px solid var(--line);padding:6px;max-height:0;overflow:hidden;transition:max-height .28s ease;box-shadow:0 10px 24px rgba(0,0,0,0.08)}.pf-nav-links.open{max-height:70vh}.pf-nav-links a{padding:12px 14px;font-size:0.95rem}}'
++ '.pf-top{position:fixed;bottom:20px;right:20px;z-index:900;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.2rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.18);opacity:0;transform:translateY(10px) scale(0.9);transition:opacity .2s,transform .2s;pointer-events:none}'
++ '.pf-top.show{opacity:1;transform:none;pointer-events:auto}'
++ '.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}'
++ '.reveal.in{opacity:1;transform:none}'
++ '@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}'
 + '@media(max-width:560px){.avatar{width:104px;height:104px;margin-top:-58px}.avatar.mono span{font-size:2.3rem}.pmain h1{font-size:1.5rem}.banner{height:110px}}';
 
   // Build the customization stylesheet — appended AFTER the base CSS so it wins.
@@ -8605,15 +8623,61 @@ window.__novaPortfolioHTML=function(d,sections){
     + 'document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.classList||!f.classList.contains("cs-form"))return;e.preventDefault();var to=f.getAttribute("data-to")||"";var g=function(n){var el=f.querySelector("[name="+n+"]");return el?el.value:"";};if(!to){alert("No contact email is set on this site.");return;}var sub="Portfolio message from "+(g("from")||"a visitor");var body=g("msg")+"\\n\\n— "+g("from")+" ("+g("email")+")";window.location.href="mailto:"+to+"?subject="+encodeURIComponent(sub)+"&body="+encodeURIComponent(body);},true);'
     + '<\/scr'+'ipt>';
 
+  // ── Professional-site runtime chrome: sticky nav (auto from sections), scroll
+  //    reveal, active-link highlight, back-to-top. Built with DOM APIs (textContent
+  //    auto-escapes), so no markup-injection risk. ──
+  var chrome = '<scr'+'ipt>(function(){'
+    + 'var col=document.querySelector(".col");if(!col)return;'
+    + 'var pc=col.querySelector(".pcard");if(pc&&!pc.id)pc.id="top";'
+    + 'var secs=[].slice.call(col.children).filter(function(s){return s.tagName==="SECTION"&&!s.classList.contains("pcard");});'
+    + 'var nav=document.createElement("nav");nav.className="pf-nav";'
+    + 'var bEl=col.querySelector(".pmain h1");var brand=document.createElement("a");brand.className="pf-nav-brand";brand.href="#top";brand.textContent=bEl?bEl.textContent.trim():"Home";nav.appendChild(brand);'
+    + 'var tog=document.createElement("button");tog.className="pf-nav-toggle";tog.setAttribute("aria-label","Menu");tog.textContent="\\u2630";nav.appendChild(tog);'
+    + 'var lw=document.createElement("div");lw.className="pf-nav-links";var count=0;'
+    + 'secs.forEach(function(s,i){var h=s.querySelector(".card-h h2");if(!h)return;var lbl=(h.textContent||"").trim();if(!lbl)return;if(!s.id)s.id="sec"+i;var a=document.createElement("a");a.href="#"+s.id;a.textContent=lbl;lw.appendChild(a);count++;});'
+    + 'if(!count)return;'
+    + 'var mA=col.querySelector(".pmeta a[href^=mailto]");if(mA){var ca=document.createElement("a");ca.className="pf-nav-cta";ca.href=mA.getAttribute("href");ca.textContent="Contact";lw.appendChild(ca);}'
+    + 'nav.appendChild(lw);document.body.insertBefore(nav,document.body.firstChild);document.body.classList.add("pf-hasnav");'
+    + 'tog.addEventListener("click",function(){lw.classList.toggle("open");});'
+    + '[].forEach.call(lw.querySelectorAll("a"),function(a){a.addEventListener("click",function(){lw.classList.remove("open");});});'
+    + 'if("IntersectionObserver" in window){'
+    + 'var map={};[].forEach.call(lw.querySelectorAll("a[href^=\\"#\\"]"),function(a){map[a.getAttribute("href").slice(1)]=a;});'
+    + 'var sp=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){for(var k in map)map[k].classList.remove("on");if(map[e.target.id])map[e.target.id].classList.add("on");}});},{rootMargin:"-45% 0px -50% 0px"});'
+    + 'secs.forEach(function(s){sp.observe(s);s.classList.add("reveal");});'
+    + 'var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:0.08});'
+    + '[].forEach.call(document.querySelectorAll(".reveal"),function(el){io.observe(el);});'
+    + 'setTimeout(function(){[].forEach.call(document.querySelectorAll(".reveal"),function(el){el.classList.add("in");});},1600);}'
+    + 'var tb=document.createElement("button");tb.className="pf-top";tb.setAttribute("aria-label","Back to top");tb.textContent="\\u2191";document.body.appendChild(tb);'
+    + 'tb.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});'
+    + 'window.addEventListener("scroll",function(){tb.classList.toggle("show",window.scrollY>400);});'
+    + '})();<\/scr'+'ipt>';
+
+  // ── SEO / social sharing / favicon (professional link previews) ──
+  var accHex = (CZ.accent && /^(#|rgb|hsl)/i.test(String(CZ.accent))) ? String(CZ.accent).replace(/[^#0-9a-zA-Z(),.%\s-]/g,'').slice(0,40) : '#0a66c2';
+  var favicon = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="13" fill="'+accHex+'"/><text x="32" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="bold" fill="#ffffff" text-anchor="middle">'+esc(initials)+'</text></svg>');
+  var ogTitle = esc(name)+(title?' — '+esc(title):'');
+  var ogDesc = esc((summary||(name+' — '+title)).slice(0,200));
+  var ogImg = /^https?:\/\//i.test(photo) ? esc(photo) : '';
+  var seo = '<meta property="og:title" content="'+ogTitle+'">'
+    + '<meta property="og:description" content="'+ogDesc+'">'
+    + '<meta property="og:type" content="website">'
+    + (ogImg?'<meta property="og:image" content="'+ogImg+'">':'')
+    + '<meta name="twitter:card" content="'+(ogImg?'summary_large_image':'summary')+'">'
+    + '<meta name="twitter:title" content="'+ogTitle+'">'
+    + '<meta name="twitter:description" content="'+ogDesc+'">'
+    + '<meta name="theme-color" content="'+accHex+'">'
+    + '<link rel="icon" href="'+favicon+'">';
+
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
 + '<meta name="viewport" content="width=device-width,initial-scale=1">'
 + '<title>'+esc(name)+(title?' — '+esc(title):'')+'</title>'
 + '<meta name="description" content="'+esc((summary||(name+' — '+title)).slice(0,155))+'">'
++ seo
 + '<style>'+CSS+'</style>'+customStyle+'</head><body>'
 + ctaTopEl + ctaFloatEl
 + '<div class="col">'+injectHTML+profile+ctaHeroEl+out
 + '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>'
-+ '</div>'+guard+'</body></html>';
++ '</div>'+guard+chrome+'</body></html>';
   return html;
 };
 
