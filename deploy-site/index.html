@@ -3494,20 +3494,49 @@ window.__iosPdfSave = function(blobUrl, filename){
         <iframe class="pf-preview-frame" id="pfPreviewFrame" title="Portfolio Preview"></iframe>
       </div>
       <div id="pfAiCustom" style="background:linear-gradient(135deg,rgba(124,58,237,0.07),rgba(124,58,237,0.02));border:1.5px solid rgba(124,58,237,0.22);border-radius:14px;padding:15px 16px;margin-bottom:14px;">
-        <div style="font-weight:800;font-size:0.92rem;color:var(--text);display:flex;align-items:center;gap:7px;"><span>✨</span>Customize with AI</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin:3px 0 11px;">Describe any change in plain words — colours, fonts, layout, section names, spacing. There's no limit.</div>
+        <div style="font-weight:800;font-size:0.92rem;color:var(--text);display:flex;align-items:center;gap:7px;"><span>✨</span>Describe your vibe</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin:3px 0 11px;">Say the style, mood or brand you want — AI restyles the whole site (colours, fonts, spacing, layout). Then fine-tune anything below.</div>
         <div id="pfAiLog" style="display:none;flex-direction:column;gap:7px;max-height:150px;overflow-y:auto;margin-bottom:11px;"></div>
         <div style="display:flex;gap:8px;">
-          <input id="pfAiInput" type="text" placeholder="e.g. Make it dark with a purple accent" onkeydown="if(event.key==='Enter'){event.preventDefault();pfAiCustomize();}" style="flex:1;min-width:0;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-size:0.85rem;font-family:inherit;">
+          <input id="pfAiInput" type="text" placeholder="e.g. calm Scandinavian — sage green, elegant serif headings, lots of whitespace" onkeydown="if(event.key==='Enter'){event.preventDefault();pfAiCustomize();}" style="flex:1;min-width:0;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-size:0.85rem;font-family:inherit;">
           <button id="pfAiSend" type="button" onclick="pfAiCustomize()" style="padding:10px 18px;border:none;border-radius:9px;background:#7c3aed;color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:inherit;white-space:nowrap;">Send</button>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">
-          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Switch to a sleek dark theme')">🌙 Dark mode</button>
-          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Use a bold modern purple accent')">🎨 Purple accent</button>
-          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Make my name bigger and bolder')">🔠 Bigger name</button>
-          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Give it a clean minimal look with more spacing')">✨ Minimal</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Make it minimal and elegant: lots of whitespace, a refined serif heading font, a muted palette')">🕊️ Minimal &amp; elegant</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Bold modern look: strong geometric sans-serif fonts, a vivid accent colour, tighter spacing')">⚡ Bold &amp; modern</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Sleek dark theme with a neon accent and a clean modern font')">🖤 Sleek dark</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Editorial magazine style: a classic serif heading with a clean sans body and generous spacing')">📰 Editorial</button>
+          <button type="button" class="pf-ai-chip" onclick="pfAiCustomize('Warm and friendly: soft rounded corners, a warm accent, a humanist sans font')">☀️ Warm</button>
           <button type="button" class="pf-ai-chip" onclick="pfAiResetCustomize()">↺ Reset</button>
         </div>
+      </div>
+      <div id="pfStyleStudio" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:15px 16px;margin-bottom:14px;">
+        <div style="font-weight:800;font-size:0.92rem;color:var(--text);display:flex;align-items:center;gap:7px;"><span>🎛️</span>Style Studio</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin:3px 0 13px;">Fine-tune every detail — fonts, colour, spacing, width, corners. The preview updates live.</div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Accent colour</label>
+          <span style="display:inline-flex;align-items:center;gap:8px;"><input type="color" id="pfSSAccent" onchange="pfStyleSet('accent',this.value)" style="width:40px;height:30px;border:1px solid var(--border);border-radius:7px;background:none;cursor:pointer;padding:2px;"><button type="button" class="pf-ss-clear" onclick="pfStyleSet('accent','')">Reset</button></span>
+        </div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Base</label>
+          <span class="pf-ss-seg" data-key="dark"><button type="button" data-val="light" onclick="pfStyleSet('dark','light')">Light</button><button type="button" data-val="dark" onclick="pfStyleSet('dark','dark')">Dark</button></span>
+        </div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Heading font</label>
+          <select id="pfSSFontHead" class="pf-ss-sel" onchange="pfStyleSet('fontHeading',this.value)"></select>
+        </div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Body font</label>
+          <select id="pfSSFontBody" class="pf-ss-sel" onchange="pfStyleSet('fontBody',this.value)"></select>
+        </div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Spacing</label>
+          <span class="pf-ss-seg" data-key="density"><button type="button" data-val="compact" onclick="pfStyleSet('density','compact')">Compact</button><button type="button" data-val="cozy" onclick="pfStyleSet('density','cozy')">Cozy</button><button type="button" data-val="spacious" onclick="pfStyleSet('density','spacious')">Spacious</button></span>
+        </div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Width</label>
+          <span class="pf-ss-seg" data-key="width"><button type="button" data-val="narrow" onclick="pfStyleSet('width','narrow')">Narrow</button><button type="button" data-val="default" onclick="pfStyleSet('width','default')">Default</button><button type="button" data-val="wide" onclick="pfStyleSet('width','wide')">Wide</button></span>
+        </div>
+        <div class="pf-ss-row"><label class="pf-ss-lbl">Corners</label>
+          <span class="pf-ss-seg" data-key="radius"><button type="button" data-val="sharp" onclick="pfStyleSet('radius','sharp')">Sharp</button><button type="button" data-val="soft" onclick="pfStyleSet('radius','soft')">Soft</button><button type="button" data-val="round" onclick="pfStyleSet('radius','round')">Round</button></span>
+        </div>
+        <details style="margin-top:10px;"><summary style="cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--muted);">Advanced — custom CSS</summary>
+          <textarea id="pfSSCss" oninput="pfStyleSet('css',this.value)" placeholder=".card{box-shadow:0 10px 30px rgba(0,0,0,.08)}" style="width:100%;min-height:80px;margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-size:0.8rem;font-family:ui-monospace,Menlo,Consolas,monospace;resize:vertical;"></textarea>
+        </details>
       </div>
       <div class="pf-footer" style="margin-top:10px;">
         <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
@@ -8219,6 +8248,10 @@ if ('serviceWorker' in navigator) {
         var cz=window.__pfCustomize||{};
         if(typeof out.accent==='string'&&out.accent) cz.accent=out.accent; else if(out.accent===null) delete cz.accent;
         if(typeof out.dark==='boolean') cz.dark=out.dark;
+        if(out.fonts===null) delete cz.fonts; else if(out.fonts&&typeof out.fonts==='object'){ var F={}; if(out.fonts.heading) F.heading=String(out.fonts.heading).slice(0,40); if(out.fonts.body) F.body=String(out.fonts.body).slice(0,40); if(F.heading||F.body) cz.fonts=F; }
+        if(typeof out.density==='string'&&/^(compact|cozy|spacious)$/.test(out.density)) cz.density=out.density;
+        if(typeof out.width==='string'&&/^(narrow|default|wide)$/.test(out.width)) cz.width=out.width;
+        if(typeof out.radius==='string'&&/^(sharp|soft|round)$/.test(out.radius)) cz.radius=out.radius;
         if(out.headings&&typeof out.headings==='object') cz.headings=Object.assign(cz.headings||{}, out.headings);
         if(Array.isArray(out.hide)) cz.hide=out.hide;
         if(typeof out.css==='string') cz.css=sanitizeCss(out.css);
@@ -8252,6 +8285,56 @@ if ('serviceWorker' in navigator) {
       .catch(function(){ if(thinking&&thinking.remove) thinking.remove(); log('err','Network error — please try again.'); })
       .then(function(){ if(btn){ btn.disabled=false; btn.textContent='Send'; } });
   };
+})();
+</script>
+<style id="_r4uPfStyleStudioCss">
+  .pf-ss-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+  .pf-ss-lbl{font-size:0.8rem;font-weight:600;color:var(--text);}
+  .pf-ss-seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .pf-ss-seg button{padding:6px 11px;border:none;background:var(--bg);color:var(--muted);font-size:0.76rem;font-weight:600;cursor:pointer;font-family:inherit;border-left:1px solid var(--border);}
+  .pf-ss-seg button:first-child{border-left:none;}
+  .pf-ss-seg button.on{background:var(--accent);color:#fff;}
+  .pf-ss-sel{padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:0.8rem;font-family:inherit;max-width:175px;}
+  .pf-ss-clear{padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--muted);font-size:0.74rem;font-weight:600;cursor:pointer;font-family:inherit;}
+</style>
+<script id="_r4uPfStyleStudioJS">
+/* Style Studio: deep-control knobs (fonts, colour, spacing, width, corners, custom
+   CSS) that write to window.__pfCustomize and live-refresh the preview. Shares the
+   same __pfCustomize the AI "describe your vibe" path and the generator both use. */
+(function(){
+  var SANS=['Inter','DM Sans','Manrope','Work Sans','Poppins','Montserrat','Sora','Space Grotesk','Plus Jakarta Sans','Outfit','Figtree','Rubik','Karla','IBM Plex Sans','Albert Sans'];
+  var SERIF=['Playfair Display','Fraunces','Lora','Cormorant Garamond','Spectral','Source Serif 4','Bricolage Grotesque'];
+  function cz(){ if(!window.__pfCustomize||typeof window.__pfCustomize!=='object'){ try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; } } return window.__pfCustomize; }
+  function save(){ try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize||{})); }catch(e){} }
+  function rerender(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
+  window.pfStyleSet=function(key,val){ var c=cz();
+    if(key==='accent'){ if(val) c.accent=val; else delete c.accent; }
+    else if(key==='dark'){ if(val==='dark'){ c.dark=true; } else { delete c.dark; } }
+    else if(key==='fontHeading'){ c.fonts=c.fonts||{}; if(val) c.fonts.heading=val; else delete c.fonts.heading; if(!c.fonts.heading&&!c.fonts.body) delete c.fonts; }
+    else if(key==='fontBody'){ c.fonts=c.fonts||{}; if(val) c.fonts.body=val; else delete c.fonts.body; if(!c.fonts.heading&&!c.fonts.body) delete c.fonts; }
+    else if(key==='density'){ if(val&&val!=='cozy') c.density=val; else delete c.density; }
+    else if(key==='width'){ if(val&&val!=='default') c.width=val; else delete c.width; }
+    else if(key==='radius'){ if(val&&val!=='soft') c.radius=val; else delete c.radius; }
+    else if(key==='css'){ if(val&&val.trim()) c.css=String(val).replace(/<\/?(style|script)[^>]*>/gi,''); else delete c.css; }
+    window.__pfCustomize=c; save(); rerender(); pfStyleSync();
+  };
+  function seg(key,val){ var w=document.querySelector('.pf-ss-seg[data-key="'+key+'"]'); if(!w) return; [].forEach.call(w.querySelectorAll('button'),function(b){ b.classList.toggle('on', b.getAttribute('data-val')===val); }); }
+  window.pfStyleSync=function(){ var c=window.__pfCustomize||{};
+    var a=document.getElementById('pfSSAccent'); if(a&&typeof c.accent==='string'&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c.accent)) a.value=c.accent;
+    seg('dark', c.dark?'dark':'light'); seg('density', c.density||'cozy'); seg('width', c.width||'default'); seg('radius', c.radius||'soft');
+    var fh=document.getElementById('pfSSFontHead'); if(fh) fh.value=(c.fonts&&c.fonts.heading)||'';
+    var fb=document.getElementById('pfSSFontBody'); if(fb) fb.value=(c.fonts&&c.fonts.body)||'';
+    var cs=document.getElementById('pfSSCss'); if(cs&&document.activeElement!==cs) cs.value=c.css||'';
+  };
+  function opts(list){ return list.map(function(f){ return '<option value="'+f+'">'+f+'</option>'; }).join(''); }
+  function fill(){ var fh=document.getElementById('pfSSFontHead'), fb=document.getElementById('pfSSFontBody'); if(!fh||!fb) return false; if(fh.__filled) return true;
+    var html='<option value="">Default</option><optgroup label="Sans-serif">'+opts(SANS)+'</optgroup><optgroup label="Serif / Display">'+opts(SERIF)+'</optgroup>';
+    fh.innerHTML=html; fb.innerHTML=html; fh.__filled=true; return true; }
+  var n=0, iv=setInterval(function(){
+    var ok=fill(); if(ok){ try{ pfStyleSync(); }catch(e){} }
+    if(typeof window.buildPfPreview==='function' && !window.buildPfPreview.__ssWrap){ var _bp=window.buildPfPreview; window.buildPfPreview=function(){ var r=_bp.apply(this,arguments); try{ pfStyleSync(); }catch(e){} return r; }; window.buildPfPreview.__ssWrap=true; }
+    if((ok && window.buildPfPreview && window.buildPfPreview.__ssWrap)||++n>120) clearInterval(iv);
+  },150);
 })();
 </script>
 <script id="_r4uPfAccount">
@@ -8729,6 +8812,25 @@ window.__novaPortfolioHTML=function(d,sections){
   var czCss='';
   if(CZ.accent){ var ac=String(CZ.accent).replace(/[^#0-9a-zA-Z(),.%\s-]/g,'').slice(0,40); if(ac) czCss+=':root{--acc:'+ac+';--acc-h:'+ac+';}'; }
   if(CZ.dark){ czCss+=':root{--bg:#0f1115;--card:#171a21;--ink:rgba(255,255,255,0.92);--mut:rgba(255,255,255,0.62);--mut2:rgba(255,255,255,0.45);--line:rgba(255,255,255,0.11);}.logo,.sk,.tags span,.link-ic{background:rgba(255,255,255,0.06)!important;}'; }
+  // ── Fonts: a heading + body pairing (Google Fonts), the strongest identity lever ──
+  var fontLink='';
+  function safeFont(f){ return String(f||'').replace(/[^a-zA-Z0-9 ]/g,'').trim().slice(0,40); }
+  var fHead=safeFont(CZ.fonts&&CZ.fonts.heading), fBody=safeFont(CZ.fonts&&CZ.fonts.body);
+  if(fHead||fBody){
+    var fams=[]; if(fHead) fams.push(fHead); if(fBody && fBody!==fHead) fams.push(fBody);
+    var q=fams.map(function(f){ return 'family='+f.replace(/ /g,'+')+':wght@400;700'; }).join('&');
+    fontLink='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?'+q+'&display=swap" rel="stylesheet">';
+    var stkHead=fHead?'"'+fHead+'",Georgia,serif':null, stkBody=fBody?'"'+fBody+'",system-ui,-apple-system,Segoe UI,Roboto,sans-serif':null;
+    czCss+=':root{'+(stkHead?'--font-head:'+stkHead+';':'')+(stkBody?'--font-body:'+stkBody+';':'')+'}';
+    if(stkBody) czCss+='body{font-family:var(--font-body)}';
+    if(stkHead) czCss+='h1,h2,h3,.hi,.name,.card-h h2,.pf-name,.ent-r{font-family:var(--font-head)}';
+  }
+  // ── Density / width / corner radius: structural feel ──
+  if(CZ.density==='compact'){ czCss+='.col{gap:8px;padding-top:14px}.card{padding:16px}.card-h{margin-bottom:10px}'; }
+  else if(CZ.density==='spacious'){ czCss+='.col{gap:20px;padding-top:34px}.card{padding:34px}.card-h{margin-bottom:22px}'; }
+  if(CZ.width==='narrow'){ czCss+='.col{max-width:600px}'; } else if(CZ.width==='wide'){ czCss+='.col{max-width:900px}'; }
+  if(CZ.radius==='sharp'){ czCss+='.card,.sk,.tags span,.logo,.avatar,.cs-imgs img,.cs-gallery img,.cs-quote{border-radius:3px!important}'; }
+  else if(CZ.radius==='round'){ czCss+='.card,.cs-imgs img,.cs-gallery img,.cs-quote{border-radius:22px!important}.sk,.tags span{border-radius:999px!important}'; }
   if(CZ.css){ czCss += String(CZ.css).replace(/<\/?(style|script)[^>]*>/gi,''); }
 
   // ── Interactive additions the AI can request (CSS can't create clickable elements) ──
@@ -8842,6 +8944,7 @@ window.__novaPortfolioHTML=function(d,sections){
 + '<title>'+esc(name)+(title?' — '+esc(title):'')+'</title>'
 + '<meta name="description" content="'+esc((summary||(name+' — '+title)).slice(0,155))+'">'
 + seo
++ fontLink
 + '<style>'+CSS+'</style>'+customStyle+'</head><body>'
 + ctaTopEl + ctaFloatEl
 + '<div class="col">'+injectHTML+profile+ctaHeroEl+out
