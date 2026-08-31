@@ -3403,9 +3403,26 @@ window.__iosPdfSave = function(blobUrl, filename){
       </div>
       <div id="pfCustomEditor" style="margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
         <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>➕</span>Content blocks</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add, remove and reorder blocks to build a real website — case studies, text, stats, testimonials, a gallery, or a contact form. Use ↑ ↓ on any block to reorder.</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Add any blocks and <b>drag</b> them (⠿) into any order — build your site your way. Start blank, or pull sections from your résumé.</div>
+        <div id="pfCanvasMode" style="display:flex;gap:6px;margin-bottom:13px;">
+          <button type="button" id="pfModeGuided" onclick="pfSetScratch(false)" class="pf-modebtn on">🧭 From my résumé</button>
+          <button type="button" id="pfModeScratch" onclick="pfSetScratch(true)" class="pf-modebtn">🧱 Blank canvas</button>
+        </div>
         <div id="pfCustomList"></div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;">
+        <div id="pfResumePalette" style="margin:2px 0 12px;display:none;">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Add from your résumé</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button type="button" onclick="pfAddResumeBlock('about')" class="pf-addblk">About</button>
+            <button type="button" onclick="pfAddResumeBlock('experience')" class="pf-addblk">Experience</button>
+            <button type="button" onclick="pfAddResumeBlock('skills')" class="pf-addblk">Skills</button>
+            <button type="button" onclick="pfAddResumeBlock('education')" class="pf-addblk">Education</button>
+            <button type="button" onclick="pfAddResumeBlock('projects')" class="pf-addblk">Projects</button>
+            <button type="button" onclick="pfAddResumeBlock('certifications')" class="pf-addblk">Certifications</button>
+            <button type="button" onclick="pfAddResumeBlock('awards')" class="pf-addblk">Awards</button>
+          </div>
+        </div>
+        <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin:2px 0 6px;">Add a block</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:0;">
           <button type="button" onclick="pfAddCustomSection('hero')" class="pf-addblk" style="border-color:var(--accent);color:var(--accent);font-weight:700;">⭐ Hero</button>
           <button type="button" onclick="pfAddCustomSection('project')" class="pf-addblk" style="border-color:var(--accent);color:var(--accent);font-weight:700;">🗂️ Case study</button>
           <button type="button" onclick="pfAddCustomSection('text')" class="pf-addblk">📝 Text</button>
@@ -8546,6 +8563,42 @@ if ('serviceWorker' in navigator) {
   },150);
 })();
 </script>
+<style id="_r4uPfDragCss">
+  .pf-modebtn{padding:7px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--muted);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;}
+  .pf-modebtn.on{border-color:var(--accent);background:rgba(217,119,6,0.08);color:var(--accent);}
+  .pf-drag:active{cursor:grabbing;}
+  .pf-dragging{opacity:0.55;box-shadow:0 10px 26px -6px rgba(0,0,0,0.32);}
+</style>
+<script id="_r4uPfDragSortJS">
+/* Pointer-based drag-to-reorder for the block canvas (works on mouse AND touch).
+   Grab a block by its ⠿ handle and drop it anywhere; the new order is written back
+   to __pfCustomSections and the preview refreshes. ↑/↓ buttons remain as a fallback. */
+(function(){
+  var list=null, card=null, dragging=false;
+  function L(){ return document.getElementById('pfCustomList'); }
+  function afterEl(y){ var l=L(); if(!l) return null; var res=null, min=Infinity;
+    [].slice.call(l.children).forEach(function(c){ if(c===card) return; var r=c.getBoundingClientRect(); var off=y-(r.top+r.height/2); if(off<0 && Math.abs(off)<min){ min=Math.abs(off); res=c; } });
+    return res; }
+  document.addEventListener('pointerdown', function(e){
+    var h=e.target && e.target.closest && e.target.closest('.pf-drag'); if(!h) return;
+    list=L(); if(!list) return; card=h; while(card && card.parentNode!==list) card=card.parentNode; if(!card) return;
+    dragging=true; card.classList.add('pf-dragging'); try{ h.setPointerCapture(e.pointerId); }catch(err){} e.preventDefault();
+  });
+  document.addEventListener('pointermove', function(e){ if(!dragging||!card||!list) return; e.preventDefault();
+    var a=afterEl(e.clientY); if(a==null){ if(list.lastElementChild!==card) list.appendChild(card); } else if(a!==card.nextElementSibling){ list.insertBefore(card, a); }
+  });
+  function end(){ if(!dragging) return; dragging=false; if(card) card.classList.remove('pf-dragging');
+    try{
+      var order=[].slice.call(list.querySelectorAll('.pf-drag')).map(function(h){ return +h.getAttribute('data-idx'); });
+      var C=window.__pfCustomSections||[]; var na=order.map(function(i){ return C[i]; }).filter(Boolean);
+      if(na.length===C.length){ window.__pfCustomSections=na; try{ localStorage.setItem('_pfCustomSections', JSON.stringify(na)); }catch(e){} if(window.pfRenderCustom) window.pfRenderCustom(); try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
+    }catch(e){}
+    card=null; list=null;
+  }
+  document.addEventListener('pointerup', end);
+  document.addEventListener('pointercancel', end);
+})();
+</script>
 <script id="_r4uPfAccount">
 /* Account-tied builder state: save the editable portfolio config (template,
    customizations, links, content blocks — images stripped to respect Firestore's
@@ -8876,6 +8929,13 @@ window.__novaPortfolioHTML=function(d,sections){
     var caps = A(cs.captions);
     var lay = cs.layout || '';
     var inner = '';
+    if(type==='resume'){
+      // A résumé-content block: reuse the already-rendered section HTML so the
+      // user can drop About / Experience / Skills / etc. anywhere on the canvas.
+      var rk = (cs.section==='certifications') ? 'certs' : (cs.section||'');
+      customHTML += (parts[rk]||'');
+      return;
+    }
     if(type==='hero'){
       if(!(t || cs.subtitle || imgs.length)) return;
       var hraw=String(cs.ctaLink||'').trim();
@@ -8934,10 +8994,17 @@ window.__novaPortfolioHTML=function(d,sections){
 
   // ── Assemble sections in the user-chosen order (CZ.order); unknown/new keys
   //    fall back to their default position, and 'custom' holds all added blocks. ──
-  var DEFAULT_ORDER=['about','links','experience','education','projects','certs','skills','awards','custom'];
-  var ORDER = (Array.isArray(CZ.order)&&CZ.order.length) ? CZ.order.slice() : DEFAULT_ORDER.slice();
-  DEFAULT_ORDER.forEach(function(k){ if(ORDER.indexOf(k)<0) ORDER.push(k); });
-  var out = ORDER.map(function(k){ return k==='custom' ? (parts.custom||'') : (parts[k]||''); }).join('');
+  var out;
+  if(CZ.scratch){
+    // Blank-canvas / from-scratch mode: render ONLY the blocks the user placed
+    // (which may include résumé-content blocks), in their order. No auto sections.
+    out = parts.custom || '';
+  } else {
+    var DEFAULT_ORDER=['about','links','experience','education','projects','certs','skills','awards','custom'];
+    var ORDER = (Array.isArray(CZ.order)&&CZ.order.length) ? CZ.order.slice() : DEFAULT_ORDER.slice();
+    DEFAULT_ORDER.forEach(function(k){ if(ORDER.indexOf(k)<0) ORDER.push(k); });
+    out = ORDER.map(function(k){ return k==='custom' ? (parts.custom||'') : (parts[k]||''); }).join('');
+  }
 
   var CSS = ''
 + ':root{--bg:#f4f2ee;--card:#fff;--ink:rgba(0,0,0,0.9);--mut:rgba(0,0,0,0.6);--mut2:rgba(0,0,0,0.45);--line:rgba(0,0,0,0.09);--acc:#0a66c2;--acc-h:#004182;--band:linear-gradient(120deg,#1b4f8a,#2d6cb0 45%,#5b8fd0);}'
@@ -9316,6 +9383,19 @@ window.__novaPortfolioHTML=function(d,sections){
     window.__pfCustomSections.push(s); saveCustom(); window.pfRenderCustom(); refreshPreview();
     setTimeout(function(){ var b=document.getElementById('pfCustomList'); if(b){ var cards=b.children; var last=cards[cards.length-1]; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:'smooth',block:'center'}); } },60); };
   window.pfRemoveCustomSection=function(i){ window.__pfCustomSections.splice(i,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
+  // Add a résumé-content block (About / Experience / Skills / …) the user can place & reorder.
+  window.pfAddResumeBlock=function(section){ window.__pfCustomSections.push({type:'resume',section:section}); saveCustom(); window.pfRenderCustom(); refreshPreview();
+    setTimeout(function(){ var b=document.getElementById('pfCustomList'); if(b){ var last=b.children[b.children.length-1]; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:'smooth',block:'center'}); } },60); };
+  // Blank-canvas mode: render only the blocks the user places (no auto résumé sections).
+  window.pfSetScratch=function(on){ try{ if(!window.__pfCustomize||typeof window.__pfCustomize!=='object'){ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); } }catch(e){ window.__pfCustomize={}; }
+    if(on) window.__pfCustomize.scratch=true; else delete window.__pfCustomize.scratch;
+    try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize)); }catch(e){}
+    try{ if(window.pfSyncScratchUI) window.pfSyncScratchUI(); }catch(e){}
+    refreshPreview(); };
+  window.pfSyncScratchUI=function(){ var on=!!(window.__pfCustomize&&window.__pfCustomize.scratch);
+    var g=document.getElementById('pfModeGuided'), sc=document.getElementById('pfModeScratch'), rp=document.getElementById('pfResumePalette');
+    if(g) g.classList.toggle('on',!on); if(sc) sc.classList.toggle('on',on);
+    if(rp) rp.style.display = on ? 'block' : 'none'; };
   window.pfCsRemoveImage=function(i,j){ if(window.__pfCustomSections[i]&&window.__pfCustomSections[i].images){ window.__pfCustomSections[i].images.splice(j,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); } };
   window.pfCsAddItem=function(i){ var s=window.__pfCustomSections[i]; if(!s) return; if(!s.items) s.items=[]; s.items.push({}); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
   window.pfCsRemoveItem=function(i,j){ var s=window.__pfCustomSections[i]; if(s&&s.items){ s.items.splice(j,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); } };
@@ -9345,15 +9425,20 @@ window.__novaPortfolioHTML=function(d,sections){
     box.innerHTML=C.map(function(s,i){
       var type=s.type||'text';
       var titlePH = type==='hero'?'Headline — e.g. Designer & product thinker':type==='project'?'Project / case-study title':type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
-      var head='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
-        +'<span style="font-size:0.68rem;font-weight:700;color:var(--accent);background:rgba(217,119,6,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;">'+(CS_LABELS[type]||'Block')+'</span>'
-        +'<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">'
+      var lbl = type==='resume' ? ('📄 '+(String(s.section||'section').charAt(0).toUpperCase()+String(s.section||'section').slice(1))) : (CS_LABELS[type]||'Block');
+      var titleField = type==='resume' ? '<span style="flex:1;font-size:0.8rem;color:var(--muted);">From your résumé</span>' : '<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">';
+      var head='<div style="display:flex;gap:7px;align-items:center;margin-bottom:8px;">'
+        +'<span class="pf-drag" data-idx="'+i+'" title="Drag to move" style="cursor:grab;color:var(--muted);font-size:1rem;padding:2px 3px;touch-action:none;user-select:none;flex-shrink:0;">⠿</span>'
+        +'<span style="font-size:0.68rem;font-weight:700;color:var(--accent);background:rgba(217,119,6,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;">'+lbl+'</span>'
+        +titleField
         +'<button type="button" onclick="pfCsMove('+i+',-1)" title="Move up" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;font-size:0.82rem;line-height:1;">↑</button>'
         +'<button type="button" onclick="pfCsMove('+i+',1)" title="Move down" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;font-size:0.82rem;line-height:1;">↓</button>'
         +'<button type="button" onclick="pfRemoveCustomSection('+i+')" style="background:none;border:none;color:#dc2626;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;">Remove</button></div>';
       var body='';
       var layRow = (CS_LAYOUTS[type]) ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="font-size:0.74rem;color:var(--muted);">Layout</span><select onchange="pfCsSet('+i+',\'layout\',this.value)" style="'+IN+'">'+CS_LAYOUTS[type].map(function(o){return '<option value="'+o[0]+'"'+((s.layout||'')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>' : '';
-      if(type==='hero'){
+      if(type==='resume'){
+        body='<div style="font-size:0.78rem;color:var(--muted);line-height:1.5;padding:2px;">Pulls your <b>'+esc(s.section||'')+'</b> straight from your résumé. Edit the content in “Build Your Resume”; drag this block to place it anywhere.</div>';
+      } else if(type==='hero'){
         var hImg=(s.images&&s.images[0])?'<div style="position:relative;width:80px;height:54px;flex-shrink:0;"><img src="'+esc(s.images[0])+'" style="width:80px;height:54px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+',0)" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>':'';
         body='<textarea placeholder="Subheadline — a punchy line about you" oninput="pfCsSet('+i+',\'subtitle\',this.value)" style="width:100%;min-height:50px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.subtitle||'')+'</textarea>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">'+hImg+'<label style="display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px dashed var(--border);border-radius:7px;font-size:0.78rem;color:var(--muted);cursor:pointer;">＋ Background image<input type="file" accept="image/*" onchange="pfCsAddImage('+i+',this)" style="display:none;"></label></div>'
@@ -9389,7 +9474,7 @@ window.__novaPortfolioHTML=function(d,sections){
     }).join('');
   };
 
-  function renderEditors(){ try{ window.pfRenderExtraLinks(); }catch(e){} try{ window.pfRenderCustom(); }catch(e){} }
+  function renderEditors(){ try{ window.pfRenderExtraLinks(); }catch(e){} try{ window.pfRenderCustom(); }catch(e){} try{ if(window.pfSyncScratchUI) window.pfSyncScratchUI(); }catch(e){} }
   function wrapOpen(){
     if(typeof window.openPortfolioBuilder==='function' && !window.openPortfolioBuilder.__novaLinks){
       var oo=window.openPortfolioBuilder;
