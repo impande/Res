@@ -8370,6 +8370,16 @@ if ('serviceWorker' in navigator) {
   .pfg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
   .pfg-chip{padding:6px 12px;border:1px solid var(--border);border-radius:99px;background:var(--bg);color:var(--text);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;}
   .pfg-chip:hover{border-color:var(--accent);color:var(--accent);}
+  .pfg-vibes{display:grid;grid-template-columns:1fr;gap:8px;width:100%;}
+  @media(min-width:430px){.pfg-vibes{grid-template-columns:1fr 1fr;}}
+  .pfg-vibe{display:flex;align-items:center;gap:11px;text-align:left;padding:9px;border:1px solid var(--border);border-radius:12px;background:var(--bg);cursor:pointer;font-family:inherit;transition:border-color .15s,box-shadow .15s;}
+  .pfg-vibe:hover{border-color:var(--accent);box-shadow:0 4px 14px -6px rgba(0,0,0,.18);}
+  .pfg-vibe-sw{position:relative;width:52px;height:52px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,.10);overflow:hidden;}
+  .pfg-vibe-dot{position:absolute;top:7px;right:7px;width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.5);}
+  .pfg-vibe-aa{font-size:1.3rem;font-weight:700;line-height:1;}
+  .pfg-vibe-tx{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .pfg-vibe-nm{font-size:0.85rem;font-weight:700;color:var(--text);}
+  .pfg-vibe-ds{font-size:0.72rem;color:var(--muted);line-height:1.35;}
   .pfg-input-row{display:flex;gap:8px;}
   #pfGuideInput{flex:1;min-width:0;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-size:0.85rem;font-family:inherit;}
   #pfGuideSend{padding:10px 18px;border:none;border-radius:9px;background:var(--accent);color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:inherit;white-space:nowrap;}
@@ -8383,8 +8393,8 @@ if ('serviceWorker' in navigator) {
 (function(){
   var EP='/.netlify/functions/generate';
   var STEPS=[
-    {key:'Vibe', q:"First, the overall feel. Describe a vibe, mood, or brand — I'll style your whole site to match.",
-      chips:{'✨ Minimal & elegant':'Make it minimal and elegant: lots of whitespace, a refined serif heading font, a muted palette','⚡ Bold & modern':'Bold modern look: strong geometric sans-serif fonts, a vivid accent colour, tighter spacing','🖤 Sleek dark':'Sleek dark theme with a neon accent and a clean modern font','☀️ Warm':'Warm and friendly: soft rounded corners, a warm accent colour, a humanist sans font'}},
+    {key:'Vibe', q:"First, the overall feel. Pick a look below — each shows its real colours and font, and what it's good for — or just type your own in your words.",
+      chips:{}},
     {key:'Sections', q:"Now your sections — tell me what to feature, hide, or rename. E.g. 'put projects first', 'hide awards', 'rename Experience to Where I have worked'.",
       chips:{'⭐ Feature projects':'Feature my projects section prominently near the top','🙈 Hide awards':'Hide the awards section','✍️ Rename Experience':'Rename the Experience section heading to Where I have worked'}},
     {key:'Add', q:"Want to add anything? A case study for a key project, testimonials, a stats strip, or a contact form.",
@@ -8392,12 +8402,37 @@ if ('serviceWorker' in navigator) {
     {key:'Polish', q:"Last step — any final tweaks? Colours, fonts, spacing, or wording. When you're happy, you're done.",
       chips:{'🔠 Bigger headings':'Make the headings a bit bigger and bolder','🌬️ More whitespace':'Add more whitespace and breathing room','🎨 Fresh accent':'Try a fresh accent colour that fits the vibe','✅ All done':'__done'}}
   ];
+  // Vibe presets shown as visual preview cards (real colours + typeface + a plain,
+  // relatable description) so a first-time builder can SEE what each look means.
+  var VIBES=[
+    {name:'Minimal & elegant', emoji:'🕊️', bg:'#f6f5f2', ink:'#1a1a1a', accent:'#8a7a63', font:"'Fraunces',Georgia,serif", desc:'Calm and premium — lots of white space and a refined serif. Like a high-end studio.', prompt:'Make it minimal and elegant: lots of whitespace, a refined serif heading font (Fraunces), a warm muted palette'},
+    {name:'Bold & modern', emoji:'⚡', bg:'#ffffff', ink:'#0f172a', accent:'#4f46e5', font:"'Space Grotesk',sans-serif", desc:'Confident and current — strong geometric type and a vivid accent. Like a tech startup.', prompt:'Bold modern look: a strong geometric sans-serif (Space Grotesk), a vivid indigo accent, tighter spacing'},
+    {name:'Sleek dark', emoji:'🖤', bg:'#12141a', ink:'#ffffff', accent:'#22d3ee', font:"'Sora',sans-serif", desc:'Dramatic and techy — a dark background with a neon accent. Like a product designer.', prompt:'Sleek dark theme with a neon cyan accent and a clean modern font (Sora)'},
+    {name:'Warm & friendly', emoji:'☀️', bg:'#fff8f1', ink:'#3a2a1a', accent:'#e0662a', font:"'Poppins',sans-serif", desc:'Approachable and human — soft corners and a warm accent. Feels welcoming.', prompt:'Warm and friendly: soft rounded corners, a warm orange accent, a friendly rounded sans (Poppins)'},
+    {name:'Editorial', emoji:'📰', bg:'#fbfaf7', ink:'#1a1a1a', accent:'#111111', font:"'Playfair Display',Georgia,serif", desc:'Magazine-style — a classic serif headline over clean text. Feels authoritative.', prompt:'Editorial magazine style: a classic serif heading (Playfair Display) with a clean sans body and generous spacing'},
+    {name:'Creative pop', emoji:'🎨', bg:'#fdf4ff', ink:'#2a1030', accent:'#db2777', font:"'Bricolage Grotesque',sans-serif", desc:'Playful and expressive — a punchy accent and characterful type. Great for creatives.', prompt:'Creative and playful: a punchy pink accent, a characterful display font (Bricolage Grotesque), rounded corners'}
+  ];
+  try{ if(!document.getElementById('pfgVibeFonts')){ var _vf=document.createElement('link'); _vf.id='pfgVibeFonts'; _vf.rel='stylesheet'; _vf.href='https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Space+Grotesk:wght@400;700&family=Sora:wght@400;700&family=Poppins:wght@400;700&family=Playfair+Display:wght@400;700&family=Bricolage+Grotesque:wght@400;700&display=swap'; document.head.appendChild(_vf); } }catch(e){}
   var idx=0, started=false, busy=false;
   function el(id){ return document.getElementById(id); }
   function firstName(){ try{ if(window.lastResumeData&&lastResumeData.firstName) return lastResumeData.firstName; if(typeof collectData==='function'){ var d=collectData(); return d&&d.firstName||''; } }catch(e){} return ''; }
   function road(){ var r=el('pfGuideRoad'); if(!r) return; r.innerHTML=STEPS.map(function(s,i){ var cls=i<idx?'done':(i===idx?'on':''); return '<span class="pfg-pill '+cls+'">'+(i<idx?'✓ ':'')+s.key+'</span>'; }).join(''); }
   function msg(cls,txt){ var box=el('pfGuideLog'); if(!box) return; var d=document.createElement('div'); d.className='pfg-msg '+cls; d.textContent=txt; box.appendChild(d); box.scrollTop=box.scrollHeight; }
-  function chips(){ var c=el('pfGuideChips'); if(!c) return; if(idx>=STEPS.length){ c.innerHTML=''; return; } var C=STEPS[idx].chips||{}; c.innerHTML=Object.keys(C).map(function(label){ return '<button type="button" class="pfg-chip" data-val="'+encodeURIComponent(C[label])+'">'+label+'</button>'; }).join(''); [].forEach.call(c.querySelectorAll('.pfg-chip'),function(b){ b.onclick=function(){ send(decodeURIComponent(b.getAttribute('data-val')), b.textContent); }; }); }
+  function chips(){ var c=el('pfGuideChips'); if(!c) return; if(idx>=STEPS.length){ c.innerHTML=''; return; }
+    if(idx===0){
+      c.innerHTML='<div class="pfg-vibes">'+VIBES.map(function(v,k){
+        return '<button type="button" class="pfg-vibe" data-k="'+k+'">'
+          +'<span class="pfg-vibe-sw" style="background:'+v.bg+';">'
+            +'<span class="pfg-vibe-dot" style="background:'+v.accent+';"></span>'
+            +'<span class="pfg-vibe-aa" style="font-family:'+v.font+';color:'+v.ink+';">Aa</span>'
+          +'</span>'
+          +'<span class="pfg-vibe-tx"><span class="pfg-vibe-nm">'+v.emoji+' '+v.name+'</span><span class="pfg-vibe-ds">'+v.desc+'</span></span>'
+        +'</button>';
+      }).join('')+'</div>';
+      [].forEach.call(c.querySelectorAll('.pfg-vibe'),function(b){ b.onclick=function(){ var v=VIBES[+b.getAttribute('data-k')]; send(v.prompt, v.emoji+' '+v.name); }; });
+      return;
+    }
+    var C=STEPS[idx].chips||{}; c.innerHTML=Object.keys(C).map(function(label){ return '<button type="button" class="pfg-chip" data-val="'+encodeURIComponent(C[label])+'">'+label+'</button>'; }).join(''); [].forEach.call(c.querySelectorAll('.pfg-chip'),function(b){ b.onclick=function(){ send(decodeURIComponent(b.getAttribute('data-val')), b.textContent); }; }); }
   function ask(){ if(idx>=STEPS.length){ road(); chips(); msg('g',"🎉 That's a wrap — your site is ready. Preview it below and publish when you're happy. You can fine-tune anything with the manual controls too."); return; } road(); msg('g', STEPS[idx].q); chips(); }
   function advance(){ idx++; setTimeout(ask, 250); }
   function send(val, label){
