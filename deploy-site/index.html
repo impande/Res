@@ -8266,7 +8266,7 @@ if ('serviceWorker' in navigator) {
     if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
     if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
     if(Array.isArray(out.order)) cz.order=out.order.filter(function(k){return typeof k==='string';}).slice(0,12);
-    if(typeof out.template==='string'&&/^(nova|sidebar|minimal|bold)$/.test(out.template)) cz.template=out.template;
+    if(typeof out.template==='string'&&/^(nova|sidebar|minimal|bold|studio)$/.test(out.template)) cz.template=out.template;
     window.__pfCustomize=cz; save();
     try{ if(typeof window.pfArrangeSync==='function') window.pfArrangeSync(); }catch(e){}
     try{ if(typeof window.pfTplSync==='function') window.pfTplSync(); }catch(e){}
@@ -8626,6 +8626,10 @@ if ('serviceWorker' in navigator) {
   .pft-thumb.pft-bold{flex-direction:column;gap:0;padding:0;}
   .pft-bold .bh{height:32px;background:#12141a;display:block;}
   .pft-bold .bl{height:11px;background:#fff;border:1px solid #d6dae0;border-radius:3px;display:block;margin:5px 6px 0;}
+  .pft-thumb.pft-studio{flex-direction:column;gap:5px;justify-content:center;}
+  .pft-studio .sbig{height:20px;width:80%;background:#9aa1ab;border-radius:3px;display:block;}
+  .pft-studio .sl{height:8px;width:60%;background:#c7ccd4;border-radius:2px;display:block;}
+  .pft-studio .sl2{height:8px;width:45%;background:#c7ccd4;border-radius:2px;display:block;}
 </style>
 <script id="_r4uPfTplPickJS">
 /* Template picker: pick a base design (Nova cards / Sidebar rail / Minimal
@@ -8633,6 +8637,7 @@ if ('serviceWorker' in navigator) {
    all blocks, customization and drag still work on top of whichever is chosen. */
 (function(){
   var TPLS=[
+    {id:'studio', name:'Studio ✦', desc:'Flagship — huge type, big statement hero, cover image, smooth scroll animations.'},
     {id:'nova', name:'Nova', desc:'Clean cards + profile banner. Professional & versatile.'},
     {id:'sidebar', name:'Sidebar', desc:'Sticky profile rail on the left, content on the right.'},
     {id:'minimal', name:'Minimal', desc:'Big centered name, no boxes. Editorial & elegant.'},
@@ -8644,6 +8649,7 @@ if ('serviceWorker' in navigator) {
     if(id==='sidebar') return '<div class="pft-thumb pft-side"><div class="s1"></div><div class="s2"><span></span><span></span><span></span></div></div>';
     if(id==='minimal') return '<div class="pft-thumb pft-min"><span class="l1"></span><span class="l2"></span><span></span><span class="l3"></span></div>';
     if(id==='bold') return '<div class="pft-thumb pft-bold"><span class="bh"></span><span class="bl"></span><span class="bl"></span></div>';
+    if(id==='studio') return '<div class="pft-thumb pft-studio"><span class="sbig"></span><span class="sl"></span><span class="sl2"></span></div>';
     return '<div class="pft-thumb pft-nova"><div class="pft-col"><span></span><span></span><span></span></div></div>';
   }
   window.pfSetTemplate=function(id){ var c=cz(); c.template=id; window.__pfCustomize=c; try{ localStorage.setItem('_pfCustomize',JSON.stringify(c)); }catch(e){} render(); try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} };
@@ -9391,7 +9397,7 @@ window.__novaPortfolioHTML=function(d,sections){
 
   // ── Template skeletons: Nova (cards) · Sidebar (rail) · Minimal (editorial) ──
   var TPL = String(CZ.template||'nova').toLowerCase().replace(/[^a-z]/g,'') || 'nova';
-  if(['sidebar','minimal','bold'].indexOf(TPL)<0) TPL='nova';
+  if(['sidebar','minimal','bold','studio'].indexOf(TPL)<0) TPL='nova';
   var sideProfile = '<div class="side-in">'+avatar
     + '<h1 class="side-name">'+esc(name)+'</h1>'
     + (title?'<div class="side-title">'+esc(title)+'</div>':'')
@@ -9414,6 +9420,14 @@ window.__novaPortfolioHTML=function(d,sections){
     + (meta.length?'<div class="bhero-meta">'+meta.join('<span class="sep">·</span>')+'</div>':'')
     + (btns?'<div class="bhero-actions">'+btns+'</div>':'')
     + '</div></header>';
+  var studioProfile = '<header class="shero"><div class="shero-in">'
+    + '<div class="shero-eyebrow">Portfolio</div>'
+    + '<h1 class="shero-name">'+esc(name)+'</h1>'
+    + (title?'<p class="shero-title">'+esc(title)+'</p>':'')
+    + (meta.length?'<div class="shero-meta">'+meta.join('<span class="sep">·</span>')+'</div>':'')
+    + (btns?'<div class="shero-actions">'+btns+'</div>':'')
+    + '</div></header>'
+    + (cover?'<div class="shero-cover" style="background-image:url('+esc(cover)+')"></div>':'');
   var TPLCSS = {
     sidebar: '.layout{max-width:1060px;margin:0 auto;padding:22px 16px 60px}'
       +'@media(min-width:820px){.layout{display:grid;grid-template-columns:288px 1fr;gap:30px;align-items:start;padding-top:34px}.side{position:sticky;top:26px}}'
@@ -9452,13 +9466,39 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.bhero-actions .btn-s{background:rgba(255,255,255,0.10)!important;color:#fff!important;border:1px solid rgba(255,255,255,0.22)!important}'
       +'.col.tpl-bold{max-width:880px;padding-top:46px}'
       +'.tpl-bold .card{border:1px solid var(--line);border-radius:16px;padding:30px}'
-      +'.tpl-bold .card-h h2{font-size:1.55rem;font-weight:800;letter-spacing:-0.01em}'
+      +'.tpl-bold .card-h h2{font-size:1.55rem;font-weight:800;letter-spacing:-0.01em}',
+    studio: '.shero{padding:13vh 0 7vh}'
+      +'.shero-in{max-width:940px;margin:0 auto;padding:0 24px}'
+      +'.shero-eyebrow{font-size:0.8rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--acc);margin-bottom:22px;animation:sUp .6s cubic-bezier(.2,.7,.2,1) both}'
+      +'.shero-name{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:clamp(2.8rem,10vw,6rem);font-weight:800;line-height:0.98;letter-spacing:-0.035em;margin:0;animation:sUp .7s .05s cubic-bezier(.2,.7,.2,1) both}'
+      +'.shero-title{font-size:clamp(1.25rem,3.2vw,1.9rem);color:var(--mut);margin-top:22px;max-width:660px;line-height:1.3;font-weight:500;animation:sUp .7s .15s cubic-bezier(.2,.7,.2,1) both}'
+      +'.shero-meta{color:var(--mut);font-size:0.92rem;margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;animation:sUp .7s .22s cubic-bezier(.2,.7,.2,1) both}.shero-meta a{color:var(--acc)}.shero-meta .sep{opacity:.4}'
+      +'.shero-actions{margin-top:34px;display:flex;gap:12px;flex-wrap:wrap;animation:sUp .7s .3s cubic-bezier(.2,.7,.2,1) both}'
+      +'.shero-cover{height:min(54vh,470px);background-size:cover;background-position:center;margin:10px 0 0}'
+      +'@keyframes sUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}'
+      +'@media(prefers-reduced-motion:reduce){.shero-eyebrow,.shero-name,.shero-title,.shero-meta,.shero-actions{animation:none}}'
+      +'.col.tpl-studio{max-width:940px;padding-top:0}'
+      +'.tpl-studio .card{border:none!important;background:none!important;border-radius:0!important;padding:72px 0!important;border-top:1px solid var(--line)!important;overflow:visible}'
+      +'.tpl-studio .card:first-of-type{border-top:none!important;padding-top:52px!important}'
+      +'.tpl-studio .card-h{margin-bottom:30px}'
+      +'.tpl-studio .card-h h2{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-0.02em}'
+      +'.tpl-studio .reveal{opacity:0;transform:translateY(38px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}'
+      +'.tpl-studio .reveal.in{opacity:1;transform:none}'
+      +'.tpl-studio .cs-proj-card{padding:0!important;border-top:none!important}'
+      +'.tpl-studio .cs-proj{border:1px solid var(--line);border-radius:20px;overflow:hidden}'
+      +'.tpl-studio .cs-proj-media img{min-height:300px;transition:transform .6s cubic-bezier(.2,.7,.2,1)}'
+      +'.tpl-studio .cs-proj:hover .cs-proj-media img{transform:scale(1.045)}'
+      +'.tpl-studio .cs-gallery img{border-radius:14px;transition:transform .5s cubic-bezier(.2,.7,.2,1)}'
+      +'.tpl-studio .cs-gallery figure:hover img{transform:scale(1.05)}'
+      +'.tpl-studio .ent{transition:transform .2s cubic-bezier(.2,.7,.2,1)}.tpl-studio .ent:hover{transform:translateX(4px)}'
+      +'.tpl-studio .sk{font-size:0.95rem;padding:8px 15px}'
   };
   var foot = '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>';
   var bodyInner;
   if(TPL==='sidebar'){ bodyInner = '<div class="layout tpl-sidebar">'+injectHTML+'<aside class="side">'+sideProfile+'</aside><main class="main">'+ctaHeroEl+out+foot+'</main></div>'; }
   else if(TPL==='minimal'){ bodyInner = '<div class="col tpl-minimal">'+injectHTML+minProfile+ctaHeroEl+out+foot+'</div>'; }
   else if(TPL==='bold'){ bodyInner = boldProfile + '<div class="col tpl-bold">'+injectHTML+ctaHeroEl+out+foot+'</div>'; }
+  else if(TPL==='studio'){ bodyInner = studioProfile + '<div class="col tpl-studio">'+injectHTML+ctaHeroEl+out+foot+'</div>'; }
   else { bodyInner = '<div class="col tpl-nova">'+injectHTML+profile+ctaHeroEl+out+foot+'</div>'; }
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
@@ -9467,6 +9507,7 @@ window.__novaPortfolioHTML=function(d,sections){
 + '<meta name="description" content="'+esc((summary||(name+' \u2014 '+title)).slice(0,155))+'">'
 + seo
 + fontLink
++ (TPL==='studio'?'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">':'')
 + '<style>'+CSS+(TPLCSS[TPL]||'')+'</style>'+customStyle+'</head><body>'
 + ctaTopEl + ctaFloatEl
 + bodyInner
