@@ -8660,6 +8660,45 @@ if ('serviceWorker' in navigator) {
   },150);
 })();
 </script>
+<style id="_r4uPfCustomizeTabsCss">
+  #pfCustomizeTabs{margin-bottom:14px;border:1.5px solid var(--border);border-radius:14px;background:var(--surface);padding:14px 14px 4px;}
+  .pfct-intro{font-size:0.9rem;font-weight:800;color:var(--text);}
+  .pfct-intro span{display:block;font-weight:500;color:var(--muted);font-size:0.78rem;margin-top:2px;}
+  .pfct-bar{display:flex;gap:6px;flex-wrap:wrap;margin:11px 0 12px;}
+  .pfct-tab{padding:7px 13px;border:1.5px solid var(--border);border-radius:99px;background:var(--bg);color:var(--muted);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;}
+  .pfct-tab.on{border-color:var(--accent);background:rgba(217,119,6,0.08);color:var(--accent);}
+  #pfCustomizeTabs .pfct-panel > div{margin-bottom:12px!important;}
+</style>
+<script id="_r4uPfCustomizeTabsJS">
+/* Declutter the Preview step: gather the customization panels (Template, Design,
+   Layout, Guide) into ONE tabbed area so only one shows at a time — clear direction
+   instead of five stacked panels. The panels keep working; they're just re-parented. */
+(function(){
+  var TABS=[
+    {id:'tpl', label:'🎨 Template', els:['pfTplPicker']},
+    {id:'design', label:'✨ Design', els:['pfAiCustom','pfStyleStudio']},
+    {id:'layout', label:'🔀 Layout', els:['pfArrangePanel']},
+    {id:'guide', label:'🧭 AI guide', els:['pfGuidePanel']}
+  ];
+  function ready(){ return document.getElementById('pfTplPicker') && document.getElementById('pfStyleStudio') && document.getElementById('pfArrangePanel') && document.getElementById('pfAiCustom'); }
+  function build(){
+    if(document.getElementById('pfCustomizeTabs')) return true;
+    if(!ready()) return false;
+    var anchor=document.getElementById('pfTplPicker'); if(!anchor||!anchor.parentNode) return false;
+    var wrap=document.createElement('div'); wrap.id='pfCustomizeTabs';
+    wrap.innerHTML='<div class="pfct-intro">Customize your site <span>Optional — pick a tab to tweak the look, or just publish below.</span></div>'
+      +'<div class="pfct-bar">'+TABS.map(function(t,i){return '<button type="button" class="pfct-tab'+(i===0?' on':'')+'" data-tab="'+t.id+'">'+t.label+'</button>';}).join('')+'</div>'
+      +TABS.map(function(t){return '<div class="pfct-panel" data-tab="'+t.id+'"></div>';}).join('');
+    anchor.parentNode.insertBefore(wrap, anchor);
+    TABS.forEach(function(t){ var panel=wrap.querySelector('.pfct-panel[data-tab="'+t.id+'"]'); t.els.forEach(function(id){ var el=document.getElementById(id); if(el) panel.appendChild(el); }); });
+    function show(id){ [].forEach.call(wrap.querySelectorAll('.pfct-tab'),function(b){ b.classList.toggle('on', b.getAttribute('data-tab')===id); }); [].forEach.call(wrap.querySelectorAll('.pfct-panel'),function(p){ p.style.display = p.getAttribute('data-tab')===id?'block':'none'; }); }
+    [].forEach.call(wrap.querySelectorAll('.pfct-tab'),function(b){ b.onclick=function(){ show(b.getAttribute('data-tab')); }; });
+    show('tpl');
+    return true;
+  }
+  var n=0, iv=setInterval(function(){ if(build()||++n>160) clearInterval(iv); },200);
+})();
+</script>
 <script id="_r4uPfAccount">
 /* Account-tied builder state: save the editable portfolio config (template,
    customizations, links, content blocks — images stripped to respect Firestore's
@@ -9065,6 +9104,15 @@ window.__novaPortfolioHTML=function(d,sections){
     var ORDER = (Array.isArray(CZ.order)&&CZ.order.length) ? CZ.order.slice() : DEFAULT_ORDER.slice();
     DEFAULT_ORDER.forEach(function(k){ if(ORDER.indexOf(k)<0) ORDER.push(k); });
     out = ORDER.map(function(k){ return k==='custom' ? (parts.custom||'') : (parts[k]||''); }).join('');
+  }
+  // Never leave a confusing blank page: if nothing rendered, show a clear prompt.
+  if(!out || !out.replace(/\s+/g,'')){
+    out = '<section class="card" style="text-align:center;padding:46px 26px">'
+      + '<div style="font-size:2rem;margin-bottom:10px">🧩</div>'
+      + '<h2 style="margin:0 0 8px;font-size:1.25rem">Your site is empty</h2>'
+      + '<p style="color:var(--mut);margin:0 auto;max-width:440px;line-height:1.55">'
+      + (CZ.scratch ? 'You’re in Blank-canvas mode. Add blocks in “Content blocks”, or switch to “From my résumé” to pull your sections in automatically.' : 'Add your details in the earlier steps to see your portfolio here.')
+      + '</p></section>';
   }
 
   var CSS = ''
