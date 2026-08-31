@@ -8266,7 +8266,7 @@ if ('serviceWorker' in navigator) {
     if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
     if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
     if(Array.isArray(out.order)) cz.order=out.order.filter(function(k){return typeof k==='string';}).slice(0,12);
-    if(typeof out.template==='string'&&/^(nova|sidebar|minimal)$/.test(out.template)) cz.template=out.template;
+    if(typeof out.template==='string'&&/^(nova|sidebar|minimal|bold)$/.test(out.template)) cz.template=out.template;
     window.__pfCustomize=cz; save();
     try{ if(typeof window.pfArrangeSync==='function') window.pfArrangeSync(); }catch(e){}
     try{ if(typeof window.pfTplSync==='function') window.pfTplSync(); }catch(e){}
@@ -8605,8 +8605,8 @@ if ('serviceWorker' in navigator) {
   #pfTplPicker{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:15px 16px;margin-bottom:14px;}
   #pfTplPicker .pft-h{font-weight:800;font-size:0.92rem;color:var(--text);display:flex;align-items:center;gap:7px;}
   #pfTplPicker .pft-sub{font-size:0.78rem;color:var(--muted);margin:3px 0 12px;}
-  .pft-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
-  @media(max-width:520px){.pft-grid{grid-template-columns:1fr;}}
+  .pft-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  @media(max-width:400px){.pft-grid{grid-template-columns:1fr;}}
   .pft-card{border:1.5px solid var(--border);border-radius:12px;padding:9px;background:var(--bg);cursor:pointer;text-align:left;font-family:inherit;transition:border-color .15s,box-shadow .15s;}
   .pft-card:hover{border-color:var(--accent);}
   .pft-card.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);}
@@ -8623,6 +8623,9 @@ if ('serviceWorker' in navigator) {
   .pft-min .l1{width:62%;height:12px;background:#9aa1ab;}
   .pft-min .l2{width:40%;}
   .pft-min .l3{width:72%;}
+  .pft-thumb.pft-bold{flex-direction:column;gap:0;padding:0;}
+  .pft-bold .bh{height:32px;background:#12141a;display:block;}
+  .pft-bold .bl{height:11px;background:#fff;border:1px solid #d6dae0;border-radius:3px;display:block;margin:5px 6px 0;}
 </style>
 <script id="_r4uPfTplPickJS">
 /* Template picker: pick a base design (Nova cards / Sidebar rail / Minimal
@@ -8632,13 +8635,15 @@ if ('serviceWorker' in navigator) {
   var TPLS=[
     {id:'nova', name:'Nova', desc:'Clean cards + profile banner. Professional & versatile.'},
     {id:'sidebar', name:'Sidebar', desc:'Sticky profile rail on the left, content on the right.'},
-    {id:'minimal', name:'Minimal', desc:'Big centered name, no boxes. Editorial & elegant.'}
+    {id:'minimal', name:'Minimal', desc:'Big centered name, no boxes. Editorial & elegant.'},
+    {id:'bold', name:'Bold', desc:'Full-width dark hero, big type. Modern & striking.'}
   ];
   function cz(){ if(!window.__pfCustomize||typeof window.__pfCustomize!=='object'){ try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; } } return window.__pfCustomize; }
   function cur(){ return (cz().template)||'nova'; }
   function thumb(id){
     if(id==='sidebar') return '<div class="pft-thumb pft-side"><div class="s1"></div><div class="s2"><span></span><span></span><span></span></div></div>';
     if(id==='minimal') return '<div class="pft-thumb pft-min"><span class="l1"></span><span class="l2"></span><span></span><span class="l3"></span></div>';
+    if(id==='bold') return '<div class="pft-thumb pft-bold"><span class="bh"></span><span class="bl"></span><span class="bl"></span></div>';
     return '<div class="pft-thumb pft-nova"><div class="pft-col"><span></span><span></span><span></span></div></div>';
   }
   window.pfSetTemplate=function(id){ var c=cz(); c.template=id; window.__pfCustomize=c; try{ localStorage.setItem('_pfCustomize',JSON.stringify(c)); }catch(e){} render(); try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} };
@@ -9338,7 +9343,7 @@ window.__novaPortfolioHTML=function(d,sections){
 
   // ── Template skeletons: Nova (cards) · Sidebar (rail) · Minimal (editorial) ──
   var TPL = String(CZ.template||'nova').toLowerCase().replace(/[^a-z]/g,'') || 'nova';
-  if(TPL!=='sidebar' && TPL!=='minimal') TPL='nova';
+  if(['sidebar','minimal','bold'].indexOf(TPL)<0) TPL='nova';
   var sideProfile = '<div class="side-in">'+avatar
     + '<h1 class="side-name">'+esc(name)+'</h1>'
     + (title?'<div class="side-title">'+esc(title)+'</div>':'')
@@ -9353,6 +9358,14 @@ window.__novaPortfolioHTML=function(d,sections){
     + (meta.length?'<div class="mhero-meta">'+meta.join('<span class="sep">\u00b7</span>')+'</div>':'')
     + (btns?'<div class="mhero-actions">'+btns+'</div>':'')
     + '</header>';
+  var boldProfile = '<header class="bhero"><div class="bhero-in">'
+    + (photo?'<div class="bhero-av"><img src="'+esc(photo)+'" alt="'+esc(name)+'"></div>':'')
+    + '<div class="bhero-eyebrow">Portfolio</div>'
+    + '<h1 class="bhero-name">'+esc(name)+'</h1>'
+    + (title?'<p class="bhero-tag">'+esc(title)+'</p>':'')
+    + (meta.length?'<div class="bhero-meta">'+meta.join('<span class="sep">·</span>')+'</div>':'')
+    + (btns?'<div class="bhero-actions">'+btns+'</div>':'')
+    + '</div></header>';
   var TPLCSS = {
     sidebar: '.layout{max-width:1060px;margin:0 auto;padding:22px 16px 60px}'
       +'@media(min-width:820px){.layout{display:grid;grid-template-columns:288px 1fr;gap:30px;align-items:start;padding-top:34px}.side{position:sticky;top:26px}}'
@@ -9378,12 +9391,26 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.mhero-meta{color:var(--mut);font-size:0.9rem;margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}'
       +'.mhero-meta a{color:var(--acc)}'
       +'.mhero-meta .sep{opacity:.5}'
-      +'.mhero-actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}'
+      +'.mhero-actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}',
+    bold: '.bhero{background:linear-gradient(135deg,#0d1017,#191d26 60%,#20242e)}'
+      +'.bhero-in{max-width:880px;margin:0 auto;padding:74px 22px 62px;text-align:center;color:#fff}'
+      +'.bhero-av{width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 22px;border:2px solid rgba(255,255,255,0.18)}.bhero-av img{width:100%;height:100%;object-fit:cover}'
+      +'.bhero-eyebrow{font-size:0.76rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc)}'
+      +'.bhero-name{font-size:clamp(2.4rem,9vw,4.6rem);font-weight:800;line-height:1.02;letter-spacing:-0.03em;margin:14px 0 0;color:#fff}'
+      +'.bhero-tag{font-size:1.3rem;color:rgba(255,255,255,0.72);margin:16px auto 0;max-width:620px;line-height:1.4}'
+      +'.bhero-meta{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.bhero-meta a{color:#fff}.bhero-meta .sep{opacity:.4}'
+      +'.bhero-actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}'
+      +'.bhero-actions .btn-p{background:var(--acc)!important;color:#fff!important}'
+      +'.bhero-actions .btn-s{background:rgba(255,255,255,0.10)!important;color:#fff!important;border:1px solid rgba(255,255,255,0.22)!important}'
+      +'.col.tpl-bold{max-width:880px;padding-top:46px}'
+      +'.tpl-bold .card{border:1px solid var(--line);border-radius:16px;padding:30px}'
+      +'.tpl-bold .card-h h2{font-size:1.55rem;font-weight:800;letter-spacing:-0.01em}'
   };
   var foot = '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>';
   var bodyInner;
   if(TPL==='sidebar'){ bodyInner = '<div class="layout tpl-sidebar">'+injectHTML+'<aside class="side">'+sideProfile+'</aside><main class="main">'+ctaHeroEl+out+foot+'</main></div>'; }
   else if(TPL==='minimal'){ bodyInner = '<div class="col tpl-minimal">'+injectHTML+minProfile+ctaHeroEl+out+foot+'</div>'; }
+  else if(TPL==='bold'){ bodyInner = boldProfile + '<div class="col tpl-bold">'+injectHTML+ctaHeroEl+out+foot+'</div>'; }
   else { bodyInner = '<div class="col tpl-nova">'+injectHTML+profile+ctaHeroEl+out+foot+'</div>'; }
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
