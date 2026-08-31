@@ -8266,7 +8266,7 @@ if ('serviceWorker' in navigator) {
     if(out.topBar===null) delete cz.topBar; else if(out.topBar&&typeof out.topBar==='object'&&out.topBar.text) cz.topBar={text:String(out.topBar.text).slice(0,90),target:String(out.topBar.target||'projects')};
     if(out.injectHTML===null) delete cz.injectHTML; else if(typeof out.injectHTML==='string') cz.injectHTML=out.injectHTML.slice(0,4000);
     if(Array.isArray(out.order)) cz.order=out.order.filter(function(k){return typeof k==='string';}).slice(0,12);
-    if(typeof out.template==='string'&&/^(nova|sidebar|minimal|bold|studio|atelier)$/.test(out.template)) cz.template=out.template;
+    if(typeof out.template==='string'&&/^(nova|sidebar|minimal|bold|studio|atelier|onepage)$/.test(out.template)) cz.template=out.template;
     window.__pfCustomize=cz; save();
     try{ if(typeof window.pfArrangeSync==='function') window.pfArrangeSync(); }catch(e){}
     try{ if(typeof window.pfTplSync==='function') window.pfTplSync(); }catch(e){}
@@ -8634,6 +8634,10 @@ if ('serviceWorker' in navigator) {
   .pft-atelier .ab{height:22px;width:88%;background:#3a3733;border-radius:3px;display:block;}
   .pft-atelier .al{height:7px;width:64%;background:#b8b2a6;border-radius:2px;display:block;}
   .pft-atelier .al2{height:7px;width:50%;background:#b8b2a6;border-radius:2px;display:block;}
+  .pft-thumb.pft-onepage{flex-direction:column;gap:5px;padding:6px;}
+  .pft-onepage .oh{height:16px;width:70%;background:#9aa1ab;border-radius:3px;display:block;}
+  .pft-onepage .og{display:flex;gap:5px;flex:1;}
+  .pft-onepage .og i{flex:1;background:var(--accent,#7c3aed);opacity:.85;border-radius:4px;}
 </style>
 <script id="_r4uPfTplPickJS">
 /* Template picker: pick a base design (Nova cards / Sidebar rail / Minimal
@@ -8641,7 +8645,8 @@ if ('serviceWorker' in navigator) {
    all blocks, customization and drag still work on top of whichever is chosen. */
 (function(){
   var TPLS=[
-    {id:'atelier', name:'Atelier ✦', desc:'Premium editorial — elegant serif display, airy whitespace, refined details, smooth motion.'},
+    {id:'onepage', name:'Website ✦', desc:'A real one-page site — hero, Selected Work (visual cards), services, about, contact. Not a résumé.'},
+    {id:'atelier', name:'Atelier', desc:'Premium editorial — elegant serif display, airy whitespace, refined details, smooth motion.'},
     {id:'studio', name:'Studio', desc:'Huge type, big statement hero, cover image, smooth scroll animations.'},
     {id:'nova', name:'Nova', desc:'Clean cards + profile banner. Professional & versatile.'},
     {id:'sidebar', name:'Sidebar', desc:'Sticky profile rail on the left, content on the right.'},
@@ -8656,6 +8661,7 @@ if ('serviceWorker' in navigator) {
     if(id==='bold') return '<div class="pft-thumb pft-bold"><span class="bh"></span><span class="bl"></span><span class="bl"></span></div>';
     if(id==='studio') return '<div class="pft-thumb pft-studio"><span class="sbig"></span><span class="sl"></span><span class="sl2"></span></div>';
     if(id==='atelier') return '<div class="pft-thumb pft-atelier"><span class="ab"></span><span class="al"></span><span class="al2"></span></div>';
+    if(id==='onepage') return '<div class="pft-thumb pft-onepage"><span class="oh"></span><span class="og"><i></i><i></i></span></div>';
     return '<div class="pft-thumb pft-nova"><div class="pft-col"><span></span><span></span><span></span></div></div>';
   }
   window.pfSetTemplate=function(id){ var c=cz(); c.template=id; window.__pfCustomize=c; try{ localStorage.setItem('_pfCustomize',JSON.stringify(c)); }catch(e){} render(); try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} };
@@ -8665,7 +8671,9 @@ if ('serviceWorker' in navigator) {
   function build(){ if(document.getElementById('pfTplPicker')) return true; var anchor=document.getElementById('pfGuidePanel')||document.getElementById('pfAiCustom'); if(!anchor||!anchor.parentNode) return false;
     var p=document.createElement('div'); p.id='pfTplPicker';
     p.innerHTML='<div class="pft-h"><span>🎨</span>Template</div><div class="pft-sub">Pick a base design — then make it yours with blocks, colours, fonts and layout.</div><div class="pft-grid" id="pfTplGrid"></div>';
-    anchor.parentNode.insertBefore(p, anchor); render(); return true; }
+    anchor.parentNode.insertBefore(p, anchor);
+    var c=cz(); if(!c.template){ c.template='onepage'; window.__pfCustomize=c; try{ localStorage.setItem('_pfCustomize', JSON.stringify(c)); }catch(e){} try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} }
+    render(); return true; }
   var n=0, iv=setInterval(function(){ var ok=build();
     if(typeof window.buildPfPreview==='function' && !window.buildPfPreview.__tplWrap){ var _bp=window.buildPfPreview; window.buildPfPreview=function(){ var r=_bp.apply(this,arguments); try{ render(); }catch(e){} return r; }; window.buildPfPreview.__tplWrap=true; }
     if((ok && window.buildPfPreview && window.buildPfPreview.__tplWrap)||++n>120) clearInterval(iv);
@@ -9403,7 +9411,7 @@ window.__novaPortfolioHTML=function(d,sections){
 
   // ── Template skeletons: Nova (cards) · Sidebar (rail) · Minimal (editorial) ──
   var TPL = String(CZ.template||'nova').toLowerCase().replace(/[^a-z]/g,'') || 'nova';
-  if(['sidebar','minimal','bold','studio','atelier'].indexOf(TPL)<0) TPL='nova';
+  if(['sidebar','minimal','bold','studio','atelier','onepage'].indexOf(TPL)<0) TPL='nova';
   var sideProfile = '<div class="side-in">'+avatar
     + '<h1 class="side-name">'+esc(name)+'</h1>'
     + (title?'<div class="side-title">'+esc(title)+'</div>':'')
@@ -9541,15 +9549,71 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.tpl-atelier .cs-proj-t{font-family:var(--font-head,"Fraunces",Georgia,serif);font-size:1.7rem;font-weight:600}'
       +'.tpl-atelier .cs-gallery img{border-radius:14px;transition:transform .5s cubic-bezier(.2,.7,.2,1)}.tpl-atelier .cs-gallery figure:hover img{transform:scale(1.05)}'
       +'.tpl-atelier .btn-p{background:var(--acc)!important;color:#fff!important;border-radius:99px;padding:13px 26px}'
-      +'.tpl-atelier .btn-s{border-radius:99px;padding:13px 26px;border-color:var(--line)}'
+      +'.tpl-atelier .btn-s{border-radius:99px;padding:13px 26px;border-color:var(--line)}',
+    onepage: 'body{font-family:var(--font-body,"Inter",system-ui,-apple-system,sans-serif)}'
+      +'.ophero{padding:16vh 0 9vh}'
+      +'.ophero-in{max-width:1000px;margin:0 auto;padding:0 26px}'
+      +'.ophero-eyebrow{font-size:0.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:20px;animation:opUp .7s cubic-bezier(.2,.7,.2,1) both}'
+      +'.ophero-name{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:clamp(2.6rem,9vw,5.5rem);font-weight:800;line-height:1;letter-spacing:-0.03em;margin:0;animation:opUp .75s .05s cubic-bezier(.2,.7,.2,1) both}'
+      +'.ophero-role{font-size:clamp(1.3rem,3.4vw,2rem);color:var(--mut);margin-top:18px;max-width:680px;line-height:1.3;animation:opUp .75s .15s cubic-bezier(.2,.7,.2,1) both}'
+      +'.ophero-cta{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;animation:opUp .75s .25s cubic-bezier(.2,.7,.2,1) both}'
+      +'.ophero-cover{height:min(52vh,440px);background-size:cover;background-position:center;margin:12px auto 0;max-width:1240px}'
+      +'@keyframes opUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}'
+      +'@media(prefers-reduced-motion:reduce){.ophero-eyebrow,.ophero-name,.ophero-role,.ophero-cta{animation:none}}'
+      +'.col.tpl-onepage{max-width:1000px}'
+      +'.tpl-onepage .opsec{padding:66px 0;border-top:1px solid var(--line)}'
+      +'.tpl-onepage .opsec-h{display:block!important;margin-bottom:32px}'
+      +'.tpl-onepage .opsec-num{font-size:0.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc)}'
+      +'.tpl-onepage .opsec-h h2{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:clamp(1.9rem,5vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-top:8px}'
+      +'.opwork-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:640px){.opwork-grid{grid-template-columns:1fr}}'
+      +'.opwork-card{display:block;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--card);color:inherit;text-decoration:none;transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s}'
+      +'.opwork-card:hover{transform:translateY(-4px);box-shadow:0 18px 42px -18px rgba(0,0,0,0.28)}'
+      +'.opwork-vis{aspect-ratio:16/10;background:linear-gradient(135deg,var(--acc),var(--acc-h))}'
+      +'.opwork-vis[style*="--i:1"]{filter:hue-rotate(35deg)}.opwork-vis[style*="--i:2"]{filter:hue-rotate(-35deg)}.opwork-vis[style*="--i:3"]{filter:hue-rotate(75deg)}'
+      +'.opwork-body{padding:22px}.opwork-body h3{font-size:1.35rem;font-weight:800;margin:0 0 8px}.opwork-body p{color:var(--mut);font-size:0.98rem;line-height:1.5}'
+      +'.opserv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}'
+      +'.opserv{border:1px solid var(--line);border-radius:14px;padding:20px;font-size:1.1rem;font-weight:600}'
+      +'.opabout{font-size:clamp(1.2rem,2.8vw,1.6rem);line-height:1.5;max-width:800px;color:var(--ink)}'
+      +'.optl-row{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}@media(max-width:560px){.optl-row{grid-template-columns:1fr;gap:2px}}'
+      +'.optl-when{color:var(--mut);font-size:0.9rem}.optl-what{font-size:1.05rem}'
+      +'.opcta{margin:24px 0 0;background:var(--ink);border-radius:24px;padding:66px 30px;text-align:center}'
+      +'.opcta-in h2{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);color:var(--bg);font-size:clamp(2rem,6vw,3.4rem);font-weight:800;letter-spacing:-0.02em;margin:0 0 24px}'
+      +'.opcta-btn{background:var(--bg)!important;color:var(--ink)!important;font-size:1.05rem;padding:15px 30px;border-radius:99px;font-weight:700}'
+      +'.tpl-onepage .reveal{opacity:0;transform:translateY(34px);transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)}.tpl-onepage .reveal.in{opacity:1;transform:none}'
   };
   var foot = '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>';
+  // ── Website (one-page) mode: résumé data restyled into a marketing site ──
+  var opHero='', opBody='';
+  if(TPL==='onepage'){
+    var hasWork = projects.length || custom.length;
+    opHero = '<header class="ophero"><div class="ophero-in">'
+      + '<div class="ophero-eyebrow">'+(loc?esc(loc):'Portfolio')+'</div>'
+      + '<h1 class="ophero-name">'+esc(name)+'</h1>'
+      + (title?'<p class="ophero-role">'+esc(title)+'</p>':'')
+      + '<div class="ophero-cta">'
+        + (hasWork?'<a class="btn btn-p" href="#work">View work</a>':'')
+        + (email?'<a class="btn btn-s" href="mailto:'+esc(email)+'">Get in touch</a>':'')
+      + '</div></div></header>'
+      + (cover?'<div class="ophero-cover" style="background-image:url('+esc(cover)+')"></div>':'');
+    // Selected Work (résumé projects as visual cards)
+    var wc='';
+    projects.forEach(function(pr,ix){ var pt=esc(pr.title||pr.name||'Project'); var pd=linkify(pr.description||pr.summary||pr.desc||''); var purl=lk(pr.link||pr.url||pr.website||''); var tg=A(pr.tags||pr.tech);
+      wc+='<a class="opwork-card"'+(purl?' href="'+esc(purl)+'" target="_blank" rel="noopener"':'')+'><div class="opwork-vis" style="--i:'+(ix%4)+'"></div><div class="opwork-body"><h3>'+pt+'</h3>'+(pd?'<p>'+pd+'</p>':'')+(tg.length?'<div class="tags">'+tg.map(function(t){return '<span>'+esc(t)+'</span>';}).join('')+'</div>':'')+'</div></a>';
+    });
+    var work = wc ? '<section id="work" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Work</span><h2>Selected Work</h2></div><div class="opwork-grid">'+wc+'</div></section>' : '';
+    var services = skills.length ? '<section id="services" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Services</span><h2>What I do</h2></div><div class="opserv-grid">'+skills.slice(0,12).map(function(sk){return '<div class="opserv">'+esc(sk)+'</div>';}).join('')+'</div></section>' : '';
+    var about = summary ? '<section id="about" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">About</span><h2>About</h2></div><p class="opabout">'+linkify(summary)+'</p></section>' : '';
+    var expT = exp.length ? '<section id="experience" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Career</span><h2>Experience</h2></div><div class="optl">'+exp.map(function(x){var role=esc(x.title||x.role||'');var co=esc(x.co||x.company||'');var per=((x.start||'')+((x.end)?' \u2014 '+esc(x.end):''));return '<div class="optl-row"><div class="optl-when">'+esc(per)+'</div><div class="optl-what"><b>'+role+'</b>'+(co?' · '+co:'')+'</div></div>';}).join('')+'</div></section>' : '';
+    var contact = '<section id="contact" class="opcta"><div class="opcta-in"><h2>Let\u2019s work together</h2>'+(email?'<a class="btn opcta-btn" href="mailto:'+esc(email)+'">'+esc(email)+'</a>':(btns||''))+'</div></section>';
+    opBody = work + services + about + expT + (parts.custom||'') + contact;
+  }
   var bodyInner;
   if(TPL==='sidebar'){ bodyInner = '<div class="layout tpl-sidebar">'+injectHTML+'<aside class="side">'+sideProfile+'</aside><main class="main">'+ctaHeroEl+out+foot+'</main></div>'; }
   else if(TPL==='minimal'){ bodyInner = '<div class="col tpl-minimal">'+injectHTML+minProfile+ctaHeroEl+out+foot+'</div>'; }
   else if(TPL==='bold'){ bodyInner = boldProfile + '<div class="col tpl-bold">'+injectHTML+ctaHeroEl+out+foot+'</div>'; }
   else if(TPL==='studio'){ bodyInner = studioProfile + '<div class="col tpl-studio">'+injectHTML+ctaHeroEl+out+foot+'</div>'; }
   else if(TPL==='atelier'){ bodyInner = atelierProfile + '<div class="col tpl-atelier">'+injectHTML+ctaHeroEl+out+foot+'</div>'; }
+  else if(TPL==='onepage'){ bodyInner = opHero + '<div class="col tpl-onepage">'+injectHTML+opBody+foot+'</div>'; }
   else { bodyInner = '<div class="col tpl-nova">'+injectHTML+profile+ctaHeroEl+out+foot+'</div>'; }
 
   var html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
@@ -9560,6 +9624,7 @@ window.__novaPortfolioHTML=function(d,sections){
 + fontLink
 + (TPL==='studio'?'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">':'')
 + (TPL==='atelier'?'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">':'')
++ (TPL==='onepage'?'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">':'')
 + '<style>'+CSS+(TPLCSS[TPL]||'')+'</style>'+customStyle+'</head><body>'
 + ctaTopEl + ctaFloatEl
 + bodyInner
