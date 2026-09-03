@@ -10215,51 +10215,5 @@ window.__novaPortfolioHTML=function(d,sections){
   var n=0, iv=setInterval(function(){ var a=ensureStep(), b=wrapRender(), c=wrapGoToStep(); if((a&&b&&c)||++n>140) clearInterval(iv); },200);
 })();
 </script>
-<style id="_r4uSidebarCss">
-  #r4uSbToggle{display:flex;align-items:center;gap:9px;margin:11px 0 2px;padding:10px 12px;border:1px solid var(--border,#e5e7eb);border-radius:10px;background:var(--surface,#faf9f7);font-size:0.85rem;cursor:pointer;flex-wrap:wrap;}
-  #r4uSbToggle input{width:16px;height:16px;flex-shrink:0;}
-  #r4uSbToggle .r4u-sb-hint{color:var(--muted,#888);font-size:0.76rem;}
-  .r4u-sb .r-aside{background:var(--accent,#1f2a44);color:#fff;padding:22px 20px;border-radius:10px;}
-  .r4u-sb .r-aside .r-sec-t,.r4u-sb .r-aside .r-deg,.r4u-sb .r-aside .r-sch,.r4u-sb .r-aside .r-yr,.r4u-sb .r-aside .r-award-name,.r4u-sb .r-aside .r-award-desc,.r4u-sb .r-aside div,.r4u-sb .r-aside span,.r4u-sb .r-aside li{color:#fff !important;}
-  .r4u-sb .r-aside .r-sec-t{border-bottom-color:rgba(255,255,255,0.35) !important;opacity:0.96;}
-  .r4u-sb .r-aside .r-sk{background:rgba(255,255,255,0.16) !important;color:#fff !important;border-color:transparent !important;}
-  .r4u-sb .r-aside .r-award,.r4u-sb .r-aside .r-ka-item{background:rgba(255,255,255,0.14) !important;border:none !important;box-shadow:none !important;border-radius:8px !important;padding:10px 12px !important;}
-  .r4u-sb .r-aside .r-award-desc{opacity:0.92;}
-  .r4u-sb .r-sb-photo{width:100%;max-width:126px;aspect-ratio:1/1;object-fit:cover;border-radius:10px;display:block;margin:0 auto 16px;border:3px solid rgba(255,255,255,0.28);}
-  @media print{.r4u-sb .r-aside{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
-</style>
-<script id="_r4uSidebarJS">
-/* Coloured sidebar layout — an optional résumé style toggle. The résumé DOM is
-   already two-column (.r-aside + .r-main-col); this paints .r-aside with the
-   template's accent, moves the photo into it, and (with Key Achievements) yields
-   the classic sidebar CV look — on ANY template, following the accent colour. */
-(function(){
-  try{ window.__r4uSidebar = localStorage.getItem('_r4uSidebar')==='1'; }catch(e){ window.__r4uSidebar=false; }
-  function save(){ try{ localStorage.setItem('_r4uSidebar', window.__r4uSidebar?'1':'0'); }catch(e){} }
-  function rerender(){ try{ if(window.__roLastData!==undefined && typeof renderOutput==='function'){ renderOutput(window.__roLastData); } else if(typeof updatePreview==='function'){ updatePreview(); } }catch(e){} }
-  window.pfToggleSidebar=function(on){ window.__r4uSidebar=!!on; save(); rerender(); };
-  function apply(){
-    var ro=document.getElementById('resumeOutput'); if(!ro) return;
-    var tpl=ro.querySelector('[class*="tpl-"]')||ro.firstElementChild; if(!tpl) return;
-    tpl.classList.toggle('r4u-sb', !!window.__r4uSidebar);
-    var aside=ro.querySelector('.r-aside'); if(!aside) return;
-    var existing=aside.querySelector('.r-sb-photo');
-    var photo=(window.__roLastData&&window.__roLastData.photo)||'';
-    if(window.__r4uSidebar && photo){
-      if(!existing){ var img=document.createElement('img'); img.className='r-sb-photo'; img.src=photo; img.alt=''; aside.insertBefore(img, aside.firstChild); }
-    } else if(existing){ existing.remove(); }
-  }
-  function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__sb){
-      var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0]; var r=o.apply(this,arguments); try{ apply(); }catch(e){} return r; }; window.renderOutput.__sb=true; return true; }
-    return false; }
-  function mount(){ if(document.getElementById('r4uSbToggle')) return true;
-    var sec=document.getElementById('tplSection'); var fr=sec&&sec.querySelector('.tpl-filter-row'); if(!sec||!fr) return false;
-    var l=document.createElement('label'); l.id='r4uSbToggle';
-    l.innerHTML='<input type="checkbox" '+(window.__r4uSidebar?'checked':'')+' onchange="pfToggleSidebar(this.checked)"> <span>🎨 Coloured sidebar layout</span> <span class="r4u-sb-hint">— uses the template’s accent colour</span>';
-    fr.parentNode.insertBefore(l, fr.nextSibling); return true;
-  }
-  var n=0, iv=setInterval(function(){ var a=mount(), b=wrapRender(); if((a&&b)||++n>150) clearInterval(iv); },200);
-})();
-</script>
 </body>
 </html>
