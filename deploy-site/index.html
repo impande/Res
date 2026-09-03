@@ -10032,5 +10032,69 @@ window.__novaPortfolioHTML=function(d,sections){
   try{ fixPhotoIn('resumeOutput'); fixPhotoIn('previewModalBody'); }catch(e){}
 })();
 </script>
+<style id="_r4uKeyAchievCss">
+  #keyAchievBlock{margin-top:22px;padding-top:20px;border-top:1px dashed var(--border,#e5e7eb);}
+  #keyAchievEntries .ka-entry{margin-bottom:12px;}
+  .ka-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .ka-icon-sel{width:64px;flex-shrink:0;font-size:1.15rem;padding:9px 4px;text-align:center;}
+  .r-ka-item .r-award-desc{margin-top:2px;}
+</style>
+<script id="_r4uKeyAchievJS">
+/* Key Achievements — an optional résumé highlights section. Users add icon+title+
+   description items in step 3; they render across EVERY template as an r-section
+   injected into #resumeOutput, reusing the shared résumé classes so the styling
+   matches whichever template is chosen. Included in the PDF (renders from the DOM). */
+(function(){
+  var ICONS=['🏆','⭐','🚀','💡','📈','💰','👥','🎯','✅','🔥','🛠️','📊'];
+  try{ window.__keyAchiev=JSON.parse(localStorage.getItem('_keyAchiev')||'[]'); }catch(e){ window.__keyAchiev=[]; }
+  if(!Array.isArray(window.__keyAchiev)) window.__keyAchiev=[];
+  function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function rerender(){ try{ if(window.__roLastData!==undefined && typeof renderOutput==='function'){ renderOutput(window.__roLastData); } else if(typeof updatePreview==='function'){ updatePreview(); } }catch(e){} }
+  var _kaT; function rerenderD(){ clearTimeout(_kaT); _kaT=setTimeout(rerender,350); }
+  window.pfKaSet=function(i,f,v){ if(!window.__keyAchiev[i]) return; window.__keyAchiev[i][f]=v; save(); if(f==='icon') rerender(); else rerenderD(); };
+  window.pfKaRemove=function(i){ window.__keyAchiev.splice(i,1); save(); pfRenderKa(); rerender(); };
+  window.pfAddKeyAchiev=function(){ window.__keyAchiev.push({icon:'🏆',title:'',desc:''}); save(); pfRenderKa();
+    setTimeout(function(){ var b=document.getElementById('keyAchievEntries'); if(b){ var last=b.lastElementChild; var inp=last&&last.querySelector('input[type=text]'); if(inp) inp.focus(); } },40); };
+  window.pfRenderKa=function(){ var box=document.getElementById('keyAchievEntries'); if(!box) return; var A=window.__keyAchiev||[];
+    box.innerHTML=A.map(function(a,i){
+      var opts=ICONS.map(function(ic){return '<option value="'+ic+'"'+((a.icon||'🏆')===ic?' selected':'')+'>'+ic+'</option>';}).join('');
+      return '<div class="entry-card ka-entry">'
+        +'<button type="button" class="entry-remove" onclick="pfKaRemove('+i+')" title="Remove">✕</button>'
+        +'<div class="ka-row"><select class="ka-icon-sel" onchange="pfKaSet('+i+',\'icon\',this.value)">'+opts+'</select>'
+        +'<input type="text" value="'+esc(a.title||'')+'" placeholder="Achievement title — e.g. Startup Launch Success" oninput="pfKaSet('+i+',\'title\',this.value)" style="flex:1;"></div>'
+        +'<textarea placeholder="One or two lines on the achievement and its impact" oninput="pfKaSet('+i+',\'desc\',this.value)" rows="2" style="width:100%;">'+esc(a.desc||'')+'</textarea>'
+        +'</div>';
+    }).join('');
+  };
+  function mountForm(){ if(document.getElementById('keyAchievBlock')) return true;
+    var aw=document.getElementById('awardEntries'); if(!aw||!aw.parentNode) return false;
+    var d=document.createElement('div'); d.id='keyAchievBlock';
+    d.innerHTML='<h2 class="step-title" style="font-size:1.05rem;margin-top:0;">⭐ Key Achievements <span style="font-weight:400;font-size:0.8rem;color:var(--muted,#888);">(optional)</span></h2>'
+      +'<p class="step-subtitle">Highlight 3–5 standout wins — shown as a prominent section on your resume, in whichever template you pick.</p>'
+      +'<button class="add-entry-btn" type="button" onclick="pfAddKeyAchiev()">+ Add Key Achievement</button>'
+      +'<div id="keyAchievEntries"></div>';
+    aw.parentNode.insertBefore(d, aw.nextSibling); pfRenderKa(); return true;
+  }
+  function injectIntoResume(){
+    var outCard=document.getElementById('resumeOutput'); if(!outCard) return;
+    var prev=outCard.querySelector('.r-keyachiev'); if(prev&&prev.parentNode) prev.parentNode.removeChild(prev);
+    var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);}); if(!A.length) return;
+    var items=A.map(function(a){ return '<div class="r-award-item r-ka-item"><div class="r-award-name">'+(a.icon?esc(a.icon)+' ':'')+esc(a.title||'')+'</div>'+(a.desc?'<div class="r-award-desc">'+esc(a.desc)+'</div>':'')+'</div>'; }).join('');
+    var sec=document.createElement('div'); sec.className='r-section r-keyachiev'; sec.innerHTML='<div class="r-title">Key Achievements</div>'+items;
+    var side=outCard.querySelector('.r-side');
+    if(side){ side.insertBefore(sec, side.firstChild); return; }
+    var main=outCard.querySelector('.r-main')||outCard; var firstSec=main.querySelector('.r-section');
+    if(firstSec && firstSec.nextSibling){ main.insertBefore(sec, firstSec.nextSibling); }
+    else if(firstSec){ main.appendChild(sec); }
+    else { main.insertBefore(sec, main.firstChild); }
+  }
+  window.__kaInject=injectIntoResume;
+  function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__ka){
+      var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0]; var r=o.apply(this,arguments); try{ injectIntoResume(); }catch(e){} return r; }; window.renderOutput.__ka=true; return true; }
+    return false; }
+  var n=0, iv=setInterval(function(){ var a=mountForm(), b=wrapRender(); if((a&&b)||++n>140) clearInterval(iv); },200);
+})();
+</script>
 </body>
 </html>
