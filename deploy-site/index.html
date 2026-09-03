@@ -10290,9 +10290,45 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   window.__kaInject=injectIntoResume;
   function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__ka){
-      var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0]; var r=o.apply(this,arguments); try{ injectIntoResume(); }catch(e){} return r; }; window.renderOutput.__ka=true; return true; }
+      var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0]; var r=o.apply(this,arguments);
+        try{ injectIntoResume(); }catch(e){}
+        /* Key Achievements is injected AFTER the section-order restore (_apply) has
+           already run, so a saved order that involves KA (e.g. "Awards after Key
+           Achievements") would ignore it. Re-apply the order now that KA is in the
+           DOM so it takes its saved place along with the sections around it. */
+        try{ var d=arguments[0]; if(d && d.sectionOrder && typeof window._r4uApplySecOrder==='function') window._r4uApplySecOrder(d.sectionOrder); }catch(e){}
+        return r; }; window.renderOutput.__ka=true; return true; }
     return false; }
   var n=0, iv=setInterval(function(){ var a=ensureStep(), b=wrapRender(), c=wrapGoToStep(); if((a&&b&&c)||++n>140) clearInterval(iv); },200);
+})();
+</script>
+<script id="_r4uSecOrderPersistJS">
+/* Persist résumé section order across reloads. The reorder tool (Refine with AI →
+   Reorder sections) records the new order on lastResumeData.sectionOrder for
+   mid-session re-renders, but the app's save collector doesn't include it — so a
+   reload dropped the arrangement (it went back to the original order). Here we
+   attach the current sectionOrder to every saved payload, so the existing restore
+   path (renderOutput → _r4uApplySecOrder) puts it back on load. */
+(function(){
+  function wrap(){
+    if(typeof window._collectCloudData!=='function' || window._collectCloudData.__secOrder) return true;
+    var oc=window._collectCloudData;
+    window._collectCloudData=function(){
+      var d=oc.apply(this,arguments);
+      try{
+        /* The app's collector already captures the live section order in most
+           paths; only fill it in as a safety net when it's missing, from the
+           explicit reorder recorded on lastResumeData (never a default order,
+           which would fight a later template change — _apply is template-scoped). */
+        var so=(typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) ? lastResumeData.sectionOrder : null;
+        if(d && typeof d==='object' && so && !d.sectionOrder) d.sectionOrder=so;
+      }catch(e){}
+      return d;
+    };
+    window._collectCloudData.__secOrder=true;
+    return true;
+  }
+  var n=0, iv=setInterval(function(){ if(wrap()||++n>150) clearInterval(iv); },200);
 })();
 </script>
 <script id="_r4uPfKaToggleJS">
