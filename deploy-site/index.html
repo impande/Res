@@ -2459,6 +2459,7 @@
     <li class="step-item" data-step="1" onclick="goToStep(1)"><div class="step-num"><span>1</span></div><span class="step-label">Basic Info</span></li>
     <li class="step-item" data-step="2" onclick="goToStep(2)"><div class="step-num"><span>2</span></div><span class="step-label">Experience</span></li>
     <li class="step-item" data-step="3" onclick="goToStep(3)"><div class="step-num"><span>3</span></div><span class="step-label">Awards</span></li>
+    <li class="step-item" data-step="ka" onclick="pfShowKaStep()"><div class="step-num"><span>★</span></div><span class="step-label">Highlights</span></li>
     <li class="step-item" data-step="4" onclick="goToStep(4)"><div class="step-num"><span>4</span></div><span class="step-label">Education</span></li>
     <li class="step-item" data-step="5" onclick="goToStep(5)"><div class="step-num"><span>5</span></div><span class="step-label">Skills</span></li>
     <li class="step-item" data-step="6" onclick="goToStep(6)"><div class="step-num"><span>6</span></div><span class="step-label">Extras</span></li>
@@ -2820,7 +2821,7 @@
     <div id="awardEntries"></div>
     <div class="nav-buttons">
       <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
-      <button class="btn-primary" onclick="goToStep(4)">Next: Education →</button>
+      <button class="btn-primary" onclick="pfShowKaStep()">Next: Key Achievements →</button>
     </div>
   </div>
 
@@ -2830,7 +2831,7 @@
     <button class="add-entry-btn" onclick="addEducation(true)">+ Add Education</button>
     <div id="educationEntries"></div>
     <div class="nav-buttons">
-      <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
+      <button class="btn-secondary" onclick="pfShowKaStep()">← Back</button>
       <button class="btn-primary" onclick="goToStep(5)">Next: Skills →</button>
     </div>
   </div>
@@ -8541,8 +8542,8 @@ if ('serviceWorker' in navigator) {
    blocks group) via ↑/↓, written to window.__pfCustomize.order which the generator
    consumes. Sits alongside the guide + Style Studio in the preview step. */
 (function(){
-  var LABELS={about:'About',links:'Links',experience:'Experience',education:'Education',projects:'Projects',certs:'Certifications',skills:'Skills',awards:'Awards',custom:'Added blocks (hero, case studies…)'};
-  var DEF=['about','links','experience','education','projects','certs','skills','awards','custom'];
+  var LABELS={about:'About',keyachiev:'Key achievements',links:'Links',experience:'Experience',education:'Education',projects:'Projects',certs:'Certifications',skills:'Skills',awards:'Awards',custom:'Added blocks (hero, case studies…)'};
+  var DEF=['about','keyachiev','links','experience','education','projects','certs','skills','awards','custom'];
   function el(id){ return document.getElementById(id); }
   function cz(){ if(!window.__pfCustomize||typeof window.__pfCustomize!=='object'){ try{ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); }catch(e){ window.__pfCustomize={}; } } return window.__pfCustomize; }
   function save(){ try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize||{})); }catch(e){} }
@@ -8740,6 +8741,7 @@ if ('serviceWorker' in navigator) {
   var ROWS=[
     {label:'Work', ph:'Selected Work', keys:['work','projects'], sugg:['Selected Work','Featured Projects','Case Studies','Recent Work']},
     {label:'Services', ph:'What I do', keys:['services','skills'], sugg:['What I Do','Services','How I Can Help','Expertise']},
+    {label:'Key achievements', ph:'Key achievements', keys:['keyachiev'], sugg:['Key Achievements','Highlights','Career Wins','Impact','What I’m Proud Of']},
     {label:'About', ph:'About', keys:['about'], sugg:['About','About Me','My Story','Who I Am']},
     {label:'Experience', ph:'Experience', keys:['experience'], sugg:['Experience','Career','Where I’ve Worked','Journey']},
     {label:'Education', ph:'Education', keys:['education'], sugg:['Education','Background','Studied At']}
@@ -8943,6 +8945,10 @@ window.__novaPortfolioHTML=function(d,sections){
   var awards = A(d.awards), projects = A(d.projects), certs = A(d.certifications);
   var photo = String(d.photo||'').trim();
   var cover = String(d.coverPhoto||'').trim();
+  // Key achievements (optional highlights) — from data, else the builder's global store
+  var kachiev = A(d.keyAchievements);
+  if(!kachiev.length && typeof window!=='undefined' && Array.isArray(window.__keyAchiev)) kachiev = window.__keyAchiev;
+  kachiev = kachiev.filter(function(a){ return a && (a.title||a.desc); });
   // extra custom links: from data, else the builder's global store
   var extra = A(d.links);
   if(!extra.length && typeof window!=='undefined' && Array.isArray(window.__pfExtraLinks)) extra = window.__pfExtraLinks;
@@ -9082,6 +9088,15 @@ window.__novaPortfolioHTML=function(d,sections){
     parts.awards = card('awards','Honors & awards','<div class="ent-list">'+aitems+'</div>');
   }
 
+  // Key achievements (optional highlights) — a prominent stat-style grid
+  if(S('keyachiev') && kachiev.length){
+    var kaItems = kachiev.map(function(a){
+      var ic=esc(a.icon||'🏆'); var t=esc(a.title||''); var ds=a.desc?linkify(a.desc):'';
+      return '<div class="ka-card"><div class="ka-ic">'+ic+'</div><div class="ka-t">'+t+'</div>'+(ds?'<div class="ka-d">'+ds+'</div>':'')+'</div>';
+    }).join('');
+    parts.keyachiev = card('keyachiev','Key achievements','<div class="ka-grid">'+kaItems+'</div>');
+  }
+
   // Custom content blocks (user-added). Types: hero / project / text / stats /
   // testimonials / gallery / contact (+ back-compat: no type = text).
   var custom = A(d.customSections);
@@ -9167,7 +9182,7 @@ window.__novaPortfolioHTML=function(d,sections){
     // (which may include résumé-content blocks), in their order. No auto sections.
     out = parts.custom || '';
   } else {
-    var DEFAULT_ORDER=['about','links','experience','education','projects','certs','skills','awards','custom'];
+    var DEFAULT_ORDER=['about','keyachiev','links','experience','education','projects','certs','skills','awards','custom'];
     var ORDER = (Array.isArray(CZ.order)&&CZ.order.length) ? CZ.order.slice() : DEFAULT_ORDER.slice();
     DEFAULT_ORDER.forEach(function(k){ if(ORDER.indexOf(k)<0) ORDER.push(k); });
     out = ORDER.map(function(k){ return k==='custom' ? (parts.custom||'') : (parts[k]||''); }).join('');
@@ -9299,6 +9314,13 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.cs-gallery.lg{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}'
 /* centered layout variants */
 + '.cs-stats.center{justify-items:center}.cs-quotes.center{max-width:620px;margin:0 auto}'
+/* key achievements — prominent highlight cards (all templates) */
++ '.ka-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}'
++ '.ka-card{border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;background:color-mix(in srgb,var(--acc) 5%,var(--card));position:relative;overflow:hidden}'
++ '.ka-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc)}'
++ '.ka-ic{font-size:1.6rem;line-height:1;margin-bottom:10px}'
++ '.ka-t{font-weight:700;font-size:1.02rem;color:var(--ink);margin-bottom:5px}'
++ '.ka-d{color:var(--mut);font-size:0.9rem;line-height:1.5}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
 /* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
@@ -9624,6 +9646,11 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.opwork-body{padding:22px}.opwork-body h3{font-size:1.35rem;font-weight:800;margin:0 0 8px}.opwork-body p{color:var(--mut);font-size:0.98rem;line-height:1.5}'
       +'.opserv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}'
       +'.opserv{border:1px solid var(--line);border-radius:14px;padding:20px;font-size:1.1rem;font-weight:600}'
+      +'.opka-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}'
+      +'.opka-card{border:1px solid var(--line);border-radius:18px;padding:26px 24px;background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 9%,var(--card)),var(--card))}'
+      +'.opka-ic{font-size:2rem;line-height:1;margin-bottom:14px}'
+      +'.opka-t{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:1.25rem;font-weight:800;letter-spacing:-0.01em;margin-bottom:8px}'
+      +'.opka-d{color:var(--mut);font-size:0.98rem;line-height:1.55}'
       +'.opabout{font-size:clamp(1.2rem,2.8vw,1.6rem);line-height:1.5;max-width:800px;color:var(--ink)}'
       +'.optl-row{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}@media(max-width:560px){.optl-row{grid-template-columns:1fr;gap:2px}}'
       +'.optl-when{color:var(--mut);font-size:0.9rem}.optl-what{font-size:1.05rem}'
@@ -9658,7 +9685,8 @@ window.__novaPortfolioHTML=function(d,sections){
     var about = summary ? '<section id="about" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">About</span><h2>'+esc(H('about','About'))+'</h2></div><p class="opabout">'+linkify(summary)+'</p></section>' : '';
     var expT = exp.length ? '<section id="experience" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Career</span><h2>'+esc(H('experience','Experience'))+'</h2></div><div class="optl">'+exp.map(function(x){var role=esc(x.title||x.role||'');var co=esc(x.co||x.company||'');var per=((x.start||'')+((x.end)?' \u2014 '+esc(x.end):''));return '<div class="optl-row"><div class="optl-when">'+esc(per)+'</div><div class="optl-what"><b>'+role+'</b>'+(co?' · '+co:'')+'</div></div>';}).join('')+'</div></section>' : '';
     var contact = '<section id="contact" class="opcta"><div class="opcta-in"><h2>Let\u2019s work together</h2>'+(email?'<a class="btn opcta-btn" href="mailto:'+esc(email)+'">'+esc(email)+'</a>':(btns||''))+'</div></section>';
-    opBody = work + services + about + expT + (parts.custom||'') + contact;
+    var opKa = kachiev.length ? '<section id="highlights" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Highlights</span><h2>'+esc(H('keyachiev','Key achievements'))+'</h2></div><div class="opka-grid">'+kachiev.map(function(a){var ic=esc(a.icon||'\ud83c\udfc6');var t=esc(a.title||'');var ds=a.desc?linkify(a.desc):'';return '<div class="opka-card"><div class="opka-ic">'+ic+'</div><div class="opka-t">'+t+'</div>'+(ds?'<div class="opka-d">'+ds+'</div>':'')+'</div>';}).join('')+'</div></section>' : '';
+    opBody = work + services + about + opKa + expT + (parts.custom||'') + contact;
   }
   var bodyInner;
   if(TPL==='sidebar'){ bodyInner = '<div class="layout tpl-sidebar">'+injectHTML+'<aside class="side">'+sideProfile+'</aside><main class="main">'+ctaHeroEl+out+foot+'</main></div>'; }
@@ -10067,15 +10095,38 @@ window.__novaPortfolioHTML=function(d,sections){
         +'</div>';
     }).join('');
   };
-  function mountForm(){ if(document.getElementById('keyAchievBlock')) return true;
-    var aw=document.getElementById('awardEntries'); if(!aw||!aw.parentNode) return false;
-    var d=document.createElement('div'); d.id='keyAchievBlock';
-    d.innerHTML='<h2 class="step-title" style="font-size:1.05rem;margin-top:0;">⭐ Key Achievements <span style="font-weight:400;font-size:0.8rem;color:var(--muted,#888);">(optional)</span></h2>'
-      +'<p class="step-subtitle">Highlight 3–5 standout wins — shown as a prominent section on your resume, in whichever template you pick.</p>'
+  /* Key Achievements is its own wizard step, sitting between Awards (3) and
+     Education (4). It is NOT a numbered step in the obfuscated stepper (that
+     would mean renumbering 4–7 and STEP_NAMES); instead it is a sibling
+     .step-content panel (#stepKA) that goToStep automatically hides on any
+     numbered navigation, plus a sidebar item (data-step="ka") we drive here. */
+  function ensureStep(){ if(document.getElementById('stepKA')) return true;
+    var s3=document.getElementById('step3'); if(!s3||!s3.parentNode) return false;
+    var d=document.createElement('div'); d.className='step-content'; d.id='stepKA';
+    d.innerHTML='<h2 class="step-title">⭐ Key Achievements <span style="font-weight:400;font-size:0.8rem;color:var(--muted,#888);">(optional)</span></h2>'
+      +'<p class="step-subtitle">Highlight 3–5 standout wins — shown as a prominent section on your resume, and on your portfolio website.</p>'
       +'<button class="add-entry-btn" type="button" onclick="pfAddKeyAchiev()">+ Add Key Achievement</button>'
-      +'<div id="keyAchievEntries"></div>';
-    aw.parentNode.insertBefore(d, aw.nextSibling); pfRenderKa(); return true;
+      +'<div id="keyAchievEntries"></div>'
+      +'<div class="nav-buttons"><button class="btn-secondary" type="button" onclick="goToStep(3)">← Back</button>'
+      +'<button class="btn-primary" type="button" onclick="goToStep(4)">Next: Education →</button></div>';
+    s3.parentNode.insertBefore(d, s3.nextSibling); pfRenderKa(); return true;
   }
+  function setKaItem(state){ var it=document.querySelector('.step-item[data-step="ka"]'); if(!it) return;
+    it.classList.remove('active','completed'); if(state) it.classList.add(state); }
+  window.pfShowKaStep=function(){ ensureStep();
+    var all=document.querySelectorAll('.step-content'); for(var i=0;i<all.length;i++) all[i].classList.remove('active');
+    var ka=document.getElementById('stepKA'); if(ka) ka.classList.add('active');
+    /* sidebar: 1–3 done, ka active, 4–7 pending */
+    document.querySelectorAll('.step-item').forEach(function(it){ var s=parseInt(it.getAttribute('data-step')); it.classList.remove('active','completed'); if(!isNaN(s)){ if(s<=3) it.classList.add('completed'); } });
+    setKaItem('active');
+    var mn=document.getElementById('mobStepName'); if(mn) mn.textContent='Key Achievements';
+    var mf=document.getElementById('mobProgFill'); if(mf) mf.style.width='50%';
+    try{ var m=document.querySelector('main'); if(m) m.scrollTop=0; }catch(e){}
+  };
+  function wrapGoToStep(){ if(typeof window.goToStep!=='function'||window.goToStep.__kaStep) return false;
+    var g=window.goToStep; window.goToStep=function(){ var r=g.apply(this,arguments);
+      try{ var n=arguments[0]; setKaItem((typeof n==='number'&&n>3&&n<=7)?'completed':''); }catch(e){} return r; };
+    window.goToStep.__kaStep=true; return true; }
   function injectIntoResume(){
     var outCard=document.getElementById('resumeOutput'); if(!outCard) return;
     var prev=outCard.querySelector('.r-keyachiev'); if(prev&&prev.parentNode) prev.parentNode.removeChild(prev);
@@ -10093,7 +10144,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__ka){
       var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0]; var r=o.apply(this,arguments); try{ injectIntoResume(); }catch(e){} return r; }; window.renderOutput.__ka=true; return true; }
     return false; }
-  var n=0, iv=setInterval(function(){ var a=mountForm(), b=wrapRender(); if((a&&b)||++n>140) clearInterval(iv); },200);
+  var n=0, iv=setInterval(function(){ var a=ensureStep(), b=wrapRender(), c=wrapGoToStep(); if((a&&b&&c)||++n>140) clearInterval(iv); },200);
 })();
 </script>
 <style id="_r4uSidebarCss">
