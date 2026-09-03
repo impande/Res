@@ -3392,6 +3392,16 @@ window.__iosPdfSave = function(blobUrl, filename){
           <button id="pfWzNextBtn" onclick="pfWzNav(1)" style="padding:7px 16px;font-size:0.82rem;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;margin-left:auto;">Next →</button>
         </div>
       </div>
+      <div id="pfKaPanel" style="display:none;margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
+        <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>⭐</span>Key Achievements</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Highlight your standout wins — they appear as a section on your portfolio. Shared with your résumé’s Key Achievements.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <button type="button" class="btn-gen-bullets" id="pfKaAiBtn" onclick="pfKbSuggest()">✦ Suggest 5 with AI</button>
+          <button type="button" onclick="pfKbAdd()" style="padding:9px 16px;border:1.5px dashed var(--border);border-radius:9px;background:var(--bg);color:var(--accent);font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit;">+ Add Key Achievement</button>
+        </div>
+        <div id="pfKaSug"></div>
+        <div id="pfKaList"></div>
+      </div>
       <div id="pfLinksEditor" style="margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
         <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>🔗</span>Additional links</div>
         <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Add any links to show on your portfolio — personal site, Behance, Dribbble, Twitter/X, blog, YouTube, etc.</div>
@@ -8201,10 +8211,13 @@ if ('serviceWorker' in navigator) {
       if(tabs && Array.isArray(steps)){
         var cur=window.pfWzIdx||0;
         function rdyOf(id){ return id==='photo'?s.photo:(id==='links'?s.links:!!(s.sec&&s.sec[id])); }
-        var sig=steps.map(function(st,i){ var id=(st&&st.id)||''; return id+(i===cur?'*':'')+(rdyOf(id)?'1':'0'); }).join(',');
+        var kaRdy=false; try{ kaRdy=(window.__keyAchiev||[]).some(function(a){return a&&(a.title||a.desc);}); }catch(e){}
+        var kaOpen=!!(document.getElementById('pfKaPanel')&&document.getElementById('pfKaPanel').style.display!=='none');
+        var sig=steps.map(function(st,i){ var id=(st&&st.id)||''; return id+(i===cur?'*':'')+(rdyOf(id)?'1':'0'); }).join(',')+'|ka'+(kaRdy?1:0)+(kaOpen?'*':'');
         if(sig!==lastTabKey){
           lastTabKey=sig;
-          tabs.innerHTML=steps.map(function(st,i){ var id=(st&&st.id)||''; var lbl=((st&&st.icon)?st.icon+' ':'')+((st&&st.label)||id||('Step '+(i+1))); return '<button type="button" class="pf-wztab'+(i===cur?' on':'')+(rdyOf(id)?' rdy':'')+'" onclick="pfWzGo('+i+')">'+esc(lbl)+'</button>'; }).join('');
+          tabs.innerHTML=steps.map(function(st,i){ var id=(st&&st.id)||''; var lbl=((st&&st.icon)?st.icon+' ':'')+((st&&st.label)||id||('Step '+(i+1))); return '<button type="button" class="pf-wztab'+(i===cur?' on':'')+(rdyOf(id)?' rdy':'')+'" onclick="pfWzGo('+i+')">'+esc(lbl)+'</button>'; }).join('')
+            + '<button type="button" class="pf-wztab'+(kaOpen?' on':'')+(kaRdy?' rdy':'')+'" onclick="pfKaBuilderShow()">'+esc('⭐ Key Achievements')+'</button>';
         }
       }
     }catch(e){}
@@ -10301,6 +10314,76 @@ window.__novaPortfolioHTML=function(d,sections){
     b.classList.toggle('ready', ready);
   }
   setInterval(sync, 650);
+})();
+</script>
+<script id="_r4uPfKaEditorJS">
+/* Portfolio builder — a self-contained Key Achievements editor (its own IDs, so it
+   never clashes with the résumé step's editor) that reads/writes the SAME shared
+   store (window.__keyAchiev + localStorage _keyAchiev). Reached from the
+   "⭐ Key Achievements" chip in "Fill your portfolio details". Includes the same
+   AI-suggest-5 flow, sourced from the user's skills/experience/projects. */
+(function(){
+  var ICONS=['🏆','⭐','🚀','💡','📈','💰','👥','🎯','✅','🔥','🛠️','📊'];
+  function data(){ if(!Array.isArray(window.__keyAchiev)){ try{ window.__keyAchiev=JSON.parse(localStorage.getItem('_keyAchiev')||'[]'); }catch(e){ window.__keyAchiev=[]; } if(!Array.isArray(window.__keyAchiev)) window.__keyAchiev=[]; } return window.__keyAchiev; }
+  function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev||[])); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var _pt; function preview(){ clearTimeout(_pt); _pt=setTimeout(function(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} },400); }
+  window.pfKbRender=function(){ var box=document.getElementById('pfKaList'); if(!box) return; var A=data();
+    box.innerHTML=A.map(function(a,i){
+      var opts=ICONS.map(function(ic){return '<option value="'+ic+'"'+((a.icon||'🏆')===ic?' selected':'')+'>'+ic+'</option>';}).join('');
+      return '<div class="entry-card ka-entry">'
+        +'<button type="button" class="entry-remove" onclick="pfKbRemove('+i+')" title="Remove">✕</button>'
+        +'<div class="ka-row"><select class="ka-icon-sel" onchange="pfKbSet('+i+',\'icon\',this.value)">'+opts+'</select>'
+        +'<input type="text" value="'+esc(a.title||'')+'" placeholder="Achievement title — e.g. Startup Launch Success" oninput="pfKbSet('+i+',\'title\',this.value)" style="flex:1;"></div>'
+        +'<textarea placeholder="One or two lines on the achievement and its impact" oninput="pfKbSet('+i+',\'desc\',this.value)" rows="2" style="width:100%;">'+esc(a.desc||'')+'</textarea>'
+        +'<div class="ka-link-row"><span class="ka-link-ic">🔗</span><input type="url" inputmode="url" value="'+esc(a.link||'')+'" placeholder="Add a link (optional) — proof, article, certificate…" oninput="pfKbSet('+i+',\'link\',this.value)" autocapitalize="off" autocorrect="off" spellcheck="false"></div>'
+        +'</div>';
+    }).join('');
+  };
+  window.pfKbSet=function(i,f,v){ var A=data(); if(!A[i]) return; A[i][f]=v; save(); preview(); };
+  window.pfKbRemove=function(i){ var A=data(); A.splice(i,1); save(); pfKbRender(); preview(); };
+  window.pfKbAdd=function(){ var A=data(); A.push({icon:'🏆',title:'',desc:'',link:''}); save(); pfKbRender();
+    setTimeout(function(){ var b=document.getElementById('pfKaList'); if(b){ var last=b.lastElementChild; var inp=last&&last.querySelector('input[type=text]'); if(inp) inp.focus(); } },40); };
+  window.pfKaBuilderShow=function(){ var p=document.getElementById('pfKaPanel'); if(!p) return; p.style.display=''; pfKbRender();
+    try{ p.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){ p.scrollIntoView(); } };
+  /* AI suggest — same contract as the résumé step, builder-local IDs */
+  function collect(){ var d={}; try{ if(typeof window._collectCloudData==='function') d=window._collectCloudData()||{}; }catch(e){}
+    if(!(d&&(d.skills||d.experience||d.customSections||d.summary))) d=window.__roLastData||d||{}; return d||{}; }
+  function ctx(d){ function A(x){return Array.isArray(x)?x:[];} function flat(x){ if(Array.isArray(x)) return x.join('; '); if(x&&typeof x==='object') return JSON.stringify(x); return String(x||''); }
+    var role=d.jobTitle||d.title||'', sk=A(d.skills).filter(Boolean), ex=A(d.experience), cs=A(d.customSections);
+    var t='Role / target title: '+(role||'(not specified)')+'\n';
+    if(sk.length) t+='Key skills: '+sk.join(', ')+'\n';
+    if(ex.length) t+='Experience:\n'+ex.map(function(x){ var r=(x.title||x.role||''),c=(x.company||x.co||''),b=flat(x.description||x.bullets||x.desc||''); return '- '+r+(c?' at '+c:'')+(b?': '+b:''); }).join('\n')+'\n';
+    if(cs.length) t+='Projects / other:\n'+cs.map(function(s){ var ti=(s.title||s.heading||s.name||''),b=flat(s.content||s.body||s.text||s.items||''); return '- '+ti+(b?': '+b:''); }).join('\n')+'\n';
+    if(d.summary) t+='Summary: '+String(d.summary)+'\n';
+    return {ctx:t, has:!!(sk.length||ex.length||cs.length||d.summary)}; }
+  function parse(text){ if(!text) return []; text=String(text).replace(/```json/gi,'').replace(/```/g,'').trim();
+    var a=null; try{ a=JSON.parse(text); }catch(e){ var m=text.match(/\[[\s\S]*\]/); if(m){ try{ a=JSON.parse(m[0]); }catch(e2){} } }
+    if(!Array.isArray(a)) return [];
+    return a.filter(function(x){return x&&(x.title||x.desc);}).slice(0,5).map(function(x){ return {icon:String(x.icon||'🏆').slice(0,4)||'🏆',title:String(x.title||'').slice(0,90),desc:String(x.desc||x.description||'').slice(0,220)}; }); }
+  function renderSug(){ var box=document.getElementById('pfKaSug'); if(!box) return; var Q=window.__pfKaSug||[];
+    if(!Q.length){ box.innerHTML=''; return; }
+    box.innerHTML='<div class="ka-sug-h">✦ AI suggestions <span>— tap ＋ to add</span></div>'+Q.map(function(a,i){
+      return '<div class="ka-sug-card"><span class="ka-sug-ic">'+esc(a.icon||'🏆')+'</span><div class="ka-sug-tx"><div class="ka-sug-t">'+esc(a.title||'')+'</div>'+(a.desc?'<div class="ka-sug-d">'+esc(a.desc)+'</div>':'')+'</div><button type="button" class="ka-sug-add" onclick="pfKbAddSug('+i+')">＋ Add</button></div>';
+    }).join(''); }
+  window.pfKbAddSug=function(i){ var a=(window.__pfKaSug||[])[i]; if(!a) return; var A=data();
+    A.push({icon:a.icon||'🏆',title:a.title||'',desc:a.desc||'',link:''}); save(); pfKbRender();
+    window.__pfKaSug.splice(i,1); renderSug(); preview(); };
+  window.pfKbSuggest=function(){ var btn=document.getElementById('pfKaAiBtn'), box=document.getElementById('pfKaSug'); if(!box) return;
+    var c=ctx(collect());
+    if(!c.has){ box.innerHTML='<div class="ka-sug-empty">Add your skills, experience or projects in the résumé first — then AI can tailor achievements to you.</div>'; return; }
+    var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. '
+      +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
+    if(btn){ btn.disabled=true; btn.setAttribute('data-t',btn.textContent); btn.textContent='✦ Thinking…'; }
+    box.innerHTML='<div class="ka-sug-loading">Generating 5 suggestions from your resume…</div>';
+    fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
+      .then(function(res){ var raw=res.content; var text=((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||res.text||'').trim();
+        var arr=parse(text); if(!arr.length){ box.innerHTML='<div class="ka-sug-empty">Couldn’t generate suggestions just now — please try again.</div>'; return; }
+        window.__pfKaSug=arr; renderSug(); })
+      .catch(function(){ box.innerHTML='<div class="ka-sug-empty">Couldn’t reach AI just now — please try again.</div>'; })
+      .then(function(){ if(btn){ btn.disabled=false; btn.textContent=btn.getAttribute('data-t')||'✦ Suggest 5 with AI'; } });
+  };
 })();
 </script>
 </body>
