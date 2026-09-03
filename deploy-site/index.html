@@ -9091,8 +9091,9 @@ window.__novaPortfolioHTML=function(d,sections){
   // Key achievements (optional highlights) — a prominent stat-style grid
   if(S('keyachiev') && kachiev.length){
     var kaItems = kachiev.map(function(a){
-      var ic=esc(a.icon||'🏆'); var t=esc(a.title||''); var ds=a.desc?linkify(a.desc):'';
-      return '<div class="ka-card"><div class="ka-ic">'+ic+'</div><div class="ka-t">'+t+'</div>'+(ds?'<div class="ka-d">'+ds+'</div>':'')+'</div>';
+      var ic=esc(a.icon||'🏆'); var t=esc(a.title||''); var ds=a.desc?linkify(a.desc):''; var href=lk(a.link);
+      var inner='<div class="ka-ic">'+ic+'</div><div class="ka-t">'+t+(href?' <span class="ka-arrow">↗</span>':'')+'</div>'+(ds?'<div class="ka-d">'+ds+'</div>':'');
+      return href ? '<a class="ka-card ka-linked" href="'+esc(href)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<div class="ka-card">'+inner+'</div>';
     }).join('');
     parts.keyachiev = card('keyachiev','Key achievements','<div class="ka-grid">'+kaItems+'</div>');
   }
@@ -9321,6 +9322,9 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.ka-ic{font-size:1.6rem;line-height:1;margin-bottom:10px}'
 + '.ka-t{font-weight:700;font-size:1.02rem;color:var(--ink);margin-bottom:5px}'
 + '.ka-d{color:var(--mut);font-size:0.9rem;line-height:1.5}'
++ '.ka-card.ka-linked{cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none}'
++ '.ka-card.ka-linked:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px rgba(0,0,0,0.28)}'
++ '.ka-arrow{color:var(--acc);font-weight:700}'
 /* footer */
 + '.foot{text-align:center;color:var(--mut2);font-size:0.82rem;padding:8px 0 30px}'
 /* keep the profile header and footer full-width even if a customization turns .col into a multi-column grid */
@@ -9651,6 +9655,9 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.opka-ic{font-size:2rem;line-height:1;margin-bottom:14px}'
       +'.opka-t{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:1.25rem;font-weight:800;letter-spacing:-0.01em;margin-bottom:8px}'
       +'.opka-d{color:var(--mut);font-size:0.98rem;line-height:1.55}'
+      +'.opka-card.opka-linked{cursor:pointer;text-decoration:none;transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s}'
+      +'.opka-card.opka-linked:hover{transform:translateY(-4px);box-shadow:0 18px 42px -18px rgba(0,0,0,0.28)}'
+      +'.opka-arrow{color:var(--acc);font-weight:800}'
       +'.opabout{font-size:clamp(1.2rem,2.8vw,1.6rem);line-height:1.5;max-width:800px;color:var(--ink)}'
       +'.optl-row{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}@media(max-width:560px){.optl-row{grid-template-columns:1fr;gap:2px}}'
       +'.optl-when{color:var(--mut);font-size:0.9rem}.optl-what{font-size:1.05rem}'
@@ -9685,7 +9692,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var about = summary ? '<section id="about" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">About</span><h2>'+esc(H('about','About'))+'</h2></div><p class="opabout">'+linkify(summary)+'</p></section>' : '';
     var expT = exp.length ? '<section id="experience" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Career</span><h2>'+esc(H('experience','Experience'))+'</h2></div><div class="optl">'+exp.map(function(x){var role=esc(x.title||x.role||'');var co=esc(x.co||x.company||'');var per=((x.start||'')+((x.end)?' \u2014 '+esc(x.end):''));return '<div class="optl-row"><div class="optl-when">'+esc(per)+'</div><div class="optl-what"><b>'+role+'</b>'+(co?' · '+co:'')+'</div></div>';}).join('')+'</div></section>' : '';
     var contact = '<section id="contact" class="opcta"><div class="opcta-in"><h2>Let\u2019s work together</h2>'+(email?'<a class="btn opcta-btn" href="mailto:'+esc(email)+'">'+esc(email)+'</a>':(btns||''))+'</div></section>';
-    var opKa = kachiev.length ? '<section id="highlights" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Highlights</span><h2>'+esc(H('keyachiev','Key achievements'))+'</h2></div><div class="opka-grid">'+kachiev.map(function(a){var ic=esc(a.icon||'\ud83c\udfc6');var t=esc(a.title||'');var ds=a.desc?linkify(a.desc):'';return '<div class="opka-card"><div class="opka-ic">'+ic+'</div><div class="opka-t">'+t+'</div>'+(ds?'<div class="opka-d">'+ds+'</div>':'')+'</div>';}).join('')+'</div></section>' : '';
+    var opKa = kachiev.length ? '<section id="highlights" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Highlights</span><h2>'+esc(H('keyachiev','Key achievements'))+'</h2></div><div class="opka-grid">'+kachiev.map(function(a){var ic=esc(a.icon||'\ud83c\udfc6');var t=esc(a.title||'');var ds=a.desc?linkify(a.desc):'';var href=lk(a.link);var inner='<div class="opka-ic">'+ic+'</div><div class="opka-t">'+t+(href?' <span class="opka-arrow">\u2197</span>':'')+'</div>'+(ds?'<div class="opka-d">'+ds+'</div>':'');return href?'<a class="opka-card opka-linked" href="'+esc(href)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="opka-card">'+inner+'</div>';}).join('')+'</div></section>' : '';
     opBody = work + services + about + opKa + expT + (parts.custom||'') + contact;
   }
   var bodyInner;
@@ -10065,7 +10072,12 @@ window.__novaPortfolioHTML=function(d,sections){
   #keyAchievEntries .ka-entry{margin-bottom:12px;}
   .ka-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
   .ka-icon-sel{width:64px;flex-shrink:0;font-size:1.15rem;padding:9px 4px;text-align:center;}
+  .ka-link-row{display:flex;align-items:center;gap:7px;margin-top:8px;}
+  .ka-link-row .ka-link-ic{flex-shrink:0;font-size:0.95rem;opacity:0.7;}
+  .ka-link-row input{flex:1;}
   .r-ka-item .r-award-desc{margin-top:2px;}
+  .r-ka-item .r-ka-link{display:inline-block;margin-top:3px;font-size:0.82em;color:var(--accent,#1f2a44);word-break:break-word;}
+  .r4u-sb .r-aside .r-ka-item .r-ka-link{color:#fff !important;text-decoration:underline;opacity:0.92;}
 </style>
 <script id="_r4uKeyAchievJS">
 /* Key Achievements — an optional résumé highlights section. Users add icon+title+
@@ -10082,7 +10094,7 @@ window.__novaPortfolioHTML=function(d,sections){
   var _kaT; function rerenderD(){ clearTimeout(_kaT); _kaT=setTimeout(rerender,350); }
   window.pfKaSet=function(i,f,v){ if(!window.__keyAchiev[i]) return; window.__keyAchiev[i][f]=v; save(); if(f==='icon') rerender(); else rerenderD(); };
   window.pfKaRemove=function(i){ window.__keyAchiev.splice(i,1); save(); pfRenderKa(); rerender(); };
-  window.pfAddKeyAchiev=function(){ window.__keyAchiev.push({icon:'🏆',title:'',desc:''}); save(); pfRenderKa();
+  window.pfAddKeyAchiev=function(){ window.__keyAchiev.push({icon:'🏆',title:'',desc:'',link:''}); save(); pfRenderKa();
     setTimeout(function(){ var b=document.getElementById('keyAchievEntries'); if(b){ var last=b.lastElementChild; var inp=last&&last.querySelector('input[type=text]'); if(inp) inp.focus(); } },40); };
   window.pfRenderKa=function(){ var box=document.getElementById('keyAchievEntries'); if(!box) return; var A=window.__keyAchiev||[];
     box.innerHTML=A.map(function(a,i){
@@ -10092,6 +10104,7 @@ window.__novaPortfolioHTML=function(d,sections){
         +'<div class="ka-row"><select class="ka-icon-sel" onchange="pfKaSet('+i+',\'icon\',this.value)">'+opts+'</select>'
         +'<input type="text" value="'+esc(a.title||'')+'" placeholder="Achievement title — e.g. Startup Launch Success" oninput="pfKaSet('+i+',\'title\',this.value)" style="flex:1;"></div>'
         +'<textarea placeholder="One or two lines on the achievement and its impact" oninput="pfKaSet('+i+',\'desc\',this.value)" rows="2" style="width:100%;">'+esc(a.desc||'')+'</textarea>'
+        +'<div class="ka-link-row"><span class="ka-link-ic">🔗</span><input type="url" inputmode="url" value="'+esc(a.link||'')+'" placeholder="Add a link (optional) — proof, article, certificate…" oninput="pfKaSet('+i+',\'link\',this.value)" autocapitalize="off" autocorrect="off" spellcheck="false"></div>'
         +'</div>';
     }).join('');
   };
@@ -10183,7 +10196,10 @@ window.__novaPortfolioHTML=function(d,sections){
     var outCard=document.getElementById('resumeOutput'); if(!outCard) return;
     var prev=outCard.querySelector('.r-keyachiev'); if(prev&&prev.parentNode) prev.parentNode.removeChild(prev);
     var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);}); if(!A.length) return;
-    var items=A.map(function(a){ return '<div class="r-award r-ka-item"><div class="r-award-name">'+(a.icon?esc(a.icon)+' ':'')+esc(a.title||'')+'</div>'+(a.desc?'<div class="r-award-desc">'+esc(a.desc)+'</div>':'')+'</div>'; }).join('');
+    function lk(u){ u=String(u||'').trim(); if(!u) return ''; if(/^(https?:|mailto:|tel:)/i.test(u)) return u; return 'https://'+u; }
+    function disp(u){ return String(u||'').replace(/^https?:\/\//i,'').replace(/^www\./i,'').replace(/\/$/,''); }
+    var items=A.map(function(a){ var href=lk(a.link);
+      return '<div class="r-award r-ka-item"><div class="r-award-name">'+(a.icon?esc(a.icon)+' ':'')+esc(a.title||'')+'</div>'+(a.desc?'<div class="r-award-desc">'+esc(a.desc)+'</div>':'')+(href?'<a class="r-ka-link" href="'+esc(href)+'" target="_blank" rel="noopener">🔗 '+esc(disp(a.link))+'</a>':'')+'</div>'; }).join('');
     var sec=document.createElement('div'); sec.className='r-sec r-keyachiev'; sec.innerHTML='<div class="r-sec-t">Key Achievements</div>'+items;
     var side=outCard.querySelector('.r-aside');
     if(side){ side.insertBefore(sec, side.firstChild); return; }
