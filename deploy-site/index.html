@@ -10075,6 +10075,19 @@ window.__novaPortfolioHTML=function(d,sections){
   .ka-link-row{display:flex;align-items:center;gap:7px;margin-top:8px;}
   .ka-link-row .ka-link-ic{flex-shrink:0;font-size:0.95rem;opacity:0.7;}
   .ka-link-row input{flex:1;}
+  .ka-ai-wrap{margin-bottom:12px;}
+  .ka-ai-note{font-size:0.72rem;color:var(--muted,#888);margin-top:5px;}
+  #kaSuggestBox{margin-bottom:12px;}
+  .ka-sug-h{font-size:0.82rem;font-weight:700;color:var(--text,#222);margin:4px 0 8px;}
+  .ka-sug-h span{font-weight:400;color:var(--muted,#888);}
+  .ka-sug-loading,.ka-sug-empty{font-size:0.82rem;color:var(--muted,#888);padding:12px 4px;}
+  .ka-sug-card{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border:1px solid var(--border,#e5e7eb);border-radius:11px;background:var(--surface,#faf9f7);margin-bottom:8px;}
+  .ka-sug-ic{font-size:1.25rem;line-height:1.2;flex-shrink:0;}
+  .ka-sug-tx{flex:1;min-width:0;}
+  .ka-sug-t{font-weight:700;font-size:0.92rem;color:var(--text,#222);}
+  .ka-sug-d{font-size:0.82rem;color:var(--muted,#666);line-height:1.45;margin-top:2px;}
+  .ka-sug-add{flex-shrink:0;border:1.5px solid var(--accent,#d97706);background:transparent;color:var(--accent,#d97706);font-weight:700;font-size:0.8rem;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .ka-sug-add:hover{background:var(--accent,#d97706);color:#fff;}
   .r-ka-item .r-award-desc{margin-top:2px;}
   .r-ka-item .r-ka-link{display:inline-block;margin-top:3px;font-size:0.82em;color:var(--accent,#1f2a44);word-break:break-word;}
   .r4u-sb .r-aside .r-ka-item .r-ka-link{color:#fff !important;text-decoration:underline;opacity:0.92;}
@@ -10096,6 +10109,56 @@ window.__novaPortfolioHTML=function(d,sections){
   window.pfKaRemove=function(i){ window.__keyAchiev.splice(i,1); save(); pfRenderKa(); rerender(); };
   window.pfAddKeyAchiev=function(){ window.__keyAchiev.push({icon:'🏆',title:'',desc:'',link:''}); save(); pfRenderKa();
     setTimeout(function(){ var b=document.getElementById('keyAchievEntries'); if(b){ var last=b.lastElementChild; var inp=last&&last.querySelector('input[type=text]'); if(inp) inp.focus(); } },40); };
+
+  /* ── AI: suggest 5 key achievements from the user's own resume data ────────── */
+  function kaCollect(){ var d={};
+    try{ if(typeof window._collectCloudData==='function'){ d=window._collectCloudData()||{}; } }catch(e){}
+    if(!(d && (d.skills||d.experience||d.customSections||d.summary))) d=window.__roLastData||d||{};
+    return d||{}; }
+  function kaContext(d){
+    function arr(x){ return Array.isArray(x)?x:[]; }
+    function flat(x){ if(Array.isArray(x)) return x.join('; '); if(x&&typeof x==='object') return JSON.stringify(x); return String(x||''); }
+    var role=d.jobTitle||d.title||''; var skills=arr(d.skills).filter(Boolean);
+    var exp=arr(d.experience), cs=arr(d.customSections);
+    var ctx='Role / target title: '+(role||'(not specified)')+'\n';
+    if(skills.length) ctx+='Key skills: '+skills.join(', ')+'\n';
+    if(exp.length) ctx+='Experience:\n'+exp.map(function(x){ var t=(x.title||x.role||x.jobTitle||''); var c=(x.company||x.co||''); var b=flat(x.description||x.bullets||x.desc||''); return '- '+t+(c?' at '+c:'')+(b?': '+b:''); }).join('\n')+'\n';
+    if(cs.length) ctx+='Projects / other sections:\n'+cs.map(function(s){ var t=(s.title||s.heading||s.name||''); var b=flat(s.content||s.body||s.text||s.items||''); return '- '+t+(b?': '+b:''); }).join('\n')+'\n';
+    if(d.summary) ctx+='Summary: '+String(d.summary)+'\n';
+    return { ctx:ctx, has:!!(skills.length||exp.length||cs.length||d.summary) };
+  }
+  function kaParse(text){ if(!text) return [];
+    text=String(text).replace(/```json/gi,'').replace(/```/g,'').trim();
+    var a=null; try{ a=JSON.parse(text); }catch(e){ var m=text.match(/\[[\s\S]*\]/); if(m){ try{ a=JSON.parse(m[0]); }catch(e2){} } }
+    if(!Array.isArray(a)) return [];
+    return a.filter(function(x){ return x&&(x.title||x.desc); }).slice(0,5).map(function(x){ return {icon:String(x.icon||'🏆').slice(0,4)||'🏆', title:String(x.title||'').slice(0,90), desc:String(x.desc||x.description||'').slice(0,220)}; });
+  }
+  function kaRenderSug(){ var box=document.getElementById('kaSuggestBox'); if(!box) return; var A=window.__kaSuggest||[];
+    if(!A.length){ box.innerHTML=''; return; }
+    box.innerHTML='<div class="ka-sug-h">✦ AI suggestions <span>— tap ＋ to add</span></div>'+A.map(function(a,i){
+      return '<div class="ka-sug-card"><span class="ka-sug-ic">'+esc(a.icon||'🏆')+'</span><div class="ka-sug-tx"><div class="ka-sug-t">'+esc(a.title||'')+'</div>'+(a.desc?'<div class="ka-sug-d">'+esc(a.desc)+'</div>':'')+'</div><button type="button" class="ka-sug-add" onclick="pfAddSuggested('+i+')">＋ Add</button></div>';
+    }).join('');
+  }
+  window.pfAddSuggested=function(i){ var a=(window.__kaSuggest||[])[i]; if(!a) return;
+    window.__keyAchiev.push({icon:a.icon||'🏆', title:a.title||'', desc:a.desc||'', link:''}); save(); pfRenderKa();
+    window.__kaSuggest.splice(i,1); kaRenderSug(); rerender(); };
+  window.pfSuggestKa=function(){
+    var btn=document.getElementById('kaAiBtn'), box=document.getElementById('kaSuggestBox'); if(!box) return;
+    var c=kaContext(kaCollect());
+    if(!c.has){ box.innerHTML='<div class="ka-sug-empty">Add your skills, experience or projects in the earlier steps first — then AI can tailor achievements to you.</div>'; return; }
+    var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. '
+      +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
+    if(btn){ btn.disabled=true; btn.setAttribute('data-t', btn.textContent); btn.textContent='✦ Thinking…'; }
+    box.innerHTML='<div class="ka-sug-loading">Generating 5 suggestions from your resume…</div>';
+    fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
+      .then(function(res){ var raw=res.content; var text=((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||res.text||'').trim();
+        var arr=kaParse(text);
+        if(!arr.length){ box.innerHTML='<div class="ka-sug-empty">Couldn’t generate suggestions just now — please try again.</div>'; return; }
+        window.__kaSuggest=arr; kaRenderSug(); })
+      .catch(function(){ box.innerHTML='<div class="ka-sug-empty">Couldn’t reach AI just now — please try again.</div>'; })
+      .then(function(){ if(btn){ btn.disabled=false; btn.textContent=btn.getAttribute('data-t')||'✦ Suggest 5 with AI'; } });
+  };
   window.pfRenderKa=function(){ var box=document.getElementById('keyAchievEntries'); if(!box) return; var A=window.__keyAchiev||[];
     box.innerHTML=A.map(function(a,i){
       var opts=ICONS.map(function(ic){return '<option value="'+ic+'"'+((a.icon||'🏆')===ic?' selected':'')+'>'+ic+'</option>';}).join('');
@@ -10118,6 +10181,9 @@ window.__novaPortfolioHTML=function(d,sections){
     var d=document.createElement('div'); d.className='step-content'; d.id='stepKA';
     d.innerHTML='<h2 class="step-title">⭐ Key Achievements <span style="font-weight:400;font-size:0.8rem;color:var(--muted,#888);">(optional)</span></h2>'
       +'<p class="step-subtitle">Highlight 3–5 standout wins — shown as a prominent section on your resume, and on your portfolio website.</p>'
+      +'<div class="ka-ai-wrap"><button class="btn-gen-bullets" type="button" id="kaAiBtn" onclick="pfSuggestKa()">✦ Suggest 5 with AI</button>'
+      +'<div class="ka-ai-note">Tailored to your skills, experience and projects — tap ＋ to add any.</div></div>'
+      +'<div id="kaSuggestBox"></div>'
       +'<button class="add-entry-btn" type="button" onclick="pfAddKeyAchiev()">+ Add Key Achievement</button>'
       +'<div id="keyAchievEntries"></div>'
       +'<div class="nav-buttons"><button class="btn-secondary" type="button" onclick="goToStep(3)">← Back</button>'
