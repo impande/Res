@@ -10122,8 +10122,8 @@ window.__novaPortfolioHTML=function(d,sections){
      genuine Back/Next and never fight the user). Uses inline display too, so it
      works even if a class rule is ever overridden. */
   window.__kaNavGen = window.__kaNavGen || 0;
-  function kaAssert(ka, myGen){
-    if(window.__kaNavGen!==myGen) return; /* a real step nav happened → stop */
+  window.__kaMode = window.__kaMode || false;
+  function kaShow(ka){
     try{
       var all=document.querySelectorAll('.step-content');
       for(var i=0;i<all.length;i++){ var el=all[i];
@@ -10132,36 +10132,52 @@ window.__novaPortfolioHTML=function(d,sections){
       }
     }catch(e){}
   }
-  window.pfShowKaStep=function(){
-    var ka=null; try{ ensureStep(); ka=document.getElementById('stepKA'); }catch(e){}
-    /* Never strand the user: if the KA panel can't be shown for any reason, fall
-       through to Education (Key Achievements is optional). */
-    if(!ka){ try{ if(typeof goToStep==='function') goToStep(4); }catch(e){} return; }
-    var myGen = ++window.__kaNavGen;
-    kaAssert(ka, myGen);
-    /* Cosmetic sidebar/mobile updates — isolated so a failure here can never
-       block the panel from showing (which is what strands the user). */
+  function kaAssert(ka, myGen){ if(window.__kaNavGen!==myGen) return; kaShow(ka); }
+  function kaCosmetic(){
     try{
       document.querySelectorAll('.step-item').forEach(function(it){ var s=parseInt(it.getAttribute('data-step')); it.classList.remove('active','completed'); if(!isNaN(s)){ if(s<=3) it.classList.add('completed'); } });
       setKaItem('active');
       var mn=document.getElementById('mobStepName'); if(mn) mn.textContent='Key Achievements';
       var mf=document.getElementById('mobProgFill'); if(mf) mf.style.width='50%';
-      var m=document.querySelector('main'); if(m) m.scrollTop=0;
       var hdr=document.getElementById('mhdrSection'); if(hdr) hdr.textContent='Key Achievements';
     }catch(e){}
-    /* Re-assert over the next few frames to beat any late render/sync revert. */
+  }
+  window.pfShowKaStep=function(){
+    var ka=null; try{ ensureStep(); ka=document.getElementById('stepKA'); }catch(e){}
+    /* Never strand the user: if the KA panel can't be shown for any reason, fall
+       through to Education (Key Achievements is optional). */
+    if(!ka){ window.__kaMode=false; try{ if(typeof goToStep==='function') goToStep(4); }catch(e){} return; }
+    window.__kaMode=true;
+    var myGen = ++window.__kaNavGen;
+    kaShow(ka); kaCosmetic();
+    try{ var m=document.querySelector('main'); if(m) m.scrollTop=0; }catch(e){}
+    /* Re-assert over the next few frames to beat any late SYNCHRONOUS render/sync revert. */
     if(window.requestAnimationFrame) requestAnimationFrame(function(){ kaAssert(ka,myGen); });
     setTimeout(function(){ kaAssert(ka,myGen); }, 60);
     setTimeout(function(){ kaAssert(ka,myGen); }, 240);
   };
+  /* Wrap goToStep so KA is STICKY against history/popstate events. The app drives
+     navigation through history (every step pushState's {step:n}; a popstate calls
+     goToStep(n, true)). KA is not a numbered step and pushes no history entry, so
+     a spurious popstate — common on iOS Safari — would fire goToStep(prev, true)
+     and silently kick the user off KA back to an earlier step (the reported bug).
+     While in KA mode we swallow such history-driven navigations and re-assert KA;
+     an EXPLICIT Back/Next (goToStep called with no second arg, e.g. KA's own
+     buttons or a sidebar tap) clears KA mode and navigates normally. */
   function wrapGoToStep(){ if(typeof window.goToStep!=='function'||window.goToStep.__kaStep) return false;
     var g=window.goToStep; window.goToStep=function(){
-      /* A genuine numbered navigation: cancel any pending KA re-assert and drop
-         the KA panel's inline display so goToStep's own class toggle governs. */
+      var n=arguments[0], fromHistory=arguments[1];
+      if(window.__kaMode && fromHistory){
+        /* A history/popstate event tried to move us while on KA — keep KA put. */
+        var ka=document.getElementById('stepKA');
+        if(ka){ kaShow(ka); kaCosmetic(); return undefined; }
+      }
+      /* Explicit numbered navigation: leave KA. */
+      window.__kaMode=false;
       window.__kaNavGen=(window.__kaNavGen||0)+1;
-      try{ var ka=document.getElementById('stepKA'); if(ka) ka.style.display=''; }catch(e){}
+      try{ var kaEl=document.getElementById('stepKA'); if(kaEl) kaEl.style.display=''; }catch(e){}
       var r=g.apply(this,arguments);
-      try{ var n=arguments[0]; setKaItem((typeof n==='number'&&n>3&&n<=7)?'completed':''); }catch(e){} return r; };
+      try{ setKaItem((typeof n==='number'&&n>3&&n<=7)?'completed':''); }catch(e){} return r; };
     window.goToStep.__kaStep=true; return true; }
   function injectIntoResume(){
     var outCard=document.getElementById('resumeOutput'); if(!outCard) return;
