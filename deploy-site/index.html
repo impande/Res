@@ -10089,6 +10089,9 @@ window.__novaPortfolioHTML=function(d,sections){
   .ka-link-row{display:flex;align-items:center;gap:7px;margin-top:8px;}
   .ka-link-row .ka-link-ic{flex-shrink:0;font-size:0.95rem;opacity:0.7;}
   .ka-link-row input{flex:1;}
+  .ka-inc-row{display:flex;align-items:center;gap:9px;margin:0 0 14px;padding:10px 12px;border:1px solid var(--border,#e5e7eb);border-radius:10px;background:var(--surface,#faf9f7);font-size:0.85rem;cursor:pointer;flex-wrap:wrap;}
+  .ka-inc-row input{width:16px;height:16px;flex-shrink:0;}
+  .ka-inc-row .ka-inc-hint{color:var(--muted,#888);font-size:0.76rem;}
   .ka-ai-wrap{margin-bottom:12px;}
   .ka-ai-note{font-size:0.72rem;color:var(--muted,#888);margin-top:5px;}
   #kaSuggestBox{margin-bottom:12px;}
@@ -10115,7 +10118,9 @@ window.__novaPortfolioHTML=function(d,sections){
   var ICONS=['🏆','⭐','🚀','💡','📈','💰','👥','🎯','✅','🔥','🛠️','📊'];
   try{ window.__keyAchiev=JSON.parse(localStorage.getItem('_keyAchiev')||'[]'); }catch(e){ window.__keyAchiev=[]; }
   if(!Array.isArray(window.__keyAchiev)) window.__keyAchiev=[];
+  try{ window.__kaIncludeResume = localStorage.getItem('_kaIncludeResume')!=='0'; }catch(e){ window.__kaIncludeResume=true; }
   function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){} }
+  window.pfKaToggleResume=function(on){ window.__kaIncludeResume=!!on; try{ localStorage.setItem('_kaIncludeResume', on?'1':'0'); }catch(e){} try{ injectIntoResume(); }catch(e){} };
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function rerender(){ try{ if(window.__roLastData!==undefined && typeof renderOutput==='function'){ renderOutput(window.__roLastData); } else if(typeof updatePreview==='function'){ updatePreview(); } }catch(e){} }
   var _kaT; function rerenderD(){ clearTimeout(_kaT); _kaT=setTimeout(rerender,350); }
@@ -10195,6 +10200,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var d=document.createElement('div'); d.className='step-content'; d.id='stepKA';
     d.innerHTML='<h2 class="step-title">⭐ Key Achievements <span style="font-weight:400;font-size:0.8rem;color:var(--muted,#888);">(optional)</span></h2>'
       +'<p class="step-subtitle">Highlight 3–5 standout wins — shown as a prominent section on your resume, and on your portfolio website.</p>'
+      +'<label class="ka-inc-row"><input type="checkbox" id="kaIncResume" '+(window.__kaIncludeResume!==false?'checked':'')+' onchange="pfKaToggleResume(this.checked)"> <span>📄 Show Key Achievements on my résumé</span> <span class="ka-inc-hint">— appears in every template</span></label>'
       +'<div class="ka-ai-wrap"><button class="btn-gen-bullets" type="button" id="kaAiBtn" onclick="pfSuggestKa()">✦ Suggest 5 with AI</button>'
       +'<div class="ka-ai-note">Tailored to your skills, experience and projects — tap ＋ to add any.</div></div>'
       +'<div id="kaSuggestBox"></div>'
@@ -10275,18 +10281,25 @@ window.__novaPortfolioHTML=function(d,sections){
   function injectIntoResume(){
     var outCard=document.getElementById('resumeOutput'); if(!outCard) return;
     var prev=outCard.querySelector('.r-keyachiev'); if(prev&&prev.parentNode) prev.parentNode.removeChild(prev);
+    /* Optional: let the user exclude Key Achievements from the résumé. */
+    if(window.__kaIncludeResume===false) return;
     var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);}); if(!A.length) return;
     function lk(u){ u=String(u||'').trim(); if(!u) return ''; if(/^(https?:|mailto:|tel:)/i.test(u)) return u; return 'https://'+u; }
     function disp(u){ return String(u||'').replace(/^https?:\/\//i,'').replace(/^www\./i,'').replace(/\/$/,''); }
     var items=A.map(function(a){ var href=lk(a.link);
       return '<div class="r-award r-ka-item"><div class="r-award-name">'+(a.icon?esc(a.icon)+' ':'')+esc(a.title||'')+'</div>'+(a.desc?'<div class="r-award-desc">'+esc(a.desc)+'</div>':'')+(href?'<a class="r-ka-link" href="'+esc(href)+'" target="_blank" rel="noopener">🔗 '+esc(disp(a.link))+'</a>':'')+'</div>'; }).join('');
     var sec=document.createElement('div'); sec.className='r-sec r-keyachiev'; sec.innerHTML='<div class="r-sec-t">Key Achievements</div>'+items;
+    /* Two-column templates: put KA at the top of the coloured sidebar. */
     var side=outCard.querySelector('.r-aside');
     if(side){ side.insertBefore(sec, side.firstChild); return; }
-    var main=outCard.querySelector('.r-main-col')||outCard; var firstSec=main.querySelector('.r-sec');
-    if(firstSec && firstSec.nextSibling){ main.insertBefore(sec, firstSec.nextSibling); }
-    else if(firstSec){ main.appendChild(sec); }
-    else { main.insertBefore(sec, main.firstChild); }
+    /* Single-column templates have no .r-aside, and their .r-sec sections may be
+       nested inside a wrapper — so insert relative to the FIRST section's real
+       parent (not #resumeOutput), else insertBefore throws and KA silently
+       vanishes on those templates. Fall back to the page/main container. */
+    var firstSec=outCard.querySelector('.r-sec');
+    if(firstSec && firstSec.parentNode){ firstSec.parentNode.insertBefore(sec, firstSec.nextSibling); return; }
+    var host=outCard.querySelector('.r-main-col')||outCard.querySelector('.resume-a4-page')||outCard;
+    host.appendChild(sec);
   }
   window.__kaInject=injectIntoResume;
   function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__ka){
