@@ -10113,13 +10113,32 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function setKaItem(state){ var it=document.querySelector('.step-item[data-step="ka"]'); if(!it) return;
     it.classList.remove('active','completed'); if(state) it.classList.add(state); }
+  /* Show the KA panel and KEEP it shown. Because #stepKA is not a numbered step,
+     the app's own state machine doesn't know about it — so if anything re-runs a
+     render/sync right after the tap it could revert the visible panel back to
+     Awards (the reported "Next does nothing" symptom). We defend against that by
+     re-asserting the panel across the next few frames, tagged with a generation
+     counter that any real numbered navigation bumps (so we yield instantly to a
+     genuine Back/Next and never fight the user). Uses inline display too, so it
+     works even if a class rule is ever overridden. */
+  window.__kaNavGen = window.__kaNavGen || 0;
+  function kaAssert(ka, myGen){
+    if(window.__kaNavGen!==myGen) return; /* a real step nav happened → stop */
+    try{
+      var all=document.querySelectorAll('.step-content');
+      for(var i=0;i<all.length;i++){ var el=all[i];
+        if(el===ka){ el.classList.add('active'); el.style.display='block'; }
+        else { el.classList.remove('active'); el.style.display=''; }
+      }
+    }catch(e){}
+  }
   window.pfShowKaStep=function(){
     var ka=null; try{ ensureStep(); ka=document.getElementById('stepKA'); }catch(e){}
     /* Never strand the user: if the KA panel can't be shown for any reason, fall
        through to Education (Key Achievements is optional). */
     if(!ka){ try{ if(typeof goToStep==='function') goToStep(4); }catch(e){} return; }
-    var all=document.querySelectorAll('.step-content'); for(var i=0;i<all.length;i++) all[i].classList.remove('active');
-    ka.classList.add('active');
+    var myGen = ++window.__kaNavGen;
+    kaAssert(ka, myGen);
     /* Cosmetic sidebar/mobile updates — isolated so a failure here can never
        block the panel from showing (which is what strands the user). */
     try{
@@ -10128,10 +10147,20 @@ window.__novaPortfolioHTML=function(d,sections){
       var mn=document.getElementById('mobStepName'); if(mn) mn.textContent='Key Achievements';
       var mf=document.getElementById('mobProgFill'); if(mf) mf.style.width='50%';
       var m=document.querySelector('main'); if(m) m.scrollTop=0;
+      var hdr=document.getElementById('mhdrSection'); if(hdr) hdr.textContent='Key Achievements';
     }catch(e){}
+    /* Re-assert over the next few frames to beat any late render/sync revert. */
+    if(window.requestAnimationFrame) requestAnimationFrame(function(){ kaAssert(ka,myGen); });
+    setTimeout(function(){ kaAssert(ka,myGen); }, 60);
+    setTimeout(function(){ kaAssert(ka,myGen); }, 240);
   };
   function wrapGoToStep(){ if(typeof window.goToStep!=='function'||window.goToStep.__kaStep) return false;
-    var g=window.goToStep; window.goToStep=function(){ var r=g.apply(this,arguments);
+    var g=window.goToStep; window.goToStep=function(){
+      /* A genuine numbered navigation: cancel any pending KA re-assert and drop
+         the KA panel's inline display so goToStep's own class toggle governs. */
+      window.__kaNavGen=(window.__kaNavGen||0)+1;
+      try{ var ka=document.getElementById('stepKA'); if(ka) ka.style.display=''; }catch(e){}
+      var r=g.apply(this,arguments);
       try{ var n=arguments[0]; setKaItem((typeof n==='number'&&n>3&&n<=7)?'completed':''); }catch(e){} return r; };
     window.goToStep.__kaStep=true; return true; }
   function injectIntoResume(){
