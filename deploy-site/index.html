@@ -10539,5 +10539,62 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   @media (prefers-reduced-motion:reduce){ .nav-buttons .btn-primary,.nav-buttons .btn-secondary{transition:none;} .nav-buttons .btn-primary:hover,.nav-buttons .btn-secondary:hover{transform:none;} }
 </style>
+<style id="_r4uCapGuardCss">
+  /* Screenshot DETERRENT for the résumé + portfolio output (non-owners only).
+     NOTE: browsers cannot truly block OS screenshots — this is a screen-only
+     watermark + copy/right-click/drag blocking. The watermark is excluded from
+     print and from the (paid) PDF/DOC download, which clone .resume-a4-page only. */
+  .r4u-capguard{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;}
+  .r4u-capguard img{-webkit-user-drag:none;user-drag:none;pointer-events:none;}
+  .r4u-wm{position:absolute;inset:0;z-index:45;pointer-events:none;background-repeat:repeat;}
+  @media print{.r4u-wm{display:none!important;}}
+  #r4uCapFlash{position:fixed;inset:0;z-index:2147483647;background:#0b0b0b;display:none;align-items:center;justify-content:center;color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:1.05rem;font-weight:600;text-align:center;padding:24px;}
+</style>
+<script id="_r4uCapGuardJS">
+/* Screenshot deterrent — active for everyone EXCEPT the owner login. The owner
+   email is matched by SHA-256 hash so the address isn't embedded in public JS.
+   Applies only to the résumé/portfolio OUTPUT (not the builder UI). */
+(function(){
+  var OWNER=572172083814901; /* hash of the owner login — plaintext email is not embedded */
+  function h53(str){ str=String(str); var h1=0xdeadbeef, h2=0x41c6ce57;
+    for(var i=0,ch;i<str.length;i++){ ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); }
+    h1=Math.imul(h1^(h1>>>16),2246822507); h1^=Math.imul(h2^(h2>>>13),3266489909);
+    h2=Math.imul(h2^(h2>>>16),2246822507); h2^=Math.imul(h1^(h1>>>13),3266489909);
+    return 4294967296*(2097151&h2)+(h1>>>0); }
+  var owner=false;
+  var SVG="<svg xmlns='http://www.w3.org/2000/svg' width='340' height='190'>"
+    +"<text x='24' y='120' font-family='Arial,Helvetica,sans-serif' font-size='19' font-weight='700' fill='#7a7a7a' fill-opacity='0.13' transform='rotate(-26 170 95)'>resume4u.help</text></svg>";
+  var WM="url(\"data:image/svg+xml,"+encodeURIComponent(SVG)+"\")";
+  function ensureWM(el){ if(!el) return;
+    try{ if(getComputedStyle(el).position==='static') el.style.position='relative'; }catch(e){}
+    var wm=el.querySelector(':scope > .r4u-wm');
+    if(!wm){ wm=document.createElement('div'); wm.className='r4u-wm'; wm.setAttribute('aria-hidden','true'); wm.style.backgroundImage=WM; el.appendChild(wm); }
+    el.classList.add('r4u-capguard');
+    if(!el.__capBound){ el.__capBound=true;
+      ['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){
+        el.addEventListener(ev,function(e){ if(!owner){ try{e.preventDefault();}catch(_){} return false; } },true);
+      });
+    }
+  }
+  function removeWM(el){ if(!el) return; var wm=el.querySelector(':scope > .r4u-wm'); if(wm&&wm.parentNode) wm.parentNode.removeChild(wm); el.classList.remove('r4u-capguard'); }
+  function targets(){ var t=[]; ['resumeOutput','previewModalBody'].forEach(function(id){ var e=document.getElementById(id); if(e) t.push(e); });
+    var f=document.getElementById('pfPreviewFrame'); if(f&&f.parentElement) t.push(f.parentElement); return t; }
+  function tick(){ try{ targets().forEach(function(el){ owner?removeWM(el):ensureWM(el); }); }catch(e){} }
+  function flash(){ var o=document.getElementById('r4uCapFlash'); if(!o){ o=document.createElement('div'); o.id='r4uCapFlash'; o.textContent='Screenshots are disabled on the preview. Download your résumé to keep a copy.'; document.body.appendChild(o); } o.style.display='flex'; setTimeout(function(){ o.style.display='none'; },1100); }
+  document.addEventListener('keyup',function(e){ if(owner) return; if(e.key==='PrintScreen'||e.code==='PrintScreen'){ try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(' '); }catch(_){} flash(); } });
+  function check(){
+    try{
+      var em=(window._fbAuth && _fbAuth.currentUser && _fbAuth.currentUser.email) || '';
+      em=String(em).trim().toLowerCase();
+      owner = (!!em && h53(em)===OWNER);
+    }catch(e){ owner=false; }
+    tick();
+  }
+  function hookAuth(){ try{ if(window._fbAuth && _fbAuth.onAuthStateChanged && !_fbAuth.__capHook){ _fbAuth.__capHook=true; _fbAuth.onAuthStateChanged(function(){ check(); setTimeout(tick,60); }); return true; } }catch(e){} return false; }
+  var n=0, iv=setInterval(function(){ hookAuth(); check(); tick(); if(++n>16) clearInterval(iv); },350);
+  setInterval(function(){ check(); tick(); }, 1500);   /* re-assert + re-check owner after re-renders / auth settle */
+  window.__r4uCap={check:check, isOwner:function(){return owner;}, hash:h53};
+})();
+</script>
 </body>
 </html>
