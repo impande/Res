@@ -6042,6 +6042,19 @@ if ('serviceWorker' in navigator) {
   if(typeof window._applyCloudDoc!=='function') return;
   var orig=window._applyCloudDoc;
   window._applyCloudDoc=function(uid,data,portfolio){
+    /* Version / cloud restore: bring Key Achievements in line with the restored
+       document — exactly like every other résumé field (empty if that version had
+       none). Set BEFORE the underlying apply so the render uses it, and mark
+       auto-gen done so a restore is never overridden by the one-time generator. */
+    try{
+      if(data && typeof data==='object' && ('keyAchievements' in data || data.summary || (data.experience && data.experience.length))){
+        window.__keyAchiev = Array.isArray(data.keyAchievements) ? data.keyAchievements.slice() : [];
+        try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){}
+        window.__kaIncludeResume = (data.kaIncludeResume===false) ? false : true;
+        try{ localStorage.setItem('_kaIncludeResume', window.__kaIncludeResume?'1':'0'); localStorage.setItem('_kaAutoGen','1'); }catch(e){}
+        try{ if(typeof pfRenderKa==='function') pfRenderKa(); var _cb=document.getElementById('kaIncResume'); if(_cb) _cb.checked=window.__kaIncludeResume; }catch(e){}
+      }
+    }catch(e){}
     var r=orig.apply(this,arguments);
     /* Data-loaded signal: a cloud doc has now applied, so the "loading your account /
        restoring your resume" loader can come down. Hiding here (on the real signal)
