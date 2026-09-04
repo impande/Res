@@ -10200,6 +10200,43 @@ window.__novaPortfolioHTML=function(d,sections){
       .catch(function(){ box.innerHTML='<div class="ka-sug-empty">Couldn’t reach AI just now — please try again.</div>'; })
       .then(function(){ if(btn){ btn.disabled=false; btn.textContent=btn.getAttribute('data-t')||'✦ Suggest 5 with AI'; } });
   };
+  /* Auto-populate 5 Key Achievements the first time a user reaches the step with
+     none, so the section is present (min 5) in the résumé output card and preview
+     without the user having to ask. Runs once (guarded by _kaAutoGen); skipped if
+     they already have real achievements or there's no résumé data to draw from.
+     Replaces any seeded blank; the 5 are fully editable afterwards. */
+  window.__kaAutoGenRunning=false;
+  window.pfKaAutoGen=function(){
+    try{
+      if(window.__kaAutoGenRunning) return;
+      var real=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);});
+      if(real.length){ try{ localStorage.setItem('_kaAutoGen','1'); }catch(e){} return; }
+      if(localStorage.getItem('_kaAutoGen')==='1') return;
+      var c=kaContext(kaCollect());
+      if(!c.has) return; /* no résumé data yet — try again on a later visit */
+      window.__kaAutoGenRunning=true;
+      var box=document.getElementById('kaSuggestBox');
+      if(box) box.innerHTML='<div class="ka-sug-loading">✦ Generating 5 key achievements from your resume…</div>';
+      var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. '
+        +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
+      fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+        .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
+        .then(function(res){ var raw=res.content; var text=((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||res.text||'').trim();
+          var arr=kaParse(text);
+          if(arr.length){
+            window.__keyAchiev=arr.map(function(a){ return {icon:a.icon||'🏆', title:a.title||'', desc:a.desc||'', link:''}; });
+            save(); if(box) box.innerHTML=''; pfRenderKa(); rerender();
+            try{ localStorage.setItem('_kaAutoGen','1'); }catch(e){}
+          } else { if(box) box.innerHTML=''; }
+        })
+        .catch(function(){ if(box) box.innerHTML=''; })
+        .then(function(){ window.__kaAutoGenRunning=false; });
+    }catch(e){ window.__kaAutoGenRunning=false; }
+  };
+  function wrapGoToStepKa(){ if(typeof window.goToStep!=='function'||window.goToStep.__kaAuto) return false;
+    var g=window.goToStep; window.goToStep=function(){ var r=g.apply(this,arguments);
+      try{ if(arguments[0]===4) setTimeout(window.pfKaAutoGen,200); }catch(e){} return r; };
+    window.goToStep.__kaAuto=true; return true; }
   window.pfRenderKa=function(){ var box=document.getElementById('keyAchievEntries'); if(!box) return; var A=window.__keyAchiev||[];
     box.innerHTML=A.map(function(a,i){
       var opts=ICONS.map(function(ic){return '<option value="'+ic+'"'+((a.icon||'🏆')===ic?' selected':'')+'>'+ic+'</option>';}).join('');
@@ -10313,7 +10350,7 @@ window.__novaPortfolioHTML=function(d,sections){
         }catch(e){}
         return r; }; window.renderOutput.__ka=true; return true; }
     return false; }
-  var n=0, iv=setInterval(function(){ var a=mountKa(), b=wrapRender(), c=wrapPreview(); if((a&&b&&c)||++n>200) clearInterval(iv); },200);
+  var n=0, iv=setInterval(function(){ var a=mountKa(), b=wrapRender(), c=wrapPreview(), d=wrapGoToStepKa(); if((a&&b&&c&&d)||++n>200) clearInterval(iv); },200);
 })();
 </script>
 <script id="_r4uSecOrderPersistJS">
