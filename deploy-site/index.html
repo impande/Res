@@ -10521,6 +10521,20 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   .nav-buttons .btn-secondary:hover{transform:translateY(-2px);border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface,#fff));box-shadow:0 8px 18px -10px rgba(0,0,0,0.22);}
   .nav-buttons .btn-secondary:active{transform:translateY(0);}
+  /* Keep every CTA label on ONE line: 'Back' stays compact (sized to its text),
+     'Next: …' takes the remaining width and never wraps. Override the base
+     .nav-buttons button{flex:1;min-width:110px} that forced equal halves and
+     wrapped long labels like "Next: Key Achievements". */
+  .nav-buttons{flex-wrap:nowrap;align-items:stretch;}
+  .nav-buttons .btn-secondary{flex:0 0 auto!important;min-width:0!important;white-space:nowrap;}
+  .nav-buttons .btn-primary{flex:1 1 auto!important;min-width:0!important;white-space:nowrap;justify-content:center;}
+  @media (max-width:560px){
+    .nav-buttons .btn-primary,.nav-buttons .btn-secondary{padding:14px 16px;font-size:0.92rem;}
+    .nav-buttons .btn-secondary{padding-left:14px;padding-right:14px;}
+  }
+  @media (max-width:380px){
+    .nav-buttons .btn-primary,.nav-buttons .btn-secondary{font-size:0.86rem;padding:13px 12px;}
+  }
   @media (prefers-reduced-motion:reduce){ .nav-buttons .btn-primary,.nav-buttons .btn-secondary{transition:none;} .nav-buttons .btn-primary:hover,.nav-buttons .btn-secondary:hover{transform:none;} }
 </style>
 </body>
