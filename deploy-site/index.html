@@ -10216,6 +10216,18 @@ window.__novaPortfolioHTML=function(d,sections){
      (#step4); on mount we just populate the entries and reflect the include
      toggle from saved state. */
   function mountKa(){ var box=document.getElementById('keyAchievEntries'); if(!box) return false;
+    /* Key Achievements added by default for every user: seed one starter entry
+       (once) so the step is never empty and everyone is nudged to fill it in.
+       Guarded by _kaSeeded so a user who deletes it isn't re-seeded, and skipped
+       when they already have achievements. */
+    try{
+      if(localStorage.getItem('_kaSeeded')!=='1' && !((window.__keyAchiev||[]).length)){
+        if(!Array.isArray(window.__keyAchiev)) window.__keyAchiev=[];
+        window.__keyAchiev.push({icon:'🏆',title:'',desc:'',link:''});
+        localStorage.setItem('_kaSeeded','1');
+        try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){}
+      }
+    }catch(e){}
     pfRenderKa();
     var cb=document.getElementById('kaIncResume'); if(cb) cb.checked=(window.__kaIncludeResume!==false);
     return true; }
