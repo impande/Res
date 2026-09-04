@@ -10162,8 +10162,16 @@ window.__novaPortfolioHTML=function(d,sections){
   try{ window.__keyAchiev=JSON.parse(localStorage.getItem('_keyAchiev')||'[]'); }catch(e){ window.__keyAchiev=[]; }
   if(!Array.isArray(window.__keyAchiev)) window.__keyAchiev=[];
   try{ window.__kaIncludeResume = localStorage.getItem('_kaIncludeResume')!=='0'; }catch(e){ window.__kaIncludeResume=true; }
-  function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){} }
-  window.pfKaToggleResume=function(on){ window.__kaIncludeResume=!!on; try{ localStorage.setItem('_kaIncludeResume', on?'1':'0'); }catch(e){} try{ injectIntoResume(); }catch(e){} };
+  /* Push Key Achievements to the cloud (debounced) whenever they change, so a
+     fresh login on another session/device restores them. Only when signed in;
+     saves the whole résumé doc (KA is part of _collectCloudData). */
+  var _kaCloudT;
+  window.__kaCloudSave=function(){ clearTimeout(_kaCloudT); _kaCloudT=setTimeout(function(){
+    try{ var uid=(window._fbAuth && _fbAuth.currentUser && _fbAuth.currentUser.uid);
+      if(uid && typeof window._saveToCloud==='function') window._saveToCloud(uid, false); }catch(e){}
+  }, 1500); };
+  function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){} try{ window.__kaCloudSave(); }catch(e){} }
+  window.pfKaToggleResume=function(on){ window.__kaIncludeResume=!!on; try{ localStorage.setItem('_kaIncludeResume', on?'1':'0'); }catch(e){} try{ injectIntoResume(); }catch(e){} try{ window.__kaCloudSave(); }catch(e){} };
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function rerender(){ try{ if(window.__roLastData!==undefined && typeof renderOutput==='function'){ renderOutput(window.__roLastData); } else if(typeof updatePreview==='function'){ updatePreview(); } }catch(e){} }
   var _kaT; function rerenderD(){ clearTimeout(_kaT); _kaT=setTimeout(rerender,350); }
@@ -10458,7 +10466,7 @@ window.__novaPortfolioHTML=function(d,sections){
 (function(){
   var ICONS=['🏆','⭐','🚀','💡','📈','💰','👥','🎯','✅','🔥','🛠️','📊'];
   function data(){ if(!Array.isArray(window.__keyAchiev)){ try{ window.__keyAchiev=JSON.parse(localStorage.getItem('_keyAchiev')||'[]'); }catch(e){ window.__keyAchiev=[]; } if(!Array.isArray(window.__keyAchiev)) window.__keyAchiev=[]; } return window.__keyAchiev; }
-  function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev||[])); }catch(e){} }
+  function save(){ try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev||[])); }catch(e){} try{ if(typeof window.__kaCloudSave==='function') window.__kaCloudSave(); }catch(e){} }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   var _pt; function preview(){ clearTimeout(_pt); _pt=setTimeout(function(){ try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} },400); }
   window.pfKbRender=function(){ var box=document.getElementById('pfKaList'); if(!box) return; var A=data();
