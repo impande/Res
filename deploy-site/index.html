@@ -10148,7 +10148,10 @@ window.__novaPortfolioHTML=function(d,sections){
   var _kaT; function rerenderD(){ clearTimeout(_kaT); _kaT=setTimeout(rerender,350); }
   window.pfKaSet=function(i,f,v){ if(!window.__keyAchiev[i]) return; window.__keyAchiev[i][f]=v; save(); if(f==='icon') rerender(); else rerenderD(); };
   window.pfKaRemove=function(i){ window.__keyAchiev.splice(i,1); save(); pfRenderKa(); rerender(); };
-  window.pfAddKeyAchiev=function(){ window.__keyAchiev.push({icon:'🏆',title:'',desc:'',link:''}); save(); pfRenderKa();
+  /* Any manual engagement (adding an achievement) permanently disables the
+     one-time auto-generation, so removing everything later never re-populates. */
+  function kaMarkTouched(){ try{ localStorage.setItem('_kaAutoGen','1'); }catch(e){} }
+  window.pfAddKeyAchiev=function(){ kaMarkTouched(); window.__keyAchiev.push({icon:'🏆',title:'',desc:'',link:''}); save(); pfRenderKa();
     setTimeout(function(){ var b=document.getElementById('keyAchievEntries'); if(b){ var last=b.lastElementChild; var inp=last&&last.querySelector('input[type=text]'); if(inp) inp.focus(); } },40); };
 
   /* ── AI: suggest 5 key achievements from the user's own resume data ────────── */
@@ -10180,7 +10183,7 @@ window.__novaPortfolioHTML=function(d,sections){
       return '<div class="ka-sug-card"><span class="ka-sug-ic">'+esc(a.icon||'🏆')+'</span><div class="ka-sug-tx"><div class="ka-sug-t">'+esc(a.title||'')+'</div>'+(a.desc?'<div class="ka-sug-d">'+esc(a.desc)+'</div>':'')+'</div><button type="button" class="ka-sug-add" onclick="pfAddSuggested('+i+')">＋ Add</button></div>';
     }).join('');
   }
-  window.pfAddSuggested=function(i){ var a=(window.__kaSuggest||[])[i]; if(!a) return;
+  window.pfAddSuggested=function(i){ var a=(window.__kaSuggest||[])[i]; if(!a) return; kaMarkTouched();
     window.__keyAchiev.push({icon:a.icon||'🏆', title:a.title||'', desc:a.desc||'', link:''}); save(); pfRenderKa();
     window.__kaSuggest.splice(i,1); kaRenderSug(); rerender(); };
   window.pfSuggestKa=function(){
