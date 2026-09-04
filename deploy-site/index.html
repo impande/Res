@@ -8937,12 +8937,12 @@ if ('serviceWorker' in navigator) {
             ? '<button type="button" onclick="pfModAct(\''+d.name+'\',true)" style="padding:6px 14px;border:none;border-radius:7px;background:#16a34a;color:#fff;font-weight:600;font-size:0.78rem;cursor:pointer;">Approve</button>'
               +'<button type="button" onclick="pfModAct(\''+d.name+'\',false)" style="padding:6px 14px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:#dc2626;font-weight:600;font-size:0.78rem;cursor:pointer;">Reject</button>'
             : '<button type="button" onclick="if(confirm(\'Remove this testimonial from your live portfolio?\'))pfModAct(\''+d.name+'\',false)" style="padding:6px 14px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:#dc2626;font-weight:600;font-size:0.78rem;cursor:pointer;">Remove</button>';
-          return '<div style="display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:9px;padding:8px 11px;margin-bottom:6px;background:var(--bg);">'
+          return '<div style="display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin-bottom:5px;background:var(--bg);">'
             +'<div style="flex:1;min-width:0;">'
-              +'<div style="font-size:0.82rem;color:var(--text);line-height:1.38;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">“'+q+'”</div>'
-              +'<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n+(ro?' · '+ro:'')+'</div>'
+              +'<div style="font-size:0.8rem;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">“'+q+'”</div>'
+              +'<div style="font-size:0.69rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n+(ro?' · '+ro:'')+'</div>'
             +'</div>'
-            +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">'+btns+'</div></div>';
+            +'<div style="display:flex;flex-direction:'+(kind==='pending'?'column':'row')+';gap:5px;flex-shrink:0;">'+btns+'</div></div>';
         }
         var out='';
         if(pend.length){ out+='<div style="font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:9px;">🕓 '+pend.length+' testimonial'+(pend.length>1?'s':'')+' awaiting your approval</div>'
@@ -8950,6 +8950,9 @@ if ('serviceWorker' in navigator) {
         if(appr.length){ out+='<div style="font-weight:700;font-size:0.88rem;color:var(--text);margin:'+(pend.length?'14px':'0')+' 0 9px;">✅ '+appr.length+' live on your portfolio</div>'
           + appr.map(function(d){ return tCard(d,'approved'); }).join(''); }
         panel.innerHTML=out;
+        /* Cap the list height so many testimonials scroll inside the panel
+           instead of stretching the page. */
+        try{ panel.style.maxHeight='42vh'; panel.style.overflowY='auto'; panel.style.overflowX='hidden'; panel.style.webkitOverflowScrolling='touch'; }catch(e){}
       }).catch(function(){});
   };
 
