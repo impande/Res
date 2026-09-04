@@ -10370,6 +10370,20 @@ window.__novaPortfolioHTML=function(d,sections){
         return r; }; window.renderOutput.__ka=true; return true; }
     return false; }
   var n=0, iv=setInterval(function(){ var a=mountKa(), b=wrapRender(), c=wrapPreview(), d=wrapGoToStepKa(); if((a&&b&&c&&d)||++n>200) clearInterval(iv); },200);
+  /* Self-heal: whenever a résumé is on screen but the Key Achievements section is
+     missing (e.g. after a login/version restore that painted a saved HTML snapshot
+     or rendered before the store was ready), inject it — so already-added
+     achievements always show in the output card without visiting the KA step. */
+  function ensureKAInOutput(){
+    try{
+      var ro=document.getElementById('resumeOutput');
+      if(!ro || !ro.querySelector('.resume-a4-page')) return;
+      if(window.__kaIncludeResume===false) return;
+      var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);});
+      if(A.length && !ro.querySelector('.r-keyachiev')){ injectIntoResume(); }
+    }catch(e){}
+  }
+  setInterval(ensureKAInOutput, 900);
 })();
 </script>
 <script id="_r4uSecOrderPersistJS">
