@@ -10267,7 +10267,21 @@ window.__novaPortfolioHTML=function(d,sections){
     return ok;
   }
   function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__ka){
-      var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0]; var r=o.apply(this,arguments);
+      var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0];
+        /* Adopt Key Achievements carried on the résumé data (cloud/localStorage
+           restore) when the in-memory store is empty — KA lives outside the app's
+           own résumé document, so without this it would vanish after a reload or
+           on another device. Never overwrite a non-empty live store. */
+        try{ var _d0=arguments[0];
+          if(_d0 && Array.isArray(_d0.keyAchievements) && _d0.keyAchievements.length &&
+             !((window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);}).length)){
+            window.__keyAchiev=_d0.keyAchievements;
+            try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){}
+            if(_d0.kaIncludeResume===false){ window.__kaIncludeResume=false; }
+            try{ if(typeof pfRenderKa==='function') pfRenderKa(); }catch(e){}
+          }
+        }catch(e){}
+        var r=o.apply(this,arguments);
         try{ injectIntoResume(); }catch(e){}
         /* Key Achievements is injected AFTER the section-order restore (_apply) has
            already run, so a saved order that involves KA (e.g. "Awards after Key
@@ -10310,6 +10324,14 @@ window.__novaPortfolioHTML=function(d,sections){
            which would fight a later template change — _apply is template-scoped). */
         var so=(typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) ? lastResumeData.sectionOrder : null;
         if(d && typeof d==='object' && so && !d.sectionOrder) d.sectionOrder=so;
+        /* Persist Key Achievements into the résumé document too — it otherwise
+           lives only in this browser's localStorage and would be lost on a cloud
+           restore or another device. */
+        if(d && typeof d==='object'){
+          var ka=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);});
+          if(ka.length) d.keyAchievements=window.__keyAchiev;
+          if(window.__kaIncludeResume===false) d.kaIncludeResume=false;
+        }
       }catch(e){}
       return d;
     };
