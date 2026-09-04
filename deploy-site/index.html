@@ -6042,17 +6042,19 @@ if ('serviceWorker' in navigator) {
   if(typeof window._applyCloudDoc!=='function') return;
   var orig=window._applyCloudDoc;
   window._applyCloudDoc=function(uid,data,portfolio){
-    /* Version / cloud restore: bring Key Achievements in line with the restored
-       document — exactly like every other résumé field (empty if that version had
-       none). Set BEFORE the underlying apply so the render uses it, and mark
-       auto-gen done so a restore is never overridden by the one-time generator. */
+    /* Version / cloud restore: adopt Key Achievements from the restored document
+       ONLY when it actually carries some. If the doc has none (e.g. an older cloud
+       doc saved before KA existed, or a pre-KA version), KEEP whatever the user has
+       locally — otherwise signing in / reloading would wipe achievements they'd
+       already added (the reported data loss). Set before the underlying apply. */
     try{
-      if(data && typeof data==='object' && ('keyAchievements' in data || data.summary || (data.experience && data.experience.length))){
-        window.__keyAchiev = Array.isArray(data.keyAchievements) ? data.keyAchievements.slice() : [];
+      var _docKA = (data && Array.isArray(data.keyAchievements)) ? data.keyAchievements.filter(function(a){return a&&(a.title||a.desc);}) : [];
+      if(_docKA.length){
+        window.__keyAchiev = data.keyAchievements.slice();
         try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){}
-        window.__kaIncludeResume = (data.kaIncludeResume===false) ? false : true;
-        try{ localStorage.setItem('_kaIncludeResume', window.__kaIncludeResume?'1':'0'); localStorage.setItem('_kaAutoGen','1'); }catch(e){}
-        try{ if(typeof pfRenderKa==='function') pfRenderKa(); var _cb=document.getElementById('kaIncResume'); if(_cb) _cb.checked=window.__kaIncludeResume; }catch(e){}
+        if(data.kaIncludeResume===false){ window.__kaIncludeResume=false; try{ localStorage.setItem('_kaIncludeResume','0'); }catch(e){} }
+        try{ localStorage.setItem('_kaAutoGen','1'); }catch(e){}
+        try{ if(typeof pfRenderKa==='function') pfRenderKa(); var _cb=document.getElementById('kaIncResume'); if(_cb) _cb.checked=(window.__kaIncludeResume!==false); }catch(e){}
       }
     }catch(e){}
     var r=orig.apply(this,arguments);
