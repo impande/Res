@@ -8230,6 +8230,9 @@ if ('serviceWorker' in navigator) {
     try{
       step.querySelectorAll('.pf-toggle').forEach(function(t){
         var sec=t.getAttribute('data-section'); var sw=t.querySelector('.pf-toggle-switch'); if(!sw) return;
+        /* Key Achievements readiness isn't in the builder's state(); its own sync
+           owns that badge — skip it here so the two don't fight (badge blinking). */
+        if(sec==='keyachiev') return;
         var b=t.querySelector('.pf-rdy'); if(!b){ b=document.createElement('span'); b.className='pf-rdy'; t.insertBefore(b, sw); }
         var ready=s.sec[sec];
         b.textContent = ready?'✓ Ready':'Add details';
