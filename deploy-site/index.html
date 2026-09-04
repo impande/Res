@@ -10121,7 +10121,13 @@ window.__novaPortfolioHTML=function(d,sections){
   .ka-sug-d{font-size:0.82rem;color:var(--muted,#666);line-height:1.45;margin-top:2px;}
   .ka-sug-add{flex-shrink:0;border:1.5px solid var(--accent,#d97706);background:transparent;color:var(--accent,#d97706);font-weight:700;font-size:0.8rem;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .ka-sug-add:hover{background:var(--accent,#d97706);color:#fff;}
-  .r-ka-item .r-award-desc{margin-top:2px;}
+  /* Key Achievements must always STACK (title → description → link). Without this,
+     single-column templates apply their two-column .r-award layout (name | year)
+     to KA items, pushing the description into the "year" column — the cramped
+     horizontal "strip" bug. High specificity + !important beats template rules. */
+  .r-sec.r-keyachiev .r-ka-item{display:block !important;grid-template-columns:none !important;}
+  .r-sec.r-keyachiev .r-ka-item .r-award-name{display:block !important;float:none !important;width:auto !important;grid-column:1 / -1 !important;margin:0 0 2px !important;}
+  .r-sec.r-keyachiev .r-ka-item .r-award-desc{display:block !important;float:none !important;width:auto !important;grid-column:1 / -1 !important;margin-top:2px !important;}
   .r-ka-item .r-ka-link{display:inline-block;margin-top:3px;font-size:0.82em;color:var(--accent,#1f2a44);word-break:break-word;}
   .r4u-sb .r-aside .r-ka-item .r-ka-link{color:#fff !important;text-decoration:underline;opacity:0.92;}
 </style>
@@ -10404,5 +10410,30 @@ window.__novaPortfolioHTML=function(d,sections){
   };
 })();
 </script>
+<style id="_r4uNavCtaCss">
+  /* Polished wizard nav CTAs (Back / Next). Scoped to .nav-buttons so other
+     buttons are unaffected. Gradient primary with a soft accent shadow + hover
+     lift; crisp outlined secondary; larger tap targets. */
+  .nav-buttons{gap:12px;}
+  .nav-buttons .btn-primary,.nav-buttons .btn-secondary{
+    padding:15px 26px;font-size:0.98rem;border-radius:13px;line-height:1.25;
+    transition:transform .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s ease,filter .18s ease,background .18s ease,border-color .18s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .nav-buttons .btn-primary{
+    font-weight:700;letter-spacing:0.01em;border:none;
+    background:linear-gradient(135deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 82%,#000) 100%);
+    box-shadow:0 8px 20px -8px rgba(180,90,10,0.55),0 2px 5px -2px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.22);
+  }
+  .nav-buttons .btn-primary:hover{transform:translateY(-2px);filter:brightness(1.04);box-shadow:0 14px 28px -10px rgba(180,90,10,0.6),0 3px 8px -3px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.25);}
+  .nav-buttons .btn-primary:active{transform:translateY(0);box-shadow:0 5px 12px -8px rgba(180,90,10,0.55),inset 0 1px 0 rgba(255,255,255,0.15);}
+  .nav-buttons .btn-secondary{
+    font-weight:600;background:var(--surface,#fff);border:1.5px solid var(--border,#e5e7eb);color:var(--text);
+    box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  }
+  .nav-buttons .btn-secondary:hover{transform:translateY(-2px);border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface,#fff));box-shadow:0 8px 18px -10px rgba(0,0,0,0.22);}
+  .nav-buttons .btn-secondary:active{transform:translateY(0);}
+  @media (prefers-reduced-motion:reduce){ .nav-buttons .btn-primary,.nav-buttons .btn-secondary{transition:none;} .nav-buttons .btn-primary:hover,.nav-buttons .btn-secondary:hover{transform:none;} }
+</style>
 </body>
 </html>
