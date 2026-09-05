@@ -8936,16 +8936,14 @@ if ('serviceWorker' in navigator) {
         if(!pend.length && !appr.length){ panel.style.display='none'; return; }
         panel.style.display='block';
         function tCard(d,kind){ var f=d.fields; var q=esc2(f.quote&&f.quote.stringValue),n=esc2(f.name&&f.name.stringValue),ro=esc2(f.role&&f.role.stringValue);
+          var bs='width:26px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:0.82rem;line-height:1;cursor:pointer;padding:0;';
           var btns = kind==='pending'
-            ? '<button type="button" onclick="pfModAct(\''+d.name+'\',true)" style="padding:6px 14px;border:none;border-radius:7px;background:#16a34a;color:#fff;font-weight:600;font-size:0.78rem;cursor:pointer;">Approve</button>'
-              +'<button type="button" onclick="pfModAct(\''+d.name+'\',false)" style="padding:6px 14px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:#dc2626;font-weight:600;font-size:0.78rem;cursor:pointer;">Reject</button>'
-            : '<button type="button" onclick="if(confirm(\'Remove this testimonial from your live portfolio?\'))pfModAct(\''+d.name+'\',false)" style="padding:6px 14px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:#dc2626;font-weight:600;font-size:0.78rem;cursor:pointer;">Remove</button>';
-          return '<div style="display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin-bottom:5px;background:var(--bg);">'
-            +'<div style="flex:1;min-width:0;">'
-              +'<div style="font-size:0.8rem;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">“'+q+'”</div>'
-              +'<div style="font-size:0.69rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n+(ro?' · '+ro:'')+'</div>'
-            +'</div>'
-            +'<div style="display:flex;flex-direction:'+(kind==='pending'?'column':'row')+';gap:5px;flex-shrink:0;">'+btns+'</div></div>';
+            ? '<button type="button" title="Approve" aria-label="Approve" onclick="pfModAct(\''+d.name+'\',true)" style="'+bs+'border:none;background:#16a34a;color:#fff;">✓</button>'
+              +'<button type="button" title="Reject" aria-label="Reject" onclick="pfModAct(\''+d.name+'\',false)" style="'+bs+'border:1px solid var(--border);background:var(--surface);color:#dc2626;">✕</button>'
+            : '<button type="button" title="Remove from portfolio" aria-label="Remove" onclick="if(confirm(\'Remove this testimonial from your live portfolio?\'))pfModAct(\''+d.name+'\',false)" style="'+bs+'border:1px solid var(--border);background:var(--surface);color:#dc2626;">✕</button>';
+          return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:7px;padding:4px 8px 4px 10px;margin-bottom:4px;background:var(--bg);">'
+            +'<div style="flex:1;min-width:0;font-size:0.76rem;color:var(--text);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">“'+q+'”<span style="color:var(--muted);font-size:0.7rem;"> — '+n+(ro?' · '+ro:'')+'</span></div>'
+            +'<div style="display:flex;flex-direction:row;gap:4px;flex-shrink:0;">'+btns+'</div></div>';
         }
         var out='';
         if(pend.length){ out+='<div style="font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:9px;">🕓 '+pend.length+' testimonial'+(pend.length>1?'s':'')+' awaiting your approval</div>'
