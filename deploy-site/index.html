@@ -8513,7 +8513,7 @@ if ('serviceWorker' in navigator) {
 </script>
 <style id="_r4uPfGuideCss">
   #pfStep1 .pf-tpl-grid{display:none!important;}
-  #pfMiniSwitcher{display:flex!important;}
+  #pfMiniSwitcher{display:none!important;}
   /* Template step removed from the flow → hide its pill and the step-number circles
      so the bar reads as clean labels (Sections · Preview · Upload). */
   #pfPill1{display:none!important;}
@@ -8789,6 +8789,12 @@ if ('serviceWorker' in navigator) {
 (function(){
   var TPLS=[
     {id:'onepage', name:'Website ✦', desc:'A real one-page site — hero, Selected Work (visual cards), services, about, contact. Not a résumé.'},
+    {id:'editorial', name:'Editorial', desc:'Warm cream, elegant serif display, terracotta accent — a refined magazine feel.'},
+    {id:'brutalist', name:'Brutalist', desc:'Mono type, hard black borders and offset shadows — bold, raw, confident.'},
+    {id:'swiss', name:'Swiss', desc:'International typographic style — big tight type, numbered sections, hairline rules.'},
+    {id:'glass', name:'Glass', desc:'Deep blue with frosted glassmorphism cards and a cyan glow.'},
+    {id:'sage', name:'Sage', desc:'Calm off-white, serif, muted green — organic and understated.'},
+    {id:'cobalt', name:'Cobalt', desc:'Clean corporate light with cobalt blue and soft-shadow cards.'},
     {id:'atelier', name:'Atelier', desc:'Premium editorial — elegant serif display, airy whitespace, refined details, smooth motion.'},
     {id:'studio', name:'Studio', desc:'Huge type, big statement hero, cover image, smooth scroll animations.'},
     {id:'nova', name:'Nova', desc:'Clean cards + profile banner. Professional & versatile.'},
@@ -8805,6 +8811,12 @@ if ('serviceWorker' in navigator) {
     if(id==='studio') return '<div class="pft-thumb pft-studio"><span class="sbig"></span><span class="sl"></span><span class="sl2"></span></div>';
     if(id==='atelier') return '<div class="pft-thumb pft-atelier"><span class="ab"></span><span class="al"></span><span class="al2"></span></div>';
     if(id==='onepage') return '<div class="pft-thumb pft-onepage"><span class="oh"></span><span class="og"><i></i><i></i></span></div>';
+    if(id==='editorial') return '<div class="pft-thumb" style="flex-direction:column;background:#f7f3ea;"><span style="height:12px;width:60%;background:#211b12;border-radius:2px;"></span><div style="display:flex;gap:5px;flex:1;"><i style="flex:1;background:linear-gradient(135deg,#b4532a,#e0a06e);border-radius:3px;"></i><i style="flex:1;background:#fffdf8;border:1px solid rgba(33,27,18,0.15);border-radius:3px;"></i></div></div>';
+    if(id==='brutalist') return '<div class="pft-thumb" style="flex-direction:column;background:#fff;border:1px solid #0a0a0a;"><span style="height:11px;width:55%;background:#0a0a0a;border-radius:0;"></span><div style="display:flex;gap:5px;flex:1;"><i style="flex:1;background:#e5322d;border:1.5px solid #0a0a0a;box-shadow:2px 2px 0 #0a0a0a;"></i><i style="flex:1;background:#fff;border:1.5px solid #0a0a0a;box-shadow:2px 2px 0 #0a0a0a;"></i></div></div>';
+    if(id==='swiss') return '<div class="pft-thumb" style="flex-direction:column;background:#fff;"><span style="height:13px;width:70%;background:#111;border-radius:1px;"></span><div style="display:flex;gap:5px;flex:1;align-items:flex-end;"><span style="width:14px;height:9px;background:#ff2d2d;border-radius:1px;"></span><i style="flex:1;background:linear-gradient(135deg,#ff2d2d,#ff8f8f);border-radius:1px;"></i></div></div>';
+    if(id==='glass') return '<div class="pft-thumb" style="flex-direction:column;background:#0b1220;"><span style="height:11px;width:60%;background:linear-gradient(90deg,#38bdf8,#8b5cf6);border-radius:3px;"></span><div style="display:flex;gap:5px;flex:1;"><i style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:5px;"></i><i style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:5px;"></i></div></div>';
+    if(id==='sage') return '<div class="pft-thumb" style="flex-direction:column;background:#f1f5ef;"><span style="height:12px;width:58%;background:#1e2b22;border-radius:2px;"></span><div style="display:flex;gap:5px;flex:1;"><i style="flex:1;background:linear-gradient(135deg,#3f6b4f,#8bb08f);border-radius:8px;"></i><i style="flex:1;background:#fff;border:1px solid rgba(30,43,34,0.12);border-radius:8px;"></i></div></div>';
+    if(id==='cobalt') return '<div class="pft-thumb" style="flex-direction:column;background:#f4f7fe;"><span style="height:11px;width:55%;background:#0b1b3a;border-radius:3px;"></span><div style="display:flex;gap:5px;flex:1;"><i style="flex:1;background:linear-gradient(135deg,#1d4ed8,#38bdf8);border-radius:6px;"></i><i style="flex:1;background:#fff;border:1px solid rgba(11,27,58,0.12);border-radius:6px;box-shadow:0 4px 10px -6px rgba(29,78,216,0.5);"></i></div></div>';
     return '<div class="pft-thumb pft-nova"><div class="pft-col"><span></span><span></span><span></span></div></div>';
   }
   window.pfSetTemplate=function(id){ var c=cz(); c.template=id; window.__pfCustomize=c; try{ localStorage.setItem('_pfCustomize',JSON.stringify(c)); }catch(e){} render(); try{ if(typeof buildPfPreview==='function') buildPfPreview(); }catch(e){} };
