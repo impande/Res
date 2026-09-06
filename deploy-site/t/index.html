@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leave a testimonial</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,system-ui,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f5f7;color:#16171c;padding:20px}
+  .card{width:100%;max-width:520px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:30px 26px;box-shadow:0 10px 40px -12px rgba(0,0,0,0.18)}
+  .eyebrow{font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#0a66c2}
+  h1{font-size:1.5rem;font-weight:800;margin:6px 0 6px;letter-spacing:-0.01em}
+  .sub{color:#5b6270;font-size:0.92rem;margin-bottom:20px;line-height:1.5}
+  label{display:block;font-size:0.82rem;font-weight:600;color:#3a3f49;margin:14px 0 6px}
+  input,textarea{width:100%;padding:12px 13px;border:1px solid #d7dae0;border-radius:10px;font-size:0.95rem;font-family:inherit;color:#16171c;background:#fbfbfc}
+  input:focus,textarea:focus{outline:none;border-color:#0a66c2;box-shadow:0 0 0 3px rgba(10,102,194,0.12)}
+  textarea{min-height:110px;resize:vertical}
+  .btn{margin-top:20px;width:100%;padding:13px;border:none;border-radius:10px;background:#0a66c2;color:#fff;font-size:0.98rem;font-weight:700;cursor:pointer;font-family:inherit}
+  .btn:hover{background:#004182}.btn:disabled{opacity:.6;cursor:default}
+  .note{font-size:0.78rem;color:#8a909b;margin-top:14px;text-align:center}
+  .ok{text-align:center;padding:20px 0}
+  .ok .tick{width:56px;height:56px;border-radius:50%;background:#eafbf0;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px}
+  .err{color:#dc2626;font-size:0.85rem;margin-top:10px;text-align:center;min-height:1em}
+  a{color:#0a66c2}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="eyebrow">Testimonial</div>
+  <h1 id="title">Leave a testimonial</h1>
+  <div class="sub" id="sub">Share a few words — it’ll be reviewed and, once approved, shown on the portfolio.</div>
+  <form id="form">
+    <label for="quote">Your testimonial</label>
+    <textarea id="quote" maxlength="700" placeholder="What was it like working with them?" required></textarea>
+    <label for="name">Your name</label>
+    <input id="name" type="text" maxlength="90" placeholder="e.g. Jane Doe" required>
+    <label for="role">Role / company (optional)</label>
+    <input id="role" type="text" maxlength="120" placeholder="e.g. VP Product, Acme">
+    <button class="btn" id="send" type="submit">Submit testimonial</button>
+    <div class="err" id="err"></div>
+  </form>
+  <div class="note">Powered by <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>
+</div>
+<script>
+(function(){
+  var parts = location.pathname.split('/').filter(function(s){return s.length>0;});
+  var slug = parts[parts.length-1] || '';
+  if(!slug || slug==='t'){ slug=(new URLSearchParams(location.search)).get('slug')||''; }
+  var card=document.getElementById('card');
+  if(!slug){ card.innerHTML='<h1>Invalid link</h1><div class="sub">This testimonial link is missing a portfolio id.</div>'; return; }
+  // Try to greet with the owner's name (best-effort: parse the stored portfolio title).
+  try{
+    fetch('https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'+encodeURIComponent(slug)+'?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10&mask.fieldPaths=html')
+      .then(function(r){return r.ok?r.json():null;}).then(function(doc){
+        var html=doc&&doc.fields&&doc.fields.html&&doc.fields.html.stringValue; if(!html)return;
+        var m=html.match(/<title>([^<]+)<\/title>/i); if(m){ var nm=m[1].split('—')[0].split('|')[0].trim(); if(nm){ document.getElementById('title').textContent='Leave a testimonial for '+nm; document.getElementById('sub').textContent='Share a few words about working with '+nm+'. It’ll be reviewed and, once approved, shown on their portfolio.'; document.title='Testimonial for '+nm; } }
+      }).catch(function(){});
+  }catch(e){}
+  var form=document.getElementById('form'), send=document.getElementById('send'), err=document.getElementById('err');
+  form.addEventListener('submit',function(e){
+    e.preventDefault(); err.textContent='';
+    var quote=document.getElementById('quote').value.trim();
+    var name=document.getElementById('name').value.trim();
+    var role=document.getElementById('role').value.trim();
+    if(quote.length<4){ err.textContent='Please write a testimonial.'; return; }
+    if(!name){ err.textContent='Please add your name.'; return; }
+    send.disabled=true; send.textContent='Submitting…';
+    fetch('/.netlify/functions/submit-testimonial',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:slug,quote:quote,name:name,role:role})})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+      .then(function(res){
+        if(!res.ok){ throw new Error(res.j&&res.j.error||'Something went wrong'); }
+        card.innerHTML='<div class="ok"><div class="tick">✓</div><h1>Thank you!</h1><div class="sub">Your testimonial has been submitted for review. Once approved, it’ll appear on the portfolio.</div></div>';
+      })
+      .catch(function(e2){ err.textContent=e2.message||'Could not submit — please try again.'; send.disabled=false; send.textContent='Submit testimonial'; });
+  });
+})();
+</script>
+</body>
+</html>
