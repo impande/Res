@@ -9515,7 +9515,7 @@ window.__novaPortfolioHTML=function(d,sections){
 + '.pf-nav-links a.on{color:var(--acc)}'
 + '.pf-nav-cta{background:var(--acc)!important;color:#fff!important}'
 + '.pf-nav-toggle{display:none;background:none;border:none;color:var(--ink);font-size:1.4rem;cursor:pointer;padding:4px 8px;line-height:1}'
-+ '@media(max-width:720px){.pf-nav-toggle{display:block}.pf-nav-links{position:fixed;top:54px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--bg);border-bottom:1px solid var(--line);padding:6px;max-height:0;overflow:hidden;transition:max-height .28s ease;box-shadow:0 10px 24px rgba(0,0,0,0.08)}.pf-nav-links.open{max-height:70vh}.pf-nav-links a{padding:12px 14px;font-size:0.95rem}}'
++ '@media(max-width:720px){.pf-nav-toggle{display:block}.pf-nav-links{position:fixed;top:54px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--bg);border-bottom:1px solid var(--line);padding:6px;max-height:0;overflow:hidden;transition:max-height .28s ease;box-shadow:0 10px 24px rgba(0,0,0,0.08)}.pf-nav-links.open{max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch}.pf-nav-links a{padding:12px 14px;font-size:0.95rem}}'
 + '.pf-top{position:fixed;bottom:20px;right:20px;z-index:900;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.2rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.18);opacity:0;transform:translateY(10px) scale(0.9);transition:opacity .2s,transform .2s;pointer-events:none}'
 + '.pf-top.show{opacity:1;transform:none;pointer-events:auto}'
 + '.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}'
@@ -9604,9 +9604,10 @@ window.__novaPortfolioHTML=function(d,sections){
     + 'var bEl=col.querySelector(".pmain h1");var brand=document.createElement("a");brand.className="pf-nav-brand";brand.href="#top";brand.textContent=bEl?bEl.textContent.trim():"Home";nav.appendChild(brand);'
     + 'var tog=document.createElement("button");tog.className="pf-nav-toggle";tog.setAttribute("aria-label","Menu");tog.textContent="\\u2630";nav.appendChild(tog);'
     + 'var lw=document.createElement("div");lw.className="pf-nav-links";var count=0;'
-    + 'secs.forEach(function(s,i){var h=s.querySelector(".card-h h2");if(!h)return;var lbl=(h.textContent||"").trim();if(!lbl)return;if(!s.id)s.id="sec"+i;var a=document.createElement("a");a.href="#"+s.id;a.textContent=lbl;lw.appendChild(a);count++;});'
+    + 'var hasContact=false;'
+    + 'secs.forEach(function(s,i){var h=s.querySelector(".card-h h2")||s.querySelector(".opcta-in h2")||s.querySelector(":scope > h2");var lbl=h?(h.textContent||"").trim():"";if(!lbl&&s.classList.contains("opcta"))lbl="Contact";if(!lbl)return;if(s.classList.contains("opcta")||s.id==="contact")lbl="Contact";if(!s.id)s.id="sec"+i;var a=document.createElement("a");a.href="#"+s.id;a.textContent=lbl;if(lbl==="Contact"){a.className="pf-nav-cta";hasContact=true;}lw.appendChild(a);count++;});'
     + 'if(!count)return;'
-    + 'var mA=col.querySelector(".pmeta a[href^=mailto]");if(mA){var ca=document.createElement("a");ca.className="pf-nav-cta";ca.href=mA.getAttribute("href");ca.textContent="Contact";lw.appendChild(ca);}'
+    + 'if(!hasContact){var mA=col.querySelector(".pmeta a[href^=mailto], .ophero a[href^=mailto], a[href^=mailto]");if(mA){var ca=document.createElement("a");ca.className="pf-nav-cta";ca.href=mA.getAttribute("href");ca.textContent="Contact";lw.appendChild(ca);}}'
     + 'nav.appendChild(lw);document.body.insertBefore(nav,document.body.firstChild);document.body.classList.add("pf-hasnav");'
     + 'tog.addEventListener("click",function(){lw.classList.toggle("open");});'
     + '[].forEach.call(lw.querySelectorAll("a"),function(a){a.addEventListener("click",function(){lw.classList.remove("open");});});'
@@ -9981,17 +9982,9 @@ window.__novaPortfolioHTML=function(d,sections){
   function wrapGen(){
     if(typeof window.generatePortfolioHTML==='function' && !window.generatePortfolioHTML.__novaWrapped){
       var orig=window.generatePortfolioHTML;
-      /* Templates served by the self-contained Nova generator (__novaPortfolioHTML).
-         'nova' is the flagship; the rest are premium web themes that re-skin the
-         one-page layout via data.customize.template. Everything else falls through
-         to the original core generator. */
-      var NOVA_TPLS={nova:1,editorial:1,brutalist:1,swiss:1,glass:1,sage:1,cobalt:1};
       window.generatePortfolioHTML=function(data,template,sections){
-        if(NOVA_TPLS[template]){
-          try{
-            var d2=data; if(template!=='nova'){ d2=Object.assign({},data); d2.customize=Object.assign({},data&&data.customize,{template:template}); }
-            return window.__novaPortfolioHTML(d2,sections);
-          }
+        if(template==='nova'){
+          try{ return window.__novaPortfolioHTML(data,sections); }
           catch(e){ try{ return orig(data,'aurora',sections); }catch(e2){ return orig.apply(this,arguments); } }
         }
         return orig.apply(this,arguments);
@@ -10001,28 +9994,21 @@ window.__novaPortfolioHTML=function(d,sections){
     }
     return false;
   }
-  /* The core's selectPfTemplate/switchPfTemplate only toggle the highlight for their
-     hardcoded (original) template list, so the Nova-served templates (nova + the
-     premium web themes) need their cards/mini-buttons highlighted here. */
-  var NOVA_CARDS=['nova','editorial','brutalist','swiss','glass','sage','cobalt'];
-  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-  function markCards(id){ NOVA_CARDS.forEach(function(t){ try{ var c=document.getElementById('pfTpl'+cap(t)); if(c) c.classList.toggle('selected', t===id); }catch(e){} }); }
-  function markMinis(id){ NOVA_CARDS.forEach(function(t){ try{ var m=document.getElementById('pfMini'+cap(t)); if(m) m.classList.toggle('active', t===id); }catch(e){} }); }
   function wrapPicker(){
     var ok=true;
     if(typeof window.selectPfTemplate==='function' && !window.selectPfTemplate.__nova){
       var os=window.selectPfTemplate;
-      window.selectPfTemplate=function(id){ var r=os.apply(this,arguments); markCards(id); return r; };
+      window.selectPfTemplate=function(id){ var r=os.apply(this,arguments); try{ var c=document.getElementById('pfTplNova'); if(c) c.classList.toggle('selected', id==='nova'); }catch(e){} return r; };
       window.selectPfTemplate.__nova=true;
     } else if(typeof window.selectPfTemplate!=='function'){ ok=false; }
     if(typeof window.switchPfTemplate==='function' && !window.switchPfTemplate.__nova){
       var ow=window.switchPfTemplate;
-      window.switchPfTemplate=function(id){ var r=ow.apply(this,arguments); markMinis(id); markCards(id); return r; };
+      window.switchPfTemplate=function(id){ var r=ow.apply(this,arguments); try{ var mc=document.getElementById('pfMiniNova'); if(mc) mc.classList.toggle('active', id==='nova'); var cc=document.getElementById('pfTplNova'); if(cc) cc.classList.toggle('selected', id==='nova'); }catch(e){} return r; };
       window.switchPfTemplate.__nova=true;
     } else if(typeof window.switchPfTemplate!=='function'){ ok=false; }
     if(typeof window.updatePfMiniSwitcher==='function' && !window.updatePfMiniSwitcher.__nova){
       var ou=window.updatePfMiniSwitcher;
-      window.updatePfMiniSwitcher=function(){ var r=ou.apply(this,arguments); try{ if(typeof pfTemplate!=='undefined') markMinis(pfTemplate); }catch(e){} return r; };
+      window.updatePfMiniSwitcher=function(){ var r=ou.apply(this,arguments); try{ var mc=document.getElementById('pfMiniNova'); if(mc) mc.classList.toggle('active', (typeof pfTemplate!=='undefined'&&pfTemplate==='nova')); }catch(e){} return r; };
       window.updatePfMiniSwitcher.__nova=true;
     } else if(typeof window.updatePfMiniSwitcher!=='function'){ ok=false; }
     return ok && window.selectPfTemplate.__nova && window.switchPfTemplate.__nova && window.updatePfMiniSwitcher.__nova;
