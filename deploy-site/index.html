@@ -8534,6 +8534,20 @@ if ('serviceWorker' in navigator) {
      so the bar reads as clean labels (Sections · Preview · Upload). */
   #pfPill1{display:none!important;}
   .pf-steps-bar .pf-step-num{display:none!important;}
+  /* ── Beautified step indicator: status dot / green ✓ / colored connectors ── */
+  .pf-steps-bar{justify-content:center;padding:14px 16px;}
+  #pfPill1 + .pf-step-sep{display:none!important;}   /* no dangling line before the first visible step */
+  .pf-step-pill{gap:7px;font-size:0.82rem;letter-spacing:0.01em;padding:6px 13px;margin:0;border-radius:999px;border:1px solid transparent;}
+  .pf-step-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:all .2s ease;}
+  .pf-step-pill:hover::before{background:var(--muted);}
+  .pf-step-pill.active{background:rgba(217,119,6,0.10);color:var(--accent);font-weight:700;border-color:rgba(217,119,6,0.22);}
+  .pf-step-pill.active::before{background:var(--accent);box-shadow:0 0 0 3px rgba(217,119,6,0.20);}
+  .pf-step-pill.done{color:#16a34a;}
+  .pf-step-pill.done::before{content:'\2713';width:auto;height:auto;background:none!important;box-shadow:none;font-size:0.82rem;font-weight:800;color:#16a34a;line-height:1;}
+  .pf-step-sep{flex:1;min-width:18px;max-width:64px;height:2px;border-radius:2px;background:var(--border);margin:0 6px;transition:background .2s ease;}
+  .pf-step-pill.done + .pf-step-sep{background:#16a34a;}
+  .pf-step-pill.active + .pf-step-sep{background:linear-gradient(90deg,var(--accent),var(--border));}
+  @media(max-width:520px){.pf-step-pill{font-size:0.8rem;padding:6px 10px;}.pf-step-sep{max-width:40px;margin:0 4px;}}
   #pfGuidePanel{background:linear-gradient(135deg,rgba(10,102,194,0.10),rgba(124,58,237,0.05));border:1.5px solid rgba(10,102,194,0.28);border-radius:16px;padding:16px 17px;margin-bottom:14px;}
   #pfGuidePanel .pfg-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem;color:var(--text);}
   #pfGuidePanel .pfg-sub{font-size:0.78rem;color:var(--muted);margin:3px 0 12px;line-height:1.5;}
