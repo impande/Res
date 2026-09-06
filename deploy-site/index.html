@@ -5182,7 +5182,7 @@ if ('serviceWorker' in navigator) {
       movingIdx=null;
       // Record the new order onto lastResumeData so a mid-session re-render
       // (e.g. template switch) — and the next save — keep this arrangement.
-      try{ if(window._r4uCaptureSecOrder && typeof lastResumeData!=='undefined' && lastResumeData){ var _so=window._r4uCaptureSecOrder(); if(_so) lastResumeData.sectionOrder=_so; } }catch(e){}
+      try{ if(window._r4uCaptureSecOrder && typeof lastResumeData!=='undefined' && lastResumeData){ var _so=window._r4uCaptureSecOrder(); if(_so){ lastResumeData.sectionOrder=_so; try{ localStorage.setItem('_r4uSecOrder', JSON.stringify(_so)); }catch(_e){} } } }catch(e){}
       _markEdited();
       _clear(); showPages();
       _msg('<span class="aig-ok">✓ Moved '+_movedTitle+' — nice!</span>');
@@ -10615,9 +10615,12 @@ window.__novaPortfolioHTML=function(d,sections){
           var so=(d && d.sectionOrder) || null;
           if(!so){ try{ so=JSON.parse(localStorage.getItem('_r4uSecOrder')||'null'); }catch(e){} }
           if(so && typeof window._r4uApplySecOrder==='function') window._r4uApplySecOrder(so);
-          /* Persist an EXPLICIT reorder (the reorder tool records it on
-             lastResumeData) so the next reload can restore it locally. */
-          try{ if(typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) localStorage.setItem('_r4uSecOrder', JSON.stringify(lastResumeData.sectionOrder)); }catch(e){}
+          /* Persist the order that was actually applied so the next reload can
+             restore it locally. Persist `so` (from the data or a prior local copy)
+             rather than lastResumeData.sectionOrder — the app's renderOutput
+             normalises lastResumeData and drops sectionOrder, which is why the
+             local copy was never being written (reorder lost on plain reload). */
+          try{ if(so && (so.secs||Array.isArray(so))) localStorage.setItem('_r4uSecOrder', JSON.stringify(so)); }catch(e){}
         }catch(e){}
         return r; }; window.renderOutput.__ka=true; return true; }
     return false; }
