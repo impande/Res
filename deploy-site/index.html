@@ -10862,5 +10862,49 @@ window.__novaPortfolioHTML=function(d,sections){
   window.__r4uCap={check:check, isOwner:function(){return owner;}, hash:h53};
 })();
 </script>
+<script>
+/* Prominent résumé-upload progress overlay. The inline status bar (#uploadStatusBar)
+   sits under the drop zone, so a user who scrolled down into the wizard couldn't
+   tell parsing was still running. This shows a clear, centered "Reading your résumé…"
+   overlay with a spinner whenever showUploadStatus is in the 'parsing' state, and
+   dismisses it on success/error. Non-invasive: it only wraps showUploadStatus. */
+(function(){
+  var OV='r4uUploadOverlay';
+  function build(){
+    if(document.getElementById(OV)) return document.getElementById(OV);
+    var st=document.createElement('style');
+    st.textContent=
+      '#'+OV+'{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,17,21,0.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}'
+     +'#'+OV+'.on{display:flex;}'
+     +'#'+OV+' .r4u-ulc{background:var(--bg,#fff);border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:16px;box-shadow:0 20px 60px -15px rgba(0,0,0,0.45);padding:28px 26px;max-width:340px;width:100%;text-align:center;}'
+     +'#'+OV+' .r4u-uls{width:46px;height:46px;margin:0 auto 16px;border-radius:50%;border:4px solid rgba(217,119,6,0.18);border-top-color:var(--accent,#d97706);animation:r4uUlSpin .8s linear infinite;}'
+     +'@keyframes r4uUlSpin{to{transform:rotate(360deg)}}'
+     +'#'+OV+' .r4u-ulh{font-size:1.05rem;font-weight:700;color:var(--text,#111);margin:0 0 6px;}'
+     +'#'+OV+' .r4u-ulm{font-size:0.85rem;color:var(--muted,#666);line-height:1.5;margin:0 0 14px;}'
+     +'#'+OV+' .r4u-ulp{height:6px;border-radius:99px;background:rgba(217,119,6,0.14);overflow:hidden;}'
+     +'#'+OV+' .r4u-ulp i{display:block;height:100%;width:40%;border-radius:99px;background:var(--accent,#d97706);animation:r4uUlSlide 1.1s ease-in-out infinite;}'
+     +'@keyframes r4uUlSlide{0%{margin-left:-40%}100%{margin-left:105%}}'
+     +'@media (prefers-reduced-motion: reduce){#'+OV+' .r4u-uls{animation:none}#'+OV+' .r4u-ulp i{animation:none;width:100%}}';
+    document.head.appendChild(st);
+    var d=document.createElement('div'); d.id=OV; d.setAttribute('role','status'); d.setAttribute('aria-live','polite');
+    d.innerHTML='<div class="r4u-ulc"><div class="r4u-uls"></div><div class="r4u-ulh">Reading your résumé…</div>'
+      +'<div class="r4u-ulm">Extracting your experience, skills and achievements. This takes a few seconds — please hold on.</div>'
+      +'<div class="r4u-ulp"><i></i></div></div>';
+    document.body.appendChild(d);
+    return d;
+  }
+  var _safety;
+  function show(msg){ var d=build(); try{ var m=d.querySelector('.r4u-ulm'); if(m && msg){ var t=String(msg).replace(/^[^0-9A-Za-zÀ-ÿ]+/,'').trim(); if(t.length>3) m.textContent=t; } }catch(e){}
+    d.classList.add('on'); clearTimeout(_safety); _safety=setTimeout(hide,60000); }
+  function hide(){ var d=document.getElementById(OV); if(d) d.classList.remove('on'); clearTimeout(_safety); }
+  function wrap(){
+    if(typeof window.showUploadStatus!=='function' || window.showUploadStatus.__r4uOverlay) return false;
+    var orig=window.showUploadStatus;
+    window.showUploadStatus=function(type,msg){ try{ if(type==='parsing') show(msg); else hide(); }catch(e){} return orig.apply(this,arguments); };
+    window.showUploadStatus.__r4uOverlay=true; return true;
+  }
+  var n=0, iv=setInterval(function(){ if(wrap()||++n>150) clearInterval(iv); },200);
+})();
+</script>
 </body>
 </html>
