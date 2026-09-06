@@ -10614,6 +10614,24 @@ window.__novaPortfolioHTML=function(d,sections){
       if(!ro || !ro.querySelector('.resume-a4-page')) return;
       if(window.__kaIncludeResume===false) return;
       var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);});
+      /* Hydrate the in-memory KA store if it's empty but the loaded résumé data (or
+         this device's localStorage) actually carries achievements. Covers fresh
+         logins where the card was painted from a saved snapshot, or where the cloud
+         adopt ran before the store was ready — so KA shows without visiting step 4. */
+      if(!A.length){
+        var src=null;
+        try{ if(window.__roLastData && Array.isArray(window.__roLastData.keyAchievements)) src=window.__roLastData.keyAchievements; }catch(e){}
+        try{ if(!src && typeof lastResumeData!=='undefined' && lastResumeData && Array.isArray(lastResumeData.keyAchievements)) src=lastResumeData.keyAchievements; }catch(e){}
+        try{ if(!src){ var ls=JSON.parse(localStorage.getItem('_keyAchiev')||'[]'); if(Array.isArray(ls)) src=ls; } }catch(e){}
+        var hy=(src||[]).filter(function(a){return a&&(a.title||a.desc);});
+        if(hy.length){
+          window.__keyAchiev=src.slice();
+          try{ localStorage.setItem('_keyAchiev', JSON.stringify(window.__keyAchiev)); }catch(e){}
+          try{ localStorage.setItem('_kaAutoGen','1'); }catch(e){}
+          try{ if(typeof pfRenderKa==='function') pfRenderKa(); }catch(e){}
+          A=hy;
+        }
+      }
       if(A.length && !ro.querySelector('.r-keyachiev')){ injectIntoResume(); }
     }catch(e){}
   }
