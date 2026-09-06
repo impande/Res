@@ -1077,8 +1077,13 @@
     /* 8 segment dividers drawn over the whole track (gap colour matches the header) */
     .mhdr-bar-track::after{content:'';position:absolute;inset:0;border-radius:99px;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(12.5% - 1.5px),var(--bg,#fff) calc(12.5% - 1.5px),var(--bg,#fff) 12.5%);}
     /* current-step knob at the leading edge of the fill */
-    .mhdr-bar-fill::after{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#b45309;border:2.5px solid var(--bg,#fff);box-shadow:0 0 0 3px rgba(217,119,6,0.22);}
+    .mhdr-bar-fill::after{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#b45309;border:2.5px solid var(--bg,#fff);box-shadow:0 0 0 3px rgba(217,119,6,0.22);pointer-events:none;}
     .mhdr-step{font-weight:700;}
+    /* Tappable step segments — jump to any step from the tracker */
+    .mhdr-bar-track{cursor:pointer;}
+    .mhdr-seg-hit{position:absolute;top:-9px;height:25px;width:12.5%;background:transparent;border:0;margin:0;padding:0;cursor:pointer;z-index:3;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    .mhdr-seg-hit:active{background:rgba(217,119,6,0.16);border-radius:5px;}
+    @media(hover:hover){.mhdr-seg-hit:hover{background:rgba(217,119,6,0.10);border-radius:5px;}}
     /* ── Contextual tips sidebar ── */
     #tipsSidebar{display:none;width:220px;min-width:220px;padding:24px 14px;position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;border-left:1px solid var(--border);}
     .tips-hd{font-size:0.65rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
@@ -10926,6 +10931,30 @@ window.__novaPortfolioHTML=function(d,sections){
   var n=0, iv=setInterval(function(){ hookAuth(); check(); tick(); if(++n>16) clearInterval(iv); },350);
   setInterval(function(){ check(); tick(); }, 1500);   /* re-assert + re-check owner after re-renders / auth settle */
   window.__r4uCap={check:check, isOwner:function(){return owner;}, hash:h53};
+})();
+</script>
+<script id="_r4uStepTapJS">
+/* Make the mobile step tracker tappable: 8 transparent hit-zones over the progress
+   bar, each jumping to that step via goToStep (mirrors the desktop sidebar). */
+(function(){
+  var NAMES=['','Basic Info','Experience','Awards','Key Achievements','Education','Skills','Extras','Generate'];
+  function build(){
+    var track=document.querySelector('#mobileHdr .mhdr-bar-track');
+    if(!track) return false;
+    if(track.__stepTap) return true;
+    track.__stepTap=true;
+    for(var i=1;i<=8;i++){ (function(n){
+      var seg=document.createElement('button');
+      seg.type='button'; seg.className='mhdr-seg-hit';
+      seg.style.left=((n-1)*12.5)+'%';
+      var nm=NAMES[n]||('Step '+n);
+      seg.title='Go to '+nm; seg.setAttribute('aria-label','Go to step '+n+': '+nm);
+      seg.addEventListener('click',function(e){ try{e.preventDefault();e.stopPropagation();}catch(_){} try{ if(typeof goToStep==='function') goToStep(n); }catch(_){} });
+      track.appendChild(seg);
+    })(i); }
+    return true;
+  }
+  var n=0, iv=setInterval(function(){ if(build()||++n>150) clearInterval(iv); },200);
 })();
 </script>
 <script>
