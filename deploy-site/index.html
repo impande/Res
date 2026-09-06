@@ -10854,7 +10854,9 @@ window.__novaPortfolioHTML=function(d,sections){
     var wm=el.querySelector(':scope > .r4u-wm');
     if(!wm){ wm=document.createElement('div'); wm.className='r4u-wm'; wm.setAttribute('aria-hidden','true'); wm.style.backgroundImage=_wmCache; el.appendChild(wm); }
     else if(wm.style.backgroundImage!==_wmCache){ wm.style.backgroundImage=_wmCache; }
-    el.classList.add('r4u-capguard');
+    /* Watermark shows for everyone (owner included, per config), but the select/
+       copy blocking (r4u-capguard) stays owner-exempt so the owner isn't hindered. */
+    el.classList.toggle('r4u-capguard', !owner);
     if(!el.__capBound){ el.__capBound=true;
       ['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){
         el.addEventListener(ev,function(e){ if(!owner){ try{e.preventDefault();}catch(_){} return false; } },true);
@@ -10869,8 +10871,8 @@ window.__novaPortfolioHTML=function(d,sections){
     if(on){ if(!el){ el=document.createElement('div'); el.id='r4uCapBlurNote'; el.className='r4u-capblur-note'; el.textContent='Preview hidden — return to this tab to view.'; document.body.appendChild(el);} el.style.display='flex'; }
     else if(el){ el.style.display='none'; } }
   function tick(){ try{ targets().forEach(function(el){
-      if(owner){ removeWM(el); el.classList.remove('r4u-capblur'); }
-      else { ensureWM(el); el.classList.toggle('r4u-capblur', blurred); }
+      ensureWM(el);                                       /* watermark for everyone */
+      el.classList.toggle('r4u-capblur', !owner && blurred);  /* blur: non-owner only */
     }); note(!owner && blurred); }catch(e){} }
   function hasVisibleOutput(){ try{
       var ro=document.getElementById('resumeOutput'); if(ro && ro.offsetParent!==null && ro.querySelector('.resume-a4-page')) return true;
@@ -10897,13 +10899,12 @@ window.__novaPortfolioHTML=function(d,sections){
       owner = (!!em && h53(em)===OWNER);
     }catch(e){ owner=false; }
     /* Rebuild the traceable watermark when the viewer's email becomes known/changes
-       (non-owner only) and refresh any watermark layers already on screen. */
+       and refresh any watermark layers already on screen. The watermark now applies
+       to everyone (owner included), so this runs regardless of owner status. */
     try{
-      if(!owner){
-        var key=em||'';
-        if(key!==_wmEmail){ _wmEmail=key; _wmCache=buildWM(key);
-          Array.prototype.forEach.call(document.querySelectorAll('.r4u-wm'),function(w){ w.style.backgroundImage=_wmCache; });
-        }
+      var key=em||'';
+      if(key!==_wmEmail){ _wmEmail=key; _wmCache=buildWM(key);
+        Array.prototype.forEach.call(document.querySelectorAll('.r4u-wm'),function(w){ w.style.backgroundImage=_wmCache; });
       }
     }catch(e){}
     tick();
