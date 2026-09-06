@@ -1071,8 +1071,14 @@
     .mhdr-avatar{width:34px;height:34px;border-radius:50%;border:2px solid #f59e0b;background:linear-gradient(135deg,#fbbf24,#b45309);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0;}
     .mhdr-row2{display:flex;align-items:center;gap:8px;padding-bottom:9px;}
     .mhdr-step{font-size:0.66rem;color:var(--muted);font-weight:600;white-space:nowrap;}
-    .mhdr-bar-track{height:3px;background:var(--border);border-radius:99px;flex:1;}
-    .mhdr-bar-fill{height:3px;border-radius:99px;background:linear-gradient(90deg,#fbbf24,#b45309);transition:width .4s;}
+    /* ── Beautified segmented step tracker (echoes the portfolio stepper) ── */
+    .mhdr-bar-track{position:relative;height:7px;background:var(--border);border-radius:99px;flex:1;}
+    .mhdr-bar-fill{position:relative;height:7px;border-radius:99px;background:linear-gradient(90deg,#fbbf24,#f59e0b 55%,#b45309);transition:width .45s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 4px rgba(217,119,6,0.40);min-width:7px;}
+    /* 8 segment dividers drawn over the whole track (gap colour matches the header) */
+    .mhdr-bar-track::after{content:'';position:absolute;inset:0;border-radius:99px;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(12.5% - 1.5px),var(--bg,#fff) calc(12.5% - 1.5px),var(--bg,#fff) 12.5%);}
+    /* current-step knob at the leading edge of the fill */
+    .mhdr-bar-fill::after{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#b45309;border:2.5px solid var(--bg,#fff);box-shadow:0 0 0 3px rgba(217,119,6,0.22);}
+    .mhdr-step{font-weight:700;}
     /* ── Contextual tips sidebar ── */
     #tipsSidebar{display:none;width:220px;min-width:220px;padding:24px 14px;position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;border-left:1px solid var(--border);}
     .tips-hd{font-size:0.65rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
