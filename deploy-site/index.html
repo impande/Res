@@ -9996,9 +9996,16 @@ window.__novaPortfolioHTML=function(d,sections){
   function wrapGen(){
     if(typeof window.generatePortfolioHTML==='function' && !window.generatePortfolioHTML.__novaWrapped){
       var orig=window.generatePortfolioHTML;
+      /* Nova generator serves the flagship 'nova' plus the premium web themes; the
+         rest fall through to the original core generator. (Re-applied after an
+         assemble step reverted it — keep this in sync if the Nova block is rebuilt.) */
+      var NOVA_TPLS={nova:1,editorial:1,brutalist:1,swiss:1,glass:1,sage:1,cobalt:1};
       window.generatePortfolioHTML=function(data,template,sections){
-        if(template==='nova'){
-          try{ return window.__novaPortfolioHTML(data,sections); }
+        if(NOVA_TPLS[template]){
+          try{
+            var d2=data; if(template!=='nova'){ d2=Object.assign({},data); d2.customize=Object.assign({},data&&data.customize,{template:template}); }
+            return window.__novaPortfolioHTML(d2,sections);
+          }
           catch(e){ try{ return orig(data,'aurora',sections); }catch(e2){ return orig.apply(this,arguments); } }
         }
         return orig.apply(this,arguments);
