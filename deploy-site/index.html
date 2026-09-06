@@ -10833,13 +10833,27 @@ window.__novaPortfolioHTML=function(d,sections){
     h2=Math.imul(h2^(h2>>>16),2246822507); h2^=Math.imul(h1^(h1>>>13),3266489909);
     return 4294967296*(2097151&h2)+(h1>>>0); }
   var owner=false;
-  var SVG="<svg xmlns='http://www.w3.org/2000/svg' width='340' height='190'>"
-    +"<text x='24' y='120' font-family='Arial,Helvetica,sans-serif' font-size='19' font-weight='700' fill='#7a7a7a' fill-opacity='0.13' transform='rotate(-26 170 95)'>resume4u.help</text></svg>";
-  var WM="url(\"data:image/svg+xml,"+encodeURIComponent(SVG)+"\")";
+  /* Traceable, tiled watermark: brand line + the signed-in viewer's email, so any
+     screenshot that leaks is clearly marked AND identifiable to the account that
+     took it. Denser + more visible than before (a faint mark deters no one). Owner
+     is exempt (no watermark). Rebuilt when the viewer's email becomes known. */
+  function _wmXml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function buildWM(email){
+    var l1='resume4u.help';
+    var l2=email ? email : 'preview — do not share';
+    var svg="<svg xmlns='http://www.w3.org/2000/svg' width='300' height='150'>"
+      +"<g transform='rotate(-24 150 75)' font-family='Arial,Helvetica,sans-serif' fill='#6f6f6f' fill-opacity='0.20'>"
+      +"<text x='14' y='70' font-size='16' font-weight='700'>"+_wmXml(l1)+"</text>"
+      +"<text x='14' y='90' font-size='11'>"+_wmXml(l2)+"</text>"
+      +"</g></svg>";
+    return "url(\"data:image/svg+xml,"+encodeURIComponent(svg)+"\")";
+  }
+  var _wmEmail=null, _wmCache=buildWM('');
   function ensureWM(el){ if(!el) return;
     try{ if(getComputedStyle(el).position==='static') el.style.position='relative'; }catch(e){}
     var wm=el.querySelector(':scope > .r4u-wm');
-    if(!wm){ wm=document.createElement('div'); wm.className='r4u-wm'; wm.setAttribute('aria-hidden','true'); wm.style.backgroundImage=WM; el.appendChild(wm); }
+    if(!wm){ wm=document.createElement('div'); wm.className='r4u-wm'; wm.setAttribute('aria-hidden','true'); wm.style.backgroundImage=_wmCache; el.appendChild(wm); }
+    else if(wm.style.backgroundImage!==_wmCache){ wm.style.backgroundImage=_wmCache; }
     el.classList.add('r4u-capguard');
     if(!el.__capBound){ el.__capBound=true;
       ['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){
@@ -10876,11 +10890,22 @@ window.__novaPortfolioHTML=function(d,sections){
   function flash(){ var o=document.getElementById('r4uCapFlash'); if(!o){ o=document.createElement('div'); o.id='r4uCapFlash'; o.textContent='Screenshots are disabled on the preview. Download your résumé to keep a copy.'; document.body.appendChild(o); } o.style.display='flex'; setTimeout(function(){ o.style.display='none'; },1100); }
   document.addEventListener('keyup',function(e){ if(owner) return; if(e.key==='PrintScreen'||e.code==='PrintScreen'){ try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(' '); }catch(_){} flash(); } });
   function check(){
+    var em='';
     try{
-      var em=(window._fbAuth && _fbAuth.currentUser && _fbAuth.currentUser.email) || '';
+      em=(window._fbAuth && _fbAuth.currentUser && _fbAuth.currentUser.email) || '';
       em=String(em).trim().toLowerCase();
       owner = (!!em && h53(em)===OWNER);
     }catch(e){ owner=false; }
+    /* Rebuild the traceable watermark when the viewer's email becomes known/changes
+       (non-owner only) and refresh any watermark layers already on screen. */
+    try{
+      if(!owner){
+        var key=em||'';
+        if(key!==_wmEmail){ _wmEmail=key; _wmCache=buildWM(key);
+          Array.prototype.forEach.call(document.querySelectorAll('.r4u-wm'),function(w){ w.style.backgroundImage=_wmCache; });
+        }
+      }
+    }catch(e){}
     tick();
   }
   function hookAuth(){ try{ if(window._fbAuth && _fbAuth.onAuthStateChanged && !_fbAuth.__capHook){ _fbAuth.__capHook=true; _fbAuth.onAuthStateChanged(function(){ check(); setTimeout(tick,60); }); return true; } }catch(e){} return false; }
