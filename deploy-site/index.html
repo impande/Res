@@ -7719,6 +7719,22 @@ if ('serviceWorker' in navigator) {
             if(wz.length) d.projects=wz.map(function(p){ return { title:p.title||'', desc:p.desc||'', tech:p.tech||'' }; });
           }
         }catch(e){}
+        /* Key Achievements: getPfData never carried them, so the portfolio preview
+           and downloaded site never showed the KA section. Inject from the shared
+           KA store (the same achievements used on the résumé) so the generator's
+           "Key Achievements" section renders whenever its toggle is on. */
+        try{
+          var _pfKa=(window.__keyAchiev||[]).filter(function(a){ return a && (a.title||a.desc); });
+          if(d && _pfKa.length) d.keyAchievements=window.__keyAchiev;
+        }catch(e){}
+        /* Carry the selected base template (and the rest of the Style-Studio
+           customization) on the data object itself, so the generator applies the
+           chosen template reliably rather than depending only on a global lookup. */
+        try{
+          if(d && window.__pfCustomize && typeof window.__pfCustomize==='object'){
+            d.customize=Object.assign({}, window.__pfCustomize, d.customize||{});
+          }
+        }catch(e){}
         /* Strip stray non-breaking-space entities ("&nbsp;" / U+00A0) captured from
            inline edits, so the portfolio preview + downloaded site don't show the raw
            entity the way the résumé card used to. */
