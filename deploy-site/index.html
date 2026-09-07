@@ -664,7 +664,11 @@
     /* Keep small atomic units whole across a PDF page break and never orphan a
        section heading at the bottom of a page. Only affects paginated output
        (the PDF); on screen (no pages) break-inside is a no-op. */
-    .resume-a4-page li,.resume-a4-page .r-award,.resume-a4-page .r-edu,.resume-a4-page .r-exp,.resume-a4-page .r-ka-item{break-inside:avoid;page-break-inside:avoid;}
+    /* Fill-the-page mode: bullets may flow across a page break (each bullet stays
+       whole), while the entry heading + company are kept with their first bullet
+       (break-after:avoid) so a heading is never orphaned at the bottom of a page.
+       Awards/education/KA items stay atomic. */
+    .resume-a4-page li,.resume-a4-page .r-award,.resume-a4-page .r-edu,.resume-a4-page .r-ka-item{break-inside:avoid;page-break-inside:avoid;}
     .resume-a4-page .r-sec-t,.resume-a4-page .r-exp-top,.resume-a4-page .r-co{break-after:avoid;page-break-after:avoid;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
