@@ -660,7 +660,12 @@
     .pg-break::after,.pg-pagemark::after{content:attr(data-pglabel);position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;padding:3px 9px;border-radius:11px;background:#7a92a8;color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;line-height:1;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.25);}
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
-    .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:18mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
+    .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:10mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
+    /* Keep small atomic units whole across a PDF page break and never orphan a
+       section heading at the bottom of a page. Only affects paginated output
+       (the PDF); on screen (no pages) break-inside is a no-op. */
+    .resume-a4-page li,.resume-a4-page .r-award,.resume-a4-page .r-edu,.resume-a4-page .r-exp,.resume-a4-page .r-ka-item{break-inside:avoid;page-break-inside:avoid;}
+    .resume-a4-page .r-sec-t,.resume-a4-page .r-exp-top,.resume-a4-page .r-co{break-after:avoid;page-break-after:avoid;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
     .resume-placeholder{text-align:center;color:var(--muted);font-family:Inter,'Segoe UI',Inter,system-ui,sans-serif;}
@@ -699,7 +704,7 @@
       .resume-bar-actions{width:100%;}
       .resume-bar-actions button{flex:1;justify-content:center;}
       .resume-output-card{padding:0;}
-      .resume-a4-page{padding:12mm 8mm;}
+      .resume-a4-page{padding:10mm 8mm;}
       #step0{padding:28px 16px 24px;}
       .hero-title{font-size:2rem;}
       .hero-feat-grid{max-width:100%;}
