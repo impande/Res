@@ -624,6 +624,21 @@
        it can never exceed the visible screen on iOS (where 100vh is the taller
        toolbar-hidden height). vh is the fallback for browsers without svh. */
     #_authDropdown{position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:9999;min-width:240px;max-width:300px;max-height:calc(100vh - 80px);max-height:calc(100svh - 80px);display:flex;flex-direction:column;overflow:hidden;}
+    /* Mobile: render the account menu as a bottom-anchored sheet so Sign out is
+       ALWAYS pinned just above the bottom edge and can never be clipped by mobile
+       Chrome's dynamic toolbar / viewport. The JS-set inline top/left is overridden;
+       the version list scrolls inside; footer actions (incl. Sign out) flow at the
+       bottom. Uses svh + safe-area inset so it's robust across devices. */
+    @media(max-width:640px){
+      #_authDropdown{
+        left:8px!important;right:8px!important;top:auto!important;
+        bottom:max(8px,env(safe-area-inset-bottom))!important;
+        min-width:0!important;max-width:none!important;width:auto!important;
+        max-height:82vh!important;max-height:82svh!important;border-radius:18px!important;
+      }
+      #_authDropdown .drop-signout,#_authDropdown .drop-savenow,#_authDropdown .drop-contact{position:static!important;bottom:auto!important;}
+      #_authDropdown #_versionListItems{max-height:none!important;flex:1 1 auto!important;min-height:0!important;}
+    }
     #_authDropdown>*{flex:0 0 auto;}
     /* The versions live in their own bounded, scrollable "folder": it never grows past
        ~(screen − room for header/CTAs), so Save now / Sign out always sit below it and
