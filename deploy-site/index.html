@@ -627,6 +627,14 @@
     /* Let the saved-versions list shrink further on short screens so the footer
        (Save now / Contact us / Sign out) always fits inside the dropdown. */
     #_authDropdown #_versionListItems{min-height:48px;}
+    /* Very short viewports (e.g. a phone in landscape) can't fit the header +
+       versions + full footer at once, which would clip Sign out. There, let the
+       whole dropdown scroll as one block so every item — including Sign out — is
+       always reachable and never hidden. */
+    @media(max-height:520px){
+      #_authDropdown{overflow-y:auto!important;-webkit-overflow-scrolling:touch;}
+      #_authDropdown #_versionListItems{max-height:none!important;overflow:visible!important;flex:0 0 auto!important;min-height:0!important;}
+    }
     #_authDropdown>*{flex:0 0 auto;}
     /* The versions live in their own bounded, scrollable "folder": it never grows past
        ~(screen − room for header/CTAs), so Save now / Sign out always sit below it and
