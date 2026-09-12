@@ -624,6 +624,17 @@
        it can never exceed the visible screen on iOS (where 100vh is the taller
        toolbar-hidden height). vh is the fallback for browsers without svh. */
     #_authDropdown{position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:9999;min-width:240px;max-width:300px;max-height:calc(100vh - 80px);max-height:calc(100svh - 80px);display:flex;flex-direction:column;overflow:hidden;}
+    /* Let the saved-versions list shrink further on short screens so the footer
+       (Save now / Contact us / Sign out) always fits inside the dropdown. */
+    #_authDropdown #_versionListItems{min-height:48px;}
+    /* Very short viewports (e.g. a phone in landscape) can't fit the header +
+       versions + full footer at once, which would clip Sign out. There, let the
+       whole dropdown scroll as one block so every item — including Sign out — is
+       always reachable and never hidden. */
+    @media(max-height:520px){
+      #_authDropdown{overflow-y:auto!important;-webkit-overflow-scrolling:touch;}
+      #_authDropdown #_versionListItems{max-height:none!important;overflow:visible!important;flex:0 0 auto!important;min-height:0!important;}
+    }
     #_authDropdown>*{flex:0 0 auto;}
     /* The versions live in their own bounded, scrollable "folder": it never grows past
        ~(screen − room for header/CTAs), so Save now / Sign out always sit below it and
@@ -664,7 +675,11 @@
     /* Keep small atomic units whole across a PDF page break and never orphan a
        section heading at the bottom of a page. Only affects paginated output
        (the PDF); on screen (no pages) break-inside is a no-op. */
-    .resume-a4-page li,.resume-a4-page .r-award,.resume-a4-page .r-edu,.resume-a4-page .r-exp,.resume-a4-page .r-ka-item{break-inside:avoid;page-break-inside:avoid;}
+    /* Fill-the-page mode: bullets may flow across a page break (each bullet stays
+       whole), while the entry heading + company are kept with their first bullet
+       (break-after:avoid) so a heading is never orphaned at the bottom of a page.
+       Awards/education/KA items stay atomic. */
+    .resume-a4-page li,.resume-a4-page .r-award,.resume-a4-page .r-edu,.resume-a4-page .r-ka-item{break-inside:avoid;page-break-inside:avoid;}
     .resume-a4-page .r-sec-t,.resume-a4-page .r-exp-top,.resume-a4-page .r-co{break-after:avoid;page-break-after:avoid;}
     .resume-output-card [contenteditable]:focus{outline:2px dashed rgba(245,158,11,0.35);outline-offset:4px;border-radius:4px;}
     .resume-output-card{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
@@ -11007,6 +11022,40 @@ window.__novaPortfolioHTML=function(d,sections){
     window.showUploadStatus.__r4uOverlay=true; return true;
   }
   var n=0, iv=setInterval(function(){ if(wrap()||++n>150) clearInterval(iv); },200);
+})();
+</script>
+<script id="_r4uAuthDropdownFitJS">
+/* Keep the account menu a top-anchored DROPDOWN (drops down from the avatar) but
+   never let its bottom — where Sign out lives — get clipped by mobile Chrome's
+   dynamic toolbar / viewport. After it opens, cap its height to the visible
+   viewport below its top; the saved-versions list scrolls inside and the footer
+   (Save now / Contact us / Sign out) stays pinned and visible. Re-fits when the
+   toolbar/keyboard resizes the visual viewport while the menu is open. */
+(function(){
+  function fit(){
+    try{
+      var dd=document.getElementById('_authDropdown'); if(!dd || dd.offsetParent===null) return;
+      var vv=window.visualViewport;
+      var vh=vv?vv.height:(window.innerHeight||document.documentElement.clientHeight||0);
+      var vTop=vv?vv.offsetTop:0;
+      var top=dd.getBoundingClientRect().top;
+      var avail=(vh+vTop)-top-12;                 /* space from the menu's top to the visible bottom */
+      if(avail<160) avail=160;                     /* keep it usable even in a very short viewport */
+      dd.style.maxHeight=avail+'px';
+    }catch(e){}
+  }
+  function wrap(){
+    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uFit){
+      var o=window._authDropdown;
+      window._authDropdown=function(){ var r=o.apply(this,arguments); try{ fit(); requestAnimationFrame(fit); setTimeout(fit,60); }catch(e){} return r; };
+      window._authDropdown.__r4uFit=true; return true;
+    }
+    return typeof window._authDropdown==='function';
+  }
+  var n=0, iv=setInterval(function(){ if(wrap()||++n>150) clearInterval(iv); },200);
+  function onResize(){ if(document.getElementById('_authDropdown')) fit(); }
+  if(window.visualViewport){ window.visualViewport.addEventListener('resize',onResize); window.visualViewport.addEventListener('scroll',onResize); }
+  window.addEventListener('resize',onResize);
 })();
 </script>
 </body>
