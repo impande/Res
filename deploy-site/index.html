@@ -672,6 +672,10 @@
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:10mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
+    /* Match the ATS-clean PDF: normal letter-spacing on headings / job title /
+       contact in the on-screen preview too, so preview and download look identical
+       (the PDF export applies the same override). */
+    .resume-a4-page .r-sec-t,.resume-a4-page .r-head,.resume-a4-page .r-head *,.resume-a4-page .r-role,.resume-a4-page .r-contact,.resume-a4-page .r-contact *{letter-spacing:normal!important;word-spacing:normal!important;}
     /* Keep small atomic units whole across a PDF page break and never orphan a
        section heading at the bottom of a page. Only affects paginated output
        (the PDF); on screen (no pages) break-inside is a no-op. */
