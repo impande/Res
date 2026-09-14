@@ -10482,7 +10482,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var btn=document.getElementById('kaAiBtn'), box=document.getElementById('kaSuggestBox'); if(!box) return;
     var c=kaContext(kaCollect());
     if(!c.has){ box.innerHTML='<div class="ka-sug-empty">Add your skills, experience or projects in the earlier steps first — then AI can tailor achievements to you.</div>'; return; }
-    var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. '
+    var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. Use ATS-friendly, industry-standard wording with role-relevant keywords in the title and description.'
       +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
     if(btn){ btn.disabled=true; btn.setAttribute('data-t', btn.textContent); btn.textContent='✦ Thinking…'; }
     box.innerHTML='<div class="ka-sug-loading">Generating 5 suggestions from your resume…</div>';
@@ -10512,7 +10512,7 @@ window.__novaPortfolioHTML=function(d,sections){
       window.__kaAutoGenRunning=true;
       var box=document.getElementById('kaSuggestBox');
       if(box) box.innerHTML='<div class="ka-sug-loading">✦ Generating 5 key achievements from your resume…</div>';
-      var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. '
+      var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. Use ATS-friendly, industry-standard wording with role-relevant keywords in the title and description.'
         +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
       fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
         .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
@@ -10797,7 +10797,7 @@ window.__novaPortfolioHTML=function(d,sections){
   window.pfKbSuggest=function(){ var btn=document.getElementById('pfKaAiBtn'), box=document.getElementById('pfKaSug'); if(!box) return;
     var c=ctx(collect());
     if(!c.has){ box.innerHTML='<div class="ka-sug-empty">Add your skills, experience or projects in the résumé first — then AI can tailor achievements to you.</div>'; return; }
-    var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. '
+    var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. Use ATS-friendly, industry-standard wording with role-relevant keywords in the title and description.'
       +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
     if(btn){ btn.disabled=true; btn.setAttribute('data-t',btn.textContent); btn.textContent='✦ Thinking…'; }
     box.innerHTML='<div class="ka-sug-loading">Generating 5 suggestions from your resume…</div>';
