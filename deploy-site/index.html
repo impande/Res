@@ -7996,6 +7996,21 @@ if ('serviceWorker' in navigator) {
             if(wz.length) d.projects=wz.map(function(p){ return { title:p.title||'', desc:p.desc||'', tech:p.tech||'' }; });
           }
         }catch(e){}
+        /* Carry the résumé's Projects / Certifications / Awards / Education through to
+           the portfolio. The base getPfData dropped projects & certifications entirely,
+           so even with the Include toggle ON the website preview and the published site
+           never showed those sections. Fall back to the résumé data mirror
+           (__roLastData / lastResumeData) whenever the portfolio copy is empty. */
+        try{
+          var _ro=(window.__roLastData)||((typeof lastResumeData!=='undefined')?lastResumeData:null)||{};
+          var _nz=function(a){ return Array.isArray(a)&&a.length; };
+          if(d){
+            if(!_nz(d.projects) && _nz(_ro.projects)) d.projects=_ro.projects.map(function(p){ return {title:p.title||p.name||'', desc:p.desc||p.description||'', tech:p.tech||p.tags||'', link:p.link||p.url||''}; });
+            if(!_nz(d.certifications) && _nz(_ro.certifications)) d.certifications=_ro.certifications.map(function(c){ return {name:c.name||c.title||c.cert||String(c||''), issuer:c.issuer||c.org||'', year:c.year||c.date||''}; });
+            if(!_nz(d.awards) && _nz(_ro.awards)) d.awards=_ro.awards.map(function(a){ return {title:a.title||a.name||String(a||''), desc:a.desc||a.description||'', org:a.org||a.issuer||'', year:a.year||''}; });
+            if(!_nz(d.education) && _nz(_ro.education)) d.education=_ro.education.map(function(e){ return {degree:e.degree||e.deg||e.title||'', school:e.school||e.sch||e.institution||'', dates:e.dates||e.yr||e.year||''}; });
+          }
+        }catch(e){}
         /* Key Achievements: getPfData never carried them, so the portfolio preview
            and downloaded site never showed the KA section. Inject from the shared
            KA store (the same achievements used on the résumé) so the generator's
@@ -10240,7 +10255,20 @@ window.__novaPortfolioHTML=function(d,sections){
     var expT = exp.length ? '<section id="experience" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Career</span><h2>'+esc(H('experience','Experience'))+'</h2></div><div class="optl">'+exp.map(function(x){var role=esc(x.title||x.role||'');var co=esc(x.co||x.company||'');var per=((x.start||'')+((x.end)?' \u2014 '+esc(x.end):''));return '<div class="optl-row"><div class="optl-when">'+esc(per)+'</div><div class="optl-what"><b>'+role+'</b>'+(co?' · '+co:'')+'</div></div>';}).join('')+'</div></section>' : '';
     var contact = '<section id="contact" class="opcta"><div class="opcta-in"><h2>Let\u2019s work together</h2>'+(email?'<a class="btn opcta-btn" href="mailto:'+esc(email)+'">'+esc(email)+'</a>':(btns||''))+'</div></section>';
     var opKa = (S('keyachiev') && kachiev.length) ? '<section id="highlights" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Highlights</span><h2>'+esc(H('keyachiev','Key achievements'))+'</h2></div><div class="opka-grid">'+kachiev.map(function(a){var ic=esc(a.icon||'\ud83c\udfc6');var t=esc(a.title||'');var ds=a.desc?linkify(a.desc):'';var href=lk(a.link);var inner='<div class="opka-ic">'+ic+'</div><div class="opka-t">'+t+(href?' <span class="opka-arrow">\u2197</span>':'')+'</div>'+(ds?'<div class="opka-d">'+ds+'</div>':'');return href?'<a class="opka-card opka-linked" href="'+esc(href)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="opka-card">'+inner+'</div>';}).join('')+'</div></section>' : '';
-    opBody = work + services + about + opKa + expT + (parts.custom||'') + contact;
+    // Education / Certifications / Awards — these were never built in website mode,
+    // so a résumé's education, certifications and awards never appeared on the site
+    // even though the data was there. Each now renders whenever that data exists
+    // (same as Work / Skills / Experience), reusing the template's own timeline and
+    // chip styles so they match the rest of the site.
+    var eduT = edu.length ? '<section id="education" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Education</span><h2>'+esc(H('education','Education'))+'</h2></div><div class="optl">'+edu.map(function(e){var deg=esc(e.degree||e.deg||e.title||'');var sch=esc(e.school||e.sch||e.institution||e.co||'');var per=esc(e.dates||e.yr||e.year||((e.start||'')+(e.end?(' — '+e.end):'')));return '<div class="optl-row"><div class="optl-when">'+per+'</div><div class="optl-what"><b>'+deg+'</b>'+(sch?(' · '+sch):'')+'</div></div>';}).join('')+'</div></section>' : '';
+    var certsT = certs.length ? '<section id="certs" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Credentials</span><h2>'+esc(H('certifications','Certifications'))+'</h2></div><div class="opserv-grid">'+certs.map(function(c){var t=(typeof c==='string')?c:(c.name||c.title||c.cert||'');var iss=(c&&typeof c==='object')?(c.issuer||c.org||''):'';return '<div class="opserv">'+esc(t)+(iss?(' — '+esc(iss)):'')+'</div>';}).join('')+'</div></section>' : '';
+    var awardsT = awards.length ? '<section id="awards" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Recognition</span><h2>'+esc(H('awards','Awards'))+'</h2></div><div class="optl">'+awards.map(function(a){var t=(typeof a==='string')?esc(a):esc(a.title||a.name||a.award||'');var org=(a&&typeof a==='object')?esc(a.org||a.issuer||''):'';var yr=(a&&typeof a==='object')?esc(a.year||a.date||''):'';var ds=(a&&typeof a==='object'&&(a.desc||a.description))?linkify(a.desc||a.description):'';return '<div class="optl-row"><div class="optl-when">'+yr+'</div><div class="optl-what"><b>'+t+'</b>'+(org?(' · '+org):'')+(ds?('<div style="color:var(--mut);font-size:0.95rem;margin-top:4px">'+ds+'</div>'):'')+'</div></div>';}).join('')+'</div></section>' : '';
+    // Additional links (the "Add a link" list in Sections) — built for the standard
+    // template as parts.links but never included in the website body, so a résumé's
+    // extra links never showed on the published site. Render them as a compact
+    // "Elsewhere" section using the template's own chip style.
+    var linksT = extra.length ? '<section id="links" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Elsewhere</span><h2>'+esc(H('links','Links'))+'</h2></div><div class="opserv-grid">'+extra.map(function(l){var lb=esc(l.label||host(l.url||l.href||''));var u=esc(lk(l.url||l.href||''));return '<a class="opserv" href="'+u+'" target="_blank" rel="noopener" style="text-decoration:none;display:flex;align-items:center;gap:8px;justify-content:space-between">'+lb+' <span aria-hidden="true">↗</span></a>';}).join('')+'</div></section>' : '';
+    opBody = work + services + about + opKa + expT + eduT + certsT + awardsT + (parts.custom||'') + linksT + contact;
   }
   /* ── Website theme fonts + palettes. Each theme reuses the one-page structure
      (.tpl-onepage) and re-skins it: distinct :root palette, fonts, hero glow,
