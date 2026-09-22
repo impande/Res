@@ -1,0 +1,26 @@
+name: regression
+
+# Guards the single-file build against the regressions this project keeps
+# hitting. Runs on every push to the release branches and on PRs into them.
+on:
+  push:
+    branches: [uat, main]
+  pull_request:
+    branches: [uat, main]
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run regression harness (build + syntax + feature checks)
+        run: node scripts/regression.js

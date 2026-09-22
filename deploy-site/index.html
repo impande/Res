@@ -2779,6 +2779,7 @@
           <div class="upload-zone-title">Upload your resume</div>
           <div class="upload-zone-sub">PDF · DOCX · DOC · TXT · JPG · PNG &nbsp;·&nbsp; Drag &amp; drop</div>
           <span class="btn-browse">Choose File</span>
+          <div class="upload-zone-li"><span class="uzli-badge">in</span> From LinkedIn? Export your profile (<b>More → Save to PDF</b>) and drop it here — our AI reads it like a résumé.</div>
         </label>
       </div>
       <!-- Paste text panel -->
@@ -2795,7 +2796,7 @@
         <input type="text" id="ghUsername" placeholder="GitHub username (e.g. torvalds)">
         <button class="btn-accent" style="padding:9px 16px;font-size:0.85rem;flex-shrink:0;" onclick="prefillFromGithub()">Import from GitHub</button>
       </div>
-      <p class="prefill-note">💡 <strong style="color:var(--text)">LinkedIn:</strong> LinkedIn's API doesn't allow automatic import — please copy your details from your LinkedIn profile manually and paste them below.</p>
+      <p class="prefill-note">💡 <strong style="color:var(--text)">LinkedIn:</strong> Export your profile from LinkedIn (Profile → More → Save to PDF) and upload it in the <strong>Upload PDF / DOC</strong> tab above — our AI fills everything in. You can also paste your details in the <strong>Paste Text</strong> tab.</p>
     </div>
     <span class="photo-section-label">Profile Photo <span style="font-size:0.7rem;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">(optional)</span></span>
     <div class="photo-section" id="photoSection">
@@ -3578,8 +3579,8 @@ window.__iosPdfSave = function(blobUrl, filename){
           <span class="pf-section-title" style="margin:0;">Choose what to include</span>
         </div>
         <div class="pf-section-sub">Pick which sections appear on your published site — toggle any off to hide it.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span style="font-size:0.8rem;color:var(--muted)">Tap a section to toggle it</span>
+        <div class="pf-inc-hintrow" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span class="pf-inc-hint" style="font-size:0.8rem;color:var(--muted)">Tap a section to toggle it</span>
           <button id="pfSelectAllBtn" onclick="pfToggleAll()" style="padding:5px 13px;font-size:0.8rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;font-weight:600;">Deselect All</button>
         </div>
         <div class="pf-toggle-grid" id="pfToggleGrid">
@@ -3599,6 +3600,18 @@ window.__iosPdfSave = function(blobUrl, filename){
         <div class="pf-footer-right">
           <button class="btn-primary" onclick="pfGoStep(3)">Preview &amp; Download →</button>
         </div>
+      </div>
+    </div>
+    <!-- Step: Choose what to include (between Sections and Preview). Static so iOS
+         gives it momentum touch-scroll like the other steps; the toggles are moved
+         into #pfIncludeMount at runtime by _r4uPfIncludeStepJS. -->
+    <div class="pf-body" id="pfStepInclude" style="display:none">
+      <div class="pf-section-title" style="margin-top:4px;">Choose what to include</div>
+      <div class="pf-section-sub">Pick which sections appear on your published site — toggle any off to hide it.</div>
+      <div id="pfIncludeMount"></div>
+      <div class="pf-footer" style="margin-top:16px;border-top:1px solid var(--border);">
+        <button class="btn-secondary" onclick="pfGoStep(2)">← Back</button>
+        <div class="pf-footer-right"><button class="btn-primary" onclick="pfGoStep(3)">Continue to Preview →</button></div>
       </div>
     </div>
     <!-- Step 3: Preview & Download -->
@@ -4031,16 +4044,17 @@ if ('serviceWorker' in navigator) {
     wrap.appendChild(say('Or pick any tool:'));
     var tc=group();
     var tools=[
+      {ico:'↕️',lbl:'Reorder sections',ai:false,sub:'Arrange sections for your target role',fn:_reorderFlow},
       {ico:'📝',lbl:'Rewrite summary',ai:true,sub:'Craft a sharper professional summary',fn:_aiRewriteSummary},
       {ico:'✨',lbl:'Polish sections',ai:true,sub:'Rewrite bullets punchier, section by section',fn:_polishHome},
+      {ico:'💪',lbl:'Bullet coach',ai:true,sub:'Flag weak bullets — no metric, weak verb, too long — & fix',fn:_bulletCoach},
       {ico:'🧩',lbl:'Suggest skills',ai:true,sub:'Add role-relevant, ATS-friendly skills',fn:_aiSuggestSkills},
       {ico:'🔎',lbl:'AI review',ai:true,sub:'Recruiter-style feedback tailored to your role',fn:_aiReview},
       {ico:'🎯',lbl:'ATS match to a job',ai:true,sub:'Paste a job — score keyword match like a real ATS',fn:_atsMatch},
       {ico:'📊',lbl:'ATS breakdown',ai:false,sub:'See exactly what helps and what’s missing',fn:_atsBreakdown},
       {ico:'📄',lbl:'Fit to page',ai:true,sub:'Font, bullets & spacing — auto or manual',fn:_fitFlow},
       {ico:'🎨',lbl:'Customise look',ai:false,sub:'Colours, fonts & section highlights',fn:_customiseFlow},
-      {ico:'🪄',lbl:'Template versions',ai:true,sub:'Restyle the current template — accent colour & spacing',fn:_templateVersions},
-      {ico:'↕️',lbl:'Reorder sections',ai:false,sub:'Arrange sections for your target role',fn:_reorderFlow}
+      {ico:'🪄',lbl:'Template versions',ai:true,sub:'Restyle the current template — accent colour & spacing',fn:_templateVersions}
     ];
     tools.forEach(function(t){
       var b=document.createElement('button'); b.className='airx-tool';
@@ -4244,6 +4258,107 @@ if ('serviceWorker' in navigator) {
     m.appendChild(wrap); _backBtn(_home); _scroll();
   }
 
+  /* Bullet coach: scan every experience bullet and flag the three weaknesses a
+     recruiter/ATS penalises — no quantified result, a weak/passive opener, or an
+     overlong line — then let the user fix each (inline or one-tap AI) or fix all.
+     Truthful: AI is told never to invent numbers. */
+  var _WEAK_OPENERS=/^(responsible for|worked on|helped|assisted( with)?|handled|involved in|duties included|participated in|tasked with|was responsible|in charge of|managed to|contributed to|took part in|part of|responsible|work on|helping)\b/i;
+  /* Gibberish / typo signal: a word with 3+ of the same letter in a row
+     (keyboard mash like "ghhhhhbhhhh") or a long vowel-less run ("asdfghjkl").
+     Both are vanishingly rare in real résumé prose, so false positives are low. */
+  function _looksOff(tx){
+    var ws=String(tx||'').split(/\s+/);
+    for(var i=0;i<ws.length;i++){ var w=ws[i].replace(/[^A-Za-z]/g,'');
+      if(w.length>=5 && /([a-z])\1{2,}/.test(w)) return true;
+      if(w.length>=8 && !/[aeiouy]/i.test(w)) return true; }
+    return false;
+  }
+  function _bulletReasons(tx){
+    var r=[];
+    if(!/\d/.test(tx)) r.push('No metric');
+    if(_WEAK_OPENERS.test(tx.replace(/^[•\-\*\s]+/,''))) r.push('Weak opener');
+    if(tx.split(/\s+/).filter(Boolean).length>36) r.push('Too long');
+    if(_looksOff(tx)) r.push('Looks off');
+    return r;
+  }
+  function _bulletCoach(){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.querySelector('.resume-a4-page')){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var lis=Array.from(out.querySelectorAll('.r-exp .r-ul li, .r-exp ul li')).filter(function(li){ return li.style.display!=='none' && li.textContent.trim(); });
+    _msg('<b>💪 Bullet coach</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Strong bullets lead with an action verb, quantify impact, and stay concise.</div>');
+    if(!lis.length){ _msg('<span class="aig-warn">No experience bullets found yet.</span>'); _backBtn(_home); return; }
+    var all_=lis.map(function(li){ return {li:li, reasons:_bulletReasons(li.textContent.trim())}; });
+    /* Only a weak opener or overlong line is "fixable"; a missing number alone is
+       a soft tip (a fix can't invent a truthful metric), so freshly-generated
+       bullets aren't all flagged as weak. */
+    function _fixable(rs){ return rs.indexOf('Weak opener')>-1 || rs.indexOf('Too long')>-1 || rs.indexOf('Looks off')>-1; }
+    var weak=all_.filter(function(x){ return _fixable(x.reasons); });
+    var _noMetric=all_.filter(function(x){ return !_fixable(x.reasons) && x.reasons.indexOf('No metric')>-1; }).length;
+    function _metricTip(n){ _msg('<div style="font-size:0.74rem;color:var(--muted);margin-top:7px">💡 '+n+' bullet'+(n>1?'s':'')+' read well but ha'+(n>1?'ve':'s')+' no number — add a metric where you truthfully can (%, ₹, count, time saved).</div>'); }
+    if(!weak.length){
+      if(!_noMetric){ _msg('<span class="aig-ok">✓ Your bullets are strong — solid verbs, concise, and quantified. Nice work!</span>'); }
+      else { _msg('<span class="aig-ok">✓ Strong, concise bullets.</span>'); _metricTip(_noMetric); }
+      _backBtn(_home); return;
+    }
+    _msg('<div style="font-size:0.74rem;color:var(--muted);margin-bottom:2px">'+weak.length+' of '+lis.length+' bullet'+(lis.length>1?'s':'')+' could be stronger — fix each below, or all at once.</div>');
+    function _fixPrompt(tx, reasons){
+      var wants=[];
+      wants.push('lead with a strong action verb (never "Responsible for", "Worked on", "Helped")');
+      if(reasons.indexOf('No metric')>-1) wants.push('quantify the result if the work implies one — but be truthful and do NOT invent specific numbers; if none exists, emphasise scope and outcome');
+      if(reasons.indexOf('Looks off')>-1) wants.push('remove any gibberish or nonsense words and fix obvious typos, keeping the real achievement');
+      if(reasons.indexOf('Too long')>-1) wants.push('keep it under 26 words');
+      else wants.push('keep it under 30 words');
+      return 'Rewrite this résumé bullet to '+wants.join('; ')+'. Output ONLY the bullet text, no bullet symbol.\n\n'+tx;
+    }
+    function _applyFix(item, act, lbl){
+      if(act.disabled) return Promise.resolve(false);
+      act.disabled=true; var old=act.textContent; act.textContent='…';
+      return _aiGenerate(_fixPrompt(item.li.textContent.trim(), item.reasons)).then(function(text){
+        if(!text){ act.disabled=false; act.textContent=lbl||old; return false; }
+        text=text.replace(/^["'“‘\s•\-\*]+|["'”’\s]+$/g,'');
+        item.li.textContent=text; if(item.txt) item.txt.textContent=text;
+        if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge();
+        act.textContent='✓ Fixed'; item.done=true;
+        if(item.chips) item.chips.innerHTML='<span style="font-size:0.68rem;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px">✓ improved</span>';
+        return true;
+      }).catch(function(){ act.disabled=false; act.textContent=lbl||old; return false; });
+    }
+
+    var wrap=document.createElement('div'); wrap.className='aig-wrap';
+    weak.forEach(function(item){
+      var row=document.createElement('div'); row.style.cssText='background:#fff;border:1px solid #ececf3;border-radius:12px;padding:10px 12px;margin-bottom:9px;box-shadow:0 2px 10px rgba(24,24,40,0.04)';
+      var chips=document.createElement('div'); chips.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px';
+      chips.innerHTML=item.reasons.map(function(r){ return '<span style="font-size:0.66rem;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:99px">'+r+'</span>'; }).join('');
+      var txt=document.createElement('div'); txt.contentEditable='true'; txt.spellcheck=false;
+      txt.style.cssText='font-size:0.8rem;line-height:1.45;color:var(--text);outline:none;border:1px solid transparent;border-radius:6px;padding:3px 5px;';
+      txt.textContent=item.li.textContent.trim();
+      txt.addEventListener('focus',function(){ txt.style.borderColor='var(--accent,#7c3aed)'; });
+      txt.addEventListener('blur',function(){ txt.style.borderColor='transparent'; var v=txt.textContent.trim(); if(v){ item.li.textContent=v; } else { txt.textContent=item.li.textContent.trim(); } if(typeof _markEdited==='function')_markEdited(); if(typeof _updPageBadge==='function')_updPageBadge(); });
+      var act=document.createElement('button'); act.className='aig-opt'; act.style.marginTop='8px'; act.textContent='✨ Fix with AI';
+      act.addEventListener('click',function(){ _applyFix(item, act, '✨ Fix with AI'); });
+      item.txt=txt; item.chips=chips; item.act=act;
+      row.appendChild(chips); row.appendChild(txt); row.appendChild(act); wrap.appendChild(row);
+    });
+    m.appendChild(wrap);
+
+    var allBtn=document.createElement('button'); allBtn.className='aig-opt aig-primary'; allBtn.style.marginTop='2px'; allBtn.textContent='✨ Fix all '+weak.length+' with AI';
+    allBtn.addEventListener('click',function(){
+      if(allBtn.disabled) return; allBtn.disabled=true; allBtn.textContent='Fixing…';
+      var pending=weak.filter(function(it){ return !it.done; });
+      Promise.all(pending.map(function(it){ return _applyFix(it, it.act, '✨ Fix with AI'); })).then(function(res){
+        var n=res.filter(Boolean).length;
+        allBtn.textContent='✓ Fixed '+n;
+        var snap=(window._snapResumeStyles?window._snapResumeStyles():null); if(window._applyResumeStyles) window._applyResumeStyles(snap);
+        if(typeof showToast==='function') showToast('Strengthened '+n+' bullet'+(n===1?'':'s')+' — review each for accuracy before downloading.','success');
+      });
+    });
+    m.appendChild(allBtn);
+    if(_noMetric) _metricTip(_noMetric);
+    _msg('<div style="font-size:0.73rem;color:var(--muted);margin-top:7px">⚠ Review each rewrite — keep only what\'s true. AI won\'t invent numbers, but check scope and wording.</div>');
+    _backBtn(_home); _scroll();
+  }
+
   function _smartCase(str){
     if(!str) return str;
     var ACR={'aws':'AWS','gcp':'GCP','sql':'SQL','nosql':'NoSQL','api':'API','apis':'APIs','ci/cd':'CI/CD','ux':'UX','ui':'UI','ui/ux':'UI/UX','kpi':'KPI','kpis':'KPIs','ml':'ML','ai':'AI','html':'HTML','css':'CSS','js':'JS','saas':'SaaS','paas':'PaaS','b2b':'B2B','b2c':'B2C','crm':'CRM','erp':'ERP','seo':'SEO','sem':'SEM','etl':'ETL','nlp':'NLP','ios':'iOS','devops':'DevOps','graphql':'GraphQL','postgresql':'PostgreSQL','mysql':'MySQL','rest':'REST','grpc':'gRPC','elk':'ELK','aws':'AWS','okrs':'OKRs','roi':'ROI'};
@@ -4434,6 +4549,24 @@ if ('serviceWorker' in navigator) {
     ta.style.cssText='width:100%;min-height:130px;padding:11px;border:1px solid var(--border,#d1d5db);border-radius:11px;font-size:0.82rem;font-family:inherit;color:var(--text);background:#fff;margin:9px 0;box-sizing:border-box;resize:vertical;';
     $m().appendChild(ta);
     var btn=document.createElement('button'); btn.className='aig-opt aig-primary'; btn.textContent='🎯 Check match';
+    /* Word-boundary match so short terms don't false-positive (e.g. "go" must not
+       match "google", "java" must not match "javascript"). + and # count as part
+       of a token so "c++" / "c#" still work. Multi-word terms match as a phrase. */
+    function _kwIn(k, text){
+      try{
+        var e=k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        return new RegExp('(^|[^a-z0-9+#])'+e+'([^a-z0-9+#]|$)','i').test(text);
+      }catch(_e){ return text.indexOf(k.toLowerCase())>-1; }
+    }
+    function _addKw(k){
+      var _sk=_smartCase(k);
+      if(typeof lastResumeData!=='undefined'&&lastResumeData){
+        if(!lastResumeData.skills) lastResumeData.skills=[];
+        if(lastResumeData.skills.indexOf(_sk)<0) lastResumeData.skills.push(_sk);
+      }
+      if(typeof skills!=='undefined'&&skills.indexOf(_sk)<0) skills.push(_sk);
+      return _sk;
+    }
     btn.addEventListener('click',function(){
       var jd=ta.value.trim();
       if(jd.length<40){ _msg('<span class="aig-warn">Paste a bit more of the job description.</span>'); return; }
@@ -4444,40 +4577,146 @@ if ('serviceWorker' in navigator) {
         if(!kws.length){ _msg('<span class="aig-warn">Could not read that job description. Try again.</span>'); btn.disabled=false; btn.textContent='🎯 Check match'; return; }
         if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
         var resumeText=((document.getElementById('resumeOutput').textContent)||'').toLowerCase();
-        var matched=kws.filter(function(k){ return resumeText.indexOf(k)>-1; });
-        var missing=kws.filter(function(k){ return resumeText.indexOf(k)<0; });
+        var matched=kws.filter(function(k){ return _kwIn(k,resumeText); });
+        var missing=kws.filter(function(k){ return !_kwIn(k,resumeText); });
         var pct=kws.length?Math.round(matched.length/kws.length*100):0;
         _clear();
         var col=pct>=70?'#16a34a':pct>=45?'#d97706':'#dc2626';
         _msg('<b>ATS match: <span style="color:'+col+'">'+pct+'%</span></b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">'+matched.length+' of '+kws.length+' key terms from this job are in your resume.</div>');
+        /* Primary action: actually tailor the résumé (summary + bullets) to the job,
+           not just suggest skills. */
+        var tailorBtn=document.createElement('button'); tailorBtn.className='aig-opt aig-primary'; tailorBtn.style.margin='10px 0 2px'; tailorBtn.textContent='✨ Tailor my résumé to this job';
+        tailorBtn.addEventListener('click',function(){ _tailorToJd(jd, missing); });
+        $m().appendChild(tailorBtn);
+        _msg('<div style="font-size:0.73rem;color:var(--muted);margin:2px 0 6px">Rewrites your summary &amp; experience bullets to target this job — truthfully, no invented experience. Or add individual skills below.</div>');
         if(matched.length) _msg('<div class="airx-sect" style="margin:1px 0 6px">✅ Found ('+matched.length+')</div><div style="display:flex;flex-wrap:wrap;gap:5px">'+matched.map(function(k){ return '<span style="font-size:0.72rem;background:#dcfce7;color:#166534;padding:2px 9px;border-radius:99px;text-transform:capitalize">'+k+'</span>'; }).join('')+'</div>');
         if(missing.length){
           _msg('<div class="airx-sect" style="margin:9px 0 6px">⭕ Missing ('+missing.length+') — tap to add any you genuinely have</div>');
           var row=document.createElement('div'); row.className='aig-row';
+          function _reRender(){
+            var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
+            if(typeof _markEdited==='function')_markEdited();
+            if(typeof renderOutput==='function'&&typeof lastResumeData!=='undefined'&&lastResumeData) renderOutput(lastResumeData);
+            if(window._applyResumeStyles) window._applyResumeStyles(snap);
+          }
+          var chips=[];
           missing.forEach(function(k){
             var chip=document.createElement('button'); chip.className='aig-chip'; chip.textContent='+ '+k; chip.style.textTransform='capitalize';
             chip.addEventListener('click',function(){
               if(chip.disabled) return;
-              var _sk=_smartCase(k);
-              if(!lastResumeData.skills) lastResumeData.skills=[];
-              if(lastResumeData.skills.indexOf(_sk)<0) lastResumeData.skills.push(_sk);
-              if(typeof skills!=='undefined'&&skills.indexOf(_sk)<0) skills.push(_sk);
+              var _sk=_addKw(k);
               chip.className='aig-chip sel'; chip.textContent='✓ '+_sk; chip.disabled=true;
-              if(typeof _markEdited==='function')_markEdited();
-              var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
-              if(typeof renderOutput==='function') renderOutput(lastResumeData);
-              if(window._applyResumeStyles) window._applyResumeStyles(snap);
+              _reRender();
             });
-            row.appendChild(chip);
+            chips.push(chip); row.appendChild(chip);
           });
           $m().appendChild(row);
-          _msg('<div style="font-size:0.74rem;color:var(--muted);margin-top:7px">⚠ Only add terms you truly have — never keyword-stuff. Also weave them into your bullets, not just Skills.</div>');
+          var allBtn=document.createElement('button'); allBtn.className='aig-opt'; allBtn.style.marginTop='8px'; allBtn.textContent='➕ Add all '+missing.length+' to Skills';
+          allBtn.addEventListener('click',function(){
+            if(allBtn.disabled) return; allBtn.disabled=true;
+            var added=0;
+            chips.forEach(function(chip,i){ if(chip.disabled) return; var _sk=_addKw(missing[i]); chip.className='aig-chip sel'; chip.textContent='✓ '+_sk; chip.disabled=true; added++; });
+            _reRender();
+            allBtn.textContent='✓ Added '+added+' to Skills';
+            if(typeof showToast==='function') showToast('Added '+added+' keyword'+(added===1?'':'s')+' to Skills — regenerate to fold them in, and weave the key ones into your bullets too.','success');
+          });
+          $m().appendChild(allBtn);
+          _msg('<div style="font-size:0.74rem;color:var(--muted);margin-top:7px">⚠ Only keep terms you truly have — never keyword-stuff. For the ones that matter most, weave them into your experience bullets, not just the Skills list.</div>');
         } else { _msg('<span class="aig-ok">✓ Strong keyword coverage for this role.</span>'); }
         _backBtn(_home); _scroll();
       }).catch(function(){ _msg('<span class="aig-warn">Could not reach AI. Try again.</span>'); btn.disabled=false; btn.textContent='🎯 Check match'; });
     });
     $m().appendChild(btn);
     _backBtn(_home); _scroll();
+  }
+
+  /* Full tailoring: rewrite the professional summary AND each experience's bullets
+     to target the pasted job (truthfully, no invented experience), and add the
+     genuinely-relevant missing skills. Operates on lastResumeData and re-renders
+     once. All calls run in parallel; each is defensive / fail-open. */
+  function _tailorToJd(jd, missing){
+    _clear(); var m=$m(); if(!m) return;
+    var out=document.getElementById('resumeOutput');
+    if(!out||!out.querySelector('.resume-a4-page')||typeof lastResumeData==='undefined'||!lastResumeData){ _msg('Generate your resume first.'); _backBtn(_home); return; }
+    if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
+    var d=lastResumeData;
+    var jdShort=String(jd||'').slice(0,1600);
+    _msg('<b>✨ Tailoring your résumé to this job…</b>');
+    var status=_msg('<span class="aig-warn">Rewriting your summary and experience to match — this can take a few seconds.</span>');
+
+    var role=d.jobTitle||d.title||'';
+    var curSum=(d.summary||'').trim();
+    var skillsList=(d.skills||[]).slice(0,12).join(', ');
+    var exps=Array.isArray(d.experience)?d.experience:[];
+
+    /* 1) summary — JD-aware, truthful */
+    var sumPrompt='You are an expert resume writer tailoring a candidate\'s résumé to a specific job. Rewrite the professional summary (2-3 sentences, max 45 words, no first-person pronouns, no preamble) so it targets THIS job and mirrors its core requirements and terminology — but ONLY claim experience the candidate\'s background supports. Do not invent titles, employers, or achievements. Output ONLY the summary text.\n\nJOB DESCRIPTION:\n'+jdShort+'\n\nCANDIDATE TARGET ROLE: '+role+'\nCANDIDATE SKILLS: '+skillsList+'\nCURRENT SUMMARY: '+(curSum||'(none)');
+    var sumP=(curSum||role||skillsList)?_aiGenerate(sumPrompt).then(function(t){ return (t||'').replace(/^["'“‘\s]+|["'”’\s]+$/g,''); }).catch(function(){ return ''; }):Promise.resolve('');
+
+    /* 2) bullets — one call per experience, in parallel */
+    var expPs=exps.map(function(e,idx){
+      var bl=Array.isArray(e.bullets)?e.bullets.filter(Boolean):[];
+      if(!bl.length) return Promise.resolve(null);
+      var n=bl.length;
+      var label=(e.title||e.role||'')+((e.co||e.company)?(' at '+(e.co||e.company)):'');
+      var p='You are an expert resume writer tailoring a résumé to a specific job. Rewrite the bullet points for the role "'+label+'" so they emphasise the experience most relevant to THIS job and naturally use the job\'s terminology WHERE the original bullet genuinely supports it. Rules: return EXACTLY '+n+' bullet'+(n>1?'s':'')+'; start each with a strong action verb; keep any real metrics; DO NOT invent new responsibilities, tools, employers, or numbers not implied by the original. Output ONLY the revised bullets, one per line, each starting with •. No intro.\n\nJOB DESCRIPTION (context):\n'+jdShort+'\n\nCURRENT BULLETS:\n'+bl.map(function(b){return '• '+b;}).join('\n');
+      return _aiGenerate(p).then(function(t){
+        var lines=(t||'').split('\n').map(function(l){ return l.replace(/^[•\-\*\d.\s]+/,'').trim(); }).filter(Boolean);
+        if(!lines.length) return null;
+        if(lines.length>n) lines=lines.slice(0,n);
+        return { idx: idx, bullets: lines };
+      }).catch(function(){ return null; });
+    });
+
+    /* 3) skills — only the missing keywords the candidate plausibly already has */
+    var skillsP=Promise.resolve([]);
+    if(missing && missing.length){
+      var expCtx=exps.slice(0,4).map(function(e){ return (e.title||e.role||'')+((e.co||e.company)?(' at '+(e.co||e.company)):'')+': '+((e.bullets||[]).slice(0,3).join(' ')); }).join(' | ');
+      var skPrompt='From the KEYWORDS below, output ONLY the ones this candidate plausibly already has, judging from their experience — comma-separated, canonical casing, no preamble. Omit anything their background does not support.\n\nKEYWORDS: '+missing.join(', ')+'\n\nCANDIDATE EXPERIENCE:\n'+expCtx;
+      skillsP=_aiGenerate(skPrompt).then(function(t){
+        return (t||'').split(/[,\n]/).map(function(s){ return s.replace(/^[-•\d.\s]+/,'').trim(); }).filter(function(s){ return s.length>1 && s.length<40; });
+      }).catch(function(){ return []; });
+    }
+
+    Promise.all([sumP, Promise.all(expPs), skillsP]).then(function(res){
+      var newSum=res[0], expResults=res[1]||[], skToAdd=res[2]||[];
+      var changed=[];
+      if(newSum){ d.summary=newSum; changed.push('summary'); }
+      var bulletJobs=0;
+      expResults.forEach(function(r){
+        if(!r) return; var e=d.experience[r.idx]; if(!e) return;
+        e.bullets=r.bullets; e.desc=r.bullets.join('\n'); bulletJobs++;
+      });
+      if(bulletJobs) changed.push('bullets in '+bulletJobs+' role'+(bulletJobs>1?'s':''));
+      var addedSkills=[];
+      skToAdd.forEach(function(k){
+        var low=k.toLowerCase();
+        if(!(missing||[]).some(function(mm){ return mm.toLowerCase()===low; })) return; /* guard hallucinated extras */
+        var sk=_smartCase(k);
+        if(!d.skills) d.skills=[];
+        if(d.skills.indexOf(sk)<0){ d.skills.push(sk); addedSkills.push(sk); }
+        if(typeof skills!=='undefined'&&skills.indexOf(sk)<0) skills.push(sk);
+      });
+      if(addedSkills.length) changed.push(addedSkills.length+' skill'+(addedSkills.length>1?'s':''));
+
+      if(!changed.length){ status.innerHTML='<span class="aig-warn">Could not tailor right now. Try again.</span>'; _backBtn(_home); return; }
+
+      var snap=(window._snapResumeStyles?window._snapResumeStyles():null);
+      if(typeof _markEdited==='function')_markEdited();
+      if(typeof renderOutput==='function') renderOutput(d);
+      if(window._applyResumeStyles) window._applyResumeStyles(snap);
+      if(typeof _updPageBadge==='function')_updPageBadge();
+
+      _clear();
+      _msg('<b>✓ Tailored to this job</b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">Updated: '+changed.join(', ')+'.</div>');
+      if(addedSkills.length) _msg('<div class="airx-sect" style="margin:6px 0 4px">Skills added</div><div style="display:flex;flex-wrap:wrap;gap:5px">'+addedSkills.map(function(k){ return '<span style="font-size:0.72rem;background:#dcfce7;color:#166534;padding:2px 9px;border-radius:99px">'+k+'</span>'; }).join('')+'</div>');
+      var recheck=document.createElement('button'); recheck.className='aig-opt aig-primary'; recheck.style.marginTop='10px'; recheck.textContent='🎯 Re-check match';
+      recheck.addEventListener('click',_atsMatch);
+      $m().appendChild(recheck);
+      _msg('<div style="font-size:0.73rem;color:var(--muted);margin-top:7px">⚠ AI can overstate — read every bullet and edit anything that isn\'t accurate before downloading. Your résumé is already updated; don\'t click <b>Generate Resume</b> again unless you want to rebuild it from your form (that would replace this tailoring).</div>');
+      if(typeof showToast==='function') showToast('Résumé tailored to the job — review each line for accuracy.','success');
+      _backBtn(_home); _scroll();
+    }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; _backBtn(_home); });
   }
 
   /* Focused bullet trimming for layouts that read best with fewer bullets per role */
@@ -5333,6 +5572,9 @@ if ('serviceWorker' in navigator) {
     var t=setInterval(function(){var p2=document.getElementById('aiChatPanel');if(p2){clearInterval(t);_bindPanel(p2);}},400);
   }
   _init();
+  /* Expose the JD keyword-match tool so a prominent Generate-page button can
+     deep-link straight into it (see _r4uJdTailorJS). */
+  try{ window._r4uJdMatch=_atsMatch; }catch(e){}
 })();
 </script>
 <script>
@@ -7762,6 +8004,19 @@ if ('serviceWorker' in navigator) {
           var _pfKa=(window.__keyAchiev||[]).filter(function(a){ return a && (a.title||a.desc); });
           if(d && _pfKa.length) d.keyAchievements=window.__keyAchiev;
         }catch(e){}
+        /* Professional headline: the portfolio hero shows d.title, but getPfData
+           often leaves it empty — so the published site showed only name + location,
+           with no role. Fill it from the résumé's job title so the hero leads with
+           the candidate's headline (e.g. "VP Product"). */
+        try{
+          if(d && !String(d.title||'').trim()){
+            var _jt=String(d.jobTitle||'').trim();
+            if(!_jt){ try{ _jt=String(window.__roLastData&&window.__roLastData.jobTitle||'').trim(); }catch(_e){} }
+            if(!_jt){ try{ _jt=String((typeof lastResumeData!=='undefined'&&lastResumeData&&lastResumeData.jobTitle)||'').trim(); }catch(_e){} }
+            if(!_jt){ try{ _jt=String((typeof pfWzData!=='undefined'&&pfWzData&&pfWzData.jobTitle)||'').trim(); }catch(_e){} }
+            if(_jt) d.title=_jt;
+          }
+        }catch(e){}
         /* Carry the selected base template (and the rest of the Style-Studio
            customization) on the data object itself, so the generator applies the
            chosen template reliably rather than depending only on a global lookup. */
@@ -9042,20 +9297,75 @@ if ('serviceWorker' in navigator) {
   };
   /* ── View-count badge in the Preview step (shows once a portfolio is published) ── */
   var PBASE='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/';
+  function _pfReadMap(field){ var out={}; var f=field&&field.mapValue&&field.mapValue.fields; if(f){ for(var k in f){ out[k]=parseInt(f[k].integerValue||'0',10)||0; } } return out; }
+  function _pfEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  /* Collapsible cards (Insights, Moderation) — collapsed by default so they don't
+     push the live preview down, like the résumé ATS card. State per-card in
+     localStorage; re-applied on each re-render. */
+  function pfCardOpen(key){ try{ return localStorage.getItem('_pfCard_'+key)==='1'; }catch(e){ return false; } }
+  window.pfToggleCard=function(key,head){
+    try{
+      var open=!pfCardOpen(key); try{ localStorage.setItem('_pfCard_'+key, open?'1':'0'); }catch(e){}
+      if(head){ var body=head.parentNode.querySelector('.pf-collap-body'); if(body) body.style.display=open?'':'none'; var ch=head.querySelector('.pf-collap-chev'); if(ch) ch.style.transform=open?'rotate(90deg)':''; }
+    }catch(e){}
+  };
+  var PF_HEAD='display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;';
+  var PF_CHEV='font-size:0.8rem;color:var(--muted);transition:transform .2s;display:inline-block;flex-shrink:0;';
+  function _pfInsightsHTML(v, daily, refs, slug, liveUrl){
+    /* 14-day trend */
+    var days=[]; for(var i=13;i>=0;i--){ var dt=new Date(Date.now()-i*86400000).toISOString().slice(0,10); days.push({d:dt, n:daily[dt]||0}); }
+    var last14=days.reduce(function(a,x){return a+x.n;},0);
+    var max=Math.max.apply(null, days.map(function(x){return x.n;}).concat([1]));
+    var bars=days.map(function(x){ var h=x.n?Math.max(2,Math.round((x.n/max)*30)):0; return '<div title="'+x.d+': '+x.n+' view'+(x.n===1?'':'s')+'" style="flex:1;display:flex;align-items:flex-end;justify-content:center;height:34px;"><div style="width:64%;background:var(--accent);border-radius:2px 2px 0 0;height:'+h+'px;opacity:'+(x.n?1:0.18)+';min-height:'+(x.n?2:1)+'px;"></div></div>'; }).join('');
+    /* top referrers */
+    var rk=Object.keys(refs).sort(function(a,b){return refs[b]-refs[a];}).slice(0,4);
+    var refHtml = rk.length ? rk.map(function(k){ var label=k==='direct'?'Direct / private':k; return '<span style="font-size:0.72rem;background:var(--input-bg,#f1f1f6);border:1px solid var(--border);color:var(--text);padding:2px 9px;border-radius:99px;">'+_pfEsc(label)+' · '+refs[k]+'</span>'; }).join(' ') : '<span style="font-size:0.74rem;color:var(--muted);">No sources yet</span>';
+    var esl=String(slug).replace(/'/g,"\\'");
+    var open=pfCardOpen('ins');
+    return ''
+      +'<div class="pf-collap-head" onclick="pfToggleCard(\'ins\',this)" style="'+PF_HEAD+'">'
+      +  '<span class="pf-collap-chev" style="'+PF_CHEV+(open?'transform:rotate(90deg);':'')+'">▸</span>'
+      +  '<span style="font-size:0.72rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);">📊 Portfolio insights</span>'
+      +  '<span style="font-size:0.82rem;font-weight:700;color:var(--text);">'+v+' view'+(v===1?'':'s')+'</span>'
+      +  '<a href="'+_pfEsc(liveUrl)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:auto;font-size:0.76rem;font-weight:700;color:var(--accent);text-decoration:none;">View live ↗</a>'
+      +'</div>'
+      +'<div class="pf-collap-body"'+(open?'':' style="display:none"')+'>'
+      +  '<div style="display:flex;align-items:baseline;gap:8px;margin-top:10px;"><span style="font-size:1.7rem;font-weight:800;color:var(--text);line-height:1;">'+v+'</span><span style="font-size:0.8rem;color:var(--muted);">total view'+(v===1?'':'s')+' · '+last14+' in last 14 days</span></div>'
+      +  '<div style="display:flex;align-items:flex-end;gap:2px;margin-top:10px;">'+bars+'</div>'
+      +  '<div style="font-size:0.66rem;color:var(--muted);margin-top:3px;">Last 14 days</div>'
+      +  '<div style="margin-top:11px;font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Top sources</div>'
+      +  '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;">'+refHtml+'</div>'
+      +  '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border);">'
+      +    '<a href="#" onclick="return pfCopyPortfolioLink(\''+esl+'\')" style="font-size:0.78rem;font-weight:700;color:var(--accent);text-decoration:none;">🔗 Copy link</a>'
+      +    '<a href="#" onclick="return pfCopyTestiLink(\''+esl+'\')" style="font-size:0.78rem;font-weight:700;color:var(--accent);text-decoration:none;">💬 Copy testimonial link</a>'
+      +  '</div>'
+      +  '<details style="margin-top:10px;"><summary style="cursor:pointer;font-size:0.76rem;font-weight:700;color:var(--text);">🌐 Use your own domain</summary>'
+      +    '<div style="font-size:0.74rem;color:var(--muted);line-height:1.5;margin-top:6px;">Your portfolio lives at <b>resume4u.help/p/'+_pfEsc(slug)+'</b>. To share it under your own domain (e.g. <b>yourname.com</b>), add a <b>URL redirect / forwarding</b> rule at your domain registrar (GoDaddy, Namecheap, Google Domains, etc.) pointing to the link above. Most registrars offer this free under “Forwarding”. <span style="opacity:.85;">(Direct custom-domain hosting isn’t available yet — the redirect approach works today.)</span></div>'
+      +  '</details>'
+      +'</div>';
+  }
+  window.pfCopyPortfolioLink=function(slug){
+    var url='https://resume4u.help/p/'+slug;
+    function done(){ try{ if(typeof showToast==='function') showToast('Portfolio link copied — share it anywhere','success'); }catch(e){} }
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,done); } else { var ta=document.createElement('textarea'); ta.value=url; ta.style.cssText='position:fixed;top:-9999px;'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } }catch(e){}
+    return false;
+  };
   window.pfShowViews=function(){
     var slug; try{ slug=window._pfSavedSlug; }catch(e){}
     var host=document.getElementById('pfStep3'); var badge=document.getElementById('pfViewsBadge');
     if(!slug || !host){ if(badge) badge.style.display='none'; return; }
     fetch(PBASE+encodeURIComponent(slug)+'?key='+KEY).then(function(r){ return r.ok?r.json():null; }).then(function(doc){
-      var v=doc&&doc.fields&&doc.fields.views&&doc.fields.views.integerValue; if(v==null) v='0';
+      var f=(doc&&doc.fields)||{};
+      var v=parseInt((f.views&&f.views.integerValue)||'0',10)||0;
+      var daily=_pfReadMap(f.daily), refs=_pfReadMap(f.referrers);
+      /* Re-query + de-dup: async, and several callers can be in flight at once. */
+      var _vb=document.querySelectorAll('#pfViewsBadge'); badge=_vb[0]||null; for(var _j=1;_j<_vb.length;_j++){ _vb[_j].parentNode&&_vb[_j].parentNode.removeChild(_vb[_j]); }
       if(!badge){ badge=document.createElement('div'); badge.id='pfViewsBadge';
-        badge.style.cssText='display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:0.84rem;color:var(--text);font-weight:600;';
+        badge.style.cssText='margin-bottom:12px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;';
         var rc=document.getElementById('pfReadyCard'); if(rc&&rc.parentNode){ rc.parentNode.insertBefore(badge, rc.nextSibling); } else { host.insertBefore(badge, host.firstChild); }
       }
-      badge.style.display='flex';
-      badge.innerHTML='👁 <span style="color:var(--accent);">'+String(v)+'</span> '+(String(v)==='1'?'view':'views')
-        +' · <a href="https://resume4u.help/p/'+encodeURIComponent(slug)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">View live ↗</a>'
-        +' · <a href="#" onclick="return pfCopyTestiLink(\''+String(slug).replace(/'/g,"\\'")+'\')" style="color:var(--accent);text-decoration:none;" title="Share this link so clients can leave a testimonial">💬 Copy testimonial link</a>';
+      badge.style.display='block';
+      badge.innerHTML=_pfInsightsHTML(v, daily, refs, slug, 'https://resume4u.help/p/'+encodeURIComponent(slug));
     }).catch(function(){});
   };
   /* ── Copy the public /t/{slug} link so the owner can request testimonials ── */
@@ -9098,6 +9408,10 @@ if ('serviceWorker' in navigator) {
       .then(function(r){ return r.ok?r.json():[]; })
       .then(function(rows){
         var pend=(rows||[]).map(function(x){return x.document;}).filter(function(d){return d&&d.fields&&d.fields.status&&d.fields.status.stringValue==='pending';});
+        /* Re-query at render time and drop any extras: this is async, and several
+           callers (open, stamp, the 15s tick) can be in flight at once — each had
+           captured panel=null at call-start, which created duplicate panels. */
+        var _mp=document.querySelectorAll('#pfModPanel'); panel=_mp[0]||null; for(var _i=1;_i<_mp.length;_i++){ _mp[_i].parentNode&&_mp[_i].parentNode.removeChild(_mp[_i]); }
         if(!panel){ panel=document.createElement('div'); panel.id='pfModPanel';
           panel.style.cssText='margin-bottom:12px;padding:12px 14px;background:var(--surface);border:1.5px solid rgba(217,119,6,0.3);border-radius:12px;';
           var rc=document.getElementById('pfViewsBadge')||document.getElementById('pfReadyCard');
@@ -9121,10 +9435,16 @@ if ('serviceWorker' in navigator) {
           + pend.map(function(d){ return tCard(d,'pending'); }).join(''); }
         if(appr.length){ out+='<div style="font-weight:700;font-size:0.88rem;color:var(--text);margin:'+(pend.length?'14px':'0')+' 0 9px;">✅ '+appr.length+' live on your portfolio</div>'
           + appr.map(function(d){ return tCard(d,'approved'); }).join(''); }
-        panel.innerHTML=out;
-        /* Cap the list height so many testimonials scroll inside the panel
-           instead of stretching the page. */
-        try{ panel.style.maxHeight='42vh'; panel.style.overflowY='auto'; panel.style.overflowX='hidden'; panel.style.webkitOverflowScrolling='touch'; }catch(e){}
+        /* Collapsible (collapsed by default) so it doesn't push the preview down —
+           a compact header with counts, tap to expand the list. */
+        var _open=pfCardOpen('mod');
+        var _sum=(pend.length?('🕓 '+pend.length+' pending'):'')+(pend.length&&appr.length?' · ':'')+(appr.length?('✅ '+appr.length+' live'):'');
+        panel.innerHTML='<div class="pf-collap-head" onclick="pfToggleCard(\'mod\',this)" style="'+PF_HEAD+'">'
+          +'<span class="pf-collap-chev" style="'+PF_CHEV+(_open?'transform:rotate(90deg);':'')+'">▸</span>'
+          +'<span style="font-weight:700;font-size:0.88rem;color:var(--text);">Testimonials</span>'
+          +'<span style="margin-left:auto;font-size:0.78rem;color:var(--muted);">'+_sum+'</span></div>'
+          +'<div class="pf-collap-body"'+(_open?'':' style="display:none"')+'>'
+          +'<div style="max-height:42vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;margin-top:10px;">'+out+'</div></div>';
       }).catch(function(){});
   };
 
@@ -9858,7 +10178,7 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.ophero-in{max-width:1000px;margin:0 auto;padding:0 26px}'
       +'.ophero-eyebrow{font-size:0.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:20px;animation:opUp .7s cubic-bezier(.2,.7,.2,1) both}'
       +'.ophero-name{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:clamp(2.6rem,9vw,5.5rem);font-weight:800;line-height:1;letter-spacing:-0.03em;margin:0;animation:opUp .75s .05s cubic-bezier(.2,.7,.2,1) both}'
-      +'.ophero-role{font-size:clamp(1.3rem,3.4vw,2rem);color:var(--mut);margin-top:18px;max-width:680px;line-height:1.3;animation:opUp .75s .15s cubic-bezier(.2,.7,.2,1) both}'
+      +'.ophero-role{font-size:clamp(1.35rem,3.6vw,2.1rem);color:var(--acc);font-weight:600;margin-top:14px;max-width:680px;line-height:1.3;animation:opUp .75s .15s cubic-bezier(.2,.7,.2,1) both}'
       +'.ophero-cta{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;animation:opUp .75s .25s cubic-bezier(.2,.7,.2,1) both}'
       +'.ophero-cover{height:min(52vh,440px);background-size:cover;background-position:center;margin:12px auto 0;max-width:1240px}'
       +'@keyframes opUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}'
@@ -10718,6 +11038,43 @@ window.__novaPortfolioHTML=function(d,sections){
     return true;
   }
   var n=0, iv=setInterval(function(){ if(wrap()||++n>150) clearInterval(iv); },200);
+
+  /* Self-heal the section order. A saved arrangement can be lost on reload when a
+     late cloud-adopt render, a stale snapshot, or a secondary re-render paints the
+     résumé in the DEFAULT order after (or instead of) the renderOutput wrapper that
+     re-applies it. Re-assert the saved order whenever the résumé is on screen and
+     its current order differs — mirroring the Key-Achievements self-heal. Reads the
+     order from lastResumeData first, then this device's localStorage copy. Skips
+     while the user is editing text in the résumé; records the achieved order so it
+     never loops when a section can't be placed (e.g. absent in this template). */
+  var _healResult='';
+  function _titles(page){ return [].map.call(page.querySelectorAll('.r-sec .r-sec-t'), function(t){ return (t.textContent||'').trim(); }); }
+  function _savedOrder(){
+    var so=null; try{ so=(typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) || null; }catch(e){}
+    if(!so){ try{ so=JSON.parse(localStorage.getItem('_r4uSecOrder')||'null'); }catch(e){} }
+    return so;
+  }
+  function _desired(so, cur){
+    var arr=(so&&so.secs)?so.secs:(Array.isArray(so)?so:null); if(!arr) return null;
+    var saved=[]; arr.forEach(function(o){ var t=(o&&o.title)||o; if(t) saved.push(String(t).trim()); });
+    var out=saved.filter(function(t){ return cur.indexOf(t)>-1; });
+    cur.forEach(function(t){ if(out.indexOf(t)<0) out.push(t); });
+    return out;
+  }
+  function heal(){
+    try{
+      var ro=document.getElementById('resumeOutput'); var page=ro&&ro.querySelector('.resume-a4-page'); if(!page) return;
+      if(document.activeElement && ro.contains(document.activeElement)) return;   /* don't disrupt an active edit */
+      var so=_savedOrder(); if(!so) return;
+      var cur=_titles(page); if(cur.length<2) return;
+      var want=_desired(so, cur); if(!want) return;
+      var curSig=cur.join('||'), wantSig=want.join('||');
+      if(curSig===wantSig){ _healResult=curSig; return; }        /* already arranged */
+      if(curSig===_healResult) return;                            /* applied as far as possible — avoid loop */
+      if(typeof window._r4uApplySecOrder==='function'){ window._r4uApplySecOrder(so); _healResult=_titles(page).join('||'); }
+    }catch(e){}
+  }
+  setInterval(heal, 1000);
 })();
 </script>
 <script id="_r4uPfKaToggleJS">
@@ -11062,5 +11419,550 @@ window.__novaPortfolioHTML=function(d,sections){
   window.addEventListener('resize',onResize);
 })();
 </script>
+<style id="_r4uLinkedInImportCss">
+/* LinkedIn guidance folded into the résumé upload zone — a LinkedIn "Save to
+   PDF" export drops straight into the existing parser, so there's no separate
+   button, just a hint. */
+.upload-zone-li{display:flex;align-items:flex-start;gap:8px;margin-top:14px;padding-top:12px;
+  border-top:1px dashed rgba(10,102,194,0.3);width:100%;max-width:420px;
+  font-size:0.76rem;line-height:1.45;color:var(--muted);text-align:left;}
+.upload-zone-li b{color:var(--text);}
+.upload-zone-li .uzli-badge{flex-shrink:0;width:22px;height:22px;border-radius:5px;
+  display:inline-flex;align-items:center;justify-content:center;background:#0a66c2;color:#fff;
+  font-weight:800;font-size:0.7rem;font-family:Georgia,'Times New Roman',serif;text-transform:lowercase;}
+</style>
+<style id="_r4uJdTailorCss">
+/* Prominent "Tailor to a job description" entry point on the Generate page.
+   The JD keyword-match logic already lives inside Refine with AI (_atsMatch);
+   this just surfaces it as a first-class card so users actually find it.
+   Sits right under the résumé actions, above the ATS score card. Styled as a
+   calm, bordered surface so it doesn't fight the coloured download buttons. */
+#_r4uJdTailorBar{display:none;margin:16px 0 0;align-items:center;gap:13px;padding:13px 15px;
+  border-radius:14px;cursor:pointer;border:1px solid rgba(124,58,237,0.30);
+  background:var(--card-bg,#fff);position:relative;overflow:hidden;
+  transition:box-shadow .18s,transform .12s,border-color .18s;-webkit-tap-highlight-color:transparent;}
+#_r4uJdTailorBar::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,rgba(124,58,237,0.07),rgba(79,70,229,0.04));}
+#_r4uJdTailorBar.show{display:flex;}
+#_r4uJdTailorBar:hover{border-color:rgba(124,58,237,0.55);box-shadow:0 6px 20px rgba(109,40,217,0.14);}
+#_r4uJdTailorBar:active{transform:translateY(1px);}
+#_r4uJdTailorBar>*{position:relative;z-index:1;}
+#_r4uJdTailorBar .jdt-ico{flex-shrink:0;width:38px;height:38px;border-radius:11px;display:flex;
+  align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 3px 10px rgba(109,40,217,0.35);}
+#_r4uJdTailorBar .jdt-ico svg{width:20px;height:20px;display:block;}
+#_r4uJdTailorBar .jdt-body{flex:1;min-width:0;}
+#_r4uJdTailorBar .jdt-title{display:block;font-size:0.92rem;font-weight:800;color:var(--text);line-height:1.25;}
+#_r4uJdTailorBar .jdt-sub{display:block;font-size:0.76rem;color:var(--muted);margin-top:3px;line-height:1.4;}
+#_r4uJdTailorBar .jdt-go{flex-shrink:0;font-size:0.78rem;font-weight:800;color:#7c3aed;
+  border:1px solid rgba(124,58,237,0.4);border-radius:99px;padding:6px 14px;white-space:nowrap;}
+@media(max-width:520px){
+  #_r4uJdTailorBar{padding:12px 13px;gap:11px;}
+  #_r4uJdTailorBar .jdt-ico{width:36px;height:36px;}
+  #_r4uJdTailorBar .jdt-ico svg{width:19px;height:19px;}
+  #_r4uJdTailorBar .jdt-title{font-size:0.86rem;}
+  #_r4uJdTailorBar .jdt-sub{font-size:0.73rem;}
+  #_r4uJdTailorBar .jdt-go{display:none;}
+}
+</style>
+<script id="_r4uJdTailorJS">
+/* Surface the existing JD keyword-match tool (Refine with AI → "ATS match to a
+   job") as a prominent banner on the Generate page. Tapping it opens the AI
+   assistant and routes straight to that tool via window._r4uJdMatch. All
+   defensive / fail-open — if anything is missing it simply stays hidden. */
+(function(){
+  function hasResume(){
+    var ro=document.getElementById('resumeOutput');
+    return !!(ro && ro.querySelector('.resume-a4-page'));
+  }
+  function openJdMatch(){
+    var panel=document.getElementById('aiChatPanel');
+    var cta=document.getElementById('aiChatCta');
+    var wasOpen=!!(panel && panel.classList.contains('ai-panel-open'));
+    if(!wasOpen){
+      if(cta && typeof cta.click==='function') cta.click();
+      /* fallback: force the open state if the CTA click didn't take */
+      setTimeout(function(){ if(panel && !panel.classList.contains('ai-panel-open')) panel.classList.add('ai-panel-open'); }, 70);
+    }
+    /* Run after the panel's own auto "home" render (fires ~60ms after open). */
+    setTimeout(function(){ try{ if(typeof window._r4uJdMatch==='function') window._r4uJdMatch(); }catch(e){} }, wasOpen?30:200);
+  }
+  function build(){
+    var bar=document.getElementById('_r4uJdTailorBar');
+    if(bar) return bar;
+    /* Anchor: the résumé action bar on the Generate page. */
+    var resumeBar=document.querySelector('#step8 .resume-bar');
+    if(!resumeBar || !resumeBar.parentNode) return null;
+    bar=document.createElement('div');
+    bar.id='_r4uJdTailorBar';
+    bar.setAttribute('role','button');
+    bar.setAttribute('tabindex','0');
+    bar.innerHTML='<span class="jdt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="#fff" stroke="none"/></svg></span>'
+      +'<span class="jdt-body"><span class="jdt-title">Tailor to a job description</span>'
+      +'<span class="jdt-sub">Paste a job post — see your ATS keyword match and add what’s missing.</span></span>'
+      +'<span class="jdt-go">Check match →</span>';
+    bar.addEventListener('click',openJdMatch);
+    bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openJdMatch(); } });
+    place(bar);
+    return bar;
+  }
+  /* Keep the card right under the résumé actions and directly ABOVE the ATS
+     score card (which renderATSScore inserts after .resume-bar on generation). */
+  function place(bar){
+    var ats=document.getElementById('atsScoreCard');
+    var resumeBar=document.querySelector('#step8 .resume-bar');
+    if(ats && ats.parentNode){
+      if(bar.nextSibling!==ats) ats.parentNode.insertBefore(bar, ats);
+    } else if(resumeBar && resumeBar.parentNode){
+      if(resumeBar.nextSibling!==bar) resumeBar.parentNode.insertBefore(bar, resumeBar.nextSibling);
+    }
+  }
+  function sync(){
+    var bar=build(); if(!bar) return;
+    place(bar);
+    if(hasResume()) bar.classList.add('show'); else bar.classList.remove('show');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',sync);
+  else sync();
+  setInterval(sync, 800);
+})();
+</script>
+<script id="_r4uCoverLetterJS">
+/* Enhance the cover-letter generator (#5): the built-in one is already
+   JD-aware, but it feeds the AI only "Title at Company" — not the candidate's
+   actual achievements — so letters drift generic and can invent results. This
+   override grounds the letter in the REAL experience bullets + dates from
+   window.__roLastData, with an explicit "do not invent" guardrail, and keeps
+   the existing modal + DOC/PDF export untouched. Falls back to the original if
+   résumé data isn't available. Installed after the core defines the function
+   (poll, matching how other _r4u blocks wrap globals). */
+(function(){
+  function build(orig){
+    var d=window.__roLastData;
+    var company=((document.getElementById('cl-company')||{}).value||'').trim();
+    var role=((document.getElementById('cl-role')||{}).value||'').trim();
+    var jd=((document.getElementById('cl-jd')||{}).value||'').trim().slice(0,1500);
+    var toneEl=document.querySelector('#clToneChips .chip.selected, #clToneChips .selected');
+    var tone=toneEl?(toneEl.getAttribute('data-tone')||'professional'):'professional';
+    if(!d || !(d.firstName||d.lastName||d.jobTitle||(d.experience&&d.experience.length))){ return orig&&orig(); }
+    if(!company || !role){ if(typeof showToast==='function') showToast('Enter the company name and role first.'); return; }
+    var name=((d.firstName||'')+' '+(d.lastName||'')).trim()||'the candidate';
+    var toneMap={professional:'formal and professional',enthusiastic:'warm and enthusiastic',creative:'creative and distinctive',concise:'concise and direct'};
+    var skills=(d.skills||[]).slice(0,14).join(', ');
+    var exp=(d.experience||[]).slice(0,4).map(function(e){
+      var dates=[e.start,e.end].filter(Boolean).join(' – ');
+      var head='- '+(e.title||e.role||'')+((e.co||e.company)?(' at '+(e.co||e.company)):'')+(dates?(' ('+dates+')'):'');
+      var bl=(e.bullets||[]).filter(Boolean).slice(0,4).map(function(x){ return '  • '+x; }).join('\n');
+      return head+(bl?('\n'+bl):'');
+    }).join('\n');
+    var edu=(d.education||[]).slice(0,2).map(function(e){ return (e.deg||'')+(e.sch?(', '+e.sch):''); }).filter(Boolean).join('; ');
+    var awards=(d.awards||[]).map(function(a){ return (a&&a.name)||a; }).filter(Boolean).slice(0,4).join('; ');
+    var prompt='Write a tailored cover letter for this candidate. Ground it ONLY in the real background below — do NOT invent employers, titles, achievements, tools, or metrics.\n\n'
+      +'Candidate: '+name+'\n'
+      +'Current/Target title: '+(d.jobTitle||d.title||'')+'\n'
+      +(d.summary?('Professional summary: '+String(d.summary).trim()+'\n'):'')
+      +(skills?('Key skills: '+skills+'\n'):'')
+      +(exp?('Experience:\n'+exp+'\n'):'')
+      +(edu?('Education: '+edu+'\n'):'')
+      +(awards?('Awards/Certifications: '+awards+'\n'):'')
+      +'\nApplying to: '+company+'\nRole: '+role+'\n'
+      +'Job description:\n'+(jd||'(not provided — infer typical expectations for this role)')+'\n\n'
+      +'Write the cover letter so it:\n'
+      +'- Opens with genuine interest in THIS specific role and company (never "I am writing to express my interest").\n'
+      +'- In the body, highlights the 2–3 real achievements/skills above that best match the job description, mirroring the job\'s terminology where the candidate\'s experience truthfully supports it.\n'
+      +'- Never claims experience, tools, or results the candidate does not have.\n'
+      +'- Closes with a confident call to action and mentions availability for an interview.\n'
+      +'- Tone: '+(toneMap[tone]||'formal and professional')+'. Length: 3–4 paragraphs (250–380 words). Plain text, no bullet points or headers.\n'
+      +'- Starts with "Dear Hiring Manager," and signs off with the candidate\'s name ('+name+').\n\n'
+      +'Return ONLY the cover letter text.';
+    var btn=document.getElementById('clGenBtn'); var lbl=btn?btn.innerHTML:'';
+    function restore(){ if(btn){ btn.disabled=false; btn.innerHTML=lbl||'✦ Generate Cover Letter'; } }
+    if(btn){ btn.disabled=true; btn.innerHTML='✦ Writing your cover letter…'; }
+    fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
+      .then(function(res){ var raw=res.content; var text=((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||res.text||'').trim(); if(!text) throw new Error('empty');
+        var out=document.getElementById('clText'); if(out) out.textContent=text;
+        var box=document.getElementById('clOutput'); if(box){ box.style.display=''; try{ box.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){} }
+        restore();
+      })
+      .catch(function(){ if(typeof showToast==='function') showToast('Could not generate the cover letter. Try again.'); restore(); });
+  }
+  function install(){
+    if(window.generateCoverLetter && window.generateCoverLetter.__r4uCL) return true;
+    if(typeof window.generateCoverLetter!=='function') return false;
+    var orig=window.generateCoverLetter;
+    window.generateCoverLetter=function(){ return build(orig); };
+    window.generateCoverLetter.__r4uCL=true;
+    return true;
+  }
+  var n=0, iv=setInterval(function(){ if(install()||++n>150) clearInterval(iv); },200);
+  if(document.readyState!=='loading') install();
+})();
+</script>
+<style id="_r4uInlineBulletCoachCss">
+/* Inline bullet coach on the wizard steps — attaches under every bullet/impact
+   text box (Experience, Awards, Key Achievements) so weak bullets are flagged
+   and fixed right where they're written, not only on the final Generate page. */
+.r4u-ibc{margin:10px 0 2px;}
+.r4u-ibc-toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;border:1px solid rgba(124,58,237,0.35);
+  background:rgba(124,58,237,0.06);color:#7c3aed;font-weight:700;font-size:0.74rem;border-radius:99px;padding:5px 12px;
+  font-family:inherit;-webkit-tap-highlight-color:transparent;}
+.r4u-ibc-toggle:hover{background:rgba(124,58,237,0.12);}
+.r4u-ibc-toggle.open{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+.r4u-ibc-panel{margin-top:8px;padding:11px 12px;border:1px solid #ececf3;border-radius:11px;background:#fff;
+  box-shadow:0 2px 10px rgba(24,24,40,0.05);}
+.r4u-ibc-msg{font-size:0.76rem;color:var(--muted,#6b7280);margin-bottom:8px;line-height:1.4;}
+.r4u-ibc-msg.ok{color:#166534;font-weight:600;margin-bottom:0;}
+.r4u-ibc-row{border-top:1px solid #f1f1f6;padding-top:9px;margin-top:9px;}
+.r4u-ibc-row:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+.r4u-ibc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.r4u-ibc-chips span{font-size:0.64rem;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:99px;}
+.r4u-ibc-txt{font-size:0.78rem;line-height:1.45;color:var(--text,#1f2937);margin-bottom:7px;}
+.r4u-ibc-fix,.r4u-ibc-all{cursor:pointer;border:none;border-radius:8px;font-family:inherit;font-weight:700;}
+.r4u-ibc-fix{background:rgba(124,58,237,0.1);color:#7c3aed;font-size:0.74rem;padding:6px 12px;}
+.r4u-ibc-fix:hover{background:rgba(124,58,237,0.18);}
+.r4u-ibc-all{display:block;width:100%;margin-top:11px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:0.8rem;padding:9px 12px;}
+.r4u-ibc-all:disabled{opacity:0.7;cursor:default;}
+.r4u-ibc-note{font-size:0.7rem;color:var(--muted,#6b7280);margin-top:8px;line-height:1.4;}
+</style>
+<script id="_r4uInlineBulletCoachJS">
+/* Bring the bullet coach onto the wizard steps: under each Experience, Award,
+   and Key Achievements text box, a "Check bullets" toggle flags weak lines
+   (no metric / weak opener / too long) and fixes them in place via AI, writing
+   back into the same box. The holistic coach on the Generate page is unchanged.
+   Defensive / fail-open; re-scans so dynamically-added and re-rendered entries
+   are covered. */
+(function(){
+  var WEAK=/^(responsible for|worked on|helped|assisted( with)?|handled|involved in|duties included|participated in|tasked with|was responsible|in charge of|managed to|contributed to|took part in|part of|responsible|work on|helping)\b/i;
+  /* Gibberish / typo signal: a word with 3+ of the same letter in a row (keyboard
+     mash like "ghhhhhbhhhh") or a long vowel-less run ("asdfghjkl") — rare in real
+     résumé prose, so false positives stay low. */
+  function looksOff(tx){ var ws=String(tx||'').split(/\s+/); for(var i=0;i<ws.length;i++){ var w=ws[i].replace(/[^A-Za-z]/g,''); if(w.length>=5 && /([a-z])\1{2,}/.test(w)) return true; if(w.length>=8 && !/[aeiouy]/i.test(w)) return true; } return false; }
+  function reasons(tx){ var r=[]; if(!/\d/.test(tx)) r.push('No metric'); if(WEAK.test(tx.replace(/^[•\-\*\s]+/,''))) r.push('Weak opener'); if(tx.split(/\s+/).filter(Boolean).length>36) r.push('Too long'); if(looksOff(tx)) r.push('Looks off'); return r; }
+  function aiGen(prompt){ return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})}).then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); }).then(function(res){ var raw=res.content; return ((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||res.text||'').trim(); }); }
+  /* Any reason that isn't one of the three structural ones is a LANGUAGE issue
+     (our gibberish flag, or anything the AI proofreader surfaced — a typo,
+     broken grammar, an incomplete sentence, placeholder text). Whenever one is
+     present, tell the fix to clean up the language too. */
+  var _STRUCT={'No metric':1,'Weak opener':1,'Too long':1};
+  function hasLangIssue(rs){ for(var i=0;i<rs.length;i++){ if(!_STRUCT[rs[i]]) return true; } return false; }
+  function fixPrompt(tx, rs){ var wants=['lead with a strong action verb (never "Responsible for", "Worked on", "Helped")']; if(rs.indexOf('No metric')>-1) wants.push('quantify the result if the work implies one — be truthful and do NOT invent specific numbers'); if(hasLangIssue(rs)) wants.push('fix any spelling, grammar or clarity problems and remove any gibberish, nonsense or placeholder words — keep only the real, truthful achievement'); wants.push(rs.indexOf('Too long')>-1?'keep it under 26 words':'keep it under 30 words'); return 'Rewrite this résumé bullet to '+wants.join('; ')+'. Output ONLY the bullet text, no bullet symbol.\n\n'+tx; }
+  /* AI proofreader — the catch-all for "anything a user can type". Heuristics only
+     see gibberish/length/weak-opener; this reads every bullet and flags real
+     language problems (typos, misspellings, broken grammar, incomplete/cut-off
+     sentences, placeholder/filler, non-English). Strictly language-only: it must
+     NOT flag a bullet for lacking a number or for style. Fail-open. */
+  function parseIssues(t){ try{ var m=String(t||'').match(/\[[\s\S]*\]/); if(!m) return null; var a=JSON.parse(m[0]); return Array.isArray(a)?a:null; }catch(e){ return null; } }
+  function aiProofread(items, cache){
+    var texts=items.map(function(x){return x.text;});
+    var list=texts.map(function(t,n){ return (n+1)+'. '+t; }).join('\n');
+    var prompt='You are proofreading résumé bullet points for LANGUAGE problems ONLY: spelling mistakes or typos, gibberish / random characters, broken or ungrammatical wording, an incomplete or cut-off sentence, placeholder or filler text, or text that is not real English. Do NOT flag a bullet for missing numbers, for style, for tone, or for word choice — only genuine language errors a proofreader would fix. Reply with ONLY a compact JSON array (no prose, no code fence) listing just the problematic bullets as {"i":<the bullet number>,"issue":"<a 1-3 word label, e.g. Typo, Spelling, Grammar, Incomplete, Gibberish, Placeholder>"}. If every bullet is clean, reply with exactly [].\n\n'+list;
+    return aiGen(prompt).then(function(t){
+      var arr=parseIssues(t); if(!arr) return false; var changed=false;
+      arr.forEach(function(o){ if(!o) return; var i=(parseInt(o.i,10)||0)-1; if(i<0||i>=texts.length) return; var iss=String(o.issue||'Looks off').replace(/["\[\]{}]/g,'').trim().slice(0,22)||'Looks off'; if(cache[texts[i]]!==iss){ cache[texts[i]]=iss; changed=true; } });
+      return changed;
+    }).catch(function(){ return false; });
+  }
+  /* Fields differ by type: Experience/Awards descriptions are contenteditable
+     rich-text DIVs (.rte-field, ids exp-desc-N and award-desc-N); Key Achievements
+     is a plain textarea inside #keyAchievEntries. Read/write abstracts over both. */
+  function kind(el){ var id=el.id||''; if(/^exp-desc-/.test(id)) return 'exp'; if(/^award-desc-/.test(id)) return 'award'; if(el.tagName==='TEXTAREA' && el.closest && el.closest('#keyAchievEntries')) return 'ka'; return null; }
+  function getText(el){ return el.tagName==='TEXTAREA' ? (el.value||'') : (el.innerText||el.textContent||''); }
+  function setText(el, str){ if(el.tagName==='TEXTAREA') el.value=str; else el.innerText=str; try{ el.dispatchEvent(new Event('input',{bubbles:true})); }catch(e){} }
+  function splitLines(v){ return String(v||'').split(/\r?\n/); }
+  function stripBullet(l){ return l.replace(/^\s*[•\-\*]\s?/,''); }
+  function prefixOf(l){ var m=l.match(/^(\s*[•\-\*]\s?)/); return m?m[1]:''; }
+
+  function buildPanel(ta){
+    var panel=document.createElement('div'); panel.className='r4u-ibc-panel'; panel.style.display='none';
+    function msg(t,ok){ var d=document.createElement('div'); d.className='r4u-ibc-msg'+(ok?' ok':''); d.textContent=t; return d; }
+    function findIdx(item){ var lines=splitLines(getText(ta)); for(var i=0;i<lines.length;i++){ if(stripBullet(lines[i]).trim()===item.text) return i; } return item.idx; }
+    function doFix(item, btn){
+      if(item._done) return Promise.resolve(false);
+      if(btn){ btn.disabled=true; btn.textContent='…'; }
+      return aiGen(fixPrompt(item.text, item.reasons)).then(function(t){
+        if(!t){ if(btn){ btn.disabled=false; btn.textContent='✨ Fix'; } return false; }
+        t=t.replace(/^["'“‘\s•\-\*]+|["'”’\s]+$/g,'');
+        var lines=splitLines(getText(ta)); var i=findIdx(item);
+        if(lines[i]!==undefined){ lines[i]=(item.prefix||'')+t; setText(ta, lines.join('\n')); }
+        item._done=true; item.text=t;
+        /* Reflect the rewrite in the panel too — otherwise the row keeps showing
+           the OLD bullet next to a "✓ Fixed" button, which reads as "nothing
+           happened". Update the shown text and swap the reason chips for a ✓. */
+        if(item._txEl){ item._txEl.textContent=t; item._txEl.style.color='var(--text)'; item._txEl.style.opacity='1'; }
+        if(item._chipsEl){ item._chipsEl.innerHTML='<span style="background:#dcfce7;color:#166534;">✓ Updated</span>'; }
+        if(btn){ btn.textContent='✓ Fixed'; btn.disabled=true; }
+        return true;
+      }).catch(function(){ if(btn){ btn.disabled=false; btn.textContent='✨ Fix'; } return false; });
+    }
+    /* AI-proofread results cached per bullet text, so re-renders keep the flags
+       without re-calling, and a signature of what we last checked so we only spend
+       an AI call when the bullet text actually changed. */
+    var aiCache={}, aiCheckedSig='', aiBusy=false, seq=0, interacted=false;
+    function fixable(rs){ return rs.indexOf('Weak opener')>-1 || rs.indexOf('Too long')>-1 || hasLangIssue(rs); }
+    function buildItems(){
+      var lines=splitLines(getText(ta)); var items=[];
+      lines.forEach(function(line,idx){ var t=stripBullet(line).trim(); if(!t) return; var rs=reasons(t); if(aiCache[t] && rs.indexOf(aiCache[t])===-1) rs.push(aiCache[t]); items.push({idx:idx, text:t, prefix:prefixOf(line), reasons:rs}); });
+      return items;
+    }
+    function render(){
+      var my=++seq;
+      panel.innerHTML='';
+      var items=buildItems();
+      if(!items.length){ panel.appendChild(msg('Write a line or two, then check.')); return; }
+      /* A weak opener, an overlong line, OR any language problem (gibberish, typo,
+         grammar, incomplete — from the heuristic flag or the AI proofreader) makes
+         a bullet fixable. A missing number alone does not — a fix can't invent a
+         truthful metric — so it's shown only as a gentle aggregate tip. */
+      function metricTip(n){ return msg('💡 '+n+' bullet'+(n>1?'s':'')+' ha'+(n>1?'ve':'s')+' no number — add a metric where you truthfully can (e.g. %, ₹, count, time saved).'); }
+      var weak=items.filter(function(x){ return fixable(x.reasons); });
+      var noMetricOnly=items.filter(function(x){ return !fixable(x.reasons) && x.reasons.indexOf('No metric')>-1; });
+      /* Kick a fresh AI proofread whenever the bullet text has changed since the
+         last check; re-render once it returns so newly-found issues appear. */
+      var sig=items.map(function(x){return x.text;}).join('\u0001');
+      var checking=(aiCheckedSig!==sig);
+      if(checking && !aiBusy && !interacted){
+        aiBusy=true;
+        aiProofread(items, aiCache).then(function(changed){ aiBusy=false; aiCheckedSig=sig; if(seq===my && !interacted) render(); }).catch(function(){ aiBusy=false; aiCheckedSig=sig; });
+      }
+      function checkNote(){ if(!checking) return; var d=msg('🔍 Checking spelling & grammar…'); d.style.opacity='0.7'; d.style.marginTop='8px'; panel.appendChild(d); }
+      if(!weak.length){
+        if(!noMetricOnly.length){ panel.appendChild(msg(checking?'✓ Verbs, length and numbers look good.':'✓ These read well — strong verbs, clear, concise.',true)); }
+        else { panel.appendChild(msg('✓ Strong, concise bullets.',true)); panel.appendChild(metricTip(noMetricOnly.length)); }
+        checkNote();
+        return;
+      }
+      panel.appendChild(msg(weak.length+' of '+items.length+' line'+(items.length>1?'s':'')+' could be stronger:'));
+      weak.forEach(function(item){
+        var row=document.createElement('div'); row.className='r4u-ibc-row';
+        var chips=document.createElement('div'); chips.className='r4u-ibc-chips'; chips.innerHTML=item.reasons.map(function(r){ return '<span>'+r+'</span>'; }).join('');
+        var tx=document.createElement('div'); tx.className='r4u-ibc-txt'; tx.textContent=item.text;
+        var fix=document.createElement('button'); fix.type='button'; fix.className='r4u-ibc-fix'; fix.textContent='✨ Fix';
+        fix.addEventListener('click',function(){ interacted=true; doFix(item, fix); });
+        item._fixBtn=fix; item._txEl=tx; item._chipsEl=chips;
+        row.appendChild(chips); row.appendChild(tx); row.appendChild(fix); panel.appendChild(row);
+      });
+      var all=document.createElement('button'); all.type='button'; all.className='r4u-ibc-all'; all.textContent='✨ Fix all '+weak.length;
+      all.addEventListener('click',function(){ if(all.disabled) return; interacted=true; all.disabled=true; all.textContent='Fixing…'; Promise.all(weak.filter(function(w){ return !w._done; }).map(function(w){ return doFix(w, w._fixBtn); })).then(function(res){ all.textContent='✓ Fixed '+res.filter(Boolean).length; }); });
+      panel.appendChild(all);
+      if(noMetricOnly.length) panel.appendChild(metricTip(noMetricOnly.length));
+      var note=document.createElement('div'); note.className='r4u-ibc-note'; note.textContent='⚠ Review each rewrite — AI won\'t invent numbers, but check it\'s true.'; panel.appendChild(note);
+      checkNote();
+    }
+    panel._render=render;
+    panel._open=function(){ interacted=false; render(); panel.style.display='block'; };
+    panel._close=function(){ panel.style.display='none'; };
+    panel._toggle=function(){ if(panel.style.display==='none') panel._open(); else panel._close(); };
+    return panel;
+  }
+
+  /* Standalone coach (Key Achievements / Awards — no per-entry generate button):
+     its own "Improve bullets" toggle + panel. */
+  function buildStandalone(ta){
+    var box=document.createElement('div'); box.className='r4u-ibc';
+    var toggle=document.createElement('button'); toggle.type='button'; toggle.className='r4u-ibc-toggle'; toggle.textContent='💪 Improve bullets';
+    var panel=buildPanel(ta);
+    box.appendChild(toggle); box.appendChild(panel);
+    toggle.addEventListener('click',function(){ panel._toggle(); toggle.classList.toggle('open', panel.style.display!=='none'); });
+    return box;
+  }
+
+  function anchorFor(ta){ var w=ta.closest?ta.closest('.rte-wrap'):null; return w||ta; }
+  function genBtnFor(ta){ var m=(ta.id||'').match(/^exp-desc-(\w+)$/); return m?document.getElementById('gen-bullets-btn-'+m[1]):null; }
+  function hintFor(ta){ var g=ta.closest?ta.closest('.form-group'):null; return g?g.querySelector('.field-tip'):null; }
+
+  /* Experience: ONE smart button. Empty → the existing "Generate Bullets with AI"
+     (creates). Filled → relabel it to "Improve bullets" and open the coach instead,
+     and hide the now-irrelevant "leave blank" hint — so there's a single CTA per state. */
+  function attachExp(ta, gen){
+    var panel=ta._r4uPanel;
+    if(!panel || !panel.isConnected){ panel=buildPanel(ta); ta._r4uPanel=panel; if(gen.after) gen.after(panel); else if(gen.parentNode) gen.parentNode.insertBefore(panel, gen.nextSibling); }
+    if(!gen._r4uSmart){
+      gen._r4uSmart=true; gen._origHTML=gen.innerHTML;
+      gen.addEventListener('click',function(e){
+        if(getText(ta).trim()){ e.stopImmediatePropagation(); e.preventDefault(); panel._toggle(); }
+      }, true);
+    }
+    if(gen.disabled) return;                       /* leave the "Generating…" state alone */
+    var has=getText(ta).trim();
+    gen.innerHTML = has ? '💪 Improve bullets' : (gen._origHTML || '✦ Generate Bullets with AI');
+    var hint=hintFor(ta); if(hint) hint.style.display = has ? 'none' : '';
+    if(!has) panel._close();
+  }
+
+  function attachStandalone(ta){
+    var box=ta._r4uCoach;
+    if(!box || !box.isConnected){ box=buildStandalone(ta); ta._r4uCoach=box; var a=anchorFor(ta); if(a.after) a.after(box); else if(a.parentNode) a.parentNode.insertBefore(box, a.nextSibling); }
+    box.style.display = getText(ta).trim() ? '' : 'none';   /* only show once there's content */
+  }
+
+  function attach(){
+    var tas=document.querySelectorAll('[id^="exp-desc-"],[id^="award-desc-"],#keyAchievEntries textarea');
+    Array.prototype.forEach.call(tas,function(ta){
+      if(!kind(ta)) return;
+      var gen=genBtnFor(ta);
+      if(gen) attachExp(ta, gen); else attachStandalone(ta);
+    });
+  }
+  function tick(){ try{ attach(); }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
+  setInterval(tick, 1200);
+  document.addEventListener('focusin',tick);
+  document.addEventListener('input',function(e){ if(e.target && kind(e.target)) tick(); });
+})();
+</script>
+<script id="_r4uPfPreviewTopJS">
+/* Put the live site preview upfront on the portfolio Preview step. The preview is
+   the main thing a customer wants to see, but it sat BELOW the profile/cover photo
+   upload controls. Reorder the DOM so the template switcher + live preview come
+   right after the status card, above the upload controls. Idempotent; the static
+   markup is untouched, so it also survives step re-renders. */
+(function(){
+  /* Preview-step order: Template chips → live preview → photo → cover → …
+     (Section-include toggles now live on their own dedicated step — see
+     _r4uPfIncludeStepJS.) */
+  function seq(){
+    var step3=document.getElementById('pfStep3')||document;
+    return [document.getElementById('pfMiniSwitcher'), step3.querySelector('.pf-preview-wrap')].filter(Boolean);
+  }
+  function arranged(){
+    var photo=document.getElementById('pfStep3Photo'); if(!photo) return true;
+    var s=seq(); if(!s.length) return true;
+    for(var i=0;i<s.length-1;i++){ if(s[i].nextElementSibling!==s[i+1]) return false; }
+    return s[s.length-1].nextElementSibling===photo;
+  }
+  function reorder(){
+    try{
+      var photo=document.getElementById('pfStep3Photo'); if(!photo) return;
+      var s=seq(); if(s.length && !arranged()) s.forEach(function(el){ photo.parentNode.insertBefore(el, photo); });
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',reorder); else reorder();
+  setInterval(reorder, 700);
+})();
+</script>
+<script id="_r4uPfIncludeStepJS">
+/* Give "Choose what to include" its own dedicated wizard step between Sections and
+   Preview: Template → Sections → Include → Preview → Upload. Adds an "Include" pill,
+   a step screen holding the section toggles with Back/Continue nav, reroutes the
+   Sections "next" button through it, and keeps the pill state in sync with the core
+   pfGoStep navigation. All layered in readable JS — the core step engine is
+   untouched, just wrapped. */
+(function(){
+  function setCls(id, on){ var e=document.getElementById(id); if(!e) return; e.classList.remove('active','done'); if(on) e.classList.add(on); }
+  window.pfShowInclude=function(){
+    try{
+      ['pfStep1','pfStep2','pfStep3','pfStep4'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
+      var step=document.getElementById('pfStepInclude');
+      if(step){
+        /* Lay the step out as a flex column so the footer (the Continue button)
+           stays pinned in view and ONLY the toggle list scrolls in its own small
+           area. This is what makes the step usable on iOS: the button is never
+           trapped below the modal's clipped edge, and with the compact 2-col grid
+           (see _r4uPfStepsFitCss) the toggles usually fit with no scroll at all. */
+        step.style.display='flex';
+        step.style.flexDirection='column';
+        step.style.overflow='hidden';
+        var mount=document.getElementById('pfIncludeMount');
+        if(mount){ mount.style.flex='1 1 auto'; mount.style.minHeight='0'; mount.style.overflowY='auto'; mount.style.webkitOverflowScrolling='touch'; mount.style.overscrollBehavior='contain'; mount.scrollTop=0; }
+      }
+      /* Template + Sections done, Include active, Preview/Upload upcoming */
+      setCls('pfPill1','done'); setCls('pfPill2','done'); setCls('pfPillInc','active'); setCls('pfPill3',null); setCls('pfPill4',null);
+      try{ if(step) step.scrollTop=0; }catch(e){}
+    }catch(e){}
+  };
+  function buildPill(){
+    var p2=document.getElementById('pfPill2'); if(!p2 || document.getElementById('pfPillInc')) return;
+    var sep=document.createElement('div'); sep.className='pf-step-sep';
+    var pill=document.createElement('div'); pill.className='pf-step-pill'; pill.id='pfPillInc'; pill.setAttribute('role','button'); pill.setAttribute('aria-label','Go to step: Choose what to include');
+    pill.setAttribute('onclick','pfShowInclude()');
+    /* Icon rather than a digit so it doesn't clash with the core pills' numbers
+       (which another block manages) — it reads as a distinct step between 2 and 3. */
+    pill.innerHTML='<div class="pf-step-num" style="font-size:0.72rem;">🧩</div>Include';
+    if(p2.after) p2.after(sep, pill); else { p2.parentNode.insertBefore(sep,p2.nextSibling); p2.parentNode.insertBefore(pill,sep.nextSibling); }
+  }
+  function buildStep(){
+    /* The step container (#pfStepInclude) is now STATIC HTML so iOS gives it real
+       momentum touch-scroll like the other steps; here we just move the section
+       toggles into its mount point once. */
+    var mount=document.getElementById('pfIncludeMount'), inc=document.getElementById('pfIncludeStep');
+    if(!mount || !inc || mount.contains(inc)) return;
+    try{ var st=inc.querySelector('.pf-section-title'); if(st&&st.parentNode) st.parentNode.style.display='none'; var sub=inc.querySelector('.pf-section-sub'); if(sub) sub.style.display='none'; }catch(e){}
+    inc.style.cssText='margin-top:6px;';
+    mount.appendChild(inc);
+  }
+  function rerouteSectionsNext(){
+    /* The Sections step's "Preview & Download →" button jumps straight to Preview;
+       send it through the new Include step instead. */
+    try{
+      var s2=document.getElementById('pfStep2'); if(!s2) return;
+      var btn=s2.querySelector('.pf-footer .btn-primary'); if(!btn || btn.__incRouted) return;
+      btn.__incRouted=true; btn.onclick=function(){ pfShowInclude(); return false; };
+      btn.textContent='Choose what to include →';
+    }catch(e){}
+  }
+  function wrapGo(){
+    if(typeof window.pfGoStep!=='function' || window.pfGoStep.__incWrap) return;
+    var o=window.pfGoStep;
+    window.pfGoStep=function(n){
+      var r=o.apply(this,arguments);
+      try{
+        var step=document.getElementById('pfStepInclude'); if(step) step.style.display='none';
+        /* Include pill: done once we're at/after Preview, upcoming before it */
+        setCls('pfPillInc', (Number(n)>=3)?'done':null);
+      }catch(e){}
+      return r;
+    };
+    window.pfGoStep.__incWrap=true;
+  }
+  function build(){ buildPill(); buildStep(); rerouteSectionsNext(); wrapGo(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',build); else build();
+  /* Re-assert after late renders / builder open (rerouteSectionsNext is idempotent). */
+  var n=0, iv=setInterval(function(){ build(); if((document.getElementById('pfPillInc')&&document.getElementById('pfStepInclude')&&window.pfGoStep&&window.pfGoStep.__incWrap)||++n>200) { /* keep light re-check for the routed button */ if(n>200) clearInterval(iv); } }, 400);
+})();
+</script>
+<style id="_r4uPfStepsFitCss">
+/* With the extra "Include" step there are now 5 pills; compact them on phones so
+   all of Sections · Include · Preview · Upload (and Template) fit without the last
+   one being cut off. Also give the Include step room at the bottom so its footer
+   clears the device's bottom bar. */
+@media(max-width:560px){
+  .pf-steps-bar{padding-left:12px!important;padding-right:12px!important;}
+  .pf-steps-bar .pf-step-pill{font-size:0.73rem!important;padding:5px 9px!important;gap:5px!important;}
+  .pf-steps-bar .pf-step-sep{min-width:6px!important;max-width:22px!important;margin:0 3px!important;}
+}
+/* Include step: keep the heading + footer fixed and let only the toggle list
+   scroll, so the Continue button is always reachable (never trapped below the
+   modal's clipped edge). The footer is a direct child of the flex column. */
+#pfStepInclude > .pf-section-title,
+#pfStepInclude > .pf-section-sub,
+#pfStepInclude > .pf-footer{flex-shrink:0;}
+#pfIncludeMount{display:flex;flex-direction:column;}
+/* Compact 2-column toggle grid inside the Include step even on phones (the base
+   mobile rule drops toggles to 1 column, which made the 9 sections overflow).
+   minmax(0,1fr) forces EQUAL columns so a long label (e.g. "Key Achievements")
+   ellipsizes instead of stretching its column and unbalancing the grid. Two tight
+   columns keep all 9 sections short enough to fit without scrolling on phones. */
+#pfStepInclude .pf-toggle-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;margin-bottom:4px!important;}
+#pfStepInclude .pf-toggle{padding:7px 10px!important;gap:7px!important;min-width:0;}
+#pfStepInclude .pf-toggle-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Reclaim vertical space on phones so the 9 toggles fit above the pinned footer:
+   drop the step-level sub-heading and the helper line, tighten the heading. */
+@media(max-width:600px){
+  #pfStepInclude > .pf-section-title{margin:0 0 8px!important;font-size:0.95rem!important;}
+  #pfStepInclude > .pf-section-sub{display:none!important;}
+  /* Hide the "Tap a section to toggle it" helper text (keep the Deselect-All
+     button, right-aligned) and tighten the toggles so all 9 fit above the pinned
+     footer even on the smallest phones. */
+  #pfStepInclude .pf-inc-hint{display:none!important;}
+  #pfStepInclude .pf-inc-hintrow{justify-content:flex-end!important;margin-bottom:8px!important;}
+  #pfStepInclude .pf-toggle{padding:6px 10px!important;}
+  #pfStepInclude .pf-toggle-ico{font-size:0.9rem!important;}
+  /* "Key Achievements" is the only toggle with a Ready/Add-details badge, which
+     crowds its longer label down to "K…" in a narrow 2-col cell. Give it the full
+     row width and place it last, so the full label + badge + switch all fit. */
+  #pfStepInclude .pf-toggle[data-section="keyachiev"]{grid-column:1 / -1!important;order:99;}
+}
+</style>
 </body>
 </html>

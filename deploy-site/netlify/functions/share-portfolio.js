@@ -35,16 +35,30 @@ exports.handler = async function(event) {
       if (!html) {
         return { statusCode: 404, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }, body: notFound() };
       }
-      // ── Analytics: increment the view counter (best-effort, awaited so it lands
-      //    on Lambda). Racy under heavy concurrency, which is fine for a counter. ──
+      // ── Analytics (best-effort, awaited so it lands on Lambda; racy under heavy
+      //    concurrency, which is fine here). Records total views plus daily buckets
+      //    (last 60 days) and referrer hosts (top 40) for the owner's insights. ──
       try {
-        const cur = parseInt((doc.fields.views && doc.fields.views.integerValue) || '0', 10) || 0;
-        await fetch(`${FS_BASE}/${encodeURIComponent(id)}?key=${FS_KEY}&updateMask.fieldPaths=views`, {
+        const f = doc.fields || {};
+        const views = (parseInt((f.views && f.views.integerValue) || '0', 10) || 0) + 1;
+        const daily = readMap(f.daily);
+        const today = new Date().toISOString().slice(0, 10);
+        daily[today] = (daily[today] || 0) + 1;
+        capOldest(daily, 60);
+        const referrers = readMap(f.referrers);
+        const ref = refHost((event.headers || {}).referer || (event.headers || {}).referrer);
+        referrers[ref] = (referrers[ref] || 0) + 1;
+        capTop(referrers, 40);
+        await fetch(`${FS_BASE}/${encodeURIComponent(id)}?key=${FS_KEY}&updateMask.fieldPaths=views&updateMask.fieldPaths=daily&updateMask.fieldPaths=referrers`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fields: { views: { integerValue: String(cur + 1) } } }),
+          body: JSON.stringify({ fields: {
+            views: { integerValue: String(views) },
+            daily: mapField(daily),
+            referrers: mapField(referrers),
+          } }),
         });
-      } catch (e) { /* never block serving on the counter */ }
+      } catch (e) { /* never block serving on analytics */ }
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -61,6 +75,37 @@ exports.handler = async function(event) {
 
   return { statusCode: 405, headers: CORS, body: 'Method not allowed' };
 };
+
+// ── Analytics helpers (Firestore mapValue <-> plain {key:count}) ──────────────
+function readMap(field) {
+  const out = {};
+  const f = field && field.mapValue && field.mapValue.fields;
+  if (f) for (const k in f) { out[k] = parseInt(f[k].integerValue || '0', 10) || 0; }
+  return out;
+}
+function mapField(obj) {
+  const fields = {};
+  for (const k in obj) fields[k] = { integerValue: String(obj[k]) };
+  return { mapValue: { fields } };
+}
+function capOldest(obj, n) { // keep the n newest date keys (YYYY-MM-DD sorts lexically)
+  const keys = Object.keys(obj).sort();
+  while (keys.length > n) { delete obj[keys.shift()]; }
+}
+function capTop(obj, n) { // keep the n highest-count keys
+  const keys = Object.keys(obj);
+  if (keys.length <= n) return;
+  keys.sort((a, b) => obj[b] - obj[a]);
+  keys.slice(n).forEach(k => delete obj[k]);
+}
+function refHost(ref) {
+  if (!ref) return 'direct';
+  try {
+    const h = new URL(ref).hostname.replace(/^www\./, '').toLowerCase();
+    if (!h || h.endsWith('resume4u.help') || h === 'localhost') return 'direct';
+    return h.slice(0, 60);
+  } catch (e) { return 'direct'; }
+}
 
 // Ensures every served portfolio page renders its APPROVED visitor testimonials
 // live from Firestore — including pages published before that script existed.
