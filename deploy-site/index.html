@@ -2,6 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script id="_r4uPerfPause">
+  /* Performance / battery: when the tab or app is in the BACKGROUND, skip the
+     repeated work of interval timers and (via the data-bg attribute + CSS) pause
+     animations, so the site stops burning CPU/GPU while nobody is looking. This is
+     fully transparent while the page is visible — the guard only short-circuits
+     work when document.hidden is true, so active use behaves exactly as before.
+     Kept inline + early (id attribute) so it wraps setInterval before any other
+     script schedules its timers. */
+  (function(){
+    try{
+      var _si = window.setInterval;
+      window.setInterval = function(fn, ms){
+        if(typeof fn === 'function'){
+          var extra = Array.prototype.slice.call(arguments, 2);
+          var wrapped = function(){ if(document.hidden) return; return fn.apply(this, extra); };
+          return _si.call(window, wrapped, ms);
+        }
+        return _si.apply(window, arguments);
+      };
+    }catch(e){}
+    try{
+      var root = document.documentElement;
+      var mark = function(){ if(document.hidden) root.setAttribute('data-bg','1'); else root.removeAttribute('data-bg'); };
+      document.addEventListener('visibilitychange', mark);
+      mark();
+    }catch(e){}
+  })();
+  </script>
   <!-- Perf: warm up TLS/DNS to Firebase & Google auth hosts that sit on the sign-in + cloud-restore critical path -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
@@ -24,15 +52,8 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 
-  <!-- ── Resource hints: warm up the origins the app connects to (Firebase SDK
-       host + auth/firestore APIs) so the deferred SDKs and returning-user
-       account restore aren't waiting on cold DNS/TLS. ─────────────────────── -->
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-  <link rel="dns-prefetch" href="https://www.gstatic.com">
-  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
-  <link rel="dns-prefetch" href="https://securetoken.googleapis.com">
-  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <!-- (Resource hints for these origins are already declared above — duplicates
+       removed so the browser isn't opening the same warm-up connections twice.) -->
 
   <title>Free AI Resume Builder – ATS-Optimised, No Sign-Up | resume4u.help</title>
 
@@ -1255,7 +1276,7 @@
     .pf-preview-bar{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);background:#fff;}
     .pf-preview-dot{width:10px;height:10px;border-radius:50%;}
     .pf-preview-url{flex:1;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:0.73rem;color:var(--muted);margin:0 8px;}
-    .pf-preview-frame{width:100%;height:340px;border:none;background:#fff;}
+    .pf-preview-frame{width:100%;height:min(58vh,520px);border:none;background:#fff;}
     /* Footer buttons */
     .pf-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-shrink:0;}
     .pf-footer-right{display:flex;gap:10px;}
@@ -10187,11 +10208,11 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.tpl-atelier .btn-s{border-radius:99px;padding:13px 26px;border-color:var(--line)}',
     onepage: ':root{--bg:#f6f6fb;--card:#ffffff;--ink:#111019;--mut:rgba(17,16,25,0.6);--mut2:rgba(17,16,25,0.42);--line:rgba(17,16,25,0.1);--acc:#5b4bfc;--acc-h:#4436d1;}'
       +'body{font-family:var(--font-body,"Inter",system-ui,-apple-system,sans-serif)}'
-      +'.ophero{position:relative;overflow:hidden;padding:15vh 0 9vh}'
+      +'.ophero{position:relative;overflow:hidden;padding:clamp(32px,7vh,88px) 0 clamp(40px,7vh,80px)}'
       +'.ophero-blob{position:absolute;inset:0;pointer-events:none;background:radial-gradient(46% 55% at 82% -5%,rgba(91,75,252,0.20),transparent 70%),radial-gradient(40% 50% at 5% 15%,rgba(236,72,153,0.14),transparent 70%),radial-gradient(50% 60% at 100% 60%,rgba(16,185,129,0.10),transparent 70%)}'
-      +'.ophero-photo{width:104px;height:104px;border-radius:26px;overflow:hidden;margin-bottom:26px;box-shadow:0 12px 34px -12px rgba(0,0,0,0.28);position:relative}.ophero-photo img{width:100%;height:100%;object-fit:cover}'
+      +'.ophero-photo{width:104px;height:104px;border-radius:50%;overflow:hidden;margin-bottom:20px;box-shadow:0 12px 34px -12px rgba(0,0,0,0.28);position:relative}.ophero-photo img{width:100%;height:100%;object-fit:cover}'
       +'.ophero-in{max-width:1000px;margin:0 auto;padding:0 26px}'
-      +'.ophero-eyebrow{font-size:0.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:20px;animation:opUp .7s cubic-bezier(.2,.7,.2,1) both}'
+      +'.ophero-eyebrow{font-size:0.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:14px;animation:opUp .7s cubic-bezier(.2,.7,.2,1) both}'
       +'.ophero-name{font-family:var(--font-head,"Space Grotesk",system-ui,sans-serif);font-size:clamp(2.6rem,9vw,5.5rem);font-weight:800;line-height:1;letter-spacing:-0.03em;margin:0;animation:opUp .75s .05s cubic-bezier(.2,.7,.2,1) both}'
       +'.ophero-role{font-size:clamp(1.35rem,3.6vw,2.1rem);color:var(--acc);font-weight:600;margin-top:14px;max-width:680px;line-height:1.3;animation:opUp .75s .15s cubic-bezier(.2,.7,.2,1) both}'
       +'.ophero-cta{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;animation:opUp .75s .25s cubic-bezier(.2,.7,.2,1) both}'
@@ -11846,27 +11867,28 @@ window.__novaPortfolioHTML=function(d,sections){
    right after the status card, above the upload controls. Idempotent; the static
    markup is untouched, so it also survives step re-renders. */
 (function(){
-  /* Preview-step order: Template chips → live preview → photo → cover → …
-     (Section-include toggles now live on their own dedicated step — see
-     _r4uPfIncludeStepJS.) */
-  function seq(){
-    var step3=document.getElementById('pfStep3')||document;
-    return [document.getElementById('pfMiniSwitcher'), step3.querySelector('.pf-preview-wrap')].filter(Boolean);
-  }
-  function arranged(){
-    var photo=document.getElementById('pfStep3Photo'); if(!photo) return true;
-    var s=seq(); if(!s.length) return true;
-    for(var i=0;i<s.length-1;i++){ if(s[i].nextElementSibling!==s[i+1]) return false; }
-    return s[s.length-1].nextElementSibling===photo;
-  }
+  /* The live site preview is what a customer most wants to see on the Preview
+     step, so make it the FIRST, tallest thing — above the status/ready card and
+     the photo/cover controls. And when the step first opens, scroll it to the top
+     so the preview is fully in view immediately (not hidden below other cards). */
+  var wasVisible=false;
   function reorder(){
     try{
-      var photo=document.getElementById('pfStep3Photo'); if(!photo) return;
-      var s=seq(); if(s.length && !arranged()) s.forEach(function(el){ photo.parentNode.insertBefore(el, photo); });
+      var step3=document.getElementById('pfStep3'); if(!step3) return;
+      var wrap=step3.querySelector('.pf-preview-wrap'); if(!wrap) return;
+      var mini=document.getElementById('pfMiniSwitcher');
+      /* Preview first — above everything else in the step. */
+      if(step3.firstElementChild!==wrap){ step3.insertBefore(wrap, step3.firstElementChild); }
+      /* Keep the (hidden) template mini-switcher right after the preview. */
+      if(mini && wrap.nextElementSibling!==mini){ step3.insertBefore(mini, wrap.nextElementSibling); }
+      /* On first appearance, land at the top so the preview is immediately visible. */
+      var vis = step3.style.display!=='none' && step3.offsetParent!==null;
+      if(vis && !wasVisible){ try{ step3.scrollTop=0; }catch(e){} }
+      wasVisible=vis;
     }catch(e){}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',reorder); else reorder();
-  setInterval(reorder, 700);
+  setInterval(reorder, 500);
 })();
 </script>
 <script id="_r4uPfIncludeStepJS">
@@ -11990,6 +12012,42 @@ window.__novaPortfolioHTML=function(d,sections){
      crowds its longer label down to "K…" in a narrow 2-col cell. Give it the full
      row width and place it last, so the full label + badge + switch all fit. */
   #pfStepInclude .pf-toggle[data-section="keyachiev"]{grid-column:1 / -1!important;order:99;}
+}
+</style>
+<style id="_r4uNoZoomCss">
+/* iOS Safari auto-zooms into any form field whose text is smaller than 16px. On a
+   phone that makes tapping a field (e.g. inside the Build-Portfolio drawer) zoom
+   the whole page; re-zooming to fit then trips pull-to-refresh and the page
+   reloads. Pin the FORM fields to 16px on phones so focusing one never zooms —
+   the viewport is untouched, so pinch-zoom stays available for accessibility.
+   IMPORTANT: this only targets the form/builder areas (portfolio drawer + wizard
+   form groups), never the résumé preview — enlarging the résumé's editable text
+   would push it onto an extra page. Simple selectors only, so every Safari
+   version parses the rule identically. */
+@media (max-width: 768px){
+  .pf-overlay input, .pf-overlay textarea, .pf-overlay select, .pf-overlay [contenteditable="true"],
+  .form-group input, .form-group textarea, .form-group select,
+  .chips-input, .skills-input, input.tag-input,
+  .rte-field[contenteditable]{
+    font-size:16px !important;
+  }
+}
+</style>
+<style id="_r4uPerfCss">
+/* Performance: freeze every animation while the tab/app is backgrounded (paired
+   with the data-bg attribute set by _r4uPerfPause) — no point painting motion
+   nobody can see; saves GPU/battery. Resumes instantly on return. */
+html[data-bg] *, html[data-bg] *::before, html[data-bg] *::after{animation-play-state:paused !important;}
+/* Respect visitors who ask their device for reduced motion (also lighter on
+   low-end phones): collapse decorative animation/transition to near-instant so
+   the page stays calm and smooth instead of continuously animating. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.001ms !important;
+    scroll-behavior:auto !important;
+  }
 }
 </style>
 </body>
