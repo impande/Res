@@ -12168,10 +12168,15 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 
     var cv=window._r4uQRcanvas(url, 660);
     var qbox=document.createElement('div');
-    qbox.style.cssText='background:#ffffff;border-radius:14px;padding:14px;display:inline-block;border:1px solid #eee;margin-bottom:14px;';
+    qbox.style.cssText='background:#ffffff;border-radius:14px;padding:14px;display:inline-block;border:1px solid #eee;margin-bottom:6px;';
     if(cv){ cv.style.cssText='display:block;width:220px;height:220px;image-rendering:pixelated;image-rendering:crisp-edges;'; qbox.appendChild(cv); }
     else { qbox.textContent='Could not generate a QR code for this link.'; qbox.style.padding='28px'; qbox.style.color='#b91c1c'; qbox.style.fontSize='0.85rem'; }
+    /* Tap / click the QR to open the résumé directly (handy when viewing on the
+       same device that generated it). */
+    if(url && cv){ qbox.style.cursor='pointer'; qbox.title='Open resume'; qbox.setAttribute('role','link');
+      qbox.onclick=function(){ try{ window.open(url,'_blank','noopener'); }catch(e){ try{ location.href=url; }catch(e2){} } }; }
     card.appendChild(qbox);
+    if(url && cv){ var tap=document.createElement('div'); tap.textContent='Tap the code to open'; tap.style.cssText='font-size:0.68rem;color:var(--muted,#9a938a);margin:0 0 12px;'; card.appendChild(tap); }
 
     /* Professional caption: name + validity (replaces the raw URL). */
     if(opts.name || opts.caption || opts.role){
@@ -12203,10 +12208,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
      brand) on a canvas, for the "Download QR" action. */
   window._r4uQRPoster=function(url, opts){
     opts=opts||{};
-    /* Render at 2x for a crisp, print-quality PNG (PNG is lossless, so resolution
-       is the quality lever). QR is generated at the same density so its modules
-       stay pixel-sharp. */
-    var SC=2;
+    /* Render at high resolution for a crisp, print-quality PNG (PNG is lossless,
+       so resolution is the quality lever). QR is generated at the same density so
+       its modules stay pixel-sharp. SC=3 → ~3240px wide, kept under the 4096/side
+       canvas limit that some mobile browsers enforce. */
+    var SC=3;
     var qr=window._r4uQRcanvas(url, 620*SC); if(!qr) return null;
     var W=1080*SC, pad=84*SC, accent='#d97706', dark='#141414', muted='#6b6257', faint='#ddd6c8', qrSize=qr.width;
     var cv=document.createElement('canvas'), ctx=cv.getContext('2d'); if(!ctx) return null;
