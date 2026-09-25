@@ -12172,19 +12172,57 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     else { qbox.textContent='Could not generate a QR code for this link.'; qbox.style.padding='28px'; qbox.style.color='#b91c1c'; qbox.style.fontSize='0.85rem'; }
     card.appendChild(qbox);
 
-    var u=document.createElement('div'); u.textContent=url;
-    u.style.cssText='font-size:0.72rem;color:var(--muted,#7a7a86);word-break:break-all;margin:0 4px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;';
-    card.appendChild(u);
+    /* Professional caption: name + validity (replaces the raw URL). */
+    if(opts.name || opts.caption){
+      var capw=document.createElement('div'); capw.style.cssText='margin:2px 6px 16px;';
+      if(opts.name){ var nmEl=document.createElement('div'); nmEl.textContent=opts.name; nmEl.style.cssText='font-size:0.95rem;font-weight:800;color:var(--text,#141414);letter-spacing:-0.01em;'; capw.appendChild(nmEl); }
+      if(opts.caption){ var cpEl=document.createElement('div'); cpEl.textContent=opts.caption; cpEl.style.cssText='font-size:0.74rem;font-weight:700;color:var(--accent,#d97706);margin-top:4px;'; capw.appendChild(cpEl); }
+      card.appendChild(capw);
+    }
+    if(!opts.hideUrl){
+      var u=document.createElement('div'); u.textContent=url;
+      u.style.cssText='font-size:0.72rem;color:var(--muted,#7a7a86);word-break:break-all;margin:0 4px 16px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;';
+      card.appendChild(u);
+    }
 
     var row=document.createElement('div'); row.style.cssText='display:flex;gap:10px;justify-content:center;flex-wrap:wrap;';
-    var cbtn=mkbtn('🔗 Copy link', false); cbtn.onclick=function(){ copy(url); }; row.appendChild(cbtn);
+    if(!opts.hideCopy){ var cbtn=mkbtn('🔗 Copy link', false); cbtn.onclick=function(){ copy(url); }; row.appendChild(cbtn); }
     if(cv){
-      var dbtn=mkbtn('⬇ Download PNG', true);
-      dbtn.onclick=function(){ saveCanvasPng(cv, opts.file||'resume4u-qr.png'); };
+      var dbtn=mkbtn('⬇ Download QR', true);
+      if(opts.hideCopy){ dbtn.style.width='100%'; dbtn.style.padding='13px 18px'; dbtn.style.fontSize='0.9rem'; }
+      dbtn.onclick=function(){ var outCv=cv; try{ if(opts.poster && window._r4uQRPoster){ outCv=window._r4uQRPoster(url, opts)||cv; } }catch(e){} saveCanvasPng(outCv, opts.file||'resume4u-qr.png'); };
       row.appendChild(dbtn);
     }
     card.appendChild(row);
     ov.appendChild(card); document.body.appendChild(ov); document.addEventListener('keydown', esc);
+  };
+
+  /* Compose a designed, share-ready QR poster (title · name · QR · validity ·
+     brand) on a canvas, for the "Download QR" action. */
+  window._r4uQRPoster=function(url, opts){
+    opts=opts||{};
+    var qr=window._r4uQRcanvas(url, 620); if(!qr) return null;
+    var W=1080, pad=84, accent='#d97706', dark='#141414', muted='#6b6257', qrSize=qr.width;
+    var cv=document.createElement('canvas'), ctx=cv.getContext('2d'); if(!ctx) return null;
+    var hasName=!!opts.name;
+    var yBrand=pad+30, yTitle=yBrand+64, yName=yTitle+(hasName?48:0), yQr=yName+34,
+        yValid=yQr+qrSize+60, yFoot=yValid+46, H=yFoot+pad-18;
+    cv.width=W; cv.height=H;
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=accent; ctx.fillRect(0,0,W,12);
+    ctx.strokeStyle='#ece3d4'; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);
+    ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    function draw(weight,size,color,text,y){ var s=size; ctx.fillStyle=color;
+      ctx.font=weight+' '+s+'px Inter, Arial, sans-serif';
+      while(s>16 && ctx.measureText(text).width>W-2*pad){ s-=2; ctx.font=weight+' '+s+'px Inter, Arial, sans-serif'; }
+      ctx.fillText(text, W/2, y); }
+    draw('800',30,accent,'resume4u.help',yBrand);
+    draw('800',52,dark,opts.posterTitle||'Scan to view my résumé',yTitle);
+    if(hasName) draw('600',36,muted,opts.name,yName);
+    ctx.drawImage(qr,(W-qrSize)/2,yQr,qrSize,qrSize);
+    draw('700',30,dark,opts.validText||'Link valid for 30 days',yValid);
+    draw('500',25,muted,'Create your own free at resume4u.help',yFoot);
+    return cv;
   };
 
   /* Portfolio insights card → QR of the live portfolio link */
@@ -12286,9 +12324,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       if(html.length>950000){ reject(new Error('too-large')); return; }
       var slug=window._r4uResumeSlug;
       if(!slug){ slug=slugify(personName())+'-'+rand(6); window._r4uResumeSlug=slug; }
-      var url='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/'+encodeURIComponent(slug)+'?updateMask.fieldPaths=html&updateMask.fieldPaths=kind&key='+KEY;
-      fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{html:{stringValue:html},kind:{stringValue:'resume'}}})})
-        .then(function(r){ if(!r.ok) throw new Error('save-'+r.status); resolve(slug); })
+      /* 30-day validity: recorded on the doc and enforced by the /r/ viewer. */
+      var expires=new Date(Date.now()+30*24*60*60*1000);
+      var url='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/'+encodeURIComponent(slug)+'?updateMask.fieldPaths=html&updateMask.fieldPaths=kind&updateMask.fieldPaths=expiresAt&key='+KEY;
+      fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{html:{stringValue:html},kind:{stringValue:'resume'},expiresAt:{timestampValue:expires.toISOString()}}})})
+        .then(function(r){ if(!r.ok) throw new Error('save-'+r.status); resolve({slug:slug, expires:expires}); })
         .catch(reject);
     });
   };
@@ -12330,13 +12370,24 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       return false;
     }
     showLoading();
-    window._r4uPublishResume().then(function(slug){
+    window._r4uPublishResume().then(function(res){
+      var slug=res.slug, expires=res.expires;
       /* Use the origin that generated the résumé so the link resolves in the same
          environment: a UAT publish → a UAT link, a production publish → a
          resume4u.help link. (Hardcoding resume4u.help 404s until /r/ ships to prod.) */
       var base=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'https://resume4u.help';
       var url=base+'/r/'+slug;
-      if(window._r4uShowQR) window._r4uShowQR(url, {title:'Your résumé QR code', sub:'Scan to open your résumé — it looks just like your PDF. Add it to a printed résumé or business card.', file:'resume-qr.png'});
+      var nm=personName();
+      var validUntil=expires.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+      if(window._r4uShowQR) window._r4uShowQR(url, {
+        title:'Your résumé QR code',
+        sub:'Scan to open your résumé — it looks just like your PDF.',
+        name:nm,
+        caption:'Valid for 30 days · until '+validUntil,
+        hideUrl:true, hideCopy:true,
+        poster:true, posterTitle:'Scan to view my résumé', validText:'Link valid until '+validUntil,
+        file:(slugify(nm)||'resume')+'-qr.png'
+      });
     }).catch(function(e){
       var m=(e&&e.message==='too-large')?'This résumé is too large to publish as a link. Try removing any large images.':'Please check your connection and try again.';
       showError(m);
