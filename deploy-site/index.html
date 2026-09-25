@@ -12251,25 +12251,26 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        preserves the exact proportions/line-breaks of the PDF. #r4uFit is scaled
        by a tiny inline script; print resets the transform so it prints full A4. */
     var wrap='html,body{margin:0;padding:0;background:#ececef;-webkit-text-size-adjust:100%;}'
-      +'#r4uOuter{overflow:hidden;padding:16px 0;}'
-      +'#r4uFit{width:210mm;transform-origin:top left;}'
+      +'#r4uOuter{overflow-x:hidden;padding:16px 0;}'
+      +'#r4uFit{width:210mm;margin:0 auto;transform-origin:top left;}'
       +'#resumeOutput{display:block;}'
       +'#resumeOutput .resume-a4-page{width:210mm;max-width:none;margin:0 auto 8mm;}'
       +baseRule
-      +'@media print{html,body{background:#fff;}#r4uOuter{overflow:visible;padding:0;}#r4uFit{width:auto;transform:none!important;margin:0!important;}#resumeOutput .resume-a4-page{margin:0;box-shadow:none;}}';
-    var fitJs='(function(){var o=document.getElementById("r4uOuter"),f=document.getElementById("r4uFit");if(!o||!f)return;'
-      +'function d(){f.style.transform="none";'
-      +'var n=Math.max(f.scrollWidth,f.offsetWidth,794);'                      /* real content width (catches overflow, e.g. long URLs) */
-      +'var vw=document.documentElement.clientWidth||window.innerWidth;'
-      +'var s=vw/n;if(s>1)s=1;'
-      +'f.style.transform="scale("+s+")";f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";'
-      +'o.style.height=(f.scrollHeight*s)+"px";}'                              /* full content height so the bottom is never cut */
+      +'@media print{html,body{background:#fff;}#r4uOuter{overflow:visible;padding:0;}#r4uFit{zoom:1!important;transform:none!important;width:auto;margin:0;}#resumeOutput .resume-a4-page{margin:0;box-shadow:none;}}';
+    /* Fit the A4 page to the viewport. Prefer CSS zoom: it scales the LAYOUT too,
+       so the page reflows to its scaled size and the document scrolls naturally —
+       no manual height, nothing can clip the bottom. Fall back to transform+height
+       only where zoom is unsupported. */
+    var fitJs='(function(){var o=document.getElementById("r4uOuter"),f=document.getElementById("r4uFit");if(!f)return;'
+      +'var Z=("zoom" in document.documentElement.style);'
+      +'function d(){var vw=document.documentElement.clientWidth||window.innerWidth;var n=794;var s=vw/n;if(s>1)s=1;'
+      +'if(Z){f.style.zoom=s;}'
+      +'else{f.style.transform="scale("+s+")";f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";if(o)o.style.height=(f.scrollHeight*s)+"px";}}'
       +'window.addEventListener("resize",d);window.addEventListener("orientationchange",d);window.addEventListener("load",d);'
       +'if(document.readyState!=="loading")d();else window.addEventListener("DOMContentLoaded",d);'
       +'if(document.fonts&&document.fonts.ready)document.fonts.ready.then(d);'
-      +'try{if(window.ResizeObserver){var ro=new ResizeObserver(function(){d();});ro.observe(f);}}catch(e){}'  /* re-fit on any late reflow */
-      +'var im=f.getElementsByTagName("img");for(var i=0;i<im.length;i++){if(!im[i].complete){im[i].addEventListener("load",d);im[i].addEventListener("error",d);}}'
-      +'setTimeout(d,200);setTimeout(d,700);setTimeout(d,1600);})();';
+      +'try{if(!Z&&window.ResizeObserver){var ro=new ResizeObserver(function(){d();});ro.observe(f);}}catch(e){}'
+      +'setTimeout(d,250);setTimeout(d,800);})();';
     return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
       +'<meta name="viewport" content="width=device-width,initial-scale=1">'
       +'<title>'+esc(nm)+' — Résumé</title>'
