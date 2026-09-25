@@ -137,6 +137,12 @@ check('feature: portfolio analytics recording (share fn)', () => {
   return fn.indexOf('updateMask.fieldPaths=daily') > -1 || 'daily-bucket recording missing from share-portfolio.js';
 });
 
+// QR share codes (résumé actions bar + portfolio insights) — bundled offline lib
+present('feature: QR generator bundled inline', 'id="_r4uQR"');
+present('feature: QR share modal + helpers', 'window._r4uShowQR');
+present('feature: résumé Share/QR button wired', '_r4uShareResumeQR()');
+present('feature: portfolio QR link in insights', '_r4uPortfolioQR');
+
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
   const m = src.match(/NOVA_TPLS\s*=\s*\{([^}]*)\}/);
