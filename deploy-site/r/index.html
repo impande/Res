@@ -55,9 +55,10 @@
   var fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
     + encodeURIComponent(slug)
     + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
-  // cache:'no-store' + a cache-busting param so a fresh scan always pulls the
-  // latest published résumé, never a stale cached copy.
-  fetch(fsUrl + '&_ts=' + Date.now(), { cache: 'no-store' })
+  // cache:'no-store' so a fresh scan always pulls the latest published résumé.
+  // (Do NOT append extra query params — Firestore's REST API rejects unknown
+  // parameters with a 400, which would break the fetch.)
+  fetch(fsUrl, { cache: 'no-store' })
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(doc) {
       if (!doc || !doc.fields) { showNotFound(); return; }
