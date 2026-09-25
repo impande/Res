@@ -12299,7 +12299,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     }
     showLoading();
     window._r4uPublishResume().then(function(slug){
-      var url='https://resume4u.help/r/'+slug;
+      /* Use the origin that generated the résumé so the link resolves in the same
+         environment: a UAT publish → a UAT link, a production publish → a
+         resume4u.help link. (Hardcoding resume4u.help 404s until /r/ ships to prod.) */
+      var base=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'https://resume4u.help';
+      var url=base+'/r/'+slug;
       if(window._r4uShowQR) window._r4uShowQR(url, {title:'Your résumé QR code', sub:'Scan to open your résumé — it looks just like your PDF. Add it to a printed résumé or business card.', file:'resume-qr.png'});
     }).catch(function(e){
       var m=(e&&e.message==='too-large')?'This résumé is too large to publish as a link. Try removing any large images.':'Please check your connection and try again.';
