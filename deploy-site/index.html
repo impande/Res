@@ -693,6 +693,14 @@
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:10mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
+    /* Output card shows the A4 at TRUE proportions, scaled to fit like the PDF /
+       preview modal. CSS zoom (set by _r4uFitCard) keeps the card editable and
+       leaves offsetHeight/scrollHeight unscaled, so page-count is unaffected.
+       Reset zoom to 1 while printing so the downloaded PDF is full-size A4. */
+    #resumeOutput > .resume-a4-page{max-width:none;}
+    @media print{ #resumeOutput > .resume-a4-page{zoom:1!important;} }
+    body.pdf-printing #resumeOutput .resume-a4-page,
+    body.ios-print-mode #resumeOutput .resume-a4-page{zoom:1!important;}
     /* Match the ATS-clean PDF: normal letter-spacing on headings / job title /
        contact in the on-screen preview too, so preview and download look identical
        (the PDF export applies the same override). */
@@ -12446,6 +12454,37 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       return true;
     }
     if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>50) clearInterval(iv); }, 300); }
+  })();
+
+  /* Scale the résumé OUTPUT CARD to show the A4 at true PDF proportions (like the
+     preview modal), while keeping it editable. CSS zoom scales the visual but
+     leaves offsetHeight/scrollHeight unscaled, so page-count is unaffected; print
+     CSS resets zoom to 1 for a full-size PDF. */
+  (function(){
+    function pagesIn(card){ var out=[], ch=card.children; for(var i=0;i<ch.length;i++){ var c=ch[i]; if(c.className && (''+c.className).indexOf('resume-a4-page')>-1) out.push(c); } return out; }
+    function fit(){
+      var card=document.getElementById('resumeOutput'); if(!card) return;
+      try{ if(card.closest && card.closest('.preview-modal-body')) return; }catch(e){}
+      var pages=pagesIn(card); if(!pages.length) return;
+      var cs=getComputedStyle(card);
+      var avail=card.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0);
+      if(avail<=0) return;                          /* card hidden (not on résumé step yet) */
+      var z=avail/794; if(z>1) z=1; z=Math.round(z*1000)/1000;   /* fit width; never upscale */
+      for(var i=0;i<pages.length;i++){ if(pages[i].__z!==z){ pages[i].style.zoom=String(z); pages[i].__z=z; } }
+    }
+    window._r4uFitOutputCard=fit;
+    function start(){
+      var card=document.getElementById('resumeOutput'); if(!card) return false;
+      /* childList only (NOT characterData) so typing while editing doesn't refit. */
+      try{ new MutationObserver(function(){ fit(); }).observe(card,{childList:true}); }catch(e){}
+      /* ResizeObserver catches the card becoming visible (0→width when the user
+         reaches the résumé step) and any width change; the __z guard prevents loops. */
+      try{ if(window.ResizeObserver){ new ResizeObserver(function(){ fit(); }).observe(card); } }catch(e){}
+      window.addEventListener('resize', fit); window.addEventListener('orientationchange', fit);
+      fit(); setTimeout(fit,300); setTimeout(fit,1200);
+      return true;
+    }
+    if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
   })();
 })();
 </script>
