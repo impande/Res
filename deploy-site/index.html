@@ -12095,6 +12095,47 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     return b;
   }
 
+  function isIOS(){ try{ return /iP(hone|ad|od)/.test(navigator.platform||'') || /iPhone|iPad|iPod/i.test(navigator.userAgent||'') || ((navigator.platform==='MacIntel'||/Macintosh/.test(navigator.userAgent||'')) && (navigator.maxTouchPoints||0)>1); }catch(e){ return false; } }
+  /* Save the QR canvas as PNG. A synthetic <a download> on a data: URL is a no-op
+     on iOS Safari (and unreliable elsewhere), so: prefer the Web Share sheet with
+     a real File (lets phones save to Photos/Files), then a Blob object-URL, then
+     open-in-new-tab for long-press save, and finally a data-URL anchor. */
+  function saveCanvasPng(cv, filename){
+    function anchor(href, revoke){
+      try{ var a=document.createElement('a'); a.href=href; a.download=filename; a.rel='noopener';
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ try{ document.body.removeChild(a); }catch(e){} if(revoke){ try{ URL.revokeObjectURL(href); }catch(e){} } }, 1500);
+      }catch(e){ try{ window.open(href,'_blank'); }catch(e2){} }
+    }
+    function openTab(href, revoke){
+      var w; try{ w=window.open(href,'_blank'); }catch(e){}
+      if(w){ toast('Long-press the image → Save to Photos'); if(revoke) setTimeout(function(){ try{ URL.revokeObjectURL(href); }catch(e){} }, 60000); }
+      else { anchor(href, revoke); }
+    }
+    function withBlob(blob){
+      if(!blob){ anchor(cv.toDataURL('image/png'), false); return; }
+      var file=null; try{ file=new File([blob], filename, {type:'image/png'}); }catch(e){}
+      if(file && navigator.canShare && navigator.share){
+        var can=false; try{ can=navigator.canShare({files:[file]}); }catch(e){}
+        if(can){ navigator.share({files:[file], title:'resume4u QR code'})
+            .then(function(){ toast('QR image saved'); })
+            .catch(function(err){ if(!(err&&err.name==='AbortError')){ fallbackFromBlob(blob); } });
+          return; }
+      }
+      fallbackFromBlob(blob);
+    }
+    function fallbackFromBlob(blob){
+      var url=null; try{ url=URL.createObjectURL(blob); }catch(e){}
+      if(!url){ anchor(cv.toDataURL('image/png'), false); return; }
+      if(isIOS()) openTab(url, true); else { anchor(url, true); toast('QR image downloaded'); }
+    }
+    try{
+      if(cv.toBlob){ cv.toBlob(function(blob){ withBlob(blob); }, 'image/png'); }
+      else if(isIOS()){ openTab(cv.toDataURL('image/png'), false); }
+      else { anchor(cv.toDataURL('image/png'), false); toast('QR image downloaded'); }
+    }catch(e){ try{ openTab(cv.toDataURL('image/png'), false); }catch(e2){} }
+  }
+
   window._r4uShowQR=function(url, opts){
     opts=opts||{}; close();
     var ov=document.createElement('div'); ov.id='_r4uQRov';
@@ -12139,7 +12180,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var cbtn=mkbtn('🔗 Copy link', false); cbtn.onclick=function(){ copy(url); }; row.appendChild(cbtn);
     if(cv){
       var dbtn=mkbtn('⬇ Download PNG', true);
-      dbtn.onclick=function(){ try{ var a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=opts.file||'resume4u-qr.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); toast('QR image downloaded'); }catch(e){} };
+      dbtn.onclick=function(){ saveCanvasPng(cv, opts.file||'resume4u-qr.png'); };
       row.appendChild(dbtn);
     }
     card.appendChild(row);
