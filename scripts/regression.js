@@ -153,10 +153,15 @@ check('feature: /r/ résumé viewer page exists', () => {
   const v = fs.readFileSync(fp, 'utf8');
   return v.indexOf('documents/portfolios/') > -1 || 'résumé viewer does not read from Firestore';
 });
-check('feature: /r/* redirect configured', () => {
-  const fp = path.join(ROOT, 'netlify.toml');
-  const t = fs.readFileSync(fp, 'utf8');
-  return /from\s*=\s*"\/r\/\*"/.test(t) || '/r/* redirect missing from root netlify.toml';
+check('feature: /r/* redirect configured (both netlify.toml)', () => {
+  const re = /from\s*=\s*"\/r\/\*"/;
+  const rootT = fs.readFileSync(path.join(ROOT, 'netlify.toml'), 'utf8');
+  const dsT = fs.readFileSync(path.join(ROOT, 'deploy-site', 'netlify.toml'), 'utf8');
+  // deploy-site/netlify.toml is the config Netlify actually serves routing from
+  // (it carries /p/*, /t/* — the live redirect set), so /r/* MUST be there.
+  if (!re.test(dsT)) return '/r/* redirect missing from deploy-site/netlify.toml (the effective routing config)';
+  if (!re.test(rootT)) return '/r/* redirect missing from root netlify.toml';
+  return true;
 });
 
 // sanity: portfolio template ids still routed
