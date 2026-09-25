@@ -2990,9 +2990,10 @@
         <p id="resumeStatus">Ready to generate</p>
       </div>
       <div class="resume-bar-actions" id="dlActions" style="display:none">
-        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOC</button>
+        <button class="btn-dl btn-dl-qr" onclick="_r4uShareResumeQR()" title="Get a QR code that links to your online profile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="17"/><line x1="17" y1="14" x2="17" y2="14"/><line x1="21" y1="14" x2="21" y2="17"/><line x1="14" y1="21" x2="17" y2="21"/><line x1="21" y1="20" x2="21" y2="21"/></svg>Share / QR</button>
         <button class="btn-dl btn-dl-pdf" onclick="downloadPDF()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download PDF</button>
-        <button class="btn-dl btn-dl-cl" onclick="openCoverLetter()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Cover Letter</button><button class="btn-dl btn-dl-qr" onclick="_r4uShareResumeQR()" title="Get a QR code that links to your online profile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="17"/><line x1="17" y1="14" x2="17" y2="14"/><line x1="21" y1="14" x2="21" y2="17"/><line x1="14" y1="21" x2="17" y2="21"/><line x1="21" y1="20" x2="21" y2="21"/></svg>Share / QR</button>
+        <button class="btn-dl btn-dl-cl" onclick="openCoverLetter()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Cover Letter</button>
+        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOC</button>
       </div>
     </div>
     <div id="pageCountStrip">
@@ -12202,22 +12203,26 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
      brand) on a canvas, for the "Download QR" action. */
   window._r4uQRPoster=function(url, opts){
     opts=opts||{};
-    var qr=window._r4uQRcanvas(url, 620); if(!qr) return null;
-    var W=1080, pad=84, accent='#d97706', dark='#141414', muted='#6b6257', faint='#b8b0a4', qrSize=qr.width;
+    /* Render at 2x for a crisp, print-quality PNG (PNG is lossless, so resolution
+       is the quality lever). QR is generated at the same density so its modules
+       stay pixel-sharp. */
+    var SC=2;
+    var qr=window._r4uQRcanvas(url, 620*SC); if(!qr) return null;
+    var W=1080*SC, pad=84*SC, accent='#d97706', dark='#141414', muted='#6b6257', faint='#ddd6c8', qrSize=qr.width;
     var cv=document.createElement('canvas'), ctx=cv.getContext('2d'); if(!ctx) return null;
     var hasName=!!opts.name, hasRole=!!opts.role;
     /* Candidate-focused layout for job applications: name → role → scan line →
        QR → validity → subtle attribution (no platform promo). */
-    var yName=pad+56, yRole=yName+(hasRole?42:0), yScan=yRole+58, yQr=yScan+28,
-        yValid=yQr+qrSize+58, H=yValid+pad-26;
+    var yName=pad+56*SC, yRole=yName+(hasRole?42*SC:0), yScan=yRole+58*SC, yQr=yScan+28*SC,
+        yValid=yQr+qrSize+58*SC, H=yValid+pad-26*SC;
     cv.width=W; cv.height=H;
     ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle=accent; ctx.fillRect(0,0,W,12);
-    ctx.strokeStyle='#ece3d4'; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);
+    ctx.fillStyle=accent; ctx.fillRect(0,0,W,12*SC);
+    ctx.strokeStyle='#ece3d4'; ctx.lineWidth=2*SC; ctx.strokeRect(SC,SC,W-2*SC,H-2*SC);
     ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-    function draw(weight,size,color,text,y){ var s=size; ctx.fillStyle=color;
+    function draw(weight,size,color,text,y){ var s=size*SC; ctx.fillStyle=color;
       ctx.font=weight+' '+s+'px Inter, Arial, sans-serif';
-      while(s>15 && ctx.measureText(text).width>W-2*pad){ s-=2; ctx.font=weight+' '+s+'px Inter, Arial, sans-serif'; }
+      while(s>15*SC && ctx.measureText(text).width>W-2*pad){ s-=2*SC; ctx.font=weight+' '+s+'px Inter, Arial, sans-serif'; }
       ctx.fillText(text, W/2, y); }
     if(hasName) draw('800',54,dark,opts.name,yName);
     if(hasRole) draw('600',32,muted,opts.role,yRole);
@@ -12225,9 +12230,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     ctx.drawImage(qr,(W-qrSize)/2,yQr,qrSize,qrSize);
     draw('600',28,muted,opts.validText||'Link valid for 30 days',yValid);
     /* Brand kept subtle, running vertically along both side margins ("a bit hidden"). */
-    ctx.fillStyle='#ddd6c8'; ctx.font='600 22px Inter, Arial, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.save(); ctx.translate(32, H/2); ctx.rotate(-Math.PI/2); ctx.fillText('resume4u.help', 0, 0); ctx.restore();
-    ctx.save(); ctx.translate(W-32, H/2); ctx.rotate(Math.PI/2); ctx.fillText('resume4u.help', 0, 0); ctx.restore();
+    ctx.fillStyle=faint; ctx.font='600 '+(22*SC)+'px Inter, Arial, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.save(); ctx.translate(32*SC, H/2); ctx.rotate(-Math.PI/2); ctx.fillText('resume4u.help', 0, 0); ctx.restore();
+    ctx.save(); ctx.translate(W-32*SC, H/2); ctx.rotate(Math.PI/2); ctx.fillText('resume4u.help', 0, 0); ctx.restore();
     return cv;
   };
 
