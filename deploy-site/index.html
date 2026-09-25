@@ -12173,10 +12173,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     card.appendChild(qbox);
 
     /* Professional caption: name + validity (replaces the raw URL). */
-    if(opts.name || opts.caption){
+    if(opts.name || opts.caption || opts.role){
       var capw=document.createElement('div'); capw.style.cssText='margin:2px 6px 16px;';
       if(opts.name){ var nmEl=document.createElement('div'); nmEl.textContent=opts.name; nmEl.style.cssText='font-size:0.95rem;font-weight:800;color:var(--text,#141414);letter-spacing:-0.01em;'; capw.appendChild(nmEl); }
-      if(opts.caption){ var cpEl=document.createElement('div'); cpEl.textContent=opts.caption; cpEl.style.cssText='font-size:0.74rem;font-weight:700;color:var(--accent,#d97706);margin-top:4px;'; capw.appendChild(cpEl); }
+      if(opts.role){ var roEl=document.createElement('div'); roEl.textContent=opts.role; roEl.style.cssText='font-size:0.8rem;font-weight:600;color:var(--muted,#7a7a86);margin-top:2px;'; capw.appendChild(roEl); }
+      if(opts.caption){ var cpEl=document.createElement('div'); cpEl.textContent=opts.caption; cpEl.style.cssText='font-size:0.74rem;font-weight:700;color:var(--accent,#d97706);margin-top:6px;'; capw.appendChild(cpEl); }
       card.appendChild(capw);
     }
     if(!opts.hideUrl){
@@ -12202,11 +12203,13 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   window._r4uQRPoster=function(url, opts){
     opts=opts||{};
     var qr=window._r4uQRcanvas(url, 620); if(!qr) return null;
-    var W=1080, pad=84, accent='#d97706', dark='#141414', muted='#6b6257', qrSize=qr.width;
+    var W=1080, pad=84, accent='#d97706', dark='#141414', muted='#6b6257', faint='#b8b0a4', qrSize=qr.width;
     var cv=document.createElement('canvas'), ctx=cv.getContext('2d'); if(!ctx) return null;
-    var hasName=!!opts.name;
-    var yBrand=pad+30, yTitle=yBrand+64, yName=yTitle+(hasName?48:0), yQr=yName+34,
-        yValid=yQr+qrSize+60, yFoot=yValid+46, H=yFoot+pad-18;
+    var hasName=!!opts.name, hasRole=!!opts.role;
+    /* Candidate-focused layout for job applications: name → role → scan line →
+       QR → validity → subtle attribution (no platform promo). */
+    var yName=pad+56, yRole=yName+(hasRole?42:0), yScan=yRole+58, yQr=yScan+28,
+        yValid=yQr+qrSize+58, yFoot=yValid+44, H=yFoot+pad-24;
     cv.width=W; cv.height=H;
     ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle=accent; ctx.fillRect(0,0,W,12);
@@ -12214,14 +12217,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     ctx.textAlign='center'; ctx.textBaseline='alphabetic';
     function draw(weight,size,color,text,y){ var s=size; ctx.fillStyle=color;
       ctx.font=weight+' '+s+'px Inter, Arial, sans-serif';
-      while(s>16 && ctx.measureText(text).width>W-2*pad){ s-=2; ctx.font=weight+' '+s+'px Inter, Arial, sans-serif'; }
+      while(s>15 && ctx.measureText(text).width>W-2*pad){ s-=2; ctx.font=weight+' '+s+'px Inter, Arial, sans-serif'; }
       ctx.fillText(text, W/2, y); }
-    draw('800',30,accent,'resume4u.help',yBrand);
-    draw('800',52,dark,opts.posterTitle||'Scan to view my résumé',yTitle);
-    if(hasName) draw('600',36,muted,opts.name,yName);
+    if(hasName) draw('800',54,dark,opts.name,yName);
+    if(hasRole) draw('600',32,muted,opts.role,yRole);
+    draw('700',34,accent,opts.posterTitle||'Scan to view my résumé',yScan);
     ctx.drawImage(qr,(W-qrSize)/2,yQr,qrSize,qrSize);
-    draw('700',30,dark,opts.validText||'Link valid for 30 days',yValid);
-    draw('500',25,muted,'Create your own free at resume4u.help',yFoot);
+    draw('600',28,muted,opts.validText||'Link valid for 30 days',yValid);
+    draw('500',22,faint,'resume4u.help',yFoot);
     return cv;
   };
 
@@ -12253,6 +12256,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var nm=(fn+' '+ln).trim();
     if(!nm){ try{ var h=document.querySelector('#resumeOutput .r-head'); if(h) nm=((h.textContent||'').trim().split('\n')[0]||'').slice(0,60); }catch(e){} }
     return nm||'My résumé';
+  }
+  function personRole(){
+    var r=''; try{ r=(document.getElementById('jobTitle')||{}).value||''; }catch(e){}
+    if(!r){ try{ var el=document.querySelector('#resumeOutput .r-role'); if(el) r=(el.textContent||'').trim().replace(/\s+/g,' '); }catch(e){} }
+    return (r||'').slice(0,70);
   }
   /* Build a fully self-contained HTML page that renders the résumé identically to
      the on-screen A4 preview (which is what the PDF mirrors). Inline every <style>
@@ -12377,12 +12385,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
          resume4u.help link. (Hardcoding resume4u.help 404s until /r/ ships to prod.) */
       var base=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'https://resume4u.help';
       var url=base+'/r/'+slug;
-      var nm=personName();
+      var nm=personName(), role=personRole();
       var validUntil=expires.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
       if(window._r4uShowQR) window._r4uShowQR(url, {
         title:'Your résumé QR code',
         sub:'Scan to open your résumé — it looks just like your PDF.',
-        name:nm,
+        name:nm, role:role,
         caption:'Valid for 30 days · until '+validUntil,
         hideUrl:true, hideCopy:true,
         poster:true, posterTitle:'Scan to view my résumé', validText:'Link valid until '+validUntil,
