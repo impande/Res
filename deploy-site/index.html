@@ -12234,18 +12234,30 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        exactly rather than inheriting a fresh document's 16px defaults. */
     var pcs=null; try{ pcs=getComputedStyle(pages[0]); }catch(e){}
     var baseRule = pcs ? ('#resumeOutput .resume-a4-page{font-size:'+pcs.fontSize+';line-height:'+pcs.lineHeight+';color:'+pcs.color+';font-family:'+pcs.fontFamily+';}') : '';
-    var wrap='html,body{margin:0;padding:0;background:#ececef;}'
-      +'body{padding:24px 10px;-webkit-text-size-adjust:100%;}'
+    /* Render the résumé at its TRUE A4 width and uniformly scale it to fit the
+       viewport (like a PDF viewer) instead of reflowing it to phone width — that
+       preserves the exact proportions/line-breaks of the PDF. #r4uFit is scaled
+       by a tiny inline script; print resets the transform so it prints full A4. */
+    var wrap='html,body{margin:0;padding:0;background:#ececef;-webkit-text-size-adjust:100%;}'
+      +'#r4uOuter{overflow:hidden;padding:16px 0;}'
+      +'#r4uFit{width:210mm;transform-origin:top left;}'
       +'#resumeOutput{display:block;}'
-      +'#resumeOutput .resume-a4-page{margin:0 auto 22px;max-width:100%;}'
+      +'#resumeOutput .resume-a4-page{width:210mm;max-width:none;margin:0 auto 8mm;}'
       +baseRule
-      +'@media print{html,body{background:#fff;}body{padding:0;}#resumeOutput .resume-a4-page{margin:0;box-shadow:none;}}';
+      +'@media print{html,body{background:#fff;}#r4uOuter{overflow:visible;padding:0;}#r4uFit{width:auto;transform:none!important;margin:0!important;}#resumeOutput .resume-a4-page{margin:0;box-shadow:none;}}';
+    var fitJs='(function(){var o=document.getElementById("r4uOuter"),f=document.getElementById("r4uFit");if(!o||!f)return;'
+      +'function d(){f.style.transform="none";var n=f.offsetWidth||794,vw=document.documentElement.clientWidth,s=vw/n;if(s>1)s=1;'
+      +'f.style.transform="scale("+s+")";f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";o.style.height=(f.offsetHeight*s)+"px";}'
+      +'window.addEventListener("resize",d);window.addEventListener("orientationchange",d);window.addEventListener("load",d);'
+      +'if(document.readyState!=="loading")d();else window.addEventListener("DOMContentLoaded",d);'
+      +'if(document.fonts&&document.fonts.ready)document.fonts.ready.then(d);setTimeout(d,200);setTimeout(d,700);})();';
     return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
       +'<meta name="viewport" content="width=device-width,initial-scale=1">'
       +'<title>'+esc(nm)+' — Résumé</title>'
       +'<meta name="robots" content="noindex">'
       +'<style>'+css+'</style><style>'+wrap+'</style></head>'
-      +'<body><div id="resumeOutput">'+pagesHtml+'</div></body></html>';
+      +'<body><div id="r4uOuter"><div id="r4uFit"><div id="resumeOutput">'+pagesHtml+'</div></div></div>'
+      +'<scr'+'ipt>'+fitJs+'<\/scr'+'ipt></body></html>';
   };
   window._r4uPublishResume=function(){
     return new Promise(function(resolve,reject){
