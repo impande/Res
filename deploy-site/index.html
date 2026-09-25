@@ -12204,5 +12204,110 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   };
 })();
 </script>
+<script id="_r4uResumeShare">
+(function(){
+  var PROJ='resume-ai-2eda1', KEY='AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function slugify(s){ return String(s||'resume').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40) || 'resume'; }
+  function rand(n){ var c='abcdefghijklmnopqrstuvwxyz0123456789',s=''; for(var i=0;i<n;i++) s+=c.charAt(Math.floor(Math.random()*c.length)); return s; }
+  function personName(){
+    var fn='',ln=''; try{ fn=(document.getElementById('firstName')||{}).value||''; ln=(document.getElementById('lastName')||{}).value||''; }catch(e){}
+    var nm=(fn+' '+ln).trim();
+    if(!nm){ try{ var h=document.querySelector('#resumeOutput .r-head'); if(h) nm=((h.textContent||'').trim().split('\n')[0]||'').slice(0,60); }catch(e){} }
+    return nm||'My résumé';
+  }
+  /* Build a fully self-contained HTML page that renders the résumé identically to
+     the on-screen A4 preview (which is what the PDF mirrors). Inline every <style>
+     in the document (embedded fonts, template styles, and the dynamically-injected
+     accent/spacing rules) and wrap the pages in #resumeOutput so the id-scoped
+     selectors still apply. */
+  window._r4uBuildResumeStandalone=function(){
+    var out=document.getElementById('resumeOutput');
+    var pages=out?out.querySelectorAll('.resume-a4-page'):null;
+    if(!pages||!pages.length) return null;
+    var css=''; var st=document.querySelectorAll('style');
+    for(var i=0;i<st.length;i++){ css+=(st[i].textContent||'')+'\n'; }
+    var pagesHtml=''; for(var p=0;p<pages.length;p++){ pagesHtml+=pages[p].outerHTML; }
+    var nm=personName();
+    /* Pin the résumé's inherited base (font-size/colour/line-height/family) from
+       the LIVE element, so the hosted page matches the on-screen preview / PDF
+       exactly rather than inheriting a fresh document's 16px defaults. */
+    var pcs=null; try{ pcs=getComputedStyle(pages[0]); }catch(e){}
+    var baseRule = pcs ? ('#resumeOutput .resume-a4-page{font-size:'+pcs.fontSize+';line-height:'+pcs.lineHeight+';color:'+pcs.color+';font-family:'+pcs.fontFamily+';}') : '';
+    var wrap='html,body{margin:0;padding:0;background:#ececef;}'
+      +'body{padding:24px 10px;-webkit-text-size-adjust:100%;}'
+      +'#resumeOutput{display:block;}'
+      +'#resumeOutput .resume-a4-page{margin:0 auto 22px;max-width:100%;}'
+      +baseRule
+      +'@media print{html,body{background:#fff;}body{padding:0;}#resumeOutput .resume-a4-page{margin:0;box-shadow:none;}}';
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+      +'<meta name="viewport" content="width=device-width,initial-scale=1">'
+      +'<title>'+esc(nm)+' — Résumé</title>'
+      +'<meta name="robots" content="noindex">'
+      +'<style>'+css+'</style><style>'+wrap+'</style></head>'
+      +'<body><div id="resumeOutput">'+pagesHtml+'</div></body></html>';
+  };
+  window._r4uPublishResume=function(){
+    return new Promise(function(resolve,reject){
+      var html; try{ html=window._r4uBuildResumeStandalone(); }catch(e){ reject(e); return; }
+      if(!html){ reject(new Error('no-resume')); return; }
+      if(html.length>950000){ reject(new Error('too-large')); return; }
+      var slug=window._r4uResumeSlug;
+      if(!slug){ slug=slugify(personName())+'-'+rand(6); window._r4uResumeSlug=slug; }
+      var url='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/'+encodeURIComponent(slug)+'?updateMask.fieldPaths=html&updateMask.fieldPaths=kind&key='+KEY;
+      fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{html:{stringValue:html},kind:{stringValue:'resume'}}})})
+        .then(function(r){ if(!r.ok) throw new Error('save-'+r.status); resolve(slug); })
+        .catch(reject);
+    });
+  };
+  /* Minimal overlay reused for loading / error / info states (shares #_r4uQRov id
+     so _r4uCloseQR / Esc / backdrop close work, and _r4uShowQR replaces it). */
+  function shell(inner){
+    try{ if(window._r4uCloseQR) window._r4uCloseQR(); }catch(e){}
+    var ov=document.createElement('div'); ov.id='_r4uQRov';
+    ov.style.cssText='position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,12,8,0.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);';
+    ov.addEventListener('click',function(e){ if(e.target===ov && window._r4uCloseQR) window._r4uCloseQR(); });
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--surface,#fff);color:var(--text,#141414);border:1px solid var(--border,#e6e6ee);border-radius:20px;max-width:340px;width:100%;padding:30px 24px;box-shadow:0 40px 90px -24px rgba(0,0,0,0.55);text-align:center;font-family:inherit;';
+    card.innerHTML=inner; ov.appendChild(card); document.body.appendChild(ov); return card;
+  }
+  function showLoading(){
+    shell('<div style="width:40px;height:40px;border:3px solid var(--border,#e5e7eb);border-top-color:#d97706;border-radius:50%;animation:_r4uspin .7s linear infinite;margin:0 auto 16px;"></div>'
+      +'<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:4px;">Publishing your résumé…</div>'
+      +'<div style="font-size:0.8rem;color:var(--muted,#7a7a86);">Creating a shareable page that looks just like your PDF.</div>'
+      +'<style>@keyframes _r4uspin{to{transform:rotate(360deg)}}</style>');
+  }
+  function showError(msg){
+    var c=shell('<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:6px;">Couldn’t publish the résumé</div>'
+      +'<div style="font-size:0.82rem;color:var(--muted,#7a7a86);line-height:1.5;margin-bottom:16px;">'+esc(msg)+'</div>'
+      +'<button id="_r4uQRretry" style="font-family:inherit;font-size:0.85rem;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;">Try again</button>');
+    var rb=c.querySelector('#_r4uQRretry'); if(rb) rb.onclick=function(){ window._r4uShareResumeQR(); };
+  }
+  function showInfo(title,msg){
+    var c=shell('<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:6px;">'+esc(title)+'</div>'
+      +'<div style="font-size:0.82rem;color:var(--muted,#7a7a86);line-height:1.5;margin-bottom:16px;">'+esc(msg)+'</div>'
+      +'<button id="_r4uQRok" style="font-family:inherit;font-size:0.85rem;font-weight:700;padding:10px 18px;border-radius:10px;border:1px solid var(--border,#dcdce6);cursor:pointer;background:transparent;color:var(--text,#333);">Got it</button>');
+    var ok=c.querySelector('#_r4uQRok'); if(ok) ok.onclick=function(){ if(window._r4uCloseQR) window._r4uCloseQR(); };
+  }
+  /* Override the earlier stub: publish the résumé as a PDF-identical page, then
+     show a scannable QR that opens /r/<slug>. */
+  window._r4uShareResumeQR=function(){
+    var out=document.getElementById('resumeOutput');
+    if(!out || !out.querySelector('.resume-a4-page')){
+      showInfo('Generate your résumé first','Create your résumé, then tap “Share / QR” again to get a scannable code that opens it — looking just like your PDF.');
+      return false;
+    }
+    showLoading();
+    window._r4uPublishResume().then(function(slug){
+      var url='https://resume4u.help/r/'+slug;
+      if(window._r4uShowQR) window._r4uShowQR(url, {title:'Your résumé QR code', sub:'Scan to open your résumé — it looks just like your PDF. Add it to a printed résumé or business card.', file:'resume-qr.png'});
+    }).catch(function(e){
+      var m=(e&&e.message==='too-large')?'This résumé is too large to publish as a link. Try removing any large images.':'Please check your connection and try again.';
+      showError(m);
+    });
+    return false;
+  };
+})();
+</script>
 </body>
 </html>
