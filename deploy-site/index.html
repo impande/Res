@@ -12156,7 +12156,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(!url){
       var box=document.createElement('div');
       box.style.cssText='background:var(--input-bg,#f5f5fa);border:1px dashed var(--border,#dcdce6);border-radius:14px;padding:22px 16px;margin-bottom:16px;font-size:0.84rem;color:var(--text,#333);line-height:1.5;';
-      box.innerHTML='To make a QR for your résumé, first give it a link to point to:<br><b>publish your portfolio</b>, or add your <b>LinkedIn / portfolio URL</b> in Step 1.';
+      box.innerHTML='To make a QR for your resume, first give it a link to point to:<br><b>publish your portfolio</b>, or add your <b>LinkedIn / portfolio URL</b> in Step 1.';
       card.appendChild(box);
       var row0=document.createElement('div'); row0.style.cssText='display:flex;gap:10px;justify-content:center;flex-wrap:wrap;';
       var pbtn=mkbtn('🌐 Build portfolio', true);
@@ -12209,7 +12209,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     /* Candidate-focused layout for job applications: name → role → scan line →
        QR → validity → subtle attribution (no platform promo). */
     var yName=pad+56, yRole=yName+(hasRole?42:0), yScan=yRole+58, yQr=yScan+28,
-        yValid=yQr+qrSize+58, yFoot=yValid+44, H=yFoot+pad-24;
+        yValid=yQr+qrSize+58, H=yValid+pad-26;
     cv.width=W; cv.height=H;
     ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle=accent; ctx.fillRect(0,0,W,12);
@@ -12221,26 +12221,29 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       ctx.fillText(text, W/2, y); }
     if(hasName) draw('800',54,dark,opts.name,yName);
     if(hasRole) draw('600',32,muted,opts.role,yRole);
-    draw('700',34,accent,opts.posterTitle||'Scan to view my résumé',yScan);
+    draw('700',34,accent,opts.posterTitle||'Scan to view my resume',yScan);
     ctx.drawImage(qr,(W-qrSize)/2,yQr,qrSize,qrSize);
     draw('600',28,muted,opts.validText||'Link valid for 30 days',yValid);
-    draw('500',22,faint,'resume4u.help',yFoot);
+    /* Brand kept subtle, running vertically along both side margins ("a bit hidden"). */
+    ctx.fillStyle='#ddd6c8'; ctx.font='600 22px Inter, Arial, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.save(); ctx.translate(32, H/2); ctx.rotate(-Math.PI/2); ctx.fillText('resume4u.help', 0, 0); ctx.restore();
+    ctx.save(); ctx.translate(W-32, H/2); ctx.rotate(Math.PI/2); ctx.fillText('resume4u.help', 0, 0); ctx.restore();
     return cv;
   };
 
   /* Portfolio insights card → QR of the live portfolio link */
   window._r4uPortfolioQR=function(slug){
-    window._r4uShowQR('https://resume4u.help/p/'+slug, {title:'Portfolio QR code', sub:'Scan to open your live portfolio — add it to your résumé, email signature, or business card.', file:'portfolio-qr.png'});
+    window._r4uShowQR('https://resume4u.help/p/'+slug, {title:'Portfolio QR code', sub:'Scan to open your live portfolio — add it to your resume, email signature, or business card.', file:'portfolio-qr.png'});
     return false;
   };
 
-  /* Résumé actions bar → QR pointing at the person's best available online link */
+  /* Resume actions bar → QR pointing at the person's best available online link */
   window._r4uShareResumeQR=function(){
     var url=null;
     try{ if(window._pfSavedSlug){ url='https://resume4u.help/p/'+window._pfSavedSlug; } }catch(e){}
     if(!url){ try{ var li=(document.getElementById('linkedin')||{}).value||''; li=li.trim(); if(li){ if(!/^https?:\/\//i.test(li)){ li='https://'+li.replace(/^\/+/,''); } url=li; } }catch(e){} }
-    if(!url){ window._r4uShowQR(null, {title:'Add a QR to your résumé'}); return false; }
-    window._r4uShowQR(url, {title:'Your résumé QR code', sub:'Add it to your printed résumé or business card — anyone can scan it to open your online profile.', file:'resume-qr.png'});
+    if(!url){ window._r4uShowQR(null, {title:'Add a QR to your resume'}); return false; }
+    window._r4uShowQR(url, {title:'Your resume QR code', sub:'Add it to your printed resume or business card — anyone can scan it to open your online profile.', file:'resume-qr.png'});
     return false;
   };
 })();
@@ -12255,14 +12258,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var fn='',ln=''; try{ fn=(document.getElementById('firstName')||{}).value||''; ln=(document.getElementById('lastName')||{}).value||''; }catch(e){}
     var nm=(fn+' '+ln).trim();
     if(!nm){ try{ var h=document.querySelector('#resumeOutput .r-head'); if(h) nm=((h.textContent||'').trim().split('\n')[0]||'').slice(0,60); }catch(e){} }
-    return nm||'My résumé';
+    return nm||'My resume';
   }
   function personRole(){
     var r=''; try{ r=(document.getElementById('jobTitle')||{}).value||''; }catch(e){}
     if(!r){ try{ var el=document.querySelector('#resumeOutput .r-role'); if(el) r=(el.textContent||'').trim().replace(/\s+/g,' '); }catch(e){} }
     return (r||'').slice(0,70);
   }
-  /* Build a fully self-contained HTML page that renders the résumé identically to
+  /* Build a fully self-contained HTML page that renders the resume identically to
      the on-screen A4 preview (which is what the PDF mirrors). Inline every <style>
      in the document (embedded fonts, template styles, and the dynamically-injected
      accent/spacing rules) and wrap the pages in #resumeOutput so the id-scoped
@@ -12274,7 +12277,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var css=''; var st=document.querySelectorAll('style');
     for(var i=0;i<st.length;i++){ css+=(st[i].textContent||'')+'\n'; }
     /* Clone the pages and strip everything that makes the live card editable —
-       the résumé uses inline contenteditable editing, and those attributes would
+       the resume uses inline contenteditable editing, and those attributes would
        otherwise let anyone type into the published page. */
     var host=document.createElement('div');
     for(var p=0;p<pages.length;p++){ host.appendChild(pages[p].cloneNode(true)); }
@@ -12287,12 +12290,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     }catch(e){}
     var pagesHtml=host.innerHTML;
     var nm=personName();
-    /* Pin the résumé's inherited base (font-size/colour/line-height/family) from
+    /* Pin the resume's inherited base (font-size/colour/line-height/family) from
        the LIVE element, so the hosted page matches the on-screen preview / PDF
        exactly rather than inheriting a fresh document's 16px defaults. */
     var pcs=null; try{ pcs=getComputedStyle(pages[0]); }catch(e){}
     var baseRule = pcs ? ('#resumeOutput .resume-a4-page{font-size:'+pcs.fontSize+';line-height:'+pcs.lineHeight+';color:'+pcs.color+';font-family:'+pcs.fontFamily+';}') : '';
-    /* Render the résumé at its TRUE A4 width and uniformly scale it to fit the
+    /* Render the resume at its TRUE A4 width and uniformly scale it to fit the
        viewport (like a PDF viewer) instead of reflowing it to phone width — that
        preserves the exact proportions/line-breaks of the PDF. #r4uFit is scaled
        by a tiny inline script; print resets the transform so it prints full A4. */
@@ -12319,7 +12322,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'setTimeout(d,250);setTimeout(d,800);})();';
     return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
       +'<meta name="viewport" content="width=device-width,initial-scale=1">'
-      +'<title>'+esc(nm)+' — Résumé</title>'
+      +'<title>'+esc(nm)+' — Resume</title>'
       +'<meta name="robots" content="noindex">'
       +'<style>'+css+'</style><style>'+wrap+'</style></head>'
       +'<body><div id="r4uOuter"><div id="r4uFit"><div id="resumeOutput">'+pagesHtml+'</div></div></div>'
@@ -12353,12 +12356,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }
   function showLoading(){
     shell('<div style="width:40px;height:40px;border:3px solid var(--border,#e5e7eb);border-top-color:#d97706;border-radius:50%;animation:_r4uspin .7s linear infinite;margin:0 auto 16px;"></div>'
-      +'<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:4px;">Publishing your résumé…</div>'
+      +'<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:4px;">Publishing your resume…</div>'
       +'<div style="font-size:0.8rem;color:var(--muted,#7a7a86);">Creating a shareable page that looks just like your PDF.</div>'
       +'<style>@keyframes _r4uspin{to{transform:rotate(360deg)}}</style>');
   }
   function showError(msg){
-    var c=shell('<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:6px;">Couldn’t publish the résumé</div>'
+    var c=shell('<div style="font-size:1rem;font-weight:800;color:var(--text,#141414);margin-bottom:6px;">Couldn’t publish the resume</div>'
       +'<div style="font-size:0.82rem;color:var(--muted,#7a7a86);line-height:1.5;margin-bottom:16px;">'+esc(msg)+'</div>'
       +'<button id="_r4uQRretry" style="font-family:inherit;font-size:0.85rem;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;">Try again</button>');
     var rb=c.querySelector('#_r4uQRretry'); if(rb) rb.onclick=function(){ window._r4uShareResumeQR(); };
@@ -12369,18 +12372,18 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'<button id="_r4uQRok" style="font-family:inherit;font-size:0.85rem;font-weight:700;padding:10px 18px;border-radius:10px;border:1px solid var(--border,#dcdce6);cursor:pointer;background:transparent;color:var(--text,#333);">Got it</button>');
     var ok=c.querySelector('#_r4uQRok'); if(ok) ok.onclick=function(){ if(window._r4uCloseQR) window._r4uCloseQR(); };
   }
-  /* Override the earlier stub: publish the résumé as a PDF-identical page, then
+  /* Override the earlier stub: publish the resume as a PDF-identical page, then
      show a scannable QR that opens /r/<slug>. */
   window._r4uShareResumeQR=function(){
     var out=document.getElementById('resumeOutput');
     if(!out || !out.querySelector('.resume-a4-page')){
-      showInfo('Generate your résumé first','Create your résumé, then tap “Share / QR” again to get a scannable code that opens it — looking just like your PDF.');
+      showInfo('Generate your resume first','Create your resume, then tap “Share / QR” again to get a scannable code that opens it — looking just like your PDF.');
       return false;
     }
     showLoading();
     window._r4uPublishResume().then(function(res){
       var slug=res.slug, expires=res.expires;
-      /* Use the origin that generated the résumé so the link resolves in the same
+      /* Use the origin that generated the resume so the link resolves in the same
          environment: a UAT publish → a UAT link, a production publish → a
          resume4u.help link. (Hardcoding resume4u.help 404s until /r/ ships to prod.) */
       var base=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'https://resume4u.help';
@@ -12388,16 +12391,16 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       var nm=personName(), role=personRole();
       var validUntil=expires.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
       if(window._r4uShowQR) window._r4uShowQR(url, {
-        title:'Your résumé QR code',
-        sub:'Scan to open your résumé — it looks just like your PDF.',
+        title:'Your resume QR code',
+        sub:'Scan to open your resume — it looks just like your PDF.',
         name:nm, role:role,
         caption:'Valid for 30 days · until '+validUntil,
         hideUrl:true, hideCopy:true,
-        poster:true, posterTitle:'Scan to view my résumé', validText:'Link valid until '+validUntil,
+        poster:true, posterTitle:'Scan to view my resume', validText:'Link valid until '+validUntil,
         file:(slugify(nm)||'resume')+'-qr.png'
       });
     }).catch(function(e){
-      var m=(e&&e.message==='too-large')?'This résumé is too large to publish as a link. Try removing any large images.':'Please check your connection and try again.';
+      var m=(e&&e.message==='too-large')?'This resume is too large to publish as a link. Try removing any large images.':'Please check your connection and try again.';
       showError(m);
     });
     return false;

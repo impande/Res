@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Loading résumé…</title>
+<title>Loading resume…</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Arial,sans-serif;background:#f1f1f4;color:#1e293b;}
@@ -19,7 +19,7 @@
 <body>
 <div class="msg" id="msg">
   <div class="spinner"></div>
-  <h2>Loading résumé…</h2>
+  <h2>Loading resume…</h2>
   <p>Please wait a moment.</p>
 </div>
 <script>
@@ -28,19 +28,19 @@
   var slug = parts[parts.length - 1] || '';
   if (!slug || slug === 'r') {
     document.getElementById('msg').innerHTML =
-      '<h2>Résumé not found</h2><p>No résumé ID in the URL.<br>Visit <a href="https://resume4u.help">resume4u.help</a> to create one.</p>';
+      '<h2>Resume not found</h2><p>No resume ID in the URL.<br>Visit <a href="https://resume4u.help">resume4u.help</a> to create one.</p>';
     return;
   }
   function showNotFound() {
     document.getElementById('msg').innerHTML =
-      '<h2>Résumé not found</h2>'
-      + '<p>This link may have expired or the résumé does not exist.<br>'
+      '<h2>Resume not found</h2>'
+      + '<p>This link may have expired or the resume does not exist.<br>'
       + 'Please <a href="https://resume4u.help">generate a new share link</a>.</p>';
   }
   function showExpired() {
     document.getElementById('msg').innerHTML =
-      '<h2>This résumé link has expired</h2>'
-      + '<p>Shared résumé links stay active for 30 days.<br>'
+      '<h2>This resume link has expired</h2>'
+      + '<p>Shared resume links stay active for 30 days.<br>'
       + 'Ask for an updated link, or create your own free at <a href="https://resume4u.help">resume4u.help</a>.</p>';
   }
   function renderHtml(html) {
@@ -48,10 +48,10 @@
     document.write(html);
     document.close();
   }
-  // Résumé pages are stored in the same Firestore collection as portfolios (an
+  // Resume pages are stored in the same Firestore collection as portfolios (an
   // html document), read directly in the browser (the correct Referer lets a
   // restricted API key work). No Netlify function is used, so no portfolio-only
-  // analytics or testimonial injection runs against a résumé doc.
+  // analytics or testimonial injection runs against a resume doc.
   var fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
     + encodeURIComponent(slug)
     + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
