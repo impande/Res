@@ -12333,8 +12333,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       var html; try{ html=window._r4uBuildResumeStandalone(); }catch(e){ reject(e); return; }
       if(!html){ reject(new Error('no-resume')); return; }
       if(html.length>950000){ reject(new Error('too-large')); return; }
+      /* Stable slug so the SAME printed QR keeps working and auto-updates. */
       var slug=window._r4uResumeSlug;
-      if(!slug){ slug=slugify(personName())+'-'+rand(6); window._r4uResumeSlug=slug; }
+      if(!slug){ try{ slug=localStorage.getItem('_r4uResumeSlug')||''; }catch(e){} }
+      if(!slug){ slug=slugify(personName())+'-'+rand(6); }
+      window._r4uResumeSlug=slug; try{ localStorage.setItem('_r4uResumeSlug',slug); }catch(e){}
       /* 30-day validity: recorded on the doc and enforced by the /r/ viewer. */
       var expires=new Date(Date.now()+30*24*60*60*1000);
       var url='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/'+encodeURIComponent(slug)+'?updateMask.fieldPaths=html&updateMask.fieldPaths=kind&updateMask.fieldPaths=expiresAt&key='+KEY;
@@ -12405,6 +12408,34 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     });
     return false;
   };
+
+  /* Keep an ALREADY-SHARED résumé link current: silently re-publish the latest
+     résumé to the same slug on load and whenever it changes, so scanning the
+     existing QR (the /r/ page fetches fresh each load) always shows the newest
+     content — no need to re-tap Share / QR. Only runs once a QR exists. */
+  if(!window._r4uLastPubSig){ try{ window._r4uLastPubSig=localStorage.getItem('_r4uLastPubSig')||''; }catch(e){} }
+  window._r4uAutoRepublish=function(){
+    var slug=''; try{ slug=window._r4uResumeSlug||localStorage.getItem('_r4uResumeSlug')||''; }catch(e){}
+    if(!slug) return;                                   /* nothing shared yet — don't auto-create */
+    var out=document.getElementById('resumeOutput'); var page=out&&out.querySelector('.resume-a4-page');
+    if(!page) return;
+    var sig=page.innerHTML.length+'|'+(page.textContent||'').slice(0,160);
+    if(sig===window._r4uLastPubSig) return;             /* unchanged since last publish */
+    window._r4uResumeSlug=slug;
+    window._r4uPublishResume().then(function(){ window._r4uLastPubSig=sig; try{ localStorage.setItem('_r4uLastPubSig',sig); }catch(e){} }).catch(function(){});
+  };
+  (function(){
+    function deb(fn,ms){ var t; return function(){ clearTimeout(t); t=setTimeout(fn,ms); }; }
+    var run=deb(function(){ try{ window._r4uAutoRepublish(); }catch(e){} }, 2500);
+    function start(){
+      var out=document.getElementById('resumeOutput'); if(!out) return false;
+      try{ new MutationObserver(run).observe(out,{childList:true,subtree:true,characterData:true}); }catch(e){}
+      setTimeout(function(){ try{ window._r4uAutoRepublish(); }catch(e){} }, 1800);
+      setTimeout(function(){ try{ window._r4uAutoRepublish(); }catch(e){} }, 5000);
+      return true;
+    }
+    if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>50) clearInterval(iv); }, 300); }
+  })();
 })();
 </script>
 </body>
