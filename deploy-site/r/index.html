@@ -37,6 +37,12 @@
       + '<p>This link may have expired or the résumé does not exist.<br>'
       + 'Please <a href="https://resume4u.help">generate a new share link</a>.</p>';
   }
+  function showExpired() {
+    document.getElementById('msg').innerHTML =
+      '<h2>This résumé link has expired</h2>'
+      + '<p>Shared résumé links stay active for 30 days.<br>'
+      + 'Ask for an updated link, or create your own free at <a href="https://resume4u.help">resume4u.help</a>.</p>';
+  }
   function renderHtml(html) {
     document.open('text/html', 'replace');
     document.write(html);
@@ -52,7 +58,11 @@
   fetch(fsUrl)
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(doc) {
-      var html = doc && doc.fields && doc.fields.html && doc.fields.html.stringValue;
+      if (!doc || !doc.fields) { showNotFound(); return; }
+      // Enforce the 30-day validity window recorded at publish time.
+      var exp = doc.fields.expiresAt && doc.fields.expiresAt.timestampValue;
+      if (exp) { var t = Date.parse(exp); if (!isNaN(t) && Date.now() > t) { showExpired(); return; } }
+      var html = doc.fields.html && doc.fields.html.stringValue;
       if (html) { renderHtml(html); } else { showNotFound(); }
     })
     .catch(showNotFound);
