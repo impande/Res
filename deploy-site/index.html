@@ -12227,7 +12227,19 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(!pages||!pages.length) return null;
     var css=''; var st=document.querySelectorAll('style');
     for(var i=0;i<st.length;i++){ css+=(st[i].textContent||'')+'\n'; }
-    var pagesHtml=''; for(var p=0;p<pages.length;p++){ pagesHtml+=pages[p].outerHTML; }
+    /* Clone the pages and strip everything that makes the live card editable —
+       the résumé uses inline contenteditable editing, and those attributes would
+       otherwise let anyone type into the published page. */
+    var host=document.createElement('div');
+    for(var p=0;p<pages.length;p++){ host.appendChild(pages[p].cloneNode(true)); }
+    try{
+      var all=host.querySelectorAll('*'); var HANDLERS=['oninput','onfocus','onblur','onkeydown','onkeyup','onkeypress','onclick','onpaste','oncut','onmousedown','ondblclick'];
+      for(var a=0;a<all.length;a++){ var el=all[a];
+        el.removeAttribute('contenteditable'); el.removeAttribute('spellcheck'); el.removeAttribute('role'); el.removeAttribute('tabindex');
+        for(var h=0;h<HANDLERS.length;h++){ if(el.hasAttribute(HANDLERS[h])) el.removeAttribute(HANDLERS[h]); }
+      }
+    }catch(e){}
+    var pagesHtml=host.innerHTML;
     var nm=personName();
     /* Pin the résumé's inherited base (font-size/colour/line-height/family) from
        the LIVE element, so the hosted page matches the on-screen preview / PDF
