@@ -143,6 +143,22 @@ present('feature: QR share modal + helpers', 'window._r4uShowQR');
 present('feature: résumé Share/QR button wired', '_r4uShareResumeQR()');
 present('feature: portfolio QR link in insights', '_r4uPortfolioQR');
 
+// Hosted résumé page (QR opens a PDF-identical résumé at /r/<slug>)
+present('feature: résumé publish/share block', 'id="_r4uResumeShare"');
+present('feature: standalone résumé builder', '_r4uBuildResumeStandalone');
+present('feature: résumé publish to Firestore', 'window._r4uPublishResume');
+check('feature: /r/ résumé viewer page exists', () => {
+  const fp = path.join(ROOT, 'deploy-site', 'r', 'index.html');
+  if (!fs.existsSync(fp)) return 'deploy-site/r/index.html not found';
+  const v = fs.readFileSync(fp, 'utf8');
+  return v.indexOf('documents/portfolios/') > -1 || 'résumé viewer does not read from Firestore';
+});
+check('feature: /r/* redirect configured', () => {
+  const fp = path.join(ROOT, 'netlify.toml');
+  const t = fs.readFileSync(fp, 'utf8');
+  return /from\s*=\s*"\/r\/\*"/.test(t) || '/r/* redirect missing from root netlify.toml';
+});
+
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
   const m = src.match(/NOVA_TPLS\s*=\s*\{([^}]*)\}/);
