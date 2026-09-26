@@ -12515,7 +12515,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        only where zoom is unsupported. */
     var fitJs='(function(){var o=document.getElementById("r4uOuter"),f=document.getElementById("r4uFit");if(!f)return;'
       +'function d(){var vw=document.documentElement.clientWidth||window.innerWidth;var n=794;var s;'
-      +'if(vw>=n){s=Math.min(1.3,vw/(n*1.35));if(s<1)s=1;}else{s=vw/(n+24);}'   /* desktop: fill space (100%–130%, centered); mobile: fit to width */
+      +'if(vw>=n){s=Math.min(1.25,vw/(n*1.45));if(s<1)s=1;}else{s=vw/(n+24);}'   /* desktop: fill space (100%–125%, centered, generous side gutter); mobile: fit to width */
       +'f.style.transform=(s===1)?"none":"scale("+s+")";'
       +'f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";'                          /* centre the scaled page */
       +'f.style.marginBottom=(s===1?0:Math.round(f.offsetHeight*(s-1)))+"px";}'   /* reserve the scaled height so nothing clips */
@@ -12623,7 +12623,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(!slug) return;                                   /* nothing shared yet — don't auto-create */
     var out=document.getElementById('resumeOutput'); var page=out&&out.querySelector('.resume-a4-page');
     if(!page) return;
-    var sig=page.innerHTML.length+'|'+(page.textContent||'').slice(0,160);
+    /* The signature includes a STANDALONE-BUILDER version tag, not just the résumé
+       content — so when the hosted-page layout/fit code changes (e.g. the desktop
+       centering + scaling fix) every existing share auto-refreshes once on the next
+       app open, instead of keeping stale HTML forever because the content was
+       unchanged. Bump 'sv3' whenever _r4uBuildResumeStandalone's output changes. */
+    var sig='sv3|'+page.innerHTML.length+'|'+(page.textContent||'').slice(0,160);
     if(sig===window._r4uLastPubSig) return;             /* unchanged since last publish */
     window._r4uResumeSlug=slug;
     window._r4uPublishResume().then(function(){ window._r4uLastPubSig=sig; try{ localStorage.setItem('_r4uLastPubSig',sig); }catch(e){} }).catch(function(){});
