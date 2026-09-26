@@ -12482,14 +12482,29 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     try{ if(card.closest && card.closest('.preview-modal-body')) return; }catch(e){}
     var els; try{ els=card.querySelectorAll(SEL); }catch(e){ return; }
     var active=null; try{ active=document.activeElement; }catch(_){}
+    function blankEl(e){ var m=false; try{ m=!!e.querySelector('img,svg,canvas,video'); }catch(_){}
+      return !m && !((e.textContent||'').replace(/ /g,' ').trim()); }
     for(var i=0;i<els.length;i++){ var e=els[i];
       /* Never hide a field the user is currently editing (so an inline edit that
          momentarily empties a field doesn't make it vanish mid-type). */
       if(active && (e===active || e.contains(active))) { if(e.style.display==='none') e.style.display=''; continue; }
-      var hasMedia=false; try{ hasMedia=!!e.querySelector('img,svg,canvas,video'); }catch(_){}
-      var blank=!hasMedia && !((e.textContent||'').replace(/ /g,' ').trim());
+      var blank=blankEl(e);
       if(blank){ if(e.style.display!=='none') e.style.display='none'; }
       else if(e.style.display==='none'){ e.style.display=''; }
+    }
+    /* Collapse a whole SECTION that has no visible body left (e.g. a Key
+       Achievements / awards section whose entries were all cleared) — otherwise the
+       section heading + its margins remain as a blank gap between real sections. */
+    var secs; try{ secs=card.querySelectorAll('.r-sec'); }catch(_e){ secs=[]; }
+    for(var j=0;j<secs.length;j++){ var sec=secs[j];
+      if(active && (sec===active || sec.contains(active))) { if(sec.style.display==='none') sec.style.display=''; continue; }
+      var mediaS=false; try{ mediaS=!!sec.querySelector('img,svg,canvas,video'); }catch(_){}
+      var full=(sec.textContent||'').replace(/ /g,' ').trim();
+      var t=sec.querySelector('.r-sec-t'); var head=t?((t.textContent||'').replace(/ /g,' ').trim()):'';
+      var body=(head && full.indexOf(head)===0)?full.slice(head.length).trim():full;
+      var blankSec=!mediaS && !body;                 /* nothing beyond the heading */
+      if(blankSec){ if(sec.style.display!=='none') sec.style.display='none'; }
+      else if(sec.style.display==='none'){ sec.style.display=''; }
     }
   }
   window._r4uCollapseEmpty=collapse;
