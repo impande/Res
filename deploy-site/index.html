@@ -7675,7 +7675,7 @@ if ('serviceWorker' in navigator) {
       }) };
     }catch(e){ return null; }
   }
-  function _apply(order){
+  function _apply(order, rootEl, tplOverride){
     try{
       if(!order) return;
       // Legacy array shape (saved briefly before this guard existed) carries no
@@ -7684,10 +7684,11 @@ if ('serviceWorker' in navigator) {
       if(Array.isArray(order)) return;
       var secsArr=order.secs, tpl=order.tpl;
       if(!secsArr || !secsArr.length) return;
-      // Only re-apply when the current template matches the captured one; otherwise
-      // let the new template render in its own default order.
-      if(!tpl || tpl !== _curTpl()) return;
-      var out=document.getElementById('resumeOutput'); if(!out) return;
+      // Only re-apply when the target's template matches the captured one; otherwise
+      // let the new template render in its own default order. rootEl/tplOverride let
+      // this run on the Preview modal (#previewModalBody), not just the output card.
+      if(!tpl || tpl !== (tplOverride||_curTpl())) return;
+      var out=rootEl||document.getElementById('resumeOutput'); if(!out) return;
       var page=out.querySelector('.resume-a4-page'); if(!page) return;
       var aside=page.querySelector('.r-aside'), main=page.querySelector('.r-main-col');
       var byTitle={};
@@ -7733,6 +7734,46 @@ if ('serviceWorker' in navigator) {
   }
   window._r4uCaptureSecOrder=_cap;
   window._r4uApplySecOrder=_apply;
+
+  /* The Preview Resume modal renders through its own path (renderPreviewWithTemplate
+     → #previewModalBody) and never had the saved section order applied — so a
+     reorder showed on the output card but not in the modal. Watch the modal body
+     and re-apply the saved order whenever it renders (after KA is injected).
+     Template-scoped to the modal's currently-previewed template, and guarded so it
+     only writes when the order actually differs (no observer feedback loop). */
+  function _savedOrder(){
+    var so=null; try{ so=(typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) || null; }catch(e){}
+    if(!so){ try{ so=JSON.parse(localStorage.getItem('_r4uSecOrder')||'null'); }catch(e){} }
+    return so;
+  }
+  function _wantTitles(so, cur){
+    var arr=(so&&so.secs)?so.secs:null; if(!arr) return null;
+    var saved=arr.map(function(o){ return ((o&&o.title)||'').trim(); }).filter(Boolean);
+    var out=saved.filter(function(t){ return cur.indexOf(t)>-1; });
+    cur.forEach(function(t){ if(out.indexOf(t)<0) out.push(t); });
+    for(var i=0;i<out.length;i++){ if(/summary/i.test(out[i])){ if(i>0){ var s=out.splice(i,1)[0]; out.unshift(s); } break; } }
+    return out;
+  }
+  function _applyToPreview(){
+    try{
+      var body=document.getElementById('previewModalBody'); if(!body) return;
+      var page=body.querySelector('.resume-a4-page'); if(!page) return;
+      var so=_savedOrder(); if(!so || !so.secs) return;
+      var sel=document.getElementById('previewTplSelect'); var mt=(sel&&sel.value)||_curTpl();
+      if(!so.tpl || so.tpl!==mt) return;                     /* template-scoped */
+      var cur=[].map.call(page.querySelectorAll('.r-sec .r-sec-t'),function(t){ return (t.textContent||'').trim(); });
+      var want=_wantTitles(so, cur); if(!want) return;
+      if(cur.join('||')===want.join('||')) return;           /* already ordered — no DOM writes, no loop */
+      _apply(so, body, mt);
+    }catch(e){}
+  }
+  var _pvT; function _dPrev(){ clearTimeout(_pvT); _pvT=setTimeout(_applyToPreview, 120); }
+  function _startPrevObs(){
+    var body=document.getElementById('previewModalBody'); if(!body) return false;
+    try{ new MutationObserver(_dPrev).observe(body,{childList:true,subtree:true}); }catch(e){}
+    return true;
+  }
+  if(!_startPrevObs()){ var _pn=0, _piv=setInterval(function(){ if(_startPrevObs()||++_pn>60) clearInterval(_piv); },300); }
 
   /* One-time repair for resumes saved before the bullet-dedup fix. That fix's
      predecessor copied the first same-titled role's bullets onto every other
