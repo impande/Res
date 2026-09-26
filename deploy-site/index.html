@@ -12606,7 +12606,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        automatically if the element is later refilled. */
     var ev; try{ ev=root.querySelectorAll('*'); }catch(_v){ ev=[]; }
     for(var v=0; v<ev.length; v++){ var el=ev[v]; var tn=(el.tagName||'').toLowerCase();
-      if(tn==='svg'||tn==='path'||tn==='img'||tn==='input'||tn==='textarea'||tn==='select'||tn==='canvas'||tn==='video') continue;
+      /* Never touch SVG icons. Their geometry children (rect, polyline, circle, …)
+         have no text so they look "blank", but hiding one breaks the icon — e.g.
+         the envelope's <rect> box was hidden, leaving only the flap, so the email
+         icon rendered as a stray chevron. ownerSVGElement is set on every element
+         INSIDE an <svg>; the svg root itself is covered by the tag check. */
+      if(tn==='svg'||el.ownerSVGElement||tn==='path'||tn==='img'||tn==='input'||tn==='textarea'||tn==='select'||tn==='canvas'||tn==='video') continue;
       if(el.classList && (el.classList.contains('r-sec')||el.classList.contains('r-sec-t')||el.classList.contains('resume-a4-page')
         ||el.classList.contains('pg-break')||el.classList.contains('pg-pagemark')||el.classList.contains('pg-num'))) continue;
       if(el.hasAttribute && el.hasAttribute('data-pglabel')) continue;   /* page-break markers (label via CSS ::before) */
