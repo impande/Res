@@ -12437,6 +12437,22 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       row.appendChild(dbtn);
     }
     card.appendChild(row);
+
+    /* Optional: create a separate, FIXED link/QR for the current version, so a
+       user can send different versions of their résumé to different recruiters,
+       each on its own link (the main link keeps auto-updating). */
+    if(typeof opts.onNewVersion === 'function'){
+      var nvRow=document.createElement('div'); nvRow.style.cssText='margin-top:12px;border-top:1px solid var(--border,#eee);padding-top:12px;';
+      var nvb=mkbtn('✦ New version link', false);
+      nvb.style.width='100%'; nvb.onclick=function(){ try{ opts.onNewVersion(); }catch(e){} };
+      nvRow.appendChild(nvb);
+      if(opts.newVersionNote){
+        var nn=document.createElement('div'); nn.textContent=opts.newVersionNote;
+        nn.style.cssText='font-size:0.7rem;color:var(--muted,#8a8a94);line-height:1.45;margin:8px 4px 0;';
+        nvRow.appendChild(nn);
+      }
+      card.appendChild(nvRow);
+    }
     ov.appendChild(card); document.body.appendChild(ov); document.addEventListener('keydown', esc);
   };
 
@@ -12576,21 +12592,30 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'<body><div id="r4uOuter"><div id="r4uFit"><div id="resumeOutput">'+pagesHtml+'</div></div></div>'
       +'<scr'+'ipt>'+fitJs+'<\/scr'+'ipt></body></html>';
   };
-  window._r4uPublishResume=function(){
+  window._r4uPublishResume=function(forceNew){
     return new Promise(function(resolve,reject){
       var html; try{ html=window._r4uBuildResumeStandalone(); }catch(e){ reject(e); return; }
       if(!html){ reject(new Error('no-resume')); return; }
       if(html.length>950000){ reject(new Error('too-large')); return; }
-      /* Stable slug so the SAME printed QR keeps working and auto-updates. */
-      var slug=window._r4uResumeSlug;
-      if(!slug){ try{ slug=localStorage.getItem('_r4uResumeSlug')||''; }catch(e){} }
-      if(!slug){ slug=slugify(personName())+'-'+rand(6); }
-      window._r4uResumeSlug=slug; try{ localStorage.setItem('_r4uResumeSlug',slug); }catch(e){}
+      var slug;
+      if(forceNew){
+        /* A distinct, FIXED version link: a brand-new slug that is NOT stored as the
+           primary auto-updating slug. This freezes a snapshot of the current version
+           (e.g. tailored for one job) while the main link keeps tracking edits — so
+           different versions can go to different recruiters, each on its own link. */
+        slug=slugify(personName())+'-v'+rand(5);
+      } else {
+        /* Stable slug so the SAME printed QR keeps working and auto-updates. */
+        slug=window._r4uResumeSlug;
+        if(!slug){ try{ slug=localStorage.getItem('_r4uResumeSlug')||''; }catch(e){} }
+        if(!slug){ slug=slugify(personName())+'-'+rand(6); }
+        window._r4uResumeSlug=slug; try{ localStorage.setItem('_r4uResumeSlug',slug); }catch(e){}
+      }
       /* 30-day validity: recorded on the doc and enforced by the /r/ viewer. */
       var expires=new Date(Date.now()+30*24*60*60*1000);
       var url='https://firestore.googleapis.com/v1/projects/'+PROJ+'/databases/(default)/documents/portfolios/'+encodeURIComponent(slug)+'?updateMask.fieldPaths=html&updateMask.fieldPaths=kind&updateMask.fieldPaths=expiresAt&key='+KEY;
       fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{html:{stringValue:html},kind:{stringValue:'resume'},expiresAt:{timestampValue:expires.toISOString()}}})})
-        .then(function(r){ if(!r.ok) throw new Error('save-'+r.status); resolve({slug:slug, expires:expires}); })
+        .then(function(r){ if(!r.ok) throw new Error('save-'+r.status); resolve({slug:slug, expires:expires, isNew:!!forceNew}); })
         .catch(reject);
     });
   };
@@ -12625,15 +12650,16 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }
   /* Override the earlier stub: publish the resume as a PDF-identical page, then
      show a scannable QR that opens /r/<slug>. */
-  window._r4uShareResumeQR=function(){
+  window._r4uShareResumeQR=function(o){
+    o=o||{};
     var out=document.getElementById('resumeOutput');
     if(!out || !out.querySelector('.resume-a4-page')){
       showInfo('Generate your resume first','Create your resume, then tap “Share / QR” again to get a scannable code that opens it — looking just like your PDF.');
       return false;
     }
     showLoading();
-    window._r4uPublishResume().then(function(res){
-      var slug=res.slug, expires=res.expires;
+    window._r4uPublishResume(o.newVersion).then(function(res){
+      var slug=res.slug, expires=res.expires, isNew=res.isNew;
       /* Use the origin that generated the resume so the link resolves in the same
          environment: a UAT publish → a UAT link, a production publish → a
          resume4u.help link. (Hardcoding resume4u.help 404s until /r/ ships to prod.) */
@@ -12642,14 +12668,17 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       var nm=personName(), role=personRole();
       var validUntil=expires.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
       if(window._r4uShowQR) window._r4uShowQR(url, {
-        title:'Your resume QR code',
-        sub:'Scan to open your resume — it looks just like your PDF.',
+        title: isNew ? 'New version link' : 'Your resume QR code',
+        sub: isNew ? 'A separate, fixed copy of this version — share it with a specific recruiter.' : 'Scan to open your resume — it looks just like your PDF.',
         name:nm, role:role,
-        caption:'Valid for 30 days · until '+validUntil,
+        caption:(isNew?'Fixed version · ':'')+'Valid for 30 days · until '+validUntil,
         hideUrl:true, hideCopy:true,
         poster:true, posterTitle:'Scan to view my resume', validText:'Link valid until '+validUntil,
-        file:(slugify(nm)||'resume')+'-qr.png'
+        file:(slugify(nm)||'resume')+(isNew?'-version':'')+'-qr.png',
+        onNewVersion: function(){ window._r4uShareResumeQR({newVersion:true}); },
+        newVersionNote: isNew ? 'Your main link keeps updating with edits; this one stays fixed to this version.' : 'Want a fixed copy for a specific job? Create a separate version link — your main link stays as it is.'
       });
+      if(isNew && typeof showToast==='function') showToast('New version link created — your main link is unchanged.','success');
     }).catch(function(e){
       var m=(e&&e.message==='too-large')?'This resume is too large to publish as a link. Try removing any large images.':'Please check your connection and try again.';
       showError(m);
