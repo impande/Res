@@ -137,6 +137,33 @@ check('feature: portfolio analytics recording (share fn)', () => {
   return fn.indexOf('updateMask.fieldPaths=daily') > -1 || 'daily-bucket recording missing from share-portfolio.js';
 });
 
+// QR share codes (résumé actions bar + portfolio insights) — bundled offline lib
+present('feature: QR generator bundled inline', 'id="_r4uQR"');
+present('feature: QR share modal + helpers', 'window._r4uShowQR');
+present('feature: résumé Share/QR button wired', '_r4uShareResumeQR()');
+present('feature: portfolio QR link in insights', '_r4uPortfolioQR');
+
+// Hosted résumé page (QR opens a PDF-identical résumé at /r/<slug>)
+present('feature: résumé publish/share block', 'id="_r4uResumeShare"');
+present('feature: standalone résumé builder', '_r4uBuildResumeStandalone');
+present('feature: résumé publish to Firestore', 'window._r4uPublishResume');
+check('feature: /r/ résumé viewer page exists', () => {
+  const fp = path.join(ROOT, 'deploy-site', 'r', 'index.html');
+  if (!fs.existsSync(fp)) return 'deploy-site/r/index.html not found';
+  const v = fs.readFileSync(fp, 'utf8');
+  return v.indexOf('documents/portfolios/') > -1 || 'résumé viewer does not read from Firestore';
+});
+check('feature: /r/* redirect configured (both netlify.toml)', () => {
+  const re = /from\s*=\s*"\/r\/\*"/;
+  const rootT = fs.readFileSync(path.join(ROOT, 'netlify.toml'), 'utf8');
+  const dsT = fs.readFileSync(path.join(ROOT, 'deploy-site', 'netlify.toml'), 'utf8');
+  // deploy-site/netlify.toml is the config Netlify actually serves routing from
+  // (it carries /p/*, /t/* — the live redirect set), so /r/* MUST be there.
+  if (!re.test(dsT)) return '/r/* redirect missing from deploy-site/netlify.toml (the effective routing config)';
+  if (!re.test(rootT)) return '/r/* redirect missing from root netlify.toml';
+  return true;
+});
+
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
   const m = src.match(/NOVA_TPLS\s*=\s*\{([^}]*)\}/);

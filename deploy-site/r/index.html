@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loading resume…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Arial,sans-serif;background:#f1f1f4;color:#1e293b;}
+  .msg{text-align:center;padding:24px;}
+  .spinner{width:44px;height:44px;border:3px solid #e2e8f0;border-top-color:#d97706;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 18px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  h2{font-size:1.15rem;font-weight:700;margin:0 0 8px;}
+  p{font-size:0.88rem;color:#64748b;line-height:1.6;}
+  a{color:#d97706;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="msg" id="msg">
+  <div class="spinner"></div>
+  <h2>Loading resume…</h2>
+  <p>Please wait a moment.</p>
+</div>
+<script>
+(function() {
+  var parts = window.location.pathname.split('/').filter(function(s){ return s.length > 0; });
+  var slug = parts[parts.length - 1] || '';
+  if (!slug || slug === 'r') {
+    document.getElementById('msg').innerHTML =
+      '<h2>Resume not found</h2><p>No resume ID in the URL.<br>Visit <a href="https://resume4u.help">resume4u.help</a> to create one.</p>';
+    return;
+  }
+  function showNotFound() {
+    document.getElementById('msg').innerHTML =
+      '<h2>Resume not found</h2>'
+      + '<p>This link may have expired or the resume does not exist.<br>'
+      + 'Please <a href="https://resume4u.help">generate a new share link</a>.</p>';
+  }
+  function showExpired() {
+    document.getElementById('msg').innerHTML =
+      '<h2>This resume link has expired</h2>'
+      + '<p>Shared resume links stay active for 30 days.<br>'
+      + 'Ask for an updated link, or create your own free at <a href="https://resume4u.help">resume4u.help</a>.</p>';
+  }
+  function renderHtml(html) {
+    document.open('text/html', 'replace');
+    document.write(html);
+    document.close();
+  }
+  // Resume pages are stored in the same Firestore collection as portfolios (an
+  // html document), read directly in the browser (the correct Referer lets a
+  // restricted API key work). No Netlify function is used, so no portfolio-only
+  // analytics or testimonial injection runs against a resume doc.
+  var fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
+    + encodeURIComponent(slug)
+    + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+  // cache:'no-store' so a fresh scan always pulls the latest published résumé.
+  // (Do NOT append extra query params — Firestore's REST API rejects unknown
+  // parameters with a 400, which would break the fetch.)
+  fetch(fsUrl, { cache: 'no-store' })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(doc) {
+      if (!doc || !doc.fields) { showNotFound(); return; }
+      // Enforce the 30-day validity window recorded at publish time.
+      var exp = doc.fields.expiresAt && doc.fields.expiresAt.timestampValue;
+      if (exp) { var t = Date.parse(exp); if (!isNaN(t) && Date.now() > t) { showExpired(); return; } }
+      var html = doc.fields.html && doc.fields.html.stringValue;
+      if (html) { renderHtml(html); } else { showNotFound(); }
+    })
+    .catch(showNotFound);
+})();
+</script>
+</body>
+</html>
