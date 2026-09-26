@@ -7760,6 +7760,14 @@ if ('serviceWorker' in navigator) {
       }
       if(already) return;                                    /* already arranged — no DOM writes, no loop */
       _apply(so, body, mt);
+      /* Reordering changes each column's height, so the page-break lines and the
+         "Page x / N" count computed at render time are now stale. Recompute them
+         for the new arrangement (guard above stops this from looping — once the
+         order is settled, the pagemark mutations don't re-trigger a reorder). */
+      setTimeout(function(){
+        try{ if(typeof scalePreview==='function') scalePreview(); }catch(e){}
+        try{ if(typeof window._injectPreviewPageBreaks==='function') window._injectPreviewPageBreaks(); }catch(e){}
+      }, 90);
     }catch(e){}
   }
   var _pvT; function _dPrev(){ clearTimeout(_pvT); _pvT=setTimeout(_applyToPreview, 120); }
