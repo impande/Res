@@ -7645,6 +7645,24 @@ if ('serviceWorker' in navigator) {
         while(sib && sib.classList && sib.classList.contains('r-div')){ var nx=sib.nextElementSibling; move.push(sib); sib=nx; }
         move.forEach(function(n){ target.appendChild(n); });
       });
+      /* Pin the Professional Summary to the top. A stale saved arrangement (e.g. an
+         old reorder) must never push Key Achievements or another section above the
+         summary — the summary is the conventional first section of a résumé. Find it
+         by its body class (.r-sum) and move it before the first .r-sec in its own
+         column, carrying any divider that follows it (minimal template). */
+      try{
+        var sumBody = page.querySelector('.r-sum');
+        var sumSec = sumBody ? (sumBody.closest ? sumBody.closest('.r-sec') : null) : null;
+        if(sumSec && sumSec.parentNode){
+          var par = sumSec.parentNode, kids = par.children, firstSec = null;
+          for(var i=0;i<kids.length;i++){ if(kids[i].classList && kids[i].classList.contains('r-sec')){ firstSec = kids[i]; break; } }
+          if(firstSec && firstSec !== sumSec){
+            var grp=[sumSec], s2=sumSec.nextElementSibling;
+            while(s2 && s2.classList && s2.classList.contains('r-div')){ var nx2=s2.nextElementSibling; grp.push(s2); s2=nx2; }
+            for(var g=0; g<grp.length; g++){ par.insertBefore(grp[g], firstSec); }
+          }
+        }
+      }catch(e){}
     }catch(e){}
   }
   window._r4uCaptureSecOrder=_cap;
