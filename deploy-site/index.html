@@ -7326,19 +7326,37 @@ if ('serviceWorker' in navigator) {
   var _origStart = window.startRazorpayPayment;
   if(typeof _origStart !== 'function') return;
 
-  function _createOrder(amount, currency){
+  /* One create-order attempt. Resolves the order_id, or null on timeout/error.
+     Include the signed-in account's uid/email as order notes so the Razorpay
+     webhook can tie a captured payment back to the account and grant 24h access
+     even if the browser handler never runs. */
+  function _createOrderOnce(amount, currency, timeoutMs){
     return new Promise(function(resolve){
       var done = false;
-      var to = setTimeout(function(){ if(!done){ done = true; resolve(null); } }, 7000);
+      var to = setTimeout(function(){ if(!done){ done = true; resolve(null); } }, timeoutMs);
+      var notes = null;
+      try{ if(window._fbUser && window._fbUser.uid){ notes = { uid: window._fbUser.uid, email: (window._fbUser.email||'') }; } }catch(e){}
       try{
         fetch(GEN, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'create-order', amount: amount, currency: currency })
+          body: JSON.stringify({ action: 'create-order', amount: amount, currency: currency, notes: notes })
         }).then(function(r){ return r.ok ? r.json() : null; })
           .then(function(o){ if(done) return; done = true; clearTimeout(to); resolve(o && o.id ? o.id : null); })
           .catch(function(){ if(done) return; done = true; clearTimeout(to); resolve(null); });
       }catch(e){ if(!done){ done = true; clearTimeout(to); resolve(null); } }
+    });
+  }
+  /* The #1 cause of "UPI charged but no download" was create-order returning null
+     (cold-start latency beating the old 7s cap), which opened a keyless checkout
+     that captures a UPI payment WITHOUT firing the success handler. Give it a
+     longer budget and one retry (the function is warm on the 2nd try, so it's
+     fast) so an order_id is available far more often — which is what makes the
+     handler fire, the PDF download, and markPaid run. */
+  function _createOrder(amount, currency){
+    return _createOrderOnce(amount, currency, 12000).then(function(id){
+      if(id) return id;
+      return _createOrderOnce(amount, currency, 12000);
     });
   }
 
@@ -7411,6 +7429,59 @@ if ('serviceWorker' in navigator) {
       });
     });
   };
+})();
+</script>
+<script id="_r4uPaidWebhookSync">
+/* ── Webhook-backed paid recovery ─────────────────────────────────────────────
+   The Razorpay webhook (razorpay-webhook.js) records a 24h paid flag in Redis,
+   keyed by the signed-in account's uid/email, whenever a payment is CAPTURED —
+   which is reliable even if the browser's checkout success handler never fired
+   (the "UPI charged but no download" bug). Here the client polls `check-paid`
+   and, when it sees the flag, unlocks the download for free so the user is never
+   charged twice. Signed-in only (that's what the order notes can key to);
+   fail-safe (any error → no change). ── */
+(function(){
+  var GEN='/.netlify/functions/generate';
+  var _granted=false, _polling=false;
+  function _who(){ try{ var u=window._fbUser; if(u&&u.uid) return {uid:u.uid,email:(u.email||'')}; }catch(e){} return null; }
+  function _check(){
+    var w=_who(); if(!w) return Promise.resolve(null);
+    return fetch(GEN,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'check-paid',uid:w.uid,email:w.email})})
+      .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; });
+  }
+  function _grant(paidAt){
+    if(_granted) return; _granted=true;
+    try{ window.__acctPaidAt = paidAt || Date.now(); }catch(e){}
+    try{ if(typeof window.markPaid==='function') window.markPaid(); }catch(e){}
+    try{ var b=document.getElementById('payNowBtn'); if(b){ b.disabled=false; } }catch(e){}
+    try{ if(typeof window.showToast==='function') window.showToast('✓ Payment received — your download is unlocked. Tap Download.','success'); }catch(e){}
+  }
+  function _once(){ _check().then(function(res){ if(res && res.paid){ _grant(res.paidAt); } }); }
+  /* Poll for a short window after a payment is started, to catch a capture whose
+     browser handler was missed. Stops as soon as the flag appears. */
+  window._r4uPollPaid=function(){
+    if(_polling||_granted) return; if(!_who()) return;
+    _polling=true; var n=0;
+    var iv=setInterval(function(){
+      n++;
+      _check().then(function(res){
+        if(res && res.paid){ _grant(res.paidAt); clearInterval(iv); _polling=false; }
+        else if(n>=40){ clearInterval(iv); _polling=false; }   /* ~40 × 4s ≈ 2.7 min */
+      });
+    }, 4000);
+  };
+  /* Kick off polling whenever a payment is launched. */
+  try{
+    var _s=window.startRazorpayPayment;
+    if(typeof _s==='function' && !_s.__r4uPollWrap){
+      var _wrapped=function(){ var r=_s.apply(this,arguments); try{ setTimeout(window._r4uPollPaid,3000); }catch(e){} return r; };
+      _wrapped.__r4uPollWrap=true; window.startRazorpayPayment=_wrapped;
+    }
+  }catch(e){}
+  /* On load (once signed in), restore access if a recent payment is on record —
+     e.g. the capture landed but this device/tab never got the download. */
+  var t=0, iv0=setInterval(function(){ t++; if(_who()){ _once(); clearInterval(iv0); } else if(t>60){ clearInterval(iv0); } }, 1000);
 })();
 </script>
 <script>
