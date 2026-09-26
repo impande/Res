@@ -12506,22 +12506,29 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       if(!mediaS && !body){ if(sec.style.display!=='none') sec.style.display='none'; }
       else if(sec.style.display==='none'){ sec.style.display=''; }
     }
-    /* Catch-all for stray "divider" gaps: a BLANK element that only draws a border
-       (e.g. an empty bordered row between the header and the first section — outside
-       any .r-sec). Decorative accents use background bars (no border) and real
-       bordered elements (header, section titles) have text, so they're unaffected.
-       Skips media, form controls, sections and the focused element; restores on refill. */
+    /* Catch-all for stray gaps: any BLANK element that still occupies vertical space
+       (height, margin, padding OR a border) — e.g. an empty spacer/divider between the
+       header and the first section, outside any .r-sec. Spares DECORATIVE elements
+       (a background colour or image → accent bars, the watermark), media, form
+       controls, sections, the résumé page/wrapper and the focused element. Restores
+       automatically if the element is later refilled. */
     var ev; try{ ev=root.querySelectorAll('*'); }catch(_v){ ev=[]; }
     for(var v=0; v<ev.length; v++){ var el=ev[v]; var tn=(el.tagName||'').toLowerCase();
       if(tn==='svg'||tn==='path'||tn==='img'||tn==='input'||tn==='textarea'||tn==='select'||tn==='canvas'||tn==='video') continue;
-      if(el.classList && (el.classList.contains('r-sec')||el.classList.contains('r-sec-t'))) continue;
+      if(el.classList && (el.classList.contains('r-sec')||el.classList.contains('r-sec-t')||el.classList.contains('resume-a4-page'))) continue;
+      if(el.id==='resumeOutput'||el.id==='r4uFit'||el.id==='r4uOuter') continue;
       if(active && (el===active || el.contains(active))) continue;
       var wasHid = el.getAttribute && el.getAttribute('data-r4uhid')==='1';
       if(!blankEl(el)){ if(wasHid){ el.style.display=''; el.removeAttribute('data-r4uhid'); } continue; }
       var bc; try{ bc=getComputedStyle(el); }catch(_c){ continue; }
-      var bt=(parseFloat(bc.borderTopWidth)||0)>0 && bc.borderTopStyle!=='none';
-      var bb=(parseFloat(bc.borderBottomWidth)||0)>0 && bc.borderBottomStyle!=='none';
-      if(bt||bb){ if(el.style.display!=='none'){ el.style.display='none'; if(el.setAttribute) el.setAttribute('data-r4uhid','1'); } }
+      if(bc.backgroundImage && bc.backgroundImage!=='none') continue;                 /* watermark / gradient accent */
+      var bg=bc.backgroundColor; if(bg && bg!=='rgba(0, 0, 0, 0)' && bg!=='transparent') continue;  /* accent bar */
+      var occupies = (el.offsetHeight>2)
+        || (parseFloat(bc.height)||0)>2 || (parseFloat(bc.minHeight)||0)>2
+        || (parseFloat(bc.marginTop)||0)>2 || (parseFloat(bc.marginBottom)||0)>2
+        || (parseFloat(bc.paddingTop)||0)>2 || (parseFloat(bc.paddingBottom)||0)>2
+        || (parseFloat(bc.borderTopWidth)||0)>0 || (parseFloat(bc.borderBottomWidth)||0)>0;
+      if(occupies){ if(el.style.display!=='none'){ el.style.display='none'; if(el.setAttribute) el.setAttribute('data-r4uhid','1'); } }
     }
   }
   function collapse(){
