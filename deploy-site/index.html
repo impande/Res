@@ -1150,7 +1150,9 @@
     .tip-card-icon{font-size:1rem;margin-bottom:5px;}
     .tip-card-title{font-size:0.78rem;font-weight:700;color:var(--text);margin-bottom:4px;}
     .tip-card-body{font-size:0.72rem;color:var(--muted);line-height:1.55;}
-    @media(min-width:1100px){#tipsSidebar{display:block;}}
+    /* Writing-tips rail hidden on desktop (was shown ≥1100px) — kept out of the
+       résumé workspace per request; tips still available in the Quick Tips drawer. */
+    #tipsSidebar{display:none!important;}
     @media(max-width:768px){.mob-prog-label{display:none;}.mob-prog-track{display:none;}#sidebar{display:none;}}
     #mhdrSection{transition:opacity .18s ease;}
     #mhdrSection.ghost-rotating{color:var(--muted);font-weight:500;opacity:0.55;font-style:italic;}
