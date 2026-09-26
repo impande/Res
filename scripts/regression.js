@@ -143,6 +143,11 @@ present('feature: QR share modal + helpers', 'window._r4uShowQR');
 present('feature: résumé Share/QR button wired', '_r4uShareResumeQR()');
 present('feature: portfolio QR link in insights', '_r4uPortfolioQR');
 
+// Per-version résumé links: a fixed, separate link/QR per version alongside the
+// auto-updating main link (so different versions go to different recruiters).
+present('feature: per-version link (forceNew publish)', 'forceNew');
+present('feature: per-version link (New version button)', 'onNewVersion');
+
 // Hosted résumé page (QR opens a PDF-identical résumé at /r/<slug>)
 present('feature: résumé publish/share block', 'id="_r4uResumeShare"');
 present('feature: standalone résumé builder', '_r4uBuildResumeStandalone');
