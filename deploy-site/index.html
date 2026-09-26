@@ -7484,6 +7484,64 @@ if ('serviceWorker' in navigator) {
   var t=0, iv0=setInterval(function(){ t++; if(_who()){ _once(); clearInterval(iv0); } else if(t>60){ clearInterval(iv0); } }, 1000);
 })();
 </script>
+<script id="_r4uPaidAcctScope">
+/* Account-scope the ₹9 paid access so ONE account's payment can never unlock a
+   free download for a DIFFERENT account on the same device.
+   Cause: the core keeps a device-wide 24h flag ('r4u_paid') that hasPaid() trusts
+   regardless of who is signed in — so after account A paid, account B on the same
+   device got a free download. Here we tag the flag with the paying account and
+   drop it for anyone else. Signed-in access then comes from that account's own
+   record (window.__acctPaidAt, synced from its Firestore _paidAt), which is
+   correctly per-account. Anonymous sessions keep an anon-created flag. */
+(function(){
+  var KEY='r4u_paid', UIDKEY='_r4uPaidUid', DAY=86400000;
+  function uidNow(){ try{ return (window._fbUser&&window._fbUser.uid)?window._fbUser.uid:''; }catch(e){ return ''; } }
+  function get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+  /* Tag every payment with the account that made it (or '_anon' when signed out). */
+  try{
+    var _om=window.markPaid;
+    if(typeof _om==='function' && !_om.__r4uScoped){
+      window.markPaid=function(){ var r; try{ r=_om.apply(this,arguments); }catch(e){}
+        try{ localStorage.setItem(UIDKEY, uidNow()||'_anon'); }catch(e){} return r; };
+      window.markPaid.__r4uScoped=true;
+    }
+  }catch(e){}
+
+  /* Re-read THIS account's paid record from the cloud (24h, cross-device), so a
+     genuinely-paid account keeps access after the device flag is dropped. */
+  function reSync(uid){
+    try{ if(!uid || typeof _fbDb==='undefined' || !_fbDb) return;
+      _fbDb.collection('users').doc(uid).get().then(function(d){
+        try{ var v=d&&d.exists&&d.data()&&d.data()._paidAt;
+          if(v&&(Date.now()-v)<DAY){ window.__acctPaidAt=v; } }catch(e){}
+      }).catch(function(){});
+    }catch(e){}
+  }
+
+  /* When signed in, a device flag owned by a different (or unknown) account is not
+     valid for this account — remove it. */
+  function cleanupFor(uid){ if(!uid) return; if(get(UIDKEY)!==uid){ del(KEY); del(UIDKEY); } }
+
+  /* Load-time (before Firebase auth resolves): neutralise any flag not confirmed
+     anonymous, so a stale signed-in flag can't grant a free download in the gap.
+     The legitimate account's access returns via the account (__acctPaidAt) sync. */
+  try{ if(get(UIDKEY)!=='_anon'){ del(KEY); del(UIDKEY); } }catch(e){}
+
+  var _last=uidNow();
+  cleanupFor(_last);
+  setInterval(function(){
+    var u=uidNow();
+    if(u!==_last){
+      _last=u;
+      try{ window.__acctPaidAt=0; }catch(e){}   /* forget the previous account's marker */
+      cleanupFor(u);
+      reSync(u);
+    }
+  }, 600);
+})();
+</script>
 <script>
 /* ── Text-size control (Small / Medium / Large), reflected in the downloaded PDF ──
    Resume text is ~rem-based, but scaling the document root would also resize the app
