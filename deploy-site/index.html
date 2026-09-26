@@ -2425,6 +2425,14 @@
       .preview-modal{border-radius:24px;max-height:88vh;}
       .preview-modal-handle{display:none;}
     }
+    /* Wide screens: show the résumé at full A4 desktop size (like the shared /r/
+       page) instead of a cramped 600px sheet. scalePreview() caps scale at
+       min(1, bodyWidth/794), so a body ≥794px renders at scale 1. Center the page
+       in the roomier modal. */
+    @media(min-width:860px){
+      .preview-modal{max-width:840px;}
+      .preview-scale-wrap{display:flex;justify-content:center;}
+    }
   </style>
   <!-- Firebase Auth + Firestore (compat SDK — works with existing vanilla JS) -->
   <!-- Firebase SDKs are loaded LAZILY to keep ~300KB of auth/firestore JS off
