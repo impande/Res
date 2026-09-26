@@ -164,6 +164,28 @@ check('feature: /r/* redirect configured (both netlify.toml)', () => {
   return true;
 });
 
+// Payment reliability + webhook recovery (₹9 PDF): the "UPI charged but no
+// download" bug. create-order retry, order notes, webhook + check-paid, client sync.
+present('payment: create-order retry (longer timeout)', '_createOrderOnce');
+present('payment: order notes carry account uid', 'notes: notes');
+present('payment: webhook client sync block', 'id="_r4uPaidWebhookSync"');
+present('payment: client polls check-paid', "action:'check-paid'");
+check('payment: razorpay webhook function verifies signature', () => {
+  const fp = path.join(ROOT, 'deploy-site', 'netlify', 'functions', 'razorpay-webhook.js');
+  if (!fs.existsSync(fp)) return 'razorpay-webhook.js not found';
+  const w = fs.readFileSync(fp, 'utf8');
+  cp.execSync('node --check ' + JSON.stringify(fp), { stdio: 'pipe' });
+  if (w.indexOf('createHmac') === -1) return 'webhook does not verify a signature';
+  if (w.indexOf('payment.captured') === -1) return 'webhook does not handle payment.captured';
+  return true;
+});
+check('payment: generate.js check-paid action (Redis-backed, fail-safe)', () => {
+  const fp = path.join(ROOT, 'deploy-site', 'netlify', 'functions', 'generate.js');
+  const g = fs.readFileSync(fp, 'utf8');
+  cp.execSync('node --check ' + JSON.stringify(fp), { stdio: 'pipe' });
+  return g.indexOf("action === 'check-paid'") > -1 || 'check-paid action missing from generate.js';
+});
+
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
   const m = src.match(/NOVA_TPLS\s*=\s*\{([^}]*)\}/);

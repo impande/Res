@@ -34,13 +34,27 @@ exports.handler = async function(event) {
       if (!amount || amount < 1) {
         return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Invalid amount' }) };
       }
+      // Carry the signed-in account's uid/email as order notes so the Razorpay
+      // webhook can grant 24h access to the right account when a payment is
+      // captured — even if the browser's success handler never runs (the
+      // "UPI charged but no download" case). Notes are optional and sanitised.
+      const orderBody = { amount, currency, payment_capture: 1 };
+      try {
+        const n = body.notes;
+        if (n && typeof n === 'object') {
+          const notes = {};
+          if (n.uid) notes.uid = String(n.uid).slice(0, 128);
+          if (n.email) notes.email = String(n.email).slice(0, 200);
+          if (Object.keys(notes).length) orderBody.notes = notes;
+        }
+      } catch (e) {}
       const orderRes = await fetch('https://api.razorpay.com/v1/orders', {
         method: 'POST',
         headers: {
           'Authorization': 'Basic ' + Buffer.from(keyId + ':' + secret).toString('base64'),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount, currency, payment_capture: 1 }),
+        body: JSON.stringify(orderBody),
       });
       const orderData = await orderRes.json();
       if (!orderRes.ok) {
@@ -51,6 +65,45 @@ exports.handler = async function(event) {
         headers: { ...CORS, 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: orderData.id, amount: orderData.amount, currency: orderData.currency }),
       };
+    }
+
+    // ── Paid-status check (webhook recovery) ──────────────────────────────────
+    // The Razorpay webhook records a 24h "paid" flag in Upstash Redis keyed by
+    // the account uid/email attached to the order. The client polls this so a
+    // captured payment unlocks the download even when the browser's checkout
+    // success handler never fired — preventing a second charge. Fail-safe: any
+    // error or missing config returns { paid:false } (never grants access wrongly).
+    if (body.action === 'check-paid') {
+      const RURL = process.env.UPSTASH_REDIS_REST_URL;
+      const RTOK = process.env.UPSTASH_REDIS_REST_TOKEN;
+      if (!RURL || !RTOK) {
+        return { statusCode: 200, headers: CORS, body: JSON.stringify({ paid: false }) };
+      }
+      const DAY = 86400000;
+      const keys = [];
+      if (body.uid) keys.push('r4u:paid:uid:' + String(body.uid).slice(0, 128));
+      if (body.email) keys.push('r4u:paid:email:' + String(body.email).trim().toLowerCase().slice(0, 200));
+      if (!keys.length) {
+        return { statusCode: 200, headers: CORS, body: JSON.stringify({ paid: false }) };
+      }
+      let paidAt = 0;
+      try {
+        for (const k of keys) {
+          const r = await fetch(RURL, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + RTOK, 'Content-Type': 'application/json' },
+            body: JSON.stringify(['GET', k]),
+          });
+          if (!r.ok) continue;
+          const j = await r.json();
+          const v = j && j.result ? parseInt(j.result, 10) : 0;
+          if (v && v > paidAt) paidAt = v;
+        }
+      } catch (e) {
+        return { statusCode: 200, headers: CORS, body: JSON.stringify({ paid: false }) };
+      }
+      const paid = !!paidAt && (Date.now() - paidAt) < DAY;
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ paid, paidAt: paid ? paidAt : 0 }) };
     }
 
     // ── PDF generation ────────────────────────────────────────────────────────
