@@ -698,14 +698,14 @@
        elements (accents, timeline dots) are deliberately excluded. Applies to the
        card, the PDF (printed from #resumeOutput) and the hosted /r/ page (this CSS
        is inlined into it). A JS pass (_r4uCollapseEmpty) also handles whitespace. */
-    #resumeOutput .r-award-name:empty, #resumeOutput .r-award-org:empty, #resumeOutput .r-award-desc:empty,
-    #resumeOutput .r-award-year:empty, #resumeOutput .r-award-top:empty, #resumeOutput .r-award-left:empty,
-    #resumeOutput .r-award-right:empty, #resumeOutput .r-co:empty, #resumeOutput .r-role:empty,
-    #resumeOutput .r-period:empty, #resumeOutput .r-yr:empty, #resumeOutput .r-deg:empty,
-    #resumeOutput .r-desc:empty, #resumeOutput .r-cert-name:empty, #resumeOutput .r-cert-org:empty,
-    #resumeOutput .r-cert-year:empty, #resumeOutput .r-cert-desc:empty, #resumeOutput .r-proj-name:empty,
-    #resumeOutput .r-proj-desc:empty, #resumeOutput .r-proj-link:empty, #resumeOutput .r-edu-desc:empty,
-    #resumeOutput .r-school:empty, #resumeOutput .r-award-sub:empty
+    .resume-a4-page .r-award-name:empty, .resume-a4-page .r-award-org:empty, .resume-a4-page .r-award-desc:empty,
+    .resume-a4-page .r-award-year:empty, .resume-a4-page .r-award-top:empty, .resume-a4-page .r-award-left:empty,
+    .resume-a4-page .r-award-right:empty, .resume-a4-page .r-co:empty, .resume-a4-page .r-role:empty,
+    .resume-a4-page .r-period:empty, .resume-a4-page .r-yr:empty, .resume-a4-page .r-deg:empty,
+    .resume-a4-page .r-desc:empty, .resume-a4-page .r-cert-name:empty, .resume-a4-page .r-cert-org:empty,
+    .resume-a4-page .r-cert-year:empty, .resume-a4-page .r-cert-desc:empty, .resume-a4-page .r-proj-name:empty,
+    .resume-a4-page .r-proj-desc:empty, .resume-a4-page .r-proj-link:empty, .resume-a4-page .r-edu-desc:empty,
+    .resume-a4-page .r-school:empty, .resume-a4-page .r-award-sub:empty
     { display:none !important; }
     /* Match the ATS-clean PDF: normal letter-spacing on headings / job title /
        contact in the on-screen preview too, so preview and download look identical
@@ -12464,65 +12464,56 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 })();
 </script>
 <script id="_r4uCollapseEmpty">
-/* Prod hotfix: collapse résumé text fields that are empty OR whitespace-only, so a
-   removed company/year (or any blank optional field, in any section) never leaves a
-   gap. CSS :empty handles truly-empty; this also catches whitespace, and runs on the
-   live card BEFORE the hosted /r/ snapshot is captured so the hosted page inherits it.
-   Only text fields are targeted — decorative elements are untouched. */
+/* Collapse empty résumé fields, entries AND whole sections so cleared content never
+   leaves a blank gap. Runs on the output card, the Preview modal and (once cloned)
+   the hosted page — anywhere a .resume-a4-page renders. display:none only removes
+   space, so this can never add a gap. Focus- and media-guarded. */
 (function(){
-  /* Leaf text fields AND whole entry containers (an award/experience/etc. with
-     everything cleared renders as an empty container that still reserves margin/
-     padding/border — that is the gap). An element is "blank" when it has no
-     visible text and no image/icon; blank ones are hidden and restored if refilled. */
   var SEL='.r-award,.r-award-left,.r-award-right,.r-award-top,.r-award-sub,.r-award-name,.r-award-org,.r-award-desc,.r-award-year,'
         +'.r-exp,.r-edu,.r-cert,.r-proj,.r-ka-item,'
         +'.r-co,.r-role,.r-period,.r-yr,.r-deg,.r-desc,.r-cert-name,.r-cert-org,.r-cert-year,.r-cert-desc,.r-proj-name,.r-proj-desc,.r-proj-link,.r-edu-desc,.r-school';
-  function collapse(){
-    var card=document.getElementById('resumeOutput'); if(!card) return;
-    try{ if(card.closest && card.closest('.preview-modal-body')) return; }catch(e){}
-    var els; try{ els=card.querySelectorAll(SEL); }catch(e){ return; }
+  function blankEl(e){
+    try{ if(e.querySelector('img,svg,canvas,video')) return false; }catch(_){}
+    return !((e.textContent||'').replace(/\u00a0/g,' ').trim());
+  }
+  function collapseIn(root){
+    if(!root) return;
     var active=null; try{ active=document.activeElement; }catch(_){}
-    function blankEl(e){ var m=false; try{ m=!!e.querySelector('img,svg,canvas,video'); }catch(_){}
-      return !m && !((e.textContent||'').replace(/ /g,' ').trim()); }
+    var els; try{ els=root.querySelectorAll(SEL); }catch(e){ els=[]; }
     for(var i=0;i<els.length;i++){ var e=els[i];
-      /* Never hide a field the user is currently editing (so an inline edit that
-         momentarily empties a field doesn't make it vanish mid-type). */
-      if(active && (e===active || e.contains(active))) { if(e.style.display==='none') e.style.display=''; continue; }
-      var blank=blankEl(e);
-      if(blank){ if(e.style.display!=='none') e.style.display='none'; }
+      if(active && (e===active || e.contains(active))){ if(e.style.display==='none') e.style.display=''; continue; }
+      if(blankEl(e)){ if(e.style.display!=='none') e.style.display='none'; }
       else if(e.style.display==='none'){ e.style.display=''; }
     }
-    /* Generic: hide any blank ENTRY (a direct child of a section other than its
-       heading) — covers EVERY section type incl. projects, certifications and any
-       custom section, without needing to know each entry's class name. */
-    var gsecs; try{ gsecs=card.querySelectorAll('.r-sec'); }catch(_g){ gsecs=[]; }
+    var gsecs; try{ gsecs=root.querySelectorAll('.r-sec'); }catch(_g){ gsecs=[]; }
     for(var g=0;g<gsecs.length;g++){ var gk=gsecs[g].children;
-      for(var h=0;h<gk.length;h++){ var kd=gk[h];
-        if(kd.classList && kd.classList.contains('r-sec-t')) continue;   /* keep the heading */
+      for(var q=0;q<gk.length;q++){ var kd=gk[q];
+        if(kd.classList && kd.classList.contains('r-sec-t')) continue;
         if(active && (kd===active || kd.contains(active))){ if(kd.style.display==='none') kd.style.display=''; continue; }
         if(blankEl(kd)){ if(kd.style.display!=='none') kd.style.display='none'; }
         else if(kd.style.display==='none'){ kd.style.display=''; }
       }
     }
-    /* Collapse a whole SECTION that has no visible body left (e.g. a Key
-       Achievements / awards section whose entries were all cleared) — otherwise the
-       section heading + its margins remain as a blank gap between real sections. */
-    var secs; try{ secs=card.querySelectorAll('.r-sec'); }catch(_e){ secs=[]; }
+    var secs; try{ secs=root.querySelectorAll('.r-sec'); }catch(_e){ secs=[]; }
     for(var j=0;j<secs.length;j++){ var sec=secs[j];
-      if(active && (sec===active || sec.contains(active))) { if(sec.style.display==='none') sec.style.display=''; continue; }
+      if(active && (sec===active || sec.contains(active))){ if(sec.style.display==='none') sec.style.display=''; continue; }
       var mediaS=false; try{ mediaS=!!sec.querySelector('img,svg,canvas,video'); }catch(_){}
-      var full=(sec.textContent||'').replace(/ /g,' ').trim();
-      var t=sec.querySelector('.r-sec-t'); var head=t?((t.textContent||'').replace(/ /g,' ').trim()):'';
+      var full=(sec.textContent||'').replace(/\u00a0/g,' ').trim();
+      var t=sec.querySelector('.r-sec-t'); var head=t?((t.textContent||'').replace(/\u00a0/g,' ').trim()):'';
       var body=(head && full.indexOf(head)===0)?full.slice(head.length).trim():full;
-      var blankSec=!mediaS && !body;                 /* nothing beyond the heading */
-      if(blankSec){ if(sec.style.display!=='none') sec.style.display='none'; }
+      if(!mediaS && !body){ if(sec.style.display!=='none') sec.style.display='none'; }
       else if(sec.style.display==='none'){ sec.style.display=''; }
     }
   }
+  function collapse(){
+    try{ collapseIn(document.getElementById('resumeOutput')); }catch(e){}
+    try{ var m=document.querySelector('.preview-modal-body'); if(m) collapseIn(m); }catch(e){}
+  }
   window._r4uCollapseEmpty=collapse;
+  function obs(el){ try{ new MutationObserver(function(){ collapse(); }).observe(el,{childList:true,subtree:true,characterData:true}); }catch(e){} }
   function start(){
     var card=document.getElementById('resumeOutput'); if(!card) return false;
-    try{ new MutationObserver(function(){ collapse(); }).observe(card,{childList:true,subtree:true,characterData:true}); }catch(e){}
+    obs(card); var m=document.querySelector('.preview-modal-body'); if(m) obs(m);
     collapse(); setTimeout(collapse,300); setTimeout(collapse,1200);
     return true;
   }
