@@ -7563,7 +7563,16 @@ if ('serviceWorker' in navigator) {
         // Restore into the same column when it exists; fall back to the current
         // parent for single-column templates that have no aside/main split.
         var target = (o.col==='aside'&&aside)?aside : (o.col==='main'&&main)?main : el.parentElement;
-        if(target) target.appendChild(el);
+        if(!target) return;
+        // The minimal template renders thin .r-div divider lines BETWEEN sections,
+        // as siblings of the .r-sec nodes. Re-appending only the sections would
+        // leave every divider behind, bunched under the header (the reported
+        // "stacked lines after reload, minimal only"). Move each section together
+        // with the divider(s) immediately following it so they travel as a unit
+        // and stay interleaved. Templates without .r-div are unaffected.
+        var move=[el], sib=el.nextElementSibling;
+        while(sib && sib.classList && sib.classList.contains('r-div')){ var nx=sib.nextElementSibling; move.push(sib); sib=nx; }
+        move.forEach(function(n){ target.appendChild(n); });
       });
     }catch(e){}
   }
