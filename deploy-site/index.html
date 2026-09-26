@@ -12470,13 +12470,24 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    live card BEFORE the hosted /r/ snapshot is captured so the hosted page inherits it.
    Only text fields are targeted — decorative elements are untouched. */
 (function(){
-  var SEL='.r-award-name,.r-award-org,.r-award-desc,.r-award-year,.r-award-top,.r-award-left,.r-award-right,.r-award-sub,.r-co,.r-role,.r-period,.r-yr,.r-deg,.r-desc,.r-cert-name,.r-cert-org,.r-cert-year,.r-cert-desc,.r-proj-name,.r-proj-desc,.r-proj-link,.r-edu-desc,.r-school';
+  /* Leaf text fields AND whole entry containers (an award/experience/etc. with
+     everything cleared renders as an empty container that still reserves margin/
+     padding/border — that is the gap). An element is "blank" when it has no
+     visible text and no image/icon; blank ones are hidden and restored if refilled. */
+  var SEL='.r-award,.r-award-left,.r-award-right,.r-award-top,.r-award-sub,.r-award-name,.r-award-org,.r-award-desc,.r-award-year,'
+        +'.r-exp,.r-edu,.r-cert,.r-proj,.r-ka-item,'
+        +'.r-co,.r-role,.r-period,.r-yr,.r-deg,.r-desc,.r-cert-name,.r-cert-org,.r-cert-year,.r-cert-desc,.r-proj-name,.r-proj-desc,.r-proj-link,.r-edu-desc,.r-school';
   function collapse(){
     var card=document.getElementById('resumeOutput'); if(!card) return;
     try{ if(card.closest && card.closest('.preview-modal-body')) return; }catch(e){}
     var els; try{ els=card.querySelectorAll(SEL); }catch(e){ return; }
+    var active=null; try{ active=document.activeElement; }catch(_){}
     for(var i=0;i<els.length;i++){ var e=els[i];
-      var blank=(e.children.length===0) && !((e.textContent||'').replace(/ /g,' ').trim());
+      /* Never hide a field the user is currently editing (so an inline edit that
+         momentarily empties a field doesn't make it vanish mid-type). */
+      if(active && (e===active || e.contains(active))) { if(e.style.display==='none') e.style.display=''; continue; }
+      var hasMedia=false; try{ hasMedia=!!e.querySelector('img,svg,canvas,video'); }catch(_){}
+      var blank=!hasMedia && !((e.textContent||'').replace(/ /g,' ').trim());
       if(blank){ if(e.style.display!=='none') e.style.display='none'; }
       else if(e.style.display==='none'){ e.style.display=''; }
     }
