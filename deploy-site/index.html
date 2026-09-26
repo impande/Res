@@ -7712,24 +7712,10 @@ if ('serviceWorker' in navigator) {
         while(sib && sib.classList && sib.classList.contains('r-div')){ var nx=sib.nextElementSibling; move.push(sib); sib=nx; }
         move.forEach(function(n){ target.appendChild(n); });
       });
-      /* Pin the Professional Summary to the top. A stale saved arrangement (e.g. an
-         old reorder) must never push Key Achievements or another section above the
-         summary — the summary is the conventional first section of a résumé. Find it
-         by its body class (.r-sum) and move it before the first .r-sec in its own
-         column, carrying any divider that follows it (minimal template). */
-      try{
-        var sumBody = page.querySelector('.r-sum');
-        var sumSec = sumBody ? (sumBody.closest ? sumBody.closest('.r-sec') : null) : null;
-        if(sumSec && sumSec.parentNode){
-          var par = sumSec.parentNode, kids = par.children, firstSec = null;
-          for(var i=0;i<kids.length;i++){ if(kids[i].classList && kids[i].classList.contains('r-sec')){ firstSec = kids[i]; break; } }
-          if(firstSec && firstSec !== sumSec){
-            var grp=[sumSec], s2=sumSec.nextElementSibling;
-            while(s2 && s2.classList && s2.classList.contains('r-div')){ var nx2=s2.nextElementSibling; grp.push(s2); s2=nx2; }
-            for(var g=0; g<grp.length; g++){ par.insertBefore(grp[g], firstSec); }
-          }
-        }
-      }catch(e){}
+      /* NOTE: no "pin summary to top" here — that would override an intentional
+         reorder (e.g. moving Experience above the summary). Fresh renders are
+         already summary-first by default, and this only runs for an explicit saved
+         order, so the user's exact arrangement is respected verbatim. */
     }catch(e){}
   }
   window._r4uCaptureSecOrder=_cap;
@@ -7746,13 +7732,14 @@ if ('serviceWorker' in navigator) {
     if(!so){ try{ so=JSON.parse(localStorage.getItem('_r4uSecOrder')||'null'); }catch(e){} }
     return so;
   }
-  function _wantTitles(so, cur){
-    var arr=(so&&so.secs)?so.secs:null; if(!arr) return null;
-    var saved=arr.map(function(o){ return ((o&&o.title)||'').trim(); }).filter(Boolean);
-    var out=saved.filter(function(t){ return cur.indexOf(t)>-1; });
-    cur.forEach(function(t){ if(out.indexOf(t)<0) out.push(t); });
-    for(var i=0;i<out.length;i++){ if(/summary/i.test(out[i])){ if(i>0){ var s=out.splice(i,1)[0]; out.unshift(s); } break; } }
-    return out;
+  /* Is a column already in the saved order? Compares by title, ignoring sections not
+     present. Matches how _apply reorders (per column), so the guard can tell when
+     nothing needs doing — preventing the observer from looping on its own writes. */
+  function _colMatches(colEl, savedTitles){
+    var cur=[].map.call(colEl.querySelectorAll('.r-sec .r-sec-t'),function(t){ return (t.textContent||'').trim(); });
+    var want=savedTitles.filter(function(t){ return cur.indexOf(t)>-1; });
+    cur.forEach(function(t){ if(want.indexOf(t)<0) want.push(t); });
+    return cur.join('||')===want.join('||');
   }
   function _applyToPreview(){
     try{
@@ -7761,9 +7748,17 @@ if ('serviceWorker' in navigator) {
       var so=_savedOrder(); if(!so || !so.secs) return;
       var sel=document.getElementById('previewTplSelect'); var mt=(sel&&sel.value)||_curTpl();
       if(!so.tpl || so.tpl!==mt) return;                     /* template-scoped */
-      var cur=[].map.call(page.querySelectorAll('.r-sec .r-sec-t'),function(t){ return (t.textContent||'').trim(); });
-      var want=_wantTitles(so, cur); if(!want) return;
-      if(cur.join('||')===want.join('||')) return;           /* already ordered — no DOM writes, no loop */
+      var byCol={aside:[],main:[],single:[]};
+      so.secs.forEach(function(o){ var c=(o&&o.col); if(c!=='aside'&&c!=='main') c='single'; byCol[c].push(((o&&o.title)||'').trim()); });
+      var aside=page.querySelector('.r-aside'), main=page.querySelector('.r-main-col');
+      var already=true;
+      if(aside||main){
+        if(aside && !_colMatches(aside, byCol.aside.concat(byCol.single))) already=false;
+        if(main && !_colMatches(main, byCol.main)) already=false;
+      } else {
+        if(!_colMatches(page, byCol.single.concat(byCol.aside, byCol.main))) already=false;
+      }
+      if(already) return;                                    /* already arranged — no DOM writes, no loop */
       _apply(so, body, mt);
     }catch(e){}
   }
