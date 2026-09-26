@@ -12490,40 +12490,33 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     try{ if(e.querySelector('img,svg,canvas,video')) return false; }catch(_){}
     return !((e.textContent||'').replace(/\u00a0/g,' ').trim());
   }
-  /* Only ever hide/restore elements THIS pass owns. Every element we hide is
-     stamped data-r4uhid="1"; restore un-hides only those. Never touch elements
-     the app itself hid (e.g. Key Achievements toggled off, template-specific
-     sections) \u2014 un-hiding them re-adds content and can push the r\u00e9sum\u00e9 onto an
-     extra page. This is the fix for "same content now spills to a 3rd page". */
-  function hide(e){ if(e.style.display!=='none'){ e.style.display='none'; if(e.setAttribute) e.setAttribute('data-r4uhid','1'); } }
-  function restore(e){ if(e.getAttribute && e.getAttribute('data-r4uhid')==='1'){ e.style.display=''; e.removeAttribute('data-r4uhid'); } }
   function collapseIn(root){
     if(!root) return;
     var active=null; try{ active=document.activeElement; }catch(_){}
     var els; try{ els=root.querySelectorAll(SEL); }catch(e){ els=[]; }
     for(var i=0;i<els.length;i++){ var e=els[i];
-      if(active && (e===active || e.contains(active))){ restore(e); continue; }
-      if(blankEl(e)){ hide(e); }
-      else{ restore(e); }
+      if(active && (e===active || e.contains(active))){ if(e.style.display==='none') e.style.display=''; continue; }
+      if(blankEl(e)){ if(e.style.display!=='none') e.style.display='none'; }
+      else if(e.style.display==='none'){ e.style.display=''; }
     }
     var gsecs; try{ gsecs=root.querySelectorAll('.r-sec'); }catch(_g){ gsecs=[]; }
     for(var g=0;g<gsecs.length;g++){ var gk=gsecs[g].children;
       for(var q=0;q<gk.length;q++){ var kd=gk[q];
         if(kd.classList && kd.classList.contains('r-sec-t')) continue;
-        if(active && (kd===active || kd.contains(active))){ restore(kd); continue; }
-        if(blankEl(kd)){ hide(kd); }
-        else{ restore(kd); }
+        if(active && (kd===active || kd.contains(active))){ if(kd.style.display==='none') kd.style.display=''; continue; }
+        if(blankEl(kd)){ if(kd.style.display!=='none') kd.style.display='none'; }
+        else if(kd.style.display==='none'){ kd.style.display=''; }
       }
     }
     var secs; try{ secs=root.querySelectorAll('.r-sec'); }catch(_e){ secs=[]; }
     for(var j=0;j<secs.length;j++){ var sec=secs[j];
-      if(active && (sec===active || sec.contains(active))){ restore(sec); continue; }
+      if(active && (sec===active || sec.contains(active))){ if(sec.style.display==='none') sec.style.display=''; continue; }
       var mediaS=false; try{ mediaS=!!sec.querySelector('img,svg,canvas,video'); }catch(_){}
       var full=(sec.textContent||'').replace(/\u00a0/g,' ').trim();
       var t=sec.querySelector('.r-sec-t'); var head=t?((t.textContent||'').replace(/\u00a0/g,' ').trim()):'';
       var body=(head && full.indexOf(head)===0)?full.slice(head.length).trim():full;
-      if(!mediaS && !body){ hide(sec); }
-      else{ restore(sec); }
+      if(!mediaS && !body){ if(sec.style.display!=='none') sec.style.display='none'; }
+      else if(sec.style.display==='none'){ sec.style.display=''; }
     }
     /* Catch-all for stray gaps: any BLANK element that still occupies vertical space
        (height, margin, padding OR a border) — e.g. an empty spacer/divider between the
@@ -12539,7 +12532,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       if(el.hasAttribute && el.hasAttribute('data-pglabel')) continue;   /* page-break markers (label via CSS ::before) */
       if(el.id==='resumeOutput'||el.id==='r4uFit'||el.id==='r4uOuter') continue;
       if(active && (el===active || el.contains(active))) continue;
-      if(!blankEl(el)){ restore(el); continue; }
+      var wasHid = el.getAttribute && el.getAttribute('data-r4uhid')==='1';
+      if(!blankEl(el)){ if(wasHid){ el.style.display=''; el.removeAttribute('data-r4uhid'); } continue; }
       var bc; try{ bc=getComputedStyle(el); }catch(_c){ continue; }
       if(bc.backgroundImage && bc.backgroundImage!=='none') continue;                 /* watermark / gradient accent */
       var bg=bc.backgroundColor; if(bg && bg!=='rgba(0, 0, 0, 0)' && bg!=='transparent') continue;  /* accent bar */
@@ -12548,7 +12542,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         || (parseFloat(bc.marginTop)||0)>2 || (parseFloat(bc.marginBottom)||0)>2
         || (parseFloat(bc.paddingTop)||0)>2 || (parseFloat(bc.paddingBottom)||0)>2
         || (parseFloat(bc.borderTopWidth)||0)>0 || (parseFloat(bc.borderBottomWidth)||0)>0;
-      if(occupies){ hide(el); }
+      if(occupies){ if(el.style.display!=='none'){ el.style.display='none'; if(el.setAttribute) el.setAttribute('data-r4uhid','1'); } }
     }
   }
   function collapse(){
@@ -12565,25 +12559,6 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     return true;
   }
   if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
-  /* Safety-net sweep. The MutationObserver above catches edits, but reload races
-     can slip past it and leave freshly-rendered empty rows uncollapsed — the
-     reported "blank lines reappear after multiple reloads". Known escapes: a late
-     cloud-adopt / draft-restore re-render or the section-order self-heal that
-     rebuilds the output node (orphaning the observer bound to the old node), and
-     blanket inline-style resets (attribute changes the observer doesn't watch).
-     A cheap, idempotent periodic pass while a résumé is on screen guarantees
-     empties always collapse, independent of observer timing. collapse() already
-     skips the focused element, so it never disturbs an active edit; and because
-     it's idempotent it settles immediately once everything is already hidden.
-     Mirrors the existing 1s section-order self-heal, which exists for the same
-     class of reload race. */
-  setInterval(function(){
-    try{
-      var ro=document.getElementById('resumeOutput');
-      var m=document.querySelector('.preview-modal-body');
-      if((ro&&ro.querySelector('.resume-a4-page'))||(m&&m.querySelector('.resume-a4-page'))) collapse();
-    }catch(e){}
-  }, 1200);
 })();
 </script>
 <script id="_r4uEditHint">
