@@ -11144,7 +11144,15 @@ window.__novaPortfolioHTML=function(d,sections){
       var curSig=cur.join('||'), wantSig=want.join('||');
       if(curSig===wantSig){ _healResult=curSig; return; }        /* already arranged */
       if(curSig===_healResult) return;                            /* applied as far as possible — avoid loop */
-      if(typeof window._r4uApplySecOrder==='function'){ window._r4uApplySecOrder(so); _healResult=_titles(page).join('||'); }
+      if(typeof window._r4uApplySecOrder==='function'){
+        window._r4uApplySecOrder(so);
+        var newSig=_titles(page).join('||');
+        /* Only remember the result when the order ACTUALLY changed. If _apply was a
+           no-op (e.g. the template hadn't finished restoring yet, so its template
+           guard skipped), leave _healResult untouched so the next tick retries once
+           the template matches — instead of poisoning the loop-guard and giving up. */
+        if(newSig!==curSig) _healResult=newSig;
+      }
     }catch(e){}
   }
   setInterval(heal, 1000);
