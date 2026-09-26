@@ -3017,6 +3017,10 @@
       <span class="pcs-chip" id="pageCountChip">1 page</span>
     </div>
     <div id="pageAdvisorPanel"></div>
+    <div id="editHint" style="display:none;align-items:center;gap:8px;margin:0 0 10px;padding:9px 13px;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.25);border-radius:9px;font-size:0.8rem;color:var(--text);line-height:1.4;">
+      <span style="font-size:1rem;flex-shrink:0;">✏️</span>
+      <span><strong>Tip:</strong> tap any text in your resume below to edit it directly — no need to regenerate.</span>
+    </div>
     <div style="position:relative;">
       <div class="resume-output-card" id="resumeOutput">
         <div class="resume-placeholder">Click <strong>Generate Resume</strong> to create your resume</div>
@@ -12544,6 +12548,18 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     collapse(); setTimeout(collapse,300); setTimeout(collapse,1200);
     return true;
   }
+  if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
+})();
+</script>
+<script id="_r4uEditHint">
+/* Surface the inline-edit affordance: show the "tap any text to edit" tip only
+   once a résumé has been generated (the output card is editable but nothing said so). */
+(function(){
+  function sync(){ try{ var card=document.getElementById('resumeOutput'), hint=document.getElementById('editHint'); if(!card||!hint) return;
+    hint.style.display = card.querySelector('.resume-a4-page') ? 'flex' : 'none'; }catch(e){} }
+  function start(){ var card=document.getElementById('resumeOutput'); if(!card) return false;
+    try{ new MutationObserver(sync).observe(card,{childList:true}); }catch(e){}
+    sync(); setTimeout(sync,400); setTimeout(sync,1500); return true; }
   if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
 })();
 </script>
