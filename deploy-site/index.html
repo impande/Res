@@ -12565,6 +12565,25 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     return true;
   }
   if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
+  /* Safety-net sweep. The MutationObserver above catches edits, but reload races
+     can slip past it and leave freshly-rendered empty rows uncollapsed — the
+     reported "blank lines reappear after multiple reloads". Known escapes: a late
+     cloud-adopt / draft-restore re-render or the section-order self-heal that
+     rebuilds the output node (orphaning the observer bound to the old node), and
+     blanket inline-style resets (attribute changes the observer doesn't watch).
+     A cheap, idempotent periodic pass while a résumé is on screen guarantees
+     empties always collapse, independent of observer timing. collapse() already
+     skips the focused element, so it never disturbs an active edit; and because
+     it's idempotent it settles immediately once everything is already hidden.
+     Mirrors the existing 1s section-order self-heal, which exists for the same
+     class of reload race. */
+  setInterval(function(){
+    try{
+      var ro=document.getElementById('resumeOutput');
+      var m=document.querySelector('.preview-modal-body');
+      if((ro&&ro.querySelector('.resume-a4-page'))||(m&&m.querySelector('.resume-a4-page'))) collapse();
+    }catch(e){}
+  }, 1200);
 })();
 </script>
 <script id="_r4uEditHint">
