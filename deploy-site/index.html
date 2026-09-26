@@ -12519,7 +12519,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var ev; try{ ev=root.querySelectorAll('*'); }catch(_v){ ev=[]; }
     for(var v=0; v<ev.length; v++){ var el=ev[v]; var tn=(el.tagName||'').toLowerCase();
       if(tn==='svg'||tn==='path'||tn==='img'||tn==='input'||tn==='textarea'||tn==='select'||tn==='canvas'||tn==='video') continue;
-      if(el.classList && (el.classList.contains('r-sec')||el.classList.contains('r-sec-t')||el.classList.contains('resume-a4-page'))) continue;
+      if(el.classList && (el.classList.contains('r-sec')||el.classList.contains('r-sec-t')||el.classList.contains('resume-a4-page')
+        ||el.classList.contains('pg-break')||el.classList.contains('pg-pagemark')||el.classList.contains('pg-num'))) continue;
+      if(el.hasAttribute && el.hasAttribute('data-pglabel')) continue;   /* page-break markers (label via CSS ::before) */
       if(el.id==='resumeOutput'||el.id==='r4uFit'||el.id==='r4uOuter') continue;
       if(active && (el===active || el.contains(active))) continue;
       var wasHid = el.getAttribute && el.getAttribute('data-r4uhid')==='1';
