@@ -12492,6 +12492,18 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       if(blank){ if(e.style.display!=='none') e.style.display='none'; }
       else if(e.style.display==='none'){ e.style.display=''; }
     }
+    /* Generic: hide any blank ENTRY (a direct child of a section other than its
+       heading) — covers EVERY section type incl. projects, certifications and any
+       custom section, without needing to know each entry's class name. */
+    var gsecs; try{ gsecs=card.querySelectorAll('.r-sec'); }catch(_g){ gsecs=[]; }
+    for(var g=0;g<gsecs.length;g++){ var gk=gsecs[g].children;
+      for(var h=0;h<gk.length;h++){ var kd=gk[h];
+        if(kd.classList && kd.classList.contains('r-sec-t')) continue;   /* keep the heading */
+        if(active && (kd===active || kd.contains(active))){ if(kd.style.display==='none') kd.style.display=''; continue; }
+        if(blankEl(kd)){ if(kd.style.display!=='none') kd.style.display='none'; }
+        else if(kd.style.display==='none'){ kd.style.display=''; }
+      }
+    }
     /* Collapse a whole SECTION that has no visible body left (e.g. a Key
        Achievements / awards section whose entries were all cleared) — otherwise the
        section heading + its margins remain as a blank gap between real sections. */
