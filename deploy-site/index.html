@@ -693,6 +693,20 @@
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:10mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
+    /* Never reserve vertical space for an EMPTY résumé text field (e.g. an award
+       with the company/year removed). Targets text fields only — decorative
+       elements (accents, timeline dots) are deliberately excluded. Applies to the
+       card, the PDF (printed from #resumeOutput) and the hosted /r/ page (this CSS
+       is inlined into it). A JS pass (_r4uCollapseEmpty) also handles whitespace. */
+    #resumeOutput .r-award-name:empty, #resumeOutput .r-award-org:empty, #resumeOutput .r-award-desc:empty,
+    #resumeOutput .r-award-year:empty, #resumeOutput .r-award-top:empty, #resumeOutput .r-award-left:empty,
+    #resumeOutput .r-award-right:empty, #resumeOutput .r-co:empty, #resumeOutput .r-role:empty,
+    #resumeOutput .r-period:empty, #resumeOutput .r-yr:empty, #resumeOutput .r-deg:empty,
+    #resumeOutput .r-desc:empty, #resumeOutput .r-cert-name:empty, #resumeOutput .r-cert-org:empty,
+    #resumeOutput .r-cert-year:empty, #resumeOutput .r-cert-desc:empty, #resumeOutput .r-proj-name:empty,
+    #resumeOutput .r-proj-desc:empty, #resumeOutput .r-proj-link:empty, #resumeOutput .r-edu-desc:empty,
+    #resumeOutput .r-school:empty, #resumeOutput .r-award-sub:empty
+    { display:none !important; }
     /* Match the ATS-clean PDF: normal letter-spacing on headings / job title /
        contact in the on-screen preview too, so preview and download look identical
        (the PDF export applies the same override). */
@@ -12447,6 +12461,34 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     }
     if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>50) clearInterval(iv); }, 300); }
   })();
+})();
+</script>
+<script id="_r4uCollapseEmpty">
+/* Prod hotfix: collapse résumé text fields that are empty OR whitespace-only, so a
+   removed company/year (or any blank optional field, in any section) never leaves a
+   gap. CSS :empty handles truly-empty; this also catches whitespace, and runs on the
+   live card BEFORE the hosted /r/ snapshot is captured so the hosted page inherits it.
+   Only text fields are targeted — decorative elements are untouched. */
+(function(){
+  var SEL='.r-award-name,.r-award-org,.r-award-desc,.r-award-year,.r-award-top,.r-award-left,.r-award-right,.r-award-sub,.r-co,.r-role,.r-period,.r-yr,.r-deg,.r-desc,.r-cert-name,.r-cert-org,.r-cert-year,.r-cert-desc,.r-proj-name,.r-proj-desc,.r-proj-link,.r-edu-desc,.r-school';
+  function collapse(){
+    var card=document.getElementById('resumeOutput'); if(!card) return;
+    try{ if(card.closest && card.closest('.preview-modal-body')) return; }catch(e){}
+    var els; try{ els=card.querySelectorAll(SEL); }catch(e){ return; }
+    for(var i=0;i<els.length;i++){ var e=els[i];
+      var blank=(e.children.length===0) && !((e.textContent||'').replace(/ /g,' ').trim());
+      if(blank){ if(e.style.display!=='none') e.style.display='none'; }
+      else if(e.style.display==='none'){ e.style.display=''; }
+    }
+  }
+  window._r4uCollapseEmpty=collapse;
+  function start(){
+    var card=document.getElementById('resumeOutput'); if(!card) return false;
+    try{ new MutationObserver(function(){ collapse(); }).observe(card,{childList:true,subtree:true,characterData:true}); }catch(e){}
+    collapse(); setTimeout(collapse,300); setTimeout(collapse,1200);
+    return true;
+  }
+  if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
 })();
 </script>
 </body>
