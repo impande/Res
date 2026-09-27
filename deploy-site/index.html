@@ -12562,7 +12562,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        viewport (like a PDF viewer) instead of reflowing it to phone width — that
        preserves the exact proportions/line-breaks of the PDF. #r4uFit is scaled
        by a tiny inline script; print resets the transform so it prints full A4. */
-    var wrap='html,body{margin:0;padding:0;background:linear-gradient(180deg,#eef0f4,#e6e8ee);-webkit-text-size-adjust:100%;}'
+    var wrap='html,body{margin:0;padding:0;background:linear-gradient(180deg,#eef0f4,#e6e8ee);-webkit-text-size-adjust:100%;overflow-x:hidden;}'
       +'#r4uOuter{overflow-x:hidden;padding:32px 0;min-height:100vh;box-sizing:border-box;}'
       +'#r4uFit{width:210mm;transform-origin:top left;}'   /* centered + scaled by JS via transform (zoom breaks centering in some browsers) */
       +'#resumeOutput{display:block;}'
@@ -12573,17 +12573,27 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        so the page reflows to its scaled size and the document scrolls naturally —
        no manual height, nothing can clip the bottom. Fall back to transform+height
        only where zoom is unsupported. */
-    var fitJs='(function(){var o=document.getElementById("r4uOuter"),f=document.getElementById("r4uFit");if(!f)return;'
-      +'function d(){var vw=document.documentElement.clientWidth||window.innerWidth;var n=794;var s;'
-      +'if(vw>=n){s=Math.min(1.4,vw/(n*1.14));if(s<1)s=1;}else{s=vw/(n+24);}'   /* desktop: fill ~88% of width (100%–140%, centered, tidy gutter); mobile: fit to width */
-      +'f.style.transform=(s===1)?"none":"scale("+s+")";'
-      +'f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";'                          /* centre the scaled page */
-      +'f.style.marginBottom=(s===1?0:Math.round(f.offsetHeight*(s-1)))+"px";}'   /* reserve the scaled height so nothing clips */
+    var fitJs='(function(){var o=document.getElementById("r4uOuter"),f=document.getElementById("r4uFit");if(!f)return;var n=794;'
+      +'function apply(sc){f.style.transform=(sc===1)?"none":"scale("+sc+")";f.style.marginBottom=(sc===1?0:Math.round(f.offsetHeight*(sc-1)))+"px";}'
+      /* measure the ACTUAL rendered content — the furthest-right pixel of anything on
+         the page (catches a line that did not wrap in this device fonts, not just the
+         A4 box). Used to guarantee nothing is ever cut off, on any device. */
+      +'function maxRight(){var pg=document.querySelector(".resume-a4-page");if(!pg)return 0;var e=pg.getElementsByTagName("*"),m=0;for(var i=0;i<e.length;i++){var r=e[i].getBoundingClientRect();if(r.right>m)m=r.right;}return m;}'
+      /* the TRUE visible width: visualViewport (accounts for iPad layout-viewport
+         quirks / pinch-zoom) capped by clientWidth/innerWidth — so we never scale
+         to a width that isn\x27t actually visible. */
+      +'function VW(){var vv=(window.visualViewport&&window.visualViewport.width)||9999;return Math.min(document.documentElement.clientWidth||9999,window.innerWidth||9999,vv);}'
+      +'function d(){var vw=VW();'
+      +'var s=(vw>=n)?Math.min(1.25,vw/(n*1.2)):vw/(n+24);if(vw>=n&&s<1)s=1;'    /* fill ~83% of the visible width (100%–125%), or fit on mobile */
+      +'f.style.marginLeft="0px";apply(s);'
+      +'var g=0;while(g++<16&&(maxRight()>vw-2||document.documentElement.scrollWidth>vw+2)&&s>0.25){s*=0.95;apply(s);}'  /* SAFETY: shrink until NOTHING spills past the visible width — never cut, any device */
+      +'f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";}'                          /* then centre the scaled page */
       +'window.addEventListener("resize",d);window.addEventListener("orientationchange",d);window.addEventListener("load",d);'
       +'if(document.readyState!=="loading")d();else window.addEventListener("DOMContentLoaded",d);'
       +'if(document.fonts&&document.fonts.ready)document.fonts.ready.then(d);'
-      +'try{if(!Z&&window.ResizeObserver){var ro=new ResizeObserver(function(){d();});ro.observe(f);}}catch(e){}'
-      +'setTimeout(d,250);setTimeout(d,800);})();';
+      +'try{if(window.visualViewport)window.visualViewport.addEventListener("resize",d);}catch(e){}'
+      +'try{if(window.ResizeObserver){var ro=new ResizeObserver(function(){d();});ro.observe(f);}}catch(e){}'
+      +'setTimeout(d,250);setTimeout(d,800);setTimeout(d,1600);})();';
     return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
       +'<meta name="viewport" content="width=device-width,initial-scale=1">'
       +'<title>'+esc(nm)+' — Resume</title>'
@@ -12701,7 +12711,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        centering + scaling fix) every existing share auto-refreshes once on the next
        app open, instead of keeping stale HTML forever because the content was
        unchanged. Bump 'sv3' whenever _r4uBuildResumeStandalone's output changes. */
-    var sig='sv4|'+page.innerHTML.length+'|'+(page.textContent||'').slice(0,160);
+    var sig='sv5|'+page.innerHTML.length+'|'+(page.textContent||'').slice(0,160);
     if(sig===window._r4uLastPubSig) return;             /* unchanged since last publish */
     window._r4uResumeSlug=slug;
     window._r4uPublishResume().then(function(){ window._r4uLastPubSig=sig; try{ localStorage.setItem('_r4uLastPubSig',sig); }catch(e){} }).catch(function(){});
