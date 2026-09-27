@@ -43,6 +43,13 @@ const SUITES = {
   import:    () => require('./suites/journey-import'),
   mobile:    () => require('./suites/journey-mobile'),
   edge:      () => require('./suites/edge-cases'),
+  // web standards
+  a11y:      () => require('./suites/standards').a11y,
+  perf:      () => require('./suites/standards').perf,
+  seo:       () => require('./suites/standards').seo,
+  security:  () => require('./suites/standards').security,
+  links:     () => require('./suites/standards').links,
+  browsers:  () => require('./suites/standards').browsers,
 };
 
 (async () => {

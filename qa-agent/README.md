@@ -20,6 +20,17 @@ the GitHub mobile app).
 | `mobile` | **Journey E, iPhone 13 with touch.** No sideways scrolling on any step, "Step N of 8" header, generate, résumé fits the screen, full-screen preview + template picker, tap-target sizes, DOC download |
 | `edge` | **Journey F.** Empty form shows a "Required" message, Hindi/apostrophe/ampersand names, **XSS: typed HTML must never execute**, guest reload, **Google sign-in opens** (not completed), **Razorpay checkout opens** (never paid) |
 
+### Web standards
+
+| Suite | Standard |
+|---|---|
+| `a11y` | **WCAG 2.1 AA** via axe-core on the homepage and all 8 builder steps, keyboard-only use with a visible focus ring, 320px reflow, `lang`, pinch-zoom allowed, image alt text |
+| `perf` | **Core Web Vitals** (LCP, CLS, TBT, TTFB) and page weight against Google's thresholds, on desktop and on a throttled mid-range phone over 4G; every landing page under 3s; gzip/brotli and cache headers |
+| `seo` | For every sitemap page: title/description length, one H1, canonical, noindex, duplicate titles; **Open Graph + Twitter** previews incl. OG image size; valid **JSON-LD**; robots.txt |
+| `security` | HTTP→HTTPS redirect; **HSTS, nosniff, clickjacking protection**, Referrer-Policy/CSP/Permissions-Policy; mixed content; cookie flags; **leaked API keys/secrets** in public JS; backend error hardening |
+| `links` | Broken internal + external links, real 404s, **legal pages (Privacy, Terms, Refund, Contact)**, PWA manifest |
+| `browsers` | Builder smoke test in **Safari (WebKit, iPhone)** and **Firefox** |
+
 Every run also records JavaScript errors, console errors, failed network requests
 and the latency of each backend call (`/.netlify/functions/*`, Firestore, GitHub API).
 
