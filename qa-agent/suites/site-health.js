@@ -3,8 +3,9 @@
  * builder needs, and side-effect-free backend endpoints. */
 const { assert, warn } = require('../lib/harness');
 const { openHome } = require('../lib/app');
+const E = require('../lib/env');
 
-module.exports = async function siteHealth(audit, { base, mockAi }) {
+module.exports = async function siteHealth(audit, { base, mockAi, env }) {
   await audit.suite('Site health & SEO pages', async (s, page) => {
     const req = page.context().request;
 
@@ -74,17 +75,20 @@ module.exports = async function siteHealth(audit, { base, mockAi }) {
     }, { severity: 'major' });
 
     await s.step('Third-party scripts reachable (Firebase, Razorpay)', async () => {
-      const deps = [
-        'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
-        'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
-        'https://checkout.razorpay.com/v1/checkout.js',
-      ];
+      const deps = [['firebase', 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js'],
+        ['firebase', 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js'],
+        ['razorpay', 'https://checkout.razorpay.com/v1/checkout.js']];
+      const testable = deps.filter(([k]) => !(env && env.unreachable.includes(k)));
+      if (!testable.length) E.needs(env, ...new Set(deps.map(d => d[0])));
       const bad = [];
-      for (const d of deps) { try { const r = await req.get(d, { timeout: 20000 }); if (!r.ok()) bad.push(r.status() + ' ' + d); } catch (e) { bad.push('unreachable ' + d); } }
+      for (const [, d] of testable) { try { const r = await req.get(d, { timeout: 20000 }); if (!r.ok()) bad.push(r.status() + ' ' + d); } catch (e) { bad.push('unreachable ' + d); } }
       assert(!bad.length, bad.join(' | '));
+      const limited = deps.length - testable.length;
+      return testable.length + ' OK' + (limited ? ` · ${limited} environment-limited` : '');
     }, { severity: 'major' });
 
     await s.step('Backend: generate function is up (CORS preflight + paid-status check)', async () => {
+      E.needsDeployed(env, 'Netlify functions');
       if (mockAi) return 'mock mode — skipped live backend probe';
       const fn = base + '/.netlify/functions/generate';
       const pre = await req.fetch(fn, { method: 'OPTIONS', headers: { Origin: base } });

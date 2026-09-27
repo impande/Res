@@ -4,8 +4,9 @@
  * opened to prove they work, never completed. */
 const { assert, warn } = require('../lib/harness');
 const A = require('../lib/app');
+const E = require('../lib/env');
 
-module.exports = async function edgeCases(audit, { base, mockAi }) {
+module.exports = async function edgeCases(audit, { base, mockAi, env }) {
   await audit.suite('Journey F — Validation, security, sign-in & payment gateway', async (s, page) => {
     await s.step('Generate with an empty form → friendly "Required" message, back to step 1', async () => {
       await A.openHome(page, base);
@@ -48,7 +49,7 @@ module.exports = async function edgeCases(audit, { base, mockAi }) {
     }, { severity: 'minor' });
 
     await s.step('"Sign in" opens Google sign-in (not completed)', async () => {
-      if (mockAi) return 'mock mode — Firebase is not reachable offline';
+      E.needs(env, 'firebase', 'google');
       const btn = page.locator('#_authBtn:visible, button[onclick="signInWithGoogle()"]:visible').first();
       const [popup] = await Promise.all([
         page.context().waitForEvent('page', { timeout: 15000 }).catch(() => null),
@@ -68,7 +69,7 @@ module.exports = async function edgeCases(audit, { base, mockAi }) {
     }, { severity: 'major', timeout: 40000 });
 
     await s.step('Payment gateway: "Pay & Download PDF" opens Razorpay checkout (not paid)', async () => {
-      if (mockAi) return 'mock mode — Razorpay is not reachable offline';
+      E.needs(env, 'razorpay');
       // A fresh visitor again: build the smallest valid résumé.
       await A.openHome(page, base);
       await page.locator('button[onclick="startBuild()"]').first().click();

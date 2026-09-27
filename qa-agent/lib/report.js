@@ -52,7 +52,11 @@ function writeReport(audit, meta) {
 
   const td = 'padding:8px 10px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;';
   const th = 'padding:8px 10px;border-bottom:2px solid #ddd;font-size:12px;text-align:left;color:#555;text-transform:uppercase;letter-spacing:.04em;';
-  const badge = st => `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff;background:${COLORS[st]}">${LABEL[st]}</span>`;
+  const isEnv = st => st.status === 'skip' && /^environment-limited/.test(st.detail || '');
+  const pill = (txt, bg) => `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff;background:${bg}">${txt}</span>`;
+  const badge = st => typeof st === 'string' ? pill(LABEL[st], COLORS[st]) : isEnv(st) ? pill('ENV', '#64748b') : pill(LABEL[st.status], COLORS[st.status]);
+  const envSkips = suites.reduce((n, s) => n + s.steps.filter(isEnv).length, 0);
+  const envSuppressed = suites.reduce((n, s) => n + (s.envSuppressed || 0), 0);
   const stat = (n, label, color) => `<td align="center" style="padding:12px 4px;background:#fafafa;border-radius:8px"><div style="font-size:26px;font-weight:800;color:${color}">${n}</div><div style="font-size:12px;color:#666">${label}</div></td>`;
 
   let html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>resume4u audit — ${esc(when)}</title></head>
@@ -64,6 +68,12 @@ function writeReport(audit, meta) {
   <div style="font-size:22px;font-weight:800;margin-top:4px">${v.emoji} ${esc(v.text)}</div>
   <div style="font-size:13px;margin-top:6px;opacity:.9">${esc(when)} · ${esc(meta.base)} · ran ${dur}${meta.buildId ? ' · build ' + esc(meta.buildId) : ''}</div>
 </td></tr>`;
+  if ((meta.envLimited && meta.envLimited.length) || meta.localTarget) {
+    html += `<tr><td style="padding:12px 24px;background:#eef2f7;color:#334155;font-size:13px"><b>External-dependency checks are environment-limited.</b> `
+      + (meta.envLimited && meta.envLimited.length ? `This runner cannot reach ${esc(meta.envLimited.join(', '))}. ` : '')
+      + (meta.localTarget ? 'The target is a local server, so Netlify-only checks (headers, compression, functions) were not run. ' : '')
+      + `${envSkips} check(s) marked <b>ENV</b> were skipped and ${envSuppressed} network error(s) from those hosts were left out — these say nothing about the site itself.</td></tr>`;
+  }
   if (meta.mockAi) html += `<tr><td style="padding:12px 24px;background:#fef3c7;color:#92400e;font-size:13px"><b>MOCK_AI run</b> — AI answers were simulated. This is a self-test of the agent, not an audit of the live site.</td></tr>`;
 
   html += `<tr><td style="padding:20px 24px"><table width="100%" cellpadding="0" cellspacing="6" style="table-layout:fixed"><tr>
@@ -79,7 +89,7 @@ function writeReport(audit, meta) {
   else {
     html += `<table width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed"><tr><th style="${th}width:70px">Status</th><th style="${th}width:34%">Where</th><th style="${th}">Problem</th></tr>`;
     for (const p of problems) {
-      html += `<tr><td style="${td}">${badge(p.status)}<div style="font-size:11px;color:#777;margin-top:3px">${esc(p.severity)}</div></td>
+      html += `<tr><td style="${td}">${badge(p)}<div style="font-size:11px;color:#777;margin-top:3px">${esc(p.severity)}</div></td>
         <td style="${td}"><b>${esc(p.name)}</b><div style="color:#777;font-size:12px">${esc(p.suite)}</div></td>
         <td style="${td}">${esc(p.detail)}${p.screenshot ? `<div style="font-size:11px;color:#777;margin-top:4px">📎 screenshot: ${esc(p.screenshot)}</div>` : ''}</td></tr>`;
     }
@@ -98,7 +108,7 @@ function writeReport(audit, meta) {
       ${s.description ? `<div style="font-size:12px;color:#777">${esc(s.description)}</div>` : ''}</td></tr></table>
       <table width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed">`;
     for (const st of s.steps) {
-      html += `<tr><td style="${td}width:52px">${badge(st.status)}</td><td style="${td}">${esc(st.name)}${st.detail ? `<div style="font-size:12px;color:${st.status === 'pass' ? '#666' : COLORS[st.status]}">${esc(st.detail)}</div>` : ''}</td><td style="${td}width:54px;color:#888;text-align:right">${sec(st.ms)}</td></tr>`;
+      html += `<tr><td style="${td}width:52px">${badge(st)}</td><td style="${td}">${esc(st.name)}${st.detail ? `<div style="font-size:12px;color:${st.status === 'pass' ? '#666' : COLORS[st.status]}">${esc(st.detail)}</div>` : ''}</td><td style="${td}width:54px;color:#888;text-align:right">${sec(st.ms)}</td></tr>`;
     }
     html += `</table>`;
     const errs = uniq(s.pageErrors), cons = uniq(s.consoleErrors), reqs = uniq(s.failedRequests);
@@ -127,14 +137,14 @@ function writeReport(audit, meta) {
 
   html += `<tr><td style="padding:14px 24px 22px;font-size:12px;color:#777;border-top:1px solid #eee">
     ${meta.runUrl ? `Full logs, screenshots &amp; this report: <a href="${esc(meta.runUrl)}" style="color:#b45309">${esc(meta.runUrl)}</a><br>` : ''}
-    Suites: ${esc(meta.suitesRun.join(', '))} · Publishing test pages: ${meta.publish ? 'on' : 'off'} · Payments are never completed by the agent.
+    Suites: ${esc(meta.suitesRun.join(', '))}${envSkips ? ' · Environment-limited checks: ' + envSkips : ''} · Publishing test pages: ${meta.publish ? 'on' : 'off'} · Payments are never completed by the agent.
   </td></tr></table></td></tr></table></body></html>`;
 
   fs.mkdirSync(audit.outDir, { recursive: true });
   const htmlPath = path.join(audit.outDir, 'report.html');
   const jsonPath = path.join(audit.outDir, 'report.json');
   fs.writeFileSync(htmlPath, html);
-  const json = { meta, totals, verdict: v.text, suites: suites.map(s => ({ name: s.name, ms: s.ms, steps: s.steps,
+  const json = { meta, totals, verdict: v.text, suites: suites.map(s => ({ name: s.name, ms: s.ms, steps: s.steps, envSuppressed: s.envSuppressed || 0,
     pageErrors: uniq(s.pageErrors), consoleErrors: uniq(s.consoleErrors), failedRequests: uniq(s.failedRequests), apiCalls: s.apiCalls })) };
   fs.writeFileSync(jsonPath, JSON.stringify(json, null, 2));
   fs.writeFileSync(path.join(audit.outDir, 'run.log'), audit.logLines.join('\n'));

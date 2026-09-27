@@ -4,9 +4,10 @@
 const fs = require('fs');
 const { assert, skip } = require('../lib/harness');
 const { quickBuild } = require('../lib/flows');
+const E = require('../lib/env');
 const { persona: P, stamp } = require('../lib/fixtures');
 
-module.exports = async function journeyPortfolio(audit, { base, publish, files }) {
+module.exports = async function journeyPortfolio(audit, { base, publish, files, env }) {
   await audit.suite('Journey C — Portfolio website builder', async (s, page) => {
     await quickBuild(s, page, base, P);
     const ov = page.locator('#pfOverlay');
@@ -88,6 +89,7 @@ module.exports = async function journeyPortfolio(audit, { base, publish, files }
     const slug = ('qa-audit-' + stamp + '-' + Math.random().toString(36).slice(2, 6)).toLowerCase();
     await s.step('Share Link: pick a URL, check availability, publish', async () => {
       if (!publish) skip('PUBLISH=0 — not creating public pages');
+      E.needs(env, 'firebase', 'firestore');
       await page.locator('#pfShareBtn').click();
       const picker = page.locator('#_pfSlugPicker');
       const appeared = await picker.waitFor({ state: 'visible', timeout: 15000 }).then(() => true, () => false);

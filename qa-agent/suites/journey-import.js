@@ -4,6 +4,7 @@
  * generate a résumé from the imported data. */
 const { assert } = require('../lib/harness');
 const A = require('../lib/app');
+const E = require('../lib/env');
 const { pastedResume } = require('../lib/fixtures');
 
 const val = (page, id) => page.locator('#' + id).inputValue().catch(() => '');
@@ -25,7 +26,7 @@ async function waitForImport(page, expectFirst, timeout = 120000) {
   assert(first.toLowerCase() === expectFirst.toLowerCase(), `imported the wrong name: "${first}" (expected "${expectFirst}")`);
 }
 
-module.exports = async function journeyImport(audit, { base, files }) {
+module.exports = async function journeyImport(audit, { base, files, env }) {
   await audit.suite('Journey D — Import an existing résumé (paste · PDF · GitHub)', async (s, page) => {
     // ── Paste text ───────────────────────────────────────────────────────
     await s.step('Paste résumé text → "Parse & Import" fills the wizard (live AI)', async () => {
@@ -63,6 +64,7 @@ module.exports = async function journeyImport(audit, { base, files }) {
 
   await audit.suite('Journey D2 — Upload a PDF résumé', async (s, page) => {
     await s.step('Upload PDF → fields are extracted (live AI)', async () => {
+      E.needs(env, 'pdfjs');
       await openBuilder(page, base);
       await page.locator('#tabUpload').click();
       await page.setInputFiles('#resumeUploadInput', files.resumePdf);
@@ -82,6 +84,7 @@ module.exports = async function journeyImport(audit, { base, files }) {
 
   await audit.suite('Journey D3 — Import from GitHub', async (s, page) => {
     await s.step('GitHub username → profile imported into Basic Info', async () => {
+      E.needs(env, 'github');
       await openBuilder(page, base);
       await A.type(page, '#ghUsername', 'torvalds');
       await page.locator('button[onclick="prefillFromGithub()"]').click();

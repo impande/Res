@@ -35,21 +35,23 @@ class Suite {
     this.consoleErrors = [];
     this.failedRequests = [];
     this.apiCalls = [];             // { url, status, ms }
+    this.envSuppressed = 0;         // errors caused only by the runner's network, not the site
     this.started = Date.now();
   }
 
   // Attach listeners that collect JS errors, console errors, failed and slow requests.
   watch(page) {
     const tag = page === this.page ? '' : '[popup] ';
+    const envNoise = s => { if (this.audit.isEnvNoise && this.audit.isEnvNoise(s)) { this.envSuppressed++; return true; } return false; };
     page.on('pageerror', e => { const m = tag + (e.message || String(e)); if (!isNoise(m)) this.pageErrors.push(m.slice(0, 400)); });
     page.on('console', m => {
       if (m.type() !== 'error') return;
       const t = tag + m.text();
-      if (!isNoise(t)) this.consoleErrors.push(t.slice(0, 400));
+      if (!isNoise(t) && !envNoise(t)) this.consoleErrors.push(t.slice(0, 400));
     });
     page.on('requestfailed', r => {
       const u = r.url(); const f = (r.failure() && r.failure().errorText) || '';
-      if (!isNoise(u + ' ' + f)) this.failedRequests.push((f + ' ' + r.method() + ' ' + u).slice(0, 300));
+      if (!isNoise(u + ' ' + f) && !envNoise(u + ' ' + f)) this.failedRequests.push((f + ' ' + r.method() + ' ' + u).slice(0, 300));
     });
     const t0 = new Map();
     page.on('request', r => { if (/\/\.netlify\/functions\/|firestore\.googleapis|api\.github\.com/.test(r.url())) t0.set(r, Date.now()); });

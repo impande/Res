@@ -6,10 +6,11 @@
 const fs = require('fs');
 const { assert, warn, skip } = require('../lib/harness');
 const A = require('../lib/app');
+const E = require('../lib/env');
 const { quickBuild } = require('../lib/flows');
 const { persona: P, jobDescription } = require('../lib/fixtures');
 
-module.exports = async function journeyShare(audit, { base, publish }) {
+module.exports = async function journeyShare(audit, { base, publish, env }) {
   await audit.suite('Journey B — Share link/QR, cover letter & AI assistant', async (s, page) => {
     await quickBuild(s, page, base, P);
 
@@ -17,6 +18,7 @@ module.exports = async function journeyShare(audit, { base, publish }) {
     let slug = null;
     await s.step('Share / QR publishes the résumé and shows a scannable QR', async () => {
       if (!publish) skip('PUBLISH=0 — not creating public pages');
+      E.needs(env, 'firestore');
       const patch = page.waitForRequest(r => r.method() === 'PATCH' && /\/documents\/portfolios\//.test(r.url()), { timeout: 30000 });
       const done = page.waitForResponse(r => r.request().method() === 'PATCH' && /\/documents\/portfolios\//.test(r.url()), { timeout: 30000 });
       await page.locator('button[onclick="_r4uShareResumeQR()"]:visible').first().click();

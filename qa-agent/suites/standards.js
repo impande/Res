@@ -11,6 +11,7 @@
 const path = require('path');
 const { assert, warn, skip } = require('../lib/harness');
 const A = require('../lib/app');
+const E = require('../lib/env');
 
 const AXE = require.resolve('axe-core/axe.min.js');
 
@@ -146,7 +147,7 @@ function judge(m, label) {
   return line;
 }
 
-async function perf(audit, { base }) {
+async function perf(audit, { base, env }) {
   await audit.suite('Standards — Performance (Core Web Vitals)', async (s, page) => {
     await s.step('Homepage, desktop', async () => judge(await measure(page, base + '/'), 'desktop'), { severity: 'major', timeout: 90000 });
 
@@ -177,6 +178,7 @@ async function perf(audit, { base }) {
     }, { severity: 'minor', timeout: 240000 });
 
     await s.step('Static assets are compressed and cacheable', async () => {
+      E.needsDeployed(env, 'Netlify compression & cache headers');
       const req = page.context().request;
       const bad = [];
       const home = await req.get(base + '/', { headers: { 'Accept-Encoding': 'gzip, br' } });
@@ -275,17 +277,18 @@ async function seo(audit, { base }) {
 }
 
 // ─────────────────────────────────────────────────────────────── security
-async function security(audit, { base }) {
+async function security(audit, { base, env }) {
   await audit.suite('Standards — Security & privacy', async (s, page) => {
     const req = page.context().request;
 
     await s.step('HTTP redirects to HTTPS', async () => {
-      if (!base.startsWith('https://')) skip('base URL is not https');
+      if (!base.startsWith('https://')) skip('environment-limited: target is not served over https (local server)');
       const r = await req.get(base.replace('https://', 'http://') + '/', { maxRedirects: 0 });
       assert([301, 308].includes(r.status()) && /^https:/.test(r.headers()['location'] || ''), `http:// → HTTP ${r.status()} ${r.headers()['location'] || ''}`);
     }, { severity: 'major' });
 
     await s.step('Security headers (HSTS, nosniff, clickjacking, referrer, CSP)', async () => {
+      E.needsDeployed(env, 'Netlify response headers');
       const h = (await req.get(base + '/')).headers();
       const miss = [], soft = [];
       if (!/max-age=\d{7,}/.test(h['strict-transport-security'] || '')) miss.push('Strict-Transport-Security (≥ 1 year)');
@@ -327,6 +330,7 @@ async function security(audit, { base }) {
     }, { severity: 'critical' });
 
     await s.step('Backend rejects bad requests (no stack traces, method limits)', async () => {
+      E.needsDeployed(env, 'Netlify functions');
       const fn = base + '/.netlify/functions/generate';
       const get = await req.get(fn);
       assert(get.status() === 405, 'GET on the AI endpoint → HTTP ' + get.status() + ' (expected 405)');
@@ -415,7 +419,7 @@ async function browsers(audit, { base, mockAi }) {
     if (browser) audit.browser = browser;
     await audit.suite('Standards — ' + name, async (s, page) => {
       if (!browser) {
-        await s.step('Browser available', async () => skip(`${type} is not installed here (CI installs it)`), { severity: 'minor' });
+        await s.step('Browser available', async () => skip(`environment-limited: ${type} is not installed on this runner (CI installs it)`), { severity: 'minor' });
         return;
       }
       await s.step('Homepage loads without JavaScript errors', async () => {

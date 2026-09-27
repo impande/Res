@@ -89,9 +89,25 @@ tested against a local copy of `deploy-site/`. It's for development only, and th
 reports are stamped **MOCK**.
 
 ```bash
-node dev-server.js &      # serves ../deploy-site with the /r/ and /p/ rewrites
+npm install --prefix ..        # build.js needs javascript-obfuscator
+node dev-server.js --build &   # runs build.js on a temp COPY and serves the real
+                               # production artifact (build id, obfuscated app.js);
+                               # your working tree is never modified
 npm run audit:local
 ```
+
+### Environment-limited checks
+At start-up the agent probes, from inside the browser, whether this runner can reach
+Firebase (gstatic), Google sign-in, Razorpay, cdnjs (pdf.js), Google Fonts, Firestore
+and the GitHub API. A step that needs an unreachable host is **not** failed:
+- on GitHub Actions (open internet) it's a **WARN**, meaning a possible third-party outage;
+- anywhere else it's a **SKIP** marked **ENV** in the report.
+
+Network errors from those hosts are left out of the JS/console/network error lists.
+Against a `localhost` target, Netlify-only checks (headers, compression, functions,
+HTTPS redirect) are ENV-skipped too. A grey banner at the top of the report lists
+everything that was environment-limited, so an amber status always means a real
+site issue.
 
 ## Files
 

@@ -73,11 +73,25 @@ const SUITES = {
   const files = { photo: fixtures.makePhotoPng(fileDir), resumePdf: await fixtures.makeResumePdf(browser, fileDir) };
 
   console.log(`resume4u live audit → ${base}${mockAi ? '  [MOCK_AI — not a real audit]' : ''}`);
-  const opts = { base, mockAi, publish, files };
+  // Which third-party hosts can this runner reach? (see lib/env.js)
+  const envInfo = await require('./lib/env').probe(browser, base);
+  if (mockAi) {   // these are faked offline, so they are not a limitation
+    const faked = ['firestore', 'github'].concat(env.MOCK_CDN_DIR ? ['pdfjs'] : []);
+    envInfo.unreachable = envInfo.unreachable.filter(k => !faked.includes(k));
+  }
+  audit.env = envInfo;
+  if (envInfo.unreachable.length) {
+    const hosts = envInfo.unreachable.map(envInfo.hostOf);
+    const re = new RegExp(hosts.map(h => h.replace(/\./g, '\\.')).join('|') + '|ERR_TUNNEL_CONNECTION_FAILED|ERR_CERT_AUTHORITY_INVALID|ERR_PROXY_CONNECTION_FAILED');
+    audit.isEnvNoise = s => re.test(s);
+    console.log('Environment-limited (unreachable from this runner): ' + hosts.join(', '));
+  }
+  const opts = { base, mockAi, publish, files, env: envInfo };
   for (const name of wanted) await SUITES[name]()(audit, opts);
   await browser.close();
 
   const meta = { base, started, finished: new Date(), mockAi, publish, suitesRun: wanted,
+    envLimited: envInfo.unreachable.map(envInfo.hostOf), localTarget: envInfo.local, ci: envInfo.ci,
     buildId: audit.buildId, templateCount: audit.templateCount, atsScore: audit.atsScore, generateMs: audit.generateMs,
     runUrl: env.GITHUB_SERVER_URL && env.GITHUB_RUN_ID ? `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}` : '' };
   const report = writeReport(audit, meta);
