@@ -1,0 +1,15 @@
+{
+  "name": "resume4u-live-audit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily end-to-end audit agent for resume4u.help \u2014 replays real user journeys on the live site and emails a report.",
+  "scripts": {
+    "audit": "node run.js",
+    "serve": "node dev-server.js",
+    "audit:local": "BASE_URL=http://localhost:8899 MOCK_AI=1 SEND_EMAIL=0 node run.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16",
+    "playwright": "1.56.1"
+  }
+}

@@ -1,0 +1,73 @@
+name: live-audit
+
+# Daily end-to-end audit of the LIVE site (https://resume4u.help): a real
+# browser replays every journey a user can take while creating a résumé, then
+# the report is emailed. See qa-agent/README.md.
+#
+#   • Runs every day at 08:00 IST.
+#   • Run it any time: GitHub → Actions → live-audit → "Run workflow"
+#     (also works from the GitHub mobile app).
+on:
+  schedule:
+    - cron: '30 2 * * *'          # 02:30 UTC = 08:00 IST
+  workflow_dispatch:
+    inputs:
+      suites:
+        description: 'Suites to run (comma list, blank = all): health,build,share,portfolio,import,mobile,edge'
+        required: false
+        default: ''
+      base_url:
+        description: 'Site to audit'
+        required: false
+        default: 'https://resume4u.help'
+      publish:
+        description: 'Publish test /r/ and /p/ pages (exercises sharing end-to-end)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: live-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: qa-agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: qa-agent/package-lock.json
+
+      - name: Install agent
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run live audit & email report
+        env:
+          BASE_URL: ${{ inputs.base_url || 'https://resume4u.help' }}
+          SUITES: ${{ inputs.suites }}
+          PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && '1' || '0' }}
+          OUT_DIR: ${{ github.workspace }}/qa-agent/reports/latest
+          REPORT_TO: ${{ vars.REPORT_TO || '2ashishpandey@gmail.com' }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+        run: node run.js
+
+      - name: Upload report & screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-audit-report-${{ github.run_number }}
+          path: qa-agent/reports/latest
+          retention-days: 30
