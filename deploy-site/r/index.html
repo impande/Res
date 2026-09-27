@@ -43,9 +43,40 @@
       + '<p>Shared resume links stay active for 30 days.<br>'
       + 'Ask for an updated link, or create your own free at <a href="https://resume4u.help">resume4u.help</a>.</p>';
   }
+  // Safe, never-cut fit applied by THIS viewer (served fresh every scan) so every
+  // shared résumé renders correctly — including ones published before the fix, with
+  // no need to re-publish. We strip whatever fit script the stored page baked in and
+  // inject one authoritative version: size from the TRUE visible width, never scale
+  // above 100% (A4 fits any desktop/tablet), centre, and shrink further if anything
+  // would spill past the screen. Guarantees no side-cut on any device.
+  var SAFEFIT = '(function(){var f=document.getElementById("r4uFit");if(!f)return;var n=794;'
+    + 'function mr(){var p=document.querySelector(".resume-a4-page");if(!p)return 0;var e=p.getElementsByTagName("*"),m=0;for(var i=0;i<e.length;i++){var r=e[i].getBoundingClientRect();if(r.right>m)m=r.right;}return m;}'
+    + 'function d(){var vv=(window.visualViewport&&window.visualViewport.width)||9999;var vw=Math.min(document.documentElement.clientWidth||9999,window.innerWidth||9999,vv);'
+    + 'var s=(vw>=n)?1:vw/(n+24);'
+    + 'f.style.transformOrigin="top left";f.style.marginLeft="0px";'
+    + 'f.style.transform=(s===1)?"none":"scale("+s+")";f.style.marginBottom=(s===1?0:Math.round(f.offsetHeight*(s-1)))+"px";'
+    + 'var g=0;while(g++<18&&(mr()>vw-2||document.documentElement.scrollWidth>vw+2)&&s>0.2){s*=0.95;f.style.transform="scale("+s+")";f.style.marginBottom=Math.round(f.offsetHeight*(s-1))+"px";}'
+    + 'f.style.marginLeft=Math.max(0,(vw-n*s)/2)+"px";}'
+    + 'window.addEventListener("resize",d);window.addEventListener("orientationchange",d);window.addEventListener("load",d);'
+    + 'try{if(window.visualViewport)window.visualViewport.addEventListener("resize",d);}catch(e){}'
+    + 'if(document.readyState!=="loading")d();else window.addEventListener("DOMContentLoaded",d);'
+    + 'if(document.fonts&&document.fonts.ready)document.fonts.ready.then(d);'
+    + 'setTimeout(d,120);setTimeout(d,400);setTimeout(d,1000);setTimeout(d,2000);})();';
+  var SAFECSS = '<style>html,body{overflow-x:hidden!important;}#r4uOuter{overflow-x:hidden!important;padding:28px 0!important;}</style>';
+  function applySafeFit(html) {
+    try {
+      // Remove the page's own fit <script> (identified by the #r4uFit id) so it
+      // can't fight ours. The standalone page has exactly one script block.
+      html = html.replace(/<script\b[^>]*>(?:(?!<\/script>)[\s\S])*?r4uFit(?:(?!<\/script>)[\s\S])*?<\/script>/gi, '');
+      var inject = SAFECSS + '<script>' + SAFEFIT + '<\/script>';
+      if (html.indexOf('</body>') > -1) html = html.replace('</body>', inject + '</body>');
+      else html = html + inject;
+    } catch (e) {}
+    return html;
+  }
   function renderHtml(html) {
     document.open('text/html', 'replace');
-    document.write(html);
+    document.write(applySafeFit(html));
     document.close();
   }
   // Resume pages are stored in the same Firestore collection as portfolios (an
