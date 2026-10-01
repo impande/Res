@@ -12837,5 +12837,34 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   if(!start()){ var n=0,iv=setInterval(function(){ if(start()||++n>60) clearInterval(iv); }, 300); }
 })();
 </script>
+<style>
+#r4uMobLegal{display:none;}
+@media(max-width:768px){
+  #r4uMobLegal{display:block;margin:26px 2px 10px;padding:16px 4px 4px;border-top:1px solid var(--border,#e5e5e0);text-align:center;font-size:0.75rem;line-height:1.9;}
+  #r4uMobLegal a{color:var(--muted,#6b7280);text-decoration:none;margin:0 7px;font-weight:600;}
+  #r4uMobLegal a:hover{color:var(--accent,#b45309);}
+  #r4uMobLegal .r4u-ml-cp{display:block;margin-top:5px;color:var(--muted,#6b7280);opacity:.8;font-size:0.7rem;font-weight:400;}
+}
+</style>
+<script id="_r4uMobLegalJS">
+/* Mobile-only legal footer. The desktop sidebar carries Privacy/Terms/Refund
+   links, but the sidebar is display:none on mobile — so mobile users (most of
+   our traffic, and Razorpay reviewers) had no way to reach the policies. This
+   appends a slim legal strip to the bottom of the scrollable #main content,
+   shown only <=768px. Purely additive DOM; hidden on desktop. */
+(function(){
+  function mk(){
+    if(document.getElementById('r4uMobLegal')) return true;
+    var main=document.getElementById('main'); if(!main) return false;
+    var f=document.createElement('div'); f.id='r4uMobLegal';
+    f.innerHTML='<a href="/privacy/">Privacy</a>·<a href="/terms/">Terms</a>·'
+      +'<a href="/refund/">Refunds</a>·'
+      +'<a href="https://wa.me/919309014196" target="_blank" rel="noopener">Contact</a>'
+      +'<span class="r4u-ml-cp">\u00a9 2026 Resume For You \u00b7 resume4u.help</span>';
+    main.appendChild(f); return true;
+  }
+  if(!mk()){ var n=0,iv=setInterval(function(){ if(mk()||++n>40) clearInterval(iv); },300); }
+})();
+</script>
 </body>
 </html>
