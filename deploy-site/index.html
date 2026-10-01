@@ -11137,7 +11137,10 @@ window.__novaPortfolioHTML=function(d,sections){
   };
   function wrapGoToStepKa(){ if(typeof window.goToStep!=='function'||window.goToStep.__kaAuto) return false;
     var g=window.goToStep; window.goToStep=function(){ var r=g.apply(this,arguments);
-      try{ if(arguments[0]===4) setTimeout(window.pfKaAutoGen,200); }catch(e){} return r; };
+      /* Key Achievements are opt-in: do NOT auto-generate/auto-insert them into
+         the résumé when the user lands on the step. They can use the manual
+         "✦ Suggest 5 with AI" button to add some if they want. */
+      return r; };
     window.goToStep.__kaAuto=true; return true; }
   window.pfRenderKa=function(){ var box=document.getElementById('keyAchievEntries'); if(!box) return; var A=window.__keyAchiev||[];
     box.innerHTML=A.map(function(a,i){
