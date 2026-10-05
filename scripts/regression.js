@@ -203,6 +203,10 @@ check('feature: submit-rating function (valid + writes ratings)', () => {
   return true;
 });
 
+// AggregateRating badge + JSON-LD (SEO star snippets), gated on real rating count
+present('feature: aggregate rating badge/JSON-LD', '_r4uAggRatingJS');
+present('feature: aggregate rating slot in hero', 'id="r4uRatingBadge"');
+
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
   const m = src.match(/NOVA_TPLS\s*=\s*\{([^}]*)\}/);
