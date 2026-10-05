@@ -191,6 +191,18 @@ check('payment: generate.js check-paid action (Redis-backed, fail-safe)', () => 
   return g.indexOf("action === 'check-paid'") > -1 || 'check-paid action missing from generate.js';
 });
 
+// Product rating feature (star prompt after download + submit-rating function)
+present('feature: product rating prompt UI', '_r4uRatingJS');
+present('feature: product rating show fn', 'window._r4uShowRating');
+check('feature: submit-rating function (valid + writes ratings)', () => {
+  const fp = path.join(ROOT, 'deploy-site', 'netlify', 'functions', 'submit-rating.js');
+  if (!fs.existsSync(fp)) return 'submit-rating.js not found';
+  const r = fs.readFileSync(fp, 'utf8');
+  cp.execSync('node --check ' + JSON.stringify(fp), { stdio: 'pipe' });
+  if (r.indexOf('/ratings?key=') === -1) return 'submit-rating does not write to the ratings collection';
+  return true;
+});
+
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
   const m = src.match(/NOVA_TPLS\s*=\s*\{([^}]*)\}/);
