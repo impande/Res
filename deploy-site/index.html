@@ -2551,6 +2551,7 @@
     <a href="/privacy/" style="color:var(--muted);text-decoration:none;margin-right:12px;">Privacy</a>
     <a href="/terms/" style="color:var(--muted);text-decoration:none;margin-right:12px;">Terms</a>
     <a href="/refund/" style="color:var(--muted);text-decoration:none;">Refunds</a>
+    <div style="margin-top:7px;"><a href="#" onclick="window._r4uShowRating(true);return false;" style="color:var(--accent,#b45309);text-decoration:none;font-weight:700;">Rate us &#9733;</a></div>
     <div style="color:var(--muted);margin-top:6px;font-size:0.7rem;">&copy; 2026 Resume For You</div>
   </div>
 </aside>
@@ -12863,7 +12864,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var f=document.createElement('div'); f.id='r4uMobLegal';
     f.innerHTML='<a href="/privacy/">Privacy</a>·<a href="/terms/">Terms</a>·'
       +'<a href="/refund/">Refunds</a>·'
-      +'<a href="https://wa.me/919309014196" target="_blank" rel="noopener">Contact</a>'
+      +'<a href="https://wa.me/919309014196" target="_blank" rel="noopener">Contact</a>\u00b7'
+      +'<a href="#" onclick="window._r4uShowRating(true);return false;">Rate us \u2605</a>'
       +'<span class="r4u-ml-cp">\u00a9 2026 Resume For You \u00b7 resume4u.help</span>';
     main.appendChild(f); return true;
   }
@@ -12953,9 +12955,10 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         .then(function(){ markRated(); follow.style.display='none'; o.querySelector('.r4u-stars').style.display='none'; o.querySelector('.r4u-rate-sub').style.display='none'; o.querySelector('.r4u-rate-title').style.display='none'; thanks.style.display='block'; setTimeout(close,1500); });
     });
   }
-  window._r4uShowRating=function(){
-    if(rated()||cooldownActive()) return;
-    build(); markSeen();
+  window._r4uShowRating=function(force){
+    if(!force && (rated()||cooldownActive())) return;
+    build();
+    if(!force) markSeen();           /* a manual "Rate us" open shouldn't start the cooldown */
     var o=document.getElementById('r4uRateOverlay'); if(o) o.classList.add('on');
   };
   /* Trigger: show on the 2nd visit onwards (returning user), for BOTH logged-in
