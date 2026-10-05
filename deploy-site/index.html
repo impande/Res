@@ -12958,13 +12958,28 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     build(); markSeen();
     var o=document.getElementById('r4uRateOverlay'); if(o) o.classList.add('on');
   };
-  function afterDownload(){ if(rated()||cooldownActive()) return; setTimeout(window._r4uShowRating, 1600); }
-  function hook(name){ var o=window[name]; if(typeof o!=='function'||o.__r4uRateHooked) return true;
-    var w=function(){ var r=o.apply(this,arguments); try{ afterDownload(); }catch(e){} return r; };
-    try{ for(var k in o){ if(Object.prototype.hasOwnProperty.call(o,k)) w[k]=o[k]; } }catch(e){}
-    w.__r4uRateHooked=true; window[name]=w; return true; }
-  function tryHook(){ var a=hook('downloadPDF'), b=hook('downloadDoc'); return a&&b&&(typeof window.downloadPDF==='function'); }
-  if(!tryHook()){ var n=0,iv=setInterval(function(){ if(tryHook()||++n>80) clearInterval(iv); },250); }
+  /* Trigger: show on the 2nd visit onwards (returning user), for BOTH logged-in
+     and anonymous users. A "visit" is counted once per browser session via
+     sessionStorage; the running count lives in localStorage (per browser/device),
+     which is how an anonymous returning user is identified without any login. */
+  function bumpVisit(){
+    try{
+      if(!sessionStorage.getItem('_r4uSess')){
+        sessionStorage.setItem('_r4uSess','1');
+        var v=(parseInt(localStorage.getItem('_r4uVisits'),10)||0)+1;
+        localStorage.setItem('_r4uVisits', String(v));
+        return v;
+      }
+      return parseInt(localStorage.getItem('_r4uVisits'),10)||1;
+    }catch(e){ return 1; }
+  }
+  function maybeShowOnVisit(){
+    var v=bumpVisit();
+    if(rated()||cooldownActive()) return;
+    if(v>=2){ setTimeout(function(){ if(!rated()&&!cooldownActive()) window._r4uShowRating(); }, 10000); }
+  }
+  if(document.readyState!=='loading') maybeShowOnVisit();
+  else window.addEventListener('DOMContentLoaded', maybeShowOnVisit);
 })();
 </script>
 </body>
