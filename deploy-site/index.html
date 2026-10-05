@@ -13001,7 +13001,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    or fake review markup. ?ratingpreview=1 renders a SAMPLE for previewing the look
    on UAT WITHOUT reading or writing any data. */
 (function(){
-  var THRESHOLD=25, FS='https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/aggregates/productRating?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
+  var THRESHOLD=1, FS='https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/aggregates/productRating?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
   function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   function render(avg, count){
     avg=Math.round(avg*10)/10;
@@ -13010,8 +13010,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(el){
       el.innerHTML='<span class="r4u-rb-stars" aria-hidden="true"><span class="r4u-rb-fill" style="width:'+pct+'%">★★★★★</span>★★★★★</span>'
         +'<span class="r4u-rb-num">'+avg.toFixed(1)+'</span>'
-        +'<span class="r4u-rb-cnt">('+fmt(count)+' ratings)</span>';
-      el.setAttribute('aria-label', avg.toFixed(1)+' out of 5 stars from '+fmt(count)+' ratings');
+        +'<span class="r4u-rb-cnt">('+fmt(count)+' rating'+(count===1?'':'s')+')</span>';
+      el.setAttribute('aria-label', avg.toFixed(1)+' out of 5 stars from '+fmt(count)+' rating'+(count===1?'':'s'));
       el.classList.add('on');
     }
     try{
