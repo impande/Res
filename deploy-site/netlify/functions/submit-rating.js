@@ -49,22 +49,25 @@ exports.handler = async function (event) {
       throw new Error('Firestore write ' + res.status + ': ' + e);
     }
 
-    // Best-effort: bump the running aggregate via a commit with field transforms
-    // (atomic increment). If this fails, the rating itself is still saved.
+    // Bump the running aggregate with a read-modify-write PATCH. PATCH creates the
+    // document if it doesn't exist (so the very first rating initialises it),
+    // which a transform-only commit can't reliably do. The race at low volume is
+    // negligible; if this fails the rating itself is still saved above.
     try {
-      const commit = {
-        writes: [{
-          transform: {
-            document: `projects/resume-ai-2eda1/databases/(default)/documents/aggregates/productRating`,
-            fieldTransforms: [
-              { fieldPath: 'sum',   increment: { integerValue: String(stars) } },
-              { fieldPath: 'count', increment: { integerValue: '1' } },
-            ],
-          },
-        }],
-      };
-      await fetch(`${FS_BASE.replace(/\/documents$/, '')}:commit?key=${FS_KEY}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(commit),
+      const aggUrl = `${FS_BASE}/aggregates/productRating?key=${FS_KEY}`;
+      let sum = 0, count = 0;
+      const cur = await fetch(aggUrl + '&mask.fieldPaths=sum&mask.fieldPaths=count');
+      if (cur.ok) {
+        const j = await cur.json();
+        if (j && j.fields) {
+          sum   = parseInt((j.fields.sum   && j.fields.sum.integerValue)   || '0', 10) || 0;
+          count = parseInt((j.fields.count && j.fields.count.integerValue) || '0', 10) || 0;
+        }
+      }
+      sum += stars; count += 1;
+      await fetch(`${FS_BASE}/aggregates/productRating?key=${FS_KEY}&updateMask.fieldPaths=sum&updateMask.fieldPaths=count`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { sum: { integerValue: String(sum) }, count: { integerValue: String(count) } } }),
       });
     } catch (e) { /* aggregate is a convenience; ignore failures */ }
 
