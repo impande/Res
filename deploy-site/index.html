@@ -2551,6 +2551,7 @@
     <a href="/privacy/" style="color:var(--muted);text-decoration:none;margin-right:12px;">Privacy</a>
     <a href="/terms/" style="color:var(--muted);text-decoration:none;margin-right:12px;">Terms</a>
     <a href="/refund/" style="color:var(--muted);text-decoration:none;">Refunds</a>
+    <div style="margin-top:7px;"><a href="#" onclick="window._r4uShowRating(true);return false;" style="color:var(--accent,#b45309);text-decoration:none;font-weight:700;">Rate us &#9733;</a></div>
     <div style="color:var(--muted);margin-top:6px;font-size:0.7rem;">&copy; 2026 Resume For You</div>
   </div>
 </aside>
@@ -12863,11 +12864,125 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var f=document.createElement('div'); f.id='r4uMobLegal';
     f.innerHTML='<a href="/privacy/">Privacy</a>·<a href="/terms/">Terms</a>·'
       +'<a href="/refund/">Refunds</a>·'
-      +'<a href="https://wa.me/919309014196" target="_blank" rel="noopener">Contact</a>'
+      +'<a href="https://wa.me/919309014196" target="_blank" rel="noopener">Contact</a>\u00b7'
+      +'<a href="#" onclick="window._r4uShowRating(true);return false;">Rate us \u2605</a>'
       +'<span class="r4u-ml-cp">\u00a9 2026 Resume For You \u00b7 resume4u.help</span>';
     main.appendChild(f); return true;
   }
   if(!mk()){ var n=0,iv=setInterval(function(){ if(mk()||++n>40) clearInterval(iv); },300); }
+})();
+</script>
+<style id="_r4uRatingCss">
+#r4uRateOverlay{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,15,26,0.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+#r4uRateOverlay.on{display:flex;}
+#r4uRateCard{width:min(380px,96%);background:var(--card,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);border-radius:16px;padding:24px 22px 20px;box-shadow:0 18px 60px rgba(0,0,0,.28);text-align:center;position:relative;font-family:inherit;}
+#r4uRateCard .r4u-rate-x{position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:1.3rem;line-height:1;color:var(--muted,#9ca3af);cursor:pointer;}
+#r4uRateCard .r4u-rate-title{font-size:1.1rem;font-weight:800;margin:2px 0 4px;}
+#r4uRateCard .r4u-rate-sub{font-size:.82rem;color:var(--muted,#6b7280);margin:0 0 16px;}
+#r4uRateCard .r4u-stars{display:flex;gap:6px;justify-content:center;margin-bottom:6px;}
+#r4uRateCard .r4u-star{font-size:2rem;line-height:1;cursor:pointer;background:none;border:0;padding:2px;color:#d7d7de;transition:transform .08s,color .1s;}
+#r4uRateCard .r4u-star:hover{transform:scale(1.12);}
+#r4uRateCard .r4u-star.sel{color:#f59e0b;}
+#r4uRateCard .r4u-rate-follow{margin-top:12px;display:none;}
+#r4uRateCard .r4u-rate-follow textarea{width:100%;min-height:62px;border:1px solid var(--border,#e5e5e0);border-radius:10px;padding:9px 11px;font:inherit;font-size:.85rem;resize:vertical;background:var(--bg,#fff);color:var(--text,#1a1a1a);box-sizing:border-box;}
+#r4uRateCard .r4u-rate-cue{font-size:.86rem;font-weight:700;margin:4px 0 8px;}
+#r4uRateCard .r4u-rate-actions{display:flex;gap:8px;margin-top:10px;}
+#r4uRateCard .r4u-rate-btn{flex:1;border:0;border-radius:10px;padding:11px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;background:var(--accent,#b45309);color:#fff;}
+#r4uRateCard .r4u-rate-btn.ghost{background:transparent;border:1px solid var(--border,#e5e5e0);color:var(--text,#1a1a1a);}
+#r4uRateCard .r4u-rate-wa{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#25d366;}
+#r4uRateCard .r4u-rate-thanks{display:none;font-size:.95rem;font-weight:700;padding:8px 0 4px;}
+</style>
+<script id="_r4uRatingJS">
+/* Product rating: a one-time star prompt after a PDF/Word download. 4-5 stars ->
+   invite a short public review; 1-3 stars -> private feedback routed to WhatsApp
+   so unhappy users reach us instead of posting a public low rating. Stored via
+   the submit-rating function. Shown once (localStorage); dismissal has a cooldown. */
+(function(){
+  var WA='https://wa.me/919309014196';
+  function rated(){ try{ return localStorage.getItem('_r4uRated')==='1'; }catch(e){ return false; } }
+  function cooldownActive(){ try{ var t=+localStorage.getItem('_r4uRateSeen')||0; return (Date.now()-t) < 60*24*3600*1000; }catch(e){ return false; } }
+  function markSeen(){ try{ localStorage.setItem('_r4uRateSeen', String(Date.now())); }catch(e){} }
+  function markRated(){ try{ localStorage.setItem('_r4uRated','1'); }catch(e){} }
+  var _chosen=0, _built=false;
+  function build(){
+    if(_built) return;
+    var o=document.createElement('div'); o.id='r4uRateOverlay';
+    o.innerHTML=''
+      +'<div id="r4uRateCard" role="dialog" aria-modal="true" aria-label="Rate your experience">'
+      +'<button class="r4u-rate-x" aria-label="Close">&times;</button>'
+      +'<div class="r4u-rate-title">How was your experience?</div>'
+      +'<div class="r4u-rate-sub">Your rating helps us improve resume4u.help</div>'
+      +'<div class="r4u-stars" role="radiogroup" aria-label="Rating">'
+      +  [1,2,3,4,5].map(function(n){return '<button class="r4u-star" data-n="'+n+'" role="radio" aria-label="'+n+' star'+(n>1?'s':'')+'">★</button>';}).join('')
+      +'</div>'
+      +'<div class="r4u-rate-follow">'
+      +'  <div class="r4u-rate-cue"></div>'
+      +'  <textarea class="r4u-rate-text" placeholder=""></textarea>'
+      +'  <div class="r4u-rate-actions">'
+      +'    <button class="r4u-rate-btn r4u-rate-submit" type="button">Submit</button>'
+      +'    <a class="r4u-rate-btn r4u-rate-wa" href="'+WA+'" target="_blank" rel="noopener" style="display:none;text-decoration:none;">WhatsApp us</a>'
+      +'  </div>'
+      +'</div>'
+      +'<div class="r4u-rate-thanks">Thank you! 🙌</div>'
+      +'</div>';
+    document.body.appendChild(o); _built=true;
+    function close(){ o.classList.remove('on'); }
+    o.addEventListener('click',function(e){ if(e.target===o){ markSeen(); close(); } });
+    o.querySelector('.r4u-rate-x').addEventListener('click',function(){ markSeen(); close(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.classList.contains('on')){ markSeen(); close(); } });
+    var stars=o.querySelectorAll('.r4u-star');
+    var follow=o.querySelector('.r4u-rate-follow'), cue=o.querySelector('.r4u-rate-cue'),
+        ta=o.querySelector('.r4u-rate-text'), wa=o.querySelector('.r4u-rate-wa'),
+        submit=o.querySelector('.r4u-rate-submit'), thanks=o.querySelector('.r4u-rate-thanks');
+    function paint(k){ stars.forEach(function(s,i){ s.classList.toggle('sel', i<k); }); }
+    stars.forEach(function(s){
+      s.addEventListener('mouseenter',function(){ paint(+s.getAttribute('data-n')); });
+      s.addEventListener('click',function(){
+        _chosen=+s.getAttribute('data-n'); paint(_chosen); follow.style.display='block';
+        if(_chosen>=4){ cue.textContent='Awesome! Mind sharing a quick line?'; ta.placeholder='What did you like? (optional)'; wa.style.display='none'; }
+        else{ cue.textContent='Sorry it fell short — what can we improve?'; ta.placeholder='Tell us what went wrong (optional)'; wa.style.display='inline-flex'; }
+        ta.focus();
+      });
+    });
+    o.querySelector('.r4u-stars').addEventListener('mouseleave',function(){ paint(_chosen); });
+    submit.addEventListener('click',function(){
+      if(!_chosen) return;
+      var u=window._fbUser||{};
+      var payload={ stars:_chosen, text:(ta.value||''), uid:(u.uid||''), email:(u.email||''), where:'builder' };
+      submit.disabled=true; submit.textContent='Sending…';
+      fetch('/.netlify/functions/submit-rating',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+        .catch(function(){})
+        .then(function(){ markRated(); follow.style.display='none'; o.querySelector('.r4u-stars').style.display='none'; o.querySelector('.r4u-rate-sub').style.display='none'; o.querySelector('.r4u-rate-title').style.display='none'; thanks.style.display='block'; setTimeout(close,1500); });
+    });
+  }
+  window._r4uShowRating=function(force){
+    if(!force && (rated()||cooldownActive())) return;
+    build();
+    if(!force) markSeen();           /* a manual "Rate us" open shouldn't start the cooldown */
+    var o=document.getElementById('r4uRateOverlay'); if(o) o.classList.add('on');
+  };
+  /* Trigger: show on the 2nd visit onwards (returning user), for BOTH logged-in
+     and anonymous users. A "visit" is counted once per browser session via
+     sessionStorage; the running count lives in localStorage (per browser/device),
+     which is how an anonymous returning user is identified without any login. */
+  function bumpVisit(){
+    try{
+      if(!sessionStorage.getItem('_r4uSess')){
+        sessionStorage.setItem('_r4uSess','1');
+        var v=(parseInt(localStorage.getItem('_r4uVisits'),10)||0)+1;
+        localStorage.setItem('_r4uVisits', String(v));
+        return v;
+      }
+      return parseInt(localStorage.getItem('_r4uVisits'),10)||1;
+    }catch(e){ return 1; }
+  }
+  function maybeShowOnVisit(){
+    var v=bumpVisit();
+    if(rated()||cooldownActive()) return;
+    if(v>=2){ setTimeout(function(){ if(!rated()&&!cooldownActive()) window._r4uShowRating(); }, 10000); }
+  }
+  if(document.readyState!=='loading') maybeShowOnVisit();
+  else window.addEventListener('DOMContentLoaded', maybeShowOnVisit);
 })();
 </script>
 </body>
