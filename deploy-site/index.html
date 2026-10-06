@@ -2552,6 +2552,7 @@
     <a href="/terms/" style="color:var(--muted);text-decoration:none;margin-right:12px;">Terms</a>
     <a href="/refund/" style="color:var(--muted);text-decoration:none;">Refunds</a>
     <div style="margin-top:7px;"><a href="#" onclick="window._r4uShowRating(true);return false;" style="color:var(--accent,#b45309);text-decoration:none;font-weight:700;">Rate us &#9733;</a></div>
+    <div id="r4uRatingBadgeSb" style="margin-top:6px;"></div>
     <div style="color:var(--muted);margin-top:6px;font-size:0.7rem;">&copy; 2026 Resume For You</div>
   </div>
 </aside>
@@ -11329,8 +11330,12 @@ window.__novaPortfolioHTML=function(d,sections){
            paths; only fill it in as a safety net when it's missing, from the
            explicit reorder recorded on lastResumeData (never a default order,
            which would fight a later template change — _apply is template-scoped). */
-        var so=(typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) ? lastResumeData.sectionOrder : null;
-        if(d && typeof d==='object' && so && !d.sectionOrder) d.sectionOrder=so;
+        /* Capture the LIVE résumé section order at save time (authoritative — reflects
+           any reorder path: AI chat, manual menu, future). Fall back to the recorded
+           order. Always set it (override any stale value the base collector wrote). */
+        var _live=(typeof window._r4uCaptureSecOrder==='function')?window._r4uCaptureSecOrder():null;
+        var so=_live || ((typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) ? lastResumeData.sectionOrder : null);
+        if(d && typeof d==='object' && so) d.sectionOrder=so;
         /* Persist Key Achievements into the résumé document too — it otherwise
            lives only in this browser's localStorage and would be lost on a cloud
            restore or another device. */
@@ -13022,6 +13027,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   function render(avg, count){
     avg=Math.round(avg*10)/10;
     var pct=Math.max(0,Math.min(100, (avg/5)*100));
+    var _sb=document.getElementById('r4uRatingBadgeSb');
+    if(_sb){ _sb.innerHTML='<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;"><span style="color:#f59e0b;letter-spacing:.5px;">★</span><strong style="color:var(--text,#1a1a1a);">'+avg.toFixed(1)+'</strong><span style="color:var(--muted,#6b7280);font-weight:400;">('+fmt(count)+')</span></span>'; }
     var el=document.getElementById('r4uRatingBadge');
     if(el){
       el.innerHTML='<span class="r4u-rb-stars" aria-hidden="true"><span class="r4u-rb-fill" style="width:'+pct+'%">★★★★★</span>★★★★★</span>'
