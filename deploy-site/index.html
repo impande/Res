@@ -5507,6 +5507,13 @@ if ('serviceWorker' in navigator) {
       // (e.g. template switch) — and the next save — keep this arrangement.
       try{ if(window._r4uCaptureSecOrder && typeof lastResumeData!=='undefined' && lastResumeData){ var _so=window._r4uCaptureSecOrder(); if(_so){ lastResumeData.sectionOrder=_so; try{ localStorage.setItem('_r4uSecOrder', JSON.stringify(_so)); }catch(_e){} } } }catch(e){}
       _markEdited();
+      /* Persist the reorder. Previously only _markEdited() ran, which does NOT set
+         _versionDirty — so the cloud autosave never saved the new order and a
+         signed-in user's reload reverted it. Re-render via renderOutput (its wrapper
+         re-applies lastResumeData.sectionOrder AND the core sets _versionDirty), then
+         force an immediate save so a quick reload keeps the arrangement. */
+      try{ if(typeof window.renderOutput==='function') window.renderOutput(lastResumeData); }catch(e){}
+      try{ if(window._fbUser && typeof window._saveToCloud==='function') window._saveToCloud(window._fbUser.uid, false); }catch(e){}
       _clear(); showPages();
       _msg('<span class="aig-ok">✓ Moved '+_movedTitle+' — nice!</span>');
       var r=_row();
