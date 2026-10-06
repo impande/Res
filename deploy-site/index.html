@@ -13028,7 +13028,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     avg=Math.round(avg*10)/10;
     var pct=Math.max(0,Math.min(100, (avg/5)*100));
     var _sb=document.getElementById('r4uRatingBadgeSb');
-    if(_sb){ _sb.innerHTML='<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;"><span style="color:#f59e0b;letter-spacing:.5px;">★</span><strong style="color:var(--text,#1a1a1a);">'+avg.toFixed(1)+'</strong><span style="color:var(--muted,#6b7280);font-weight:400;">('+fmt(count)+')</span></span>'; }
+    if(_sb){ _sb.innerHTML='<span style="position:relative;display:inline-block;font-size:0.92rem;letter-spacing:2px;color:#dcd7c9;white-space:nowrap;line-height:1;"><span style="position:absolute;top:0;left:0;overflow:hidden;color:#f59e0b;white-space:nowrap;width:'+pct+'%;">★★★★★</span>★★★★★</span><div style="font-size:0.72rem;color:var(--muted,#6b7280);margin-top:3px;"><strong style="color:var(--text,#1a1a1a);font-size:0.82rem;">'+avg.toFixed(1)+'</strong> · '+fmt(count)+' review'+(count===1?'':'s')+'</div>'; }
     var el=document.getElementById('r4uRatingBadge');
     if(el){
       el.innerHTML='<span class="r4u-rb-stars" aria-hidden="true"><span class="r4u-rb-fill" style="width:'+pct+'%">★★★★★</span>★★★★★</span>'
