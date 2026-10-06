@@ -5513,7 +5513,16 @@ if ('serviceWorker' in navigator) {
          re-applies lastResumeData.sectionOrder AND the core sets _versionDirty), then
          force an immediate save so a quick reload keeps the arrangement. */
       try{ if(typeof window.renderOutput==='function') window.renderOutput(lastResumeData); }catch(e){}
-      try{ if(window._fbUser && typeof window._saveToCloud==='function') window._saveToCloud(window._fbUser.uid, false); }catch(e){}
+      /* Force an immediate PERSIST. A reload restores a VERSION snapshot, which the
+         app otherwise only writes on the 15s autosave tick — too late if the user
+         reloads quickly, so the reorder reverted. Save the main doc AND force the
+         current version via the app's always-persist manual save. */
+      try{ if(window._fbUser){ var _u=window._fbUser.uid;
+        if(typeof window._saveToCloud==='function') window._saveToCloud(_u, false);
+        /* Mirror the autosave's version branch, immediately: */
+        if(window._currentVersionId){ if(typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(_u); }
+        else if(typeof window._saveVersionSnapshot==='function') window._saveVersionSnapshot(_u, null, null, function(){});
+      } }catch(e){}
       _clear(); showPages();
       _msg('<span class="aig-ok">✓ Moved '+_movedTitle+' — nice!</span>');
       var r=_row();
