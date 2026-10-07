@@ -215,7 +215,10 @@ check('feature: submit-rating function (valid + writes ratings)', () => {
 
 // AggregateRating badge + JSON-LD (SEO star snippets), gated on real rating count
 present('feature: aggregate rating badge/JSON-LD', '_r4uAggRatingJS');
-present('feature: aggregate rating slot in hero', 'id="r4uRatingBadge"');
+// The in-app hero rating badge was removed (distracting inside the builder); the
+// aggregate still renders in the desktop sidebar slot + injects AggregateRating
+// JSON-LD, and the landing pages carry their own badge for SEO star snippets.
+present('feature: aggregate rating sidebar slot', 'id="r4uRatingBadgeSb"');
 
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {
