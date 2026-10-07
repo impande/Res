@@ -13058,5 +13058,62 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }catch(e){}
 })();
 </script>
+
+<style id="_r4uTplMirrorCss">
+/* "Choose Template" thumbnails are a true mirror of the real résumé output card:
+   each card renders the actual resume (renderResumeHTML) for its template instead
+   of a simplified mock. The real A4 page must lay out at full width (794px) inside
+   the scaled .tpl-mini-inner, otherwise the sidebar/grid templates (blush, verdant,
+   lilac, azure, …) collapse to ~34% width inside #tplGrid's context. Forcing the
+   width here keeps every family rendering exactly as it does in the output card. */
+.tpl-mini-inner > .resume-a4-page{
+  width:794px !important; min-width:794px !important; max-width:794px !important;
+  min-height:1123px !important; margin:0 !important; box-shadow:none !important;
+  border-radius:0 !important;
+}
+</style>
+<script id="_r4uTplMirrorJS">
+/* Make each Choose-Template thumbnail a pixel-faithful mirror of the résumé output
+   card. renderTemplateGrid() fills each card with a lightweight mock; we wrap it so
+   that, right after it runs, every card's .tpl-mini-inner is re-rendered with the
+   SAME renderResumeHTML() the live output card uses (temporarily swapping
+   currentTemplate per card). Because it's the exact same renderer + the user's real
+   lastResumeData, the thumbnail is guaranteed to match what they'll get. Falls back
+   to the mock when there is no resume data yet. renderTemplateGrid/renderResumeHTML
+   live in the main (deferred) app bundle, so we install the wrapper once they exist. */
+(function(){
+  function mirror(){
+    try{
+      if(typeof renderResumeHTML!=='function') return;
+      if(typeof lastResumeData==='undefined' || !lastResumeData) return; /* keep mock until a resume exists */
+      var cards=document.querySelectorAll('#tplGrid .tpl-card');
+      if(!cards.length) return;
+      var saved=currentTemplate;
+      try{
+        for(var i=0;i<cards.length;i++){
+          var c=cards[i];
+          var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
+          if(!m) continue;
+          var inner=c.querySelector('.tpl-mini-inner');
+          if(!inner) continue;
+          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(lastResumeData)+'</div>'; }catch(e){}
+        }
+      } finally { currentTemplate=saved; }
+      if(typeof calibrateTplPreviews==='function') calibrateTplPreviews();
+    }catch(e){}
+  }
+  function install(){
+    if(typeof renderTemplateGrid!=='function') return false;
+    if(renderTemplateGrid.__r4uMirror) return true;
+    var orig=renderTemplateGrid;
+    var wrapped=function(){ var r=orig.apply(this,arguments); try{ requestAnimationFrame(mirror); }catch(e){ try{ mirror(); }catch(_){} } return r; };
+    wrapped.__r4uMirror=true;
+    try{ renderTemplateGrid=wrapped; }catch(e){}
+    try{ window.renderTemplateGrid=wrapped; }catch(e){}
+    return true;
+  }
+  if(!install()){ var n=0, iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); }, 80); }
+})();
+</script>
 </body>
 </html>
