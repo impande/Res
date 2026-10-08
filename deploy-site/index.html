@@ -13139,6 +13139,41 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   if(!install()){ var n=0, iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); }, 80); }
 })();
 </script>
+<script id="_r4uTplCrispJS">
+/* Render the template thumbnails with CSS `zoom` instead of `transform:scale`.
+   transform rasterises the résumé once and shrinks that bitmap, which is soft on a
+   1x laptop display (it only looks sharp on 2-3x phone screens). `zoom` re-lays-out
+   and re-rasterises the text at the small size, so it stays crisp at any pixel
+   density. We replace calibrateTplPreviews (the core width-only transform scaler)
+   once it exists; the mirror + every render/resize path then route through this. */
+(function(){
+  var supportsZoom = (function(){ try{ var d=document.createElement('div'); d.style.zoom='0.5'; return d.style.zoom!==''; }catch(e){ return false; } })();
+  function crisp(){
+    try{
+      var grid=document.getElementById('tplGrid'); if(!grid) return;
+      var thumbs=grid.querySelectorAll('.tpl-card-thumb'); if(!thumbs.length) return;
+      var cardW=thumbs[0].clientWidth; if(!cardW){ setTimeout(crisp,120); return; }
+      var z=cardW/794;
+      for(var i=0;i<thumbs.length;i++){
+        var inner=thumbs[i].querySelector('.tpl-mini-inner'); if(!inner) continue;
+        inner.style.left='0'; inner.style.top='0'; inner.style.willChange='auto';
+        if(supportsZoom){ inner.style.transform='none'; inner.style.zoom=z; }
+        else { inner.style.zoom=''; inner.style.transformOrigin='top left'; inner.style.transform='scale('+z.toFixed(4)+')'; }
+      }
+    }catch(e){}
+  }
+  function install(){
+    if(typeof calibrateTplPreviews!=='function') return false;
+    if(calibrateTplPreviews.__r4uCrisp) return true;
+    crisp.__r4uCrisp=true;
+    try{ calibrateTplPreviews=crisp; }catch(e){}
+    try{ window.calibrateTplPreviews=crisp; }catch(e){}
+    return true;
+  }
+  var _rz; window.addEventListener('resize',function(){ clearTimeout(_rz); _rz=setTimeout(crisp,150); });
+  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>100) clearInterval(iv); },100); }
+})();
+</script>
 
 </body>
 </html>
