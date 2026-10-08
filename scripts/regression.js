@@ -26,6 +26,7 @@ const cp = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'deploy-site', 'index.html');
 const APP = path.join(ROOT, 'deploy-site', 'app.js');
+const IDD = path.join(ROOT, 'deploy-site', 'idd.js');
 
 const results = [];
 function check(name, fn) {
@@ -52,21 +53,30 @@ function present(label, needle) {
 }
 
 // ── 1. BUILD (non-destructive) ───────────────────────────────────────────────
-check('build: node build.js succeeds + valid app.js + index references it', () => {
+check('build: node build.js succeeds + valid app.js/idd.js + index references both', () => {
   const backup = src;                       // restore source afterwards
   const hadApp = fs.existsSync(APP);
   const prevApp = hadApp ? fs.readFileSync(APP) : null;
+  const hadIdd = fs.existsSync(IDD);
+  const prevIdd = hadIdd ? fs.readFileSync(IDD) : null;
   try {
     cp.execSync('node build.js', { cwd: ROOT, stdio: 'pipe' });
     if (!fs.existsSync(APP)) return 'build did not produce deploy-site/app.js';
     cp.execSync('node --check ' + JSON.stringify(APP), { stdio: 'pipe' }); // throws on syntax error
+    // id'd feature blocks are externalised into a deferred idd.js that must load
+    // BEFORE app.js (so _r4uPerfPause wraps setInterval ahead of the main app).
+    if (!fs.existsSync(IDD)) return 'build did not produce deploy-site/idd.js';
+    cp.execSync('node --check ' + JSON.stringify(IDD), { stdio: 'pipe' }); // throws on syntax error
     const built = fs.readFileSync(SRC, 'utf8');
     if (!/app\.js\?v=/.test(built)) return 'built index.html does not reference app.js';
+    if (!/idd\.js\?v=/.test(built)) return 'built index.html does not reference idd.js';
+    if (built.indexOf('idd.js?v=') > built.indexOf('app.js?v=')) return 'idd.js must be loaded before app.js (defer order)';
     return true;
   } finally {
     // Always restore the working tree to the committed source.
     fs.writeFileSync(SRC, backup);
     if (hadApp) fs.writeFileSync(APP, prevApp); else { try { fs.unlinkSync(APP); } catch (e) {} }
+    if (hadIdd) fs.writeFileSync(IDD, prevIdd); else { try { fs.unlinkSync(IDD); } catch (e) {} }
   }
 });
 
@@ -205,7 +215,10 @@ check('feature: submit-rating function (valid + writes ratings)', () => {
 
 // AggregateRating badge + JSON-LD (SEO star snippets), gated on real rating count
 present('feature: aggregate rating badge/JSON-LD', '_r4uAggRatingJS');
-present('feature: aggregate rating slot in hero', 'id="r4uRatingBadge"');
+// The in-app hero rating badge was removed (distracting inside the builder); the
+// aggregate still renders in the desktop sidebar slot + injects AggregateRating
+// JSON-LD, and the landing pages carry their own badge for SEO star snippets.
+present('feature: aggregate rating sidebar slot', 'id="r4uRatingBadgeSb"');
 
 // sanity: portfolio template ids still routed
 check('portfolio: all 6 premium template ids routed via NOVA_TPLS', () => {

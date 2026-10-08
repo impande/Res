@@ -59,6 +59,43 @@ try {
   console.log('⚠️  javascript-obfuscator not available, deploying as-is:', e.message);
 }
 
+// ── Externalise the id'd feature <script> blocks into a deferred idd.js ─────────
+// The _r4u* feature blocks carry an `id` attribute used only as a human label
+// (none are referenced by getElementById, querySelector or CSS), which exempts
+// them from the attribute-less externalisation below — so they otherwise ship
+// inline and parser-block: the HTML parser stops to compile+run each one (~330KB
+// in all, most near end-of-body) during the initial parse. Moving them into one
+// deferred file that loads BEFORE app.js removes them from the document (smaller,
+// cacheable HTML; the parser runs straight through) while preserving execution
+// order exactly: deferred scripts run in document order, so idd.js (emitted here,
+// before the app.js tag) runs first — matching today's "id'd blocks run, then the
+// main app" ordering. Safe to defer: none use document.write, and the single
+// order-sensitive block (_r4uPerfPause, which must wrap setInterval before the app
+// schedules timers) is first in the document and so stays first in idd.js, ahead
+// of app.js. JSON-LD (type=application/ld+json) and src'd scripts stay inline.
+try {
+  const crypto = require('crypto');
+  const idScripts = [];
+  html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (m, attrs, body) => {
+    if (!/\bid\s*=/.test(attrs)) return m;                                 // not an id'd block
+    if (/\bsrc\s*=/.test(attrs)) return m;                                 // external ref (e.g. firebase)
+    if (/type\s*=\s*["']application\/(ld\+)?json/i.test(attrs)) return m;  // JSON-LD stays inline
+    idScripts.push(body);
+    return '';
+  });
+  if (idScripts.length) {
+    const iddJs = idScripts.join('\n;\n');
+    fs.writeFileSync('deploy-site/idd.js', iddJs);
+    const hash = crypto.createHash('sha1').update(iddJs).digest('hex').slice(0, 10);
+    const tag = `<script defer src="/idd.js?v=${hash}"></script>\n`;
+    const bi = html.lastIndexOf('</body>');
+    html = (bi >= 0) ? html.slice(0, bi) + tag + html.slice(bi) : html + tag;
+    console.log(`✅ Externalised ${idScripts.length} id'd feature block(s) → idd.js (${(iddJs.length / 1024).toFixed(0)}KB, v=${hash})`);
+  }
+} catch (e) {
+  console.log('⚠️  id-script externalisation skipped (deploying inline):', e.message);
+}
+
 // ── Externalise all inline JS into one deferred, cacheable app.js ──────────────
 // The page ships a large amount of inline JS the browser must parse before first
 // paint. Moving it (after obfuscation) into a single deferred external file shrinks
