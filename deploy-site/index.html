@@ -10951,6 +10951,14 @@ window.__novaPortfolioHTML=function(d,sections){
 .tpl-blush>.r-head,.tpl-verdant>.r-head,.tpl-lilac>.r-head,.tpl-azure>.r-head{padding:26px 22px 12px!important;}
 /* profile photo: circular, at the very top of the sidebar (above the name) */
 .tpl-blush>.r-head .r4u-pt-photo,.tpl-verdant>.r-head .r4u-pt-photo,.tpl-lilac>.r-head .r4u-pt-photo,.tpl-azure>.r-head .r4u-pt-photo{display:block!important;width:86px!important;height:86px!important;border-radius:50%!important;object-fit:cover!important;border:3px solid #fff!important;box-shadow:0 3px 9px rgba(0,0,0,.16)!important;margin:0 0 15px!important;padding:0!important;}
+/* The profile photo in these sidebar templates is emitted as a plain <img> AFTER
+   the name/contact block, so it fell to the BOTTOM of the sidebar. The intended
+   .r4u-pt-photo class above is never applied to it, so that rule is dead. Make the
+   sidebar header a flex column and pull the photo to the TOP (duplicate-class
+   selector for specificity, since the base r-head rule sits in a later <style>
+   block). Affects résumé output, PDF and the template thumbnails alike. */
+.tpl-blush.tpl-blush>.r-head,.tpl-verdant.tpl-verdant>.r-head,.tpl-lilac.tpl-lilac>.r-head,.tpl-azure.tpl-azure>.r-head{display:flex!important;flex-direction:column!important;align-items:flex-start!important;}
+.tpl-blush.tpl-blush>.r-head>img,.tpl-verdant.tpl-verdant>.r-head>img,.tpl-lilac.tpl-lilac>.r-head>img,.tpl-azure.tpl-azure>.r-head>img{order:-1!important;width:84px!important;height:84px!important;border-radius:50%!important;object-fit:cover!important;margin:0 0 14px!important;border:3px solid #fff!important;box-shadow:0 2px 8px rgba(0,0,0,.18)!important;}
 /* professional summary: soft pastel card matching the sidebar */
 .tpl-blush .r-main-col .r-sum,.tpl-verdant .r-main-col .r-sum,.tpl-lilac .r-main-col .r-sum,.tpl-azure .r-main-col .r-sum{background:color-mix(in srgb,var(--pt-side) 60%,#fff)!important;padding:14px 16px!important;border-radius:10px!important;border-left:3px solid var(--pt-acc)!important;line-height:1.62!important;color:#3a4048!important;}
 /* Custom sections (e.g. Projects): the date is a float:right .r-yr inside the
