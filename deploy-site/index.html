@@ -13117,9 +13117,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 </script>
 
 <style id="_r4uTplCarouselCss">
-/* Choose Template shown ONE résumé at a time with ‹ / › navigation, instead of a
-   scrolling grid of small cards. Each slide is a full-width, large mirror of the
-   résumé in that template. Overrides the grid + mobile-flex layouts on all widths. */
+/* Choose Template as a swipeable gallery with ‹ / › paging: ONE résumé per view
+   on mobile, FOUR per view on desktop. Each card is a width-fit mirror of the
+   résumé in that template. Overrides the old grid + mobile-flex layouts. */
 .r4u-tpl-car{position:relative;}
 #tplGrid{
   display:flex !important; grid-template-columns:none !important; flex-wrap:nowrap !important;
@@ -13129,15 +13129,19 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   scroll-behavior:smooth;
 }
 #tplGrid::-webkit-scrollbar{display:none;}
+/* mobile: 1 per view */
 #tplGrid .tpl-card{
   flex:0 0 100% !important; width:100% !important; max-width:100% !important;
-  margin:0 !important; scroll-snap-align:center; scroll-snap-stop:always;
+  margin:0 !important; scroll-snap-align:start; scroll-snap-stop:always;
 }
-/* height is set per-card by the fit routine; this is just the pre-JS fallback.
-   The light surface lets the (letterboxed) white résumé page read as a document. */
-#tplGrid .tpl-card-thumb{ height:clamp(300px,62vh,780px); background:#f1f1ee; }
-/* In carousel mode let the page be its natural content height (not a forced full
-   A4), so each slide hugs the résumé instead of trailing a big empty page. */
+/* desktop: 4 per view (gap 14px → 3 gaps = 42px) */
+@media(min-width:769px){
+  #tplGrid{ gap:14px !important; }
+  #tplGrid .tpl-card{ flex:0 0 calc((100% - 42px)/4) !important; width:auto !important; max-width:none !important; }
+}
+/* height + scale are set by the fit routine (this is the pre-JS fallback). White
+   page surface; the résumé fills the card width so there are no side gutters. */
+#tplGrid .tpl-card-thumb{ height:clamp(220px,46vh,520px); background:#fff; }
 #tplGrid .tpl-mini-inner > .resume-a4-page{ min-height:0 !important; }
 .r4u-tpl-nav{
   width:40px; height:40px; border-radius:50%; border:1px solid var(--border,#e5e5e0);
@@ -13170,23 +13174,28 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var count=document.createElement('span'); count.className='r4u-tpl-carcount';
     bar.appendChild(prev); bar.appendChild(count); bar.appendChild(next);
     wrap.parentNode.insertBefore(bar, wrap.nextSibling);
-    function curIndex(){
-      var cs=cardsOf(grid); if(!cs.length) return 0;
-      var gr=grid.getBoundingClientRect(); var mid=gr.left+gr.width/2; var best=0,bd=1/0;
-      for(var k=0;k<cs.length;k++){ var r=cs[k].getBoundingClientRect(); var d=Math.abs((r.left+r.width/2)-mid); if(d<bd){bd=d;best=k;} }
-      return best;
+    function metrics(){
+      var cs=cardsOf(grid);
+      var cw=cs.length?cs[0].getBoundingClientRect().width:0;
+      var gcs=getComputedStyle(grid); var gap=parseFloat(gcs.columnGap||gcs.gap||'0')||0;
+      var step=cw+gap;
+      var per=step?Math.max(1,Math.round((grid.clientWidth+gap)/step)):1;
+      return {cs:cs, step:step, per:Math.min(per, Math.max(1,cs.length))};
     }
+    function firstIdx(m){ return m.step?Math.max(0,Math.round(grid.scrollLeft/m.step)):0; }
     function go(delta){
-      var cs=cardsOf(grid); if(!cs.length) return;
-      var i=Math.max(0,Math.min(cs.length-1,curIndex()+delta)); var card=cs[i];
-      var gr=grid.getBoundingClientRect(); var cr=card.getBoundingClientRect();
-      var left=grid.scrollLeft + (cr.left-gr.left) - (grid.clientWidth-card.clientWidth)/2;
-      try{ grid.scrollTo({left:left,behavior:'smooth'}); }catch(e){ grid.scrollLeft=left; }
+      var m=metrics(); if(!m.cs.length||!m.step) return;
+      var maxStart=Math.max(0, m.cs.length-m.per);
+      var target=Math.max(0, Math.min(maxStart, firstIdx(m)+delta*m.per));
+      try{ grid.scrollTo({left:Math.round(target*m.step),behavior:'smooth'}); }catch(e){ grid.scrollLeft=Math.round(target*m.step); }
     }
     function update(){
-      var cs=cardsOf(grid); var i=curIndex();
-      count.textContent = cs.length ? (i+1)+' / '+cs.length : '';
-      prev.disabled = i<=0; next.disabled = i>=cs.length-1;
+      var m=metrics();
+      if(!m.cs.length){ count.textContent=''; prev.disabled=true; next.disabled=true; return; }
+      var f=Math.min(firstIdx(m), Math.max(0,m.cs.length-1));
+      var last=Math.min(f+m.per, m.cs.length);
+      count.textContent = (m.per>1) ? (f+1)+'–'+last+' / '+m.cs.length : (f+1)+' / '+m.cs.length;
+      prev.disabled = f<=0; next.disabled = last>=m.cs.length;
     }
     prev.addEventListener('click',function(){ go(-1); });
     next.addEventListener('click',function(){ go(1); });
@@ -13201,25 +13210,24 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
      path uses it. */
   function fit(){
     var grid=document.getElementById('tplGrid'); if(!grid) return;
-    var availW=grid.clientWidth; if(!availW){ setTimeout(fit,120); return; }
-    var maxH=Math.min((window.innerHeight||800)*0.72, 860);
+    var thumbs=[].slice.call(grid.querySelectorAll('.tpl-card-thumb')); if(!thumbs.length) return;
+    var cardW=thumbs[0].clientWidth; if(!cardW){ setTimeout(fit,120); return; }
     var PAGE_W=794, PAGE_H=1123;
-    var thumbs=[].slice.call(grid.querySelectorAll('.tpl-card-thumb'));
-    if(!thumbs.length) return;
+    var maxH=Math.min((window.innerHeight||800)*0.72, 820);
+    /* Fit each résumé to its card WIDTH (fills the card — no side gutters). Card
+       width is ~¼ of the row on desktop (4-up) and full width on mobile (1-up). */
+    var scale=cardW/PAGE_W;
     var inners=thumbs.map(function(t){ return t.querySelector('.tpl-mini-inner'); });
     var pages=inners.map(function(n){ return n && n.querySelector('.resume-a4-page'); });
     /* read pass: each résumé's natural content height (transform doesn't affect it) */
     var ch=pages.map(function(p){ return p ? p.offsetHeight : PAGE_H; });
-    /* one uniform slide height (tallest résumé, sanity-capped) so the ‹/› controls
-       don't jump between templates, and one shared scale that fits it within maxH. */
-    var refH=Math.min(Math.max.apply(null, ch.concat([PAGE_H*0.55])), PAGE_H*1.35);
-    var scale=Math.min(availW/PAGE_W, maxH/refH); if(!(scale>0)) scale=availW/PAGE_W;
-    var H=Math.round(refH*scale);
-    var left=Math.max(0, Math.round((availW-PAGE_W*scale)/2));
-    /* write pass */
+    /* one uniform card height (tallest résumé, sanity-capped) so cards align and
+       the ‹/› controls don't jump; capped so a slide never exceeds the viewport. */
+    var refH=Math.min(Math.max.apply(null, ch.concat([PAGE_H*0.55])), PAGE_H*1.4);
+    var H=Math.min(Math.round(refH*scale), Math.round(maxH));
     for(var i=0;i<thumbs.length;i++){
       thumbs[i].style.height=H+'px';
-      if(inners[i]){ inners[i].style.transformOrigin='top left'; inners[i].style.transform='scale('+scale.toFixed(4)+')'; inners[i].style.left=left+'px'; inners[i].style.top='0'; }
+      if(inners[i]){ inners[i].style.transformOrigin='top left'; inners[i].style.transform='scale('+scale.toFixed(4)+')'; inners[i].style.left='0'; inners[i].style.top='0'; }
     }
   }
   function installFit(){
