@@ -13120,7 +13120,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 /* Choose Template shown ONE résumé at a time with ‹ / › navigation, instead of a
    scrolling grid of small cards. Each slide is a full-width, large mirror of the
    résumé in that template. Overrides the grid + mobile-flex layouts on all widths. */
-.r4u-tpl-car{position:relative;--r4u-th:clamp(300px,50vh,460px);}
+.r4u-tpl-car{position:relative;}
 #tplGrid{
   display:flex !important; grid-template-columns:none !important; flex-wrap:nowrap !important;
   overflow-x:auto !important; overflow-y:hidden !important;
@@ -13133,7 +13133,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   flex:0 0 100% !important; width:100% !important; max-width:100% !important;
   margin:0 !important; scroll-snap-align:center; scroll-snap-stop:always;
 }
-#tplGrid .tpl-card-thumb{ height:var(--r4u-th,clamp(300px,50vh,460px)) !important; }
+/* height is set per-card by the fit routine; this is just the pre-JS fallback.
+   The light surface lets the (letterboxed) white résumé page read as a document. */
+#tplGrid .tpl-card-thumb{ height:clamp(300px,62vh,780px); background:#f1f1ee; }
+/* In carousel mode let the page be its natural content height (not a forced full
+   A4), so each slide hugs the résumé instead of trailing a big empty page. */
+#tplGrid .tpl-mini-inner > .resume-a4-page{ min-height:0 !important; }
 .r4u-tpl-nav{
   width:40px; height:40px; border-radius:50%; border:1px solid var(--border,#e5e5e0);
   background:var(--card-bg,#fff); color:var(--text,#1a1a1a); font-size:1.5rem; line-height:1;
@@ -13189,13 +13194,51 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     grid.__r4uCarUpdate=update; update();
     return true;
   }
+  /* Scale each slide so the WHOLE résumé page is visible (fit-to-height on wide
+     screens, fit-to-width on narrow), centered — instead of a fixed top crop that
+     cut off the résumé on desktop. We replace calibrateTplPreviews (the core's
+     width-only scaler) with this once it exists, so every render/scroll/resize
+     path uses it. */
+  function fit(){
+    var grid=document.getElementById('tplGrid'); if(!grid) return;
+    var availW=grid.clientWidth; if(!availW){ setTimeout(fit,120); return; }
+    var maxH=Math.min((window.innerHeight||800)*0.72, 860);
+    var PAGE_W=794, PAGE_H=1123;
+    var thumbs=[].slice.call(grid.querySelectorAll('.tpl-card-thumb'));
+    if(!thumbs.length) return;
+    var inners=thumbs.map(function(t){ return t.querySelector('.tpl-mini-inner'); });
+    var pages=inners.map(function(n){ return n && n.querySelector('.resume-a4-page'); });
+    /* read pass: each résumé's natural content height (transform doesn't affect it) */
+    var ch=pages.map(function(p){ return p ? p.offsetHeight : PAGE_H; });
+    /* one uniform slide height (tallest résumé, sanity-capped) so the ‹/› controls
+       don't jump between templates, and one shared scale that fits it within maxH. */
+    var refH=Math.min(Math.max.apply(null, ch.concat([PAGE_H*0.55])), PAGE_H*1.35);
+    var scale=Math.min(availW/PAGE_W, maxH/refH); if(!(scale>0)) scale=availW/PAGE_W;
+    var H=Math.round(refH*scale);
+    var left=Math.max(0, Math.round((availW-PAGE_W*scale)/2));
+    /* write pass */
+    for(var i=0;i<thumbs.length;i++){
+      thumbs[i].style.height=H+'px';
+      if(inners[i]){ inners[i].style.transformOrigin='top left'; inners[i].style.transform='scale('+scale.toFixed(4)+')'; inners[i].style.left=left+'px'; inners[i].style.top='0'; }
+    }
+  }
+  function installFit(){
+    if(typeof calibrateTplPreviews!=='function') return false;
+    if(calibrateTplPreviews.__r4uFit) return true;
+    fit.__r4uFit=true;
+    try{ calibrateTplPreviews=fit; }catch(e){}
+    try{ window.calibrateTplPreviews=fit; }catch(e){}
+    return true;
+  }
+  var _rz; window.addEventListener('resize',function(){ clearTimeout(_rz); _rz=setTimeout(fit,120); });
   function init(){
     var grid=document.getElementById('tplGrid'); if(!grid) return false;
     if(!build()) return false;
-    try{ new MutationObserver(function(){ try{ grid.scrollLeft=0; }catch(e){} if(grid.__r4uCarUpdate) requestAnimationFrame(grid.__r4uCarUpdate); }).observe(grid,{childList:true}); }catch(e){}
+    installFit();
+    try{ new MutationObserver(function(){ try{ grid.scrollLeft=0; }catch(e){} requestAnimationFrame(function(){ fit(); if(grid.__r4uCarUpdate) grid.__r4uCarUpdate(); }); }).observe(grid,{childList:true}); }catch(e){}
     return true;
   }
-  if(!init()){ var n=0,iv=setInterval(function(){ if(init()||++n>80) clearInterval(iv); },100); }
+  if(!init() || !installFit()){ var n=0,iv=setInterval(function(){ var ok=init(); installFit(); if((ok&&typeof calibrateTplPreviews==='function'&&calibrateTplPreviews.__r4uFit)||++n>100) clearInterval(iv); },100); }
 })();
 </script>
 </body>
