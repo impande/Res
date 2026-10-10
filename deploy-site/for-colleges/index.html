@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>resume4u for Colleges – Bulk Résumé Builder for Placement Cells | Resume For You</title>
+<meta name="description" content="Give your students a free, co-branded AI résumé builder and give your placement cell a dashboard to track completion and download every résumé at once. Free pilot for your next placement batch.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://resume4u.help/for-colleges/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="resume4u for Colleges – Bulk Résumé Builder for Placement Cells">
+<meta property="og:description" content="Free, co-branded AI résumé builder for your students + a dashboard to track and download every résumé. Free pilot for your next batch.">
+<meta property="og:url" content="https://resume4u.help/for-colleges/">
+<meta property="og:image" content="https://resume4u.help/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="resume4u for Colleges – Résumé tool for placement cells">
+<meta name="twitter:description" content="Free co-branded AI résumé builder for students + a tracking/download dashboard for your placement cell.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png">
+<link rel="icon" href="/favicon.svg">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#fafaf7;color:#1f2937;line-height:1.65;}
+  a{color:#b45309;}
+  .nav{background:#fff;border-bottom:1px solid #e5e5e0;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;}
+  .nav-logo{width:32px;height:32px;background:linear-gradient(135deg,#f59e0b,#b45309);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.82rem;}
+  .nav-name{font-weight:700;font-size:.98rem;color:#1a1a1a;text-decoration:none;}
+  .nav .cta{margin-left:auto;background:#b45309;color:#fff;padding:8px 18px;border-radius:8px;font-size:.84rem;font-weight:700;text-decoration:none;}
+  .nav .cta:hover{opacity:.9;text-decoration:none;}
+
+  .hero{background:linear-gradient(135deg,#fffbeb,#fef3c7);padding:64px 24px 48px;text-align:center;border-bottom:1px solid #e5e5e0;}
+  .eyebrow{display:inline-block;background:#fff;border:1px solid #fde68a;color:#b45309;font-size:.72rem;font-weight:800;letter-spacing:.06em;padding:5px 14px;border-radius:99px;margin-bottom:18px;text-transform:uppercase;}
+  h1{font-size:clamp(2rem,5.5vw,3rem);font-weight:800;color:#1a1a1a;max-width:820px;margin:0 auto 16px;line-height:1.16;}
+  h1 span{color:#b45309;}
+  .hero-sub{font-size:1.12rem;color:#4b5563;max-width:660px;margin:0 auto 26px;}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-size:1rem;font-weight:800;padding:14px 28px;border-radius:10px;text-decoration:none;}
+  .btn-wa{background:#25d366;color:#fff;}
+  .btn-wa:hover{opacity:.93;text-decoration:none;}
+  .btn-ghost{background:#fff;color:#b45309;border:1.5px solid #e7d6b8;}
+  .btn-ghost:hover{border-color:#b45309;text-decoration:none;}
+  .hero-note{font-size:.82rem;color:#6b7280;margin-top:16px;}
+
+  .wrap{max-width:960px;margin:0 auto;padding:56px 24px;}
+  .wrap.tight{max-width:780px;}
+  h2{font-size:1.75rem;font-weight:800;color:#1a1a1a;margin-bottom:12px;text-align:center;}
+  .sec-sub{text-align:center;color:#6b7280;max-width:620px;margin:0 auto 34px;font-size:1.02rem;}
+  p{margin-bottom:14px;color:#374151;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+  .card{background:#fff;border:1px solid #e5e5e0;border-radius:14px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .card .ico{font-size:1.6rem;margin-bottom:10px;}
+  .card h3{font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:6px;}
+  .card p{font-size:.9rem;color:#6b7280;margin:0;line-height:1.55;}
+
+  .pains{background:#fff;border-top:1px solid #e5e5e0;border-bottom:1px solid #e5e5e0;}
+  .pain-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;}
+  .pain{display:flex;gap:12px;align-items:flex-start;background:#fafaf7;border:1px solid #eee7da;border-radius:12px;padding:18px;}
+  .pain .x{color:#dc2626;font-weight:900;font-size:1.1rem;line-height:1.3;flex-shrink:0;}
+  .pain span.t{font-size:.92rem;color:#374151;}
+
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;counter-reset:step;}
+  .step{position:relative;background:#fff;border:1px solid #e5e5e0;border-radius:14px;padding:26px 22px 22px;}
+  .step::before{counter-increment:step;content:counter(step);position:absolute;top:-16px;left:22px;width:34px;height:34px;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;box-shadow:0 3px 8px rgba(180,83,9,.3);}
+  .step h3{font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:8px 0 6px;}
+  .step p{font-size:.9rem;color:#6b7280;margin:0;}
+
+  .callout{background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:28px 26px;max-width:780px;margin:0 auto;text-align:center;}
+  .callout h3{font-size:1.2rem;font-weight:800;color:#1a1a1a;margin-bottom:8px;}
+  .callout p{font-size:.98rem;color:#4b5563;margin:0 auto 6px;max-width:620px;}
+  .callout .em{color:#b45309;font-weight:800;}
+
+  .faq{max-width:780px;margin:0 auto;}
+  .faq details{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:0 18px;margin-bottom:12px;}
+  .faq summary{cursor:pointer;font-weight:700;color:#1a1a1a;padding:16px 0;font-size:.98rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .faq summary::-webkit-details-marker{display:none;}
+  .faq summary::after{content:'+';color:#b45309;font-weight:900;font-size:1.3rem;}
+  .faq details[open] summary::after{content:'–';}
+  .faq details p{font-size:.92rem;color:#4b5563;padding:0 0 16px;margin:0;}
+
+  .cta-band{text-align:center;padding:60px 24px 66px;background:linear-gradient(135deg,#92400e,#b45309);}
+  .cta-band h2{color:#fff;}
+  .cta-band p{color:#fde9c8;margin-bottom:26px;max-width:560px;margin-left:auto;margin-right:auto;}
+  .cta-band .btn-wa{box-shadow:0 6px 20px rgba(0,0,0,.18);}
+
+  .r4u-lfoot{background:#14142a;color:#cfcfe0;padding:34px 24px;text-align:center;}
+  .r4u-lfoot .links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 12px;}
+  .r4u-lfoot a{color:#c7c7e0;text-decoration:none;font-size:.85rem;font-weight:600;}
+  .r4u-lfoot a:hover{color:#fbbf24;}
+  .r4u-lfoot .cp{font-size:.8rem;color:#8a8aad;margin:0;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <span class="nav-logo">R4U</span><span class="nav-name">Resume For You</span>
+  </a>
+  <a class="cta" href="/">Try the builder →</a>
+</header>
+
+<section class="hero">
+  <span class="eyebrow">For Colleges &amp; Training Institutes</span>
+  <h1>Résumé-ready students, <span>before every placement drive</span></h1>
+  <p class="hero-sub">Give your students a free, co-branded page to build clean, ATS-ready résumés in minutes — and give your placement cell a simple way to track completion and download every résumé at once.</p>
+  <div class="hero-cta">
+    <a class="btn btn-wa" href="https://wa.me/919309014196?text=Hi!%20I%20would%20like%20to%20set%20up%20a%20free%20resume4u%20pilot%20for%20our%20students.%20College%2FInstitute%3A%20" target="_blank" rel="noopener">💬 Request a free pilot</a>
+    <a class="btn btn-ghost" href="/" target="_blank" rel="noopener">See the student builder →</a>
+  </div>
+  <p class="hero-note">Free for your students · Set up in a day · Nothing to install</p>
+</section>
+
+<section class="pains">
+  <div class="wrap">
+    <h2>Placement season shouldn't start with 300 broken résumés</h2>
+    <p class="sec-sub">Most placement cells lose days every drive cleaning up inconsistent, non-ATS student résumés. We fix that upstream.</p>
+    <div class="pain-list">
+      <div class="pain"><span class="x">✕</span><span class="t">Every student submits a different format — recruiters notice.</span></div>
+      <div class="pain"><span class="x">✕</span><span class="t">Officers manually reformat hundreds of résumés before each drive.</span></div>
+      <div class="pain"><span class="x">✕</span><span class="t">Students' résumés quietly fail ATS screening at top companies.</span></div>
+      <div class="pain"><span class="x">✕</span><span class="t">No visibility into who's résumé-ready and who isn't.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>What your placement cell gets</h2>
+  <p class="sec-sub">One link for your students, one dashboard for you.</p>
+  <div class="grid">
+    <div class="card"><div class="ico">🎓</div><h3>A co-branded page</h3><p>Your college's name &amp; logo on a dedicated résumé-builder page students can trust.</p></div>
+    <div class="card"><div class="ico">📐</div><h3>Consistent, ATS-ready templates</h3><p>Set a standard format so every student's résumé is clean, uniform and passes applicant tracking systems.</p></div>
+    <div class="card"><div class="ico">📊</div><h3>A tracking dashboard</h3><p>See completion at a glance — who's done, who's pending, and each student's ATS score.</p></div>
+    <div class="card"><div class="ico">📦</div><h3>Download them all</h3><p>Export every student's résumé at once — as a ZIP or a combined booklet to send to recruiters.</p></div>
+    <div class="card"><div class="ico">🤖</div><h3>AI that does the hard part</h3><p>Students get AI-written, quantified bullet points, cover letters and a live ATS score — guided, not guessed.</p></div>
+    <div class="card"><div class="ico">🆓</div><h3>100% free for students</h3><p>No paywalls, no per-student charge to your students — ever. The college covers one simple plan.</p></div>
+  </div>
+</section>
+
+<section class="pains">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="sec-sub">Live for your batch in about a day.</p>
+    <div class="steps">
+      <div class="step"><h3>We set up your page</h3><p>Your logo, your name, and a standard template chosen for your students — on a dedicated link.</p></div>
+      <div class="step"><h3>Students build their résumé</h3><p>They open the link, fill in details (or import from LinkedIn), and AI builds a clean résumé. Works on any phone.</p></div>
+      <div class="step"><h3>You track &amp; download</h3><p>Watch completion in the dashboard and download every résumé when you're ready for the drive.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap tight">
+  <h2>Start with a free pilot</h2>
+  <div class="callout">
+    <h3>Try it with one batch — on us</h3>
+    <p>Run resume4u with a single department or batch <span class="em">completely free</span>. See the time it saves and the quality jump for yourself. If it works for you, we'll set up an affordable annual plan sized to your student count — and it stays <span class="em">free for every student</span>.</p>
+    <p style="margin-top:14px;"><strong>No software to install. No student fees. Set up in a day.</strong></p>
+  </div>
+</section>
+
+<section class="wrap tight" style="padding-top:0;">
+  <h2>Questions, answered</h2>
+  <div class="faq">
+    <details><summary>Is it really free for students?</summary><p>Yes. Under a college plan, your students build, edit, preview and download their résumés at no cost. The college covers one simple plan; students never pay.</p></details>
+    <details><summary>Do students need to install anything or create accounts?</summary><p>No installs. They just open your college link and start — it works on any phone or laptop. Sign-in is optional, only if they want to save and come back.</p></details>
+    <details><summary>Can we use our own branding and a standard template?</summary><p>Yes — the page carries your college's name and logo, and you can set a standard template so every résumé looks consistent to recruiters.</p></details>
+    <details><summary>How do we collect all the résumés?</summary><p>From your dashboard you can track completion and download every student's résumé together — as individual PDFs (ZIP) or a combined booklet.</p></details>
+    <details><summary>How long does setup take?</summary><p>Usually about a day. Send us your logo and the batch size, and we'll share your college link.</p></details>
+  </div>
+</section>
+
+<section class="cta-band">
+  <h2>Make this batch's résumés your best yet</h2>
+  <p>Tell us your college and batch size — we'll set up a free pilot link you can share with students this week.</p>
+  <a class="btn btn-wa" href="https://wa.me/919309014196?text=Hi!%20I%20would%20like%20to%20set%20up%20a%20free%20resume4u%20pilot%20for%20our%20students.%20College%2FInstitute%3A%20" target="_blank" rel="noopener">💬 Request a free pilot on WhatsApp</a>
+</section>
+
+<footer class="r4u-lfoot">
+  <nav class="links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/for-colleges/">For Colleges</a>
+    <a href="/resume-templates/">Templates</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/refund/">Refund</a>
+    <a href="https://wa.me/919309014196" target="_blank" rel="noopener">Contact</a>
+  </nav>
+  <p class="cp">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Is resume4u really free for students?","acceptedAnswer":{"@type":"Answer","text":"Yes. Under a college plan, students build, edit, preview and download their résumés at no cost. The college covers one simple plan; students never pay."}},
+{"@type":"Question","name":"Do students need to install anything or create accounts?","acceptedAnswer":{"@type":"Answer","text":"No installs. Students open the college link and start on any phone or laptop. Sign-in is optional, only to save and return."}},
+{"@type":"Question","name":"Can colleges use their own branding and a standard template?","acceptedAnswer":{"@type":"Answer","text":"Yes. The page carries the college's name and logo, and the placement cell can set a standard template so every résumé is consistent for recruiters."}},
+{"@type":"Question","name":"How do placement cells collect all the résumés?","acceptedAnswer":{"@type":"Answer","text":"From the dashboard you can track completion and download every student's résumé together — as individual PDFs in a ZIP or a combined booklet."}},
+{"@type":"Question","name":"How long does setup take?","acceptedAnswer":{"@type":"Answer","text":"Usually about a day. Send the logo and batch size and we share the college link."}}
+]}
+</script>
+</body>
+</html>
