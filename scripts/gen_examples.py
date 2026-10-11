@@ -18,6 +18,12 @@ ALL_SLUGS = [
     ('human-resources', 'HR Manager'),
     ('mechanical-engineer', 'Mechanical Engineer'),
     ('graphic-designer', 'Graphic Designer'),
+    ('data-scientist', 'Data Scientist'),
+    ('full-stack-developer', 'Full Stack Developer'),
+    ('civil-engineer', 'Civil Engineer'),
+    ('staff-nurse', 'Staff Nurse'),
+    ('teacher', 'Teacher'),
+    ('project-manager', 'Project Manager'),
 ]
 
 def esc(s): return html.escape(s, quote=True)
@@ -250,6 +256,8 @@ def page(role):
 <footer class="r4u-lfoot">
   <nav class="r4u-lfoot-links" aria-label="Footer">
     <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/for-colleges/">For Colleges</a>
     <a href="/resume-templates/">Templates</a>
     <a href="/ats-resume-builder-india/">ATS Builder</a>
     <a href="/privacy/">Privacy</a>
@@ -259,6 +267,7 @@ def page(role):
   </nav>
   <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
 </footer>
+<script defer src="/rating-badge.js"></script>
 </body>
 </html>
 '''
@@ -266,8 +275,9 @@ def page(role):
 # ---- role data is loaded from gen_examples_data.py ----
 if __name__ == '__main__':
     import gen_examples_data as D
+    import gen_examples_more as M
     written = []
-    for role in D.ROLES:
+    for role in (D.ROLES + M.MORE):
         d = os.path.join(EXAMPLES, role['slug'])
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, 'index.html'), 'w', encoding='utf-8') as f:

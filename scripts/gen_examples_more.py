@@ -1,0 +1,238 @@
+# -*- coding: utf-8 -*-
+# Additional role-specific example pages (batch 2). India-oriented, unique content per role.
+MORE = [
+{
+ 'slug':'data-scientist','title':'Data Scientist','badge':'DATA SCIENTIST','plural':'data scientists',
+ 'meta':'Free data scientist resume example with a real sample. Build an ATS-friendly data scientist resume with AI — Python, machine learning, SQL. No sign-up.',
+ 'og':'A real data scientist resume example, plus an AI builder to create yours — ATS-optimised and free.',
+ 'h1a':'A Data Scientist Resume','h1b':'That Lands Interviews',
+ 'hero':'See a real data scientist resume example, then build yours with AI in minutes. ATS-optimised for Naukri and LinkedIn. No sign-up required.',
+ 'intro1':'A data scientist resume has to prove you can ship models that move a business metric — not just train them in a notebook. Recruiters scan for Python, SQL, machine learning and a production win: a model deployed, a cost reduced, a forecast made more accurate.',
+ 'intro2':'The sample below frames projects and experience as measurable outcomes. Copy the structure, then let AI rewrite your bullets into the same quantified, ATS-friendly format.',
+ 'person':{
+   'name':'Arjun Nair','title':'Data Scientist',
+   'contact':'arjun.nair@email.com · +91 98xxxxxx34 · Bengaluru, India · linkedin.com/in/arjunnair',
+   'summary':'Data Scientist with 4 years building and deploying ML models across fintech and e-commerce. Strong in Python, SQL and scikit-learn, with production experience in forecasting and recommendation systems. Shipped a churn model that cut churn 18% and a demand forecast that reduced stockouts by 24%.',
+   'jobs':[
+     {'title':'Data Scientist','co':'Swiggy','date':'2022 – Present','bullets':[
+       'Built and deployed an XGBoost churn model that lifted 90-day retention by 18%, worth an estimated Rs 6Cr in retained revenue',
+       'Developed a demand-forecasting pipeline (Python, Prophet) that cut stockouts 24% across 400+ dark stores',
+       'Productionised models with MLflow and Docker, cutting model deployment time from 2 weeks to 2 days']},
+     {'title':'Associate Data Scientist','co':'Mu Sigma','date':'2020 – 2022','bullets':[
+       'Built credit-risk classification models with 0.84 AUC, adopted by the underwriting team',
+       'Automated feature pipelines in SQL and Python, saving the team 20+ hours a week']},
+   ],
+   'skills':['Python','SQL','scikit-learn','Pandas','Machine Learning','TensorFlow','Statistics','A/B Testing','MLflow','Docker'],
+   'edu':'M.Tech, Computer Science','eduyear':'2020','eduschool':'IIT Madras · CGPA 8.6','ats':94},
+ 'include':[
+   ('Professional summary','3–4 lines with years of experience, core stack (Python, SQL, ML) and one deployed-model win.'),
+   ('Technical skills','Python, SQL, a ML library (scikit-learn/TensorFlow), plus statistics and one MLOps tool — the exact keywords ATS screens.'),
+   ('Quantified projects & experience','Each bullet needs a number: a model metric (AUC, accuracy) and a business outcome (% churn, revenue, time saved).'),
+   ('Projects (for freshers)','Show 2–3 end-to-end projects: the dataset, the model, the metric and the outcome. Link a GitHub or Kaggle profile.'),
+   ('Education & certifications','Degree plus relevant certs — DeepLearning.AI, AWS ML, or a strong Kaggle rank.'),
+ ],
+ 'skills_intro':'Recruiters and ATS scan for these first. Include the ones you genuinely know:',
+ 'topskills':['Python','SQL','Machine Learning','scikit-learn','TensorFlow','Statistics','Deep Learning','NLP','Pandas','MLOps'],
+ 'faq':[
+   ('What should a data scientist resume include?','A short summary, a technical skills section (Python, SQL, ML libraries, statistics), 2–4 quantified experience or project bullets with both a model metric and a business outcome, and education with relevant certifications or a Kaggle/GitHub link.'),
+   ('How do I write a data scientist resume as a fresher?','Lead with projects, not jobs. Pick 2–3 end-to-end ML projects, state the dataset, model, metric and result, and link your GitHub or Kaggle. Add internships, a strong skills section and relevant online certifications.'),
+   ('Data scientist vs data analyst resume — what is the difference?','A data analyst resume emphasises SQL, Excel, BI tools and reporting. A data scientist resume adds machine learning, statistics, model deployment and programming depth — show models you built and the metrics they moved.'),
+   ('Is this data scientist resume example free?','Yes. Building, editing and previewing are completely free with no sign-up. A PDF download is optional at Rs 9 in India; the Word download is free.'),
+ ],
+},
+{
+ 'slug':'full-stack-developer','title':'Full Stack Developer','badge':'FULL STACK DEVELOPER','plural':'full stack developers',
+ 'meta':'Free full stack developer resume example with a real sample. Build an ATS-friendly full stack resume with AI — React, Node.js, SQL, APIs. No sign-up.',
+ 'og':'A real full stack developer resume example plus an AI builder — ATS-optimised and free.',
+ 'h1a':'A Full Stack Developer Resume','h1b':'Recruiters Shortlist',
+ 'hero':'See a real full stack developer resume example, then build yours with AI in minutes. ATS-optimised for Naukri and LinkedIn. No sign-up.',
+ 'intro1':'A full stack developer resume has to show range and shipping: a frontend framework, a backend, a database, and features you actually put in production. Recruiters scan for the stack (React, Node.js, SQL) and for impact — users served, load time cut, bugs reduced.',
+ 'intro2':'The sample below turns projects into measurable results. Copy the structure, then let AI rewrite your bullets into the same crisp, ATS-friendly format.',
+ 'person':{
+   'name':'Karan Verma','title':'Full Stack Developer',
+   'contact':'karan.verma@email.com · +91 97xxxxxx58 · Hyderabad, India · github.com/karanverma',
+   'summary':'Full Stack Developer with 3 years building web apps end to end in React, Node.js and PostgreSQL. Shipped features used by 500K+ users and cut page load time by 45%. Comfortable across REST APIs, CI/CD and cloud deployment on AWS.',
+   'jobs':[
+     {'title':'Full Stack Developer','co':'Razorpay','date':'2022 – Present','bullets':[
+       'Built a merchant dashboard in React + Node.js used by 500K+ businesses, improving task completion by 30%',
+       'Optimised API queries and added caching, cutting average page load from 3.1s to 1.7s',
+       'Set up CI/CD with GitHub Actions, reducing release time from hours to minutes']},
+     {'title':'Software Developer','co':'Early-stage startup','date':'2021 – 2022','bullets':[
+       'Developed REST APIs in Node.js and a React frontend for an inventory product adopted by 40+ SMBs',
+       'Wrote PostgreSQL schemas and queries powering real-time stock updates']},
+   ],
+   'skills':['JavaScript','React','Node.js','TypeScript','PostgreSQL','REST APIs','Git','AWS','Docker','HTML/CSS'],
+   'edu':'B.Tech, Computer Science','eduyear':'2021','eduschool':'NIT Warangal · CGPA 8.2','ats':93},
+ 'include':[
+   ('Professional summary','3–4 lines with years of experience, your stack (frontend + backend + database) and one shipped-feature win.'),
+   ('Technical skills','A frontend framework (React/Angular), a backend (Node/Java/Python), a database, plus Git and cloud — the keywords ATS and recruiters screen for.'),
+   ('Quantified experience','Each bullet needs a number: users served, load time cut, throughput, bugs reduced, release time saved.'),
+   ('Projects & GitHub (for freshers)','Add 2–3 full-stack projects with the stack, what you built and a live link or GitHub repo.'),
+   ('Education & certifications','Degree plus any cloud (AWS/GCP) or framework certifications.'),
+ ],
+ 'skills_intro':'Recruiters and ATS scan for these first. Include the ones you genuinely know:',
+ 'topskills':['JavaScript','React','Node.js','TypeScript','SQL','REST APIs','Git','AWS','Docker','MongoDB'],
+ 'faq':[
+   ('What should a full stack developer resume include?','A short summary, a technical skills section (a frontend framework, a backend language, a database, Git, cloud), 2–4 quantified experience or project bullets, a GitHub link, and education with any relevant certifications.'),
+   ('How do I write a full stack developer resume with no experience?','Lead with projects and GitHub. Build 2–3 complete apps (frontend + backend + database), deploy them, and describe the stack and outcome. Add internships, open-source contributions and a strong skills section.'),
+   ('Which skills matter most on a full stack resume?','One frontend framework (React/Angular/Vue), one backend (Node/Java/Python), a database (SQL or MongoDB), plus Git, REST APIs and a cloud platform. List only what you can defend in an interview.'),
+   ('Is this full stack developer resume example free?','Yes — build, edit and preview free with no sign-up. PDF download is Rs 9 in India; Word is free.'),
+ ],
+},
+{
+ 'slug':'civil-engineer','title':'Civil Engineer','badge':'CIVIL ENGINEER','plural':'civil engineers',
+ 'meta':'Free civil engineer resume example with a real sample. Build an ATS-friendly civil engineering resume with AI — AutoCAD, site execution, estimation. No sign-up.',
+ 'og':'A real civil engineer resume example plus an AI builder — ATS-optimised and free.',
+ 'h1a':'A Civil Engineer Resume','h1b':'That Wins Site Roles',
+ 'hero':'See a real civil engineer resume example, then build yours with AI in minutes. ATS-optimised for Naukri and company portals. No sign-up.',
+ 'intro1':'A civil engineer resume should prove you can deliver projects on time, on budget and to spec. Recruiters look for the tools (AutoCAD, STAAD, MS Project), the project types (residential, highways, commercial), and quantified delivery — area built, cost saved, schedule met.',
+ 'intro2':'The sample below frames site and design work as measurable outcomes. Copy the structure, then let AI rewrite your bullets into the same ATS-friendly format.',
+ 'person':{
+   'name':'Sandeep Reddy','title':'Civil Engineer',
+   'contact':'sandeep.reddy@email.com · +91 96xxxxxx12 · Hyderabad, India · linkedin.com/in/sandeepreddy',
+   'summary':'Civil Engineer with 5 years in site execution and planning across residential and commercial projects. Skilled in AutoCAD, STAAD.Pro, estimation and quality control. Delivered a Rs 40Cr residential tower on schedule and cut material wastage by 12% through better planning.',
+   'jobs':[
+     {'title':'Site Engineer','co':'L&T Construction','date':'2021 – Present','bullets':[
+       'Managed execution of a Rs 40Cr, 18-floor residential tower, completed on schedule with zero major safety incidents',
+       'Reduced material wastage by 12% through optimised bar-bending schedules and reconciliation',
+       'Coordinated 60+ workers and 5 subcontractors, tracking progress against the MS Project plan']},
+     {'title':'Junior Civil Engineer','co':'Shapoorji Pallonji','date':'2019 – 2021','bullets':[
+       'Prepared BOQs and estimates for 3 commercial projects worth Rs 25Cr combined',
+       'Supervised quality checks on concrete and reinforcement to IS-code standards']},
+   ],
+   'skills':['AutoCAD','STAAD.Pro','Estimation','Quantity Surveying','MS Project','Site Execution','Quality Control','Concrete Technology','Surveying','BOQ'],
+   'edu':'B.E, Civil Engineering','eduyear':'2019','eduschool':'Osmania University · 72%','ats':92},
+ 'include':[
+   ('Professional summary','3–4 lines with years of experience, project types handled, core tools and one delivered-project win.'),
+   ('Technical skills','AutoCAD, STAAD.Pro/ETABS, estimation and MS Project — plus site execution and quality control, the keywords recruiters screen for.'),
+   ('Quantified projects','Each bullet needs a number: project value, area/floors built, % wastage cut, schedule met, team size managed.'),
+   ('Certifications & software','Add any Primavera, safety (NEBOSH) or AutoCAD/STAAD certifications.'),
+   ('Education','Degree with university and percentage/CGPA.'),
+ ],
+ 'skills_intro':'Recruiters and ATS scan for these first. Include the ones you genuinely know:',
+ 'topskills':['AutoCAD','STAAD.Pro','Estimation','MS Project','Primavera','Quantity Surveying','Site Execution','Quality Control','AutoCAD Civil 3D','Surveying'],
+ 'faq':[
+   ('What should a civil engineer resume include?','A short summary, a technical skills section (AutoCAD, STAAD/ETABS, estimation, MS Project), 2–4 quantified project bullets with value/area/schedule, certifications, and education with your university and marks.'),
+   ('How do I write a civil engineer resume as a fresher?','Lead with academic and internship projects: state the project, your role, the software used and the outcome. Add a strong software skills section, any site training, and relevant certifications like AutoCAD or Primavera.'),
+   ('Which skills are most important on a civil engineering resume?','AutoCAD and one analysis tool (STAAD.Pro or ETABS) are essential, plus estimation, quantity surveying and MS Project or Primavera. Add site execution and quality control for site roles.'),
+   ('Is this civil engineer resume example free?','Yes — build, edit and preview free with no sign-up. PDF download is Rs 9 in India; Word is free.'),
+ ],
+},
+{
+ 'slug':'staff-nurse','title':'Staff Nurse','badge':'STAFF NURSE','plural':'nurses',
+ 'meta':'Free staff nurse resume example with a real sample. Build an ATS-friendly nursing resume with AI — patient care, ICU, BLS/ACLS. No sign-up.',
+ 'og':'A real staff nurse resume example plus an AI builder — ATS-optimised and free.',
+ 'h1a':'A Staff Nurse Resume','h1b':'Hospitals Trust',
+ 'hero':'See a real staff nurse resume example, then build yours with AI in minutes. ATS-optimised for hospital and Naukri applications. No sign-up.',
+ 'intro1':'A staff nurse resume should show clinical competence, patient safety and the units you have worked. Recruiters and hospital HR look for your registration (RN/RM), the departments (ICU, ER, OT), certifications (BLS/ACLS) and quantified care — patients handled, accuracy, protocols followed.',
+ 'intro2':'The sample below frames clinical work as measurable, safety-focused outcomes. Copy the structure, then let AI rewrite your bullets into the same clear, ATS-friendly format.',
+ 'person':{
+   'name':'Anjali Thomas','title':'Staff Nurse',
+   'contact':'anjali.thomas@email.com · +91 95xxxxxx77 · Kochi, India · linkedin.com/in/anjalithomas',
+   'summary':'Registered Staff Nurse with 4 years in ICU and general medicine at NABH-accredited hospitals. Skilled in critical care, medication administration and patient monitoring, with BLS and ACLS certification. Maintained a 98% medication-accuracy record and supported a 20-bed ICU during peak load.',
+   'jobs':[
+     {'title':'Staff Nurse (ICU)','co':'Apollo Hospitals','date':'2022 – Present','bullets':[
+       'Provided critical care for a 20-bed ICU, monitoring ventilated and post-operative patients across 12-hour shifts',
+       'Maintained 98% medication-administration accuracy with zero reported errors over 2 years',
+       'Trained and mentored 6 junior nurses on ICU protocols and infection-control practices']},
+     {'title':'Staff Nurse (General Medicine)','co':'Fortis Healthcare','date':'2020 – 2022','bullets':[
+       'Managed care for up to 15 patients per shift, including vitals, IV therapy and documentation',
+       'Supported high-dependency wards, adhering strictly to PPE and infection-control protocols']},
+   ],
+   'skills':['Patient Care','ICU/Critical Care','Medication Administration','IV Therapy','Patient Monitoring','BLS','ACLS','Infection Control','EMR','Wound Care'],
+   'edu':'B.Sc Nursing','eduyear':'2020','eduschool':'Rajiv Gandhi University of Health Sciences · 78%','ats':93},
+ 'include':[
+   ('Professional summary','3–4 lines with years of experience, units worked (ICU/ER/OT), registration and certifications like BLS/ACLS.'),
+   ('Registration & certifications','State nursing council registration (RN/RM) and BLS, ACLS or specialty certifications — these are checked first.'),
+   ('Clinical skills','Patient care, critical care, medication administration, IV therapy, monitoring and EMR — the keywords hospital ATS screens for.'),
+   ('Quantified experience','Where possible add numbers: beds/patients handled, accuracy rate, shifts, juniors trained.'),
+   ('Education','B.Sc/GNM nursing with university and marks.'),
+ ],
+ 'skills_intro':'Hospital recruiters scan for these first. Include the ones that match your experience:',
+ 'topskills':['Patient Care','ICU/Critical Care','Medication Administration','IV Therapy','BLS','ACLS','Infection Control','Patient Monitoring','EMR','Emergency Care'],
+ 'faq':[
+   ('What should a staff nurse resume include?','A short summary, your nursing registration (RN/RM), certifications (BLS/ACLS), a clinical skills section, 2–4 experience bullets with the units worked and patients handled, and education with your nursing degree and marks.'),
+   ('How do I write a nursing resume as a fresher?','Lead with your clinical rotations and internship: state the department, duration and skills practised. Add your registration, BLS certification, a clinical skills section and education. Our AI can turn each rotation into clear, ATS-friendly bullets.'),
+   ('Which skills are most important on a staff nurse resume?','Core clinical skills — patient care, medication administration, IV therapy and monitoring — plus the units you have worked (ICU/ER/OT) and certifications like BLS and ACLS.'),
+   ('Is this staff nurse resume example free?','Yes — build, edit and preview free with no sign-up. PDF download is Rs 9 in India; Word is free.'),
+ ],
+},
+{
+ 'slug':'teacher','title':'Teacher','badge':'TEACHER','plural':'teachers',
+ 'meta':'Free teacher resume example with a real sample. Build an ATS-friendly teacher resume with AI — lesson planning, CBSE, classroom management. No sign-up.',
+ 'og':'A real teacher resume example plus an AI builder — ATS-optimised and free.',
+ 'h1a':'A Teacher Resume','h1b':'Schools Shortlist',
+ 'hero':'See a real teacher resume example, then build yours with AI in minutes. ATS-optimised for school and Naukri applications. No sign-up.',
+ 'intro1':'A teacher resume should show subject expertise, classroom results and the boards/levels you have taught. Recruiters and school HR look for your qualification (B.Ed), subjects, grade levels, and quantified outcomes — results improved, students mentored, programmes run.',
+ 'intro2':'The sample below frames teaching as measurable student outcomes. Copy the structure, then let AI rewrite your bullets into the same clear, ATS-friendly format.',
+ 'person':{
+   'name':'Meera Iyer','title':'Secondary School Teacher',
+   'contact':'meera.iyer@email.com · +91 94xxxxxx40 · Chennai, India · linkedin.com/in/meeraiyer',
+   'summary':'Secondary School Teacher with 6 years teaching Mathematics to CBSE grades 8–10. B.Ed qualified, skilled in lesson planning, student assessment and classroom management. Improved average class board results by 15% and introduced a peer-mentoring programme that cut failure rates to near zero.',
+   'jobs':[
+     {'title':'Mathematics Teacher','co':'DAV Public School','date':'2020 – Present','bullets':[
+       'Taught CBSE Mathematics to 150+ students across grades 8–10, raising average board scores by 15%',
+       'Designed activity-based lesson plans and assessments that improved class participation and retention',
+       'Ran a peer-mentoring programme that brought the subject failure rate to under 2%']},
+     {'title':'TGT Mathematics','co':'Kendriya Vidyalaya','date':'2018 – 2020','bullets':[
+       'Planned and delivered the full grade-9 maths curriculum across 3 sections',
+       'Prepared students for Olympiads, with 8 qualifying at the regional level']},
+   ],
+   'skills':['Lesson Planning','Classroom Management','Student Assessment','CBSE Curriculum','Smart Classroom','Mathematics','Mentoring','Parent Communication','Exam Preparation','EdTech Tools'],
+   'edu':'B.Ed · M.Sc Mathematics','eduyear':'2018','eduschool':'University of Madras · 76%','ats':91},
+ 'include':[
+   ('Professional summary','3–4 lines with years of experience, subjects and grades taught, board (CBSE/ICSE/State) and one results win.'),
+   ('Qualification','B.Ed and your subject degree, plus CTET/TET qualification — these are checked first for teaching roles.'),
+   ('Teaching skills','Lesson planning, classroom management, assessment, curriculum and EdTech tools — the keywords school ATS screens for.'),
+   ('Quantified experience','Add numbers: students taught, % results improved, programmes run, Olympiad/board outcomes.'),
+   ('Education & certifications','Degrees plus CTET/TET, computer or language certifications.'),
+ ],
+ 'skills_intro':'School recruiters scan for these first. Include the ones that match your experience:',
+ 'topskills':['Lesson Planning','Classroom Management','Student Assessment','CBSE Curriculum','Mentoring','Smart Classroom','Exam Preparation','Curriculum Design','EdTech Tools','Parent Communication'],
+ 'faq':[
+   ('What should a teacher resume include?','A short summary, your qualification (B.Ed and subject degree, plus CTET/TET), a teaching skills section, 2–4 experience bullets with subjects, grades and quantified results, and education with marks.'),
+   ('How do I write a teacher resume as a fresher?','Lead with your B.Ed teaching practice and any internship: state the school, subject, grade and what you delivered. Add CTET/TET if cleared, a teaching skills section and education. Our AI can turn your practice teaching into strong bullets.'),
+   ('Which skills are most important on a teacher resume?','Lesson planning, classroom management, student assessment and curriculum knowledge for your board (CBSE/ICSE/State), plus mentoring and EdTech/smart-classroom tools.'),
+   ('Is this teacher resume example free?','Yes — build, edit and preview free with no sign-up. PDF download is Rs 9 in India; Word is free.'),
+ ],
+},
+{
+ 'slug':'project-manager','title':'Project Manager','badge':'PROJECT MANAGER','plural':'project managers',
+ 'meta':'Free project manager resume example with a real sample. Build an ATS-friendly PM resume with AI — Agile, stakeholder management, delivery. No sign-up.',
+ 'og':'A real project manager resume example plus an AI builder — ATS-optimised and free.',
+ 'h1a':'A Project Manager Resume','h1b':'That Gets Shortlisted',
+ 'hero':'See a real project manager resume example, then build yours with AI in minutes. ATS-optimised for Naukri and LinkedIn. No sign-up.',
+ 'intro1':'A project manager resume has to prove delivery: projects shipped on time and on budget, teams led, and risks managed. Recruiters look for methodology (Agile/Scrum/Waterfall), tools (JIRA, MS Project) and quantified outcomes — budget managed, timeline cut, stakeholders aligned.',
+ 'intro2':'The sample below frames delivery as measurable business results. Copy the structure, then let AI rewrite your bullets into the same crisp, ATS-friendly format.',
+ 'person':{
+   'name':'Vikram Singh','title':'Project Manager',
+   'contact':'vikram.singh@email.com · +91 93xxxxxx19 · Gurugram, India · linkedin.com/in/vikramsingh',
+   'summary':'Project Manager with 7 years delivering software and operations projects in Agile environments. Skilled in stakeholder management, risk planning and Scrum. Delivered a Rs 12Cr platform migration two weeks early and led cross-functional teams of up to 25 across 3 time zones.',
+   'jobs':[
+     {'title':'Project Manager','co':'Infosys','date':'2021 – Present','bullets':[
+       'Delivered a Rs 12Cr platform migration 2 weeks ahead of schedule and 8% under budget',
+       'Led cross-functional teams of up to 25 across 3 time zones using Scrum and JIRA',
+       'Cut average sprint spillover from 20% to 6% by tightening backlog grooming and estimation']},
+     {'title':'Associate Project Manager','co':'Wipro','date':'2018 – 2021','bullets':[
+       'Managed 4 concurrent client projects worth Rs 8Cr combined, all delivered on time',
+       'Introduced a risk-tracking process that reduced escalations by 35%']},
+   ],
+   'skills':['Agile','Scrum','Stakeholder Management','JIRA','MS Project','Risk Management','Budgeting','Roadmapping','Team Leadership','Confluence'],
+   'edu':'MBA · B.Tech','eduyear':'2018','eduschool':'SP Jain · B.Tech, Delhi Technological University','ats':94},
+ 'include':[
+   ('Professional summary','3–4 lines with years of experience, methodology (Agile/Scrum), budget/team scale and one delivered-project win.'),
+   ('Core skills','Agile/Scrum, stakeholder management, risk management, JIRA and MS Project — the keywords ATS and recruiters screen for.'),
+   ('Quantified experience','Each bullet needs a number: budget managed, % on-time/under-budget, team size, timeline cut, escalations reduced.'),
+   ('Certifications','PMP, PMI-ACP, PRINCE2 or CSM certifications belong near the top — they are often filtered for.'),
+   ('Education','Degrees with institutions.'),
+ ],
+ 'skills_intro':'Recruiters and ATS scan for these first. Include the ones you genuinely know:',
+ 'topskills':['Agile','Scrum','Stakeholder Management','JIRA','MS Project','Risk Management','Budgeting','PMP','Roadmapping','Team Leadership'],
+ 'faq':[
+   ('What should a project manager resume include?','A short summary, a core skills section (Agile/Scrum, stakeholder and risk management, JIRA/MS Project), 2–4 quantified delivery bullets with budget/timeline/team scale, certifications like PMP, and education.'),
+   ('How do I write a project manager resume without the PM title yet?','Lead with projects you coordinated even without the title: state what you delivered, the team you aligned and the outcome. Highlight any Scrum/PMP certification, tools used and quantified results. Our AI can reframe coordination work as PM achievements.'),
+   ('Which certifications help most on a PM resume?','PMP is the most recognised, followed by PMI-ACP, PRINCE2 and CSM (Certified ScrumMaster). List them near the top — many ATS filters and recruiters screen for them.'),
+   ('Is this project manager resume example free?','Yes — build, edit and preview free with no sign-up. PDF download is Rs 9 in India; Word is free.'),
+ ],
+},
+]
