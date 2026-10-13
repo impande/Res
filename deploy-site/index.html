@@ -511,7 +511,7 @@
     /* ── Always-visible top sticky bar (Generate CTA + import) ── */
     #top-sticky-bar{
       position:relative;z-index:40;
-      margin:-40px -48px 28px;
+      margin:-40px -48px 18px;
       padding:14px 48px 16px;
       background:var(--bg);
       border-bottom:1px solid var(--border);
@@ -619,7 +619,12 @@
     #generateBtn.btn-ready{animation:generatePulse 1.9s ease-in-out infinite;}
     @keyframes generatePulse{0%,100%{box-shadow:0 2px 8px rgba(217,119,6,0.15);}55%{box-shadow:0 0 0 8px rgba(217,119,6,0.12),0 4px 22px rgba(217,119,6,0.3);}}
     #tplSelect{display:none;}
-    #step0{text-align:center;padding:48px 24px 36px;display:flex;flex-direction:column;align-items:center;}
+    #step0{text-align:center;padding:30px 24px 36px;display:flex;flex-direction:column;align-items:center;}
+    /* The decorative hero "R" icon duplicates the brand already shown in the sidebar
+       (desktop) and the mobile header, and left an awkward block of whitespace below
+       the primary CTA cards. Hide it on every viewport; the badge + headline open the
+       section cleanly. (ID+class beats the base .hero-icon-wrap rule defined later.) */
+    #step0 .hero-icon-wrap{display:none;}
     .hero-icon{width:80px;height:80px;background:linear-gradient(135deg,#d97706,#b45309);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#fff;margin-bottom:24px;box-shadow:0 0 40px rgba(217,119,6,0.2);}
     .hero-title{font-size:2.8rem;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:14px;letter-spacing:-1px;}
     .hero-title span{color:var(--accent);}
@@ -797,11 +802,6 @@
       .top-cta-row{flex-direction:column;gap:8px;}
       .top-cta-row .btn-hero,.top-cta-row .btn-portfolio-hero{width:100%;justify-content:center;text-align:center;}
       .hero-icon{width:72px;height:72px;font-size:1.9rem;border-radius:20px;}
-      /* The big R hero icon duplicates the brand already shown in the mobile header,
-         and eats prime above-the-fold space — hide it on mobile so the headline,
-         feature grid, stats and social proof pull up. (ID+class beats the base
-         .hero-icon-wrap rule that is defined later in the source.) */
-      #step0 .hero-icon-wrap{display:none;}
       .hero-badge{margin-bottom:12px;}
       .hero-sub{margin-bottom:20px;}
       .hero-feat-grid{margin-bottom:16px;}
@@ -7314,7 +7314,7 @@ if ('serviceWorker' in navigator) {
      previews / localhost) so it's obvious at a glance whether the tab is on the
      latest build or a cached one. build.js replaces __BUILD_ID__ at deploy time;
      hidden on production (resume4u.help). -->
-<div id="_buildStamp" aria-hidden="true" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:2147483000;font:600 10px/1 -apple-system,Inter,system-ui,sans-serif;color:#4b5563;background:rgba(255,255,255,0.95);padding:3px 9px;border-radius:8px;pointer-events:none;letter-spacing:.3px;display:none;">build __BUILD_ID__</div>
+<div id="_buildStamp" aria-hidden="true" style="position:fixed;bottom:4px;left:6px;z-index:2147483000;opacity:0.65;font:600 10px/1 -apple-system,Inter,system-ui,sans-serif;color:#4b5563;background:rgba(255,255,255,0.95);padding:3px 9px;border-radius:8px;pointer-events:none;letter-spacing:.3px;display:none;">build __BUILD_ID__</div>
 <script>
 (function(){
   try{
