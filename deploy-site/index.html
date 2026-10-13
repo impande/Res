@@ -623,6 +623,10 @@
     .btn-hero{padding:16px 40px;background:var(--accent-btn);color:#fff;font-size:1.05rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 20px rgba(180,83,9,0.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .btn-hero:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 28px rgba(217,119,6,0.35);}
     .hero-note{margin-top:14px;font-size:0.78rem;color:var(--muted);}
+    .hero-upload-cta{margin-top:12px;display:inline-block;text-align:center;line-height:1.45;background:#fff;border:1.5px solid #e7d6b8;color:#5f6673;font-family:inherit;font-size:0.9rem;font-weight:600;padding:11px 22px;border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    .hero-upload-cta span{color:var(--accent,#b45309);font-weight:800;}
+    .hero-upload-cta:hover{border-color:var(--accent,#b45309);background:rgba(217,119,6,0.05);}
+    @media(max-width:600px){.hero-upload-cta{width:100%;justify-content:center;}}
     .hero-social-proof{margin-top:20px;font-size:0.8rem;color:var(--muted);letter-spacing:0.2px;}
     #mobileProgress{display:none;background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:6px 16px 8px;}
     #mobileProgress .mob-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
@@ -2580,6 +2584,7 @@
       <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
       <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
     </div>
+    <button class="hero-upload-cta" onclick="startBuild()">📄 Already have a résumé? <span>Upload it &amp; let AI improve it →</span></button>
     <p class="hero-note">Free to build · Sign in anytime to save your progress</p>
   </div>
 
