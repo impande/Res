@@ -521,6 +521,13 @@
     /* The landing hero/upload bar belongs to the intro (step0) only. Hide on all
        form steps on every viewport — mobile included. */
     #main:has(.step-content.active:not(#step0)) #top-sticky-bar{display:none!important;}
+    /* The mobile progress bar (#mobileProgress — "Step X of 8 · Preview Resume") is a
+       per-step element: shown on steps, hidden by JS on the landing page. Because the
+       production bundle defers its JS, that bar flashed on the landing page on reload
+       before the JS could hide it. Hide it via CSS whenever step0 is the active step so
+       it is gone from first paint (no JS dependency, no flash). On real steps step0 is
+       not active, so the normal #mobileProgress display still applies. */
+    body:has(#step0.step-content.active) #mobileProgress{display:none!important;}
     #top-sticky-bar .top-cta-row{margin-top:4px;width:100%;justify-content:center;}
     #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
