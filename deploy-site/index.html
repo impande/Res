@@ -767,7 +767,7 @@
       .step-label{font-size:0.62rem;text-align:center;}
 #mobileProgress{display:block;}
       #main{padding:20px 16px 28px;max-width:100%;overflow-y:visible;}
-      #top-sticky-bar{margin:-20px -16px 20px;padding:12px 16px 14px;position:static;}
+      #top-sticky-bar{margin:-20px -16px 12px;padding:12px 16px 14px;position:static;}
       #pf-sticky-cta{position:static;padding:10px 16px;margin:-20px -16px 0;}
       #pf-sticky-cta .btn-portfolio-hero{font-size:0.78rem;padding:8px 14px;white-space:nowrap;}
       .step-title{font-size:1.5rem;}
@@ -780,7 +780,7 @@
       .resume-bar-actions button{flex:1;justify-content:center;}
       .resume-output-card{padding:0;}
       .resume-a4-page{padding:10mm 8mm;}
-      #step0{padding:28px 16px 24px;}
+      #step0{padding:18px 16px 24px;}
       .hero-title{font-size:2rem;}
       .hero-feat-grid{max-width:100%;}
       .hero-stats{max-width:100%;}
@@ -790,7 +790,11 @@
       .top-cta-row{flex-direction:column;gap:8px;}
       .top-cta-row .btn-hero,.top-cta-row .btn-portfolio-hero{width:100%;justify-content:center;text-align:center;}
       .hero-icon{width:72px;height:72px;font-size:1.9rem;border-radius:20px;}
-      .hero-icon-wrap{margin-bottom:14px;}
+      /* The big R hero icon duplicates the brand already shown in the mobile header,
+         and eats prime above-the-fold space — hide it on mobile so the headline,
+         feature grid, stats and social proof pull up. (ID+class beats the base
+         .hero-icon-wrap rule that is defined later in the source.) */
+      #step0 .hero-icon-wrap{display:none;}
       .hero-badge{margin-bottom:12px;}
       .hero-sub{margin-bottom:20px;}
       .hero-feat-grid{margin-bottom:16px;}
@@ -13330,6 +13334,34 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     return true;
   }
   if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); },100); }
+})();
+</script>
+<script id="_r4uMhdrBrand">
+/* Mobile header (#mhdrSection): on the landing page the obfuscated rotator cycles
+   through step names ("Basic Info", "Experience", "Education"…) as a faint ghost
+   label, which reads as a glitch next to the "R" logo. On the landing page show a
+   stable brand name instead; once the build flow starts, hand control back to the
+   normal per-step label. */
+(function(){
+  var sec=document.getElementById('mhdrSection');
+  if(!sec) return;
+  var BRAND='Resume For You';
+  function onLanding(){
+    var s0=document.getElementById('step0');
+    return !!(s0 && s0.classList.contains('active') && !s0.classList.contains('flow-started'));
+  }
+  function apply(){
+    if(!onLanding()) return;
+    if(sec.classList.contains('ghost-rotating')) sec.classList.remove('ghost-rotating');
+    if(sec.textContent!==BRAND) sec.textContent=BRAND;
+  }
+  apply();
+  try{
+    // Reassert over the rotator's writes while on the landing page (idempotent, no loop).
+    new MutationObserver(apply).observe(sec,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});
+    var s0=document.getElementById('step0');
+    if(s0) new MutationObserver(apply).observe(s0,{attributes:true,attributeFilter:['class']});
+  }catch(e){}
 })();
 </script>
 </body>
