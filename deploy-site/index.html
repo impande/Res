@@ -623,11 +623,23 @@
     .btn-hero{padding:16px 40px;background:var(--accent-btn);color:#fff;font-size:1.05rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 20px rgba(180,83,9,0.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .btn-hero:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 28px rgba(217,119,6,0.35);}
     .hero-note{margin-top:14px;font-size:0.78rem;color:var(--muted);}
-    .hero-upload-cta{margin:14px auto 0;display:inline-flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--border,#e5e5e0);color:#374151;font-family:inherit;font-size:0.92rem;font-weight:600;padding:10px 20px 10px 11px;border-radius:999px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.05);max-width:95%;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .hero-upload-cta:hover{border-color:var(--accent,#b45309);box-shadow:0 6px 18px rgba(180,83,9,0.14);transform:translateY(-1px);}
-    .hero-upload-cta .huc-ico{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;display:flex;align-items:center;justify-content:center;}
-    .hero-upload-cta .huc-txt{text-align:left;line-height:1.3;}
-    .hero-upload-cta .huc-txt b{color:var(--accent,#b45309);font-weight:800;}
+    .r4u-cta-stack{display:flex;flex-direction:column;gap:12px;width:100%;max-width:560px;margin:6px auto 0;}
+    .r4u-cta{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 18px;border-radius:15px;border:1.5px solid var(--border,#e5e5e0);background:var(--card-bg,#fff);cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s,border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    .r4u-cta:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.1);border-color:rgba(217,119,6,.5);}
+    .r4u-cta:active{transform:translateY(0);}
+    .r4u-cta-ico{flex-shrink:0;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(217,119,6,.1);color:var(--accent,#b45309);}
+    .r4u-cta-body{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+    .r4u-cta-title{font-size:1.02rem;font-weight:800;color:var(--text,#1a1a1a);line-height:1.2;}
+    .r4u-cta-desc{font-size:.8rem;color:var(--muted,#6b7280);line-height:1.3;}
+    .r4u-cta-arr{flex-shrink:0;color:var(--accent,#b45309);font-size:1.35rem;font-weight:700;opacity:.5;transition:transform .15s,opacity .15s;}
+    .r4u-cta:hover .r4u-cta-arr{opacity:1;transform:translateX(3px);}
+    .r4u-cta-primary{background:linear-gradient(135deg,#b45309,#d97706);border-color:transparent;box-shadow:0 6px 20px rgba(180,83,9,.26);}
+    .r4u-cta-primary .r4u-cta-title{color:#fff;}
+    .r4u-cta-primary .r4u-cta-desc{color:rgba(255,255,255,.88);}
+    .r4u-cta-primary .r4u-cta-arr{color:#fff;opacity:.85;}
+    .r4u-cta-primary .r4u-cta-ico{background:rgba(255,255,255,.22);color:#fff;}
+    .r4u-cta-primary:hover{box-shadow:0 12px 30px rgba(180,83,9,.38);border-color:transparent;}
+    #photoSection{scroll-margin-top:150px;}
     .hero-social-proof{margin-top:20px;font-size:0.8rem;color:var(--muted);letter-spacing:0.2px;}
     #mobileProgress{display:none;background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:6px 16px 8px;}
     #mobileProgress .mob-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
@@ -2581,14 +2593,23 @@
 
   <!-- Always-visible sticky bar: Generate Resume CTA + portfolio CTA + import existing resume -->
   <div id="top-sticky-bar">
-    <div class="top-cta-row">
-      <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
-      <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
+    <div class="r4u-cta-stack">
+      <button class="r4u-cta r4u-cta-primary" onclick="startBuild()" aria-label="Generate your resume from scratch with AI">
+        <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v6M9 14h6"/></svg></span>
+        <span class="r4u-cta-body"><span class="r4u-cta-title">Generate Your First Resume</span><span class="r4u-cta-desc">Start from scratch — our AI writes it for you</span></span>
+        <span class="r4u-cta-arr" aria-hidden="true">→</span>
+      </button>
+      <button class="r4u-cta" onclick="r4uStartUpload()" aria-label="Already have a resume? Upload it and let AI improve it">
+        <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 19h14"/></svg></span>
+        <span class="r4u-cta-body"><span class="r4u-cta-title">Already have a resume?</span><span class="r4u-cta-desc">Upload a PDF or DOC — AI improves it in minutes</span></span>
+        <span class="r4u-cta-arr" aria-hidden="true">→</span>
+      </button>
+      <button class="r4u-cta" onclick="openPortfolioBuilder()" aria-label="Build your portfolio website">
+        <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg></span>
+        <span class="r4u-cta-body"><span class="r4u-cta-title">Build Your Portfolio Website</span><span class="r4u-cta-desc">Turn your resume into a live personal site</span></span>
+        <span class="r4u-cta-arr" aria-hidden="true">→</span>
+      </button>
     </div>
-    <button class="hero-upload-cta" onclick="r4uStartUpload()" aria-label="Already have a resume? Upload it and let AI improve it">
-      <span class="huc-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 19h14"/></svg></span>
-      <span class="huc-txt">Already have a resume? <b>Upload &amp; improve it</b></span>
-    </button>
     <p class="hero-note">Free to build · Sign in anytime to save your progress</p>
   </div>
 
@@ -13276,6 +13297,20 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     try{ if(document.scrollingElement) document.scrollingElement.scrollTop=0; }catch(e){}
     try{ document.body.scrollTop=0; }catch(e){}
   }
+  function isFilled(){
+    try{ if(typeof lastResumeData!=='undefined' && lastResumeData) return true; }catch(e){}
+    try{ var fn=document.getElementById('firstName'); if(fn && fn.value && fn.value.trim()) return true; }catch(e){}
+    return false;
+  }
+  /* On step 1: if the résumé is already filled, land on the Profile Photo / form
+     (skip the empty-state upload prompt); otherwise show the top. Other steps: top. */
+  function go(stepId){
+    if(stepId==='step1' && isFilled()){
+      var ps=document.getElementById('photoSection');
+      if(ps){ try{ var m=document.getElementById('main'); if(m) m.scrollTop=0; }catch(e){} try{ ps.scrollIntoView({block:'start'}); return; }catch(e){} }
+    }
+    toTop();
+  }
   function install(){
     if(typeof goToStep!=='function') return false;
     if(goToStep.__r4uTop) return true;
@@ -13285,7 +13320,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       var r=orig.apply(this,arguments);
       try{
         var now=(document.querySelector('.step-content.active')||{}).id;
-        if(!isHistory && now!==prev){ toTop(); requestAnimationFrame(toTop); setTimeout(toTop,90); setTimeout(toTop,240); setTimeout(toTop,440); }
+        if(!isHistory && now!==prev){ go(now); requestAnimationFrame(function(){go(now);}); setTimeout(function(){go(now);},90); setTimeout(function(){go(now);},240); setTimeout(function(){go(now);},440); }
       }catch(e){}
       return r;
     };
