@@ -13262,5 +13262,40 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   if(document.readyState!=='loading') wire(); else document.addEventListener('DOMContentLoaded',wire);
 })();
 </script>
+<script id="_r4uStepScrollJS">
+/* Scroll to the top of each step on navigation. goToStep() only resets
+   #main.scrollTop, but on mobile the WINDOW is the scroll container (#main is
+   overflow:visible), so step changes were landing mid-page / below the step title.
+   Wrap goToStep to also scroll the window/document to the top on a real step change
+   (skipped for history/back restores). A few delayed passes override any late
+   focus-scroll from startBuild. */
+(function(){
+  function toTop(){
+    try{ var m=document.getElementById('main'); if(m) m.scrollTop=0; }catch(e){}
+    try{ window.scrollTo(0,0); }catch(e){}
+    try{ if(document.scrollingElement) document.scrollingElement.scrollTop=0; }catch(e){}
+    try{ document.body.scrollTop=0; }catch(e){}
+  }
+  function install(){
+    if(typeof goToStep!=='function') return false;
+    if(goToStep.__r4uTop) return true;
+    var orig=goToStep;
+    var wrapped=function(step, isHistory){
+      var prev=(document.querySelector('.step-content.active')||{}).id;
+      var r=orig.apply(this,arguments);
+      try{
+        var now=(document.querySelector('.step-content.active')||{}).id;
+        if(!isHistory && now!==prev){ toTop(); requestAnimationFrame(toTop); setTimeout(toTop,90); setTimeout(toTop,240); setTimeout(toTop,440); }
+      }catch(e){}
+      return r;
+    };
+    wrapped.__r4uTop=true;
+    try{ goToStep=wrapped; }catch(e){}
+    try{ window.goToStep=wrapped; }catch(e){}
+    return true;
+  }
+  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); },100); }
+})();
+</script>
 </body>
 </html>
