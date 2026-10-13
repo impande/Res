@@ -12977,7 +12977,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 })();
 </script>
 <style id="_r4uRatingCss">
-#r4uRateOverlay{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,15,26,0.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+#r4uRateOverlay{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,15,26,0.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
 #r4uRateOverlay.on{display:flex;}
 #r4uRateCard{width:min(380px,96%);background:var(--card,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);border-radius:16px;padding:24px 22px 20px;box-shadow:0 18px 60px rgba(0,0,0,.28);text-align:center;position:relative;font-family:inherit;}
 #r4uRateCard .r4u-rate-x{position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:1.3rem;line-height:1;color:var(--muted,#9ca3af);cursor:pointer;}
@@ -12988,7 +12988,10 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4uRateCard .r4u-star:hover{transform:scale(1.12);}
 #r4uRateCard .r4u-star.sel{color:#f59e0b;}
 #r4uRateCard .r4u-rate-follow{margin-top:12px;display:none;}
-#r4uRateCard .r4u-rate-follow textarea{width:100%;min-height:62px;border:1px solid var(--border,#e5e5e0);border-radius:10px;padding:9px 11px;font:inherit;font-size:.85rem;resize:vertical;background:var(--bg,#fff);color:var(--text,#1a1a1a);box-sizing:border-box;}
+/* font-size:16px is deliberate: iOS Safari auto-zooms the whole page when an input
+   under 16px is focused, which widened the page past the screen and made a
+   pinch-back trigger a reload. 16px stops that zoom. */
+#r4uRateCard .r4u-rate-follow textarea{width:100%;min-height:62px;border:1px solid var(--border,#e5e5e0);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:16px;line-height:1.4;resize:vertical;background:var(--bg,#fff);color:var(--text,#1a1a1a);box-sizing:border-box;max-width:100%;}
 #r4uRateCard .r4u-rate-cue{font-size:.86rem;font-weight:700;margin:4px 0 8px;}
 #r4uRateCard .r4u-rate-actions{display:flex;gap:8px;margin-top:10px;}
 #r4uRateCard .r4u-rate-btn{flex:1;border:0;border-radius:10px;padding:11px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;background:var(--accent,#b45309);color:#fff;}
@@ -13030,7 +13033,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'<div class="r4u-rate-thanks">Thank you! 🙌</div>'
       +'</div>';
     document.body.appendChild(o); _built=true;
-    function close(){ o.classList.remove('on'); }
+    function close(){ o.classList.remove('on'); try{ document.documentElement.style.overflow=''; document.body.style.overflow=''; }catch(e){} }
     o.addEventListener('click',function(e){ if(e.target===o){ markSeen(); close(); } });
     o.querySelector('.r4u-rate-x').addEventListener('click',function(){ markSeen(); close(); });
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.classList.contains('on')){ markSeen(); close(); } });
@@ -13063,7 +13066,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(!force && (rated()||cooldownActive())) return;
     build();
     if(!force) markSeen();           /* a manual "Rate us" open shouldn't start the cooldown */
-    var o=document.getElementById('r4uRateOverlay'); if(o) o.classList.add('on');
+    var o=document.getElementById('r4uRateOverlay'); if(o){ o.classList.add('on'); try{ document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden'; }catch(e){} }
   };
   /* Trigger: show on the 2nd visit onwards (returning user), for BOTH logged-in
      and anonymous users. A "visit" is counted once per browser session via
