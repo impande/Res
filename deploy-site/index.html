@@ -13184,10 +13184,26 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    to the mock when there is no resume data yet. renderTemplateGrid/renderResumeHTML
    live in the main (deferred) app bundle, so we install the wrapper once they exist. */
 (function(){
+  function mirrorData(){
+    /* Prefer the generated resume; before generation fall back to the live form
+       data (collectData) so each card still shows the user's real details. */
+    try{ if(typeof lastResumeData!=='undefined' && lastResumeData) return lastResumeData; }catch(e){}
+    try{
+      if(typeof collectData==='function'){
+        var d=collectData();
+        if(d && (d.firstName || d.lastName || d.jobTitle || (d.experience&&d.experience.length) || (d.education&&d.education.length) || (d.skills&&d.skills.length))){
+          if(!d.summary) d.summary='Your AI-written summary appears here after you generate.';
+          return d;
+        }
+      }
+    }catch(e){}
+    return null;
+  }
   function mirror(){
     try{
       if(typeof renderResumeHTML!=='function') return;
-      if(typeof lastResumeData==='undefined' || !lastResumeData) return; /* keep mock until a resume exists */
+      var data=mirrorData();
+      if(!data) return; /* no data at all — keep the mock */
       var cards=document.querySelectorAll('#tplGrid .tpl-card');
       if(!cards.length) return;
       var saved=currentTemplate;
@@ -13198,7 +13214,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
           if(!m) continue;
           var inner=c.querySelector('.tpl-mini-inner');
           if(!inner) continue;
-          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(lastResumeData)+'</div>'; }catch(e){}
+          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
         }
       } finally { currentTemplate=saved; }
       if(typeof calibrateTplPreviews==='function') calibrateTplPreviews();
@@ -13409,42 +13425,38 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }catch(e){}
 })();
 </script>
-<script id="_r4uTplPreviewOnPick">
-/* Step 8, before the resume is generated: tapping a template card opens the Resume
-   Preview modal showing the user's details rendered in that template (the modal
-   already builds a live preview from the form data via renderPreviewWithTemplate,
-   with a placeholder summary). This lets people see their resume in a template
-   before committing to AI generation. Isolated to the preview modal — it does not
-   touch #resumeOutput, autosave, ATS scoring or the download actions. Once a resume
-   HAS been generated, selecting a template re-renders the real output as before, so
-   this does nothing. */
+<script id="_r4uGenTplSync">
+/* Guarantee the resume is generated with the template the user actually selected.
+   The hidden #tplSelect only lists ~39 of the 90+ templates, so for the others its
+   value can't track the choice; currentTemplate can also be left stale by other
+   render paths. The highlighted card (#tplGrid .tpl-card.tpl-active) is the single
+   source of truth for what the user picked, so re-sync currentTemplate from it right
+   before generating (and before a template-driven re-render). */
 (function(){
-  function onGridClick(e){
+  function selectedTpl(){
     try{
-      var t=e.target;
-      var card=(t&&t.closest)?t.closest('.tpl-card'):null;
-      if(!card) return;
-      var grid=document.getElementById('tplGrid');
-      if(!grid||!grid.contains(card)) return;
-      // Only before generation (no AI resume yet)
-      var generated=false; try{ generated=(typeof lastResumeData!=='undefined'&&!!lastResumeData); }catch(_e){}
-      if(generated) return;
-      // Only on the Generate step
-      if(((document.querySelector('.step-content.active')||{}).id)!=='step8') return;
-      if(typeof openPreviewModal!=='function') return;
-      // Let the card's own selectTemplate() set currentTemplate + render first.
-      setTimeout(function(){ try{ openPreviewModal(); }catch(_e){} }, 70);
-    }catch(_e){}
+      var card=document.querySelector('#tplGrid .tpl-card.tpl-active');
+      if(card){ var m=(card.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m) return m[1]; }
+    }catch(e){}
+    return null;
   }
-  function install(){
-    var grid=document.getElementById('tplGrid');
-    if(!grid) return false;
-    if(grid.__r4uPreviewPick) return true;
-    grid.addEventListener('click', onGridClick);
-    grid.__r4uPreviewPick=true;
+  function sync(){ try{ var t=selectedTpl(); if(t){ currentTemplate=t; try{ window.currentTemplate=t; }catch(e){} var sel=document.getElementById('tplSelect'); if(sel){ for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===t){ sel.value=t; break; } } } } }catch(e){} }
+  function wrap(name){
+    if(typeof window[name]!=='function') return false;
+    if(window[name].__r4uGenSync) return true;
+    var orig=window[name];
+    var w=function(){ sync(); return orig.apply(this,arguments); };
+    w.__r4uGenSync=true;
+    try{ window[name]=w; }catch(e){}
     return true;
   }
-  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); },100); }
+  function install(){
+    var ok=wrap('generateResume');
+    // also make generateResume reachable as a bare global if it is one
+    try{ if(typeof generateResume==='function' && !generateResume.__r4uGenSync && window.generateResume && window.generateResume.__r4uGenSync){ generateResume=window.generateResume; } }catch(e){}
+    return ok;
+  }
+  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>120) clearInterval(iv); },100); }
 })();
 </script>
 </body>
