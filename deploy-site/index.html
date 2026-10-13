@@ -13409,5 +13409,43 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }catch(e){}
 })();
 </script>
+<script id="_r4uTplPreviewOnPick">
+/* Step 8, before the resume is generated: tapping a template card opens the Resume
+   Preview modal showing the user's details rendered in that template (the modal
+   already builds a live preview from the form data via renderPreviewWithTemplate,
+   with a placeholder summary). This lets people see their resume in a template
+   before committing to AI generation. Isolated to the preview modal — it does not
+   touch #resumeOutput, autosave, ATS scoring or the download actions. Once a resume
+   HAS been generated, selecting a template re-renders the real output as before, so
+   this does nothing. */
+(function(){
+  function onGridClick(e){
+    try{
+      var t=e.target;
+      var card=(t&&t.closest)?t.closest('.tpl-card'):null;
+      if(!card) return;
+      var grid=document.getElementById('tplGrid');
+      if(!grid||!grid.contains(card)) return;
+      // Only before generation (no AI resume yet)
+      var generated=false; try{ generated=(typeof lastResumeData!=='undefined'&&!!lastResumeData); }catch(_e){}
+      if(generated) return;
+      // Only on the Generate step
+      if(((document.querySelector('.step-content.active')||{}).id)!=='step8') return;
+      if(typeof openPreviewModal!=='function') return;
+      // Let the card's own selectTemplate() set currentTemplate + render first.
+      setTimeout(function(){ try{ openPreviewModal(); }catch(_e){} }, 70);
+    }catch(_e){}
+  }
+  function install(){
+    var grid=document.getElementById('tplGrid');
+    if(!grid) return false;
+    if(grid.__r4uPreviewPick) return true;
+    grid.addEventListener('click', onGridClick);
+    grid.__r4uPreviewPick=true;
+    return true;
+  }
+  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); },100); }
+})();
+</script>
 </body>
 </html>
