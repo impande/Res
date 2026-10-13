@@ -13339,26 +13339,31 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 <script id="_r4uMhdrBrand">
 /* Mobile header (#mhdrSection): on the landing page the obfuscated rotator cycles
    through step names ("Basic Info", "Experience", "Education"…) as a faint ghost
-   label, which reads as a glitch next to the "R" logo. On the landing page show a
-   stable brand name instead; once the build flow starts, hand control back to the
-   normal per-step label. */
+   label, which reads as a glitch next to the "R" logo. Rather than fight the rotator
+   with a revert (which flickers), HIDE the rotating element entirely on the landing
+   page and show a separate, static "Resume For You" brand label in its place. The
+   rotator keeps writing to the hidden element — invisibly, no blink. Once the build
+   flow starts, restore the element so the real per-step label shows as normal. */
 (function(){
   var sec=document.getElementById('mhdrSection');
-  if(!sec) return;
-  var BRAND='Resume For You';
+  if(!sec || !sec.parentNode) return;
+  var brand=document.createElement('div');
+  brand.id='_r4uMhdrBrandLbl';
+  brand.className='mhdr-section';
+  brand.textContent='Resume For You';
+  brand.style.cssText='font-style:normal;opacity:1;cursor:pointer;';
+  brand.onclick=function(){ try{ goToStep(1); }catch(e){} };
+  sec.parentNode.insertBefore(brand, sec);
   function onLanding(){
     var s0=document.getElementById('step0');
     return !!(s0 && s0.classList.contains('active') && !s0.classList.contains('flow-started'));
   }
   function apply(){
-    if(!onLanding()) return;
-    if(sec.classList.contains('ghost-rotating')) sec.classList.remove('ghost-rotating');
-    if(sec.textContent!==BRAND) sec.textContent=BRAND;
+    if(onLanding()){ brand.style.display=''; sec.style.display='none'; }
+    else { brand.style.display='none'; sec.style.display=''; }
   }
   apply();
   try{
-    // Reassert over the rotator's writes while on the landing page (idempotent, no loop).
-    new MutationObserver(apply).observe(sec,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});
     var s0=document.getElementById('step0');
     if(s0) new MutationObserver(apply).observe(s0,{attributes:true,attributeFilter:['class']});
   }catch(e){}
