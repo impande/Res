@@ -511,7 +511,7 @@
     /* ── Always-visible top sticky bar (Generate CTA + import) ── */
     #top-sticky-bar{
       position:relative;z-index:40;
-      margin:-40px -48px 28px;
+      margin:-40px -48px 18px;
       padding:14px 48px 16px;
       background:var(--bg);
       border-bottom:1px solid var(--border);
@@ -521,6 +521,13 @@
     /* The landing hero/upload bar belongs to the intro (step0) only. Hide on all
        form steps on every viewport — mobile included. */
     #main:has(.step-content.active:not(#step0)) #top-sticky-bar{display:none!important;}
+    /* The mobile progress bar (#mobileProgress — "Step X of 8 · Preview Resume") is a
+       per-step element: shown on steps, hidden by JS on the landing page. Because the
+       production bundle defers its JS, that bar flashed on the landing page on reload
+       before the JS could hide it. Hide it via CSS whenever step0 is the active step so
+       it is gone from first paint (no JS dependency, no flash). On real steps step0 is
+       not active, so the normal #mobileProgress display still applies. */
+    body:has(#step0.step-content.active) #mobileProgress{display:none!important;}
     #top-sticky-bar .top-cta-row{margin-top:4px;width:100%;justify-content:center;}
     #top-sticky-bar .hero-upload-wrap{margin-top:10px;}
     .nav-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
@@ -612,7 +619,12 @@
     #generateBtn.btn-ready{animation:generatePulse 1.9s ease-in-out infinite;}
     @keyframes generatePulse{0%,100%{box-shadow:0 2px 8px rgba(217,119,6,0.15);}55%{box-shadow:0 0 0 8px rgba(217,119,6,0.12),0 4px 22px rgba(217,119,6,0.3);}}
     #tplSelect{display:none;}
-    #step0{text-align:center;padding:48px 24px 36px;display:flex;flex-direction:column;align-items:center;}
+    #step0{text-align:center;padding:30px 24px 36px;display:flex;flex-direction:column;align-items:center;}
+    /* The decorative hero "R" icon duplicates the brand already shown in the sidebar
+       (desktop) and the mobile header, and left an awkward block of whitespace below
+       the primary CTA cards. Hide it on every viewport; the badge + headline open the
+       section cleanly. (ID+class beats the base .hero-icon-wrap rule defined later.) */
+    #step0 .hero-icon-wrap{display:none;}
     .hero-icon{width:80px;height:80px;background:linear-gradient(135deg,#d97706,#b45309);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#fff;margin-bottom:24px;box-shadow:0 0 40px rgba(217,119,6,0.2);}
     .hero-title{font-size:2.8rem;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:14px;letter-spacing:-1px;}
     .hero-title span{color:var(--accent);}
@@ -623,6 +635,53 @@
     .btn-hero{padding:16px 40px;background:var(--accent-btn);color:#fff;font-size:1.05rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 20px rgba(180,83,9,0.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .btn-hero:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 28px rgba(217,119,6,0.35);}
     .hero-note{margin-top:14px;font-size:0.78rem;color:var(--muted);}
+    .r4u-cta-stack{display:flex;flex-direction:column;gap:12px;width:100%;max-width:560px;margin:6px auto 0;}
+    .r4u-cta{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 18px;border-radius:15px;border:1.5px solid var(--border,#e5e5e0);background:var(--card-bg,#fff);cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s,border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    .r4u-cta:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.1);border-color:rgba(217,119,6,.5);}
+    .r4u-cta:active{transform:translateY(0);}
+    .r4u-cta-ico{flex-shrink:0;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(217,119,6,.1);color:var(--accent,#b45309);}
+    .r4u-cta-body{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+    .r4u-cta-title{font-size:1.02rem;font-weight:800;color:var(--text,#1a1a1a);line-height:1.2;}
+    .r4u-cta-desc{font-size:.8rem;color:var(--muted,#6b7280);line-height:1.3;}
+    .r4u-cta-arr{flex-shrink:0;color:var(--accent,#b45309);font-size:1.35rem;font-weight:700;opacity:.5;transition:transform .15s,opacity .15s;}
+    .r4u-cta:hover .r4u-cta-arr{opacity:1;transform:translateX(3px);}
+    .r4u-cta-primary{background:linear-gradient(135deg,#b45309,#d97706);border-color:transparent;box-shadow:0 6px 20px rgba(180,83,9,.26);}
+    .r4u-cta-primary .r4u-cta-title{color:#fff;}
+    .r4u-cta-primary .r4u-cta-desc{color:rgba(255,255,255,.88);}
+    .r4u-cta-primary .r4u-cta-arr{color:#fff;opacity:.85;}
+    .r4u-cta-primary .r4u-cta-ico{background:rgba(255,255,255,.22);color:#fff;}
+    .r4u-cta-primary:hover{box-shadow:0 12px 30px rgba(180,83,9,.38);border-color:transparent;}
+    /* ── CTA highlight + motion ───────────────────────────────────────────────
+       A deliberate, clearly-staggered entrance so each card lifts into place on
+       load, a soft slow attention glow on the primary card, a refined hover sheen
+       and icon lift. The entrance uses transform/opacity only, so it stays smooth
+       on the compositor even while the deferred app bundle parses. No layout shift;
+       fully disabled under prefers-reduced-motion. */
+    .r4u-cta{position:relative;overflow:hidden;}
+    .r4u-cta-ico{transition:transform .25s cubic-bezier(.34,1.4,.5,1),background .2s ease;}
+    .r4u-cta:hover .r4u-cta-ico{transform:scale(1.07);background:rgba(217,119,6,.16);}
+    .r4u-cta-primary:hover .r4u-cta-ico{background:rgba(255,255,255,.28);}
+    /* Refined light sweep across the card on hover */
+    .r4u-cta::after{content:"";position:absolute;top:0;left:-80%;width:48%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);opacity:0;pointer-events:none;}
+    .r4u-cta:hover::after{animation:r4uCtaSheen .9s ease;}
+    @keyframes r4uCtaSheen{0%{left:-80%;opacity:0;}15%{opacity:1;}100%{left:140%;opacity:0;}}
+    /* Entrance: deliberate lift + fade, clearly staggered (primary → upload → portfolio) */
+    @keyframes r4uCtaIn{0%{opacity:0;transform:translateY(28px) scale(.975);}100%{opacity:1;transform:translateY(0) scale(1);}}
+    .r4u-cta{animation:r4uCtaIn .75s cubic-bezier(.16,1,.3,1) backwards;}
+    .r4u-cta-stack .r4u-cta:nth-child(2){animation-delay:.28s;}
+    .r4u-cta-stack .r4u-cta:nth-child(3){animation-delay:.44s;}
+    /* Primary: entrance (own .12s delay) + a soft, slow attention glow */
+    @keyframes r4uCtaGlow{0%,100%{box-shadow:0 6px 20px rgba(180,83,9,.26);}50%{box-shadow:0 11px 32px rgba(180,83,9,.46);}}
+    .r4u-cta-primary{animation:r4uCtaIn .75s cubic-bezier(.16,1,.3,1) .12s backwards, r4uCtaGlow 3.4s ease-in-out 1.6s infinite;}
+    /* Primary arrow: subtle periodic glide to hint the tap (pauses on hover) */
+    @keyframes r4uCtaArr{0%,64%,100%{transform:translateX(0);}80%{transform:translateX(4px);}}
+    .r4u-cta-primary .r4u-cta-arr{animation:r4uCtaArr 3.2s ease-in-out 1.8s infinite;}
+    .r4u-cta-primary:hover .r4u-cta-arr{animation:none;transform:translateX(4px);}
+    @media (prefers-reduced-motion:reduce){
+      .r4u-cta,.r4u-cta-primary,.r4u-cta-primary .r4u-cta-arr{animation:none!important;}
+      .r4u-cta::after{display:none!important;}
+    }
+    #photoSection{scroll-margin-top:150px;}
     .hero-social-proof{margin-top:20px;font-size:0.8rem;color:var(--muted);letter-spacing:0.2px;}
     #mobileProgress{display:none;background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:6px 16px 8px;}
     #mobileProgress .mob-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
@@ -697,7 +756,7 @@
     .pg-break-chip{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:system-ui,-apple-system,sans-serif;font-size:9px;font-weight:700;color:#7a92a8;background:rgba(255,255,255,0.65);padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.85);white-space:nowrap;}
     @media print{.pg-break{display:none!important}}
     .resume-a4-page{width:210mm;min-height:297mm;max-width:100%;padding:10mm 16mm;background:#fff;box-sizing:border-box;box-shadow:0 2px 18px rgba(0,0,0,0.13);margin:0 auto;position:relative;}
-    /* Never reserve vertical space for an EMPTY résumé text field (e.g. an award
+    /* Never reserve vertical space for an EMPTY resume text field (e.g. an award
        with the company/year removed). Targets text fields only — decorative
        elements (accents, timeline dots) are deliberately excluded. Applies to the
        card, the PDF (printed from #resumeOutput) and the hosted /r/ page (this CSS
@@ -750,7 +809,7 @@
       .step-label{font-size:0.62rem;text-align:center;}
 #mobileProgress{display:block;}
       #main{padding:20px 16px 28px;max-width:100%;overflow-y:visible;}
-      #top-sticky-bar{margin:-20px -16px 20px;padding:12px 16px 14px;position:static;}
+      #top-sticky-bar{margin:-20px -16px 12px;padding:12px 16px 14px;position:static;}
       #pf-sticky-cta{position:static;padding:10px 16px;margin:-20px -16px 0;}
       #pf-sticky-cta .btn-portfolio-hero{font-size:0.78rem;padding:8px 14px;white-space:nowrap;}
       .step-title{font-size:1.5rem;}
@@ -763,7 +822,7 @@
       .resume-bar-actions button{flex:1;justify-content:center;}
       .resume-output-card{padding:0;}
       .resume-a4-page{padding:10mm 8mm;}
-      #step0{padding:28px 16px 24px;}
+      #step0{padding:18px 16px 24px;}
       .hero-title{font-size:2rem;}
       .hero-feat-grid{max-width:100%;}
       .hero-stats{max-width:100%;}
@@ -773,7 +832,6 @@
       .top-cta-row{flex-direction:column;gap:8px;}
       .top-cta-row .btn-hero,.top-cta-row .btn-portfolio-hero{width:100%;justify-content:center;text-align:center;}
       .hero-icon{width:72px;height:72px;font-size:1.9rem;border-radius:20px;}
-      .hero-icon-wrap{margin-bottom:14px;}
       .hero-badge{margin-bottom:12px;}
       .hero-sub{margin-bottom:20px;}
       .hero-feat-grid{margin-bottom:16px;}
@@ -1155,7 +1213,7 @@
     .tip-card-title{font-size:0.78rem;font-weight:700;color:var(--text);margin-bottom:4px;}
     .tip-card-body{font-size:0.72rem;color:var(--muted);line-height:1.55;}
     /* Writing-tips rail hidden on desktop (was shown ≥1100px) — kept out of the
-       résumé workspace per request; tips still available in the Quick Tips drawer. */
+       resume workspace per request; tips still available in the Quick Tips drawer. */
     #tipsSidebar{display:none!important;}
     @media(max-width:768px){.mob-prog-label{display:none;}.mob-prog-track{display:none;}#sidebar{display:none;}}
     #mhdrSection{transition:opacity .18s ease;}
@@ -2429,7 +2487,7 @@
       .preview-modal{border-radius:24px;max-height:88vh;}
       .preview-modal-handle{display:none;}
     }
-    /* Wide screens: show the résumé at full A4 desktop size (like the shared /r/
+    /* Wide screens: show the resume at full A4 desktop size (like the shared /r/
        page) instead of a cramped 600px sheet. scalePreview() caps scale at
        min(1, bodyWidth/794), so a body ≥794px renders at scale 1. Center the page
        in the roomier modal. */
@@ -2576,9 +2634,22 @@
 
   <!-- Always-visible sticky bar: Generate Resume CTA + portfolio CTA + import existing resume -->
   <div id="top-sticky-bar">
-    <div class="top-cta-row">
-      <button class="btn-hero" onclick="startBuild()">Generate Your First Resume →</button>
-      <button class="btn-portfolio-hero" onclick="openPortfolioBuilder()">🌐 Build Your Portfolio Website →</button>
+    <div class="r4u-cta-stack">
+      <button class="r4u-cta r4u-cta-primary" onclick="startBuild()" aria-label="Generate your resume from scratch with AI">
+        <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v6M9 14h6"/></svg></span>
+        <span class="r4u-cta-body"><span class="r4u-cta-title">Generate Your First Resume</span><span class="r4u-cta-desc">Start from scratch — our AI writes it for you</span></span>
+        <span class="r4u-cta-arr" aria-hidden="true">→</span>
+      </button>
+      <button class="r4u-cta" onclick="r4uStartUpload()" aria-label="Already have a resume? Upload it and let AI improve it">
+        <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 19h14"/></svg></span>
+        <span class="r4u-cta-body"><span class="r4u-cta-title">Already have a resume?</span><span class="r4u-cta-desc">Upload a PDF or DOC — AI improves it in minutes</span></span>
+        <span class="r4u-cta-arr" aria-hidden="true">→</span>
+      </button>
+      <button class="r4u-cta" onclick="openPortfolioBuilder()" aria-label="Build your portfolio website">
+        <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg></span>
+        <span class="r4u-cta-body"><span class="r4u-cta-title">Build Your Portfolio Website</span><span class="r4u-cta-desc">Turn your resume into a live personal site</span></span>
+        <span class="r4u-cta-arr" aria-hidden="true">→</span>
+      </button>
     </div>
     <p class="hero-note">Free to build · Sign in anytime to save your progress</p>
   </div>
@@ -2838,7 +2909,7 @@
           <div class="upload-zone-title">Upload your resume</div>
           <div class="upload-zone-sub">PDF · DOCX · DOC · TXT · JPG · PNG &nbsp;·&nbsp; Drag &amp; drop</div>
           <span class="btn-browse">Choose File</span>
-          <div class="upload-zone-li"><span class="uzli-badge">in</span><span class="uzli-text">From LinkedIn? Export your profile (<b>More → Save to PDF</b>) and drop it here — our AI reads it like a résumé.</span></div>
+          <div class="upload-zone-li"><span class="uzli-badge">in</span><span class="uzli-text">From LinkedIn? Export your profile (<b>More → Save to PDF</b>) and drop it here — our AI reads it like a resume.</span></div>
         </label>
       </div>
       <!-- Paste text panel -->
@@ -2924,7 +2995,7 @@
   <div class="step-content" id="step4">
     <h2 class="step-title">⭐ Key Achievements <span style="font-weight:400;font-size:0.8rem;color:var(--muted,#888);">(optional)</span></h2>
     <p class="step-subtitle">Highlight 3–5 standout wins — shown as a prominent section on your resume, and on your portfolio website.</p>
-    <label class="ka-inc-row"><input type="checkbox" id="kaIncResume" checked onchange="pfKaToggleResume(this.checked)"> <span>📄 Show Key Achievements on my résumé</span> <span class="ka-inc-hint">— appears in every template</span></label>
+    <label class="ka-inc-row"><input type="checkbox" id="kaIncResume" checked onchange="pfKaToggleResume(this.checked)"> <span>📄 Show Key Achievements on my resume</span> <span class="ka-inc-hint">— appears in every template</span></label>
     <div class="ka-ai-wrap"><button class="btn-gen-bullets" type="button" id="kaAiBtn" onclick="pfSuggestKa()">✦ Suggest 5 with AI</button>
       <div class="ka-ai-note">Tailored to your skills, experience and projects — tap ＋ to add any.</div></div>
     <div id="kaSuggestBox"></div>
@@ -3003,7 +3074,7 @@
         <button class="tpl-filter-btn" data-cat="creative" onclick="filterTpls(this,'creative')">Creative</button>
         <button class="tpl-filter-btn" data-cat="minimal" onclick="filterTpls(this,'minimal')">Minimal</button>
       </div>
-      <div class="tpl-grid" id="tplGrid" tabindex="0" role="region" aria-label="Résumé templates"></div>
+      <div class="tpl-grid" id="tplGrid" tabindex="0" role="region" aria-label="Resume templates"></div>
       <div id="tplGuide" class="tpl-guide">
         <div class="tpl-guide-check">✓</div>
         <span class="tpl-guide-text">Template chosen! Now click <strong>Generate Resume</strong> below to build your resume</span>
@@ -3309,7 +3380,7 @@ window.__iosPdfSave = function(blobUrl, filename){
     <!-- Step 1: Template -->
     <div class="pf-body" id="pfStep1">
       <div class="pf-section-title">Let’s build your website</div>
-      <div class="pf-section-sub">No template to pick — I’ll build a first draft from your résumé, then guide you section by section to make it yours. Fully responsive, free to host.</div>
+      <div class="pf-section-sub">No template to pick — I’ll build a first draft from your resume, then guide you section by section to make it yours. Fully responsive, free to host.</div>
       <div id="pfResumeHint" style="display:flex;align-items:flex-start;gap:10px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.22);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:0.8rem;color:var(--text);line-height:1.55;">
         <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">💡</span>
         <span><b>Auto-fill tip:</b> Upload your existing resume (PDF or Word) or paste your resume text in the <b>Build Your Resume</b> section first — your experience, education, skills, and awards will be pulled in automatically when you reach the details step.</span>
@@ -3588,7 +3659,7 @@ window.__iosPdfSave = function(blobUrl, filename){
       </div>
       <div id="pfKaPanel" style="display:none;margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
         <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>⭐</span>Key Achievements</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Highlight your standout wins — they appear as a section on your portfolio. Shared with your résumé’s Key Achievements.</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Highlight your standout wins — they appear as a section on your portfolio. Shared with your resume’s Key Achievements.</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <button type="button" class="btn-gen-bullets" id="pfKaAiBtn" onclick="pfKbSuggest()">✦ Suggest 5 with AI</button>
           <button type="button" onclick="pfKbAdd()" style="padding:9px 16px;border:1.5px dashed var(--border);border-radius:9px;background:var(--bg);color:var(--accent);font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit;">+ Add Key Achievement</button>
@@ -3608,14 +3679,14 @@ window.__iosPdfSave = function(blobUrl, filename){
       </div>
       <div id="pfCustomEditor" style="margin-top:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;">
         <div style="font-weight:700;font-size:0.9rem;margin-bottom:3px;color:var(--text);display:flex;align-items:center;gap:7px;"><span>➕</span>Content blocks</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Add any blocks and <b>drag</b> them (⠿) into any order — build your site your way. Start blank, or pull sections from your résumé.</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Add any blocks and <b>drag</b> them (⠿) into any order — build your site your way. Start blank, or pull sections from your resume.</div>
         <div id="pfCanvasMode" style="display:flex;gap:6px;margin-bottom:13px;">
-          <button type="button" id="pfModeGuided" onclick="pfSetScratch(false)" class="pf-modebtn on">🧭 From my résumé</button>
+          <button type="button" id="pfModeGuided" onclick="pfSetScratch(false)" class="pf-modebtn on">🧭 From my resume</button>
           <button type="button" id="pfModeScratch" onclick="pfSetScratch(true)" class="pf-modebtn">🧱 Blank canvas</button>
         </div>
         <div id="pfCustomList"></div>
         <div id="pfResumePalette" style="margin:2px 0 12px;display:none;">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Add from your résumé</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Add from your resume</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             <button type="button" onclick="pfAddResumeBlock('about')" class="pf-addblk">About</button>
             <button type="button" onclick="pfAddResumeBlock('experience')" class="pf-addblk">Experience</button>
@@ -4329,7 +4400,7 @@ if ('serviceWorker' in navigator) {
   var _WEAK_OPENERS=/^(responsible for|worked on|helped|assisted( with)?|handled|involved in|duties included|participated in|tasked with|was responsible|in charge of|managed to|contributed to|took part in|part of|responsible|work on|helping)\b/i;
   /* Gibberish / typo signal: a word with 3+ of the same letter in a row
      (keyboard mash like "ghhhhhbhhhh") or a long vowel-less run ("asdfghjkl").
-     Both are vanishingly rare in real résumé prose, so false positives are low. */
+     Both are vanishingly rare in real resume prose, so false positives are low. */
   function _looksOff(tx){
     var ws=String(tx||'').split(/\s+/);
     for(var i=0;i<ws.length;i++){ var w=ws[i].replace(/[^A-Za-z]/g,'');
@@ -4373,7 +4444,7 @@ if ('serviceWorker' in navigator) {
       if(reasons.indexOf('Looks off')>-1) wants.push('remove any gibberish or nonsense words and fix obvious typos, keeping the real achievement');
       if(reasons.indexOf('Too long')>-1) wants.push('keep it under 26 words');
       else wants.push('keep it under 30 words');
-      return 'Rewrite this résumé bullet to '+wants.join('; ')+'. Output ONLY the bullet text, no bullet symbol.\n\n'+tx;
+      return 'Rewrite this resume bullet to '+wants.join('; ')+'. Output ONLY the bullet text, no bullet symbol.\n\n'+tx;
     }
     function _applyFix(item, act, lbl){
       if(act.disabled) return Promise.resolve(false);
@@ -4647,9 +4718,9 @@ if ('serviceWorker' in navigator) {
         _clear();
         var col=pct>=70?'#16a34a':pct>=45?'#d97706':'#dc2626';
         _msg('<b>ATS match: <span style="color:'+col+'">'+pct+'%</span></b><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">'+matched.length+' of '+kws.length+' key terms from this job are in your resume.</div>');
-        /* Primary action: actually tailor the résumé (summary + bullets) to the job,
+        /* Primary action: actually tailor the resume (summary + bullets) to the job,
            not just suggest skills. */
-        var tailorBtn=document.createElement('button'); tailorBtn.className='aig-opt aig-primary'; tailorBtn.style.margin='10px 0 2px'; tailorBtn.textContent='✨ Tailor my résumé to this job';
+        var tailorBtn=document.createElement('button'); tailorBtn.className='aig-opt aig-primary'; tailorBtn.style.margin='10px 0 2px'; tailorBtn.textContent='✨ Tailor my resume to this job';
         tailorBtn.addEventListener('click',function(){ _tailorToJd(jd, missing); });
         $m().appendChild(tailorBtn);
         _msg('<div style="font-size:0.73rem;color:var(--muted);margin:2px 0 6px">Rewrites your summary &amp; experience bullets to target this job — truthfully, no invented experience. Or add individual skills below.</div>');
@@ -4705,7 +4776,7 @@ if ('serviceWorker' in navigator) {
     if(typeof _captureResumeOutputEdits==='function'){ try{ _captureResumeOutputEdits(); }catch(e){} }
     var d=lastResumeData;
     var jdShort=String(jd||'').slice(0,1600);
-    _msg('<b>✨ Tailoring your résumé to this job…</b>');
+    _msg('<b>✨ Tailoring your resume to this job…</b>');
     var status=_msg('<span class="aig-warn">Rewriting your summary and experience to match — this can take a few seconds.</span>');
 
     var role=d.jobTitle||d.title||'';
@@ -4714,7 +4785,7 @@ if ('serviceWorker' in navigator) {
     var exps=Array.isArray(d.experience)?d.experience:[];
 
     /* 1) summary — JD-aware, truthful */
-    var sumPrompt='You are an expert resume writer tailoring a candidate\'s résumé to a specific job. Rewrite the professional summary (2-3 sentences, max 45 words, no first-person pronouns, no preamble) so it targets THIS job and mirrors its core requirements and terminology — but ONLY claim experience the candidate\'s background supports. Do not invent titles, employers, or achievements. Output ONLY the summary text.\n\nJOB DESCRIPTION:\n'+jdShort+'\n\nCANDIDATE TARGET ROLE: '+role+'\nCANDIDATE SKILLS: '+skillsList+'\nCURRENT SUMMARY: '+(curSum||'(none)');
+    var sumPrompt='You are an expert resume writer tailoring a candidate\'s resume to a specific job. Rewrite the professional summary (2-3 sentences, max 45 words, no first-person pronouns, no preamble) so it targets THIS job and mirrors its core requirements and terminology — but ONLY claim experience the candidate\'s background supports. Do not invent titles, employers, or achievements. Output ONLY the summary text.\n\nJOB DESCRIPTION:\n'+jdShort+'\n\nCANDIDATE TARGET ROLE: '+role+'\nCANDIDATE SKILLS: '+skillsList+'\nCURRENT SUMMARY: '+(curSum||'(none)');
     var sumP=(curSum||role||skillsList)?_aiGenerate(sumPrompt).then(function(t){ return (t||'').replace(/^["'“‘\s]+|["'”’\s]+$/g,''); }).catch(function(){ return ''; }):Promise.resolve('');
 
     /* 2) bullets — one call per experience, in parallel */
@@ -4723,7 +4794,7 @@ if ('serviceWorker' in navigator) {
       if(!bl.length) return Promise.resolve(null);
       var n=bl.length;
       var label=(e.title||e.role||'')+((e.co||e.company)?(' at '+(e.co||e.company)):'');
-      var p='You are an expert resume writer tailoring a résumé to a specific job. Rewrite the bullet points for the role "'+label+'" so they emphasise the experience most relevant to THIS job and naturally use the job\'s terminology WHERE the original bullet genuinely supports it. Rules: return EXACTLY '+n+' bullet'+(n>1?'s':'')+'; start each with a strong action verb; keep any real metrics; DO NOT invent new responsibilities, tools, employers, or numbers not implied by the original. Output ONLY the revised bullets, one per line, each starting with •. No intro.\n\nJOB DESCRIPTION (context):\n'+jdShort+'\n\nCURRENT BULLETS:\n'+bl.map(function(b){return '• '+b;}).join('\n');
+      var p='You are an expert resume writer tailoring a resume to a specific job. Rewrite the bullet points for the role "'+label+'" so they emphasise the experience most relevant to THIS job and naturally use the job\'s terminology WHERE the original bullet genuinely supports it. Rules: return EXACTLY '+n+' bullet'+(n>1?'s':'')+'; start each with a strong action verb; keep any real metrics; DO NOT invent new responsibilities, tools, employers, or numbers not implied by the original. Output ONLY the revised bullets, one per line, each starting with •. No intro.\n\nJOB DESCRIPTION (context):\n'+jdShort+'\n\nCURRENT BULLETS:\n'+bl.map(function(b){return '• '+b;}).join('\n');
       return _aiGenerate(p).then(function(t){
         var lines=(t||'').split('\n').map(function(l){ return l.replace(/^[•\-\*\d.\s]+/,'').trim(); }).filter(Boolean);
         if(!lines.length) return null;
@@ -4777,8 +4848,8 @@ if ('serviceWorker' in navigator) {
       var recheck=document.createElement('button'); recheck.className='aig-opt aig-primary'; recheck.style.marginTop='10px'; recheck.textContent='🎯 Re-check match';
       recheck.addEventListener('click',_atsMatch);
       $m().appendChild(recheck);
-      _msg('<div style="font-size:0.73rem;color:var(--muted);margin-top:7px">⚠ AI can overstate — read every bullet and edit anything that isn\'t accurate before downloading. Your résumé is already updated; don\'t click <b>Generate Resume</b> again unless you want to rebuild it from your form (that would replace this tailoring).</div>');
-      if(typeof showToast==='function') showToast('Résumé tailored to the job — review each line for accuracy.','success');
+      _msg('<div style="font-size:0.73rem;color:var(--muted);margin-top:7px">⚠ AI can overstate — read every bullet and edit anything that isn\'t accurate before downloading. Your resume is already updated; don\'t click <b>Generate Resume</b> again unless you want to rebuild it from your form (that would replace this tailoring).</div>');
+      if(typeof showToast==='function') showToast('Resume tailored to the job — review each line for accuracy.','success');
       _backBtn(_home); _scroll();
     }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; _backBtn(_home); });
   }
@@ -6350,7 +6421,7 @@ if ('serviceWorker' in navigator) {
   [class*="tpl-spine-"] .r-sk{background:none!important;border:1px solid var(--acc)!important;color:var(--acc)!important;border-radius:4px;font-weight:600;}
   [class*="tpl-spine-"] .r-div{display:none;}
     /* chronicle & spine run slightly taller than the other families, so a ~1-page
-       résumé can spill a single trailing skill chip to page 2. Tighten their section
+       resume can spill a single trailing skill chip to page 2. Tighten their section
        and header spacing just enough to reclaim that and keep it on one page. */
     [class*="tpl-chronicle-"] .r-sec,[class*="tpl-spine-"] .r-sec{margin-bottom:12px!important;}
     [class*="tpl-chronicle-"] .r-sec-t,[class*="tpl-spine-"] .r-sec-t{margin-bottom:8px!important;}
@@ -7273,7 +7344,7 @@ if ('serviceWorker' in navigator) {
      previews / localhost) so it's obvious at a glance whether the tab is on the
      latest build or a cached one. build.js replaces __BUILD_ID__ at deploy time;
      hidden on production (resume4u.help). -->
-<div id="_buildStamp" aria-hidden="true" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:2147483000;font:600 10px/1 -apple-system,Inter,system-ui,sans-serif;color:#4b5563;background:rgba(255,255,255,0.95);padding:3px 9px;border-radius:8px;pointer-events:none;letter-spacing:.3px;display:none;">build __BUILD_ID__</div>
+<div id="_buildStamp" aria-hidden="true" style="position:fixed;bottom:4px;left:6px;z-index:2147483000;opacity:0.65;font:600 10px/1 -apple-system,Inter,system-ui,sans-serif;color:#4b5563;background:rgba(255,255,255,0.95);padding:3px 9px;border-radius:8px;pointer-events:none;letter-spacing:.3px;display:none;">build __BUILD_ID__</div>
 <script>
 (function(){
   try{
@@ -7936,14 +8007,14 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script>
-/* Add "New résumé" to the signed-in account dropdown (#_authDropdown). Snapshots
-   the current résumé into the user's saved versions first (so nothing is lost),
+/* Add "New resume" to the signed-in account dropdown (#_authDropdown). Snapshots
+   the current resume into the user's saved versions first (so nothing is lost),
    then opens a fresh empty form at step 1 — staying signed in. Injected when the
    dropdown opens, idempotent, styled to match the menu. Only shows for signed-in
    users (the account variant, which has Save now / Sign out). */
 (function(){
   function _uid(){ try{ return (window._fbUser&&window._fbUser.uid)||(typeof _fbUser!=='undefined'&&_fbUser&&_fbUser.uid)||null; }catch(e){ return null; } }
-  /* Blank the form + résumé for a fresh start. `detach` (signed-out only) clears the
+  /* Blank the form + resume for a fresh start. `detach` (signed-out only) clears the
      version pointer; when signed in we keep it pointing at the NEW version we just
      created so the blank saves into that new version — never the old one. */
   function _blankForm(detach){
@@ -7971,11 +8042,11 @@ if ('serviceWorker' in navigator) {
        _saveVersionSnapshot, which writes a NEW version to the cloud (from the current
        data) and makes IT the current one, leaving the old version intact in the list.
        Then, in its callback (after the new version id is assigned), blank the form so
-       the fresh résumé fills that new version. Net result: old résumé stays as its own
+       the fresh resume fills that new version. Net result: old resume stays as its own
        version, a new version is added and selected, and nothing is overwritten. */
     if(uid && typeof window._saveVersionSnapshot==='function'){
       var lbl='New resume'; try{ if(typeof _getUniqueVersionLabel==='function') lbl=_getUniqueVersionLabel('New resume'); }catch(e){}
-      /* _saveVersionSnapshot creates the new version as a COPY of the current résumé
+      /* _saveVersionSnapshot creates the new version as a COPY of the current resume
          (it snapshots current data). So after it's created and selected, blank the
          form AND persist that blank into the new version (_saveCurrentVersion updates
          the now-current version) — otherwise switching to the new version showed the
@@ -8030,7 +8101,7 @@ if ('serviceWorker' in navigator) {
            saved version with it, disappeared even though the versions still exist in
            the cloud. Force it true for signed-in users just for the duration of the
            build so their versions always render (and they can switch back from a
-           blank new résumé). Restored immediately after, so nothing else is affected. */
+           blank new resume). Restored immediately after, so nothing else is affected. */
         var _hmd=null, _forced=false;
         try{
           if(_uid() && typeof window._hasMinimumData==='function'){
@@ -8104,16 +8175,16 @@ if ('serviceWorker' in navigator) {
 <script>
 /* ── Refine-with-AI: keep the live card in sync + add Undo to the tool menu ─────
    Two things users hit while refining:
-   1) After a Refine-with-AI change the résumé card could sit in a state that only
+   1) After a Refine-with-AI change the resume card could sit in a state that only
       a manual "Generate resume" click would correct — confusing, since it isn't
       obvious when to click Generate. Fix: when the Refine panel CLOSES, re-render
-      the card from the (edit-captured) résumé data — exactly what Generate does —
+      the card from the (edit-captured) resume data — exactly what Generate does —
       so closing the panel always leaves a correct, final card.
    2) The tool menu (Reorder sections, Rewrite summary, …) had no Undo — only the
       free-text chat did, and even that only restored the DOM, leaving the saved
       data stale. Reuse the existing Undo button, but snapshot the PRIOR state on
       every real change during a refine session and restore BOTH the DOM and the
-      underlying résumé data + styles. All defensive / fail-open. */
+      underlying resume data + styles. All defensive / fail-open. */
 (function(){
   function panel(){ return document.getElementById('aiChatPanel'); }
   function out(){ return document.getElementById('resumeOutput'); }
@@ -8132,7 +8203,7 @@ if ('serviceWorker' in navigator) {
              styles:(window._snapResumeStyles?window._snapResumeStyles():null) };
   }
 
-  /* Robust Undo: restore DOM + résumé data + styles from the most recent snapshot. */
+  /* Robust Undo: restore DOM + resume data + styles from the most recent snapshot. */
   function robustUndo(){
     var st=stack(); if(!st.length) return;
     var snap=st.pop();
@@ -8276,10 +8347,10 @@ if ('serviceWorker' in navigator) {
             if(wz.length) d.projects=wz.map(function(p){ return { title:p.title||'', desc:p.desc||'', tech:p.tech||'' }; });
           }
         }catch(e){}
-        /* Carry the résumé's Projects / Certifications / Awards / Education through to
+        /* Carry the resume's Projects / Certifications / Awards / Education through to
            the portfolio. The base getPfData dropped projects & certifications entirely,
            so even with the Include toggle ON the website preview and the published site
-           never showed those sections. Fall back to the résumé data mirror
+           never showed those sections. Fall back to the resume data mirror
            (__roLastData / lastResumeData) whenever the portfolio copy is empty. */
         try{
           var _ro=(window.__roLastData)||((typeof lastResumeData!=='undefined')?lastResumeData:null)||{};
@@ -8293,7 +8364,7 @@ if ('serviceWorker' in navigator) {
         }catch(e){}
         /* Key Achievements: getPfData never carried them, so the portfolio preview
            and downloaded site never showed the KA section. Inject from the shared
-           KA store (the same achievements used on the résumé) so the generator's
+           KA store (the same achievements used on the resume) so the generator's
            "Key Achievements" section renders whenever its toggle is on. */
         try{
           var _pfKa=(window.__keyAchiev||[]).filter(function(a){ return a && (a.title||a.desc); });
@@ -8301,7 +8372,7 @@ if ('serviceWorker' in navigator) {
         }catch(e){}
         /* Professional headline: the portfolio hero shows d.title, but getPfData
            often leaves it empty — so the published site showed only name + location,
-           with no role. Fill it from the résumé's job title so the hero leads with
+           with no role. Fill it from the resume's job title so the hero leads with
            the candidate's headline (e.g. "VP Product"). */
         try{
           if(d && !String(d.title||'').trim()){
@@ -8322,7 +8393,7 @@ if ('serviceWorker' in navigator) {
         }catch(e){}
         /* Strip stray non-breaking-space entities ("&nbsp;" / U+00A0) captured from
            inline edits, so the portfolio preview + downloaded site don't show the raw
-           entity the way the résumé card used to. */
+           entity the way the resume card used to. */
         try{ if(d && typeof window._r4uSanitizeNbsp==='function') window._r4uSanitizeNbsp(d); }catch(e){}
         return d;
       };
@@ -8436,7 +8507,7 @@ if ('serviceWorker' in navigator) {
 </script>
 <script>
 /* ── Text size → downloaded PDF (real, not best-effort) ────────────────────────
-   The S/M/L control scales the résumé by putting CSS `zoom` on the template
+   The S/M/L control scales the resume by putting CSS `zoom` on the template
    wrapper. The on-screen preview honours `zoom`, so S/M/L look right there. But
    the PDF is rendered by PDFShift, whose engine IGNORES the CSS `zoom` property —
    so the size choice silently dropped out of the download.
@@ -8479,7 +8550,7 @@ if ('serviceWorker' in navigator) {
           if(!d || !d.body) return;                       /* not ready yet */
           /* Appending an empty iframe fires an about:blank `onload` BEFORE the
              srcdoc content loads. Ignore any load that doesn't yet contain the
-             résumé — the real content load fires right after. */
+             resume — the real content load fires right after. */
           if(!d.querySelector('.resume-a4-page')) return;
           /* strip the CSS zoom that PDFShift ignores, so computed sizes are the
              true un-zoomed base before we multiply. */
@@ -9163,7 +9234,7 @@ if ('serviceWorker' in navigator) {
   #pfGuideSend:disabled{opacity:.6;cursor:default;}
 </style>
 <script id="_r4uPfGuideJS">
-/* Conversational guide: seeds the site from the user's résumé, then walks them
+/* Conversational guide: seeds the site from the user's resume, then walks them
    through building it section by section. Each answer is applied through the same
    customize action + window.pfApplyCz the manual panel uses. Replaces the
    template-picker flow (the template grid is hidden via CSS above). */
@@ -9233,13 +9304,13 @@ if ('serviceWorker' in navigator) {
   }
   window.pfGuideSendInput=function(){ send('', ''); };
   window.pfGuideRestart=function(){ idx=0; var box=el('pfGuideLog'); if(box) box.innerHTML=''; welcome(); };
-  function welcome(){ var nm=firstName(); msg('g', (nm?('Hi '+nm+' — '):'')+"I've built a first draft of your site from your résumé (see the preview). Let's make it yours, one step at a time."); idx=0; ask(); }
+  function welcome(){ var nm=firstName(); msg('g', (nm?('Hi '+nm+' — '):'')+"I've built a first draft of your site from your resume (see the preview). Let's make it yours, one step at a time."); idx=0; ask(); }
   function build(){
     if(el('pfGuidePanel')) return true;
     var anchor=el('pfAiCustom'); if(!anchor||!anchor.parentNode) return false;
     var p=document.createElement('div'); p.id='pfGuidePanel';
     p.innerHTML='<div class="pfg-h"><span>🧭</span>Let’s build your site</div>'
-      +'<div class="pfg-sub">Seeded from your résumé — I’ll guide you section by section. Answer in your own words or tap a suggestion.</div>'
+      +'<div class="pfg-sub">Seeded from your resume — I’ll guide you section by section. Answer in your own words or tap a suggestion.</div>'
       +'<div class="pfg-road" id="pfGuideRoad"></div>'
       +'<div id="pfGuideLog"></div>'
       +'<div class="pfg-chips" id="pfGuideChips"></div>'
@@ -9259,10 +9330,10 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <script id="_r4uPfCollapseTemplateStep">
-/* The template-picker step is gone (we build from the résumé and guide instead),
+/* The template-picker step is gone (we build from the resume and guide instead),
    so the old "Template" step is now empty. Collapse it out of the flow: open
    straight on Sections, drop the Template pill, renumber the rest, move the
-   résumé auto-fill tip into Sections, and hide the dangling Back button. */
+   resume auto-fill tip into Sections, and hide the dangling Back button. */
 (function(){
   function apply(){
     var p1=document.getElementById('pfPill1'); if(!p1) return false;
@@ -9295,7 +9366,7 @@ if ('serviceWorker' in navigator) {
   .pfa-btn:disabled{opacity:.35;cursor:default;}
 </style>
 <script id="_r4uPfArrangeJS">
-/* Arrange sections: reorder every section of the page (résumé-derived + the added
+/* Arrange sections: reorder every section of the page (resume-derived + the added
    blocks group) via ↑/↓, written to window.__pfCustomize.order which the generator
    consumes. Sits alongside the guide + Style Studio in the preview step. */
 (function(){
@@ -9403,7 +9474,7 @@ if ('serviceWorker' in navigator) {
    all blocks, customization and drag still work on top of whichever is chosen. */
 (function(){
   var TPLS=[
-    {id:'onepage', name:'Website ✦', desc:'A real one-page site — hero, Selected Work (visual cards), services, about, contact. Not a résumé.'},
+    {id:'onepage', name:'Website ✦', desc:'A real one-page site — hero, Selected Work (visual cards), services, about, contact. Not a resume.'},
     {id:'editorial', name:'Editorial', desc:'Warm cream, elegant serif display, terracotta accent — a refined magazine feel.'},
     {id:'brutalist', name:'Brutalist', desc:'Mono type, hard black borders and offset shadows — bold, raw, confident.'},
     {id:'swiss', name:'Swiss', desc:'International typographic style — big tight type, numbered sections, hairline rules.'},
@@ -9505,7 +9576,7 @@ if ('serviceWorker' in navigator) {
 </style>
 <script id="_r4uPfRenameJS">
 /* Rename sections: writes friendly titles into __pfCustomize.headings, which the
-   generator applies across every template (website sections + résumé sections). */
+   generator applies across every template (website sections + resume sections). */
 (function(){
   var ROWS=[
     {label:'Work', ph:'Selected Work', keys:['work','projects'], sugg:['Selected Work','Featured Projects','Case Studies','Recent Work']},
@@ -9595,7 +9666,7 @@ if ('serviceWorker' in navigator) {
   function _pfReadMap(field){ var out={}; var f=field&&field.mapValue&&field.mapValue.fields; if(f){ for(var k in f){ out[k]=parseInt(f[k].integerValue||'0',10)||0; } } return out; }
   function _pfEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   /* Collapsible cards (Insights, Moderation) — collapsed by default so they don't
-     push the live preview down, like the résumé ATS card. State per-card in
+     push the live preview down, like the resume ATS card. State per-card in
      localStorage; re-applied on each re-render. */
   function pfCardOpen(key){ try{ return localStorage.getItem('_pfCard_'+key)==='1'; }catch(e){ return false; } }
   window.pfToggleCard=function(key,head){
@@ -9951,7 +10022,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var lay = cs.layout || '';
     var inner = '';
     if(type==='resume'){
-      // A résumé-content block: reuse the already-rendered section HTML so the
+      // A resume-content block: reuse the already-rendered section HTML so the
       // user can drop About / Experience / Skills / etc. anywhere on the canvas.
       var rk = (cs.section==='certifications') ? 'certs' : (cs.section||'');
       customHTML += (parts[rk]||'');
@@ -10018,7 +10089,7 @@ window.__novaPortfolioHTML=function(d,sections){
   var out;
   if(CZ.scratch){
     // Blank-canvas / from-scratch mode: render ONLY the blocks the user placed
-    // (which may include résumé-content blocks), in their order. No auto sections.
+    // (which may include resume-content blocks), in their order. No auto sections.
     out = parts.custom || '';
   } else {
     var DEFAULT_ORDER=['about','keyachiev','links','experience','education','projects','certs','skills','awards','custom'];
@@ -10032,7 +10103,7 @@ window.__novaPortfolioHTML=function(d,sections){
       + '<div style="font-size:2rem;margin-bottom:10px">🧩</div>'
       + '<h2 style="margin:0 0 8px;font-size:1.25rem">Your site is empty</h2>'
       + '<p style="color:var(--mut);margin:0 auto;max-width:440px;line-height:1.55">'
-      + (CZ.scratch ? 'You’re in Blank-canvas mode. Add blocks in “Content blocks”, or switch to “From my résumé” to pull your sections in automatically.' : 'Add your details in the earlier steps to see your portfolio here.')
+      + (CZ.scratch ? 'You’re in Blank-canvas mode. Add blocks in “Content blocks”, or switch to “From my resume” to pull your sections in automatically.' : 'Add your details in the earlier steps to see your portfolio here.')
       + '</p></section>';
   }
 
@@ -10510,7 +10581,7 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.tpl-onepage .reveal{opacity:0;transform:translateY(34px);transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)}.tpl-onepage .reveal.in{opacity:1;transform:none}'
   };
   var foot = '<div class="foot">Built with <a href="https://resume4u.help" target="_blank" rel="noopener">resume4u.help</a></div>';
-  // ── Website (one-page) mode: résumé data restyled into a marketing site ──
+  // ── Website (one-page) mode: resume data restyled into a marketing site ──
   var opHero='', opBody='';
   if(isWeb){
     var hasWork = projects.length || custom.length;
@@ -10525,7 +10596,7 @@ window.__novaPortfolioHTML=function(d,sections){
         + (email?'<a class="btn btn-s" href="mailto:'+esc(email)+'">Get in touch</a>':'')
       + '</div></div></header>'
       + (cover?'<div class="ophero-cover" style="background-image:url('+esc(cover)+')"></div>':'');
-    // Selected Work (résumé projects as visual cards)
+    // Selected Work (resume projects as visual cards)
     var wc='';
     projects.forEach(function(pr,ix){ var pt=esc(pr.title||pr.name||'Project'); var pd=linkify(pr.description||pr.summary||pr.desc||''); var purl=lk(pr.link||pr.url||pr.website||''); var tg=A(pr.tags||pr.tech);
       wc+='<a class="opwork-card"'+(purl?' href="'+esc(purl)+'" target="_blank" rel="noopener"':'')+'><div class="opwork-vis" style="--i:'+(ix%4)+'"></div><div class="opwork-body"><h3>'+pt+'</h3>'+(pd?'<p>'+pd+'</p>':'')+(tg.length?'<div class="tags">'+tg.map(function(t){return '<span>'+esc(t)+'</span>';}).join('')+'</div>':'')+'</div></a>';
@@ -10537,7 +10608,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var contact = '<section id="contact" class="opcta"><div class="opcta-in"><h2>Let\u2019s work together</h2>'+(email?'<a class="btn opcta-btn" href="mailto:'+esc(email)+'">'+esc(email)+'</a>':(btns||''))+'</div></section>';
     var opKa = (S('keyachiev') && kachiev.length) ? '<section id="highlights" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Highlights</span><h2>'+esc(H('keyachiev','Key achievements'))+'</h2></div><div class="opka-grid">'+kachiev.map(function(a){var ic=esc(a.icon||'\ud83c\udfc6');var t=esc(a.title||'');var ds=a.desc?linkify(a.desc):'';var href=lk(a.link);var inner='<div class="opka-ic">'+ic+'</div><div class="opka-t">'+t+(href?' <span class="opka-arrow">\u2197</span>':'')+'</div>'+(ds?'<div class="opka-d">'+ds+'</div>':'');return href?'<a class="opka-card opka-linked" href="'+esc(href)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="opka-card">'+inner+'</div>';}).join('')+'</div></section>' : '';
     // Education / Certifications / Awards — these were never built in website mode,
-    // so a résumé's education, certifications and awards never appeared on the site
+    // so a resume's education, certifications and awards never appeared on the site
     // even though the data was there. Each now renders whenever that data exists
     // (same as Work / Skills / Experience), reusing the template's own timeline and
     // chip styles so they match the rest of the site.
@@ -10545,7 +10616,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var certsT = certs.length ? '<section id="certs" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Credentials</span><h2>'+esc(H('certifications','Certifications'))+'</h2></div><div class="opserv-grid">'+certs.map(function(c){var t=(typeof c==='string')?c:(c.name||c.title||c.cert||'');var iss=(c&&typeof c==='object')?(c.issuer||c.org||''):'';return '<div class="opserv">'+esc(t)+(iss?(' — '+esc(iss)):'')+'</div>';}).join('')+'</div></section>' : '';
     var awardsT = awards.length ? '<section id="awards" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Recognition</span><h2>'+esc(H('awards','Awards'))+'</h2></div><div class="optl">'+awards.map(function(a){var t=(typeof a==='string')?esc(a):esc(a.title||a.name||a.award||'');var org=(a&&typeof a==='object')?esc(a.org||a.issuer||''):'';var yr=(a&&typeof a==='object')?esc(a.year||a.date||''):'';var ds=(a&&typeof a==='object'&&(a.desc||a.description))?linkify(a.desc||a.description):'';return '<div class="optl-row"><div class="optl-when">'+yr+'</div><div class="optl-what"><b>'+t+'</b>'+(org?(' · '+org):'')+(ds?('<div style="color:var(--mut);font-size:0.95rem;margin-top:4px">'+ds+'</div>'):'')+'</div></div>';}).join('')+'</div></section>' : '';
     // Additional links (the "Add a link" list in Sections) — built for the standard
-    // template as parts.links but never included in the website body, so a résumé's
+    // template as parts.links but never included in the website body, so a resume's
     // extra links never showed on the published site. Render them as a compact
     // "Elsewhere" section using the template's own chip style.
     var linksT = extra.length ? '<section id="links" class="opsec"><div class="opsec-h card-h"><span class="opsec-num">Elsewhere</span><h2>'+esc(H('links','Links'))+'</h2></div><div class="opserv-grid">'+extra.map(function(l){var lb=esc(l.label||host(l.url||l.href||''));var u=esc(lk(l.url||l.href||''));return '<a class="opserv" href="'+u+'" target="_blank" rel="noopener" style="text-decoration:none;display:flex;align-items:center;gap:8px;justify-content:space-between">'+lb+' <span aria-hidden="true">↗</span></a>';}).join('')+'</div></section>' : '';
@@ -10751,10 +10822,10 @@ window.__novaPortfolioHTML=function(d,sections){
     window.__pfCustomSections.push(s); saveCustom(); window.pfRenderCustom(); refreshPreview();
     setTimeout(function(){ var b=document.getElementById('pfCustomList'); if(b){ var cards=b.children; var last=cards[cards.length-1]; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:'auto',block:'center'}); } },60); };
   window.pfRemoveCustomSection=function(i){ window.__pfCustomSections.splice(i,1); saveCustom(); window.pfRenderCustom(); refreshPreview(); };
-  // Add a résumé-content block (About / Experience / Skills / …) the user can place & reorder.
+  // Add a resume-content block (About / Experience / Skills / …) the user can place & reorder.
   window.pfAddResumeBlock=function(section){ window.__pfCustomSections.push({type:'resume',section:section}); saveCustom(); window.pfRenderCustom(); refreshPreview();
     setTimeout(function(){ var b=document.getElementById('pfCustomList'); if(b){ var last=b.children[b.children.length-1]; if(last&&last.scrollIntoView) last.scrollIntoView({behavior:'auto',block:'center'}); } },60); };
-  // Blank-canvas mode: render only the blocks the user places (no auto résumé sections).
+  // Blank-canvas mode: render only the blocks the user places (no auto resume sections).
   window.pfSetScratch=function(on){ try{ if(!window.__pfCustomize||typeof window.__pfCustomize!=='object'){ window.__pfCustomize=JSON.parse(localStorage.getItem('_pfCustomize')||'{}'); } }catch(e){ window.__pfCustomize={}; }
     if(on) window.__pfCustomize.scratch=true; else delete window.__pfCustomize.scratch;
     try{ localStorage.setItem('_pfCustomize', JSON.stringify(window.__pfCustomize)); }catch(e){}
@@ -10794,7 +10865,7 @@ window.__novaPortfolioHTML=function(d,sections){
       var type=s.type||'text';
       var titlePH = type==='hero'?'Headline — e.g. Designer & product thinker':type==='project'?'Project / case-study title':type==='stats'?'Heading (e.g. By the numbers)':type==='testimonials'?'Heading (e.g. Testimonials)':type==='gallery'?'Heading (e.g. Gallery)':type==='contact'?'Heading (e.g. Get in touch)':'Section title';
       var lbl = type==='resume' ? ('📄 '+(String(s.section||'section').charAt(0).toUpperCase()+String(s.section||'section').slice(1))) : (CS_LABELS[type]||'Block');
-      var titleField = type==='resume' ? '<span style="flex:1;font-size:0.8rem;color:var(--muted);">From your résumé</span>' : '<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">';
+      var titleField = type==='resume' ? '<span style="flex:1;font-size:0.8rem;color:var(--muted);">From your resume</span>' : '<input type="text" value="'+esc(s.title||'')+'" placeholder="'+titlePH+'" oninput="pfCsSet('+i+',\'title\',this.value)" style="flex:1;'+IN+'font-weight:600;">';
       var head='<div style="display:flex;gap:7px;align-items:center;margin-bottom:8px;">'
         +'<span class="pf-drag" data-idx="'+i+'" title="Drag to move" style="cursor:grab;color:var(--muted);font-size:1rem;padding:2px 3px;touch-action:none;user-select:none;flex-shrink:0;">⠿</span>'
         +'<span style="font-size:0.68rem;font-weight:700;color:var(--accent);background:rgba(217,119,6,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;">'+lbl+'</span>'
@@ -10805,7 +10876,7 @@ window.__novaPortfolioHTML=function(d,sections){
       var body='';
       var layRow = (CS_LAYOUTS[type]) ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="font-size:0.74rem;color:var(--muted);">Layout</span><select onchange="pfCsSet('+i+',\'layout\',this.value)" style="'+IN+'">'+CS_LAYOUTS[type].map(function(o){return '<option value="'+o[0]+'"'+((s.layout||'')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>' : '';
       if(type==='resume'){
-        body='<div style="font-size:0.78rem;color:var(--muted);line-height:1.5;padding:2px;">Pulls your <b>'+esc(s.section||'')+'</b> straight from your résumé. Edit the content in “Build Your Resume”; drag this block to place it anywhere.</div>';
+        body='<div style="font-size:0.78rem;color:var(--muted);line-height:1.5;padding:2px;">Pulls your <b>'+esc(s.section||'')+'</b> straight from your resume. Edit the content in “Build Your Resume”; drag this block to place it anywhere.</div>';
       } else if(type==='hero'){
         var hImg=(s.images&&s.images[0])?'<div style="position:relative;width:80px;height:54px;flex-shrink:0;"><img src="'+esc(s.images[0])+'" style="width:80px;height:54px;object-fit:cover;border-radius:7px;border:1px solid var(--border);"><button type="button" onclick="pfCsRemoveImage('+i+',0)" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>':'';
         body='<textarea placeholder="Subheadline — a punchy line about you" oninput="pfCsSet('+i+',\'subtitle\',this.value)" style="width:100%;min-height:50px;'+IN+'resize:vertical;margin-bottom:8px;">'+esc(s.subtitle||'')+'</textarea>'
@@ -10960,7 +11031,7 @@ window.__novaPortfolioHTML=function(d,sections){
    .r4u-pt-photo class above is never applied to it, so that rule is dead. Make the
    sidebar header a flex column and pull the photo to the TOP (duplicate-class
    selector for specificity, since the base r-head rule sits in a later <style>
-   block). Affects résumé output, PDF and the template thumbnails alike. */
+   block). Affects resume output, PDF and the template thumbnails alike. */
 .tpl-blush.tpl-blush>.r-head,.tpl-verdant.tpl-verdant>.r-head,.tpl-lilac.tpl-lilac>.r-head,.tpl-azure.tpl-azure>.r-head{display:flex!important;flex-direction:column!important;align-items:flex-start!important;}
 .tpl-blush.tpl-blush>.r-head>img,.tpl-verdant.tpl-verdant>.r-head>img,.tpl-lilac.tpl-lilac>.r-head>img,.tpl-azure.tpl-azure>.r-head>img{order:-1!important;width:84px!important;height:84px!important;border-radius:50%!important;object-fit:cover!important;margin:0 0 14px!important;border:3px solid #fff!important;box-shadow:0 2px 8px rgba(0,0,0,.18)!important;}
 /* professional summary: soft pastel card matching the sidebar */
@@ -11053,9 +11124,9 @@ window.__novaPortfolioHTML=function(d,sections){
   .r4u-sb .r-aside .r-ka-item .r-ka-link{color:#fff !important;text-decoration:underline;opacity:0.92;}
 </style>
 <script id="_r4uKeyAchievJS">
-/* Key Achievements — an optional résumé highlights section. Users add icon+title+
+/* Key Achievements — an optional resume highlights section. Users add icon+title+
    description items in step 3; they render across EVERY template as an r-section
-   injected into #resumeOutput, reusing the shared résumé classes so the styling
+   injected into #resumeOutput, reusing the shared resume classes so the styling
    matches whichever template is chosen. Included in the PDF (renders from the DOM). */
 (function(){
   var ICONS=['🏆','⭐','🚀','💡','📈','💰','👥','🎯','✅','🔥','🛠️','📊'];
@@ -11064,7 +11135,7 @@ window.__novaPortfolioHTML=function(d,sections){
   try{ window.__kaIncludeResume = localStorage.getItem('_kaIncludeResume')!=='0'; }catch(e){ window.__kaIncludeResume=true; }
   /* Push Key Achievements to the cloud (debounced) whenever they change, so a
      fresh login on another session/device restores them. Only when signed in;
-     saves the whole résumé doc (KA is part of _collectCloudData). */
+     saves the whole resume doc (KA is part of _collectCloudData). */
   var _kaCloudT;
   window.__kaCloudSave=function(){ clearTimeout(_kaCloudT); _kaCloudT=setTimeout(function(){
     try{ var uid=(window._fbAuth && _fbAuth.currentUser && _fbAuth.currentUser.uid);
@@ -11133,9 +11204,9 @@ window.__novaPortfolioHTML=function(d,sections){
       .then(function(){ if(btn){ btn.disabled=false; btn.textContent=btn.getAttribute('data-t')||'✦ Suggest 5 with AI'; } });
   };
   /* Auto-populate 5 Key Achievements the first time a user reaches the step with
-     none, so the section is present (min 5) in the résumé output card and preview
+     none, so the section is present (min 5) in the resume output card and preview
      without the user having to ask. Runs once (guarded by _kaAutoGen); skipped if
-     they already have real achievements or there's no résumé data to draw from.
+     they already have real achievements or there's no resume data to draw from.
      Replaces any seeded blank; the 5 are fully editable afterwards. */
   window.__kaAutoGenRunning=false;
   window.pfKaAutoGen=function(){
@@ -11145,7 +11216,7 @@ window.__novaPortfolioHTML=function(d,sections){
       if(real.length){ try{ localStorage.setItem('_kaAutoGen','1'); }catch(e){} return; }
       if(localStorage.getItem('_kaAutoGen')==='1') return;
       var c=kaContext(kaCollect());
-      if(!c.has) return; /* no résumé data yet — try again on a later visit */
+      if(!c.has) return; /* no resume data yet — try again on a later visit */
       window.__kaAutoGenRunning=true;
       var box=document.getElementById('kaSuggestBox');
       if(box) box.innerHTML='<div class="ka-sug-loading">✦ Generating 5 key achievements from your resume…</div>';
@@ -11168,7 +11239,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function wrapGoToStepKa(){ if(typeof window.goToStep!=='function'||window.goToStep.__kaAuto) return false;
     var g=window.goToStep; window.goToStep=function(){ var r=g.apply(this,arguments);
       /* Key Achievements are opt-in: do NOT auto-generate/auto-insert them into
-         the résumé when the user lands on the step. They can use the manual
+         the resume when the user lands on the step. They can use the manual
          "✦ Suggest 5 with AI" button to add some if they want. */
       return r; };
     window.goToStep.__kaAuto=true; return true; }
@@ -11203,13 +11274,13 @@ window.__novaPortfolioHTML=function(d,sections){
     pfRenderKa();
     var cb=document.getElementById('kaIncResume'); if(cb) cb.checked=(window.__kaIncludeResume!==false);
     return true; }
-  /* Inject (or refresh) the Key Achievements section inside ANY résumé container.
+  /* Inject (or refresh) the Key Achievements section inside ANY resume container.
      Used for the live output (#resumeOutput) AND the Preview Resume modal
      (#previewModalBody), which renders through a separate path. */
   function injectKAInto(outCard){
     if(!outCard) return;
     var prev=outCard.querySelector('.r-keyachiev'); if(prev&&prev.parentNode) prev.parentNode.removeChild(prev);
-    /* Optional: let the user exclude Key Achievements from the résumé. */
+    /* Optional: let the user exclude Key Achievements from the resume. */
     if(window.__kaIncludeResume===false) return;
     var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);}); if(!A.length) return;
     function lk(u){ u=String(u||'').trim(); if(!u) return ''; if(/^(https?:|mailto:|tel:)/i.test(u)) return u; return 'https://'+u; }
@@ -11231,7 +11302,7 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function injectIntoResume(){ injectKAInto(document.getElementById('resumeOutput')); }
   window.__kaInject=injectIntoResume;
-  /* Preview Resume modal renders the résumé through renderPreviewWithTemplate /
+  /* Preview Resume modal renders the resume through renderPreviewWithTemplate /
      openPreviewModal into #previewModalBody — a path that never runs renderOutput,
      so KA was missing there (and didn't update when switching templates in the
      modal). Wrap those so KA is injected/refreshed each time the modal renders. */
@@ -11252,9 +11323,9 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function wrapRender(){ if(typeof window.renderOutput==='function' && !window.renderOutput.__ka){
       var o=window.renderOutput; window.renderOutput=function(){ window.__roLastData=arguments[0];
-        /* Adopt Key Achievements carried on the résumé data (cloud/localStorage
+        /* Adopt Key Achievements carried on the resume data (cloud/localStorage
            restore) when the in-memory store is empty — KA lives outside the app's
-           own résumé document, so without this it would vanish after a reload or
+           own resume document, so without this it would vanish after a reload or
            on another device. Never overwrite a non-empty live store. */
         try{ var _d0=arguments[0];
           if(_d0 && Array.isArray(_d0.keyAchievements) && _d0.keyAchievements.length &&
@@ -11289,7 +11360,7 @@ window.__novaPortfolioHTML=function(d,sections){
         return r; }; window.renderOutput.__ka=true; return true; }
     return false; }
   var n=0, iv=setInterval(function(){ var a=mountKa(), b=wrapRender(), c=wrapPreview(), d=wrapGoToStepKa(); if((a&&b&&c&&d)||++n>200) clearInterval(iv); },200);
-  /* Self-heal: whenever a résumé is on screen but the Key Achievements section is
+  /* Self-heal: whenever a resume is on screen but the Key Achievements section is
      missing (e.g. after a login/version restore that painted a saved HTML snapshot
      or rendered before the store was ready), inject it — so already-added
      achievements always show in the output card without visiting the KA step. */
@@ -11299,7 +11370,7 @@ window.__novaPortfolioHTML=function(d,sections){
       if(!ro || !ro.querySelector('.resume-a4-page')) return;
       if(window.__kaIncludeResume===false) return;
       var A=(window.__keyAchiev||[]).filter(function(a){return a&&(a.title||a.desc);});
-      /* Hydrate the in-memory KA store if it's empty but the loaded résumé data (or
+      /* Hydrate the in-memory KA store if it's empty but the loaded resume data (or
          this device's localStorage) actually carries achievements. Covers fresh
          logins where the card was painted from a saved snapshot, or where the cloud
          adopt ran before the store was ready — so KA shows without visiting step 4. */
@@ -11324,7 +11395,7 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 </script>
 <script id="_r4uSecOrderPersistJS">
-/* Persist résumé section order across reloads. The reorder tool (Refine with AI →
+/* Persist resume section order across reloads. The reorder tool (Refine with AI →
    Reorder sections) records the new order on lastResumeData.sectionOrder for
    mid-session re-renders, but the app's save collector doesn't include it — so a
    reload dropped the arrangement (it went back to the original order). Here we
@@ -11341,13 +11412,13 @@ window.__novaPortfolioHTML=function(d,sections){
            paths; only fill it in as a safety net when it's missing, from the
            explicit reorder recorded on lastResumeData (never a default order,
            which would fight a later template change — _apply is template-scoped). */
-        /* Capture the LIVE résumé section order at save time (authoritative — reflects
+        /* Capture the LIVE resume section order at save time (authoritative — reflects
            any reorder path: AI chat, manual menu, future). Fall back to the recorded
            order. Always set it (override any stale value the base collector wrote). */
         var _live=(typeof window._r4uCaptureSecOrder==='function')?window._r4uCaptureSecOrder():null;
         var so=_live || ((typeof lastResumeData!=='undefined' && lastResumeData && lastResumeData.sectionOrder) ? lastResumeData.sectionOrder : null);
         if(d && typeof d==='object' && so) d.sectionOrder=so;
-        /* Persist Key Achievements into the résumé document too — it otherwise
+        /* Persist Key Achievements into the resume document too — it otherwise
            lives only in this browser's localStorage and would be lost on a cloud
            restore or another device. */
         if(d && typeof d==='object'){
@@ -11365,11 +11436,11 @@ window.__novaPortfolioHTML=function(d,sections){
 
   /* Self-heal the section order. A saved arrangement can be lost on reload when a
      late cloud-adopt render, a stale snapshot, or a secondary re-render paints the
-     résumé in the DEFAULT order after (or instead of) the renderOutput wrapper that
-     re-applies it. Re-assert the saved order whenever the résumé is on screen and
+     resume in the DEFAULT order after (or instead of) the renderOutput wrapper that
+     re-applies it. Re-assert the saved order whenever the resume is on screen and
      its current order differs — mirroring the Key-Achievements self-heal. Reads the
      order from lastResumeData first, then this device's localStorage copy. Skips
-     while the user is editing text in the résumé; records the achieved order so it
+     while the user is editing text in the resume; records the achieved order so it
      never loops when a section can't be placed (e.g. absent in this template). */
   var _healResult='';
   function _titles(page){ return [].map.call(page.querySelectorAll('.r-sec .r-sec-t'), function(t){ return (t.textContent||'').trim(); }); }
@@ -11412,7 +11483,7 @@ window.__novaPortfolioHTML=function(d,sections){
 <script id="_r4uPfKaToggleJS">
 /* Portfolio builder — Key Achievements section. The "Key Achievements" toggle in
    "Choose what to include" writes pfSections.keyachiev (consumed by the generator).
-   Here we keep its Ready/Add-details badge accurate against the shared résumé
+   Here we keep its Ready/Add-details badge accurate against the shared resume
    Key Achievements store (window.__keyAchiev), since the builder's own state()
    doesn't know this section. */
 (function(){
@@ -11423,7 +11494,7 @@ window.__novaPortfolioHTML=function(d,sections){
     var sw=t.querySelector('.pf-toggle-switch'); var b=t.querySelector('.pf-rdy');
     if(!b){ if(!sw) return; b=document.createElement('span'); b.className='pf-rdy'; t.insertBefore(b, sw); }
     var ready=kaCount()>0;
-    var want=ready?'✓ Ready':'Add in résumé step';
+    var want=ready?'✓ Ready':'Add in resume step';
     if(b.textContent!==want) b.textContent=want;
     b.classList.toggle('ready', ready);
   }
@@ -11432,7 +11503,7 @@ window.__novaPortfolioHTML=function(d,sections){
 </script>
 <script id="_r4uPfKaEditorJS">
 /* Portfolio builder — a self-contained Key Achievements editor (its own IDs, so it
-   never clashes with the résumé step's editor) that reads/writes the SAME shared
+   never clashes with the resume step's editor) that reads/writes the SAME shared
    store (window.__keyAchiev + localStorage _keyAchiev). Reached from the
    "⭐ Key Achievements" chip in "Fill your portfolio details". Includes the same
    AI-suggest-5 flow, sourced from the user's skills/experience/projects. */
@@ -11460,7 +11531,7 @@ window.__novaPortfolioHTML=function(d,sections){
     setTimeout(function(){ var b=document.getElementById('pfKaList'); if(b){ var last=b.lastElementChild; var inp=last&&last.querySelector('input[type=text]'); if(inp) inp.focus(); } },40); };
   window.pfKaBuilderShow=function(){ var p=document.getElementById('pfKaPanel'); if(!p) return; p.style.display=''; pfKbRender();
     try{ p.scrollIntoView({behavior:'auto',block:'center'}); }catch(e){ p.scrollIntoView(); } };
-  /* AI suggest — same contract as the résumé step, builder-local IDs */
+  /* AI suggest — same contract as the resume step, builder-local IDs */
   function collect(){ var d={}; try{ if(typeof window._collectCloudData==='function') d=window._collectCloudData()||{}; }catch(e){}
     if(!(d&&(d.skills||d.experience||d.customSections||d.summary))) d=window.__roLastData||d||{}; return d||{}; }
   function ctx(d){ function A(x){return Array.isArray(x)?x:[];} function flat(x){ if(Array.isArray(x)) return x.join('; '); if(x&&typeof x==='object') return JSON.stringify(x); return String(x||''); }
@@ -11485,7 +11556,7 @@ window.__novaPortfolioHTML=function(d,sections){
     window.__pfKaSug.splice(i,1); renderSug(); preview(); };
   window.pfKbSuggest=function(){ var btn=document.getElementById('pfKaAiBtn'), box=document.getElementById('pfKaSug'); if(!box) return;
     var c=ctx(collect());
-    if(!c.has){ box.innerHTML='<div class="ka-sug-empty">Add your skills, experience or projects in the résumé first — then AI can tailor achievements to you.</div>'; return; }
+    if(!c.has){ box.innerHTML='<div class="ka-sug-empty">Add your skills, experience or projects in the resume first — then AI can tailor achievements to you.</div>'; return; }
     var prompt='You are an expert resume writer. Using ONLY the candidate details below, write EXACTLY 5 concise, high-impact "key achievements" that would impress recruiters, drawn from their skills, experience and projects. Prefer quantified, results-oriented wins; keep any numbers realistic and do NOT invent specific fake metrics. Use ATS-friendly, industry-standard wording with role-relevant keywords in the title and description.'
       +'Return ONLY a JSON array of exactly 5 objects and nothing else (no prose, no markdown). Each object must be {"icon":"<one relevant emoji>","title":"<3 to 6 word punchy title>","desc":"<one sentence, max 18 words>"}.\n\nCandidate details:\n'+c.ctx;
     if(btn){ btn.disabled=true; btn.setAttribute('data-t',btn.textContent); btn.textContent='✦ Thinking…'; }
@@ -11540,7 +11611,7 @@ window.__novaPortfolioHTML=function(d,sections){
   @media (prefers-reduced-motion:reduce){ .nav-buttons .btn-primary,.nav-buttons .btn-secondary{transition:none;} .nav-buttons .btn-primary:hover,.nav-buttons .btn-secondary:hover{transform:none;} }
 </style>
 <style id="_r4uCapGuardCss">
-  /* Screenshot DETERRENT for the résumé + portfolio output (non-owners only).
+  /* Screenshot DETERRENT for the resume + portfolio output (non-owners only).
      NOTE: browsers cannot truly block OS screenshots — this is a screen-only
      watermark + copy/right-click/drag blocking. The watermark is excluded from
      print and from the (paid) PDF/DOC download, which clone .resume-a4-page only. */
@@ -11558,7 +11629,7 @@ window.__novaPortfolioHTML=function(d,sections){
 <script id="_r4uCapGuardJS">
 /* Screenshot deterrent — active for everyone EXCEPT the owner login. The owner
    email is matched by SHA-256 hash so the address isn't embedded in public JS.
-   Applies only to the résumé/portfolio OUTPUT (not the builder UI). */
+   Applies only to the resume/portfolio OUTPUT (not the builder UI). */
 (function(){
   var OWNER=572172083814901; /* hash of the owner login — plaintext email is not embedded */
   function h53(str){ str=String(str); var h1=0xdeadbeef, h2=0x41c6ce57;
@@ -11623,7 +11694,7 @@ window.__novaPortfolioHTML=function(d,sections){
   window.addEventListener('blur',function(){ try{ var ae=document.activeElement; if(ae && (ae.id==='pfPreviewFrame' || ae.tagName==='IFRAME')) return; }catch(e){} setBlur(true); });
   window.addEventListener('focus',function(){ setBlur(false); });
   document.addEventListener('visibilitychange',function(){ setBlur(document.hidden); });
-  function flash(){ var o=document.getElementById('r4uCapFlash'); if(!o){ o=document.createElement('div'); o.id='r4uCapFlash'; o.textContent='Screenshots are disabled on the preview. Download your résumé to keep a copy.'; document.body.appendChild(o); } o.style.display='flex'; setTimeout(function(){ o.style.display='none'; },1100); }
+  function flash(){ var o=document.getElementById('r4uCapFlash'); if(!o){ o=document.createElement('div'); o.id='r4uCapFlash'; o.textContent='Screenshots are disabled on the preview. Download your resume to keep a copy.'; document.body.appendChild(o); } o.style.display='flex'; setTimeout(function(){ o.style.display='none'; },1100); }
   document.addEventListener('keyup',function(e){ if(owner) return; if(e.key==='PrintScreen'||e.code==='PrintScreen'){ try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(' '); }catch(_){} flash(); } });
   function check(){
     var em='';
@@ -11674,9 +11745,9 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 </script>
 <script>
-/* Prominent résumé-upload progress overlay. The inline status bar (#uploadStatusBar)
+/* Prominent resume-upload progress overlay. The inline status bar (#uploadStatusBar)
    sits under the drop zone, so a user who scrolled down into the wizard couldn't
-   tell parsing was still running. This shows a clear, centered "Reading your résumé…"
+   tell parsing was still running. This shows a clear, centered "Reading your resume…"
    overlay with a spinner whenever showUploadStatus is in the 'parsing' state, and
    dismisses it on success/error. Non-invasive: it only wraps showUploadStatus. */
 (function(){
@@ -11698,7 +11769,7 @@ window.__novaPortfolioHTML=function(d,sections){
      +'@media (prefers-reduced-motion: reduce){#'+OV+' .r4u-uls{animation:none}#'+OV+' .r4u-ulp i{animation:none;width:100%}}';
     document.head.appendChild(st);
     var d=document.createElement('div'); d.id=OV; d.setAttribute('role','status'); d.setAttribute('aria-live','polite');
-    d.innerHTML='<div class="r4u-ulc"><div class="r4u-uls"></div><div class="r4u-ulh">Reading your résumé…</div>'
+    d.innerHTML='<div class="r4u-ulc"><div class="r4u-uls"></div><div class="r4u-ulh">Reading your resume…</div>'
       +'<div class="r4u-ulm">Extracting your experience, skills and achievements. This takes a few seconds — please hold on.</div>'
       +'<div class="r4u-ulp"><i></i></div></div>';
     document.body.appendChild(d);
@@ -11752,7 +11823,7 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 </script>
 <style id="_r4uLinkedInImportCss">
-/* LinkedIn guidance folded into the résumé upload zone — a LinkedIn "Save to
+/* LinkedIn guidance folded into the resume upload zone — a LinkedIn "Save to
    PDF" export drops straight into the existing parser, so there's no separate
    button, just a hint. */
 .upload-zone-li{display:flex;align-items:center;gap:10px;margin:16px auto 2px;width:100%;max-width:440px;
@@ -11768,7 +11839,7 @@ window.__novaPortfolioHTML=function(d,sections){
 /* Prominent "Tailor to a job description" entry point on the Generate page.
    The JD keyword-match logic already lives inside Refine with AI (_atsMatch);
    this just surfaces it as a first-class card so users actually find it.
-   Sits right under the résumé actions, above the ATS score card. Styled as a
+   Sits right under the resume actions, above the ATS score card. Styled as a
    calm, bordered surface so it doesn't fight the coloured download buttons. */
 #_r4uJdTailorBar{display:none;margin:16px 0 0;align-items:center;gap:13px;padding:13px 15px;
   border-radius:14px;cursor:pointer;border:1px solid rgba(124,58,237,0.30);
@@ -11823,7 +11894,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function build(){
     var bar=document.getElementById('_r4uJdTailorBar');
     if(bar) return bar;
-    /* Anchor: the résumé action bar on the Generate page. */
+    /* Anchor: the resume action bar on the Generate page. */
     var resumeBar=document.querySelector('#step8 .resume-bar');
     if(!resumeBar || !resumeBar.parentNode) return null;
     bar=document.createElement('div');
@@ -11839,7 +11910,7 @@ window.__novaPortfolioHTML=function(d,sections){
     place(bar);
     return bar;
   }
-  /* Keep the card right under the résumé actions and directly ABOVE the ATS
+  /* Keep the card right under the resume actions and directly ABOVE the ATS
      score card (which renderATSScore inserts after .resume-bar on generation). */
   function place(bar){
     var ats=document.getElementById('atsScoreCard');
@@ -11867,7 +11938,7 @@ window.__novaPortfolioHTML=function(d,sections){
    override grounds the letter in the REAL experience bullets + dates from
    window.__roLastData, with an explicit "do not invent" guardrail, and keeps
    the existing modal + DOC/PDF export untouched. Falls back to the original if
-   résumé data isn't available. Installed after the core defines the function
+   resume data isn't available. Installed after the core defines the function
    (poll, matching how other _r4u blocks wrap globals). */
 (function(){
   function build(orig){
@@ -11969,7 +12040,7 @@ window.__novaPortfolioHTML=function(d,sections){
   var WEAK=/^(responsible for|worked on|helped|assisted( with)?|handled|involved in|duties included|participated in|tasked with|was responsible|in charge of|managed to|contributed to|took part in|part of|responsible|work on|helping)\b/i;
   /* Gibberish / typo signal: a word with 3+ of the same letter in a row (keyboard
      mash like "ghhhhhbhhhh") or a long vowel-less run ("asdfghjkl") — rare in real
-     résumé prose, so false positives stay low. */
+     resume prose, so false positives stay low. */
   function looksOff(tx){ var ws=String(tx||'').split(/\s+/); for(var i=0;i<ws.length;i++){ var w=ws[i].replace(/[^A-Za-z]/g,''); if(w.length>=5 && /([a-z])\1{2,}/.test(w)) return true; if(w.length>=8 && !/[aeiouy]/i.test(w)) return true; } return false; }
   function reasons(tx){ var r=[]; if(!/\d/.test(tx)) r.push('No metric'); if(WEAK.test(tx.replace(/^[•\-\*\s]+/,''))) r.push('Weak opener'); if(tx.split(/\s+/).filter(Boolean).length>36) r.push('Too long'); if(looksOff(tx)) r.push('Looks off'); return r; }
   function aiGen(prompt){ return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})}).then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); }).then(function(res){ var raw=res.content; return ((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||res.text||'').trim(); }); }
@@ -11979,7 +12050,7 @@ window.__novaPortfolioHTML=function(d,sections){
      present, tell the fix to clean up the language too. */
   var _STRUCT={'No metric':1,'Weak opener':1,'Too long':1};
   function hasLangIssue(rs){ for(var i=0;i<rs.length;i++){ if(!_STRUCT[rs[i]]) return true; } return false; }
-  function fixPrompt(tx, rs){ var wants=['lead with a strong action verb (never "Responsible for", "Worked on", "Helped")']; if(rs.indexOf('No metric')>-1) wants.push('quantify the result if the work implies one — be truthful and do NOT invent specific numbers'); if(hasLangIssue(rs)) wants.push('fix any spelling, grammar or clarity problems and remove any gibberish, nonsense or placeholder words — keep only the real, truthful achievement'); wants.push(rs.indexOf('Too long')>-1?'keep it under 26 words':'keep it under 30 words'); return 'Rewrite this résumé bullet to '+wants.join('; ')+'. Output ONLY the bullet text, no bullet symbol.\n\n'+tx; }
+  function fixPrompt(tx, rs){ var wants=['lead with a strong action verb (never "Responsible for", "Worked on", "Helped")']; if(rs.indexOf('No metric')>-1) wants.push('quantify the result if the work implies one — be truthful and do NOT invent specific numbers'); if(hasLangIssue(rs)) wants.push('fix any spelling, grammar or clarity problems and remove any gibberish, nonsense or placeholder words — keep only the real, truthful achievement'); wants.push(rs.indexOf('Too long')>-1?'keep it under 26 words':'keep it under 30 words'); return 'Rewrite this resume bullet to '+wants.join('; ')+'. Output ONLY the bullet text, no bullet symbol.\n\n'+tx; }
   /* AI proofreader — the catch-all for "anything a user can type". Heuristics only
      see gibberish/length/weak-opener; this reads every bullet and flags real
      language problems (typos, misspellings, broken grammar, incomplete/cut-off
@@ -11989,7 +12060,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function aiProofread(items, cache){
     var texts=items.map(function(x){return x.text;});
     var list=texts.map(function(t,n){ return (n+1)+'. '+t; }).join('\n');
-    var prompt='You are proofreading résumé bullet points for LANGUAGE problems ONLY: spelling mistakes or typos, gibberish / random characters, broken or ungrammatical wording, an incomplete or cut-off sentence, placeholder or filler text, or text that is not real English. Do NOT flag a bullet for missing numbers, for style, for tone, or for word choice — only genuine language errors a proofreader would fix. Reply with ONLY a compact JSON array (no prose, no code fence) listing just the problematic bullets as {"i":<the bullet number>,"issue":"<a 1-3 word label, e.g. Typo, Spelling, Grammar, Incomplete, Gibberish, Placeholder>"}. If every bullet is clean, reply with exactly [].\n\n'+list;
+    var prompt='You are proofreading resume bullet points for LANGUAGE problems ONLY: spelling mistakes or typos, gibberish / random characters, broken or ungrammatical wording, an incomplete or cut-off sentence, placeholder or filler text, or text that is not real English. Do NOT flag a bullet for missing numbers, for style, for tone, or for word choice — only genuine language errors a proofreader would fix. Reply with ONLY a compact JSON array (no prose, no code fence) listing just the problematic bullets as {"i":<the bullet number>,"issue":"<a 1-3 word label, e.g. Typo, Spelling, Grammar, Incomplete, Gibberish, Placeholder>"}. If every bullet is clean, reply with exactly [].\n\n'+list;
     return aiGen(prompt).then(function(t){
       var arr=parseIssues(t); if(!arr) return false; var changed=false;
       arr.forEach(function(o){ if(!o) return; var i=(parseInt(o.i,10)||0)-1; if(i<0||i>=texts.length) return; var iss=String(o.issue||'Looks off').replace(/["\[\]{}]/g,'').trim().slice(0,22)||'Looks off'; if(cache[texts[i]]!==iss){ cache[texts[i]]=iss; changed=true; } });
@@ -12305,7 +12376,7 @@ window.__novaPortfolioHTML=function(d,sections){
    reloads. Pin the FORM fields to 16px on phones so focusing one never zooms —
    the viewport is untouched, so pinch-zoom stays available for accessibility.
    IMPORTANT: this only targets the form/builder areas (portfolio drawer + wizard
-   form groups), never the résumé preview — enlarging the résumé's editable text
+   form groups), never the resume preview — enlarging the resume's editable text
    would push it onto an extra page. Simple selectors only, so every Safari
    version parses the rule identically. */
 @media (max-width: 768px){
@@ -12451,7 +12522,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     qbox.style.cssText='background:#ffffff;border-radius:14px;padding:14px;display:inline-block;border:1px solid #eee;margin-bottom:6px;';
     if(cv){ cv.style.cssText='display:block;width:220px;height:220px;image-rendering:pixelated;image-rendering:crisp-edges;'; qbox.appendChild(cv); }
     else { qbox.textContent='Could not generate a QR code for this link.'; qbox.style.padding='28px'; qbox.style.color='#b91c1c'; qbox.style.fontSize='0.85rem'; }
-    /* Tap / click the QR to open the résumé directly (handy when viewing on the
+    /* Tap / click the QR to open the resume directly (handy when viewing on the
        same device that generated it). */
     if(url && cv){ qbox.style.cursor='pointer'; qbox.title='Open resume'; qbox.setAttribute('role','link');
       qbox.onclick=function(){ try{ window.open(url,'_blank','noopener'); }catch(e){ try{ location.href=url; }catch(e2){} } }; }
@@ -12483,7 +12554,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     card.appendChild(row);
 
     /* Optional: create a separate, FIXED link/QR for the current version, so a
-       user can send different versions of their résumé to different recruiters,
+       user can send different versions of their resume to different recruiters,
        each on its own link (the main link keeps auto-updating). */
     if(typeof opts.onNewVersion === 'function'){
       var nvRow=document.createElement('div'); nvRow.style.cssText='margin-top:12px;border-top:1px solid var(--border,#eee);padding-top:12px;';
@@ -12740,8 +12811,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     return false;
   };
 
-  /* Keep an ALREADY-SHARED résumé link current: silently re-publish the latest
-     résumé to the same slug on load and whenever it changes, so scanning the
+  /* Keep an ALREADY-SHARED resume link current: silently re-publish the latest
+     resume to the same slug on load and whenever it changes, so scanning the
      existing QR (the /r/ page fetches fresh each load) always shows the newest
      content — no need to re-tap Share / QR. Only runs once a QR exists. */
   if(!window._r4uLastPubSig){ try{ window._r4uLastPubSig=localStorage.getItem('_r4uLastPubSig')||''; }catch(e){} }
@@ -12750,7 +12821,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(!slug) return;                                   /* nothing shared yet — don't auto-create */
     var out=document.getElementById('resumeOutput'); var page=out&&out.querySelector('.resume-a4-page');
     if(!page) return;
-    /* The signature includes a STANDALONE-BUILDER version tag, not just the résumé
+    /* The signature includes a STANDALONE-BUILDER version tag, not just the resume
        content — so when the hosted-page layout/fit code changes (e.g. the desktop
        centering + scaling fix) every existing share auto-refreshes once on the next
        app open, instead of keeping stale HTML forever because the content was
@@ -12775,7 +12846,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 })();
 </script>
 <script id="_r4uCollapseEmpty">
-/* Collapse empty résumé fields, entries AND whole sections so cleared content never
+/* Collapse empty resume fields, entries AND whole sections so cleared content never
    leaves a blank gap. Runs on the output card, the Preview modal and (once cloned)
    the hosted page — anywhere a .resume-a4-page renders. display:none only removes
    space, so this can never add a gap. Focus- and media-guarded. */
@@ -12819,7 +12890,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
        (height, margin, padding OR a border) — e.g. an empty spacer/divider between the
        header and the first section, outside any .r-sec. Spares DECORATIVE elements
        (a background colour or image → accent bars, the watermark), media, form
-       controls, sections, the résumé page/wrapper and the focused element. Restores
+       controls, sections, the resume page/wrapper and the focused element. Restores
        automatically if the element is later refilled. */
     var ev; try{ ev=root.querySelectorAll('*'); }catch(_v){ ev=[]; }
     for(var v=0; v<ev.length; v++){ var el=ev[v]; var tn=(el.tagName||'').toLowerCase();
@@ -12865,7 +12936,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 </script>
 <script id="_r4uEditHint">
 /* Surface the inline-edit affordance: show the "tap any text to edit" tip only
-   once a résumé has been generated (the output card is editable but nothing said so). */
+   once a resume has been generated (the output card is editable but nothing said so). */
 (function(){
   function sync(){ try{ var card=document.getElementById('resumeOutput'), hint=document.getElementById('editHint'); if(!card||!hint) return;
     hint.style.display = card.querySelector('.resume-a4-page') ? 'flex' : 'none'; }catch(e){} }
@@ -12906,7 +12977,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 })();
 </script>
 <style id="_r4uRatingCss">
-#r4uRateOverlay{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,15,26,0.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+#r4uRateOverlay{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,15,26,0.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
 #r4uRateOverlay.on{display:flex;}
 #r4uRateCard{width:min(380px,96%);background:var(--card,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);border-radius:16px;padding:24px 22px 20px;box-shadow:0 18px 60px rgba(0,0,0,.28);text-align:center;position:relative;font-family:inherit;}
 #r4uRateCard .r4u-rate-x{position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:1.3rem;line-height:1;color:var(--muted,#9ca3af);cursor:pointer;}
@@ -12917,7 +12988,10 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4uRateCard .r4u-star:hover{transform:scale(1.12);}
 #r4uRateCard .r4u-star.sel{color:#f59e0b;}
 #r4uRateCard .r4u-rate-follow{margin-top:12px;display:none;}
-#r4uRateCard .r4u-rate-follow textarea{width:100%;min-height:62px;border:1px solid var(--border,#e5e5e0);border-radius:10px;padding:9px 11px;font:inherit;font-size:.85rem;resize:vertical;background:var(--bg,#fff);color:var(--text,#1a1a1a);box-sizing:border-box;}
+/* font-size:16px is deliberate: iOS Safari auto-zooms the whole page when an input
+   under 16px is focused, which widened the page past the screen and made a
+   pinch-back trigger a reload. 16px stops that zoom. */
+#r4uRateCard .r4u-rate-follow textarea{width:100%;min-height:62px;border:1px solid var(--border,#e5e5e0);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:16px;line-height:1.4;resize:vertical;background:var(--bg,#fff);color:var(--text,#1a1a1a);box-sizing:border-box;max-width:100%;}
 #r4uRateCard .r4u-rate-cue{font-size:.86rem;font-weight:700;margin:4px 0 8px;}
 #r4uRateCard .r4u-rate-actions{display:flex;gap:8px;margin-top:10px;}
 #r4uRateCard .r4u-rate-btn{flex:1;border:0;border-radius:10px;padding:11px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;background:var(--accent,#b45309);color:#fff;}
@@ -12959,7 +13033,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'<div class="r4u-rate-thanks">Thank you! 🙌</div>'
       +'</div>';
     document.body.appendChild(o); _built=true;
-    function close(){ o.classList.remove('on'); }
+    function close(){ o.classList.remove('on'); try{ document.documentElement.style.overflow=''; document.body.style.overflow=''; }catch(e){} }
     o.addEventListener('click',function(e){ if(e.target===o){ markSeen(); close(); } });
     o.querySelector('.r4u-rate-x').addEventListener('click',function(){ markSeen(); close(); });
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.classList.contains('on')){ markSeen(); close(); } });
@@ -12992,7 +13066,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(!force && (rated()||cooldownActive())) return;
     build();
     if(!force) markSeen();           /* a manual "Rate us" open shouldn't start the cooldown */
-    var o=document.getElementById('r4uRateOverlay'); if(o) o.classList.add('on');
+    var o=document.getElementById('r4uRateOverlay'); if(o){ o.classList.add('on'); try{ document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden'; }catch(e){} }
   };
   /* Trigger: show on the 2nd visit onwards (returning user), for BOTH logged-in
      and anonymous users. A "visit" is counted once per browser session via
@@ -13072,7 +13146,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 </script>
 
 <style id="_r4uTplMirrorCss">
-/* "Choose Template" thumbnails are a true mirror of the real résumé output card:
+/* "Choose Template" thumbnails are a true mirror of the real resume output card:
    each card renders the actual resume (renderResumeHTML) for its template instead
    of a simplified mock. The real A4 page must lay out at full width (794px) inside
    the scaled .tpl-mini-inner, otherwise the sidebar/grid templates (blush, verdant,
@@ -13086,7 +13160,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 /* High-quality grid: larger cards so each mirror reads clearly. One consistent
    grid on every width (scrolls inside), replacing the old tiny-card desktop grid
    and the cramped mobile horizontal strip. Each card shows a full A4 page of the
-   résumé at a legible size. */
+   resume at a legible size. */
 #tplGrid{
   display:grid !important; grid-template-columns:repeat(2, 1fr) !important;
   gap:16px !important; padding:2px !important;
@@ -13101,7 +13175,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 }
 </style>
 <script id="_r4uTplMirrorJS">
-/* Make each Choose-Template thumbnail a pixel-faithful mirror of the résumé output
+/* Make each Choose-Template thumbnail a pixel-faithful mirror of the resume output
    card. renderTemplateGrid() fills each card with a lightweight mock; we wrap it so
    that, right after it runs, every card's .tpl-mini-inner is re-rendered with the
    SAME renderResumeHTML() the live output card uses (temporarily swapping
@@ -13110,10 +13184,26 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    to the mock when there is no resume data yet. renderTemplateGrid/renderResumeHTML
    live in the main (deferred) app bundle, so we install the wrapper once they exist. */
 (function(){
+  function mirrorData(){
+    /* Prefer the generated resume; before generation fall back to the live form
+       data (collectData) so each card still shows the user's real details. */
+    try{ if(typeof lastResumeData!=='undefined' && lastResumeData) return lastResumeData; }catch(e){}
+    try{
+      if(typeof collectData==='function'){
+        var d=collectData();
+        if(d && (d.firstName || d.lastName || d.jobTitle || (d.experience&&d.experience.length) || (d.education&&d.education.length) || (d.skills&&d.skills.length))){
+          if(!d.summary) d.summary='Your AI-written summary appears here after you generate.';
+          return d;
+        }
+      }
+    }catch(e){}
+    return null;
+  }
   function mirror(){
     try{
       if(typeof renderResumeHTML!=='function') return;
-      if(typeof lastResumeData==='undefined' || !lastResumeData) return; /* keep mock until a resume exists */
+      var data=mirrorData();
+      if(!data) return; /* no data at all — keep the mock */
       var cards=document.querySelectorAll('#tplGrid .tpl-card');
       if(!cards.length) return;
       var saved=currentTemplate;
@@ -13124,7 +13214,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
           if(!m) continue;
           var inner=c.querySelector('.tpl-mini-inner');
           if(!inner) continue;
-          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(lastResumeData)+'</div>'; }catch(e){}
+          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
         }
       } finally { currentTemplate=saved; }
       if(typeof calibrateTplPreviews==='function') calibrateTplPreviews();
@@ -13145,7 +13235,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 </script>
 <script id="_r4uTplCrispJS">
 /* Render the template thumbnails with CSS `zoom` instead of `transform:scale`.
-   transform rasterises the résumé once and shrinks that bitmap, which is soft on a
+   transform rasterises the resume once and shrinks that bitmap, which is soft on a
    1x laptop display (it only looks sharp on 2-3x phone screens). `zoom` re-lays-out
    and re-rasterises the text at the small size, so it stays crisp at any pixel
    density. We replace calibrateTplPreviews (the core width-only transform scaler)
@@ -13179,5 +13269,195 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 })();
 </script>
 
+<style id="_r4uUploadModalCss">
+.r4u-um-overlay{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,10,.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+.r4u-um-overlay.on{display:flex;}
+.r4u-um-box{background:var(--card-bg,#fff);color:var(--text,#1a1a1a);width:100%;max-width:440px;border-radius:18px;padding:26px 24px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;animation:r4uUmIn .18s ease-out;}
+@keyframes r4uUmIn{from{opacity:0;transform:translateY(12px) scale(.98);}to{opacity:1;transform:none;}}
+.r4u-um-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.6rem;line-height:1;color:var(--muted,#9ca3af);cursor:pointer;padding:4px 8px;}
+.r4u-um-close:hover{color:var(--text,#1a1a1a);}
+.r4u-um-title{font-size:1.25rem;font-weight:800;margin:0 0 4px;}
+.r4u-um-sub{font-size:.88rem;color:var(--muted,#6b7280);margin:0 0 18px;line-height:1.5;}
+.r4u-um-drop{display:block;border:2px dashed rgba(217,119,6,.35);border-radius:14px;padding:26px 18px;text-align:center;cursor:pointer;transition:border-color .18s,background .18s;background:rgba(217,119,6,.03);}
+.r4u-um-drop:hover,.r4u-um-drop.drag{border-color:var(--accent,#b45309);background:rgba(217,119,6,.07);}
+.r4u-um-ico{font-size:2rem;margin-bottom:8px;}
+.r4u-um-dt{font-size:1rem;font-weight:700;color:var(--text,#1a1a1a);margin-bottom:4px;}
+.r4u-um-dt span{color:var(--accent,#b45309);text-decoration:underline;}
+.r4u-um-formats{font-size:.74rem;color:var(--muted,#9ca3af);}
+.r4u-um-li{display:flex;align-items:flex-start;gap:9px;background:rgba(10,102,194,.06);border:1px solid rgba(10,102,194,.14);border-radius:10px;padding:10px 12px;margin-top:14px;font-size:.8rem;color:var(--muted,#4b5563);line-height:1.45;text-align:left;}
+.r4u-um-li b{color:var(--text,#1a1a1a);}
+.r4u-um-libadge{flex-shrink:0;width:22px;height:22px;border-radius:5px;background:#0a66c2;color:#fff;font-weight:800;font-size:.68rem;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.r4u-um-paste{display:block;width:100%;margin-top:14px;background:none;border:none;color:var(--accent,#b45309);font-family:inherit;font-size:.86rem;font-weight:700;cursor:pointer;padding:6px;}
+.r4u-um-paste:hover{text-decoration:underline;}
+</style>
+<div id="_r4uUploadModal" class="r4u-um-overlay" role="dialog" aria-modal="true" aria-label="Upload your resume">
+  <div class="r4u-um-box">
+    <button type="button" class="r4u-um-close" id="_r4uUmClose" aria-label="Close">&times;</button>
+    <h3 class="r4u-um-title">Upload your resume</h3>
+    <p class="r4u-um-sub">We'll read it with AI and rebuild it into a clean, ATS-ready resume in minutes.</p>
+    <label class="r4u-um-drop" id="_r4uUmDrop">
+      <input type="file" id="_r4uUmInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;">
+      <div class="r4u-um-ico">📄</div>
+      <div class="r4u-um-dt">Drag &amp; drop or <span>choose a file</span></div>
+      <div class="r4u-um-formats">PDF · DOCX · DOC · TXT · JPG · PNG</div>
+    </label>
+    <div class="r4u-um-li"><span class="r4u-um-libadge">in</span><span>From LinkedIn? Export your profile (<b>More → Save to PDF</b>) and drop it here — our AI reads it like a resume.</span></div>
+    <button type="button" class="r4u-um-paste" id="_r4uUmPaste">Or paste your resume text instead →</button>
+  </div>
+</div>
+<script id="_r4uUploadModalJS">
+/* The hero "Already have a resume?" CTA opens this upload modal. On a file
+   pick/drop it hands the file to the app's real handler (handleResumeFile) inside
+   step 1, so parsing + AI fill run in the normal flow — the modal just gives a
+   focused entry point. No core edits. */
+(function(){
+  function el(id){ return document.getElementById(id); }
+  function open(){ var ov=el('_r4uUploadModal'); if(!ov) return; ov.classList.add('on'); try{ document.body.style.overflow='hidden'; }catch(e){} }
+  function close(){ var ov=el('_r4uUploadModal'); if(ov) ov.classList.remove('on'); try{ document.body.style.overflow=''; }catch(e){} }
+  function enterBuilder(cb){
+    try{ if(typeof startBuild==='function') startBuild(); else if(typeof goToStep==='function') goToStep(1); }catch(e){}
+    setTimeout(cb,130);
+  }
+  function process(file){
+    if(!file) return;
+    close();
+    enterBuilder(function(){
+      try{ if(typeof switchUploadTab==='function') switchUploadTab('upload'); }catch(e){}
+      try{ var z=el('uploadDropZone'); if(z) z.scrollIntoView({block:'center'}); }catch(e){}
+      try{ if(typeof handleResumeFile==='function') handleResumeFile(file); }catch(e){}
+    });
+  }
+  window.r4uStartUpload=function(){ open(); };
+  function wire(){
+    var ov=el('_r4uUploadModal'), inp=el('_r4uUmInput'); if(!ov||!inp) return;
+    el('_r4uUmClose').addEventListener('click',close);
+    ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&ov.classList.contains('on')) close(); });
+    inp.addEventListener('change',function(){ var f=this.files&&this.files[0]; this.value=''; process(f); });
+    var drop=el('_r4uUmDrop');
+    ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add('drag'); }); });
+    ['dragleave','dragend'].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove('drag'); }); });
+    drop.addEventListener('drop',function(e){ e.preventDefault(); drop.classList.remove('drag'); var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) process(f); });
+    el('_r4uUmPaste').addEventListener('click',function(){ close(); enterBuilder(function(){ try{ if(typeof switchUploadTab==='function') switchUploadTab('paste'); }catch(e){} }); });
+  }
+  if(document.readyState!=='loading') wire(); else document.addEventListener('DOMContentLoaded',wire);
+})();
+</script>
+<script id="_r4uStepScrollJS">
+/* Scroll to the top of each step on navigation. goToStep() only resets
+   #main.scrollTop, but on mobile the WINDOW is the scroll container (#main is
+   overflow:visible), so step changes were landing mid-page / below the step title.
+   Wrap goToStep to also scroll the window/document to the top on a real step change
+   (skipped for history/back restores). A few delayed passes override any late
+   focus-scroll from startBuild. */
+(function(){
+  function toTop(){
+    try{ var m=document.getElementById('main'); if(m) m.scrollTop=0; }catch(e){}
+    try{ window.scrollTo(0,0); }catch(e){}
+    try{ if(document.scrollingElement) document.scrollingElement.scrollTop=0; }catch(e){}
+    try{ document.body.scrollTop=0; }catch(e){}
+  }
+  function isFilled(){
+    try{ if(typeof lastResumeData!=='undefined' && lastResumeData) return true; }catch(e){}
+    try{ var fn=document.getElementById('firstName'); if(fn && fn.value && fn.value.trim()) return true; }catch(e){}
+    return false;
+  }
+  /* On step 1: if the résumé is already filled, land on the Profile Photo / form
+     (skip the empty-state upload prompt); otherwise show the top. Other steps: top. */
+  function go(stepId){
+    if(stepId==='step1' && isFilled()){
+      var ps=document.getElementById('photoSection');
+      if(ps){ try{ var m=document.getElementById('main'); if(m) m.scrollTop=0; }catch(e){} try{ ps.scrollIntoView({block:'start'}); return; }catch(e){} }
+    }
+    toTop();
+  }
+  function install(){
+    if(typeof goToStep!=='function') return false;
+    if(goToStep.__r4uTop) return true;
+    var orig=goToStep;
+    var wrapped=function(step, isHistory){
+      var prev=(document.querySelector('.step-content.active')||{}).id;
+      var r=orig.apply(this,arguments);
+      try{
+        var now=(document.querySelector('.step-content.active')||{}).id;
+        if(!isHistory && now!==prev){ go(now); requestAnimationFrame(function(){go(now);}); setTimeout(function(){go(now);},90); setTimeout(function(){go(now);},240); setTimeout(function(){go(now);},440); }
+      }catch(e){}
+      return r;
+    };
+    wrapped.__r4uTop=true;
+    try{ goToStep=wrapped; }catch(e){}
+    try{ window.goToStep=wrapped; }catch(e){}
+    return true;
+  }
+  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); },100); }
+})();
+</script>
+<script id="_r4uMhdrBrand">
+/* Mobile header (#mhdrSection): on the landing page the obfuscated rotator cycles
+   through step names ("Basic Info", "Experience", "Education"…) as a faint ghost
+   label, which reads as a glitch next to the "R" logo. Rather than fight the rotator
+   with a revert (which flickers), HIDE the rotating element entirely on the landing
+   page and show a separate, static "Resume For You" brand label in its place. The
+   rotator keeps writing to the hidden element — invisibly, no blink. Once the build
+   flow starts, restore the element so the real per-step label shows as normal. */
+(function(){
+  var sec=document.getElementById('mhdrSection');
+  if(!sec || !sec.parentNode) return;
+  var brand=document.createElement('div');
+  brand.id='_r4uMhdrBrandLbl';
+  brand.className='mhdr-section';
+  brand.textContent='Resume For You';
+  brand.style.cssText='font-style:normal;opacity:1;cursor:pointer;';
+  brand.onclick=function(){ try{ goToStep(1); }catch(e){} };
+  sec.parentNode.insertBefore(brand, sec);
+  function onLanding(){
+    var s0=document.getElementById('step0');
+    return !!(s0 && s0.classList.contains('active') && !s0.classList.contains('flow-started'));
+  }
+  function apply(){
+    if(onLanding()){ brand.style.display=''; sec.style.display='none'; }
+    else { brand.style.display='none'; sec.style.display=''; }
+  }
+  apply();
+  try{
+    var s0=document.getElementById('step0');
+    if(s0) new MutationObserver(apply).observe(s0,{attributes:true,attributeFilter:['class']});
+  }catch(e){}
+})();
+</script>
+<script id="_r4uGenTplSync">
+/* Guarantee the resume is generated with the template the user actually selected.
+   The hidden #tplSelect only lists ~39 of the 90+ templates, so for the others its
+   value can't track the choice; currentTemplate can also be left stale by other
+   render paths. The highlighted card (#tplGrid .tpl-card.tpl-active) is the single
+   source of truth for what the user picked, so re-sync currentTemplate from it right
+   before generating (and before a template-driven re-render). */
+(function(){
+  function selectedTpl(){
+    try{
+      var card=document.querySelector('#tplGrid .tpl-card.tpl-active');
+      if(card){ var m=(card.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m) return m[1]; }
+    }catch(e){}
+    return null;
+  }
+  function sync(){ try{ var t=selectedTpl(); if(t){ currentTemplate=t; try{ window.currentTemplate=t; }catch(e){} var sel=document.getElementById('tplSelect'); if(sel){ for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===t){ sel.value=t; break; } } } } }catch(e){} }
+  function wrap(name){
+    if(typeof window[name]!=='function') return false;
+    if(window[name].__r4uGenSync) return true;
+    var orig=window[name];
+    var w=function(){ sync(); return orig.apply(this,arguments); };
+    w.__r4uGenSync=true;
+    try{ window[name]=w; }catch(e){}
+    return true;
+  }
+  function install(){
+    var ok=wrap('generateResume');
+    // also make generateResume reachable as a bare global if it is one
+    try{ if(typeof generateResume==='function' && !generateResume.__r4uGenSync && window.generateResume && window.generateResume.__r4uGenSync){ generateResume=window.generateResume; } }catch(e){}
+    return ok;
+  }
+  if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>120) clearInterval(iv); },100); }
+})();
+</script>
 </body>
 </html>

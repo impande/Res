@@ -44,7 +44,7 @@
       + 'Ask for an updated link, or create your own free at <a href="https://resume4u.help">resume4u.help</a>.</p>';
   }
   // Safe, never-cut fit applied by THIS viewer (served fresh every scan) so every
-  // shared résumé renders correctly — including ones published before the fix, with
+  // shared resume renders correctly — including ones published before the fix, with
   // no need to re-publish. We strip whatever fit script the stored page baked in and
   // inject one authoritative version: size from the TRUE visible width, never scale
   // above 100% (A4 fits any desktop/tablet), centre, and shrink further if anything
@@ -86,7 +86,7 @@
   var fsUrl = 'https://firestore.googleapis.com/v1/projects/resume-ai-2eda1/databases/(default)/documents/portfolios/'
     + encodeURIComponent(slug)
     + '?key=AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
-  // cache:'no-store' so a fresh scan always pulls the latest published résumé.
+  // cache:'no-store' so a fresh scan always pulls the latest published resume.
   // (Do NOT append extra query params — Firestore's REST API rejects unknown
   // parameters with a 400, which would break the fetch.)
   fetch(fsUrl, { cache: 'no-store' })

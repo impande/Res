@@ -121,9 +121,9 @@ exports.handler = async function(event) {
       }
 
       // NOTE: we deliberately do NOT pass PDFShift's viewport `zoom`. It scales the
-      // whole page and anchors top-left, which shrinks the résumé into the corner and
+      // whole page and anchors top-left, which shrinks the resume into the corner and
       // leaves lopsided margins (big right/bottom gap) — visibly different from the
-      // preview. Text size is instead carried by the CSS `zoom` on the résumé wrapper
+      // preview. Text size is instead carried by the CSS `zoom` on the resume wrapper
       // inside the cloned HTML (exactly what the on-screen preview uses), so the A4
       // page stays full and the side margins stay balanced and identical to the preview.
 
@@ -187,7 +187,7 @@ exports.handler = async function(event) {
         'Return a JSON object with keys:',
         '- accent: hex string (or null to clear) — sets the main accent colour.',
         '- dark: true/false — dark or light base.',
-        '- template: "onepage" | "atelier" | "studio" | "nova" | "sidebar" | "minimal" | "bold" — the base page design. onepage = a real one-page WEBSITE (not a résumé): a hero, a Selected Work section with projects as big visual cards, a What-I-do/services grid, an About, a slim experience timeline and a big contact call-to-action. atelier = premium editorial: an elegant serif display face, huge type, very airy whitespace, refined borderless sections and smooth motion (the most upscale/designer look). studio = flagship: a huge statement hero, very large display type, generous whitespace, full-width cover image and smooth scroll animations (most premium/agency); nova = clean cards with a profile banner; sidebar = a sticky left profile rail with content on the right; minimal = a big centered name with borderless, editorial sections; bold = a full-width dark hero with very large type. Only set this if the user asks to change the overall template/layout style.',
+        '- template: "onepage" | "atelier" | "studio" | "nova" | "sidebar" | "minimal" | "bold" — the base page design. onepage = a real one-page WEBSITE (not a resume): a hero, a Selected Work section with projects as big visual cards, a What-I-do/services grid, an About, a slim experience timeline and a big contact call-to-action. atelier = premium editorial: an elegant serif display face, huge type, very airy whitespace, refined borderless sections and smooth motion (the most upscale/designer look). studio = flagship: a huge statement hero, very large display type, generous whitespace, full-width cover image and smooth scroll animations (most premium/agency); nova = clean cards with a profile banner; sidebar = a sticky left profile rail with content on the right; minimal = a big centered name with borderless, editorial sections; bold = a full-width dark hero with very large type. Only set this if the user asks to change the overall template/layout style.',
         '- fonts: object {heading, body} — Google Font family names for headings and body text, chosen as a tasteful PAIRING that matches the requested vibe. Use ONLY these families (all load reliably): Sans — "Inter","DM Sans","Manrope","Work Sans","Poppins","Montserrat","Sora","Space Grotesk","Plus Jakarta Sans","Outfit","Figtree","Rubik","Karla","IBM Plex Sans","Albert Sans"; Serif/Display — "Playfair Display","Fraunces","Lora","Cormorant Garamond","Spectral","Source Serif 4","Bricolage Grotesque". A strong default is a characterful serif/display heading over a clean sans body (e.g. {"heading":"Fraunces","body":"Inter"}). Prefer this field over any @import in css. Omit or null to keep current fonts.',
         '- density: "compact" | "cozy" | "spacious" — overall spacing/whitespace.',
         '- width: "narrow" | "default" | "wide" — width of the centered content column.',
