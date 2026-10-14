@@ -13181,8 +13181,10 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #tplGrid .tpl-card-name{ font-size:0.82rem !important; font-weight:800 !important; letter-spacing:-0.1px !important; }
 #tplGrid .tpl-card-tag{ font-size:0.66rem !important; }
 #tplGrid .tpl-card-check{ top:8px !important; right:8px !important; width:22px !important; height:22px !important; box-shadow:0 2px 6px rgba(0,0,0,.2) !important; }
-@media(max-width:900px){ #tplGrid{ grid-template-columns:repeat(3, 1fr) !important; } }
-@media(max-width:600px){ #tplGrid{ grid-template-columns:repeat(2, 1fr) !important; gap:12px !important; } }
+@media(max-width:900px){ #tplGrid{ grid-template-columns:repeat(2, 1fr) !important; } }
+/* Phones: one large, legible card per row so the user can actually read how their
+   resume looks in each template — clarity is the whole point of the picker. */
+@media(max-width:600px){ #tplGrid{ grid-template-columns:1fr !important; gap:16px !important; max-height:78vh !important; } }
 </style>
 <script id="_r4uTplMirrorJS">
 /* Make each Choose-Template thumbnail a pixel-faithful mirror of the resume output
