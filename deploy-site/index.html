@@ -13244,11 +13244,26 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   function onStep8(){
     try{ return ((document.querySelector('.step-content.active')||{}).id)==='step8'; }catch(e){ return false; }
   }
-  var _mirrorRun=0;
+  var _mirrorRun=0, _io=null, _calPending=false;
+  /* Coalesce calibrate: many cards may render in one frame — recalibrate once. */
+  function scheduleCal(){
+    if(_calPending) return; _calPending=true;
+    requestAnimationFrame(function(){ _calPending=false; if(typeof calibrateTplPreviews==='function'){ try{ calibrateTplPreviews(); }catch(e){} } });
+  }
+  function renderCard(c, data, token){
+    if(token!==_mirrorRun || !c) return;
+    var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
+    if(!m) return;
+    var inner=c.querySelector('.tpl-mini-inner');
+    if(!inner || inner.getAttribute('data-r4u-tok')===String(token)) return; /* done for this data */
+    var saved=currentTemplate;
+    try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; inner.setAttribute('data-r4u-tok',String(token)); }catch(e){} finally{ currentTemplate=saved; }
+    scheduleCal();
+  }
   /* Render the card previews ONLY when the Choose Template step is on screen, and
-     spread the ~90 renders across animation frames (6 per frame) so the main thread
-     is never blocked. This keeps the landing page (and every other step) fast — the
-     old version rendered all 96 full resumes on initial page load. */
+     ONLY the cards near the viewport (lazy, via IntersectionObserver) — so opening
+     the step renders ~a handful of cards instead of all 90+, and the rest fill in as
+     the user scrolls the grid. The landing page and other steps render nothing. */
   function mirror(){
     try{
       if(typeof renderResumeHTML!=='function') return;
@@ -13257,24 +13272,18 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       if(!data) return;
       var cards=document.querySelectorAll('#tplGrid .tpl-card');
       if(!cards.length) return;
-      var token=++_mirrorRun, i=0, CHUNK=6;
-      function stepChunk(){
-        if(token!==_mirrorRun || !onStep8()) return; /* superseded or left step 8 */
-        var saved=currentTemplate, end=Math.min(i+CHUNK, cards.length);
-        try{
-          for(; i<end; i++){
-            var c=cards[i];
-            var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
-            if(!m) continue;
-            var inner=c.querySelector('.tpl-mini-inner');
-            if(!inner) continue;
-            try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
-          }
-        } finally { currentTemplate=saved; }
-        if(typeof calibrateTplPreviews==='function'){ try{ calibrateTplPreviews(); }catch(e){} }
-        if(i<cards.length){ requestAnimationFrame(stepChunk); }
+      var token=++_mirrorRun;
+      try{ if(_io) _io.disconnect(); }catch(e){}
+      if('IntersectionObserver' in window){
+        _io=new IntersectionObserver(function(entries){
+          if(token!==_mirrorRun){ try{ _io.disconnect(); }catch(e){} return; }
+          for(var k=0;k<entries.length;k++){ if(entries[k].isIntersecting){ var card=entries[k].target.closest('.tpl-card'); renderCard(card, data, token); _io.unobserve(entries[k].target); } }
+        }, { root: document.getElementById('tplGrid'), rootMargin:'600px 0px' });
+        for(var i=0;i<cards.length;i++){ var th=cards[i].querySelector('.tpl-card-thumb'); if(th) _io.observe(th); }
+      } else {
+        /* Fallback (no IO): chunked render of all cards, 6 per frame. */
+        var j=0; (function chunk(){ if(token!==_mirrorRun||!onStep8())return; var end=Math.min(j+6,cards.length); for(;j<end;j++) renderCard(cards[j], data, token); if(j<cards.length) requestAnimationFrame(chunk); })();
       }
-      requestAnimationFrame(stepChunk);
     }catch(e){}
   }
   function install(){
