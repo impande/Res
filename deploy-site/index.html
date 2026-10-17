@@ -666,7 +666,9 @@
     .r4u-cta:hover::after{animation:r4uCtaSheen .9s ease;}
     @keyframes r4uCtaSheen{0%{left:-80%;opacity:0;}15%{opacity:1;}100%{left:140%;opacity:0;}}
     /* Entrance: deliberate lift + fade, clearly staggered (primary → upload → portfolio) */
-    @keyframes r4uCtaIn{0%{opacity:0;transform:translateY(28px) scale(.975);}100%{opacity:1;transform:translateY(0) scale(1);}}
+    /* Transform-only (no opacity): a stuck/paused/janky frame still shows the card
+       fully opaque and readable — it can never render faded/washed-out. */
+    @keyframes r4uCtaIn{0%{transform:translateY(22px) scale(.985);}100%{transform:translateY(0) scale(1);}}
     .r4u-cta{animation:r4uCtaIn .75s cubic-bezier(.16,1,.3,1) backwards;}
     .r4u-cta-stack .r4u-cta:nth-child(2){animation-delay:.28s;}
     .r4u-cta-stack .r4u-cta:nth-child(3){animation-delay:.44s;}
@@ -13239,25 +13241,40 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     }catch(e){}
     return SAMPLE;
   }
+  function onStep8(){
+    try{ return ((document.querySelector('.step-content.active')||{}).id)==='step8'; }catch(e){ return false; }
+  }
+  var _mirrorRun=0;
+  /* Render the card previews ONLY when the Choose Template step is on screen, and
+     spread the ~90 renders across animation frames (6 per frame) so the main thread
+     is never blocked. This keeps the landing page (and every other step) fast — the
+     old version rendered all 96 full resumes on initial page load. */
   function mirror(){
     try{
       if(typeof renderResumeHTML!=='function') return;
+      if(!onStep8()) return;
       var data=mirrorData();
-      if(!data) return; /* no data at all — keep the mock */
+      if(!data) return;
       var cards=document.querySelectorAll('#tplGrid .tpl-card');
       if(!cards.length) return;
-      var saved=currentTemplate;
-      try{
-        for(var i=0;i<cards.length;i++){
-          var c=cards[i];
-          var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
-          if(!m) continue;
-          var inner=c.querySelector('.tpl-mini-inner');
-          if(!inner) continue;
-          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
-        }
-      } finally { currentTemplate=saved; }
-      if(typeof calibrateTplPreviews==='function') calibrateTplPreviews();
+      var token=++_mirrorRun, i=0, CHUNK=6;
+      function stepChunk(){
+        if(token!==_mirrorRun || !onStep8()) return; /* superseded or left step 8 */
+        var saved=currentTemplate, end=Math.min(i+CHUNK, cards.length);
+        try{
+          for(; i<end; i++){
+            var c=cards[i];
+            var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
+            if(!m) continue;
+            var inner=c.querySelector('.tpl-mini-inner');
+            if(!inner) continue;
+            try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
+          }
+        } finally { currentTemplate=saved; }
+        if(typeof calibrateTplPreviews==='function'){ try{ calibrateTplPreviews(); }catch(e){} }
+        if(i<cards.length){ requestAnimationFrame(stepChunk); }
+      }
+      requestAnimationFrame(stepChunk);
     }catch(e){}
   }
   function install(){
@@ -13270,7 +13287,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     try{ window.renderTemplateGrid=wrapped; }catch(e){}
     return true;
   }
-  if(!install()){ var n=0, iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); }, 80); }
+  /* Kick the render the moment the user actually opens the Generate step. */
+  function watchStep8(){
+    var s8=document.getElementById('step8');
+    if(!s8 || s8.__r4uMirrorWatch) return !!s8;
+    try{ new MutationObserver(function(){ if(onStep8()) requestAnimationFrame(mirror); }).observe(s8,{attributes:true,attributeFilter:['class']}); s8.__r4uMirrorWatch=true; }catch(e){}
+    return true;
+  }
+  if(!install() || !watchStep8()){ var n=0, iv=setInterval(function(){ var a=install(), b=watchStep8(); if((a&&b)||++n>80) clearInterval(iv); }, 80); }
 })();
 </script>
 <script id="_r4uTplCrispJS">
