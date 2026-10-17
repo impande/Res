@@ -12394,6 +12394,11 @@ window.__novaPortfolioHTML=function(d,sections){
    with the data-bg attribute set by _r4uPerfPause) — no point painting motion
    nobody can see; saves GPU/battery. Resumes instantly on return. */
 html[data-bg] *, html[data-bg] *::before, html[data-bg] *::after{animation-play-state:paused !important;}
+/* Exception: the hero CTA cards fade+slide in once on load. If the tab is briefly
+   reported "hidden" during a reload, the pause above can freeze that entrance
+   mid-fade and strand the primary card faded/invisible. Keep the CTA cards running
+   so the one-time entrance always finishes and the card never gets stuck. */
+html[data-bg] .r4u-cta, html[data-bg] .r4u-cta *{animation-play-state:running !important;}
 /* Respect visitors who ask their device for reduced motion (also lighter on
    low-end phones): collapse decorative animation/transition to near-instant so
    the page stays calm and smooth instead of continuously animating. */
