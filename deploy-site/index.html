@@ -340,7 +340,7 @@
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer support",
-          "email": "support@resume4u.help",
+          "email": "contact@resume4u.help",
           "availableLanguage": ["English", "Hindi"]
         },
         "sameAs": [
@@ -666,7 +666,9 @@
     .r4u-cta:hover::after{animation:r4uCtaSheen .9s ease;}
     @keyframes r4uCtaSheen{0%{left:-80%;opacity:0;}15%{opacity:1;}100%{left:140%;opacity:0;}}
     /* Entrance: deliberate lift + fade, clearly staggered (primary → upload → portfolio) */
-    @keyframes r4uCtaIn{0%{opacity:0;transform:translateY(28px) scale(.975);}100%{opacity:1;transform:translateY(0) scale(1);}}
+    /* Transform-only (no opacity): a stuck/paused/janky frame still shows the card
+       fully opaque and readable — it can never render faded/washed-out. */
+    @keyframes r4uCtaIn{0%{transform:translateY(22px) scale(.985);}100%{transform:translateY(0) scale(1);}}
     .r4u-cta{animation:r4uCtaIn .75s cubic-bezier(.16,1,.3,1) backwards;}
     .r4u-cta-stack .r4u-cta:nth-child(2){animation-delay:.28s;}
     .r4u-cta-stack .r4u-cta:nth-child(3){animation-delay:.44s;}
@@ -2615,6 +2617,7 @@
     <a href="/refund/" style="color:var(--muted);text-decoration:none;">Refunds</a>
     <div style="margin-top:7px;"><a href="#" onclick="window._r4uShowRating(true);return false;" style="color:var(--accent,#b45309);text-decoration:none;font-weight:700;">Rate us &#9733;</a></div>
     <div id="r4uRatingBadgeSb" style="margin-top:6px;"></div>
+    <div style="margin-top:7px;"><a href="mailto:contact@resume4u.help" style="color:var(--muted);text-decoration:none;">&#9993; contact@resume4u.help</a></div>
     <div style="color:var(--muted);margin-top:6px;font-size:0.7rem;">&copy; 2026 Resume For You</div>
   </div>
 </aside>
@@ -12393,6 +12396,11 @@ window.__novaPortfolioHTML=function(d,sections){
    with the data-bg attribute set by _r4uPerfPause) — no point painting motion
    nobody can see; saves GPU/battery. Resumes instantly on return. */
 html[data-bg] *, html[data-bg] *::before, html[data-bg] *::after{animation-play-state:paused !important;}
+/* Exception: the hero CTA cards fade+slide in once on load. If the tab is briefly
+   reported "hidden" during a reload, the pause above can freeze that entrance
+   mid-fade and strand the primary card faded/invisible. Keep the CTA cards running
+   so the one-time entrance always finishes and the card never gets stuck. */
+html[data-bg] .r4u-cta, html[data-bg] .r4u-cta *{animation-play-state:running !important;}
 /* Respect visitors who ask their device for reduced motion (also lighter on
    low-end phones): collapse decorative animation/transition to near-instant so
    the page stays calm and smooth instead of continuously animating. */
@@ -13157,22 +13165,34 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   min-height:1123px !important; margin:0 !important; box-shadow:none !important;
   border-radius:0 !important;
 }
-/* High-quality grid: larger cards so each mirror reads clearly. One consistent
-   grid on every width (scrolls inside), replacing the old tiny-card desktop grid
-   and the cramped mobile horizontal strip. Each card shows a full A4 page of the
-   resume at a legible size. */
+/* Premium "Choose Template" gallery: each card is a proportional A4-page thumbnail
+   (aspect 794:1123) showing a full sample resume, laid out in a tidy multi-column
+   grid that scrolls inside the section. The aspect ratio matches the crisp() zoom
+   (cardW/794) exactly, so the scaled page fills the card with no dead whitespace. */
 #tplGrid{
-  display:grid !important; grid-template-columns:repeat(2, 1fr) !important;
-  gap:16px !important; padding:2px !important;
-  max-height:76vh !important; overflow-y:auto !important; overflow-x:hidden !important;
+  display:grid !important; grid-template-columns:repeat(3, 1fr) !important;
+  gap:16px !important; padding:4px !important;
+  max-height:72vh !important; overflow-y:auto !important; overflow-x:hidden !important;
   scroll-snap-type:none !important;
 }
-#tplGrid .tpl-card{ width:auto !important; max-width:none !important; flex:none !important; margin:0 !important; }
-#tplGrid .tpl-card-thumb{ height:430px !important; }
-@media(max-width:600px){
-  #tplGrid{ grid-template-columns:1fr !important; gap:14px !important; }
-  #tplGrid .tpl-card-thumb{ height:460px !important; }
+#tplGrid .tpl-card{
+  width:auto !important; max-width:none !important; flex:none !important; margin:0 !important;
+  border:1px solid var(--border) !important; border-radius:14px !important;
+  background:var(--card-bg) !important; overflow:hidden !important;
+  box-shadow:0 1px 3px rgba(0,0,0,.05) !important;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
 }
+#tplGrid .tpl-card:hover{ transform:translateY(-3px) !important; box-shadow:0 12px 28px rgba(0,0,0,.13) !important; border-color:rgba(217,119,6,.45) !important; }
+#tplGrid .tpl-card.tpl-active{ border-color:var(--accent) !important; box-shadow:0 0 0 2px var(--accent), 0 10px 24px rgba(217,119,6,.22) !important; transform:translateY(-2px) !important; }
+#tplGrid .tpl-card-thumb{ height:auto !important; aspect-ratio:794 / 1040 !important; background:#fff !important; }
+#tplGrid .tpl-card-meta{ padding:9px 12px 11px !important; background:var(--card-bg) !important; }
+#tplGrid .tpl-card-name{ font-size:0.82rem !important; font-weight:800 !important; letter-spacing:-0.1px !important; }
+#tplGrid .tpl-card-tag{ font-size:0.66rem !important; }
+#tplGrid .tpl-card-check{ top:8px !important; right:8px !important; width:22px !important; height:22px !important; box-shadow:0 2px 6px rgba(0,0,0,.2) !important; }
+@media(max-width:900px){ #tplGrid{ grid-template-columns:repeat(2, 1fr) !important; } }
+/* Phones: one large, legible card per row so the user can actually read how their
+   resume looks in each template — clarity is the whole point of the picker. */
+@media(max-width:600px){ #tplGrid{ grid-template-columns:1fr !important; gap:16px !important; max-height:78vh !important; } }
 </style>
 <script id="_r4uTplMirrorJS">
 /* Make each Choose-Template thumbnail a pixel-faithful mirror of the resume output
@@ -13184,9 +13204,31 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    to the mock when there is no resume data yet. renderTemplateGrid/renderResumeHTML
    live in the main (deferred) app bundle, so we install the wrapper once they exist. */
 (function(){
+  /* A full, polished sample resume used only when the user has entered nothing yet,
+     so every template thumbnail reads as a complete document instead of a sparse,
+     mostly-empty page. Replaced by the user's real data the moment they fill the form. */
+  var SAMPLE={
+    firstName:'Aarav', lastName:'Sharma', jobTitle:'Senior Software Engineer',
+    email:'aarav.sharma@email.com', phone:'+91 98765 43210', location:'Bengaluru, India',
+    linkedin:'linkedin.com/in/aarav-sharma', github:'',
+    summary:'Senior engineer with 8+ years designing and shipping scalable web platforms. Led teams of 6+, cut infrastructure costs 30%, and delivered products used by 2M+ people.',
+    experience:[
+      {title:'Senior Software Engineer', co:'TechNova', start:'2021', end:'Present',
+       bullets:['Led a 6-person team rebuilding the core platform, cutting p95 latency 45%.','Shipped a payments service at 99.99% uptime handling high monthly volume.','Drove the migration to microservices, improving deploy frequency 3x.','Mentored 4 engineers; two promoted within a year.']},
+      {title:'Software Engineer', co:'DataPeak', start:'2018', end:'2021',
+       bullets:['Built real-time analytics dashboards adopted by 300+ enterprise clients.','Reduced cloud spend 30% by optimizing query pipelines.','Introduced automated testing, lowering production incidents 40%.']},
+      {title:'Software Developer', co:'StartHub', start:'2016', end:'2018',
+       bullets:['Developed the MVP that secured the company’s seed funding.','Owned the front-end rebuild in React, improving load time 2x.']}
+    ],
+    education:[{degree:'B.Tech, Computer Science', school:'IIT Delhi', year:'2012 – 2016', name:'B.Tech, Computer Science', org:'IIT Delhi'}],
+    awards:[{name:'Employee of the Year', org:'TechNova', year:'2023'},{name:'Hackathon Winner — FinTech Track', org:'DataPeak', year:'2020'}],
+    skills:['JavaScript','TypeScript','React','Node.js','Python','AWS','Docker','Kubernetes','System Design','PostgreSQL','GraphQL','CI/CD'],
+    customSections:[], format:'full'
+  };
   function mirrorData(){
     /* Prefer the generated resume; before generation fall back to the live form
-       data (collectData) so each card still shows the user's real details. */
+       data (collectData); when nothing is entered yet, use the full SAMPLE so the
+       gallery still looks premium. */
     try{ if(typeof lastResumeData!=='undefined' && lastResumeData) return lastResumeData; }catch(e){}
     try{
       if(typeof collectData==='function'){
@@ -13197,27 +13239,42 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         }
       }
     }catch(e){}
-    return null;
+    return SAMPLE;
   }
+  function onStep8(){
+    try{ return ((document.querySelector('.step-content.active')||{}).id)==='step8'; }catch(e){ return false; }
+  }
+  var _mirrorRun=0;
+  /* Render the card previews ONLY when the Choose Template step is on screen, and
+     spread the ~90 renders across animation frames (6 per frame) so the main thread
+     is never blocked. This keeps the landing page (and every other step) fast — the
+     old version rendered all 96 full resumes on initial page load. */
   function mirror(){
     try{
       if(typeof renderResumeHTML!=='function') return;
+      if(!onStep8()) return;
       var data=mirrorData();
-      if(!data) return; /* no data at all — keep the mock */
+      if(!data) return;
       var cards=document.querySelectorAll('#tplGrid .tpl-card');
       if(!cards.length) return;
-      var saved=currentTemplate;
-      try{
-        for(var i=0;i<cards.length;i++){
-          var c=cards[i];
-          var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
-          if(!m) continue;
-          var inner=c.querySelector('.tpl-mini-inner');
-          if(!inner) continue;
-          try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
-        }
-      } finally { currentTemplate=saved; }
-      if(typeof calibrateTplPreviews==='function') calibrateTplPreviews();
+      var token=++_mirrorRun, i=0, CHUNK=6;
+      function stepChunk(){
+        if(token!==_mirrorRun || !onStep8()) return; /* superseded or left step 8 */
+        var saved=currentTemplate, end=Math.min(i+CHUNK, cards.length);
+        try{
+          for(; i<end; i++){
+            var c=cards[i];
+            var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/);
+            if(!m) continue;
+            var inner=c.querySelector('.tpl-mini-inner');
+            if(!inner) continue;
+            try{ currentTemplate=m[1]; inner.innerHTML='<div class="resume-a4-page">'+renderResumeHTML(data)+'</div>'; }catch(e){}
+          }
+        } finally { currentTemplate=saved; }
+        if(typeof calibrateTplPreviews==='function'){ try{ calibrateTplPreviews(); }catch(e){} }
+        if(i<cards.length){ requestAnimationFrame(stepChunk); }
+      }
+      requestAnimationFrame(stepChunk);
     }catch(e){}
   }
   function install(){
@@ -13230,7 +13287,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     try{ window.renderTemplateGrid=wrapped; }catch(e){}
     return true;
   }
-  if(!install()){ var n=0, iv=setInterval(function(){ if(install()||++n>80) clearInterval(iv); }, 80); }
+  /* Kick the render the moment the user actually opens the Generate step. */
+  function watchStep8(){
+    var s8=document.getElementById('step8');
+    if(!s8 || s8.__r4uMirrorWatch) return !!s8;
+    try{ new MutationObserver(function(){ if(onStep8()) requestAnimationFrame(mirror); }).observe(s8,{attributes:true,attributeFilter:['class']}); s8.__r4uMirrorWatch=true; }catch(e){}
+    return true;
+  }
+  if(!install() || !watchStep8()){ var n=0, iv=setInterval(function(){ var a=install(), b=watchStep8(); if((a&&b)||++n>80) clearInterval(iv); }, 80); }
 })();
 </script>
 <script id="_r4uTplCrispJS">
