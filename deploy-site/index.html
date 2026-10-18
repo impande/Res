@@ -2413,9 +2413,14 @@
     .tpl-elegant .r-sk{border:1px solid #fecaca!important;border-radius:3px!important;color:#9a3412!important;background:#fff5f5!important;font-style:italic;}
 
     /* ── Two-column layout for Modern, Executive, Corporate ── */
-    .r-2col{display:flex;gap:0;margin:-6px -36px 0;min-height:160px;}
-    .r-aside{width:185px;min-width:185px;padding:18px 16px;box-sizing:border-box;flex-shrink:0;}
-    .r-main-col{flex:1;padding:4px 26px 8px 20px;min-width:0;}
+    /* WebKit-robust flex: iPad Safari & iPad Chrome (both WebKit) resolve a `0%`
+       flex-basis (from `flex:1`) against the scaled template-card's indefinite
+       width and collapse the main column, letting it overlap the sidebar. Give
+       the sidebar a fixed flex-basis and the main column a content-based (auto)
+       basis so both engines size the columns identically. */
+    .r-2col{display:flex;flex-wrap:nowrap;gap:0;margin:-6px -36px 0;min-height:160px;}
+    .r-aside{width:185px;min-width:185px;flex:0 0 185px;padding:18px 16px;box-sizing:border-box;}
+    .r-main-col{flex:1 1 auto;width:auto;padding:4px 26px 8px 20px;min-width:0;}
     /* When a section (e.g. Awards) is moved into the narrow sidebar via Refine with AI,
        stack the entry's date under the title instead of forcing it onto the same row —
        a right-aligned, non-shrinking year like "2026 – Currently Pursuing" would
@@ -13469,8 +13474,15 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       for(var i=0;i<thumbs.length;i++){
         var inner=thumbs[i].querySelector('.tpl-mini-inner'); if(!inner) continue;
         inner.style.left='0'; inner.style.top='0'; inner.style.willChange='auto';
-        if(supportsZoom){ inner.style.transform='none'; inner.style.zoom=z; }
-        else { inner.style.zoom=''; inner.style.transformOrigin='top left'; inner.style.transform='scale('+z.toFixed(4)+')'; }
+        /* Always scale the card with transform, never `zoom`. On iPad (both Safari
+           and Chrome are WebKit) `zoom` RE-LAYS-OUT the resume at the small size and
+           WebKit then mis-sizes flex/grid content — the two-column sidebar overlaps
+           the main column, and even single-column headers (name + photo flex row)
+           can overlap. transform:scale keeps the true 794px layout untouched and
+           only scales the painted pixels, so nothing can shift on any engine. The
+           slight softening on 1x desktop displays is an acceptable trade for a card
+           that is correct everywhere. */
+        inner.style.zoom=''; inner.style.transformOrigin='top left'; inner.style.transform='scale('+z.toFixed(4)+')';
       }
     }catch(e){}
   }
