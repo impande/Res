@@ -2335,6 +2335,15 @@
        layouts. ── */
     .resume-a4-page .r-exp-top,.resume-a4-page .r-edu{flex-wrap:wrap;}
     .resume-a4-page .r-exp-top .r-period,.resume-a4-page .r-exp-top .r-yr,.resume-a4-page .r-edu .r-yr,.resume-a4-page .r-edu .r-period{margin-left:auto;}
+    /* ── Disable mobile text-autosizing ("font boosting") on the live resume ──
+       iOS/Android browsers inflate some text blocks ~1.4x (wide paragraphs and
+       the job title) while leaving short headings like the name alone, so after
+       a scroll/reflow the title can render LARGER than the name. Pinning
+       text-size-adjust to 100% makes the resume always show its true baked font
+       sizes. The PDF export already does this separately; this covers the
+       on-screen output and the Preview modal. 100% (not none) keeps user zoom
+       and accessibility text scaling working. ── */
+    #resumeOutput,#resumeOutput *,#previewModalBody,#previewModalBody *,.resume-a4-page,.resume-a4-page *{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
     /* ── Bold bullets ── */
     [class*="tpl-"] .r-ul li{font-weight:600!important;}
 
