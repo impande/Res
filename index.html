@@ -2315,6 +2315,17 @@
     [class*="tpl-"] .r-title{font-size:0.77rem!important;margin-top:2px!important;}
     [class*="tpl-"] .r-contact{font-size:0.69rem!important;margin-top:6px!important;display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:5px!important;}
     [class*="tpl-"] .r-contact .r-sep{display:inline-flex;align-items:center;line-height:1;}
+    /* ── Header overlap guard ──────────────────────────────────────────────
+       A large header name with a tight line-height lets its glyph ink spill
+       downward into the job title, so "ASHISH PANDEY" overlaps "CLUSTER
+       MANAGER – PRODUCT OWNER". Pin a line-height on the name that fully
+       contains its glyphs and give the title a guaranteed gap, so the two can
+       never overlap in any render context (step-7 output, preview modal,
+       template cards, PDF) regardless of template, font or chosen spacing.
+       Pastel sidebar templates keep their own tuned values (more specific /
+       later in source). ── */
+    .resume-a4-page .r-head .r-name{line-height:1.25!important;}
+    .resume-a4-page .r-head .r-title{margin-top:4px!important;}
     /* ── Bold bullets ── */
     [class*="tpl-"] .r-ul li{font-weight:600!important;}
 
