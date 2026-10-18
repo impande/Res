@@ -2326,6 +2326,30 @@
        later in source). ── */
     .resume-a4-page .r-head .r-name{line-height:1.25!important;}
     .resume-a4-page .r-head .r-title{margin-top:4px!important;}
+    /* ── Experience/education date row: never starve the role ──────────────
+       The role+date header is a flex row; a long date ("December 2024 -
+       Current", nowrap) in a narrow column (esp. two-column templates) could
+       otherwise squeeze the role to ~0 width and break it one letter per line.
+       Allow the row to wrap so the date drops below the role when there isn't
+       room for both on one line. Only wraps when needed — no change on wide
+       layouts. ── */
+    .resume-a4-page .r-exp-top,.resume-a4-page .r-edu{flex-wrap:wrap;}
+    .resume-a4-page .r-exp-top .r-period,.resume-a4-page .r-exp-top .r-yr,.resume-a4-page .r-edu .r-yr,.resume-a4-page .r-edu .r-period{margin-left:auto;}
+    /* In the narrow sidebar (two-column templates) the date must NOT be pushed to
+       its own right-aligned line — that detaches the year (e.g. "2015") far below
+       the education entry. Keep sidebar education/experience as a left-aligned
+       stack: the year sits directly under the degree/school, not floated right. */
+    .resume-a4-page .r-aside .r-edu{flex-direction:column!important;align-items:flex-start!important;}
+    .resume-a4-page .r-aside .r-yr,.resume-a4-page .r-aside .r-period{margin-left:0!important;text-align:left!important;}
+    /* ── Disable mobile text-autosizing ("font boosting") on the live resume ──
+       iOS/Android browsers inflate some text blocks ~1.4x (wide paragraphs and
+       the job title) while leaving short headings like the name alone, so after
+       a scroll/reflow the title can render LARGER than the name. Pinning
+       text-size-adjust to 100% makes the resume always show its true baked font
+       sizes. The PDF export already does this separately; this covers the
+       on-screen output and the Preview modal. 100% (not none) keeps user zoom
+       and accessibility text scaling working. ── */
+    #resumeOutput,#resumeOutput *,#previewModalBody,#previewModalBody *,.resume-a4-page,.resume-a4-page *{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
     /* ── Bold bullets ── */
     [class*="tpl-"] .r-ul li{font-weight:600!important;}
 
@@ -11036,13 +11060,18 @@ window.__novaPortfolioHTML=function(d,sections){
 .tpl-blush .r-aside .r-sk::before,.tpl-verdant .r-aside .r-sk::before,.tpl-lilac .r-aside .r-sk::before,.tpl-azure .r-aside .r-sk::before{content:"";position:absolute!important;left:2px!important;top:0.62em!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--pt-acc)!important;}
 .tpl-blush .r-aside .r-yr,.tpl-verdant .r-aside .r-yr,.tpl-lilac .r-aside .r-yr,.tpl-azure .r-aside .r-yr{color:var(--pt-acc)!important;}
 .tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role{color:var(--pt-acc)!important;}
-/* keep the date cleanly right-aligned, never butting against a long role/degree */
+/* keep the date cleanly right-aligned, never butting against a long role/degree.
+   flex-wrap:wrap is essential: in the narrow main column a long date like
+   "December 2024 - Current" (nowrap, non-shrinking) would otherwise starve the
+   role to ~0 width (min-width:0) and break it one letter per line. Wrapping lets
+   the date drop to its own line (right-aligned via margin-left:auto) so the role
+   always keeps the full column width. */
 .tpl-blush .r-main-col .r-exp-top,.tpl-verdant .r-main-col .r-exp-top,.tpl-lilac .r-main-col .r-exp-top,.tpl-azure .r-main-col .r-exp-top,
-.tpl-blush .r-main-col .r-edu,.tpl-verdant .r-main-col .r-edu,.tpl-lilac .r-main-col .r-edu,.tpl-azure .r-main-col .r-edu{display:flex!important;flex-wrap:nowrap!important;justify-content:space-between!important;gap:14px!important;align-items:flex-start!important;}
+.tpl-blush .r-main-col .r-edu,.tpl-verdant .r-main-col .r-edu,.tpl-lilac .r-main-col .r-edu,.tpl-azure .r-main-col .r-edu{display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;gap:2px 14px!important;align-items:flex-start!important;}
 .tpl-blush .r-main-col .r-role,.tpl-verdant .r-main-col .r-role,.tpl-lilac .r-main-col .r-role,.tpl-azure .r-main-col .r-role,
 .tpl-blush .r-main-col .r-deg,.tpl-verdant .r-main-col .r-deg,.tpl-lilac .r-main-col .r-deg,.tpl-azure .r-main-col .r-deg{flex:1 1 auto!important;min-width:0!important;}
 .tpl-blush .r-main-col .r-period,.tpl-verdant .r-main-col .r-period,.tpl-lilac .r-main-col .r-period,.tpl-azure .r-main-col .r-period,
-.tpl-blush .r-main-col .r-yr,.tpl-verdant .r-main-col .r-yr,.tpl-lilac .r-main-col .r-yr,.tpl-azure .r-main-col .r-yr{flex:0 0 auto!important;white-space:nowrap!important;text-align:right!important;color:#8a8078!important;font-style:normal!important;}
+.tpl-blush .r-main-col .r-yr,.tpl-verdant .r-main-col .r-yr,.tpl-lilac .r-main-col .r-yr,.tpl-azure .r-main-col .r-yr{flex:0 0 auto!important;margin-left:auto!important;white-space:nowrap!important;text-align:right!important;color:#8a8078!important;font-style:normal!important;}
 
 /* Timeline down Education & Experience in the main column: line + dot per entry */
 .tpl-blush .r-main-col .r-exp,.tpl-verdant .r-main-col .r-exp,.tpl-lilac .r-main-col .r-exp,.tpl-azure .r-main-col .r-exp,
