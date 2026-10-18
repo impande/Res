@@ -13474,7 +13474,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       for(var i=0;i<thumbs.length;i++){
         var inner=thumbs[i].querySelector('.tpl-mini-inner'); if(!inner) continue;
         inner.style.left='0'; inner.style.top='0'; inner.style.willChange='auto';
-        if(supportsZoom){ inner.style.transform='none'; inner.style.zoom=z; }
+        /* Two-column (sidebar) templates break under WebKit's `zoom` on iPad
+           (Safari & Chrome are both WebKit there): zoom RE-LAYS-OUT the resume at
+           the small size and WebKit then mis-sizes the sidebar/main tracks, so the
+           sidebar overlaps the main column. Scale those cards with transform
+           instead — it keeps the true 794px layout and only scales the paint, so
+           the columns stay put. Single-column cards keep `zoom` for crisp text. */
+        var twoCol = false; try{ twoCol = !!inner.querySelector('.r-2col, .r-aside'); }catch(e){}
+        if(supportsZoom && !twoCol){ inner.style.transform='none'; inner.style.zoom=z; }
         else { inner.style.zoom=''; inner.style.transformOrigin='top left'; inner.style.transform='scale('+z.toFixed(4)+')'; }
       }
     }catch(e){}
