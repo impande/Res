@@ -13474,15 +13474,15 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       for(var i=0;i<thumbs.length;i++){
         var inner=thumbs[i].querySelector('.tpl-mini-inner'); if(!inner) continue;
         inner.style.left='0'; inner.style.top='0'; inner.style.willChange='auto';
-        /* Two-column (sidebar) templates break under WebKit's `zoom` on iPad
-           (Safari & Chrome are both WebKit there): zoom RE-LAYS-OUT the resume at
-           the small size and WebKit then mis-sizes the sidebar/main tracks, so the
-           sidebar overlaps the main column. Scale those cards with transform
-           instead — it keeps the true 794px layout and only scales the paint, so
-           the columns stay put. Single-column cards keep `zoom` for crisp text. */
-        var twoCol = false; try{ twoCol = !!inner.querySelector('.r-2col, .r-aside'); }catch(e){}
-        if(supportsZoom && !twoCol){ inner.style.transform='none'; inner.style.zoom=z; }
-        else { inner.style.zoom=''; inner.style.transformOrigin='top left'; inner.style.transform='scale('+z.toFixed(4)+')'; }
+        /* Always scale the card with transform, never `zoom`. On iPad (both Safari
+           and Chrome are WebKit) `zoom` RE-LAYS-OUT the resume at the small size and
+           WebKit then mis-sizes flex/grid content — the two-column sidebar overlaps
+           the main column, and even single-column headers (name + photo flex row)
+           can overlap. transform:scale keeps the true 794px layout untouched and
+           only scales the painted pixels, so nothing can shift on any engine. The
+           slight softening on 1x desktop displays is an acceptable trade for a card
+           that is correct everywhere. */
+        inner.style.zoom=''; inner.style.transformOrigin='top left'; inner.style.transform='scale('+z.toFixed(4)+')';
       }
     }catch(e){}
   }
