@@ -2335,6 +2335,12 @@
        layouts. ── */
     .resume-a4-page .r-exp-top,.resume-a4-page .r-edu{flex-wrap:wrap;}
     .resume-a4-page .r-exp-top .r-period,.resume-a4-page .r-exp-top .r-yr,.resume-a4-page .r-edu .r-yr,.resume-a4-page .r-edu .r-period{margin-left:auto;}
+    /* In the narrow sidebar (two-column templates) the date must NOT be pushed to
+       its own right-aligned line — that detaches the year (e.g. "2015") far below
+       the education entry. Keep sidebar education/experience as a left-aligned
+       stack: the year sits directly under the degree/school, not floated right. */
+    .resume-a4-page .r-aside .r-edu{flex-direction:column!important;align-items:flex-start!important;}
+    .resume-a4-page .r-aside .r-yr,.resume-a4-page .r-aside .r-period{margin-left:0!important;text-align:left!important;}
     /* ── Disable mobile text-autosizing ("font boosting") on the live resume ──
        iOS/Android browsers inflate some text blocks ~1.4x (wide paragraphs and
        the job title) while leaving short headings like the name alone, so after
