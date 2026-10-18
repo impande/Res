@@ -2630,10 +2630,10 @@
     .sl-wa svg{flex-shrink:0;color:#25d366;}
     .sl-email svg{flex-shrink:0;opacity:0.7;}
     .sl-cp{color:var(--muted);font-size:0.68rem;opacity:0.85;padding:11px 2px 2px;}
-    /* Single contact point: where the sidebar (with its Contact section) is visible,
-       hide the floating WhatsApp button so there aren't two contact CTAs. On mobile
-       the sidebar is hidden, so the floating button stays as the contact there. */
-    @media(min-width:769px){ .wa-fab{ display:none !important; } }
+    /* Single contact point everywhere: the floating "Contact Us" button is removed so
+       contact lives in ONE place per view — the sidebar Contact section on desktop,
+       and the footer "Contact" link on mobile (where the sidebar is hidden). */
+    .wa-fab{ display:none !important; }
   </style>
   <div class="sidebar-legal">
     <details class="sl-acc">
