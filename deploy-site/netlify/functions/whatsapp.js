@@ -111,6 +111,35 @@ exports.handler = async (event) => {
   // 1) Webhook verification (Meta calls this once with GET)
   if (event.httpMethod === 'GET') {
     const q = event.queryStringParameters || {};
+    // One-time admin: subscribe THIS app to the WhatsApp Business Account's
+    // webhooks (POST /<WABA_ID>/subscribed_apps). This is the step that makes
+    // Meta route the number's inbound messages to this webhook. Guarded by the
+    // verify token so only the owner can trigger it.
+    if (q.admin === 'subscribe' && q.key === process.env.WHATSAPP_VERIFY_TOKEN) {
+      const wabaId = process.env.WHATSAPP_WABA_ID || '2356692575145331';
+      try {
+        const r = await fetch(`${GRAPH}/${wabaId}/subscribed_apps`, {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + (process.env.WHATSAPP_TOKEN || '') }
+        });
+        const body = await r.text().catch(() => '');
+        return { statusCode: 200, body: 'subscribe_apps status ' + r.status + ': ' + body };
+      } catch (e) {
+        return { statusCode: 200, body: 'subscribe_apps error: ' + (e && e.message) };
+      }
+    }
+    // Let us read the current subscription from the browser too.
+    if (q.admin === 'check' && q.key === process.env.WHATSAPP_VERIFY_TOKEN) {
+      const wabaId = process.env.WHATSAPP_WABA_ID || '2356692575145331';
+      try {
+        const r = await fetch(`${GRAPH}/${wabaId}/subscribed_apps`, {
+          headers: { Authorization: 'Bearer ' + (process.env.WHATSAPP_TOKEN || '') }
+        });
+        return { statusCode: 200, body: 'subscribed_apps GET ' + r.status + ': ' + (await r.text().catch(() => '')) };
+      } catch (e) {
+        return { statusCode: 200, body: 'check error: ' + (e && e.message) };
+      }
+    }
     if (q['hub.mode'] === 'subscribe' && q['hub.verify_token'] === process.env.WHATSAPP_VERIFY_TOKEN) {
       return { statusCode: 200, body: q['hub.challenge'] || '' };
     }
