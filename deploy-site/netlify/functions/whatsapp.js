@@ -111,31 +111,47 @@ exports.handler = async (event) => {
   // 1) Webhook verification (Meta calls this once with GET)
   if (event.httpMethod === 'GET') {
     const q = event.queryStringParameters || {};
-    // One-time admin: subscribe THIS app to the WhatsApp Business Account's
-    // webhooks (POST /<WABA_ID>/subscribed_apps). This is the step that makes
-    // Meta route the number's inbound messages to this webhook. Guarded by the
-    // verify token so only the owner can trigger it.
-    if (q.admin === 'subscribe' && q.key === process.env.WHATSAPP_VERIFY_TOKEN) {
-      const wabaId = process.env.WHATSAPP_WABA_ID || '2356692575145331';
+    // One-time admin helpers, all guarded by the verify token so only the owner
+    // can trigger them. The WABA id can come from ?waba=<id> (highest priority),
+    // the WHATSAPP_WABA_ID env var, or the hardcoded fallback.
+    const _admin = q.admin && q.key === process.env.WHATSAPP_VERIFY_TOKEN;
+    const _tok = process.env.WHATSAPP_TOKEN || '';
+    const wabaId = q.waba || process.env.WHATSAPP_WABA_ID || '2356692575145331';
+
+    // whoami: ask Meta what this token can see. debug_token lists granular
+    // scopes with target_ids, which include the WhatsApp Business Account id(s)
+    // the token is allowed to act on — that's the id to use for ?waba=.
+    if (_admin && q.admin === 'whoami') {
+      try {
+        const r = await fetch(`${GRAPH}/debug_token?input_token=${encodeURIComponent(_tok)}&access_token=${encodeURIComponent(_tok)}`);
+        return { statusCode: 200, body: 'debug_token ' + r.status + ': ' + (await r.text().catch(() => '')) };
+      } catch (e) {
+        return { statusCode: 200, body: 'whoami error: ' + (e && e.message) };
+      }
+    }
+
+    // subscribe THIS app to the WhatsApp Business Account's webhooks
+    // (POST /<WABA_ID>/subscribed_apps). This is the step that makes Meta route
+    // the number's inbound messages to this webhook.
+    if (_admin && q.admin === 'subscribe') {
       try {
         const r = await fetch(`${GRAPH}/${wabaId}/subscribed_apps`, {
           method: 'POST',
-          headers: { Authorization: 'Bearer ' + (process.env.WHATSAPP_TOKEN || '') }
+          headers: { Authorization: 'Bearer ' + _tok }
         });
         const body = await r.text().catch(() => '');
-        return { statusCode: 200, body: 'subscribe_apps status ' + r.status + ': ' + body };
+        return { statusCode: 200, body: 'subscribe_apps (waba ' + wabaId + ') status ' + r.status + ': ' + body };
       } catch (e) {
         return { statusCode: 200, body: 'subscribe_apps error: ' + (e && e.message) };
       }
     }
     // Let us read the current subscription from the browser too.
-    if (q.admin === 'check' && q.key === process.env.WHATSAPP_VERIFY_TOKEN) {
-      const wabaId = process.env.WHATSAPP_WABA_ID || '2356692575145331';
+    if (_admin && q.admin === 'check') {
       try {
         const r = await fetch(`${GRAPH}/${wabaId}/subscribed_apps`, {
-          headers: { Authorization: 'Bearer ' + (process.env.WHATSAPP_TOKEN || '') }
+          headers: { Authorization: 'Bearer ' + _tok }
         });
-        return { statusCode: 200, body: 'subscribed_apps GET ' + r.status + ': ' + (await r.text().catch(() => '')) };
+        return { statusCode: 200, body: 'subscribed_apps (waba ' + wabaId + ') GET ' + r.status + ': ' + (await r.text().catch(() => '')) };
       } catch (e) {
         return { statusCode: 200, body: 'check error: ' + (e && e.message) };
       }
