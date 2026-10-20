@@ -115,7 +115,10 @@ exports.handler = async (event) => {
     // can trigger them. The WABA id can come from ?waba=<id> (highest priority),
     // the WHATSAPP_WABA_ID env var, or the hardcoded fallback.
     const _admin = q.admin && q.key === process.env.WHATSAPP_VERIFY_TOKEN;
-    const _tok = process.env.WHATSAPP_TOKEN || '';
+    // ?token=<override> lets a one-time admin call use a different token (e.g. the
+    // Step-1 temporary token, which has full permission over the test WABA) when
+    // the stored System User token can't manage the WhatsApp Business Account.
+    const _tok = q.token || process.env.WHATSAPP_TOKEN || '';
     const wabaId = q.waba || process.env.WHATSAPP_WABA_ID || '2356692575145331';
 
     // whoami: ask Meta what this token can see. debug_token lists granular
