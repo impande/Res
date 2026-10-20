@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Resume4U — Tailor to this job",
+  "version": "0.1.0",
+  "description": "One tap to tailor your resume to the job you're viewing, using resume4u.help.",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.linkedin.com/jobs/*",
+        "*://*.naukri.com/*",
+        "*://*.internshala.com/*",
+        "*://*.indeed.com/*",
+        "*://*.indeed.co.in/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Resume4U — Tailor to this job"
+  },
+  "icons": {}
+}
