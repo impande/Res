@@ -130,6 +130,30 @@ exports.handler = async (event) => {
       }
     }
 
+    // wabas: discover the WhatsApp Business Account id via the Business API
+    // (me/businesses -> owned/client WABAs). Fallback when the id isn't handy.
+    if (_admin && q.admin === 'wabas') {
+      try {
+        let out = '';
+        const biz = await fetch(`${GRAPH}/me/businesses?access_token=${encodeURIComponent(_tok)}`);
+        const bizBody = await biz.text().catch(() => '');
+        out += 'me/businesses ' + biz.status + ': ' + bizBody + '\n\n';
+        try {
+          const bj = JSON.parse(bizBody);
+          const bid = bj && bj.data && bj.data[0] && bj.data[0].id;
+          if (bid) {
+            const owned = await fetch(`${GRAPH}/${bid}/owned_whatsapp_business_accounts?access_token=${encodeURIComponent(_tok)}`);
+            out += 'owned_wabas ' + owned.status + ': ' + (await owned.text().catch(() => '')) + '\n\n';
+            const client = await fetch(`${GRAPH}/${bid}/client_whatsapp_business_accounts?access_token=${encodeURIComponent(_tok)}`);
+            out += 'client_wabas ' + client.status + ': ' + (await client.text().catch(() => ''));
+          }
+        } catch (e) { out += 'parse: ' + (e && e.message); }
+        return { statusCode: 200, body: out };
+      } catch (e) {
+        return { statusCode: 200, body: 'wabas error: ' + (e && e.message) };
+      }
+    }
+
     // subscribe THIS app to the WhatsApp Business Account's webhooks
     // (POST /<WABA_ID>/subscribed_apps). This is the step that makes Meta route
     // the number's inbound messages to this webhook.
