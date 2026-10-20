@@ -12230,6 +12230,89 @@ window.__novaPortfolioHTML=function(d,sections){
   new MutationObserver(tryFill).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+<style id="_r4uWaDiscoveryCss">
+/* Discovery for the WhatsApp résumé co-pilot: a secondary CTA on the landing
+   page, and a dismissible banner inside the builder, so people learn they can
+   build by chat. Desktop shows a QR (reuses _r4uShowQR); mobile opens wa.me. */
+.r4u-wa-cta{display:inline-flex;align-items:center;gap:9px;margin:14px auto 0;padding:11px 18px;border-radius:999px;
+  border:1.5px solid rgba(37,211,102,0.5);background:var(--card-bg,#fff);color:var(--text);cursor:pointer;
+  font-family:inherit;font-weight:700;font-size:0.9rem;text-decoration:none;transition:transform .12s,box-shadow .14s,border-color .14s;}
+.r4u-wa-cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px -12px rgba(37,211,102,.7);border-color:#25d366;}
+.r4u-wa-cta .wic{width:20px;height:20px;flex-shrink:0;color:#25d366;}
+.r4u-wa-cta small{font-weight:500;color:var(--muted);}
+.r4u-wa-ctawrap{display:flex;justify-content:center;width:100%;}
+.r4u-wa-banner{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:12px 14px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(37,211,102,0.10),rgba(37,211,102,0.03));border:1px solid rgba(37,211,102,0.35);}
+.r4u-wa-banner .wic{width:26px;height:26px;flex-shrink:0;color:#25d366;}
+.r4u-wa-banner .wb-txt{flex:1;min-width:0;font-size:0.84rem;line-height:1.4;color:var(--text);}
+.r4u-wa-banner .wb-txt b{font-weight:700;}
+.r4u-wa-banner .wb-go{flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.8rem;color:#fff;
+  background:#25d366;border-radius:9px;padding:9px 13px;white-space:nowrap;}
+.r4u-wa-banner .wb-x{flex-shrink:0;border:0;background:transparent;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer;padding:2px 4px;}
+@media(max-width:560px){
+  .r4u-wa-banner{flex-wrap:wrap;position:relative;padding-right:32px;}
+  .r4u-wa-banner .wb-txt{flex:1 1 auto;font-size:0.82rem;}
+  .r4u-wa-banner .wb-go{flex:1 1 100%;order:3;margin-top:2px;padding:10px;font-size:0.82rem;}
+  .r4u-wa-banner .wb-x{position:absolute;top:6px;right:8px;}
+}
+</style>
+<script id="_r4uWaDiscoveryJS">
+/* WhatsApp co-pilot discovery entry points. One number constant — swap it for
+   the production WhatsApp number before going live on prod. */
+(function(){
+  var WA_BOT='15556758306';  /* TEST number. Replace with the verified production number for prod. */
+  var WA_TEXT='Hi!%20I%27d%20like%20to%20build%20my%20r%C3%A9sum%C3%A9%20on%20WhatsApp';
+  var WA_URL='https://wa.me/'+WA_BOT+'?text='+WA_TEXT;
+  var WIC='<svg class="wic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2z"/></svg>';
+  function isDesktop(){ try{ return window.matchMedia && window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
+  function launch(){
+    if(isDesktop() && typeof window._r4uShowQR==='function'){
+      window._r4uShowQR(WA_URL,{title:'Build on WhatsApp',sub:'Scan to open WhatsApp on your phone and build your résumé by chat — one quick question at a time.',file:'whatsapp-qr.png'});
+    } else { window.open(WA_URL,'_blank','noopener'); }
+  }
+  function activeStepId(){ var el=document.querySelector('.step-content.active'); return el?el.id:''; }
+
+  /* 1) Landing CTA — under the main CTA cards; shown only on the landing (step 0) */
+  function landingCta(){
+    var wrap=document.getElementById('_r4uWaLandingCta');
+    if(!wrap){
+      var stack=document.querySelector('.r4u-cta-stack'); if(!stack) return;
+      wrap=document.createElement('div'); wrap.className='r4u-wa-ctawrap'; wrap.id='_r4uWaLandingCta';
+      var a=document.createElement('a'); a.href='#'; a.className='r4u-wa-cta';
+      a.innerHTML=WIC+'<span>Short on time? <b>Build on WhatsApp</b> &rarr;<br><small>One question at a time, in your spare moments.</small></span>';
+      a.addEventListener('click',function(e){ e.preventDefault(); launch(); });
+      wrap.appendChild(a);
+      stack.parentNode.insertBefore(wrap, stack.nextSibling);
+    }
+    var onLanding = activeStepId()==='step0';
+    wrap.style.display = onLanding ? 'flex' : 'none';
+  }
+
+  /* 2) In-builder banner — on steps 1-7, dismissible */
+  var DISMISS='_r4uWaBannerHidden';
+  function dismissed(){ try{ return localStorage.getItem(DISMISS)==='1'; }catch(e){ return false; } }
+  var banner=null;
+  function makeBanner(){
+    banner=document.createElement('div'); banner.className='r4u-wa-banner'; banner.id='_r4uWaBanner';
+    banner.innerHTML=WIC+'<div class="wb-txt"><b>Don’t feel like filling a form?</b> Build your résumé on WhatsApp instead — reply to one question at a time.</div>'+
+      '<button type="button" class="wb-go">Switch to WhatsApp</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
+    banner.querySelector('.wb-go').addEventListener('click',launch);
+    banner.querySelector('.wb-x').addEventListener('click',function(){ try{ localStorage.setItem(DISMISS,'1'); }catch(e){} if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); });
+    return banner;
+  }
+  function syncBanner(){
+    var id=activeStepId();
+    var show = /^step[1-7]$/.test(id) && !dismissed();
+    if(!show){ if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); return; }
+    var step=document.getElementById(id); if(!step) return;
+    if(!banner) makeBanner();
+    if(banner.parentNode!==step || step.firstChild!==banner){ step.insertBefore(banner, step.firstChild); }
+  }
+  function tick(){ try{ landingCta(); syncBanner(); }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
+  setInterval(tick, 700);
+})();
+</script>
 <script id="_r4uCoverLetterJS">
 /* Enhance the cover-letter generator (#5): the built-in one is already
    JD-aware, but it feeds the AI only "Title at Company" — not the candidate's
