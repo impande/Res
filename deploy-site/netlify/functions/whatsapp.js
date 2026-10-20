@@ -92,12 +92,18 @@ async function polishBullets(raw, role) {
 /* ---- WhatsApp send ---- */
 async function send(to, text) {
   const token = process.env.WHATSAPP_TOKEN, phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  if (!token || !phoneId) { console.log('[whatsapp] would send to', to, ':', text); return; }
-  await fetch(`${GRAPH}/${phoneId}/messages`, {
+  if (!token || !phoneId) { console.log('[whatsapp] NOT SENT — missing WHATSAPP_TOKEN or WHATSAPP_PHONE_NUMBER_ID. Would send to', to, ':', text); return; }
+  const resp = await fetch(`${GRAPH}/${phoneId}/messages`, {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + token, 'content-type': 'application/json' },
     body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { body: text } })
   });
+  if (!resp.ok) {
+    let body = ''; try { body = await resp.text(); } catch (e) {}
+    console.error('[whatsapp] SEND FAILED', resp.status, body); // e.g. recipient not in allowed list, or token expired
+  } else {
+    console.log('[whatsapp] sent ok to', to);
+  }
 }
 
 /* ---- main handler ---- */
@@ -123,6 +129,7 @@ exports.handler = async (event) => {
 
   const from = msg.from;
   const text = (msg.text && msg.text.body || '').trim();
+  console.log('[whatsapp] inbound from', from, ':', JSON.stringify(text));
 
   try {
     let state = await getState(from);
