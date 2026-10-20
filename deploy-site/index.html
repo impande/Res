@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="facebook-domain-verification" content="z75dvbk14mwrdvot8qmiqhcudibb0r" />
   <script id="_r4uPerfPause">
   /* Performance / battery: when the tab or app is in the BACKGROUND, skip the
      repeated work of interval timers and (via the data-bg attribute + CSS) pause
@@ -12019,6 +12020,298 @@ window.__novaPortfolioHTML=function(d,sections){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',sync);
   else sync();
   setInterval(sync, 800);
+})();
+</script>
+<style id="_r4uRoastCss">
+/* "Roast my résumé" — a playful, shareable entry on the Generate page. Reads the
+   generated resume, asks the AI for a witty-but-useful roast + fixes, and offers a
+   copyable share line (the growth loop). Additive; self-contained modal. */
+#_r4uRoastBar{display:none;margin:12px 0 0;align-items:center;gap:13px;padding:13px 15px;border-radius:14px;
+  cursor:pointer;border:1px solid rgba(224,70,61,0.35);background:var(--card-bg,#fff);position:relative;overflow:hidden;
+  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;}
+#_r4uRoastBar.show{display:flex;}
+#_r4uRoastBar:hover{transform:translateY(-1px);box-shadow:0 10px 24px -14px rgba(224,70,61,.5);border-color:rgba(224,70,61,.6);}
+#_r4uRoastBar .rb-ico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.25rem;background:linear-gradient(135deg,#f97316,#e0463d);box-shadow:0 6px 14px -6px rgba(224,70,61,.6);}
+#_r4uRoastBar .rb-body{flex:1;min-width:0;}
+#_r4uRoastBar .rb-title{display:block;font-weight:800;font-size:0.96rem;color:var(--text);}
+#_r4uRoastBar .rb-sub{display:block;font-size:0.78rem;color:var(--muted);margin-top:1px;}
+#_r4uRoastBar .rb-go{flex-shrink:0;font-weight:800;font-size:0.82rem;color:#e0463d;white-space:nowrap;}
+#r4uRoastOverlay{position:fixed;inset:0;z-index:10090;display:none;align-items:center;justify-content:center;padding:16px;
+  background:rgba(15,10,8,0.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);overflow-y:auto;overscroll-behavior:contain;}
+#r4uRoastOverlay.on{display:flex;}
+#r4uRoastCard{width:min(560px,100%);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card-bg,#fff);
+  color:var(--text);border:1px solid var(--border,#e5e5e0);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.35);
+  padding:22px 20px 20px;position:relative;font-family:inherit;}
+#r4uRoastCard .rr-x{position:absolute;top:11px;right:13px;border:0;background:transparent;font-size:1.4rem;line-height:1;color:var(--muted);cursor:pointer;}
+#r4uRoastCard h3{font-size:1.2rem;font-weight:800;margin:0 2px 2px;letter-spacing:-.01em;}
+#r4uRoastCard .rr-eyebrow{font-size:0.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+#r4uRoastCard .rr-meter{margin:12px 0 4px;}
+#r4uRoastCard .rr-meter-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;gap:10px;}
+#r4uRoastCard .rr-score{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+#r4uRoastCard .rr-score small{font-size:.85rem;color:var(--muted);font-weight:600;}
+#r4uRoastCard .rr-verdict{font-weight:800;font-size:.85rem;text-align:right;}
+#r4uRoastCard .rr-track{height:11px;border-radius:99px;background:var(--input-bg,#f1efe9);overflow:hidden;box-shadow:inset 0 0 0 1px var(--border,#e5e5e0);}
+#r4uRoastCard .rr-fill{height:100%;width:0;border-radius:99px;transition:width .9s cubic-bezier(.3,1,.4,1);}
+#r4uRoastCard .rr-line{display:flex;gap:11px;padding:12px 0;border-top:1px solid var(--border,#eee);}
+#r4uRoastCard .rr-line:first-child{border-top:0;}
+#r4uRoastCard .rr-emoji{font-size:1.25rem;line-height:1.3;flex-shrink:0;}
+#r4uRoastCard .rr-quote{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:3px;}
+#r4uRoastCard .rr-zing{font-size:.93rem;font-weight:600;line-height:1.5;}
+#r4uRoastCard .rr-fix{padding:12px 0;border-top:1px solid var(--border,#eee);}
+#r4uRoastCard .rr-fix:first-of-type{border-top:0;}
+#r4uRoastCard .rr-before{font-size:.82rem;color:var(--muted);text-decoration:line-through;margin-bottom:6px;}
+#r4uRoastCard .rr-after{font-size:.92rem;display:flex;gap:8px;line-height:1.5;}
+#r4uRoastCard .rr-after .rr-arw{color:#1f9d57;font-weight:800;flex-shrink:0;}
+#r4uRoastCard .rr-share{background:linear-gradient(145deg,#2a1510,#3a1d13);color:#fff5ef;border-radius:14px;padding:18px 18px 16px;margin-top:16px;position:relative;overflow:hidden;}
+#r4uRoastCard .rr-share::after{content:"🔥";position:absolute;right:-8px;bottom:-16px;font-size:5rem;opacity:.15;}
+#r4uRoastCard .rr-share .rr-st{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#f7b36a;}
+#r4uRoastCard .rr-share .rr-sq{font-size:1.08rem;font-weight:800;line-height:1.3;margin:7px 0 10px;max-width:30ch;}
+#r4uRoastCard .rr-share .rr-sf{font-size:.74rem;color:#e9c5a8;}
+#r4uRoastCard .rr-btns{display:flex;gap:9px;margin-top:15px;flex-wrap:wrap;}
+#r4uRoastCard .rr-btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;color:#fff;
+  padding:13px 18px;border-radius:12px;flex:1 1 150px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .1s;}
+#r4uRoastCard .rr-btn:active{transform:translateY(1px);}
+#r4uRoastCard .rr-btn-fix{background:linear-gradient(135deg,#22b765,#128a4a);}
+#r4uRoastCard .rr-btn-copy{background:transparent;color:var(--accent,#b45309);border:1.5px solid var(--border,#ddd);font-weight:700;}
+#r4uRoastCard .rr-note{font-size:.76rem;color:var(--muted);margin-top:10px;}
+#r4uRoastCard .rr-load{text-align:center;padding:30px 10px;}
+#r4uRoastCard .rr-spin{width:34px;height:34px;border:3px solid var(--border,#eee);border-top-color:#e0463d;border-radius:50%;margin:0 auto 14px;animation:rrSpin .8s linear infinite;}
+@keyframes rrSpin{to{transform:rotate(360deg);}}
+@media(prefers-reduced-motion:reduce){#r4uRoastCard .rr-fill,#r4uRoastCard .rr-spin{transition:none;animation:none;}}
+</style>
+<script id="_r4uRoastJS">
+/* Roast my résumé: additive feature. Reads the generated resume, asks the AI
+   (same /generate endpoint) for a witty-but-useful roast + fixes as JSON, shows
+   a score meter, the roast, a one-tap "fix it" reveal, and a copyable share line. */
+(function(){
+  var overlay=null, prevOverflow='', lastRoast=null;
+  function data(){ try{ return window.__roLastData || (typeof lastResumeData!=='undefined'&&lastResumeData) || {}; }catch(e){ return {}; } }
+  function hasResume(){ try{ var o=document.getElementById('resumeOutput'); return !!(o&&o.querySelector('.resume-a4-page')); }catch(e){ return false; } }
+  function ai(prompt){
+    return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})})
+      .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
+      .then(function(j){ var raw=j.content; return ((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||j.text||'').trim(); });
+  }
+  function parse(t){ try{ return JSON.parse(t); }catch(e){} var a=t.indexOf('{'),b=t.lastIndexOf('}'); if(a>=0&&b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(e2){} } return null; }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function resumeText(){
+    var d=data();
+    var exp=(d.experience||[]).slice(0,4).map(function(e){ return (e.title||e.role||'')+(e.co||e.company?(' at '+(e.co||e.company)):'')+': '+((e.bullets||[]).join(' | ')); }).join('\n');
+    return 'Name: '+((d.firstName||'')+' '+(d.lastName||'')).trim()+
+      '\nTitle: '+(d.jobTitle||'')+
+      '\nSummary: '+(d.summary||'(none)')+
+      '\nExperience:\n'+(exp||'(none)')+
+      '\nSkills: '+((d.skills||[]).join(', ')||'(none)');
+  }
+  function prompt(){
+    return 'You are a witty but genuinely helpful resume coach. ROAST the resume below: be funny and brutally honest about its weak spots, but every roast must point to a real, specific improvement. Then give the fixed version.\n\n'+
+      'Return ONLY valid JSON (no markdown fences, no preamble) in EXACTLY this shape:\n'+
+      '{"score":<int 0-100, how weak it is NOW, lower=weaker>,"verdict":"<=6 word punchy verdict","roasts":[{"emoji":"<1 emoji>","quote":"<the actual weak phrase, <=12 words>","zing":"<=34 word witty + useful critique"}],"fixes":[{"before":"<weak phrase>","after":"<strong rewrite>"}],"newScore":<int 0-100 after fixes, higher>,"shareLine":"<=18 word punchy line someone would post"}\n\n'+
+      'Give 3-4 roasts and 3-4 fixes. Base everything ONLY on the resume; do NOT invent achievements or numbers it does not contain. In "after" rewrites, where a metric would strengthen it but is missing, use a bracketed placeholder like [X]% or [N]+ for the person to fill in. Keep it good-natured, never cruel.\n\n'+
+      'RESUME:\n'+resumeText();
+  }
+  function build(){
+    if(overlay) return overlay;
+    overlay=document.createElement('div'); overlay.id='r4uRoastOverlay';
+    overlay.innerHTML='<div id="r4uRoastCard" role="dialog" aria-modal="true" aria-label="Resume roast"><button class="rr-x" aria-label="Close">&times;</button><div id="r4uRoastBody"></div></div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',function(e){ if(e.target===overlay) close(); });
+    overlay.querySelector('.rr-x').addEventListener('click',close);
+    return overlay;
+  }
+  function open(){
+    if(!hasResume()){ if(typeof showToast==='function') showToast('Generate your resume first, then roast it 🔥'); return; }
+    build(); try{ prevOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; }catch(e){}
+    overlay.classList.add('on');
+    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">🔥 Roasting your résumé…</div><div class="rr-note" style="margin-top:4px">Reading every line so it stings in the right places.</div></div>';
+    ai(prompt()).then(function(t){ var d=parse(t); if(!d||!d.roasts){ throw new Error('parse'); } lastRoast=d; renderRoast(d); })
+      .catch(function(){ body().innerHTML='<div class="rr-load"><div style="font-size:1.6rem">😅</div><div style="font-weight:700;margin-top:6px">The roast fizzled out</div><div class="rr-note">Couldn’t reach the AI just now. Close and try again in a moment.</div></div>'; });
+  }
+  function close(){ if(!overlay) return; overlay.classList.remove('on'); try{ document.body.style.overflow=prevOverflow; }catch(e){} }
+  function body(){ return document.getElementById('r4uRoastBody'); }
+  function clamp(n,d){ n=parseInt(n,10); return isNaN(n)?d:Math.max(0,Math.min(100,n)); }
+  function renderRoast(d){
+    var sc=clamp(d.score,40);
+    var lines=(d.roasts||[]).slice(0,4).map(function(r){
+      return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
+    }).join('');
+    body().innerHTML=
+      '<span class="rr-eyebrow">The roast 🔥 · 7-second recruiter test</span>'+
+      '<h3>'+esc(d.verdict||'Needs work')+'</h3>'+
+      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#e0463d">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:#e0463d">Current résumé strength</div></div>'+
+      '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#f97316,#e0463d)"></div></div></div>'+
+      '<div style="margin-top:6px">'+lines+'</div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy my roast</button></div>'+
+      '<div class="rr-note">AI-written from your résumé. Fixes use [brackets] where you should add a real number.</div>';
+    setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=sc+'%'; },60);
+    document.getElementById('rrFix').addEventListener('click',function(){ renderFix(d); });
+    document.getElementById('rrCopy').addEventListener('click',function(){ copy(shareText(d)); });
+  }
+  function renderFix(d){
+    var ns=clamp(d.newScore,88);
+    var fixes=(d.fixes||[]).slice(0,4).map(function(f){
+      return '<div class="rr-fix"><div class="rr-before">'+esc(f.before||'')+'</div><div class="rr-after"><span class="rr-arw">→</span><div>'+esc(f.after||'')+'</div></div></div>';
+    }).join('');
+    body().innerHTML=
+      '<span class="rr-eyebrow">The glow-up ✨ · same you, interview-ready</span>'+
+      '<h3>Here’s the stronger version</h3>'+
+      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#1f9d57">'+ns+'<small>/100</small></div><div class="rr-verdict" style="color:#1f9d57">After these fixes</div></div>'+
+      '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#22b765,#128a4a)"></div></div></div>'+
+      '<div style="margin-top:6px">'+fixes+'</div>'+
+      '<div class="rr-share"><div class="rr-st">My résumé got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+clamp(d.score,40)+' → '+ns+' · fixed free on resume4u.help</div></div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
+      '<div class="rr-note">Tap any line in your résumé below to apply a fix — or use “Refine with AI” to rewrite a section.</div>';
+    setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
+    document.getElementById('rrCopy2').addEventListener('click',function(){ copy(shareText(d)); });
+  }
+  function shareText(d){
+    var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
+    return 'My résumé got roasted by resume4u.help 🔥 ('+clamp(d.score,40)+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
+  }
+  function copy(str){
+    function ok(){ if(typeof showToast==='function') showToast('Roast copied — go share it 🔥','success'); }
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(str).then(ok,fb); return; } }catch(e){}
+    fb();
+    function fb(){ try{ var ta=document.createElement('textarea'); ta.value=str; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){ if(typeof showToast==='function') showToast('Select and copy the roast text'); } }
+  }
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&overlay&&overlay.classList.contains('on')) close(); });
+  window._r4uShowRoast=open;
+
+  /* entry card on the Generate page, under the JD-tailor bar / above ATS */
+  var bar=null;
+  function place(b){
+    var jd=document.getElementById('_r4uJdTailorBar');
+    var ats=document.getElementById('atsScoreCard');
+    if(jd&&jd.parentNode){ if(jd.nextSibling!==b) jd.parentNode.insertBefore(b, jd.nextSibling); }
+    else if(ats&&ats.parentNode){ if(b.nextSibling!==ats) ats.parentNode.insertBefore(b, ats); }
+  }
+  function sync(){
+    if(!bar){
+      bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
+      bar.innerHTML='<span class="rb-ico">🔥</span><span class="rb-body"><span class="rb-title">Roast my résumé</span><span class="rb-sub">A brutally honest (and funny) review — then one tap to fix it.</span></span><span class="rb-go">Roast it →</span>';
+      bar.addEventListener('click',open);
+      bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
+    }
+    place(bar);
+    if(hasResume()) bar.classList.add('show'); else bar.classList.remove('show');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',sync); else sync();
+  setInterval(sync, 800);
+})();
+</script>
+<script id="_r4uIncomingJdJS">
+/* Deep-link hook for the browser extension (and any share link): open
+   resume4u.help/?jd=<url-encoded job description> and this prefills the
+   existing "Tailor to a job description" flow with that JD, so the extension
+   just hands off the posting it scraped. Purely additive — watches for the
+   tailor's textarea and fills it once; no change to the tailor logic itself. */
+(function(){
+  var jd='';
+  try{
+    var p=new URLSearchParams(location.search).get('jd');
+    if(!p){ p=sessionStorage.getItem('_r4uIncomingJd')||''; } else { try{ sessionStorage.setItem('_r4uIncomingJd',p); }catch(e){} }
+    jd=(p||'').slice(0,6000);
+  }catch(e){}
+  if(!jd) return;
+  window.__r4uIncomingJd=jd;
+  var filled=false;
+  function tryFill(){
+    if(filled) return;
+    var ta=document.querySelector('textarea[placeholder*="job description" i]');
+    if(ta){ ta.value=jd; ta.dispatchEvent(new Event('input',{bubbles:true})); filled=true; try{ sessionStorage.removeItem('_r4uIncomingJd'); }catch(e){} }
+  }
+  function openTailor(){
+    var bar=document.getElementById('_r4uJdTailorBar');
+    if(bar && bar.classList.contains('show')){ bar.click(); setTimeout(tryFill,300); return true; }
+    return false;
+  }
+  /* once a resume exists, auto-open the tailor with the JD prefilled */
+  var n=0, iv=setInterval(function(){ tryFill(); if(filled || openTailor() || ++n>120) clearInterval(iv); }, 500);
+  new MutationObserver(tryFill).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+<style id="_r4uWaDiscoveryCss">
+/* Discovery for the WhatsApp résumé co-pilot: a secondary CTA on the landing
+   page, and a dismissible banner inside the builder, so people learn they can
+   build by chat. Desktop shows a QR (reuses _r4uShowQR); mobile opens wa.me. */
+.r4u-wa-cta{display:inline-flex;align-items:center;gap:9px;margin:14px auto 0;padding:11px 18px;border-radius:999px;
+  border:1.5px solid rgba(37,211,102,0.5);background:var(--card-bg,#fff);color:var(--text);cursor:pointer;
+  font-family:inherit;font-weight:700;font-size:0.9rem;text-decoration:none;transition:transform .12s,box-shadow .14s,border-color .14s;}
+.r4u-wa-cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px -12px rgba(37,211,102,.7);border-color:#25d366;}
+.r4u-wa-cta .wic{width:20px;height:20px;flex-shrink:0;color:#25d366;}
+.r4u-wa-cta small{font-weight:500;color:var(--muted);}
+.r4u-wa-ctawrap{display:flex;justify-content:center;width:100%;}
+.r4u-wa-banner{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:12px 14px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(37,211,102,0.10),rgba(37,211,102,0.03));border:1px solid rgba(37,211,102,0.35);}
+.r4u-wa-banner .wic{width:26px;height:26px;flex-shrink:0;color:#25d366;}
+.r4u-wa-banner .wb-txt{flex:1;min-width:0;font-size:0.84rem;line-height:1.4;color:var(--text);}
+.r4u-wa-banner .wb-txt b{font-weight:700;}
+.r4u-wa-banner .wb-go{flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.8rem;color:#fff;
+  background:#25d366;border-radius:9px;padding:9px 13px;white-space:nowrap;}
+.r4u-wa-banner .wb-x{flex-shrink:0;border:0;background:transparent;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer;padding:2px 4px;}
+@media(max-width:560px){
+  .r4u-wa-banner{flex-wrap:wrap;position:relative;padding-right:32px;}
+  .r4u-wa-banner .wb-txt{flex:1 1 auto;font-size:0.82rem;}
+  .r4u-wa-banner .wb-go{flex:1 1 100%;order:3;margin-top:2px;padding:10px;font-size:0.82rem;}
+  .r4u-wa-banner .wb-x{position:absolute;top:6px;right:8px;}
+}
+</style>
+<script id="_r4uWaDiscoveryJS">
+/* WhatsApp co-pilot discovery entry points. One number constant — swap it for
+   the production WhatsApp number before going live on prod. */
+(function(){
+  var WA_BOT='15556758306';  /* TEST number. Replace with the verified production number for prod. */
+  var WA_TEXT='Hi!%20I%27d%20like%20to%20build%20my%20r%C3%A9sum%C3%A9%20on%20WhatsApp';
+  var WA_URL='https://wa.me/'+WA_BOT+'?text='+WA_TEXT;
+  var WIC='<svg class="wic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2z"/></svg>';
+  function isDesktop(){ try{ return window.matchMedia && window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
+  function launch(){
+    if(isDesktop() && typeof window._r4uShowQR==='function'){
+      window._r4uShowQR(WA_URL,{title:'Build on WhatsApp',sub:'Scan to open WhatsApp on your phone and build your résumé by chat — one quick question at a time.',file:'whatsapp-qr.png'});
+    } else { window.open(WA_URL,'_blank','noopener'); }
+  }
+  function activeStepId(){ var el=document.querySelector('.step-content.active'); return el?el.id:''; }
+
+  /* 1) Landing CTA — under the main CTA cards; shown only on the landing (step 0) */
+  function landingCta(){
+    var wrap=document.getElementById('_r4uWaLandingCta');
+    if(!wrap){
+      var stack=document.querySelector('.r4u-cta-stack'); if(!stack) return;
+      wrap=document.createElement('div'); wrap.className='r4u-wa-ctawrap'; wrap.id='_r4uWaLandingCta';
+      var a=document.createElement('a'); a.href='#'; a.className='r4u-wa-cta';
+      a.innerHTML=WIC+'<span>Short on time? <b>Build on WhatsApp</b> &rarr;<br><small>One question at a time, in your spare moments.</small></span>';
+      a.addEventListener('click',function(e){ e.preventDefault(); launch(); });
+      wrap.appendChild(a);
+      stack.parentNode.insertBefore(wrap, stack.nextSibling);
+    }
+    var onLanding = activeStepId()==='step0';
+    wrap.style.display = onLanding ? 'flex' : 'none';
+  }
+
+  /* 2) In-builder banner — on steps 1-7, dismissible */
+  var DISMISS='_r4uWaBannerHidden';
+  function dismissed(){ try{ return localStorage.getItem(DISMISS)==='1'; }catch(e){ return false; } }
+  var banner=null;
+  function makeBanner(){
+    banner=document.createElement('div'); banner.className='r4u-wa-banner'; banner.id='_r4uWaBanner';
+    banner.innerHTML=WIC+'<div class="wb-txt"><b>Don’t feel like filling a form?</b> Build your résumé on WhatsApp instead — reply to one question at a time.</div>'+
+      '<button type="button" class="wb-go">Switch to WhatsApp</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
+    banner.querySelector('.wb-go').addEventListener('click',launch);
+    banner.querySelector('.wb-x').addEventListener('click',function(){ try{ localStorage.setItem(DISMISS,'1'); }catch(e){} if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); });
+    return banner;
+  }
+  function syncBanner(){
+    var id=activeStepId();
+    var show = /^step[1-7]$/.test(id) && !dismissed();
+    if(!show){ if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); return; }
+    var step=document.getElementById(id); if(!step) return;
+    if(!banner) makeBanner();
+    if(banner.parentNode!==step || step.firstChild!==banner){ step.insertBefore(banner, step.firstChild); }
+  }
+  function tick(){ try{ landingCta(); syncBanner(); }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
+  setInterval(tick, 700);
 })();
 </script>
 <script id="_r4uCoverLetterJS">
