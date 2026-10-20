@@ -157,6 +157,24 @@ exports.handler = async (event) => {
       }
     }
 
+    // testsend: reproduce the bot's outbound reply (same token + phone-number id
+    // the real send() uses) and return Meta's raw response, so a failing reply
+    // shows its actual error. ?to=<intl number, no +>, optional ?pn= / ?token=.
+    if (_admin && q.admin === 'testsend') {
+      const phoneId = q.pn || process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+      const to = q.to || '';
+      try {
+        const r = await fetch(`${GRAPH}/${phoneId}/messages`, {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + _tok, 'content-type': 'application/json' },
+          body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { body: 'Test from Resume4U co-pilot ✅' } })
+        });
+        return { statusCode: 200, body: 'testsend (pn ' + phoneId + ' to ' + to + ') status ' + r.status + ': ' + (await r.text().catch(() => '')) };
+      } catch (e) {
+        return { statusCode: 200, body: 'testsend error: ' + (e && e.message) };
+      }
+    }
+
     // subscribe THIS app to the WhatsApp Business Account's webhooks
     // (POST /<WABA_ID>/subscribed_apps). This is the step that makes Meta route
     // the number's inbound messages to this webhook.
