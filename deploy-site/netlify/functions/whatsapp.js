@@ -22,7 +22,7 @@
  * callback (field: "messages"), use WHATSAPP_VERIFY_TOKEN as the verify token.
  */
 
-const GRAPH = 'https://graph.facebook.com/v21.0'; // redeploy marker: pick up refreshed WHATSAPP_TOKEN
+const GRAPH = 'https://graph.facebook.com/v21.0'; // redeploy marker: pick up corrected UPSTASH REST creds
 const _mem = {}; // in-memory fallback state (per warm instance)
 
 /* ---- durable state (Upstash Redis REST, optional) ---- */
