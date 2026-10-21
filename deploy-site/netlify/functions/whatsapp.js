@@ -543,7 +543,17 @@ exports.handler = async (event) => {
 
     // ---- Idle / first contact: returning user → menu, new user → build ----
     if (state.mode !== 'build') {
-      const prof = await getProfile(from);
+      let prof = await getProfile(from);
+      // Linked web-account user: always refresh from their LATEST saved resume,
+      // so editing on WhatsApp works on the current version (linking stays one-time).
+      try {
+        const mapUid = await redis(['GET', 'wamap:' + from]);
+        if (mapUid) {
+          const wr = await redis(['GET', 'webresume:' + mapUid]);
+          let web = null; try { web = wr ? JSON.parse(wr) : null; } catch (e) {}
+          if (web && (web.firstName || web.jobTitle || (web.experience || []).length)) { web._src = 'web'; await setProfile(from, web); prof = web; }
+        }
+      } catch (e) {}
       const pName = prof && (prof.name || prof.firstName);
       if (prof && pName) {
         await setState(from, { step: 0, mode: 'menu', data: { experiences: [] } });
