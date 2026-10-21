@@ -12131,20 +12131,19 @@ window.__novaPortfolioHTML=function(d,sections){
   function close(){ if(!overlay) return; overlay.classList.remove('on'); try{ document.body.style.overflow=prevOverflow; }catch(e){} }
   function body(){ return document.getElementById('r4uRoastBody'); }
   function clamp(n,d){ n=parseInt(n,10); return isNaN(n)?d:Math.max(0,Math.min(100,n)); }
-  /* The ATS score is the deterministic number the ATS checker shows. The roast
-     score is the AI's own "recruiter gut-check", kept within ±10 of the ATS score
-     so the two sit side-by-side without ever wildly contradicting each other. */
+  /* One clear number: the roast's verdict score IS the deterministic ATS score,
+     so the roast and the ATS checker can never disagree. The roast's personality
+     comes from the verdict headline and the burn lines, not a second number. */
   function atsNow(){ try{ if(typeof computeATSScore==='function'&&typeof lastResumeData!=='undefined'&&lastResumeData) return computeATSScore(lastResumeData).score||0; }catch(e){} return 50; }
-  function roastScore(d){ var a=atsNow(); var r=clamp(d&&d.score, a); return Math.max(0, Math.min(100, Math.max(a-10, Math.min(a+10, r)))); }
   function renderRoast(d){
-    var ats=atsNow(), sc=roastScore(d);
+    var sc=atsNow();
     var lines=(d.roasts||[]).slice(0,4).map(function(r){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
     }).join('');
     body().innerHTML=
       '<span class="rr-eyebrow">The roast 🔥 · 7-second recruiter test</span>'+
       '<h3>'+esc(d.verdict||'Needs work')+'</h3>'+
-      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#e0463d">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:#e0463d">Recruiter score 🔥<br><span style="font-weight:600;font-size:.76rem;color:var(--muted)">ATS score: '+ats+'/100</span></div></div>'+
+      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#e0463d">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:#e0463d">Recruiter score 🔥</div></div>'+
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#f97316,#e0463d)"></div></div></div>'+
       '<div style="margin-top:6px">'+lines+'</div>'+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy my roast</button></div>'+
@@ -12172,7 +12171,7 @@ window.__novaPortfolioHTML=function(d,sections){
     return applied;
   }
   function renderFix(d){
-    var cur=roastScore(d);
+    var cur=atsNow();
     var ns=Math.min(98, Math.max(cur+8, clamp(d.newScore, cur+12)));
     var fixes=(d.fixes||[]).slice(0,4).map(function(f){
       return '<div class="rr-fix"><div class="rr-before">'+esc(f.before||'')+'</div><div class="rr-after"><span class="rr-arw">→</span><div>'+esc(f.after||'')+'</div></div></div>';
@@ -12197,7 +12196,7 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function shareText(d){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
-    return 'My résumé got roasted by resume4u.help 🔥 ('+roastScore(d)+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
+    return 'My résumé got roasted by resume4u.help 🔥 ('+atsNow()+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
   }
   function copy(str){
     function ok(){ if(typeof showToast==='function') showToast('Roast copied — go share it 🔥','success'); }
