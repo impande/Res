@@ -12231,6 +12231,70 @@ window.__novaPortfolioHTML=function(d,sections){
   new MutationObserver(tryFill).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+<script id="_r4uIncomingResumeJS">
+/* WhatsApp co-pilot handoff: open resume4u.help/?r=<token> and this fetches the
+   résumé the bot built (GET /.netlify/functions/resume?token=…), maps it to the
+   builder's data shape, and loads it through the app's own _applyCloudDoc +
+   goToStep(8) — so the user lands on the preview with everything prefilled,
+   ready to pick a template and download. Purely additive; mirrors the ?jd= hook. */
+(function(){
+  var token='';
+  try{
+    token=new URLSearchParams(location.search).get('r')||'';
+    if(!token){ token=sessionStorage.getItem('_r4uIncomingResumeTok')||''; }
+    token=(token||'').trim();
+  }catch(e){}
+  if(!token || !/^[a-z0-9]{4,24}$/i.test(token)) return;
+  try{ sessionStorage.setItem('_r4uIncomingResumeTok', token); }catch(e){}
+
+  /* map the WhatsApp résumé {name,role,years,education,skills[],experiences[]} to
+     the builder's shape {firstName,lastName,jobTitle,summary,skills[],experience[],education[]} */
+  function mapResume(r){
+    r=r||{};
+    var full=(r.name||'').trim(), sp=full.split(/\s+/);
+    var firstName=sp.shift()||'', lastName=sp.join(' ');
+    var experience=(Array.isArray(r.experiences)?r.experiences:[]).map(function(e){
+      e=e||{};
+      var role=(e.role||e.title||'').trim(), title=role, co='';
+      var parts=role.split(/\s+at\s+/i);
+      if(parts.length>1){ title=parts[0].trim(); co=parts.slice(1).join(' at ').trim(); }
+      var bullets=Array.isArray(e.bullets)?e.bullets.filter(Boolean):[];
+      return { title:title, co:co, dates:(e.dates||''), bullets:bullets, desc:bullets.join('\n') };
+    });
+    var education=[];
+    if(typeof r.education==='string' && r.education.trim()){
+      var ep=r.education.split(',').map(function(s){return s.trim();}).filter(Boolean);
+      var year='';
+      if(ep.length>1 && /^\d{4}$/.test(ep[ep.length-1])){ year=ep.pop(); }
+      education.push({ deg:(ep[0]||''), sch:(ep.slice(1).join(', ')||''), year:year });
+    } else if(Array.isArray(r.education)){ education=r.education; }
+    var summary=r.role ? (r.role + (r.years ? (' with '+r.years+' years of experience.') : '.')) : '';
+    return {
+      firstName:firstName, lastName:lastName, jobTitle:(r.role||''),
+      email:'', phone:'', location:'', summary:summary,
+      skills:(Array.isArray(r.skills)?r.skills.filter(Boolean):[]),
+      experience:experience, education:education
+    };
+  }
+
+  var mapped=null, applied=false;
+  function apply(){
+    if(applied || !mapped || typeof window._applyCloudDoc!=='function') return;
+    applied=true;
+    try{ window._applyCloudDoc(null, mapped, { template: mapped.template }); }catch(e){}
+    try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
+    try{ sessionStorage.removeItem('_r4uIncomingResumeTok'); }catch(e){}
+    try{ var u=new URL(location.href); u.searchParams.delete('r'); history.replaceState(history.state,'',u.pathname+u.search+u.hash); }catch(e){}
+  }
+
+  fetch('/.netlify/functions/resume?token='+encodeURIComponent(token))
+    .then(function(res){ return res.ok ? res.json() : null; })
+    .then(function(j){ if(j && j.ok && j.resume){ mapped=mapResume(j.resume); apply(); } })
+    .catch(function(){});
+
+  var n=0, iv=setInterval(function(){ apply(); if(applied || ++n>120) clearInterval(iv); }, 500);
+})();
+</script>
 <style id="_r4uWaDiscoveryCss">
 /* Discovery for the WhatsApp résumé co-pilot: a secondary CTA on the landing
    page, and a dismissible banner inside the builder, so people learn they can
