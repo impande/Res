@@ -157,6 +157,23 @@ exports.handler = async (event) => {
       }
     }
 
+    // grant: assign a (system) user to the WABA with a task permission, so a
+    // System User token can finally send/manage. Run with ?token=<a token that
+    // already owns the WABA, e.g. the Step-1 temp token>. ?su=<user id> defaults
+    // to the resume4u-whatsapp-bot system user; ?tasks= defaults to MANAGE.
+    if (_admin && q.admin === 'grant') {
+      const su = q.su || '61595837001313';
+      const tasks = q.tasks || 'MANAGE';
+      try {
+        const url = `${GRAPH}/${wabaId}/assigned_users?user=${encodeURIComponent(su)}` +
+          `&tasks=${encodeURIComponent('["' + tasks + '"]')}&access_token=${encodeURIComponent(_tok)}`;
+        const r = await fetch(url, { method: 'POST' });
+        return { statusCode: 200, body: 'grant (waba ' + wabaId + ' user ' + su + ' tasks ' + tasks + ') status ' + r.status + ': ' + (await r.text().catch(() => '')) };
+      } catch (e) {
+        return { statusCode: 200, body: 'grant error: ' + (e && e.message) };
+      }
+    }
+
     // testsend: reproduce the bot's outbound reply (same token + phone-number id
     // the real send() uses) and return Meta's raw response, so a failing reply
     // shows its actual error. ?to=<intl number, no +>, optional ?pn= / ?token=.
