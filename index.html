@@ -12424,9 +12424,9 @@ window.__novaPortfolioHTML=function(d,sections){
       var stack=document.querySelector('.r4u-cta-stack'); if(!stack) return;
       wrap=document.createElement('div'); wrap.className='r4u-wa-ctawrap'; wrap.id='_r4uWaLandingCta';
       var a=document.createElement('a'); a.href='#'; a.className='r4u-wa-cta';
-      a.innerHTML='<div class="r4u-wa-top">'+BADGE+'<div><div class="nm">Resume4U</div><div class="st">● online</div></div></div>'+
-        '<div class="r4u-wa-bub">Hi 👋 I\'ll build your resume one quick question at a time — ready?</div>'+
-        '<div class="r4u-wa-go">'+WIC+' Start on WhatsApp</div>';
+      a.innerHTML='<div class="r4u-wa-top">'+BADGE+'<div><div class="nm">Resume4U</div><div class="st">AI resume builder</div></div></div>'+
+        '<div class="r4u-wa-bub">Make your resume on WhatsApp — no form. 👋 Answer a few quick questions and I\'ll write your full resume for you.</div>'+
+        '<div class="r4u-wa-go">'+WIC+' Build my resume</div>';
       a.addEventListener('click',function(e){ e.preventDefault(); launch(); });
       wrap.appendChild(a);
       stack.parentNode.insertBefore(wrap, stack.nextSibling);
@@ -12441,8 +12441,8 @@ window.__novaPortfolioHTML=function(d,sections){
   var banner=null;
   function makeBanner(){
     banner=document.createElement('div'); banner.className='r4u-wa-banner'; banner.id='_r4uWaBanner';
-    banner.innerHTML=BADGE+'<div class="wb-txt"><b>Short on time?</b> Continue on WhatsApp — one question at a time.</div>'+
-      '<button type="button" class="wb-go">Open &rarr;</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
+    banner.innerHTML=BADGE+'<div class="wb-txt"><b>Prefer WhatsApp?</b> Make your resume by chat — no form.</div>'+
+      '<button type="button" class="wb-go">Build on WhatsApp &rarr;</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
     banner.querySelector('.wb-go').addEventListener('click',launch);
     banner.querySelector('.wb-x').addEventListener('click',function(){ try{ localStorage.setItem(DISMISS,'1'); }catch(e){} if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); });
     return banner;
