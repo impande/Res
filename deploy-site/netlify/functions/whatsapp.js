@@ -157,6 +157,32 @@ exports.handler = async (event) => {
       }
     }
 
+    // selftest: report which env vars are present (booleans, no secret values)
+    // and whether the Upstash Redis state store round-trips. Used to diagnose the
+    // "Oops — something hiccuped" path, which means the handler threw.
+    if (_admin && q.admin === 'selftest') {
+      const env = {
+        WHATSAPP_TOKEN: !!process.env.WHATSAPP_TOKEN,
+        WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || null,
+        WHATSAPP_VERIFY_TOKEN: !!process.env.WHATSAPP_VERIFY_TOKEN,
+        ANTHROPIC_API_KEY: !!process.env.ANTHROPIC_API_KEY,
+        UPSTASH_REDIS_REST_URL: !!process.env.UPSTASH_REDIS_REST_URL,
+        UPSTASH_REDIS_REST_TOKEN: !!process.env.UPSTASH_REDIS_REST_TOKEN
+      };
+      let redisResult;
+      try {
+        const setr = await redis(['SET', 'wa:selftest', 'ok', 'EX', '60']);
+        const getr = await redis(['GET', 'wa:selftest']);
+        redisResult = 'set=' + JSON.stringify(setr) + ' get=' + JSON.stringify(getr);
+      } catch (e) { redisResult = 'ERROR: ' + (e && e.message); }
+      let aiResult;
+      try {
+        const a = await claude('Reply with the single word OK.', 10);
+        aiResult = JSON.stringify(a);
+      } catch (e) { aiResult = 'ERROR: ' + (e && e.message); }
+      return { statusCode: 200, body: 'selftest env=' + JSON.stringify(env) + ' | redis=' + redisResult + ' | ai=' + aiResult };
+    }
+
     // grant: assign a (system) user to the WABA with a task permission, so a
     // System User token can finally send/manage. Run with ?token=<a token that
     // already owns the WABA, e.g. the Step-1 temp token>. ?su=<user id> defaults
