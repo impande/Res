@@ -52,14 +52,17 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_json' }) }; }
 
   const action = body.action || 'create';
-  if (action !== 'create') return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_action' }) };
+  if (action !== 'create' && action !== 'sync') return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_action' }) };
 
   const uid = await verifyIdToken(body.idToken);
   if (!uid) return { statusCode: 401, headers, body: JSON.stringify({ error: 'not_signed_in' }) };
 
-  // Mirror the current resume so the bot can load it (cloud/builder shape).
+  // Mirror the current resume so the bot always has the latest (cloud/builder shape).
   const resume = body.resume && typeof body.resume === 'object' ? body.resume : null;
   if (resume) await redisSet('webresume:' + uid, JSON.stringify(resume), 7776000); // 90 days
+
+  // sync = just refresh the mirror (fired on web save for already-linked users).
+  if (action === 'sync') return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
 
   const code = code6();
   await redisSet('walink:' + code, uid, 600); // 10 minutes to use the code

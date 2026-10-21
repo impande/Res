@@ -12531,6 +12531,29 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>25) clearInterval(iv); },200); }
   var ex=document.getElementById('_authDropdown'); if(ex) inject(ex);
+
+  /* Keep the server mirror fresh so a linked user always edits their LATEST resume
+     on WhatsApp. Debounced, signed-in only, fire-and-forget; wraps the app's own
+     cloud-save so it never adds its own save cadence. */
+  var _mirT=0;
+  function mirror(){
+    if(!uid()) return;
+    var now=Date.now(); if(now-_mirT<15000) return; _mirT=now;
+    var resume={}; try{ if(typeof window._collectCloudData==='function') resume=window._collectCloudData()||{}; }catch(e){}
+    if(!resume || (!resume.summary && !(resume.experience&&resume.experience.length))) return;
+    try{ window._fbAuth.currentUser.getIdToken().then(function(idToken){
+      fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'sync',idToken:idToken,resume:resume})}).catch(function(){});
+    }).catch(function(){}); }catch(e){}
+  }
+  function hookSave(){
+    if(typeof window._saveToCloud==='function' && !window._saveToCloud.__r4uWaMirror){
+      var orig=window._saveToCloud;
+      window._saveToCloud=function(){ var r=orig.apply(this,arguments); try{ setTimeout(mirror,600); }catch(e){} return r; };
+      window._saveToCloud.__r4uWaMirror=true; return true;
+    }
+    return false;
+  }
+  if(!hookSave()){ var n2=0, iv2=setInterval(function(){ if(hookSave()||++n2>25) clearInterval(iv2); },300); }
 })();
 </script>
 <script id="_r4uCoverLetterJS">
