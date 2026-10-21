@@ -29,11 +29,18 @@ const _mem = {}; // in-memory fallback state (per warm instance)
 async function redis(cmd) {
   const url = process.env.UPSTASH_REDIS_REST_URL, tok = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !tok) return null;
-  const r = await fetch(url + '/' + cmd.map(encodeURIComponent).join('/'), {
-    headers: { Authorization: 'Bearer ' + tok }
-  });
-  const j = await r.json().catch(() => ({}));
-  return j && j.result;
+  // Fail soft: if the REST call can't be made (wrong URL, Upstash down), fall
+  // back to in-memory state instead of throwing and breaking the whole handler.
+  try {
+    const r = await fetch(url.replace(/\/$/, '') + '/' + cmd.map(encodeURIComponent).join('/'), {
+      headers: { Authorization: 'Bearer ' + tok }
+    });
+    const j = await r.json().catch(() => ({}));
+    return j && j.result;
+  } catch (e) {
+    console.error('[whatsapp] redis fetch failed:', e && e.message);
+    return null;
+  }
 }
 async function getState(from) {
   const v = await redis(['GET', 'wa:' + from]);
