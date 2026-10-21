@@ -22,8 +22,9 @@
  * callback (field: "messages"), use WHATSAPP_VERIFY_TOKEN as the verify token.
  */
 
-const GRAPH = 'https://graph.facebook.com/v21.0'; // redeploy marker: pick up corrected UPSTASH REST creds
-const _mem = {}; // in-memory fallback state (per warm instance)
+const GRAPH = 'https://graph.facebook.com/v21.0';
+const _mem = {};        // in-memory fallback conversation state (per warm instance)
+const _memProfile = {}; // in-memory fallback saved résumé (per warm instance)
 
 /* ---- durable state (Upstash Redis REST, optional) ---- */
 async function redis(cmd) {
@@ -45,17 +46,27 @@ async function redis(cmd) {
 async function getState(from) {
   const v = await redis(['GET', 'wa:' + from]);
   if (v) { try { return JSON.parse(v); } catch (e) {} }
-  return _mem[from] || { step: 0, data: { experiences: [] } };
+  return _mem[from] || { step: 0, mode: 'idle', data: { experiences: [] } };
 }
 async function setState(from, state) {
   _mem[from] = state;
   await redis(['SET', 'wa:' + from, JSON.stringify(state), 'EX', '86400']); // 24h TTL
 }
+// A finished résumé, remembered per phone number so returning users can edit it.
+async function getProfile(from) {
+  const v = await redis(['GET', 'profile:' + from]);
+  if (v) { try { return JSON.parse(v); } catch (e) {} }
+  return _memProfile[from] || null;
+}
+async function setProfile(from, data) {
+  _memProfile[from] = data;
+  await redis(['SET', 'profile:' + from, JSON.stringify(data), 'EX', '7776000']); // 90 days
+}
 
 /* ---- the conversation script ---- */
 // Each step: a question to send, and how to store the user's answer.
 const STEPS = [
-  { ask: "Hi! 👋 I'm your Resume4U co-pilot. I'll build your résumé one quick question at a time — reply whenever you get a minute.\n\nFirst up: what's your full name?",
+  { ask: "Hi! 👋 I'm your Resume4U co-pilot. I'll build your résumé one quick question at a time — reply whenever you get a minute.\n\n📄 Already have a résumé? Just send it here as a PDF (or a clear photo) and I'll import it.\n\nOtherwise, let's start: what's your full name?",
     save: (d, t) => { d.name = t; } },
   { ask: (d) => `Nice to meet you, ${firstName(d.name)}! What role are you aiming for? (e.g. "Backend Developer")`,
     save: (d, t) => { d.role = t; } },
@@ -94,6 +105,97 @@ async function polishBullets(raw, role) {
   );
   return out ? out.split('\n').map((s) => s.replace(/^[-•\d.\s]+/, '').trim()).filter(Boolean).slice(0, 3)
              : [raw];
+}
+
+/* ---- import an existing résumé (PDF or photo) via Claude ---- */
+async function fetchMedia(mediaId) {
+  const token = process.env.WHATSAPP_TOKEN;
+  if (!token || !mediaId) return null;
+  const meta = await fetch(`${GRAPH}/${mediaId}`, { headers: { Authorization: 'Bearer ' + token } });
+  const mj = await meta.json().catch(() => ({}));
+  if (!mj || !mj.url) return null;
+  const bin = await fetch(mj.url, { headers: { Authorization: 'Bearer ' + token } });
+  if (!bin.ok) return null;
+  const buf = Buffer.from(await bin.arrayBuffer());
+  return { base64: buf.toString('base64'), mime: mj.mime_type || 'application/pdf' };
+}
+async function claudeExtractResume(base64, mime) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key || !base64) return null;
+  const isPdf = /pdf/i.test(mime || '');
+  const fileBlock = isPdf
+    ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
+    : { type: 'image', source: { type: 'base64', media_type: mime || 'image/jpeg', data: base64 } };
+  const instruction = { type: 'text', text:
+    'Extract this résumé into STRICT JSON with exactly these keys and nothing else: ' +
+    '{"name":"","role":"","years":"","education":"","skills":[],"experiences":[{"role":"","bullets":[]}]}. ' +
+    'role = the person\'s current or target job title. years = total years of experience as a short string. ' +
+    'experiences: one object per job (most recent first), role = "Title at Company", bullets = 2-4 concise achievement bullets keeping the résumé\'s own wording. ' +
+    'skills = flat array of individual skills. Use "" or [] where unknown. Output ONLY the JSON object — no markdown, no preamble.' };
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: [fileBlock, instruction] }] })
+  });
+  const j = await r.json().catch(() => ({}));
+  const c = j && j.content;
+  let txt = (Array.isArray(c) ? (c[0] && c[0].text) || '' : '').trim();
+  const m = txt.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const data = JSON.parse(m[0]);
+    if (!Array.isArray(data.experiences)) data.experiences = [];
+    if (!Array.isArray(data.skills)) data.skills = [];
+    return data;
+  } catch (e) { return null; }
+}
+
+/* ---- a short human summary of the collected résumé ---- */
+function summarize(d) {
+  const parts = [];
+  if (d.name) parts.push('👤 ' + d.name);
+  if (d.role) parts.push('🎯 ' + d.role);
+  if (d.years) parts.push('🕒 ' + d.years + ' yrs experience');
+  if (Array.isArray(d.experiences) && d.experiences.length) parts.push('💼 ' + d.experiences.length + ' role(s)');
+  if (Array.isArray(d.skills) && d.skills.length) parts.push('🛠️ ' + d.skills.slice(0, 8).join(', ') + (d.skills.length > 8 ? '…' : ''));
+  if (d.education) parts.push('🎓 ' + d.education);
+  return parts.join('\n') || '(nothing captured yet)';
+}
+
+/* ---- apply a plain-language edit command to the résumé data ---- */
+function applyEdit(d, text) {
+  const t = (text || '').trim();
+  let m;
+  if (!Array.isArray(d.skills)) d.skills = [];
+  if (!Array.isArray(d.experiences)) d.experiences = [];
+  if ((m = t.match(/^name\s*[:=]\s*(.+)$/is))) { d.name = m[1].trim(); return 'name'; }
+  if ((m = t.match(/^(?:role|title|target)\s*[:=]\s*(.+)$/is))) { d.role = m[1].trim(); return 'role'; }
+  if ((m = t.match(/^(?:years|experience|exp)\s*[:=]\s*(.+)$/is))) { d.years = m[1].trim(); return 'years'; }
+  if ((m = t.match(/^(?:education|qualification|degree)\s*[:=]\s*(.+)$/is))) { d.education = m[1].trim(); return 'education'; }
+  if ((m = t.match(/^add\s+skills?\s*[:=]\s*(.+)$/is))) { d.skills = d.skills.concat(m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean)); return 'skills'; }
+  if ((m = t.match(/^skills?\s*[:=]\s*(.+)$/is))) { d.skills = m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean); return 'skills'; }
+  if ((m = t.match(/^add\s+(?:experience|job|role)\s*[:=]\s*(.+)$/is))) {
+    let body = m[1].trim(), role = '';
+    const dash = body.split(/\s[-–—]\s/);
+    if (dash.length > 1) { role = dash[0].trim(); body = dash.slice(1).join(' - '); }
+    const bullets = body.split(/[\n;]/).map((s) => s.replace(/^[-•\s]+/, '').trim()).filter(Boolean);
+    d.experiences.push({ role, bullets });
+    return 'experience';
+  }
+  return null;
+}
+
+/* ---- finish: stash the résumé, remember it, hand back the finish link ---- */
+async function finishAndLink(from, data) {
+  const token = Math.random().toString(36).slice(2, 10);
+  await redis(['SET', 'resume:' + token, JSON.stringify(data), 'EX', '604800']); // 7 days for the web loader
+  await setProfile(from, data); // remember this person so they can edit later
+  await setState(from, { step: 0, mode: 'idle', data: { experiences: [] } });
+  await send(from,
+    `🎉 All set, ${firstName(data.name)}! Your résumé is ready.\n\n` +
+    `👉 Finish & download (free): https://resume4u.help/?r=${token}\n\n` +
+    `Pick a template, tweak anything, and download as PDF.\n\n` +
+    `Reply "edit" to change something here, or "new" to build another.`);
 }
 
 /* ---- WhatsApp send ---- */
@@ -265,40 +367,120 @@ exports.handler = async (event) => {
     const v = body.entry && body.entry[0] && body.entry[0].changes && body.entry[0].changes[0] && body.entry[0].changes[0].value;
     msg = v && v.messages && v.messages[0];
   } catch (e) { return { statusCode: 200, body: 'ok' }; } // always 200 so Meta doesn't retry-storm
-  if (!msg || msg.type !== 'text') return { statusCode: 200, body: 'ok' };
+  if (!msg) return { statusCode: 200, body: 'ok' };
 
   const from = msg.from;
+  const type = msg.type;
   const text = (msg.text && msg.text.body || '').trim();
-  console.log('[whatsapp] inbound from', from, ':', JSON.stringify(text));
+  const low = text.toLowerCase();
+  console.log('[whatsapp] inbound from', from, 'type', type, ':', JSON.stringify(text));
+
+  const MENU = 'Reply with a number:\n1️⃣  Edit my saved résumé\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)';
 
   try {
     let state = await getState(from);
+    if (!state.data) state.data = { experiences: [] };
+    if (!state.mode) state.mode = state.step > 0 ? 'build' : 'idle'; // migrate older states
 
-    // "restart" escape hatch
-    if (/^(restart|reset|start over)$/i.test(text)) state = { step: 0, data: { experiences: [] } };
+    // ---- Document / photo upload: import an existing résumé (any time) ----
+    if (type === 'document' || type === 'image') {
+      const mediaId = (msg.document && msg.document.id) || (msg.image && msg.image.id);
+      await send(from, '📄 Got it — reading your résumé now, give me a few seconds…');
+      const media = mediaId ? await fetchMedia(mediaId) : null;
+      const data = media ? await claudeExtractResume(media.base64, media.mime) : null;
+      if (!data || (!data.name && !(data.experiences || []).length && !(data.skills || []).length)) {
+        await send(from, "I couldn't read that one, sorry. Send a PDF (or a clear photo) of your résumé and I'll try again — or reply \"new\" to build from scratch.");
+        return { statusCode: 200, body: 'ok' };
+      }
+      await setProfile(from, data);
+      await setState(from, { step: 0, mode: 'review', data });
+      await send(from, '✅ Imported your résumé!\n\n' + summarize(data) +
+        '\n\nReply "link" to get your polished résumé, or tell me what to change — e.g.\n• role: Data Analyst\n• add skill: Python, SQL\n• years: 6');
+      return { statusCode: 200, body: 'ok' };
+    }
 
-    // Save the answer to the question we just asked (step 0 is the opener — nothing to save yet)
+    if (type !== 'text') return { statusCode: 200, body: 'ok' };
+
+    // ---- Global commands ----
+    if (/^(restart|reset|start over|new|build new)$/i.test(low)) {
+      state = { step: 0, mode: 'build', data: { experiences: [] } }; // fall through to build
+    } else if (/^(menu|help|options)$/i.test(low)) {
+      const prof = await getProfile(from);
+      await setState(from, { step: 0, mode: 'menu', data: state.data });
+      await send(from, (prof && prof.name ? 'Hi again, ' + firstName(prof.name) + '! ' : '') + MENU);
+      return { statusCode: 200, body: 'ok' };
+    }
+
+    // ---- Mode: menu (returning user picking an option) ----
+    if (state.mode === 'menu') {
+      if (/^1\b/.test(low) || /\bedit\b/i.test(low)) {
+        const prof = await getProfile(from);
+        if (prof) {
+          await setState(from, { step: 0, mode: 'edit', data: prof });
+          await send(from, 'Editing your résumé.\n\n' + summarize(prof) +
+            '\n\nTell me what to change — e.g. "role: Product Manager", "add skill: Figma", "years: 7". Reply "link" when done.');
+          return { statusCode: 200, body: 'ok' };
+        }
+        state = { step: 0, mode: 'build', data: { experiences: [] } }; // no saved résumé → build
+      } else if (/^2\b/.test(low) || /\b(fresh|new)\b/i.test(low)) {
+        state = { step: 0, mode: 'build', data: { experiences: [] } };
+      } else if (/^3\b/.test(low) || /\b(pdf|import|upload)\b/i.test(low)) {
+        await setState(from, { step: 0, mode: 'review', data: { experiences: [] } });
+        await send(from, '📎 Great — just send your résumé as a PDF (or a clear photo) right here and I\'ll import it.');
+        return { statusCode: 200, body: 'ok' };
+      } else {
+        await send(from, MENU);
+        return { statusCode: 200, body: 'ok' };
+      }
+      // (option 1 w/o profile, or option 2) → state is now build; fall through
+    }
+
+    // ---- Mode: edit / review (tweak the current résumé) ----
+    if (state.mode === 'edit' || state.mode === 'review') {
+      if (/^(link|done|finish|get link|generate|get my link)$/i.test(low)) {
+        await finishAndLink(from, state.data);
+        return { statusCode: 200, body: 'ok' };
+      }
+      if (/^edit$/i.test(low)) {
+        await setState(from, { step: 0, mode: 'edit', data: state.data });
+        await send(from, 'Sure — tell me what to change (e.g. "role: …", "add skill: …", "years: …"). Reply "link" when done.');
+        return { statusCode: 200, body: 'ok' };
+      }
+      const changed = applyEdit(state.data, text);
+      if (changed) {
+        await setState(from, { step: 0, mode: 'edit', data: state.data });
+        await send(from, '✅ Updated ' + changed + '.\n\n' + summarize(state.data) + '\n\nAnything else? Or reply "link" to get your résumé.');
+      } else {
+        await send(from, 'I can change: name, role, years, education, skills, or add experience.\nExamples:\n• role: Data Analyst\n• add skill: Python\n• years: 5\n\nOr reply "link" to get your résumé, "new" to start fresh.');
+      }
+      return { statusCode: 200, body: 'ok' };
+    }
+
+    // ---- Idle / first contact: returning user → menu, new user → build ----
+    if (state.mode !== 'build') {
+      const prof = await getProfile(from);
+      if (prof && prof.name) {
+        await setState(from, { step: 0, mode: 'menu', data: { experiences: [] } });
+        await send(from, '👋 Welcome back, ' + firstName(prof.name) + '! Your résumé is saved with me.\n\n' + MENU +
+          '\n\nOr just send a PDF to import a different one.');
+        return { statusCode: 200, body: 'ok' };
+      }
+      state = { step: 0, mode: 'build', data: { experiences: [] } }; // brand-new → build
+    }
+
+    // ---- Mode: build (the linear Q&A) ----
     if (state.step > 0 && STEPS[state.step - 1]) {
       await STEPS[state.step - 1].save(state.data, text);
     }
-
     if (state.step < STEPS.length) {
       const step = STEPS[state.step];
       const q = typeof step.ask === 'function' ? step.ask(state.data) : step.ask;
       state.step += 1;
+      state.mode = 'build';
       await setState(from, state);
       await send(from, q);
     } else {
-      // Done — stash the collected résumé and hand back a link.
-      const token = Math.random().toString(36).slice(2, 10);
-      await redis(['SET', 'resume:' + token, JSON.stringify(state.data), 'EX', '604800']); // 7 days
-      await setState(from, { step: 0, data: { experiences: [] } }); // reset for next time
-      await send(from,
-        `🎉 That's everything, ${firstName(state.data.name)}! Your résumé draft is ready.\n\n` +
-        `👉 Finish & download (free): https://resume4u.help/?r=${token}\n\n` +
-        `Pick a template, tweak anything, and download as PDF. Reply "restart" to build another.`);
-      // TODO(web): add a `?r=<token>` loader in the app (mirror of the `?jd=` hook)
-      // that fetches resume:<token> and prefills the builder.
+      await finishAndLink(from, state.data);
     }
   } catch (e) {
     console.error('[whatsapp] error', e);
