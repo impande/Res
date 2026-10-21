@@ -4702,12 +4702,12 @@ if ('serviceWorker' in navigator) {
       if(data.strengths&&data.strengths.length) _msg('<div class="airx-sect" style="margin:1px 0 6px">✅ Strengths</div>'+data.strengths.map(function(x){return '<div style="font-size:0.82rem;line-height:1.5;margin:3px 0">• '+x+'</div>';}).join(''));
       if(data.improvements&&data.improvements.length) _msg('<div class="airx-sect" style="margin:6px 0 6px">⚡ Improve</div>'+data.improvements.map(function(x){return '<div style="font-size:0.82rem;line-height:1.5;margin:3px 0">• '+x+'</div>';}).join(''));
       if(data.fixes&&data.fixes.length){
-        _msg('<button id="airxApplyFixes" class="aig-opt aig-primary" style="margin-top:8px">✅ Apply '+data.fixes.length+' fix'+(data.fixes.length>1?'es':'')+' to my résumé</button>');
+        _msg('<button id="airxApplyFixes" class="aig-opt aig-primary" style="margin-top:8px">✅ Apply '+data.fixes.length+' fix'+(data.fixes.length>1?'es':'')+' to my resume</button>');
         var ab=document.getElementById('airxApplyFixes');
         if(ab) ab.addEventListener('click',function(){
           if(ab.disabled) return;
           var n=(typeof window._r4uApplyBulletFixes==='function')?window._r4uApplyBulletFixes(data.fixes):0;
-          if(n>0){ ab.disabled=true; ab.textContent='✓ Applied '+n+' fix'+(n>1?'es':''); _msg('<span class="aig-ok">✓ Rewrote '+n+' bullet'+(n>1?'s':'')+' — see your résumé above.</span>'); _scroll(); }
+          if(n>0){ ab.disabled=true; ab.textContent='✓ Applied '+n+' fix'+(n>1?'es':''); _msg('<span class="aig-ok">✓ Rewrote '+n+' bullet'+(n>1?'s':'')+' — see your resume above.</span>'); _scroll(); }
           else { _msg('<span class="aig-warn">Couldn’t auto-match those lines — tap a bullet to edit it directly.</span>'); }
         });
       }
@@ -12056,7 +12056,7 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 </script>
 <style id="_r4uRoastCss">
-/* "Roast my résumé" — a playful, shareable entry on the Generate page. Reads the
+/* "Roast my resume" — a playful, shareable entry on the Generate page. Reads the
    generated resume, asks the AI for a witty-but-useful roast + fixes, and offers a
    copyable share line (the growth loop). Additive; self-contained modal. */
 #_r4uRoastBar{display:none;margin:12px 0 0;align-items:center;gap:13px;padding:13px 15px;border-radius:14px;
@@ -12114,7 +12114,7 @@ window.__novaPortfolioHTML=function(d,sections){
 @media(prefers-reduced-motion:reduce){#r4uRoastCard .rr-fill,#r4uRoastCard .rr-spin{transition:none;animation:none;}}
 </style>
 <script id="_r4uRoastJS">
-/* Roast my résumé: additive feature. Reads the generated resume, asks the AI
+/* Roast my resume: additive feature. Reads the generated resume, asks the AI
    (same /generate endpoint) for a witty-but-useful roast + fixes as JSON, shows
    a score meter, the roast, a one-tap "fix it" reveal, and a copyable share line. */
 (function(){
@@ -12157,7 +12157,7 @@ window.__novaPortfolioHTML=function(d,sections){
     if(!hasResume()){ if(typeof showToast==='function') showToast('Generate your resume first, then roast it 🔥'); return; }
     build(); try{ prevOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; }catch(e){}
     overlay.classList.add('on');
-    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">🔥 Roasting your résumé…</div><div class="rr-note" style="margin-top:4px">Reading every line so it stings in the right places.</div></div>';
+    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">🔥 Roasting your resume…</div><div class="rr-note" style="margin-top:4px">Reading every line so it stings in the right places.</div></div>';
     ai(prompt()).then(function(t){ var d=parse(t); if(!d||!d.roasts){ throw new Error('parse'); } lastRoast=d; renderRoast(d); })
       .catch(function(){ body().innerHTML='<div class="rr-load"><div style="font-size:1.6rem">😅</div><div style="font-weight:700;margin-top:6px">The roast fizzled out</div><div class="rr-note">Couldn’t reach the AI just now. Close and try again in a moment.</div></div>'; });
   }
@@ -12180,12 +12180,12 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#f97316,#e0463d)"></div></div></div>'+
       '<div style="margin-top:6px">'+lines+'</div>'+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy my roast</button></div>'+
-      '<div class="rr-note">AI-written from your résumé. Fixes use [brackets] where you should add a real number.</div>';
+      '<div class="rr-note">AI-written from your resume. Fixes use [brackets] where you should add a real number.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=sc+'%'; },60);
     document.getElementById('rrFix').addEventListener('click',function(){ renderFix(d); });
     document.getElementById('rrCopy').addEventListener('click',function(){ copy(shareText(d)); });
   }
-  /* Apply the roast's before→after rewrites straight into the résumé's bullets.
+  /* Apply the roast's before→after rewrites straight into the resume's bullets.
      Each fix.before is (roughly) an existing bullet; match it to the closest real
      bullet by token overlap and swap in fix.after. Returns how many were applied. */
   function _norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
@@ -12216,21 +12216,21 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#1f9d57">'+ns+'<small>/100</small></div><div class="rr-verdict" style="color:#1f9d57">After these fixes</div></div>'+
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#22b765,#128a4a)"></div></div></div>'+
       '<div style="margin-top:6px">'+fixes+'</div>'+
-      '<div class="rr-share"><div class="rr-st">My résumé got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply these fixes to my résumé</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
-      '<div class="rr-note">“Apply” rewrites the matching bullets for you. You can still tap any line in your résumé to edit it, or use “Refine with AI”.</div>';
+      '<div class="rr-share"><div class="rr-st">My resume got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply these fixes to my resume</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
+      '<div class="rr-note">“Apply” rewrites the matching bullets for you. You can still tap any line in your resume to edit it, or use “Refine with AI”.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
     document.getElementById('rrApply').addEventListener('click',function(){
       var total=(d&&d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; }).length;
       var n=applyRoastFixes(d);
-      if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' fix'+(n>1?'es':'')+' to your résumé'+(n<total?(' ('+(total-n)+' needed a manual tap)'):''),'success'); close(); }
-      else if(typeof showToast==='function') showToast('Couldn’t auto-match those lines — tap a bullet in your résumé to edit it.');
+      if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' fix'+(n>1?'es':'')+' to your resume'+(n<total?(' ('+(total-n)+' needed a manual tap)'):''),'success'); close(); }
+      else if(typeof showToast==='function') showToast('Couldn’t auto-match those lines — tap a bullet in your resume to edit it.');
     });
     document.getElementById('rrCopy2').addEventListener('click',function(){ copy(shareText(d)); });
   }
   function shareText(d){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
-    return 'My résumé got roasted by resume4u.help 🔥 ('+atsNow()+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
+    return 'My resume got roasted by resume4u.help 🔥 ('+atsNow()+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
   }
   function copy(str){
     function ok(){ if(typeof showToast==='function') showToast('Roast copied — go share it 🔥','success'); }
@@ -12252,7 +12252,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function sync(){
     if(!bar){
       bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
-      bar.innerHTML='<span class="rb-ico">🔥</span><span class="rb-body"><span class="rb-title">Roast my résumé</span><span class="rb-sub">A brutally honest (and funny) review — then one tap to fix it.</span></span><span class="rb-go">Roast it →</span>';
+      bar.innerHTML='<span class="rb-ico">🔥</span><span class="rb-body"><span class="rb-title">Roast my resume</span><span class="rb-sub">A brutally honest (and funny) review — then one tap to fix it.</span></span><span class="rb-go">Roast it →</span>';
       bar.addEventListener('click',open);
       bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
@@ -12296,7 +12296,7 @@ window.__novaPortfolioHTML=function(d,sections){
 </script>
 <script id="_r4uIncomingResumeJS">
 /* WhatsApp co-pilot handoff: open resume4u.help/?r=<token> and this fetches the
-   résumé the bot built (GET /.netlify/functions/resume?token=…), maps it to the
+   resume the bot built (GET /.netlify/functions/resume?token=…), maps it to the
    builder's data shape, and loads it through the app's own _applyCloudDoc +
    goToStep(8) — so the user lands on the preview with everything prefilled,
    ready to pick a template and download. Purely additive; mirrors the ?jd= hook. */
@@ -12310,7 +12310,7 @@ window.__novaPortfolioHTML=function(d,sections){
   if(!token || !/^[a-z0-9]{4,24}$/i.test(token)) return;
   try{ sessionStorage.setItem('_r4uIncomingResumeTok', token); }catch(e){}
 
-  /* map the WhatsApp résumé {name,role,years,education,skills[],experiences[]} to
+  /* map the WhatsApp resume {name,role,years,education,skills[],experiences[]} to
      the builder's shape {firstName,lastName,jobTitle,summary,skills[],experience[],education[]} */
   function mapResume(r){
     r=r||{};
@@ -12359,7 +12359,7 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 </script>
 <style id="_r4uWaDiscoveryCss">
-/* Discovery for the WhatsApp résumé co-pilot: a secondary CTA on the landing
+/* Discovery for the WhatsApp resume co-pilot: a secondary CTA on the landing
    page, and a dismissible banner inside the builder, so people learn they can
    build by chat. Desktop shows a QR (reuses _r4uShowQR); mobile opens wa.me. */
 .r4u-wa-cta{display:inline-flex;align-items:center;gap:9px;margin:14px auto 0;padding:11px 18px;border-radius:999px;
@@ -12395,7 +12395,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function isDesktop(){ try{ return window.matchMedia && window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
   function launch(){
     if(isDesktop() && typeof window._r4uShowQR==='function'){
-      window._r4uShowQR(WA_URL,{title:'Build on WhatsApp',sub:'Scan to open WhatsApp on your phone and build your résumé by chat — one quick question at a time.',file:'whatsapp-qr.png'});
+      window._r4uShowQR(WA_URL,{title:'Build on WhatsApp',sub:'Scan to open WhatsApp on your phone and build your resume by chat — one quick question at a time.',file:'whatsapp-qr.png'});
     } else { window.open(WA_URL,'_blank','noopener'); }
   }
   function activeStepId(){ var el=document.querySelector('.step-content.active'); return el?el.id:''; }
@@ -12422,7 +12422,7 @@ window.__novaPortfolioHTML=function(d,sections){
   var banner=null;
   function makeBanner(){
     banner=document.createElement('div'); banner.className='r4u-wa-banner'; banner.id='_r4uWaBanner';
-    banner.innerHTML=WIC+'<div class="wb-txt"><b>Don’t feel like filling a form?</b> Build your résumé on WhatsApp instead — reply to one question at a time.</div>'+
+    banner.innerHTML=WIC+'<div class="wb-txt"><b>Don’t feel like filling a form?</b> Build your resume on WhatsApp instead — reply to one question at a time.</div>'+
       '<button type="button" class="wb-go">Switch to WhatsApp</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
     banner.querySelector('.wb-go').addEventListener('click',launch);
     banner.querySelector('.wb-x').addEventListener('click',function(){ try{ localStorage.setItem(DISMISS,'1'); }catch(e){} if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); });
@@ -14012,7 +14012,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     try{ var fn=document.getElementById('firstName'); if(fn && fn.value && fn.value.trim()) return true; }catch(e){}
     return false;
   }
-  /* On step 1: if the résumé is already filled, land on the Profile Photo / form
+  /* On step 1: if the resume is already filled, land on the Profile Photo / form
      (skip the empty-state upload prompt); otherwise show the top. Other steps: top. */
   function go(stepId){
     if(stepId==='step1' && isFilled()){
