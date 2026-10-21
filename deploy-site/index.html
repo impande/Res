@@ -12153,6 +12153,24 @@ window.__novaPortfolioHTML=function(d,sections){
     document.getElementById('rrFix').addEventListener('click',function(){ renderFix(d); });
     document.getElementById('rrCopy').addEventListener('click',function(){ copy(shareText(d)); });
   }
+  /* Apply the roast's before→after rewrites straight into the résumé's bullets.
+     Each fix.before is (roughly) an existing bullet; match it to the closest real
+     bullet by token overlap and swap in fix.after. Returns how many were applied. */
+  function _norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
+  function _sim(a,b){ var A=_norm(a).split(' ').filter(Boolean),B=_norm(b).split(' ').filter(Boolean); if(!A.length||!B.length) return 0; var s={}; B.forEach(function(w){s[w]=1;}); var i=0; A.forEach(function(w){ if(s[w]) i++; }); return i/Math.max(A.length,B.length); }
+  function applyRoastFixes(d){
+    if(typeof lastResumeData==='undefined'||!lastResumeData) return 0;
+    var fixes=(d&&d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; });
+    var exps=lastResumeData.experience||[]; var applied=0;
+    fixes.forEach(function(f){
+      var best=null, bestScore=0;
+      exps.forEach(function(e){ (e.bullets||[]).forEach(function(b,i){ var sc=_sim(f.before,b); if(sc>bestScore){ bestScore=sc; best={e:e,i:i}; } }); });
+      if(best && bestScore>=0.5){ best.e.bullets[best.i]=f.after; applied++; }
+    });
+    exps.forEach(function(e){ if(Array.isArray(e.bullets)) e.desc=e.bullets.join('\n'); });
+    if(applied){ try{ if(typeof manuallyEdited!=='undefined') manuallyEdited=true; }catch(e){} try{ if(typeof renderOutput==='function') renderOutput(lastResumeData); }catch(e){} }
+    return applied;
+  }
   function renderFix(d){
     var cur=roastScore(d);
     var ns=Math.min(98, Math.max(cur+8, clamp(d.newScore, cur+12)));
@@ -12166,9 +12184,15 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#22b765,#128a4a)"></div></div></div>'+
       '<div style="margin-top:6px">'+fixes+'</div>'+
       '<div class="rr-share"><div class="rr-st">My résumé got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
-      '<div class="rr-note">Tap any line in your résumé below to apply a fix — or use “Refine with AI” to rewrite a section.</div>';
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply these fixes to my résumé</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
+      '<div class="rr-note">“Apply” rewrites the matching bullets for you. You can still tap any line in your résumé to edit it, or use “Refine with AI”.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
+    document.getElementById('rrApply').addEventListener('click',function(){
+      var total=(d&&d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; }).length;
+      var n=applyRoastFixes(d);
+      if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' fix'+(n>1?'es':'')+' to your résumé'+(n<total?(' ('+(total-n)+' needed a manual tap)'):''),'success'); close(); }
+      else if(typeof showToast==='function') showToast('Couldn’t auto-match those lines — tap a bullet in your résumé to edit it.');
+    });
     document.getElementById('rrCopy2').addEventListener('click',function(){ copy(shareText(d)); });
   }
   function shareText(d){
