@@ -12385,21 +12385,19 @@ window.__novaPortfolioHTML=function(d,sections){
   background:linear-gradient(145deg,#25d366,#1aa851);color:#fff;font-weight:700;font-size:.82rem;}
 .r4u-wa-go svg{width:17px;height:17px;}
 
-/* In-builder banner — compact tinted panel. */
-.r4u-wa-banner{display:flex;align-items:center;gap:11px;margin:0 0 16px;padding:10px 12px;border-radius:13px;
-  background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(18,140,126,.03));border:1px solid rgba(37,211,102,.28);}
-.r4u-wa-banner .r4u-wa-badge{width:34px;height:34px;}
-.r4u-wa-banner .r4u-wa-badge svg{width:19px;height:19px;}
-.r4u-wa-banner .wb-txt{flex:1;min-width:0;font-size:0.82rem;line-height:1.4;color:var(--text);}
+/* In-builder banner (steps 1-6) — a slim, light one-line bar; 'Open' is a quiet
+   green cue, not a filled button, so it never crowds the form. */
+.r4u-wa-banner{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:9px 12px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(37,211,102,.09),rgba(18,140,126,.025));border:1px solid rgba(37,211,102,.24);}
+.r4u-wa-banner .r4u-wa-badge{width:28px;height:28px;}
+.r4u-wa-banner .r4u-wa-badge svg{width:16px;height:16px;}
+.r4u-wa-banner .wb-txt{flex:1;min-width:0;font-size:0.8rem;line-height:1.35;color:var(--text);}
 .r4u-wa-banner .wb-txt b{font-weight:700;}
-.r4u-wa-banner .wb-go{flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.78rem;color:#fff;
-  background:linear-gradient(145deg,#25d366,#1aa851);border-radius:9px;padding:8px 13px;white-space:nowrap;}
-.r4u-wa-banner .wb-x{flex-shrink:0;border:0;background:transparent;color:var(--muted);font-size:1.15rem;line-height:1;cursor:pointer;padding:2px 4px;}
+.r4u-wa-banner .wb-go{flex-shrink:0;border:0;background:transparent;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.79rem;color:#128c7e;white-space:nowrap;padding:4px 2px;}
+.r4u-wa-banner .wb-x{flex-shrink:0;border:0;background:transparent;color:var(--muted);font-size:1.1rem;line-height:1;cursor:pointer;padding:2px 4px;opacity:.7;}
 @media(max-width:560px){
-  .r4u-wa-banner{flex-wrap:wrap;position:relative;padding-right:30px;}
-  .r4u-wa-banner .wb-txt{flex:1 1 auto;}
-  .r4u-wa-banner .wb-go{flex:1 1 100%;order:3;margin-top:2px;padding:9px;}
-  .r4u-wa-banner .wb-x{position:absolute;top:6px;right:8px;}
+  .r4u-wa-banner{position:relative;padding-right:26px;}
+  .r4u-wa-banner .wb-x{position:absolute;top:5px;right:7px;}
 }
 </style>
 <script id="_r4uWaDiscoveryJS">
@@ -12443,8 +12441,8 @@ window.__novaPortfolioHTML=function(d,sections){
   var banner=null;
   function makeBanner(){
     banner=document.createElement('div'); banner.className='r4u-wa-banner'; banner.id='_r4uWaBanner';
-    banner.innerHTML=BADGE+'<div class="wb-txt"><b>Short on time?</b> Build your resume on WhatsApp — one question at a time.</div>'+
-      '<button type="button" class="wb-go">Open</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
+    banner.innerHTML=BADGE+'<div class="wb-txt"><b>Short on time?</b> Continue on WhatsApp — one question at a time.</div>'+
+      '<button type="button" class="wb-go">Open &rarr;</button><button type="button" class="wb-x" aria-label="Dismiss">&times;</button>';
     banner.querySelector('.wb-go').addEventListener('click',launch);
     banner.querySelector('.wb-x').addEventListener('click',function(){ try{ localStorage.setItem(DISMISS,'1'); }catch(e){} if(banner&&banner.parentNode) banner.parentNode.removeChild(banner); });
     return banner;
