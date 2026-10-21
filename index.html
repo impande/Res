@@ -12131,15 +12131,18 @@ window.__novaPortfolioHTML=function(d,sections){
   function close(){ if(!overlay) return; overlay.classList.remove('on'); try{ document.body.style.overflow=prevOverflow; }catch(e){} }
   function body(){ return document.getElementById('r4uRoastBody'); }
   function clamp(n,d){ n=parseInt(n,10); return isNaN(n)?d:Math.max(0,Math.min(100,n)); }
+  /* Headline reuses the real (deterministic) ATS score so the roast and the ATS
+     checker always agree; the AI only supplies the verdict, roasts and fixes. */
+  function atsNow(){ try{ if(typeof computeATSScore==='function'&&typeof lastResumeData!=='undefined'&&lastResumeData) return computeATSScore(lastResumeData).score||0; }catch(e){} return 50; }
   function renderRoast(d){
-    var sc=clamp(d.score,40);
+    var sc=atsNow();
     var lines=(d.roasts||[]).slice(0,4).map(function(r){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
     }).join('');
     body().innerHTML=
       '<span class="rr-eyebrow">The roast 🔥 · 7-second recruiter test</span>'+
       '<h3>'+esc(d.verdict||'Needs work')+'</h3>'+
-      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#e0463d">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:#e0463d">Current résumé strength</div></div>'+
+      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#e0463d">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:#e0463d">Your ATS score</div></div>'+
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#f97316,#e0463d)"></div></div></div>'+
       '<div style="margin-top:6px">'+lines+'</div>'+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy my roast</button></div>'+
@@ -12149,7 +12152,8 @@ window.__novaPortfolioHTML=function(d,sections){
     document.getElementById('rrCopy').addEventListener('click',function(){ copy(shareText(d)); });
   }
   function renderFix(d){
-    var ns=clamp(d.newScore,88);
+    var cur=atsNow();
+    var ns=Math.min(98, Math.max(cur+8, clamp(d.newScore, cur+12)));
     var fixes=(d.fixes||[]).slice(0,4).map(function(f){
       return '<div class="rr-fix"><div class="rr-before">'+esc(f.before||'')+'</div><div class="rr-after"><span class="rr-arw">→</span><div>'+esc(f.after||'')+'</div></div></div>';
     }).join('');
@@ -12159,7 +12163,7 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#1f9d57">'+ns+'<small>/100</small></div><div class="rr-verdict" style="color:#1f9d57">After these fixes</div></div>'+
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#22b765,#128a4a)"></div></div></div>'+
       '<div style="margin-top:6px">'+fixes+'</div>'+
-      '<div class="rr-share"><div class="rr-st">My résumé got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+clamp(d.score,40)+' → '+ns+' · fixed free on resume4u.help</div></div>'+
+      '<div class="rr-share"><div class="rr-st">My résumé got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
       '<div class="rr-btns"><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
       '<div class="rr-note">Tap any line in your résumé below to apply a fix — or use “Refine with AI” to rewrite a section.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
@@ -12167,7 +12171,7 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function shareText(d){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
-    return 'My résumé got roasted by resume4u.help 🔥 ('+clamp(d.score,40)+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
+    return 'My résumé got roasted by resume4u.help 🔥 ('+atsNow()+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
   }
   function copy(str){
     function ok(){ if(typeof showToast==='function') showToast('Roast copied — go share it 🔥','success'); }
