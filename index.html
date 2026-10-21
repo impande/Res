@@ -4660,6 +4660,29 @@ if ('serviceWorker' in navigator) {
   }
 
   /* AI recruiter review — uses AI for a higher-quality, tailored assessment */
+  /* Shared one-tap apply for AI before→after bullet rewrites (used by AI review
+     and the roast). Matches each fix.before to the closest real bullet by token
+     overlap and swaps in fix.after, then re-renders and refreshes the score. */
+  window._r4uApplyBulletFixes=function(fixes){
+    if(typeof lastResumeData==='undefined'||!lastResumeData) return 0;
+    function norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
+    function sim(a,b){ var A=norm(a).split(' ').filter(Boolean),B=norm(b).split(' ').filter(Boolean); if(!A.length||!B.length) return 0; var s={}; B.forEach(function(w){s[w]=1;}); var i=0; A.forEach(function(w){ if(s[w]) i++; }); return i/Math.max(A.length,B.length); }
+    var list=(fixes||[]).filter(function(f){ return f&&f.after&&f.before; });
+    var exps=lastResumeData.experience||[]; var applied=0;
+    list.forEach(function(f){
+      var best=null,bs=0;
+      exps.forEach(function(e){ (e.bullets||[]).forEach(function(b,i){ var sc=sim(f.before,b); if(sc>bs){ bs=sc; best={e:e,i:i}; } }); });
+      if(best&&bs>=0.5){ best.e.bullets[best.i]=f.after; applied++; }
+    });
+    exps.forEach(function(e){ if(Array.isArray(e.bullets)) e.desc=e.bullets.join('\n'); });
+    if(applied){
+      try{ if(typeof manuallyEdited!=='undefined') manuallyEdited=true; }catch(e){}
+      try{ if(typeof renderOutput==='function') renderOutput(lastResumeData); }catch(e){}
+      try{ if(typeof _markEdited==='function') _markEdited(); }catch(e){}
+      try{ if(typeof _updPageBadge==='function') _updPageBadge(); }catch(e){}
+    }
+    return applied;
+  };
   function _aiReview(){
     _clear(); var m=$m(); if(!m) return;
     var out=document.getElementById('resumeOutput'); if(!out||!out.querySelector('.resume-a4-page')){ _msg('Generate your resume first.'); _backBtn(_home); return; }
@@ -4670,7 +4693,7 @@ if ('serviceWorker' in navigator) {
     var role=d.jobTitle||'the role';
     var resume='ROLE: '+role+'\nSUMMARY: '+(d.summary||'(none)')+'\nSKILLS: '+(((d.skills||[]).join(', '))||'(none)')+'\nEXPERIENCE:\n'+(d.experience||[]).map(function(e){ return '- '+(e.title||'')+' at '+(e.co||'')+':\n'+((e.bullets||[]).map(function(b){return '  • '+b;}).join('\n')); }).join('\n');
     var _ti=_templateInfo(); var _tctx=' The resume uses a '+_ti.layout+(_ti.dark?', dark-header':'')+' template ("'+(_ti.name||'custom')+'") — make at least one improvement specific to this layout (bullet count for the columns, sidebar length, or colour/contrast).';
-    var prompt='You are a senior technical recruiter reviewing a resume for a "'+role+'" role.'+_tctx+' Return STRICT JSON only (no markdown), shape: {"verdict":"one short overall sentence","strengths":["..",".."],"improvements":["specific fix","specific fix","specific fix"]}. Each item under 16 words, specific and actionable.\n\nRESUME:\n'+resume;
+    var prompt='You are a senior technical recruiter reviewing a resume for a "'+role+'" role.'+_tctx+' Return STRICT JSON only (no markdown), shape: {"verdict":"one short overall sentence","strengths":["..",".."],"improvements":["specific fix","specific fix","specific fix"],"fixes":[{"before":"an exact weak EXPERIENCE bullet copied from the resume","after":"the rewritten bullet — strong action verb, quantified with [X]/[N] placeholders where no real number exists, under 24 words"}]}. Give 2-4 fixes, each "before" copied closely from a real experience bullet. Each strength/improvement under 16 words.\n\nRESUME:\n'+resume;
     _aiGenerate(prompt).then(function(resp){
       var data=null; try{ var jm=resp.match(/\{[\s\S]*\}/); data=jm?JSON.parse(jm[0]):null; }catch(e){}
       status.remove();
@@ -4678,6 +4701,16 @@ if ('serviceWorker' in navigator) {
       if(data.verdict) _msg('<b>“'+data.verdict+'”</b>');
       if(data.strengths&&data.strengths.length) _msg('<div class="airx-sect" style="margin:1px 0 6px">✅ Strengths</div>'+data.strengths.map(function(x){return '<div style="font-size:0.82rem;line-height:1.5;margin:3px 0">• '+x+'</div>';}).join(''));
       if(data.improvements&&data.improvements.length) _msg('<div class="airx-sect" style="margin:6px 0 6px">⚡ Improve</div>'+data.improvements.map(function(x){return '<div style="font-size:0.82rem;line-height:1.5;margin:3px 0">• '+x+'</div>';}).join(''));
+      if(data.fixes&&data.fixes.length){
+        _msg('<button id="airxApplyFixes" class="aig-opt aig-primary" style="margin-top:8px">✅ Apply '+data.fixes.length+' fix'+(data.fixes.length>1?'es':'')+' to my résumé</button>');
+        var ab=document.getElementById('airxApplyFixes');
+        if(ab) ab.addEventListener('click',function(){
+          if(ab.disabled) return;
+          var n=(typeof window._r4uApplyBulletFixes==='function')?window._r4uApplyBulletFixes(data.fixes):0;
+          if(n>0){ ab.disabled=true; ab.textContent='✓ Applied '+n+' fix'+(n>1?'es':''); _msg('<span class="aig-ok">✓ Rewrote '+n+' bullet'+(n>1?'s':'')+' — see your résumé above.</span>'); _scroll(); }
+          else { _msg('<span class="aig-warn">Couldn’t auto-match those lines — tap a bullet to edit it directly.</span>'); }
+        });
+      }
       _scroll();
     }).catch(function(){ status.innerHTML='<span class="aig-warn">Could not reach AI. Try again.</span>'; _backBtn(_home); });
     _backBtn(_home);
@@ -12158,6 +12191,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function _norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
   function _sim(a,b){ var A=_norm(a).split(' ').filter(Boolean),B=_norm(b).split(' ').filter(Boolean); if(!A.length||!B.length) return 0; var s={}; B.forEach(function(w){s[w]=1;}); var i=0; A.forEach(function(w){ if(s[w]) i++; }); return i/Math.max(A.length,B.length); }
   function applyRoastFixes(d){
+    if(typeof window._r4uApplyBulletFixes==='function') return window._r4uApplyBulletFixes(d&&d.fixes); // shared helper (also refreshes score)
     if(typeof lastResumeData==='undefined'||!lastResumeData) return 0;
     var fixes=(d&&d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; });
     var exps=lastResumeData.experience||[]; var applied=0;
