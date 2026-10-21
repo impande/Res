@@ -197,17 +197,60 @@ function applyEdit(d, text) {
   return null;
 }
 
+/* ---- cloud-shape (web account) summary + edit: a linked user's saved resume is
+   kept in the full builder shape so nothing is flattened on the round-trip. ---- */
+function summarizeCloud(d) {
+  const parts = [];
+  const nm = ((d.firstName || '') + ' ' + (d.lastName || '')).trim();
+  if (nm) parts.push('👤 ' + nm);
+  if (d.jobTitle) parts.push('🎯 ' + d.jobTitle);
+  if (Array.isArray(d.experience) && d.experience.length) parts.push('💼 ' + d.experience.length + ' role(s)');
+  if (Array.isArray(d.skills) && d.skills.length) parts.push('🛠️ ' + d.skills.slice(0, 8).join(', ') + (d.skills.length > 8 ? '…' : ''));
+  if (Array.isArray(d.education) && d.education.length) { const e0 = d.education[0] || {}; const ed = [e0.deg, e0.sch].filter(Boolean).join(', '); if (ed) parts.push('🎓 ' + ed); }
+  return parts.join('\n') || '(your saved resume)';
+}
+function applyEditCloud(d, text) {
+  const t = (text || '').trim(); let m;
+  if (!Array.isArray(d.skills)) d.skills = [];
+  if (!Array.isArray(d.experience)) d.experience = [];
+  const syncDesc = () => { d.experience.forEach((e) => { if (Array.isArray(e.bullets)) e.desc = e.bullets.join('\n'); }); };
+  if ((m = t.match(/^name\s*[:=]\s*(.+)$/is))) { const sp = m[1].trim().split(/\s+/); d.firstName = sp.shift() || ''; d.lastName = sp.join(' '); return 'name'; }
+  if ((m = t.match(/^(?:role|title|target)\s*[:=]\s*(.+)$/is))) { d.jobTitle = m[1].trim(); return 'role'; }
+  if ((m = t.match(/^summary\s*[:=]\s*(.+)$/is))) { d.summary = m[1].trim(); return 'summary'; }
+  if ((m = t.match(/^add\s+skills?\s*[:=]\s*(.+)$/is))) { d.skills = d.skills.concat(m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean)); return 'skills'; }
+  if ((m = t.match(/^skills?\s*[:=]\s*(.+)$/is))) { d.skills = m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean); return 'skills'; }
+  if ((m = t.match(/^add\s+bullet\s*[:=]\s*(.+)$/is))) {
+    if (!d.experience.length) d.experience.push({ title: d.jobTitle || '', co: '', dates: '', bullets: [] });
+    const tgt = d.experience[0]; if (!Array.isArray(tgt.bullets)) tgt.bullets = [];
+    tgt.bullets.push(m[1].trim()); syncDesc(); return 'bullet';
+  }
+  if ((m = t.match(/^add\s+(?:experience|job|role)\s*[:=]\s*(.+)$/is))) {
+    let body = m[1].trim(), role = '', co = '';
+    const dash = body.split(/\s[-–—]\s/);
+    if (dash.length > 1) { role = dash[0].trim(); body = dash.slice(1).join(' - '); }
+    const at = role.split(/\s+at\s+/i); let title = role; if (at.length > 1) { title = at[0].trim(); co = at.slice(1).join(' at ').trim(); }
+    const bullets = body.split(/[\n;]/).map((s) => s.replace(/^[-•\s]+/, '').trim()).filter(Boolean);
+    d.experience.unshift({ title, co, dates: '', bullets, desc: bullets.join('\n') });
+    return 'experience';
+  }
+  return null;
+}
+
 /* ---- finish: stash the resume, remember it, hand back the finish link ---- */
 async function finishAndLink(from, data, base) {
+  const isWeb = data && data._src === 'web';
+  let store = data;
+  if (isWeb) { store = Object.assign({}, data); delete store._src; } // strip internal flag for the web loader
   const token = Math.random().toString(36).slice(2, 10);
-  await redis(['SET', 'resume:' + token, JSON.stringify(data), 'EX', '604800']); // 7 days for the web loader
+  await redis(['SET', 'resume:' + token, JSON.stringify(store), 'EX', '604800']); // 7 days for the web loader
   await setProfile(from, data); // remember this person so they can edit later
   await setState(from, { step: 0, mode: 'idle', data: { experiences: [] } });
+  const nm = isWeb ? ((data.firstName || '').trim() || 'there') : firstName(data.name);
   await send(from,
-    `🎉 All set, ${firstName(data.name)}! Your resume is ready.\n\n` +
+    `🎉 All set, ${nm}! Your resume is ready.\n\n` +
     `👉 Finish & download (free): ${base || 'https://resume4u.help'}/?r=${token}\n\n` +
-    `Pick a template, tweak anything, and download as PDF.\n\n` +
-    `Reply "edit" to change something here, or "new" to build another.`);
+    `Open it to review your change, pick a template, and download — ${isWeb ? 'then tap Save to update your account.' : 'or download as PDF.'}\n\n` +
+    `Reply "edit" to change something else, or "new" to build another.`);
 }
 
 /* ---- WhatsApp send ---- */
@@ -419,8 +462,34 @@ exports.handler = async (event) => {
       state = { step: 0, mode: 'build', data: { experiences: [] } }; // fall through to build
     } else if (/^(menu|help|options)$/i.test(low)) {
       const prof = await getProfile(from);
+      const pn = prof && (prof.name || prof.firstName);
       await setState(from, { step: 0, mode: 'menu', data: state.data });
-      await send(from, (prof && prof.name ? 'Hi again, ' + firstName(prof.name) + '! ' : '') + MENU);
+      await send(from, (pn ? 'Hi again, ' + firstName(pn) + '! ' : '') + MENU);
+      return { statusCode: 200, body: 'ok' };
+    }
+
+    // ---- Link a web account: user sends "LINK <code>" from the site ----
+    const lm = low.match(/^link\s+([a-z0-9]{4,8})$/i);
+    if (lm) {
+      const code = lm[1].toUpperCase();
+      const uid = await redis(['GET', 'walink:' + code]);
+      if (!uid) {
+        await send(from, "That link code didn't work (it may have expired). On resume4u.help, tap \"Connect WhatsApp\" again for a fresh code.");
+        return { statusCode: 200, body: 'ok' };
+      }
+      await redis(['SET', 'wamap:' + from, uid, 'EX', '7776000']); // remember phone→account for 90 days
+      await redis(['DEL', 'walink:' + code]);
+      let web = null; const webRaw = await redis(['GET', 'webresume:' + uid]);
+      try { web = webRaw ? JSON.parse(webRaw) : null; } catch (e) {}
+      if (web && (web.firstName || web.jobTitle || (web.experience || []).length)) {
+        web._src = 'web';
+        await setProfile(from, web);
+        await setState(from, { step: 0, mode: 'review', data: web });
+        await send(from, '✅ Linked to your resume4u.help account!\n\n' + summarizeCloud(web) +
+          '\n\nTell me what to change — e.g.\n• add bullet: Led the AWS migration, cutting costs [X]%\n• add skill: Kubernetes\n• role: Senior Product Manager\n\nReply "link" when done to get your updated resume.');
+      } else {
+        await send(from, "✅ Linked! But I couldn't find a saved resume on your account yet. Build or save one on resume4u.help, then message me again — or send a PDF to import one here.");
+      }
       return { statusCode: 200, body: 'ok' };
     }
 
@@ -429,9 +498,10 @@ exports.handler = async (event) => {
       if (/^1\b/.test(low) || /\bedit\b/i.test(low)) {
         const prof = await getProfile(from);
         if (prof) {
+          const pWeb = prof._src === 'web';
           await setState(from, { step: 0, mode: 'edit', data: prof });
-          await send(from, 'Editing your resume.\n\n' + summarize(prof) +
-            '\n\nTell me what to change — e.g. "role: Product Manager", "add skill: Figma", "years: 7". Reply "link" when done.');
+          await send(from, 'Editing your resume.\n\n' + (pWeb ? summarizeCloud(prof) : summarize(prof)) +
+            '\n\nTell me what to change — e.g. "add bullet: …", "add skill: Figma", "role: Product Manager". Reply "link" when done.');
           return { statusCode: 200, body: 'ok' };
         }
         state = { step: 0, mode: 'build', data: { experiences: [] } }; // no saved resume → build
@@ -450,21 +520,23 @@ exports.handler = async (event) => {
 
     // ---- Mode: edit / review (tweak the current resume) ----
     if (state.mode === 'edit' || state.mode === 'review') {
+      const isWeb = state.data && state.data._src === 'web';
       if (/^(link|done|finish|get link|generate|get my link)$/i.test(low)) {
         await finishAndLink(from, state.data, base);
         return { statusCode: 200, body: 'ok' };
       }
       if (/^edit$/i.test(low)) {
         await setState(from, { step: 0, mode: 'edit', data: state.data });
-        await send(from, 'Sure — tell me what to change (e.g. "role: …", "add skill: …", "years: …"). Reply "link" when done.');
+        await send(from, 'Sure — tell me what to change (e.g. "add bullet: …", "add skill: …", "role: …"). Reply "link" when done.');
         return { statusCode: 200, body: 'ok' };
       }
-      const changed = applyEdit(state.data, text);
+      const changed = isWeb ? applyEditCloud(state.data, text) : applyEdit(state.data, text);
       if (changed) {
         await setState(from, { step: 0, mode: 'edit', data: state.data });
-        await send(from, '✅ Updated ' + changed + '.\n\n' + summarize(state.data) + '\n\nAnything else? Or reply "link" to get your resume.');
+        await send(from, '✅ Updated ' + changed + '.\n\n' + (isWeb ? summarizeCloud(state.data) : summarize(state.data)) + '\n\nAnything else? Or reply "link" to get your resume.');
       } else {
-        await send(from, 'I can change: name, role, years, education, skills, or add experience.\nExamples:\n• role: Data Analyst\n• add skill: Python\n• years: 5\n\nOr reply "link" to get your resume, "new" to start fresh.');
+        await send(from, 'I can change: ' + (isWeb ? 'add bullet, add skill, role, summary, or add experience' : 'name, role, years, education, skills, or add experience') +
+          '.\nExamples:\n• add bullet: Shipped the new onboarding flow\n• add skill: Python\n• role: Data Analyst\n\nOr reply "link" to get your resume, "new" to start fresh.');
       }
       return { statusCode: 200, body: 'ok' };
     }
@@ -472,9 +544,10 @@ exports.handler = async (event) => {
     // ---- Idle / first contact: returning user → menu, new user → build ----
     if (state.mode !== 'build') {
       const prof = await getProfile(from);
-      if (prof && prof.name) {
+      const pName = prof && (prof.name || prof.firstName);
+      if (prof && pName) {
         await setState(from, { step: 0, mode: 'menu', data: { experiences: [] } });
-        await send(from, '👋 Welcome back, ' + firstName(prof.name) + '! Your resume is saved with me.\n\n' + MENU +
+        await send(from, '👋 Welcome back, ' + firstName(pName) + '! Your resume is saved with me.\n\n' + MENU +
           '\n\nOr just send a PDF to import a different one.');
         return { statusCode: 200, body: 'ok' };
       }
