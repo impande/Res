@@ -23,6 +23,15 @@
  */
 
 const GRAPH = 'https://graph.facebook.com/v21.0';
+// Base URL for the finish link. On a branch deploy (e.g. UAT) point at that
+// deploy so the ?r= loader there handles the handoff; production uses the
+// canonical domain. Netlify exposes CONTEXT / DEPLOY_PRIME_URL to functions.
+function siteBase() {
+  if (process.env.CONTEXT && process.env.CONTEXT !== 'production' && process.env.DEPLOY_PRIME_URL) {
+    return process.env.DEPLOY_PRIME_URL;
+  }
+  return process.env.R4U_SITE_URL || 'https://resume4u.help';
+}
 const _mem = {};        // in-memory fallback conversation state (per warm instance)
 const _memProfile = {}; // in-memory fallback saved résumé (per warm instance)
 
@@ -193,7 +202,7 @@ async function finishAndLink(from, data) {
   await setState(from, { step: 0, mode: 'idle', data: { experiences: [] } });
   await send(from,
     `🎉 All set, ${firstName(data.name)}! Your résumé is ready.\n\n` +
-    `👉 Finish & download (free): https://resume4u.help/?r=${token}\n\n` +
+    `👉 Finish & download (free): ${siteBase()}/?r=${token}\n\n` +
     `Pick a template, tweak anything, and download as PDF.\n\n` +
     `Reply "edit" to change something here, or "new" to build another.`);
 }
