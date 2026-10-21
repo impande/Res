@@ -23,13 +23,16 @@
  */
 
 const GRAPH = 'https://graph.facebook.com/v21.0';
-// Base URL for the finish link. On a branch deploy (e.g. UAT) point at that
-// deploy so the ?r= loader there handles the handoff; production uses the
-// canonical domain. Netlify exposes CONTEXT / DEPLOY_PRIME_URL to functions.
-function siteBase() {
-  if (process.env.CONTEXT && process.env.CONTEXT !== 'production' && process.env.DEPLOY_PRIME_URL) {
-    return process.env.DEPLOY_PRIME_URL;
-  }
+// Base URL for the finish link. Derive it from the host the webhook was called
+// on, so the ?r= loader that handles the handoff is always on the SAME deploy as
+// this function: a UAT branch-deploy keeps the link on UAT, production keeps it
+// on prod. Netlify's CONTEXT/DEPLOY_PRIME_URL aren't reliably in the function
+// runtime, but the request host always is.
+function siteBase(event) {
+  var h = '';
+  try { h = (event && event.headers && (event.headers.host || event.headers.Host)) || ''; } catch (e) {}
+  if (h === 'resume4help.netlify.app') return 'https://resume4u.help'; // canonical prod domain
+  if (h) return 'https://' + h;
   return process.env.R4U_SITE_URL || 'https://resume4u.help';
 }
 const _mem = {};        // in-memory fallback conversation state (per warm instance)
@@ -195,14 +198,14 @@ function applyEdit(d, text) {
 }
 
 /* ---- finish: stash the résumé, remember it, hand back the finish link ---- */
-async function finishAndLink(from, data) {
+async function finishAndLink(from, data, base) {
   const token = Math.random().toString(36).slice(2, 10);
   await redis(['SET', 'resume:' + token, JSON.stringify(data), 'EX', '604800']); // 7 days for the web loader
   await setProfile(from, data); // remember this person so they can edit later
   await setState(from, { step: 0, mode: 'idle', data: { experiences: [] } });
   await send(from,
     `🎉 All set, ${firstName(data.name)}! Your résumé is ready.\n\n` +
-    `👉 Finish & download (free): ${siteBase()}/?r=${token}\n\n` +
+    `👉 Finish & download (free): ${base || 'https://resume4u.help'}/?r=${token}\n\n` +
     `Pick a template, tweak anything, and download as PDF.\n\n` +
     `Reply "edit" to change something here, or "new" to build another.`);
 }
@@ -383,6 +386,7 @@ exports.handler = async (event) => {
   const text = (msg.text && msg.text.body || '').trim();
   const low = text.toLowerCase();
   console.log('[whatsapp] inbound from', from, 'type', type, ':', JSON.stringify(text));
+  const base = siteBase(event); // finish link lives on the same deploy as this webhook
 
   const MENU = 'Reply with a number:\n1️⃣  Edit my saved résumé\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)';
 
@@ -447,7 +451,7 @@ exports.handler = async (event) => {
     // ---- Mode: edit / review (tweak the current résumé) ----
     if (state.mode === 'edit' || state.mode === 'review') {
       if (/^(link|done|finish|get link|generate|get my link)$/i.test(low)) {
-        await finishAndLink(from, state.data);
+        await finishAndLink(from, state.data, base);
         return { statusCode: 200, body: 'ok' };
       }
       if (/^edit$/i.test(low)) {
@@ -489,7 +493,7 @@ exports.handler = async (event) => {
       await setState(from, state);
       await send(from, q);
     } else {
-      await finishAndLink(from, state.data);
+      await finishAndLink(from, state.data, base);
     }
   } catch (e) {
     console.error('[whatsapp] error', e);
