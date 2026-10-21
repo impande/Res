@@ -12368,17 +12368,22 @@ window.__novaPortfolioHTML=function(d,sections){
   background:linear-gradient(145deg,#25d366,#1aa851);}
 .r4u-wa-badge svg{width:21px;height:21px;}
 
-/* Landing CTA — one compact, clickable card. 'Start chat' is a light green cue,
-   not a heavy button, so it sits quietly under the main hero CTAs. */
+/* Landing CTA — a small WhatsApp-style chat teaser: reads like a quick message
+   from the bot. Kept light and compact so it sits under the hero CTAs. */
 .r4u-wa-ctawrap{display:flex;justify-content:center;width:100%;margin-top:14px;}
-.r4u-wa-cta{display:flex;align-items:center;gap:12px;max-width:400px;width:100%;padding:11px 14px;border-radius:14px;
-  background:var(--card-bg,#fff);border:1px solid var(--border,#e5e5e0);color:var(--text);cursor:pointer;text-decoration:none;
+.r4u-wa-cta{display:block;max-width:358px;width:100%;padding:12px 13px;border-radius:15px;cursor:pointer;text-decoration:none;
+  background:var(--card-bg,#fff);border:1px solid var(--border,#e5e5e0);color:var(--text);
   box-shadow:0 1px 2px rgba(0,0,0,.04);transition:transform .14s ease,box-shadow .18s ease,border-color .18s ease;}
-.r4u-wa-cta:hover{transform:translateY(-1px);box-shadow:0 10px 22px -14px rgba(18,140,126,.5);border-color:rgba(37,211,102,.45);}
-.r4u-wa-cta .wc-body{flex:1;min-width:0;text-align:left;}
-.r4u-wa-cta .wc-title{display:block;font-weight:700;font-size:0.9rem;line-height:1.25;}
-.r4u-wa-cta .wc-sub{display:block;font-size:0.75rem;color:var(--muted);margin-top:1px;line-height:1.3;}
-.r4u-wa-cta .wc-go{flex-shrink:0;display:inline-flex;align-items:center;gap:3px;font-weight:700;font-size:0.8rem;color:#128c7e;white-space:nowrap;}
+.r4u-wa-cta:hover{transform:translateY(-1px);box-shadow:0 10px 22px -16px rgba(18,140,126,.45);border-color:rgba(37,211,102,.4);}
+.r4u-wa-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.r4u-wa-top .r4u-wa-badge{width:30px;height:30px;}
+.r4u-wa-top .r4u-wa-badge svg{width:17px;height:17px;}
+.r4u-wa-top .nm{font-weight:700;font-size:.82rem;line-height:1.1;}
+.r4u-wa-top .st{font-size:.63rem;color:#1fa855;font-weight:600;}
+.r4u-wa-bub{background:var(--input-bg,#f1efe9);border-radius:3px 13px 13px 13px;padding:8px 11px;font-size:.8rem;line-height:1.42;color:var(--text);}
+.r4u-wa-go{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;padding:9px;border-radius:10px;
+  background:linear-gradient(145deg,#25d366,#1aa851);color:#fff;font-weight:700;font-size:.82rem;}
+.r4u-wa-go svg{width:17px;height:17px;}
 
 /* In-builder banner — compact tinted panel. */
 .r4u-wa-banner{display:flex;align-items:center;gap:11px;margin:0 0 16px;padding:10px 12px;border-radius:13px;
@@ -12421,7 +12426,9 @@ window.__novaPortfolioHTML=function(d,sections){
       var stack=document.querySelector('.r4u-cta-stack'); if(!stack) return;
       wrap=document.createElement('div'); wrap.className='r4u-wa-ctawrap'; wrap.id='_r4uWaLandingCta';
       var a=document.createElement('a'); a.href='#'; a.className='r4u-wa-cta';
-      a.innerHTML=BADGE+'<span class="wc-body"><span class="wc-title">Build your resume on WhatsApp</span><span class="wc-sub">One quick question at a time.</span></span><span class="wc-go">Start chat &rarr;</span>';
+      a.innerHTML='<div class="r4u-wa-top">'+BADGE+'<div><div class="nm">Resume4U</div><div class="st">● online</div></div></div>'+
+        '<div class="r4u-wa-bub">Hi 👋 I\'ll build your resume one quick question at a time — ready?</div>'+
+        '<div class="r4u-wa-go">'+WIC+' Start on WhatsApp</div>';
       a.addEventListener('click',function(e){ e.preventDefault(); launch(); });
       wrap.appendChild(a);
       stack.parentNode.insertBefore(wrap, stack.nextSibling);
