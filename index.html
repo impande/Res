@@ -636,46 +636,42 @@
     .btn-hero{padding:16px 40px;background:var(--accent-btn);color:#fff;font-size:1.05rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 4px 20px rgba(180,83,9,0.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .btn-hero:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 8px 28px rgba(217,119,6,0.35);}
     .hero-note{margin-top:14px;font-size:0.78rem;color:var(--muted);}
-    .r4u-cta-stack{display:flex;flex-direction:column;gap:12px;width:100%;max-width:560px;margin:6px auto 0;}
-    .r4u-cta{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 18px;border-radius:15px;border:1.5px solid var(--border,#e5e5e0);background:var(--card-bg,#fff);cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s,border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .r4u-cta:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.1);border-color:rgba(217,119,6,.5);}
-    .r4u-cta:active{transform:translateY(0);}
-    .r4u-cta-ico{flex-shrink:0;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(217,119,6,.1);color:var(--accent,#b45309);}
-    .r4u-cta-body{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
-    .r4u-cta-title{font-size:1.02rem;font-weight:800;color:var(--text,#1a1a1a);line-height:1.2;}
-    .r4u-cta-desc{font-size:.8rem;color:var(--muted,#6b7280);line-height:1.3;}
-    .r4u-cta-arr{flex-shrink:0;color:var(--accent,#b45309);font-size:1.35rem;font-weight:700;opacity:.5;transition:transform .15s,opacity .15s;}
-    .r4u-cta:hover .r4u-cta-arr{opacity:1;transform:translateX(3px);}
-    .r4u-cta-primary{background:linear-gradient(135deg,#b45309,#d97706);border-color:transparent;box-shadow:0 6px 20px rgba(180,83,9,.26);}
-    .r4u-cta-primary .r4u-cta-title{color:#fff;}
-    .r4u-cta-primary .r4u-cta-desc{color:rgba(255,255,255,.88);}
-    .r4u-cta-primary .r4u-cta-arr{color:#fff;opacity:.85;}
-    .r4u-cta-primary .r4u-cta-ico{background:rgba(255,255,255,.22);color:#fff;}
-    .r4u-cta-primary:hover{box-shadow:0 12px 30px rgba(180,83,9,.38);border-color:transparent;}
-    /* ── CTA highlight + motion ───────────────────────────────────────────────
-       A deliberate, clearly-staggered entrance so each card lifts into place on
-       load, a soft slow attention glow on the primary card, a refined hover sheen
-       and icon lift. The entrance uses transform/opacity only, so it stays smooth
-       on the compositor even while the deferred app bundle parses. No layout shift;
-       fully disabled under prefers-reduced-motion. */
-    .r4u-cta{position:relative;overflow:hidden;}
-    .r4u-cta-ico{transition:transform .25s cubic-bezier(.34,1.4,.5,1),background .2s ease;}
-    .r4u-cta:hover .r4u-cta-ico{transform:scale(1.07);background:rgba(217,119,6,.16);}
-    .r4u-cta-primary:hover .r4u-cta-ico{background:rgba(255,255,255,.28);}
+    .r4u-cta-stack{display:flex;flex-direction:column;gap:13px;width:100%;max-width:560px;margin:6px auto 0;}
+    .r4u-cta{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 17px;border-radius:17px;border:1px solid var(--border,#e5e5e0);background:var(--card-bg,#fff);cursor:pointer;font-family:inherit;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 30px -22px rgba(20,20,30,.35);transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease,border-color .2s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    .r4u-cta:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(0,0,0,.05),0 22px 44px -24px rgba(20,20,30,.4);border-color:rgba(0,0,0,.09);}
+    .r4u-cta:active{transform:translateY(-1px);}
+    .r4u-cta-ico{flex-shrink:0;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;transition:transform .3s cubic-bezier(.34,1.5,.5,1);}
+    .r4u-cta-ico svg{width:21px;height:21px;}
+    .r4u-cta:hover .r4u-cta-ico{transform:scale(1.09) rotate(-3deg);}
+    .r4u-cta-body{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
+    .r4u-cta-title{font-size:1.02rem;font-weight:800;color:var(--text,#1a1a1a);line-height:1.2;letter-spacing:-.01em;}
+    .r4u-cta-desc{font-size:.8rem;color:var(--muted,#6b7280);line-height:1.32;}
+    .r4u-cta-arr{flex-shrink:0;color:var(--accent,#b45309);font-size:1.3rem;font-weight:700;opacity:.45;transition:transform .22s cubic-bezier(.2,.8,.2,1),opacity .2s;}
+    .r4u-cta:hover .r4u-cta-arr{opacity:1;transform:translateX(4px);}
+    /* vibrant gradient icon badges + soft colored glow (one hue per action) */
+    .r4u-cta-primary .r4u-cta-ico{background:linear-gradient(140deg,#fbbf24,#e0820a);box-shadow:0 8px 18px -7px rgba(224,125,10,.6);}
+    .r4u-cta-upload .r4u-cta-ico{background:linear-gradient(140deg,#38bdf8,#2563eb);box-shadow:0 8px 18px -7px rgba(37,99,235,.6);}
+    .r4u-cta-portfolio .r4u-cta-ico{background:linear-gradient(140deg,#a78bfa,#7c3aed);box-shadow:0 8px 18px -7px rgba(124,58,237,.55);}
+    .r4u-cta-whatsapp .r4u-cta-ico{background:linear-gradient(145deg,#25d366,#1aa851);box-shadow:0 8px 18px -7px rgba(26,168,81,.55);}
+    /* primary (Generate) — a LIGHT card marked with an amber ring + glow + chip */
+    .r4u-cta-primary{border-color:rgba(234,140,10,.45);box-shadow:0 1px 2px rgba(0,0,0,.04),0 14px 30px -18px rgba(224,125,10,.5);}
+    .r4u-cta-primary .r4u-cta-arr{color:#e0820a;opacity:.6;}
+    .r4u-cta-primary:hover{border-color:rgba(234,140,10,.75);box-shadow:0 2px 4px rgba(0,0,0,.05),0 24px 46px -22px rgba(224,125,10,.6);}
+    .r4u-cta-tag{position:absolute;top:11px;right:13px;font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#f6a823,#e0820a);padding:3px 9px;border-radius:999px;box-shadow:0 3px 8px -3px rgba(224,125,10,.55);}
+    /* ── CTA highlight + motion (disabled under prefers-reduced-motion) ── */
     /* Refined light sweep across the card on hover */
     .r4u-cta::after{content:"";position:absolute;top:0;left:-80%;width:48%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);opacity:0;pointer-events:none;}
-    .r4u-cta:hover::after{animation:r4uCtaSheen .9s ease;}
-    @keyframes r4uCtaSheen{0%{left:-80%;opacity:0;}15%{opacity:1;}100%{left:140%;opacity:0;}}
-    /* Entrance: deliberate lift + fade, clearly staggered (primary → upload → portfolio) */
-    /* Transform-only (no opacity): a stuck/paused/janky frame still shows the card
-       fully opaque and readable — it can never render faded/washed-out. */
+    .r4u-cta:hover::after{animation:r4uCtaSheen 1s ease;}
+    @keyframes r4uCtaSheen{0%{left:-80%;opacity:0;}14%{opacity:1;}100%{left:140%;opacity:0;}}
+    /* Entrance: transform-only lift (a stuck frame still shows the card opaque), staggered */
     @keyframes r4uCtaIn{0%{transform:translateY(22px) scale(.985);}100%{transform:translateY(0) scale(1);}}
-    .r4u-cta{animation:r4uCtaIn .75s cubic-bezier(.16,1,.3,1) backwards;}
-    .r4u-cta-stack .r4u-cta:nth-child(2){animation-delay:.28s;}
-    .r4u-cta-stack .r4u-cta:nth-child(3){animation-delay:.44s;}
-    /* Primary: entrance (own .12s delay) + a soft, slow attention glow */
-    @keyframes r4uCtaGlow{0%,100%{box-shadow:0 6px 20px rgba(180,83,9,.26);}50%{box-shadow:0 11px 32px rgba(180,83,9,.46);}}
-    .r4u-cta-primary{animation:r4uCtaIn .75s cubic-bezier(.16,1,.3,1) .12s backwards, r4uCtaGlow 3.4s ease-in-out 1.6s infinite;}
+    .r4u-cta{animation:r4uCtaIn .8s cubic-bezier(.16,1,.3,1) backwards;}
+    .r4u-cta-stack .r4u-cta:nth-child(2){animation-delay:.12s;}
+    .r4u-cta-stack .r4u-cta:nth-child(3){animation-delay:.24s;}
+    .r4u-cta-stack .r4u-cta:nth-child(4){animation-delay:.36s;}
+    /* Primary: entrance + a soft, slow attention glow on the light card */
+    @keyframes r4uCtaGlow{0%,100%{box-shadow:0 1px 2px rgba(0,0,0,.04),0 14px 30px -18px rgba(224,125,10,.5);}50%{box-shadow:0 1px 2px rgba(0,0,0,.04),0 18px 38px -18px rgba(224,125,10,.72);}}
+    .r4u-cta-primary{animation:r4uCtaIn .8s cubic-bezier(.16,1,.3,1) backwards, r4uCtaGlow 3.8s ease-in-out 1.8s infinite;}
     /* Primary arrow: subtle periodic glide to hint the tap (pauses on hover) */
     @keyframes r4uCtaArr{0%,64%,100%{transform:translateX(0);}80%{transform:translateX(4px);}}
     .r4u-cta-primary .r4u-cta-arr{animation:r4uCtaArr 3.2s ease-in-out 1.8s infinite;}
@@ -2718,16 +2714,17 @@
   <div id="top-sticky-bar">
     <div class="r4u-cta-stack">
       <button class="r4u-cta r4u-cta-primary" onclick="startBuild()" aria-label="Generate your resume from scratch with AI">
+        <span class="r4u-cta-tag" aria-hidden="true">★ Recommended</span>
         <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v6M9 14h6"/></svg></span>
         <span class="r4u-cta-body"><span class="r4u-cta-title">Generate Your First Resume</span><span class="r4u-cta-desc">Start from scratch — our AI writes it for you</span></span>
         <span class="r4u-cta-arr" aria-hidden="true">→</span>
       </button>
-      <button class="r4u-cta" onclick="r4uStartUpload()" aria-label="Already have a resume? Upload it and let AI improve it">
+      <button class="r4u-cta r4u-cta-upload" onclick="r4uStartUpload()" aria-label="Already have a resume? Upload it and let AI improve it">
         <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 19h14"/></svg></span>
         <span class="r4u-cta-body"><span class="r4u-cta-title">Already have a resume?</span><span class="r4u-cta-desc">Upload a PDF or DOC — AI improves it in minutes</span></span>
         <span class="r4u-cta-arr" aria-hidden="true">→</span>
       </button>
-      <button class="r4u-cta" onclick="openPortfolioBuilder()" aria-label="Build your portfolio website">
+      <button class="r4u-cta r4u-cta-portfolio" onclick="openPortfolioBuilder()" aria-label="Build your portfolio website">
         <span class="r4u-cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg></span>
         <span class="r4u-cta-body"><span class="r4u-cta-title">Build Your Portfolio Website</span><span class="r4u-cta-desc">Turn your resume into a live personal site</span></span>
         <span class="r4u-cta-arr" aria-hidden="true">→</span>
@@ -12419,20 +12416,20 @@ window.__novaPortfolioHTML=function(d,sections){
 
   /* 1) Landing CTA — under the main CTA cards; shown only on the landing (step 0) */
   function landingCta(){
-    var wrap=document.getElementById('_r4uWaLandingCta');
-    if(!wrap){
+    var el=document.getElementById('_r4uWaLandingCta');
+    if(!el){
       var stack=document.querySelector('.r4u-cta-stack'); if(!stack) return;
-      wrap=document.createElement('div'); wrap.className='r4u-wa-ctawrap'; wrap.id='_r4uWaLandingCta';
-      var a=document.createElement('a'); a.href='#'; a.className='r4u-wa-cta';
-      a.innerHTML='<div class="r4u-wa-top">'+BADGE+'<div><div class="nm">Resume4U</div><div class="st">AI resume builder</div></div></div>'+
-        '<div class="r4u-wa-bub">Make your resume on WhatsApp — no form. 👋 Answer a few quick questions and I\'ll write your full resume for you.</div>'+
-        '<div class="r4u-wa-go">'+WIC+' Build my resume</div>';
-      a.addEventListener('click',function(e){ e.preventDefault(); launch(); });
-      wrap.appendChild(a);
-      stack.parentNode.insertBefore(wrap, stack.nextSibling);
+      /* A 4th card in the hero stack — same size/shape as the others, green badge. */
+      el=document.createElement('button'); el.type='button'; el.className='r4u-cta r4u-cta-whatsapp'; el.id='_r4uWaLandingCta';
+      el.setAttribute('aria-label','Make your resume on WhatsApp by chat');
+      el.innerHTML='<span class="r4u-cta-ico" aria-hidden="true">'+WIC+'</span>'+
+        '<span class="r4u-cta-body"><span class="r4u-cta-title">Make your resume on WhatsApp</span><span class="r4u-cta-desc">No form — answer a few quick questions by chat</span></span>'+
+        '<span class="r4u-cta-arr" aria-hidden="true">→</span>';
+      el.addEventListener('click',launch);
+      stack.appendChild(el);
     }
     var onLanding = activeStepId()==='step0';
-    wrap.style.display = onLanding ? 'flex' : 'none';
+    el.style.display = onLanding ? 'flex' : 'none';
   }
 
   /* 2) In-builder banner — on steps 1-7, dismissible */
