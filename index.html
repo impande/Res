@@ -13580,10 +13580,17 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 <style>
 #r4uMobLegal{display:none;}
 @media(max-width:768px){
-  #r4uMobLegal{display:block;margin:26px 2px 10px;padding:16px 4px 4px;border-top:1px solid var(--border,#e5e5e0);text-align:center;font-size:clamp(0.58rem,2.8vw,0.75rem);line-height:1.9;white-space:nowrap;}
-  #r4uMobLegal a{color:var(--muted,#6b7280);text-decoration:none;margin:0 clamp(3px,1.3vw,7px);font-weight:600;white-space:nowrap;}
-  #r4uMobLegal a:hover{color:var(--accent,#b45309);}
-  #r4uMobLegal .r4u-ml-cp{display:block;margin-top:5px;color:var(--muted,#6b7280);opacity:.8;font-size:0.7rem;font-weight:400;}
+  #r4uMobLegal{display:block;margin:34px -16px 0;padding:26px 18px calc(22px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border,#e5e5e0);background:linear-gradient(180deg,transparent,var(--surface,#f4f4ef));}
+  #r4uMobLegal .r4u-mf-in{max-width:520px;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
+  #r4uMobLegal .r4u-mf-brand{display:flex;align-items:center;gap:10px;}
+  #r4uMobLegal .r4u-mf-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;color:#fff;box-shadow:0 6px 14px -5px rgba(217,119,6,.55);flex-shrink:0;}
+  #r4uMobLegal .r4u-mf-bt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;}
+  #r4uMobLegal .r4u-mf-bt b{font-size:.92rem;font-weight:800;color:var(--text,#1a1a1a);letter-spacing:-.01em;}
+  #r4uMobLegal .r4u-mf-bt span{font-size:.68rem;color:var(--muted,#6b7280);font-weight:500;}
+  #r4uMobLegal .r4u-mf-links{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 8px;}
+  #r4uMobLegal .r4u-mf-links a{font-size:.76rem;font-weight:600;color:var(--muted,#6b7280);text-decoration:none;padding:5px 11px;border-radius:999px;background:var(--card-bg,#fff);border:1px solid var(--border,#e5e5e0);white-space:nowrap;}
+  #r4uMobLegal .r4u-mf-links a:active{color:var(--accent,#b45309);border-color:rgba(217,119,6,.5);}
+  #r4uMobLegal .r4u-mf-cp{font-size:.69rem;color:var(--muted,#6b7280);opacity:.85;line-height:1.55;margin-top:2px;}
 }
 </style>
 <script id="_r4uMobLegalJS">
@@ -13597,11 +13604,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(document.getElementById('r4uMobLegal')) return true;
     var main=document.getElementById('main'); if(!main) return false;
     var f=document.createElement('div'); f.id='r4uMobLegal';
-    f.innerHTML='<a href="/about/">About</a>\u00b7<a href="/privacy/">Privacy</a>·<a href="/terms/">Terms</a>·'
-      +'<a href="/refund/">Refunds</a>·'
-      +'<a href="#" onclick="window._r4uShowContact&&window._r4uShowContact();return false;">Contact</a>\u00b7'
-      +'<a href="#" onclick="window._r4uShowRating(true);return false;">Rate us \u2605</a>'
-      +'<span class="r4u-ml-cp">\u00a9 2026 Resume For You \u00b7 resume4u.help</span>';
+    f.innerHTML='<div class="r4u-mf-in">'
+      +'<div class="r4u-mf-brand"><span class="r4u-mf-logo">R</span><span class="r4u-mf-bt"><b>Resume For You</b><span>Free AI resume builder</span></span></div>'
+      +'<div class="r4u-mf-links"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>'
+      +'<a href="/refund/">Refunds</a>'
+      +'<a href="#" onclick="window._r4uShowContact&&window._r4uShowContact();return false;">Contact</a>'
+      +'<a href="#" onclick="window._r4uShowRating(true);return false;">Rate us \u2605</a></div>'
+      +'<div class="r4u-mf-cp">\u00a9 2026 Resume For You \u00b7 resume4u.help<br>Made for job seekers in India \ud83c\uddee\ud83c\uddf3</div>'
+      +'</div>';
     main.appendChild(f); return true;
   }
   if(!mk()){ var n=0,iv=setInterval(function(){ if(mk()||++n>40) clearInterval(iv); },300); }
