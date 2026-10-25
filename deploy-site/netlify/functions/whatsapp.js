@@ -175,6 +175,21 @@ function summarize(d) {
 }
 
 /* ---- apply a plain-language edit command to the resume data ---- */
+/* Parse an "add experience" value into {title, co, header, bullets}. A " — " (or
+   " - ") separates the role header from the achievement bullets. With NO separator
+   the whole thing is the header ("Senior PM at Bajaj Finserv") and there are no
+   bullets — so a role+company never lands in the bullets field. */
+function parseExp(raw) {
+  let body = (raw || '').trim(), header = body, bulletsText = '';
+  const parts = body.split(/\s[-–—]\s/);
+  if (parts.length > 1) { header = parts[0].trim(); bulletsText = parts.slice(1).join(' - '); }
+  let title = header, co = '';
+  const at = header.split(/\s+at\s+/i);
+  if (at.length > 1) { title = at[0].trim(); co = at.slice(1).join(' at ').trim(); }
+  const bullets = bulletsText ? bulletsText.split(/[\n;]/).map((s) => s.replace(/^[-•\s]+/, '').trim()).filter(Boolean) : [];
+  return { title: title, co: co, header: header, bullets: bullets };
+}
+
 function applyEdit(d, text) {
   const t = (text || '').trim();
   let m;
@@ -186,12 +201,9 @@ function applyEdit(d, text) {
   if ((m = t.match(/^(?:education|qualification|degree)\s*[:=]\s*(.+)$/is))) { d.education = m[1].trim(); return 'education'; }
   if ((m = t.match(/^add\s+skills?\s*[:=]\s*(.+)$/is))) { d.skills = d.skills.concat(m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean)); return 'skills'; }
   if ((m = t.match(/^skills?\s*[:=]\s*(.+)$/is))) { d.skills = m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean); return 'skills'; }
-  if ((m = t.match(/^add\s+(?:experience|job|role)\s*[:=]\s*(.+)$/is))) {
-    let body = m[1].trim(), role = '';
-    const dash = body.split(/\s[-–—]\s/);
-    if (dash.length > 1) { role = dash[0].trim(); body = dash.slice(1).join(' - '); }
-    const bullets = body.split(/[\n;]/).map((s) => s.replace(/^[-•\s]+/, '').trim()).filter(Boolean);
-    d.experiences.push({ role, bullets });
+  if ((m = t.match(/^add\s+(?:experience|job|role|position)\s*[:=]\s*(.+)$/is))) {
+    const p = parseExp(m[1]);
+    d.experiences.push({ role: p.header, bullets: p.bullets });
     return 'experience';
   }
   return null;
@@ -224,13 +236,9 @@ function applyEditCloud(d, text) {
     const tgt = d.experience[0]; if (!Array.isArray(tgt.bullets)) tgt.bullets = [];
     tgt.bullets.push(m[1].trim()); syncDesc(); return 'bullet';
   }
-  if ((m = t.match(/^add\s+(?:experience|job|role)\s*[:=]\s*(.+)$/is))) {
-    let body = m[1].trim(), role = '', co = '';
-    const dash = body.split(/\s[-–—]\s/);
-    if (dash.length > 1) { role = dash[0].trim(); body = dash.slice(1).join(' - '); }
-    const at = role.split(/\s+at\s+/i); let title = role; if (at.length > 1) { title = at[0].trim(); co = at.slice(1).join(' at ').trim(); }
-    const bullets = body.split(/[\n;]/).map((s) => s.replace(/^[-•\s]+/, '').trim()).filter(Boolean);
-    d.experience.unshift({ title, co, dates: '', bullets, desc: bullets.join('\n') });
+  if ((m = t.match(/^add\s+(?:experience|job|role|position)\s*[:=]\s*(.+)$/is))) {
+    const p = parseExp(m[1]);
+    d.experience.unshift({ title: p.title, co: p.co, dates: '', bullets: p.bullets, desc: p.bullets.join('\n') });
     return 'experience';
   }
   return null;
