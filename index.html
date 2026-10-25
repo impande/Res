@@ -12257,6 +12257,36 @@ window.__novaPortfolioHTML=function(d,sections){
   new MutationObserver(tryFill).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+<script id="_r4uWaReassertJS">
+/* Guard against a late account-restore wiping a just-applied WhatsApp edit.
+   When we load a WhatsApp doc (?r= handoff or apply-on-next-visit), the app's own
+   sign-in cloud-restore can fire a moment later with the account's OLDER resume
+   and overwrite it (verified: the new bullet disappears). We wrap _applyCloudDoc:
+   while a WhatsApp doc is "locked", any OTHER apply (the restore) is followed by a
+   re-apply of the WhatsApp doc, so it always wins. The lock is short and only set
+   by the WhatsApp paths, so normal account loads are untouched. */
+(function(){
+  function install(){
+    if(typeof window._applyCloudDoc!=='function' || window._applyCloudDoc.__r4uWaGuard) return (typeof window._applyCloudDoc==='function');
+    var orig=window._applyCloudDoc;
+    window._applyCloudDoc=function(uid,data,pf){
+      var r=orig.apply(this,arguments);
+      try{
+        var lock=window.__r4uWaLock;
+        if(lock && lock.until>Date.now() && data!==lock.doc){
+          setTimeout(function(){ try{ if(window.__r4uWaLock===lock && lock.until>Date.now()) orig.call(window, null, lock.doc, { template: lock.doc.template }); }catch(e){} }, 60);
+        }
+      }catch(e){}
+      return r;
+    };
+    window._applyCloudDoc.__r4uWaGuard=true; return true;
+  }
+  var n=0, iv=setInterval(function(){ if(install()||++n>50) clearInterval(iv); }, 300);
+  /* Lock the given doc as the one that must stay applied, for `ms` (default 7s). */
+  window.__r4uWaReassert=function(doc, ms){ if(doc) window.__r4uWaLock={ doc: doc, until: Date.now()+(ms||7000) }; };
+  window.__r4uWaClearReassert=function(){ window.__r4uWaLock=null; };
+})();
+</script>
 <script id="_r4uIncomingResumeJS">
 /* WhatsApp co-pilot handoff: open resume4u.help/?r=<token> and this fetches the
    resume the bot built (GET /.netlify/functions/resume?token=…), maps it to the
@@ -12339,6 +12369,7 @@ window.__novaPortfolioHTML=function(d,sections){
     if(_saving) return; _saving=true; setBarState('saving');
     var doc=null; try{ var p=ss(PENDING); doc=p?JSON.parse(p).resume:null; }catch(e){}
     try{ if(doc) window._applyCloudDoc(null, doc, { template: doc.template }); }catch(e){}
+    try{ if(doc && window.__r4uWaReassert) window.__r4uWaReassert(doc); }catch(e){} // beat a late account-restore
     try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
     try{ window._saveToCloud(u, true); }catch(e){}
     /* also clear the server-side apply-on-next-visit copy so the website won't
@@ -12404,6 +12435,7 @@ window.__novaPortfolioHTML=function(d,sections){
     if(applied || !mapped || typeof window._applyCloudDoc!=='function') return;
     applied=true;
     try{ window._applyCloudDoc(null, mapped, { template: mapped.template }); }catch(e){}
+    try{ if(fromAccount && window.__r4uWaReassert) window.__r4uWaReassert(mapped); }catch(e){} // beat a late account-restore
     try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
     try{ sessionStorage.removeItem('_r4uIncomingResumeTok'); }catch(e){}
     try{ var u=new URL(location.href); u.searchParams.delete('r'); history.replaceState(history.state,'',u.pathname+u.search+u.hash); }catch(e){}
@@ -12682,6 +12714,7 @@ window.__novaPortfolioHTML=function(d,sections){
     card.querySelector('#_r4uWaPendApply').addEventListener('click',function(){
       var u=uid();
       try{ if(typeof window._applyCloudDoc==='function') window._applyCloudDoc(null, resume, { template: resume.template }); }catch(e){}
+      try{ if(window.__r4uWaReassert) window.__r4uWaReassert(resume); }catch(e){} // beat a late account-restore
       try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
       try{ if(u && typeof window._saveToCloud==='function') window._saveToCloud(u, true); }catch(e){}
       clearServerPending();
