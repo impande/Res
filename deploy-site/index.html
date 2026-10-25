@@ -12341,6 +12341,9 @@ window.__novaPortfolioHTML=function(d,sections){
     try{ if(doc) window._applyCloudDoc(null, doc, { template: doc.template }); }catch(e){}
     try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
     try{ window._saveToCloud(u, true); }catch(e){}
+    /* also clear the server-side apply-on-next-visit copy so the website won't
+       re-offer the same edit later (this in-app save already applied it). */
+    try{ if(window._fbAuth&&window._fbAuth.currentUser){ window._fbAuth.currentUser.getIdToken().then(function(tok){ fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending-clear',idToken:tok})})['catch'](function(){}); })['catch'](function(){}); } }catch(e){}
     ss(PENDING,null); ss(AWAIT,null); _saving=false;
     setBarState('saved');
     try{ if(typeof showToast==='function') showToast('Saved to your account ✓','success'); }catch(e){}
@@ -12641,6 +12644,55 @@ window.__novaPortfolioHTML=function(d,sections){
     if(anchor && anchor.parentNode===step8) step8.insertBefore(row, anchor); else step8.insertBefore(row, step8.children[2]||null);
   }
   setInterval(injectBtn, 800);
+
+  /* ---------- apply-on-next-web-visit ----------
+     The reliable path for WhatsApp edits reaching the website: the bot stashes a
+     finished linked-account edit at wapending:<uid>. Here, once the user is
+     signed in, we fetch it and offer to apply + save — no in-app-browser sign-in
+     needed. Applied edits are cleared server-side; "Not now" is remembered for
+     the session only, so it re-offers next visit until applied. */
+  var _pendChecked=false, DISMISS_SS='_r4uWaPendDismiss';
+  function clearServerPending(){
+    getTok().then(function(tok){ fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending-clear',idToken:tok})})['catch'](function(){}); })['catch'](function(){});
+  }
+  function showPendingSheet(resume){
+    if(document.getElementById('_r4uWaPendOv')) return;
+    var ov=document.createElement('div'); ov.id='_r4uWaPendOv';
+    ov.style.cssText='position:fixed;inset:0;z-index:10140;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,12,14,.55);';
+    var who=((resume.firstName||'')+' '+(resume.lastName||'')).trim();
+    var role=resume.jobTitle?(' · '+resume.jobTitle):'';
+    var card=document.createElement('div');
+    card.style.cssText='width:min(390px,100%);background:var(--card-bg,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);text-align:center;';
+    card.innerHTML=
+      '<span style="width:46px;height:46px;border-radius:50%;margin:2px auto 10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 6px 16px -6px rgba(18,140,126,.7);"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg></span>'+
+      '<div style="font-weight:800;font-size:1.08rem;letter-spacing:-.01em;">You edited your resume on WhatsApp</div>'+
+      '<div style="font-size:.84rem;color:var(--muted,#777);margin:7px 0 15px;line-height:1.5;">Apply those changes to your saved resume'+(who?(' ('+who+role+')'):'')+'? We’ll save it to your account.</div>'+
+      '<button id="_r4uWaPendApply" style="display:block;width:100%;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;color:#fff;padding:13px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 8px 20px -10px rgba(18,140,126,.8);">Apply &amp; save</button>'+
+      '<button id="_r4uWaPendNo" style="display:block;width:100%;margin-top:9px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-weight:600;font-size:.84rem;color:var(--muted,#888);padding:8px;">Not now</button>';
+    ov.appendChild(card); document.body.appendChild(ov);
+    function close(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }
+    card.querySelector('#_r4uWaPendNo').addEventListener('click',function(){ try{ sessionStorage.setItem(DISMISS_SS,'1'); }catch(e){} close(); });
+    card.querySelector('#_r4uWaPendApply').addEventListener('click',function(){
+      var u=uid();
+      try{ if(typeof window._applyCloudDoc==='function') window._applyCloudDoc(null, resume, { template: resume.template }); }catch(e){}
+      try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
+      try{ if(u && typeof window._saveToCloud==='function') window._saveToCloud(u, true); }catch(e){}
+      clearServerPending();
+      close();
+      try{ if(typeof showToast==='function') showToast('Applied your WhatsApp changes ✓','success'); }catch(e){}
+    });
+  }
+  function checkPendingEdit(){
+    if(_pendChecked) return; var u=uid(); if(!u) return;
+    try{ if(sessionStorage.getItem(DISMISS_SS)==='1') { _pendChecked=true; return; } }catch(e){}
+    _pendChecked=true;
+    getTok().then(function(tok){
+      return fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending-get',idToken:tok})});
+    }).then(function(r){ return r.ok?r.json():null; }).then(function(j){
+      if(j&&j.ok&&j.pending&&j.pending.resume){ setTimeout(function(){ showPendingSheet(j.pending.resume); }, 1200); }
+    })['catch'](function(){ _pendChecked=false; });
+  }
+  var _cpn=0, _cpiv=setInterval(function(){ if(uid()&&window._fbDb){ checkPendingEdit(); clearInterval(_cpiv); } if(++_cpn>90) clearInterval(_cpiv); },1200);
 })();
 </script>
 <script id="_r4uCoverLetterJS">
