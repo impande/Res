@@ -194,6 +194,9 @@ function parseExp(raw) {
 function expsOf(d, isWeb) { if (isWeb) { if (!Array.isArray(d.experience)) d.experience = []; return d.experience; } if (!Array.isArray(d.experiences)) d.experiences = []; return d.experiences; }
 function roleLabel(e, isWeb) { if (!e) return '(role)'; if (isWeb) return (e.title || '(untitled role)') + (e.co ? (' at ' + e.co) : ''); return e.role || '(untitled role)'; }
 function roleDetail(e, isWeb) { const bl = ((e && e.bullets) || []).map((b) => '• ' + b).join('\n'); return roleLabel(e, isWeb) + (bl ? ('\n' + bl) : ''); }
+function eduLabel(e) { return [e && e.deg, e && e.sch, e && e.yr].filter(Boolean).join(', ') || '(education entry)'; }
+function awardLabel(a) { return [a && a.name, a && a.org, a && a.year].filter(Boolean).join(', ') || '(award)'; }
+function achLabel(k) { return (k && (k.title || k.desc)) || '(achievement)'; }
 function addBulletTo(d, isWeb, idx, text) {
   const exps = expsOf(d, isWeb); const e = exps[idx]; if (!e) return null;
   if (!Array.isArray(e.bullets)) e.bullets = [];
@@ -831,6 +834,38 @@ exports.handler = async (event) => {
         }
         await send(from, 'Reply with a number from the list (1–' + exps.length + ').'); return OK;
       }
+      // ---- remove a skill (by number or name) ----
+      if (state.awaiting === 'rmSkillPick') {
+        const sk = Array.isArray(state.data.skills) ? state.data.skills : [];
+        let idx = -1;
+        const num = parseInt((low.match(/^\s*(\d+)\s*$/) || [])[1], 10);
+        if (num >= 1 && num <= sk.length) idx = num - 1;
+        else idx = sk.findIndex((s) => String(s).trim().toLowerCase() === text.trim().toLowerCase());
+        if (idx >= 0) {
+          const removed = sk.splice(idx, 1)[0];
+          await setState(from, { step: 0, mode: 'edit', data: state.data });
+          await send(from, '🗑️ Removed skill: *' + removed + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list, or the exact skill name.'); return OK;
+      }
+      // ---- remove an education / award / key achievement (pick from list) ----
+      if (state.awaiting === 'rmEduPick' || state.awaiting === 'rmAwardPick' || state.awaiting === 'rmAchPick') {
+        const cfg = {
+          rmEduPick: { arr: 'education', label: eduLabel, name: 'education entry' },
+          rmAwardPick: { arr: 'awards', label: awardLabel, name: 'award' },
+          rmAchPick: { arr: 'keyAchievements', label: achLabel, name: 'achievement' }
+        }[state.awaiting];
+        const arr = Array.isArray(state.data[cfg.arr]) ? state.data[cfg.arr] : [];
+        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (idx >= 0 && idx < arr.length) {
+          const removed = arr.splice(idx, 1)[0];
+          await setState(from, { step: 0, mode: 'edit', data: state.data });
+          await send(from, '🗑️ Removed ' + cfg.name + ': *' + cfg.label(removed) + '*\n\nAnything else? Or reply "link".');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list (1–' + arr.length + ').'); return OK;
+      }
       if (state.awaiting) {
         const pre = { experience: 'add experience: ', skill: 'add skill: ',
           summary: 'summary: ', role: 'role: ', name: 'name: ', years: 'years: ',
@@ -874,6 +909,53 @@ exports.handler = async (event) => {
         if (_exps.length === 1) { const removed = _exps.splice(0, 1)[0]; await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".'); return OK; }
         await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmRolePick' });
         await send(from, 'Which role should I remove?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
+      }
+      // remove a skill (bare → list & pick). "remove skill: X" one-liner still works below.
+      if (/^(remove|delete|drop)\s+(a\s+)?skills?$/i.test(low)) {
+        const sk = Array.isArray(state.data.skills) ? state.data.skills : [];
+        if (!sk.length) { await send(from, 'No skills to remove.'); return OK; }
+        const list = sk.map((s, i) => (i + 1) + '. ' + s).join('\n');
+        await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmSkillPick' });
+        await send(from, 'Which skill should I remove?\n\n' + list + '\n\nReply with the number (or the skill name).'); return OK;
+      }
+      // clear a contact field / summary (cloud only — immediate)
+      if (isWeb) {
+        const _clears = [
+          [/^(remove|clear|delete)\s+e-?mail$/i, 'email', 'email'],
+          [/^(remove|clear|delete)\s+(phone|mobile|contact\s*number)$/i, 'phone', 'phone'],
+          [/^(remove|clear|delete)\s+(location|city|address)$/i, 'location', 'location'],
+          [/^(remove|clear|delete)\s+linked-?in$/i, 'linkedin', 'LinkedIn'],
+          [/^(remove|clear|delete)\s+git-?hub$/i, 'github', 'GitHub'],
+          [/^(remove|clear|delete)\s+summary$/i, 'summary', 'summary']
+        ];
+        for (let i = 0; i < _clears.length; i++) {
+          if (_clears[i][0].test(low)) {
+            state.data[_clears[i][1]] = '';
+            await setState(from, { step: 0, mode: 'edit', data: state.data });
+            await send(from, '🗑️ Cleared ' + _clears[i][2] + '.\n\nAnything else? Or reply "link".');
+            return OK;
+          }
+        }
+      }
+      // remove an education / award / key achievement (cloud list fields)
+      if (isWeb) {
+        const _rmLists = [
+          [/^(remove|delete|drop)\s+(an?\s+|the\s+)?(education|qualification|degree)$/i, 'education', eduLabel, 'education entry', 'rmEduPick'],
+          [/^(remove|delete|drop)\s+(an?\s+|the\s+)?award$/i, 'awards', awardLabel, 'award', 'rmAwardPick'],
+          [/^(remove|delete|drop)\s+(a\s+|the\s+)?(key\s+)?(achievement|highlight)$/i, 'keyAchievements', achLabel, 'achievement', 'rmAchPick']
+        ];
+        for (let i = 0; i < _rmLists.length; i++) {
+          const cfg = _rmLists[i];
+          if (cfg[0].test(low)) {
+            const arr = Array.isArray(state.data[cfg[1]]) ? state.data[cfg[1]] : [];
+            if (!arr.length) { await send(from, 'No ' + cfg[3] + ' to remove.'); return OK; }
+            if (arr.length === 1) { const removed = arr.splice(0, 1)[0]; await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, '🗑️ Removed ' + cfg[3] + ': *' + cfg[2](removed) + '*\n\nAnything else? Or reply "link".'); return OK; }
+            const list = arr.map((x, j) => (j + 1) + '. ' + cfg[2](x)).join('\n');
+            await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: cfg[4] });
+            await send(from, 'Which ' + cfg[3] + ' should I remove?\n\n' + list + '\n\nReply with the number.');
+            return OK;
+          }
+        }
       }
 
       // Bare "add …" / field command (no value yet) → ask for the value, then
