@@ -190,6 +190,20 @@ function parseExp(raw) {
   return { title: title, co: co, header: header, bullets: bullets };
 }
 
+/* ---- experience-bullet helpers (shape-aware) ---- */
+function expsOf(d, isWeb) { if (isWeb) { if (!Array.isArray(d.experience)) d.experience = []; return d.experience; } if (!Array.isArray(d.experiences)) d.experiences = []; return d.experiences; }
+function roleLabel(e, isWeb) { if (!e) return '(role)'; if (isWeb) return (e.title || '(untitled role)') + (e.co ? (' at ' + e.co) : ''); return e.role || '(untitled role)'; }
+function roleDetail(e, isWeb) { const bl = ((e && e.bullets) || []).map((b) => '• ' + b).join('\n'); return roleLabel(e, isWeb) + (bl ? ('\n' + bl) : ''); }
+function addBulletTo(d, isWeb, idx, text) {
+  const exps = expsOf(d, isWeb); const e = exps[idx]; if (!e) return null;
+  if (!Array.isArray(e.bullets)) e.bullets = [];
+  e.bullets.push(text); if (isWeb) e.desc = e.bullets.join('\n');
+  return roleLabel(e, isWeb);
+}
+/* Strip a trailing "… -> add this to my latest experience" style instruction the
+   user may append to the bullet text itself. */
+function cleanBullet(s) { return (s || '').replace(/\s*[-–—]*>?\s*(add (this|it)|put (this|it)|to my)\b.*$/i, '').replace(/[-–—>\s]+$/, '').trim() || (s || '').trim(); }
+
 function applyEdit(d, text) {
   const t = (text || '').trim();
   let m;
@@ -644,8 +658,36 @@ exports.handler = async (event) => {
       }
 
       // Conversational add: if we asked for a value last turn, THIS message is it.
+      if (state.awaiting === 'bullet') {
+        const bulletText = cleanBullet(text);
+        const exps = expsOf(state.data, isWeb);
+        if (exps.length > 1) {
+          // Multiple roles → ask WHICH role the bullet belongs to.
+          const list = exps.map((e, i) => (i + 1) + '. ' + roleLabel(e, isWeb)).join('\n');
+          await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'bulletRole', pendingBullet: bulletText });
+          await send(from, 'Which role should I add it to?\n\n' + list + '\n\nReply with the number.');
+          return OK;
+        }
+        if (!exps.length) { if (isWeb) state.data.experience = [{ title: state.data.jobTitle || '', co: '', dates: '', bullets: [], desc: '' }]; else state.data.experiences = [{ role: '', bullets: [] }]; }
+        const label = addBulletTo(state.data, isWeb, 0, bulletText);
+        await setState(from, { step: 0, mode: 'edit', data: state.data });
+        await send(from, '✅ Added to:\n' + roleDetail(expsOf(state.data, isWeb)[0], isWeb) + '\n\nAnything else? Or reply "link" to get your resume.');
+        return OK;
+      }
+      if (state.awaiting === 'bulletRole') {
+        const exps = expsOf(state.data, isWeb);
+        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (idx >= 0 && idx < exps.length && state.pendingBullet) {
+          addBulletTo(state.data, isWeb, idx, state.pendingBullet);
+          await setState(from, { step: 0, mode: 'edit', data: state.data });
+          await send(from, '✅ Added to:\n' + roleDetail(exps[idx], isWeb) + '\n\nAnything else? Or reply "link" to get your resume.');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list (1–' + exps.length + '), or "menu" for options.');
+        return OK;
+      }
       if (state.awaiting) {
-        const pre = { experience: 'add experience: ', bullet: 'add bullet: ', skill: 'add skill: ',
+        const pre = { experience: 'add experience: ', skill: 'add skill: ',
           summary: 'summary: ', role: 'role: ', name: 'name: ', years: 'years: ', education: 'education: ' }[state.awaiting] || '';
         const changed = applyFn(pre + text);
         await setState(from, { step: 0, mode: 'edit', data: state.data }); // clears awaiting
