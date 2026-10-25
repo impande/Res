@@ -12287,6 +12287,44 @@ window.__novaPortfolioHTML=function(d,sections){
   window.__r4uWaClearReassert=function(){ window.__r4uWaLock=null; };
 })();
 </script>
+<script id="_r4uAmpFixJS">
+/* Fix compounding HTML-entity escaping in the summary. The output's edit-capture
+   reads the summary back as innerHTML (so "&" → "&amp;") and stores it, then the
+   next render/collect escapes it again → "Cluster Manager &amp;amp;amp;… Product
+   Owner". We decode the entities on every collect, apply and render so the chain
+   can never build up. Plain-text fields only; idempotent. */
+(function(){
+  function deEnt(s){
+    if(typeof s!=='string') return s;
+    if(s.indexOf('&')<0) return s;
+    var p; do{ p=s; s=s.replace(/&amp;/gi,'&'); }while(s!==p);   // collapse &amp;amp;… → &
+    return s.replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&quot;/gi,'"')
+            .replace(/&#0*39;/g,"'").replace(/&#x0*27;/gi,"'").replace(/&apos;/gi,"'").replace(/&nbsp;/gi,' ');
+  }
+  function clean(d){
+    if(!d||typeof d!=='object') return d;
+    ['summary','firstName','lastName','jobTitle','location'].forEach(function(k){ if(typeof d[k]==='string') d[k]=deEnt(d[k]); });
+    if(Array.isArray(d.skills)) d.skills=d.skills.map(function(s){ return typeof s==='string'?deEnt(s):s; });
+    if(Array.isArray(d.experience)) d.experience.forEach(function(e){ if(e&&typeof e==='object'){ ['title','co','desc'].forEach(function(k){ if(typeof e[k]==='string') e[k]=deEnt(e[k]); }); if(Array.isArray(e.bullets)) e.bullets=e.bullets.map(function(b){ return typeof b==='string'?deEnt(b):b; }); } });
+    if(Array.isArray(d.education)) d.education.forEach(function(e){ if(e&&typeof e==='object'){ ['deg','sch'].forEach(function(k){ if(typeof e[k]==='string') e[k]=deEnt(e[k]); }); } });
+    return d;
+  }
+  window.__r4uDeEnt=deEnt;
+  function wrap(name, mode){
+    var f=window[name];
+    if(typeof f!=='function' || f.__r4uAmp) return typeof f==='function';
+    if(mode==='ret'){ window[name]=function(){ var r=f.apply(this,arguments); try{ clean(r); }catch(e){} return r; }; }
+    else { window[name]=function(){ try{ if(arguments[mode]) clean(arguments[mode]); }catch(e){} return f.apply(this,arguments); }; }
+    window[name].__r4uAmp=true; return true;
+  }
+  var n=0, iv=setInterval(function(){
+    var a=wrap('_collectCloudData','ret');   // clean what gets saved/mirrored
+    var b=wrap('renderOutput',0);            // clean what gets displayed (also cleans lastResumeData in place)
+    var c=wrap('_applyCloudDoc',1);          // clean a corrupted doc on load
+    if((a&&b&&c)||++n>60) clearInterval(iv);
+  }, 300);
+})();
+</script>
 <script id="_r4uIncomingResumeJS">
 /* WhatsApp co-pilot handoff: open resume4u.help/?r=<token> and this fetches the
    resume the bot built (GET /.netlify/functions/resume?token=…), maps it to the
