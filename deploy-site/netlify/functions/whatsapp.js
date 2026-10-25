@@ -244,12 +244,24 @@ async function finishAndLink(from, data, base) {
   const token = Math.random().toString(36).slice(2, 10);
   await redis(['SET', 'resume:' + token, JSON.stringify(store), 'EX', '604800']); // 7 days for the web loader
   await setProfile(from, data); // remember this person so they can edit later
+  // Apply-on-next-web-visit: for a LINKED account edit, also stash the result at
+  // wapending:<uid> so the signed-in website can detect it next time it loads and
+  // offer to apply + save — the reliable path when WhatsApp's in-app browser
+  // can't complete Google sign-in.
+  if (isWeb) {
+    try {
+      const uid = await redis(['GET', 'wamap:' + from]);
+      if (uid) await redis(['SET', 'wapending:' + uid, JSON.stringify({ resume: store, ts: Date.now() }), 'EX', '604800']);
+    } catch (e) {}
+  }
   await setState(from, { step: 0, mode: 'idle', data: { experiences: [] } });
   const nm = isWeb ? ((data.firstName || '').trim() || 'there') : firstName(data.name);
   await send(from,
     `🎉 All set, ${nm}! Your resume is ready.\n\n` +
     `👉 Finish & download (free): ${base || 'https://resume4u.help'}/?r=${token}\n\n` +
-    `Open it to review your change, pick a template, and download — ${isWeb ? 'then tap Save to update your account.' : 'or download as PDF.'}\n\n` +
+    (isWeb
+      ? `Open it to review — or just open resume4u.help on your usual browser and it’ll ask to apply this change to your saved resume.\n\n`
+      : `Open it to review your change, pick a template, and download — or download as PDF.\n\n`) +
     `Reply "edit" to change something else, or "new" to build another.`);
 }
 

@@ -27,6 +27,24 @@ async function redisSet(key, val, ttlSec) {
     return (await r.json().catch(() => ({}))).result;
   } catch (e) { console.error('[wa-link] redis set failed', e && e.message); return null; }
 }
+async function redisGet(key) {
+  const u = redisUrl('/get/' + encodeURIComponent(key));
+  const tok = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!u || !tok) return null;
+  try {
+    const r = await fetch(u, { headers: { Authorization: 'Bearer ' + tok } });
+    return (await r.json().catch(() => ({}))).result;
+  } catch (e) { console.error('[wa-link] redis get failed', e && e.message); return null; }
+}
+async function redisDel(key) {
+  const u = redisUrl('/del/' + encodeURIComponent(key));
+  const tok = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!u || !tok) return null;
+  try {
+    const r = await fetch(u, { method: 'POST', headers: { Authorization: 'Bearer ' + tok } });
+    return (await r.json().catch(() => ({}))).result;
+  } catch (e) { console.error('[wa-link] redis del failed', e && e.message); return null; }
+}
 async function verifyIdToken(idToken) {
   if (!idToken) return null;
   try {
@@ -52,10 +70,24 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_json' }) }; }
 
   const action = body.action || 'create';
-  if (action !== 'create' && action !== 'sync' && action !== 'versions') return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_action' }) };
+  const KNOWN = ['create', 'sync', 'versions', 'pending-get', 'pending-clear'];
+  if (KNOWN.indexOf(action) < 0) return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_action' }) };
 
   const uid = await verifyIdToken(body.idToken);
   if (!uid) return { statusCode: 401, headers, body: JSON.stringify({ error: 'not_signed_in' }) };
+
+  // Pending WhatsApp edit awaiting apply-on-next-web-visit. The bot writes
+  // wapending:<uid> when a linked user finishes editing by chat; the signed-in
+  // website reads it on load, offers to apply, then clears it.
+  if (action === 'pending-get') {
+    const raw = await redisGet('wapending:' + uid);
+    let pending = null; try { pending = raw ? JSON.parse(raw) : null; } catch (e) {}
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, pending: pending || null }) };
+  }
+  if (action === 'pending-clear') {
+    await redisDel('wapending:' + uid);
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+  }
 
   // Mirror the current resume so the bot always has the latest (cloud/builder shape).
   const resume = body.resume && typeof body.resume === 'object' ? body.resume : null;
