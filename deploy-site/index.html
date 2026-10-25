@@ -12325,6 +12325,55 @@ window.__novaPortfolioHTML=function(d,sections){
   }, 300);
 })();
 </script>
+<style id="_r4uToastPosCss">
+/* Pin both toast containers to the bottom-centre so none float mid-screen. */
+#toastContainerTop, #toastContainer{
+  top:auto !important;
+  bottom:calc(20px + env(safe-area-inset-bottom,0px)) !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+}
+</style>
+<script id="_r4uToastQueueJS">
+/* Toast polish: keep toasts at the BOTTOM, show them one at a time (queued), and
+   drop duplicates fired back-to-back (e.g. two "Saved to cloud"). The app has two
+   toast containers — a success one that sat mid-screen and a default one at the
+   bottom — and fires several at once on a cloud save/restore, so they piled up and
+   overlapped. All toasts (including the app's own) go through showToast, so we wrap
+   that single entry point. */
+(function(){
+  var queue=[], active=false, last={}, orig=null;
+  function conts(){ return [document.getElementById('toastContainerTop'), document.getElementById('toastContainer')].filter(Boolean); }
+  function busy(){ return conts().some(function(c){ return c.childElementCount>0; }); }
+  function pump(){
+    if(active || !queue.length) return;
+    if(busy()){ setTimeout(pump, 200); return; }   // wait for whatever's showing to clear
+    active=true;
+    var item=queue.shift();
+    try{ orig(item.msg, item.type); }catch(e){}
+    var tries=0, iv=setInterval(function(){
+      if(!busy() || ++tries>45){ clearInterval(iv); active=false; setTimeout(pump, 160); }
+    }, 180);
+  }
+  function wrapped(msg, type){
+    try{
+      var key=(type||'')+'|'+String(msg==null?'':msg);
+      var now=Date.now();
+      if(last[key] && now-last[key]<5000) return;   // drop a duplicate fired within 5s
+      last[key]=now;
+      if(queue.length<5) queue.push({ msg: msg, type: type });
+      pump();
+    }catch(e){ try{ if(orig) orig(msg,type); }catch(_){} }
+  }
+  function install(){
+    if(typeof window.showToast!=='function') return false;
+    if(window.showToast.__r4uQueued) return true;
+    orig=window.showToast; window.showToast=wrapped; window.showToast.__r4uQueued=true;
+    return true;
+  }
+  var n=0, iv=setInterval(function(){ if(install()||++n>60) clearInterval(iv); }, 250);
+})();
+</script>
 <script id="_r4uIncomingResumeJS">
 /* WhatsApp co-pilot handoff: open resume4u.help/?r=<token> and this fetches the
    resume the bot built (GET /.netlify/functions/resume?token=…), maps it to the
