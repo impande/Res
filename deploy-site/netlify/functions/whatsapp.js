@@ -610,24 +610,76 @@ exports.handler = async (event) => {
     // ---- Mode: edit / review (tweak the current resume) ----
     if (state.mode === 'edit' || state.mode === 'review') {
       const isWeb = state.data && state.data._src === 'web';
+      const applyFn = (t) => (isWeb ? applyEditCloud(state.data, t) : applyEdit(state.data, t));
+      const summ = () => (isWeb ? summarizeCloud(state.data) : summarize(state.data));
+
       if (/^(link|done|finish|get link|generate|get my link)$/i.test(low)) {
         await finishAndLink(from, state.data, base);
-        return { statusCode: 200, body: 'ok' };
+        return OK;
       }
       if (/^edit$/i.test(low)) {
         await setState(from, { step: 0, mode: 'edit', data: state.data });
-        await send(from, 'Sure — tell me what to change (e.g. "add bullet: …", "add skill: …", "role: …"). Reply "link" when done.');
-        return { statusCode: 200, body: 'ok' };
+        await send(from, 'Sure — tell me what to change. Just say "add experience", "add bullet", "add skill", "role" or "summary" and I\'ll ask for the details. (Or do it in one line: "add skill: Python".) Reply "link" when done.');
+        return OK;
       }
-      const changed = isWeb ? applyEditCloud(state.data, text) : applyEdit(state.data, text);
+
+      // Conversational add: if we asked for a value last turn, THIS message is it.
+      if (state.awaiting) {
+        const pre = { experience: 'add experience: ', bullet: 'add bullet: ', skill: 'add skill: ',
+          summary: 'summary: ', role: 'role: ', name: 'name: ', years: 'years: ', education: 'education: ' }[state.awaiting] || '';
+        const changed = applyFn(pre + text);
+        await setState(from, { step: 0, mode: 'edit', data: state.data }); // clears awaiting
+        if (changed) await send(from, '✅ Updated ' + changed + '.\n\n' + summ() + '\n\nAnything else? Or reply "link" to get your resume.');
+        else await send(from, "Hmm, I couldn't quite use that — try rephrasing it, or reply \"menu\" for options.");
+        return OK;
+      }
+
+      // Bare "add …" / field command (no value yet) → ask for the value, then
+      // apply it on the next message. This is what makes a plain "Add experience"
+      // start a guided add instead of dumping the help text.
+      let awaiting = null, prompt = null;
+      if (/^add\s+(a\s+|an\s+|new\s+)?(work\s+)?(experience|job|position|role)$/i.test(low)) {
+        awaiting = 'experience';
+        prompt = 'Sure — tell me the role, company and 1–3 things you did there, in one message.\n\nExample:\n*Senior PM at Acme — Led the AWS migration; Cut cloud costs 30%*';
+      } else if (isWeb && /^add\s+(a\s+|an\s+)?bullet(\s*point)?$/i.test(low)) {
+        awaiting = 'bullet';
+        prompt = "What should the new bullet say? Plain words are fine — I'll sharpen it.\n\nExample: *Shipped the new onboarding flow*";
+      } else if (/^add\s+(a\s+|an\s+|some\s+)?skills?$/i.test(low)) {
+        awaiting = 'skill';
+        prompt = 'Which skill(s)? List one or a few, comma-separated.\n\nExample: *Python, Kubernetes, SQL*';
+      } else if (isWeb && /^(edit\s+|change\s+|update\s+|set\s+|my\s+)?summary$/i.test(low)) {
+        awaiting = 'summary';
+        prompt = "Send me the new professional summary (1–3 sentences) and I'll set it.";
+      } else if (/^(edit\s+|change\s+|update\s+|set\s+|my\s+)?(role|title|target)$/i.test(low)) {
+        awaiting = 'role';
+        prompt = 'What role/title should I set? e.g. *Senior Product Manager*';
+      } else if (/^(edit\s+|change\s+|update\s+|set\s+|my\s+)?name$/i.test(low)) {
+        awaiting = 'name';
+        prompt = 'What name should go on the resume?';
+      } else if (!isWeb && /^(edit\s+|change\s+|update\s+|set\s+|my\s+)?(years?|experience)$/i.test(low)) {
+        awaiting = 'years';
+        prompt = 'How many years of experience? (a number is fine)';
+      } else if (!isWeb && /^(edit\s+|change\s+|update\s+|set\s+|my\s+)?(education|qualification|degree)$/i.test(low)) {
+        awaiting = 'education';
+        prompt = 'Your highest qualification + institute? e.g. *B.Tech, IIT Delhi, 2024*';
+      }
+      if (prompt) {
+        await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting });
+        await send(from, prompt);
+        return OK;
+      }
+
+      // Direct one-liners still work (e.g. "add skill: Python", "role: Data Analyst").
+      const changed = applyFn(text);
       if (changed) {
         await setState(from, { step: 0, mode: 'edit', data: state.data });
-        await send(from, '✅ Updated ' + changed + '.\n\n' + (isWeb ? summarizeCloud(state.data) : summarize(state.data)) + '\n\nAnything else? Or reply "link" to get your resume.');
+        await send(from, '✅ Updated ' + changed + '.\n\n' + summ() + '\n\nAnything else? Or reply "link" to get your resume.');
       } else {
-        await send(from, 'I can change: ' + (isWeb ? 'add bullet, add skill, role, summary, or add experience' : 'name, role, years, education, skills, or add experience') +
-          '.\nExamples:\n• add bullet: Shipped the new onboarding flow\n• add skill: Python\n• role: Data Analyst\n\nOr reply "link" to get your resume, "new" to start fresh.');
+        await send(from, "Tell me what to change — just say any of these and I'll ask for the details:\n• *add experience*\n• *add skill*" +
+          (isWeb ? '\n• *add bullet*\n• *summary*' : '\n• *years*\n• *education*') + '\n• *role*  • *name*' +
+          '\n\nOr do it in one line, e.g. "add skill: Python".\nReply "link" to get your resume, or "menu" for options.');
       }
-      return { statusCode: 200, body: 'ok' };
+      return OK;
     }
 
     // ---- Idle / first contact: returning user → menu, new user → build ----
