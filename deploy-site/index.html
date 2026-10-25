@@ -4679,7 +4679,9 @@ if ('serviceWorker' in navigator) {
     list.forEach(function(f){
       var best=null,bs=0;
       exps.forEach(function(e){ (e.bullets||[]).forEach(function(b,i){ var sc=sim(f.before,b); if(sc>bs){ bs=sc; best={e:e,i:i}; } }); });
-      if(best&&bs>=0.5){ best.e.bullets[best.i]=f.after; applied++; }
+      var sumSc=sim(f.before, lastResumeData.summary||'');   // a fix can also target the summary
+      if(best&&bs>=0.5&&bs>=sumSc){ best.e.bullets[best.i]=f.after; applied++; }
+      else if((lastResumeData.summary||'')&&sumSc>=0.4&&sumSc>bs){ lastResumeData.summary=f.after; applied++; }
     });
     exps.forEach(function(e){ if(Array.isArray(e.bullets)) e.desc=e.bullets.join('\n'); });
     if(applied){
@@ -12034,6 +12036,11 @@ window.__novaPortfolioHTML=function(d,sections){
 #r4uRoastCard .rr-before{font-size:.82rem;color:var(--muted);text-decoration:line-through;margin-bottom:6px;}
 #r4uRoastCard .rr-after{font-size:.92rem;display:flex;gap:8px;line-height:1.5;}
 #r4uRoastCard .rr-after .rr-arw{color:#1f9d57;font-weight:800;flex-shrink:0;}
+#r4uRoastCard .rr-fix-pick{display:flex;align-items:flex-start;gap:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+#r4uRoastCard .rr-fix-cb{margin:2px 0 0;width:19px;height:19px;flex-shrink:0;accent-color:#1f9d57;cursor:pointer;}
+#r4uRoastCard .rr-fix-content{flex:1;min-width:0;}
+#r4uRoastCard .rr-fix-pick:has(.rr-fix-cb:not(:checked)){opacity:.5;}
+#r4uRoastCard .rr-pick-hint{font-size:.75rem;color:var(--muted);margin:2px 0 2px;}
 #r4uRoastCard .rr-share{background:linear-gradient(145deg,#2a1510,#3a1d13);color:#fff5ef;border-radius:14px;padding:18px 18px 16px;margin-top:16px;position:relative;overflow:hidden;}
 #r4uRoastCard .rr-share::after{content:"🔥";position:absolute;right:-8px;bottom:-16px;font-size:5rem;opacity:.15;}
 #r4uRoastCard .rr-share .rr-st{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#f7b36a;}
@@ -12145,23 +12152,41 @@ window.__novaPortfolioHTML=function(d,sections){
   function renderFix(d){
     var cur=atsNow();
     var ns=Math.min(98, Math.max(cur+8, clamp(d.newScore, cur+12)));
-    var fixes=(d.fixes||[]).slice(0,4).map(function(f){
-      return '<div class="rr-fix"><div class="rr-before">'+esc(f.before||'')+'</div><div class="rr-after"><span class="rr-arw">→</span><div>'+esc(f.after||'')+'</div></div></div>';
+    /* Each fix gets a checkbox so the user applies ONLY the ones they want
+       (e.g. #1 and #3, not #2 and #4). Default: all ticked. */
+    var fixArr=(d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; }).slice(0,4);
+    var fixes=fixArr.map(function(f,i){
+      return '<label class="rr-fix rr-fix-pick"><input type="checkbox" class="rr-fix-cb" data-i="'+i+'" checked>'+
+        '<span class="rr-fix-content"><span class="rr-before" style="display:block">'+esc(f.before||'')+'</span>'+
+        '<span class="rr-after"><span class="rr-arw">→</span><span>'+esc(f.after||'')+'</span></span></span></label>';
     }).join('');
     body().innerHTML=
       '<span class="rr-eyebrow">The glow-up ✨ · same you, interview-ready</span>'+
       '<h3>Here’s the stronger version</h3>'+
       '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#1f9d57">'+ns+'<small>/100</small></div><div class="rr-verdict" style="color:#1f9d57">After these fixes</div></div>'+
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#22b765,#128a4a)"></div></div></div>'+
-      '<div style="margin-top:6px">'+fixes+'</div>'+
+      '<div class="rr-pick-hint">Tick the changes you want, then apply — untick any you’d rather keep as-is.</div>'+
+      '<div style="margin-top:4px">'+fixes+'</div>'+
       '<div class="rr-share"><div class="rr-st">My resume got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply these fixes to my resume</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
-      '<div class="rr-note">“Apply” rewrites the matching bullets for you. You can still tap any line in your resume to edit it, or use “Refine with AI”.</div>';
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply selected</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
+      '<div class="rr-note">Applies only the ticked changes. You can still tap any line in your resume to edit it, or use “Refine with AI”.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
-    document.getElementById('rrApply').addEventListener('click',function(){
-      var total=(d&&d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; }).length;
-      var n=applyRoastFixes(d);
-      if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' fix'+(n>1?'es':'')+' to your resume'+(n<total?(' ('+(total-n)+' needed a manual tap)'):''),'success'); close(); }
+
+    function picked(){
+      var out=[]; Array.prototype.forEach.call(document.querySelectorAll('#r4uRoastCard .rr-fix-cb'),function(cb){
+        if(cb.checked){ var i=parseInt(cb.getAttribute('data-i'),10); if(fixArr[i]) out.push(fixArr[i]); }
+      }); return out;
+    }
+    var applyBtn=document.getElementById('rrApply');
+    function updLabel(){ var n=picked().length; applyBtn.textContent=n?('✅ Apply '+n+' selected'):'Pick a change to apply'; applyBtn.disabled=(n===0); applyBtn.style.opacity=n?'':'0.55'; }
+    Array.prototype.forEach.call(document.querySelectorAll('#r4uRoastCard .rr-fix-cb'),function(cb){ cb.addEventListener('change', updLabel); });
+    updLabel();
+
+    applyBtn.addEventListener('click',function(){
+      if(applyBtn.disabled) return;
+      var sel=picked(); if(!sel.length) return;
+      var n=(typeof window._r4uApplyBulletFixes==='function')?window._r4uApplyBulletFixes(sel):applyRoastFixes({fixes:sel});
+      if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' change'+(n>1?'s':'')+(n<sel.length?(' ('+(sel.length-n)+' needed a manual tap)'):''),'success'); close(); }
       else if(typeof showToast==='function') showToast('Couldn’t auto-match those lines — tap a bullet in your resume to edit it.');
     });
     document.getElementById('rrCopy2').addEventListener('click',function(){ copy(shareText(d)); });
@@ -12291,33 +12316,58 @@ window.__novaPortfolioHTML=function(d,sections){
   function ss(k,v){ try{ if(v===undefined) return sessionStorage.getItem(k); if(v===null) sessionStorage.removeItem(k); else sessionStorage.setItem(k,v); }catch(e){ return null; } }
 
   function closeBar(){ var b=document.getElementById('_r4uWaSaveBar'); if(b&&b.parentNode) b.parentNode.removeChild(b); }
-  function doSaveNow(){
-    var u=uidNow(); if(!u){ return; }
+  /* Update the drawer's wording for a given state (prompt / saving / saved) so the
+     user always sees what's happening — especially after the sign-in redirect. */
+  function setBarState(state){
+    var bar=document.getElementById('_r4uWaSaveBar');
+    if(!bar){ showSaveBar(state); return; }
+    var t=bar.querySelector('[data-r4u="t"]'), s=bar.querySelector('[data-r4u="s"]'),
+        go=bar.querySelector('#_r4uWaSaveGo'), x=bar.querySelector('#_r4uWaSaveX');
+    if(state==='saving'){ if(t)t.textContent='Saving your edits…'; if(s)s.textContent='Writing them to your account — one sec.'; if(go)go.style.display='none'; if(x)x.style.display='none'; }
+    else if(state==='saved'){ if(t)t.textContent='Saved to your account ✓'; if(s)s.textContent='Your WhatsApp changes are on your resume now.'; if(go)go.style.display='none'; if(x)x.style.display=''; setTimeout(closeBar,4500); }
+  }
+  var _saving=false;
+  function doSaveNow(attempt){
+    attempt=attempt||0;
+    var u=uidNow();
+    /* Wait for auth + the app's apply/save fns to be ready (the sign-in redirect
+       reload races the app boot), then re-apply the edited doc and save it. */
+    if(!u || typeof window._applyCloudDoc!=='function' || typeof window._saveToCloud!=='function'){
+      if(attempt<16){ setBarState('saving'); setTimeout(function(){ doSaveNow(attempt+1); }, 700); }
+      return;
+    }
+    if(_saving) return; _saving=true; setBarState('saving');
     var doc=null; try{ var p=ss(PENDING); doc=p?JSON.parse(p).resume:null; }catch(e){}
-    if(doc && typeof window._applyCloudDoc==='function'){ try{ window._applyCloudDoc(null, doc, { template: doc.template }); }catch(e){} }
+    try{ if(doc) window._applyCloudDoc(null, doc, { template: doc.template }); }catch(e){}
     try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
-    try{ if(typeof window._saveToCloud==='function') window._saveToCloud(u, true); }catch(e){}
-    ss(PENDING,null); ss(AWAIT,null); closeBar();
+    try{ window._saveToCloud(u, true); }catch(e){}
+    ss(PENDING,null); ss(AWAIT,null); _saving=false;
+    setBarState('saved');
     try{ if(typeof showToast==='function') showToast('Saved to your account ✓','success'); }catch(e){}
   }
-  function showSaveBar(){
-    if(document.getElementById('_r4uWaSaveBar')) return;
+  function showSaveBar(initState){
+    if(document.getElementById('_r4uWaSaveBar')){ if(initState) setBarState(initState); return; }
     var signed=!!uidNow();
+    var saving=(initState==='saving');
+    var title = saving ? 'Saving your edits…' : 'Your WhatsApp edits are ready';
+    var sub = saving ? 'Writing them to your account — one sec.'
+                     : (signed ? 'Save them to your resume now.' : "Sign in first — we'll save your changes to your account automatically.");
     var bar=document.createElement('div'); bar.id='_r4uWaSaveBar';
     bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:10130;display:flex;justify-content:center;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,rgba(255,255,255,.98),rgba(255,255,255,.88));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--border,#e8e7e2);box-shadow:0 -8px 28px -18px rgba(20,20,30,.4);';
     var wic='<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
     bar.innerHTML='<div style="display:flex;align-items:center;gap:12px;width:100%;max-width:560px;">'+
       '<span style="width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#1aa851);box-shadow:0 6px 16px -7px rgba(26,168,81,.6);">'+wic+'</span>'+
-      '<span style="flex:1;min-width:0;line-height:1.3;"><span style="display:block;font-weight:800;font-size:.92rem;color:var(--text,#1a1a1a);letter-spacing:-.01em;">Your WhatsApp edits are ready</span><span style="display:block;font-size:.76rem;color:var(--muted,#6b7280);">'+(signed?'Save them to your account.':'Sign in to save them to your account.')+'</span></span>'+
-      '<button id="_r4uWaSaveGo" style="flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.85rem;color:#fff;padding:11px 16px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 8px 20px -10px rgba(18,140,126,.8);">'+(signed?'Save now':'Sign in & save')+'</button>'+
-      '<button id="_r4uWaSaveX" aria-label="Dismiss" style="flex-shrink:0;border:0;background:transparent;color:var(--muted,#9ca3af);font-size:1.3rem;line-height:1;cursor:pointer;padding:4px 2px;">&times;</button>'+
+      '<span style="flex:1;min-width:0;line-height:1.3;"><span data-r4u="t" style="display:block;font-weight:800;font-size:.92rem;color:var(--text,#1a1a1a);letter-spacing:-.01em;">'+title+'</span><span data-r4u="s" style="display:block;font-size:.76rem;color:var(--muted,#6b7280);">'+sub+'</span></span>'+
+      (saving ? '' : '<button id="_r4uWaSaveGo" style="flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.85rem;color:#fff;padding:11px 16px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 8px 20px -10px rgba(18,140,126,.8);">'+(signed?'Save now':'Sign in & save')+'</button>'+
+      '<button id="_r4uWaSaveX" aria-label="Dismiss" style="flex-shrink:0;border:0;background:transparent;color:var(--muted,#9ca3af);font-size:1.3rem;line-height:1;cursor:pointer;padding:4px 2px;">&times;</button>')+
       '</div>';
     document.body.appendChild(bar);
-    bar.querySelector('#_r4uWaSaveX').addEventListener('click', closeBar);
-    bar.querySelector('#_r4uWaSaveGo').addEventListener('click', function(){
+    var xb=bar.querySelector('#_r4uWaSaveX'); if(xb) xb.addEventListener('click', closeBar);
+    var gb=bar.querySelector('#_r4uWaSaveGo');
+    if(gb) gb.addEventListener('click', function(){
       if(uidNow()){ doSaveNow(); }
       else {
-        ss(AWAIT,'1'); startCompletionWatch();
+        ss(AWAIT,'1'); startCompletionWatch(); setBarState('saving');
         try{ if(typeof window.signInWithGoogle==='function') window.signInWithGoogle(); }catch(e){}
       }
     });
@@ -12330,11 +12380,14 @@ window.__novaPortfolioHTML=function(d,sections){
   function startCompletionWatch(){
     if(_cw) return; _cw=true; var k=0;
     var iv=setInterval(function(){
-      if(ss(PENDING) && ss(AWAIT) && uidNow()){ clearInterval(iv); setTimeout(doSaveNow, 1600); return; }
+      if(ss(PENDING) && ss(AWAIT) && uidNow()){ clearInterval(iv); doSaveNow(0); return; }
       if(++k>160){ clearInterval(iv); }   // ~80s
     }, 500);
   }
-  if(ss(PENDING) && ss(AWAIT)) startCompletionWatch();   // returned from the sign-in redirect
+  if(ss(PENDING) && ss(AWAIT)){   // returned from the sign-in redirect
+    startCompletionWatch();
+    setTimeout(function(){ if(ss(PENDING)) setBarState('saving'); }, 500);
+  }
 
   var mapped=null, applied=false, fromAccount=false;
   function apply(){
