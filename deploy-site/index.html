@@ -12311,8 +12311,8 @@ window.__novaPortfolioHTML=function(d,sections){
     if(!token){ token=sessionStorage.getItem('_r4uIncomingResumeTok')||''; }
     token=(token||'').trim();
   }catch(e){}
-  if(!token || !/^[a-z0-9]{4,24}$/i.test(token)) return;
-  try{ sessionStorage.setItem('_r4uIncomingResumeTok', token); }catch(e){}
+  /* NOTE: no early return here — even with no ?r= token we may be returning from a
+     sign-in redirect with a pending WhatsApp edit to save (handled below). */
 
   /* map the WhatsApp resume {name,role,years,education,skills[],experiences[]} to
      the builder's shape {firstName,lastName,jobTitle,summary,skills[],experience[],education[]} */
@@ -12344,7 +12344,65 @@ window.__novaPortfolioHTML=function(d,sections){
     };
   }
 
-  var mapped=null, applied=false;
+  /* ---- Save-to-account for a LINKED web-account edit coming back from WhatsApp ----
+     WhatsApp opens the link in its own in-app browser, where the user is signed
+     OUT, so we can't auto-login. Instead we land them on their resume (with the
+     edits already applied) and show a clear "Sign in & save" prompt: one tap signs
+     in, and we re-apply the edited doc and write it to their account so the change
+     actually sticks. The pending edit is stashed in sessionStorage so it survives
+     the Google sign-in redirect reload. */
+  var PENDING='_r4uWaEditPending';       // {resume,ts} awaiting save-to-account
+  var AWAIT='_r4uWaAwaitSignin';          // set when the user taps "Sign in & save"
+  function uidNow(){ try{ return (window._fbUser&&window._fbUser.uid)||(window._fbAuth&&window._fbAuth.currentUser&&window._fbAuth.currentUser.uid)||null; }catch(e){ return null; } }
+  function ss(k,v){ try{ if(v===undefined) return sessionStorage.getItem(k); if(v===null) sessionStorage.removeItem(k); else sessionStorage.setItem(k,v); }catch(e){ return null; } }
+
+  function closeBar(){ var b=document.getElementById('_r4uWaSaveBar'); if(b&&b.parentNode) b.parentNode.removeChild(b); }
+  function doSaveNow(){
+    var u=uidNow(); if(!u){ return; }
+    var doc=null; try{ var p=ss(PENDING); doc=p?JSON.parse(p).resume:null; }catch(e){}
+    if(doc && typeof window._applyCloudDoc==='function'){ try{ window._applyCloudDoc(null, doc, { template: doc.template }); }catch(e){} }
+    try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
+    try{ if(typeof window._saveToCloud==='function') window._saveToCloud(u, true); }catch(e){}
+    ss(PENDING,null); ss(AWAIT,null); closeBar();
+    try{ if(typeof showToast==='function') showToast('Saved to your account ✓','success'); }catch(e){}
+  }
+  function showSaveBar(){
+    if(document.getElementById('_r4uWaSaveBar')) return;
+    var signed=!!uidNow();
+    var bar=document.createElement('div'); bar.id='_r4uWaSaveBar';
+    bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:10130;display:flex;justify-content:center;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,rgba(255,255,255,.98),rgba(255,255,255,.88));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--border,#e8e7e2);box-shadow:0 -8px 28px -18px rgba(20,20,30,.4);';
+    var wic='<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+    bar.innerHTML='<div style="display:flex;align-items:center;gap:12px;width:100%;max-width:560px;">'+
+      '<span style="width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#1aa851);box-shadow:0 6px 16px -7px rgba(26,168,81,.6);">'+wic+'</span>'+
+      '<span style="flex:1;min-width:0;line-height:1.3;"><span style="display:block;font-weight:800;font-size:.92rem;color:var(--text,#1a1a1a);letter-spacing:-.01em;">Your WhatsApp edits are ready</span><span style="display:block;font-size:.76rem;color:var(--muted,#6b7280);">'+(signed?'Save them to your account.':'Sign in to save them to your account.')+'</span></span>'+
+      '<button id="_r4uWaSaveGo" style="flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.85rem;color:#fff;padding:11px 16px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 8px 20px -10px rgba(18,140,126,.8);">'+(signed?'Save now':'Sign in & save')+'</button>'+
+      '<button id="_r4uWaSaveX" aria-label="Dismiss" style="flex-shrink:0;border:0;background:transparent;color:var(--muted,#9ca3af);font-size:1.3rem;line-height:1;cursor:pointer;padding:4px 2px;">&times;</button>'+
+      '</div>';
+    document.body.appendChild(bar);
+    bar.querySelector('#_r4uWaSaveX').addEventListener('click', closeBar);
+    bar.querySelector('#_r4uWaSaveGo').addEventListener('click', function(){
+      if(uidNow()){ doSaveNow(); }
+      else {
+        ss(AWAIT,'1'); startCompletionWatch();
+        try{ if(typeof window.signInWithGoogle==='function') window.signInWithGoogle(); }catch(e){}
+      }
+    });
+  }
+
+  /* After a sign-in we initiated (popup resolves in-page, or redirect reloads the
+     page), finish the save once the user is authenticated. Re-apply + save runs on
+     a short delay so it lands AFTER the app's own post-login cloud restore. */
+  var _cw=false;
+  function startCompletionWatch(){
+    if(_cw) return; _cw=true; var k=0;
+    var iv=setInterval(function(){
+      if(ss(PENDING) && ss(AWAIT) && uidNow()){ clearInterval(iv); setTimeout(doSaveNow, 1600); return; }
+      if(++k>160){ clearInterval(iv); }   // ~80s
+    }, 500);
+  }
+  if(ss(PENDING) && ss(AWAIT)) startCompletionWatch();   // returned from the sign-in redirect
+
+  var mapped=null, applied=false, fromAccount=false;
   function apply(){
     if(applied || !mapped || typeof window._applyCloudDoc!=='function') return;
     applied=true;
@@ -12352,7 +12410,16 @@ window.__novaPortfolioHTML=function(d,sections){
     try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
     try{ sessionStorage.removeItem('_r4uIncomingResumeTok'); }catch(e){}
     try{ var u=new URL(location.href); u.searchParams.delete('r'); history.replaceState(history.state,'',u.pathname+u.search+u.hash); }catch(e){}
+    /* Linked-account edit (cloud shape): offer to save it back to their account.
+       A fresh WhatsApp build (bot shape) has no account — it just downloads. */
+    if(fromAccount){
+      ss(PENDING, JSON.stringify({ resume: mapped, ts: Date.now() }));
+      setTimeout(showSaveBar, 900);
+    }
   }
+
+  if(!token || !/^[a-z0-9]{4,24}$/i.test(token)) return;
+  try{ sessionStorage.setItem('_r4uIncomingResumeTok', token); }catch(e){}
 
   fetch('/.netlify/functions/resume?token='+encodeURIComponent(token))
     .then(function(res){ return res.ok ? res.json() : null; })
@@ -12360,7 +12427,7 @@ window.__novaPortfolioHTML=function(d,sections){
       /* A linked web-account edit is already in the builder's (cloud) shape — apply
          it directly; a fresh WhatsApp build is in the bot shape — map it first. */
       var isCloud=(r.firstName!==undefined||r.jobTitle!==undefined||Array.isArray(r.experience));
-      mapped=isCloud?r:mapResume(r); apply(); } })
+      fromAccount=isCloud; mapped=isCloud?r:mapResume(r); apply(); } })
     .catch(function(){});
 
   var n=0, iv=setInterval(function(){ apply(); if(applied || ++n>120) clearInterval(iv); }, 500);
@@ -12456,71 +12523,12 @@ window.__novaPortfolioHTML=function(d,sections){
 })();
 </script>
 <script id="_r4uWaLinkJS">
-/* "Edit on WhatsApp" for signed-in users: a row in the account dropdown that links
-   this web account to WhatsApp. It mirrors the current resume to the server and
-   shows a one-time code; the user sends "LINK <code>" to the bot, which then loads
-   their saved resume to edit by chat. Additive; mirrors the contact injector. */
+/* WhatsApp account mirror. (The "Edit on WhatsApp" row that used to sit in the
+   account dropdown was removed per request.) We still keep the server-side mirror
+   of a signed-in user's resume fresh, so anyone already linked to WhatsApp always
+   edits their LATEST version by chat. No visible UI here anymore. */
 (function(){
-  var WA_BOT='15556758306'; /* TEST number — swap for the prod number before promoting */
-  var WA_PATH='M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
   function uid(){ try{ return (window._fbUser&&window._fbUser.uid)||(window._fbAuth&&window._fbAuth.currentUser&&window._fbAuth.currentUser.uid)||null; }catch(e){ return null; } }
-
-  function showSheet(code, waUrl){
-    var old=document.getElementById('_r4uWaLinkOv'); if(old&&old.parentNode) old.parentNode.removeChild(old);
-    var ov=document.createElement('div'); ov.id='_r4uWaLinkOv';
-    ov.style.cssText='position:fixed;inset:0;z-index:10120;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,12,14,.55);';
-    var card=document.createElement('div');
-    card.style.cssText='width:min(380px,100%);background:var(--card-bg,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);text-align:center;position:relative;';
-    card.innerHTML=
-      '<button aria-label="Close" class="wl-x" style="position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:1.4rem;line-height:1;color:var(--muted,#888);cursor:pointer;">&times;</button>'+
-      '<span style="width:46px;height:46px;border-radius:50%;margin:2px auto 10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 6px 16px -6px rgba(18,140,126,.7);"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg></span>'+
-      '<div style="font-weight:800;font-size:1.08rem;letter-spacing:-.01em;">Edit this resume on WhatsApp</div>'+
-      '<div style="font-size:.82rem;color:var(--muted,#777);margin:6px 0 14px;line-height:1.45;">Send this code to our WhatsApp to link your account, then message us anytime to edit by chat.</div>'+
-      '<div style="font-size:1.6rem;font-weight:800;letter-spacing:.28em;padding:12px 8px 12px 16px;border-radius:12px;background:var(--input-bg,#f3f1ec);border:1px dashed rgba(37,211,102,.55);font-variant-numeric:tabular-nums;">'+code+'</div>'+
-      '<a href="'+waUrl+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:12px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);color:#fff;font-weight:800;font-size:.92rem;text-decoration:none;box-shadow:0 8px 20px -10px rgba(18,140,126,.8);"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg>Open WhatsApp &amp; send code</a>'+
-      '<div style="font-size:.7rem;color:var(--muted,#999);margin-top:10px;">Code expires in 10 minutes.</div>';
-    card.querySelector('.wl-x').addEventListener('click',function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); });
-    ov.addEventListener('click',function(e){ if(e.target===ov&&ov.parentNode) ov.parentNode.removeChild(ov); });
-    ov.appendChild(card); document.body.appendChild(ov);
-  }
-
-  function connect(btn){
-    if(!uid()){ if(typeof showToast==='function') showToast('Sign in first to link WhatsApp.'); return; }
-    var lbl=btn.querySelector('.wl-sub'); var prev=lbl?lbl.textContent:'';
-    btn.style.pointerEvents='none'; if(lbl) lbl.textContent='Connecting…';
-    function done(){ btn.style.pointerEvents=''; if(lbl) lbl.textContent=prev||'Edit this resume by chat'; }
-    var resume={}; try{ if(typeof window._collectCloudData==='function') resume=window._collectCloudData()||{}; }catch(e){}
-    Promise.resolve().then(function(){ return window._fbAuth.currentUser.getIdToken(); }).then(function(idToken){
-      return fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',idToken:idToken,resume:resume})});
-    }).then(function(r){ return r.ok?r.json():null; }).then(function(j){
-      done();
-      if(j&&j.ok&&j.code){ showSheet(j.code, j.waUrl||('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent('LINK '+j.code))); }
-      else if(typeof showToast==='function') showToast('Couldn’t start the link just now — try again.');
-    }).catch(function(){ done(); if(typeof showToast==='function') showToast('Couldn’t reach the server — try again.'); });
-  }
-
-  function inject(dd){
-    if(!dd || dd.querySelector('.drop-walink')) return;
-    var signout=dd.querySelector('.drop-signout'); if(!signout) return; /* signed-in dropdown only */
-    var btn=document.createElement('button'); btn.type='button'; btn.className='drop-walink';
-    btn.style.cssText='display:flex;align-items:center;gap:11px;padding:11px 16px;width:100%;border:0;background:transparent;cursor:pointer;text-align:left;';
-    btn.innerHTML=
-      '<span style="width:30px;height:30px;border-radius:9px;background:rgba(37,211,102,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="'+WA_PATH+'"/></svg></span>'+
-      '<span style="display:flex;flex-direction:column;line-height:1.3;min-width:0;"><span style="font-size:0.83rem;font-weight:700;color:var(--text);">Edit on WhatsApp</span><span class="wl-sub" style="font-size:0.68rem;color:var(--muted);">Edit this resume by chat</span></span>'+
-      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;color:var(--muted);opacity:0.55;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>';
-    btn.addEventListener('click',function(){ connect(btn); });
-    signout.parentNode.insertBefore(btn, signout);
-  }
-  function hook(){
-    if(typeof window._authDropdown==='function' && !window._authDropdown.__r4uWaLinkWrapped){
-      var orig=window._authDropdown;
-      window._authDropdown=function(){ var r=orig.apply(this,arguments); try{ var dd=document.getElementById('_authDropdown'); if(dd) inject(dd); }catch(e){} return r; };
-      window._authDropdown.__r4uWaLinkWrapped=true; return true;
-    }
-    return false;
-  }
-  if(!hook()){ var n=0, iv=setInterval(function(){ if(hook()||++n>25) clearInterval(iv); },200); }
-  var ex=document.getElementById('_authDropdown'); if(ex) inject(ex);
 
   /* Keep the server mirror fresh so a linked user always edits their LATEST resume
      on WhatsApp. Debounced, signed-in only, fire-and-forget; wraps the app's own
