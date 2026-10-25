@@ -12488,6 +12488,103 @@ window.__novaPortfolioHTML=function(d,sections){
   if(!hookSave()){ var n2=0, iv2=setInterval(function(){ if(hookSave()||++n2>25) clearInterval(iv2); },300); }
 })();
 </script>
+<script id="_r4uWaConnectJS">
+/* WhatsApp: saved-versions mirror + a "Connect" button on the Generate screen.
+   - mirrorVersions(): reads the signed-in user's OWN saved resumes from Firestore
+     (users/{uid}/resumes) and pushes a compact {id,label,resume} list to the bot
+     store (wa-link action=versions), so "versions" on WhatsApp lists them and the
+     user can pick one to edit by chat. Debounced; runs once after load + per save.
+   - Connect button (step 8): shows a one-time code to link this account to the bot
+     (wa-link action=create) for users who haven't linked yet. Signed-in only. */
+(function(){
+  var WA_BOT='15556758306'; /* TEST number — swap for the prod number before promoting */
+  var WA_PATH='M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
+  function uid(){ try{ return (window._fbUser&&window._fbUser.uid)||(window._fbAuth&&window._fbAuth.currentUser&&window._fbAuth.currentUser.uid)||null; }catch(e){ return null; } }
+  function getTok(){ try{ return window._fbAuth.currentUser.getIdToken(); }catch(e){ return Promise.reject(e); } }
+
+  /* ---------- saved-versions mirror ---------- */
+  var _vt=0, _vbusy=false;
+  function mirrorVersions(force){
+    var u=uid(); if(!u || !window._fbDb) return;
+    var now=Date.now(); if(!force && now-_vt<20000) return;
+    if(_vbusy) return; _vbusy=true; _vt=now;
+    var done=function(){ _vbusy=false; };
+    try{
+      window._fbDb.collection('users').doc(u).collection('resumes').get().then(function(snap){
+        var list=[];
+        snap.forEach(function(doc){ var d=doc.data()||{}; if(d&&d.resume){ list.push({id:doc.id,label:(d.label||'Resume'),resume:d.resume,savedAt:(d.savedAt||'')}); } });
+        /* savedAt is an ISO string; lexicographic sort = newest first */
+        list.sort(function(a,b){ return (''+(b.savedAt||'')).localeCompare(''+(a.savedAt||'')); });
+        list=list.slice(0,15).map(function(v){ return {id:v.id,label:v.label,resume:v.resume}; });
+        if(!list.length){ done(); return; }
+        getTok().then(function(tok){
+          fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'versions',idToken:tok,versions:list})})['catch'](function(){})['then'](done,done);
+        })['catch'](done);
+      })['catch'](done);
+    }catch(e){ done(); }
+  }
+  function hookSavers(){
+    ['_saveCurrentVersion','_saveVersionSnapshot','_saveToCloud'].forEach(function(fn){
+      var f=window[fn];
+      if(typeof f==='function' && !f.__r4uVerMirror){
+        window[fn]=function(){ var r=f.apply(this,arguments); try{ setTimeout(function(){mirrorVersions(false);},1800); }catch(e){} return r; };
+        window[fn].__r4uVerMirror=true;
+      }
+    });
+  }
+  var _hn=0, _hiv=setInterval(function(){ hookSavers(); if(++_hn>40) clearInterval(_hiv); },400);
+  var _pn=0, _piv=setInterval(function(){ if(uid()&&window._fbDb){ mirrorVersions(true); clearInterval(_piv); } if(++_pn>90) clearInterval(_piv); },1000);
+
+  /* ---------- Connect WhatsApp (step 8) ---------- */
+  function showSheet(code, waUrl){
+    var old=document.getElementById('_r4uWaLinkOv'); if(old&&old.parentNode) old.parentNode.removeChild(old);
+    var ov=document.createElement('div'); ov.id='_r4uWaLinkOv';
+    ov.style.cssText='position:fixed;inset:0;z-index:10120;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,12,14,.55);';
+    var card=document.createElement('div');
+    card.style.cssText='width:min(380px,100%);background:var(--card-bg,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);text-align:center;position:relative;';
+    card.innerHTML=
+      '<button aria-label="Close" class="wl-x" style="position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:1.4rem;line-height:1;color:var(--muted,#888);cursor:pointer;">&times;</button>'+
+      '<span style="width:46px;height:46px;border-radius:50%;margin:2px auto 10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 6px 16px -6px rgba(18,140,126,.7);"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg></span>'+
+      '<div style="font-weight:800;font-size:1.08rem;letter-spacing:-.01em;">Edit on WhatsApp</div>'+
+      '<div style="font-size:.82rem;color:var(--muted,#777);margin:6px 0 14px;line-height:1.45;">Send this code to our WhatsApp to connect your account. Then message us anytime to switch versions and edit by chat.</div>'+
+      '<div style="font-size:1.6rem;font-weight:800;letter-spacing:.28em;padding:12px 8px 12px 16px;border-radius:12px;background:var(--input-bg,#f3f1ec);border:1px dashed rgba(37,211,102,.55);font-variant-numeric:tabular-nums;">'+code+'</div>'+
+      '<a href="'+waUrl+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:12px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);color:#fff;font-weight:800;font-size:.92rem;text-decoration:none;box-shadow:0 8px 20px -10px rgba(18,140,126,.8);"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg>Open WhatsApp &amp; send code</a>'+
+      '<div style="font-size:.7rem;color:var(--muted,#999);margin-top:10px;">Code expires in 10 minutes.</div>';
+    card.querySelector('.wl-x').addEventListener('click',function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); });
+    ov.addEventListener('click',function(e){ if(e.target===ov&&ov.parentNode) ov.parentNode.removeChild(ov); });
+    ov.appendChild(card); document.body.appendChild(ov);
+  }
+  function connect(btn){
+    if(!uid()){ if(typeof showToast==='function') showToast('Sign in first to connect WhatsApp.'); return; }
+    var prev=btn.innerHTML; btn.style.pointerEvents='none'; btn.innerHTML='Connecting…';
+    var reset=function(){ btn.style.pointerEvents=''; btn.innerHTML=prev; };
+    var resume={}; try{ if(typeof window._collectCloudData==='function') resume=window._collectCloudData()||{}; }catch(e){}
+    getTok().then(function(tok){
+      return fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',idToken:tok,resume:resume})});
+    }).then(function(r){ return r.ok?r.json():null; }).then(function(j){
+      reset();
+      if(j&&j.ok&&j.code){ mirrorVersions(true); showSheet(j.code, j.waUrl||('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent('LINK '+j.code))); }
+      else if(typeof showToast==='function') showToast('Couldn’t start the connect just now — try again.');
+    })['catch'](function(){ reset(); if(typeof showToast==='function') showToast('Couldn’t reach the server — try again.'); });
+  }
+  function injectBtn(){
+    var step8=document.getElementById('step8');
+    var active=document.querySelector('.step-content.active');
+    var ex=document.getElementById('_r4uWaConnectRow');
+    if(!step8 || !uid() || active!==step8){ if(ex&&ex.parentNode) ex.parentNode.removeChild(ex); return; }
+    if(ex) return;
+    var row=document.createElement('div'); row.id='_r4uWaConnectRow';
+    row.style.cssText='display:flex;align-items:center;gap:11px;max-width:620px;margin:16px auto 0;padding:11px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(18,140,126,.03));border:1px solid rgba(37,211,102,.28);';
+    row.innerHTML=
+      '<span style="width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#1aa851);box-shadow:0 5px 14px -6px rgba(26,168,81,.6);"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg></span>'+
+      '<span style="flex:1;min-width:0;line-height:1.32;"><span style="display:block;font-size:.86rem;font-weight:700;color:var(--text,#1a1a1a);">Edit &amp; switch versions on WhatsApp</span><span style="display:block;font-size:.72rem;color:var(--muted,#6b7280);">Connect once, then manage your resumes by chat</span></span>'+
+      '<button type="button" style="flex-shrink:0;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.8rem;color:#fff;padding:9px 14px;border-radius:10px;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 6px 16px -8px rgba(18,140,126,.8);">Connect</button>';
+    row.querySelector('button').addEventListener('click',function(){ connect(this); });
+    step8.appendChild(row);
+  }
+  setInterval(injectBtn, 800);
+})();
+</script>
 <script id="_r4uCoverLetterJS">
 /* Enhance the cover-letter generator (#5): the built-in one is already
    JD-aware, but it feeds the AI only "Title at Company" — not the candidate's
