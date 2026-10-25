@@ -204,6 +204,36 @@ function addBulletTo(d, isWeb, idx, text) {
    user may append to the bullet text itself. */
 function cleanBullet(s) { return (s || '').replace(/\s*[-–—]*>?\s*(add (this|it)|put (this|it)|to my)\b.*$/i, '').replace(/[-–—>\s]+$/, '').trim() || (s || '').trim(); }
 
+/* "B.Tech, IIT Delhi, 2024" → {deg, sch, yr}. Year = a trailing 4-digit token. */
+function parseEdu(raw) {
+  const parts = (raw || '').split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
+  let yr = '';
+  if (parts.length && /^(19|20)\d{2}$/.test(parts[parts.length - 1])) yr = parts.pop();
+  const deg = parts.shift() || '';
+  const sch = parts.join(', ');
+  return { deg: deg, sch: sch, yr: yr, gpa: '' };
+}
+/* "Best Employee, Acme, 2023" → {name, org, year}. */
+function parseAward(raw) {
+  const parts = (raw || '').split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
+  let year = '';
+  if (parts.length && /^(19|20)\d{2}$/.test(parts[parts.length - 1])) year = parts.pop();
+  const name = parts.shift() || '';
+  const org = parts.join(', ');
+  return { name: name, org: org, year: year, desc: '' };
+}
+/* "Title — details" → {title, desc}; no separator → whole thing is the title. */
+function parseAch(raw) {
+  const m = (raw || '').trim().match(/^(.*?)\s*(?:[-–—:|]|\bis\b)\s+(.+)$/);
+  if (m) return { title: m[1].trim(), desc: m[2].trim() };
+  return { title: (raw || '').trim(), desc: '' };
+}
+/* "Jan 2020 - Present" / "2020 to 2024" → {start, end}. */
+function parseDates(raw) {
+  const parts = (raw || '').split(/\s*(?:[-–—]|to|until|till|—)\s*/i).map((s) => s.trim()).filter(Boolean);
+  return { start: parts[0] || '', end: parts[1] || '' };
+}
+
 function applyEdit(d, text) {
   const t = (text || '').trim();
   let m;
@@ -246,14 +276,42 @@ function applyEditCloud(d, text) {
   if ((m = t.match(/^add\s+skills?\s*[:=]\s*(.+)$/is))) { d.skills = d.skills.concat(m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean)); return 'skills'; }
   if ((m = t.match(/^skills?\s*[:=]\s*(.+)$/is))) { d.skills = m[1].split(/[,\n]/).map((s) => s.trim()).filter(Boolean); return 'skills'; }
   if ((m = t.match(/^add\s+bullet\s*[:=]\s*(.+)$/is))) {
-    if (!d.experience.length) d.experience.push({ title: d.jobTitle || '', co: '', dates: '', bullets: [] });
+    if (!d.experience.length) d.experience.push({ title: d.jobTitle || '', co: '', start: '', end: '', bullets: [] });
     const tgt = d.experience[0]; if (!Array.isArray(tgt.bullets)) tgt.bullets = [];
     tgt.bullets.push(m[1].trim()); syncDesc(); return 'bullet';
   }
   if ((m = t.match(/^add\s+(?:experience|job|role|position)\s*[:=]\s*(.+)$/is))) {
     const p = parseExp(m[1]);
-    d.experience.unshift({ title: p.title, co: p.co, dates: '', bullets: p.bullets, desc: p.bullets.join('\n') });
+    d.experience.unshift({ title: p.title, co: p.co, start: '', end: '', bullets: p.bullets, desc: p.bullets.join('\n') });
     return 'experience';
+  }
+  // ---- contact details ----
+  if ((m = t.match(/^e-?mail\s*[:=]\s*(.+)$/is))) { d.email = m[1].trim(); return 'email'; }
+  if ((m = t.match(/^(?:phone|mobile|contact\s*number)\s*[:=]\s*(.+)$/is))) { d.phone = m[1].trim(); return 'phone'; }
+  if ((m = t.match(/^(?:location|city|address)\s*[:=]\s*(.+)$/is))) { d.location = m[1].trim(); return 'location'; }
+  if ((m = t.match(/^linked-?in\s*[:=]\s*(.+)$/is))) { d.linkedin = m[1].trim(); return 'LinkedIn'; }
+  if ((m = t.match(/^git-?hub\s*[:=]\s*(.+)$/is))) { d.github = m[1].trim(); return 'GitHub'; }
+  // ---- education ----
+  if ((m = t.match(/^add\s+(?:education|qualification|degree)\s*[:=]\s*(.+)$/is))) {
+    if (!Array.isArray(d.education)) d.education = [];
+    d.education.push(parseEdu(m[1])); return 'education';
+  }
+  // ---- award ----
+  if ((m = t.match(/^add\s+award\s*[:=]\s*(.+)$/is))) {
+    if (!Array.isArray(d.awards)) d.awards = [];
+    d.awards.push(parseAward(m[1])); return 'award';
+  }
+  // ---- key achievement ----
+  if ((m = t.match(/^add\s+(?:key\s+)?(?:achievement|highlight)\s*[:=]\s*(.+)$/is))) {
+    if (!Array.isArray(d.keyAchievements)) d.keyAchievements = [];
+    d.keyAchievements.push(parseAch(m[1])); return 'key achievement';
+  }
+  // ---- remove a skill ----
+  if ((m = t.match(/^(?:remove|delete|drop)\s+skills?\s*[:=]\s*(.+)$/is))) {
+    const target = m[1].trim().toLowerCase();
+    const before = d.skills.length;
+    d.skills = d.skills.filter((s) => String(s).trim().toLowerCase() !== target);
+    return d.skills.length < before ? 'skills' : null;
   }
   return null;
 }
@@ -686,14 +744,136 @@ exports.handler = async (event) => {
         await send(from, 'Reply with a number from the list (1–' + exps.length + '), or "menu" for options.');
         return OK;
       }
+      // ---- set dates on a role ----
+      if (state.awaiting === 'datesRole') {
+        const exps = expsOf(state.data, isWeb);
+        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (idx >= 0 && idx < exps.length) {
+          await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'datesValue', pendingIdx: idx });
+          await send(from, 'What dates for *' + roleLabel(exps[idx], isWeb) + '*?\n\nExample: *Jan 2020 - Present* (or *2019 - 2022*)');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list (1–' + exps.length + ').'); return OK;
+      }
+      if (state.awaiting === 'datesValue') {
+        const exps = expsOf(state.data, isWeb); const e = exps[state.pendingIdx];
+        if (e) {
+          const dt = parseDates(text);
+          if (isWeb) { e.start = dt.start; e.end = dt.end; } else { e.dates = text.trim(); }
+          await setState(from, { step: 0, mode: 'edit', data: state.data });   // save AFTER mutating
+          await send(from, '✅ Dates set for *' + roleLabel(e, isWeb) + '*: ' + (dt.start || '?') + ' – ' + (dt.end || 'Present') + '\n\nAnything else? Or reply "link".');
+        } else { await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, "That role's gone — try again."); }
+        return OK;
+      }
+      // ---- remove a bullet ----
+      if (state.awaiting === 'rmBulletRole') {
+        const exps = expsOf(state.data, isWeb);
+        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1; const e = exps[idx];
+        if (e && (e.bullets || []).length) {
+          const list = e.bullets.map((b, i) => (i + 1) + '. ' + b).join('\n');
+          await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmBulletPick', pendingIdx: idx });
+          await send(from, 'Which bullet should I remove from *' + roleLabel(e, isWeb) + '*?\n\n' + list + '\n\nReply with the number.');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list.'); return OK;
+      }
+      if (state.awaiting === 'rmBulletPick') {
+        const exps = expsOf(state.data, isWeb); const e = exps[state.pendingIdx];
+        const bi = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (e && Array.isArray(e.bullets) && bi >= 0 && bi < e.bullets.length) {
+          const removed = e.bullets.splice(bi, 1)[0]; if (isWeb) e.desc = e.bullets.join('\n');
+          await setState(from, { step: 0, mode: 'edit', data: state.data });
+          await send(from, '🗑️ Removed from *' + roleLabel(e, isWeb) + '*: "' + removed + '"\n\n' + roleDetail(e, isWeb) + '\n\nAnything else? Or reply "link".');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list.'); return OK;
+      }
+      // ---- edit (rewrite) a bullet ----
+      if (state.awaiting === 'editBulletRole') {
+        const exps = expsOf(state.data, isWeb);
+        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1; const e = exps[idx];
+        if (e && (e.bullets || []).length) {
+          const list = e.bullets.map((b, i) => (i + 1) + '. ' + b).join('\n');
+          await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'editBulletPick', pendingIdx: idx });
+          await send(from, 'Which bullet should I rewrite in *' + roleLabel(e, isWeb) + '*?\n\n' + list + '\n\nReply with the number.');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list.'); return OK;
+      }
+      if (state.awaiting === 'editBulletPick') {
+        const exps = expsOf(state.data, isWeb); const e = exps[state.pendingIdx];
+        const bi = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (e && Array.isArray(e.bullets) && bi >= 0 && bi < e.bullets.length) {
+          await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'editBulletText', pendingIdx: state.pendingIdx, pendingIdx2: bi });
+          await send(from, 'What should it say instead?\n\nCurrent: "' + e.bullets[bi] + '"');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list.'); return OK;
+      }
+      if (state.awaiting === 'editBulletText') {
+        const exps = expsOf(state.data, isWeb); const e = exps[state.pendingIdx];
+        if (e && Array.isArray(e.bullets) && e.bullets[state.pendingIdx2] !== undefined) {
+          e.bullets[state.pendingIdx2] = cleanBullet(text); if (isWeb) e.desc = e.bullets.join('\n');
+          await setState(from, { step: 0, mode: 'edit', data: state.data });   // save AFTER mutating
+          await send(from, '✏️ Updated bullet in *' + roleLabel(e, isWeb) + '*.\n\n' + roleDetail(e, isWeb) + '\n\nAnything else? Or reply "link".');
+        } else { await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, "Couldn't find that bullet — try again."); }
+        return OK;
+      }
+      // ---- remove a role / experience ----
+      if (state.awaiting === 'rmRolePick') {
+        const exps = expsOf(state.data, isWeb);
+        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (idx >= 0 && idx < exps.length) {
+          const removed = exps.splice(idx, 1)[0];
+          await setState(from, { step: 0, mode: 'edit', data: state.data });
+          await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".');
+          return OK;
+        }
+        await send(from, 'Reply with a number from the list (1–' + exps.length + ').'); return OK;
+      }
       if (state.awaiting) {
         const pre = { experience: 'add experience: ', skill: 'add skill: ',
-          summary: 'summary: ', role: 'role: ', name: 'name: ', years: 'years: ', education: 'education: ' }[state.awaiting] || '';
+          summary: 'summary: ', role: 'role: ', name: 'name: ', years: 'years: ',
+          education: (isWeb ? 'add education: ' : 'education: '),
+          email: 'email: ', phone: 'phone: ', location: 'location: ', linkedin: 'linkedin: ', github: 'github: ',
+          award: 'add award: ', achievement: 'add achievement: ' }[state.awaiting] || '';
         const changed = applyFn(pre + text);
         await setState(from, { step: 0, mode: 'edit', data: state.data }); // clears awaiting
         if (changed) await send(from, '✅ Updated ' + changed + '.\n\n' + summ() + '\n\nAnything else? Or reply "link" to get your resume.');
         else await send(from, "Hmm, I couldn't quite use that — try rephrasing it, or reply \"menu\" for options.");
         return OK;
+      }
+
+      // ---- Multi-step edits that need a role / bullet picked first ----
+      const _exps = expsOf(state.data, isWeb);
+      const _roleList = () => _exps.map((e, i) => (i + 1) + '. ' + roleLabel(e, isWeb)).join('\n');
+      // set dates
+      if (/^(set|change|edit|update|add)\s+dates?$/i.test(low) || /^dates?$/i.test(low)) {
+        if (!_exps.length) { await send(from, 'No roles yet — add one first with "add experience".'); return OK; }
+        if (_exps.length === 1) { await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'datesValue', pendingIdx: 0 }); await send(from, 'What dates for *' + roleLabel(_exps[0], isWeb) + '*?\n\nExample: *Jan 2020 - Present*'); return OK; }
+        await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'datesRole' });
+        await send(from, 'Which role?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
+      }
+      // remove a bullet
+      if (/^(remove|delete|drop)\s+(a\s+)?bullet(\s*point)?$/i.test(low)) {
+        if (!_exps.length) { await send(from, 'No experience yet.'); return OK; }
+        if (_exps.length === 1) { const e = _exps[0]; if (!(e.bullets || []).length) { await send(from, 'That role has no bullets yet.'); return OK; } const list = e.bullets.map((b, i) => (i + 1) + '. ' + b).join('\n'); await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmBulletPick', pendingIdx: 0 }); await send(from, 'Which bullet should I remove from *' + roleLabel(e, isWeb) + '*?\n\n' + list + '\n\nReply with the number.'); return OK; }
+        await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmBulletRole' });
+        await send(from, 'Which role?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
+      }
+      // edit / rewrite a bullet
+      if (/^(edit|change|rewrite|fix|update)\s+(a\s+)?bullet(\s*point)?$/i.test(low)) {
+        if (!_exps.length) { await send(from, 'No experience yet.'); return OK; }
+        if (_exps.length === 1) { const e = _exps[0]; if (!(e.bullets || []).length) { await send(from, 'That role has no bullets yet.'); return OK; } const list = e.bullets.map((b, i) => (i + 1) + '. ' + b).join('\n'); await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'editBulletPick', pendingIdx: 0 }); await send(from, 'Which bullet should I rewrite in *' + roleLabel(e, isWeb) + '*?\n\n' + list + '\n\nReply with the number.'); return OK; }
+        await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'editBulletRole' });
+        await send(from, 'Which role?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
+      }
+      // remove a role / experience
+      if (/^(remove|delete|drop)\s+(a\s+|an\s+|the\s+)?(experience|role|job|position)$/i.test(low)) {
+        if (!_exps.length) { await send(from, 'No roles to remove.'); return OK; }
+        if (_exps.length === 1) { const removed = _exps.splice(0, 1)[0]; await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".'); return OK; }
+        await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmRolePick' });
+        await send(from, 'Which role should I remove?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
       }
 
       // Bare "add …" / field command (no value yet) → ask for the value, then
@@ -721,9 +901,23 @@ exports.handler = async (event) => {
       } else if (!isWeb && /^(edit\s+|change\s+|update\s+|set\s+|my\s+)?(years?|experience)$/i.test(low)) {
         awaiting = 'years';
         prompt = 'How many years of experience? (a number is fine)';
-      } else if (!isWeb && /^(edit\s+|change\s+|update\s+|set\s+|my\s+)?(education|qualification|degree)$/i.test(low)) {
+      } else if (/^(add\s+|edit\s+|change\s+|update\s+|set\s+|my\s+)?(education|qualification|degree)$/i.test(low)) {
         awaiting = 'education';
-        prompt = 'Your highest qualification + institute? e.g. *B.Tech, IIT Delhi, 2024*';
+        prompt = 'Your qualification, institute and year? e.g. *B.Tech, IIT Delhi, 2024*';
+      } else if (isWeb && /^(add\s+|edit\s+|change\s+|update\s+|set\s+|my\s+)?e-?mail$/i.test(low)) {
+        awaiting = 'email'; prompt = "What's your email address?";
+      } else if (isWeb && /^(add\s+|edit\s+|change\s+|update\s+|set\s+|my\s+)?(phone|mobile|contact\s*number)$/i.test(low)) {
+        awaiting = 'phone'; prompt = "What's your phone number?";
+      } else if (isWeb && /^(add\s+|edit\s+|change\s+|update\s+|set\s+|my\s+)?(location|city|address)$/i.test(low)) {
+        awaiting = 'location'; prompt = 'What location should I show? e.g. *Bengaluru, India*';
+      } else if (isWeb && /^(add\s+|edit\s+|change\s+|update\s+|set\s+|my\s+)?linked-?in$/i.test(low)) {
+        awaiting = 'linkedin'; prompt = 'Your LinkedIn (URL or handle)?';
+      } else if (isWeb && /^(add\s+|edit\s+|change\s+|update\s+|set\s+|my\s+)?git-?hub$/i.test(low)) {
+        awaiting = 'github'; prompt = 'Your GitHub (URL or handle)?';
+      } else if (isWeb && /^add\s+(an\s+)?award$/i.test(low)) {
+        awaiting = 'award'; prompt = 'What award? Name, who gave it, and the year.\n\nExample: *Best Employee, Acme, 2023*';
+      } else if (isWeb && /^add\s+(a\s+)?(key\s+)?(achievement|highlight)$/i.test(low)) {
+        awaiting = 'achievement'; prompt = 'What achievement? A short title and (optionally) a line of detail.\n\nExample: *Led the AWS migration — cut cloud costs 30%*';
       }
       if (prompt) {
         await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting });
@@ -737,9 +931,12 @@ exports.handler = async (event) => {
         await setState(from, { step: 0, mode: 'edit', data: state.data });
         await send(from, '✅ Updated ' + changed + '.\n\n' + summ() + '\n\nAnything else? Or reply "link" to get your resume.');
       } else {
-        await send(from, "Tell me what to change — just say any of these and I'll ask for the details:\n• *add experience*\n• *add skill*" +
-          (isWeb ? '\n• *add bullet*\n• *summary*' : '\n• *years*\n• *education*') + '\n• *role*  • *name*' +
-          '\n\nOr do it in one line, e.g. "add skill: Python".\nReply "link" to get your resume, or "menu" for options.');
+        await send(from, "Tell me what to change — just say any of these and I'll ask for the details:\n" +
+          '• *add experience*  • *add bullet*  • *edit bullet*  • *remove bullet*\n' +
+          '• *add skill*  • *remove skill*  • *set dates*  • *remove role*\n' +
+          '• *role*  • *summary*  • *name*  • *education*  • *add award*\n' +
+          '• *add achievement*  • *email*  • *phone*  • *location*  • *linkedin*  • *github*\n' +
+          '\nOr do it in one line, e.g. "add skill: Python".\nReply "link" to get your resume, or "menu" for options.');
       }
       return OK;
     }
