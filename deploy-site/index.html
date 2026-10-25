@@ -12285,6 +12285,20 @@ window.__novaPortfolioHTML=function(d,sections){
   /* Lock the given doc as the one that must stay applied, for `ms` (default 7s). */
   window.__r4uWaReassert=function(doc, ms){ if(doc) window.__r4uWaLock={ doc: doc, until: Date.now()+(ms||7000) }; };
   window.__r4uWaClearReassert=function(){ window.__r4uWaLock=null; };
+
+  /* Persist the CURRENT resume everywhere the app reads it back, the same way the
+     app's own manual "Save now" does: the main doc AND the current version
+     snapshot. A reload restores the current VERSION, so saving only the main doc
+     (what we did before) left the edit missing after reload. Mirrors the app's
+     autosave version branch. */
+  window.__r4uPersistAll=function(uid){
+    if(!uid) return;
+    try{ if(typeof window._saveToCloud==='function') window._saveToCloud(uid, false); }catch(e){}
+    try{
+      if(window._currentVersionId){ if(typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(uid); }
+      else if(typeof window._saveVersionSnapshot==='function') window._saveVersionSnapshot(uid, null, null, function(){});
+    }catch(e){}
+  };
 })();
 </script>
 <script id="_r4uAmpFixJS">
@@ -12458,7 +12472,7 @@ window.__novaPortfolioHTML=function(d,sections){
     try{ if(doc) window._applyCloudDoc(null, doc, { template: doc.template }); }catch(e){}
     try{ if(doc && window.__r4uWaReassert) window.__r4uWaReassert(doc); }catch(e){} // beat a late account-restore
     try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
-    try{ window._saveToCloud(u, true); }catch(e){}
+    try{ if(window.__r4uPersistAll) window.__r4uPersistAll(u); else window._saveToCloud(u, true); }catch(e){} // main doc + current version (reload loads the version)
     /* also clear the server-side apply-on-next-visit copy so the website won't
        re-offer the same edit later (this in-app save already applied it). */
     try{ if(window._fbAuth&&window._fbAuth.currentUser){ window._fbAuth.currentUser.getIdToken().then(function(tok){ fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending-clear',idToken:tok})})['catch'](function(){}); })['catch'](function(){}); } }catch(e){}
@@ -12803,7 +12817,7 @@ window.__novaPortfolioHTML=function(d,sections){
       try{ if(typeof window._applyCloudDoc==='function') window._applyCloudDoc(null, resume, { template: resume.template }); }catch(e){}
       try{ if(window.__r4uWaReassert) window.__r4uWaReassert(resume); }catch(e){} // beat a late account-restore
       try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
-      try{ if(u && typeof window._saveToCloud==='function') window._saveToCloud(u, true); }catch(e){}
+      try{ if(u){ if(window.__r4uPersistAll) window.__r4uPersistAll(u); else window._saveToCloud(u, true); } }catch(e){} // main doc + current version (reload loads the version)
       clearServerPending();
       close();
       try{ if(typeof showToast==='function') showToast('Applied your WhatsApp changes ✓','success'); }catch(e){}
