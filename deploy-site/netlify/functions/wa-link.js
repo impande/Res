@@ -52,7 +52,7 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); } catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_json' }) }; }
 
   const action = body.action || 'create';
-  if (action !== 'create' && action !== 'sync') return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_action' }) };
+  if (action !== 'create' && action !== 'sync' && action !== 'versions') return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad_action' }) };
 
   const uid = await verifyIdToken(body.idToken);
   if (!uid) return { statusCode: 401, headers, body: JSON.stringify({ error: 'not_signed_in' }) };
@@ -60,6 +60,20 @@ exports.handler = async (event) => {
   // Mirror the current resume so the bot always has the latest (cloud/builder shape).
   const resume = body.resume && typeof body.resume === 'object' ? body.resume : null;
   if (resume) await redisSet('webresume:' + uid, JSON.stringify(resume), 7776000); // 90 days
+
+  // versions = mirror the user's saved-version LIST so the bot can show them and
+  // let the user pick one to edit by chat. Each entry: {id,label,resume}. The web
+  // reads these from its own Firestore (the signed-in user's own data) and pushes
+  // them here; we store the latest few so the value stays small.
+  if (action === 'versions') {
+    let list = Array.isArray(body.versions) ? body.versions : [];
+    list = list
+      .filter((v) => v && v.resume && typeof v.resume === 'object')
+      .slice(0, 15)
+      .map((v) => ({ id: String(v.id || '').slice(0, 64), label: String(v.label || 'Resume').slice(0, 80), resume: v.resume }));
+    if (list.length) await redisSet('waversions:' + uid, JSON.stringify(list), 7776000); // 90 days
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, count: list.length }) };
+  }
 
   // sync = just refresh the mirror (fired on web save for already-linked users).
   if (action === 'sync') return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
