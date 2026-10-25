@@ -457,15 +457,87 @@ exports.handler = async (event) => {
 
     if (type !== 'text') return { statusCode: 200, body: 'ok' };
 
-    // ---- Global commands ----
-    if (/^(restart|reset|start over|new|build new)$/i.test(low)) {
-      state = { step: 0, mode: 'build', data: { experiences: [] } }; // fall through to build
-    } else if (/^(menu|help|options)$/i.test(low)) {
-      const prof = await getProfile(from);
-      const pn = prof && (prof.name || prof.firstName);
+    // ---- Global intents: understood in ANY mode, so a command is never
+    //      swallowed as the answer to a build question (the old bot only caught
+    //      restart/menu, so "link", "versions", "hi" got saved as answers).
+    //      Matches are anchored (exact words) so real answers — a job title, a
+    //      skill — are never hijacked. Works the same for linked ("logged-in")
+    //      and brand-new ("logged-out") users. ----
+    const OK = { statusCode: 200, body: 'ok' };
+    const haveData = (d) => !!(d && (d.name || d.firstName || (d.experiences || []).length || (d.experience || []).length));
+    const linkedUid = await redis(['GET', 'wamap:' + from]);
+    // Freshest saved resume for this chat: a linked account's LATEST web resume
+    // (so edits act on the current version), else the resume stored for this phone.
+    const savedResume = async () => {
+      let p = await getProfile(from);
+      if (linkedUid) {
+        try {
+          const wr = await redis(['GET', 'webresume:' + linkedUid]);
+          const web = wr ? JSON.parse(wr) : null;
+          if (web && (web.firstName || web.jobTitle || (web.experience || []).length)) { web._src = 'web'; await setProfile(from, web); p = web; }
+        } catch (e) {}
+      }
+      return p;
+    };
+
+    // Greeting → friendly menu (even mid-build, so "hi" isn't taken as an answer)
+    if (/^(hi+|hey+|hello+|yo|hola|namaste|hii+|start|get started)[.!\s]*$/i.test(low)) {
+      const p = await getProfile(from); const pn = p && (p.name || p.firstName);
+      await setState(from, { step: 0, mode: 'menu', data: state.data });
+      await send(from, (pn ? 'Hi again, ' + firstName(pn) + '! 👋\n\n' : "Hi! 👋 I'm your Resume4U co-pilot.\n\n") + MENU);
+      return OK;
+    }
+    // Menu / help
+    if (/^(menu|help|options|commands|\?)$/i.test(low)) {
+      const p = await getProfile(from); const pn = p && (p.name || p.firstName);
       await setState(from, { step: 0, mode: 'menu', data: state.data });
       await send(from, (pn ? 'Hi again, ' + firstName(pn) + '! ' : '') + MENU);
-      return { statusCode: 200, body: 'ok' };
+      return OK;
+    }
+    // Finish & get link — wrap up the resume in progress (or the saved one).
+    // "link <code>" (account linking) has its own handler below and won't match this.
+    if (/^(link|get ?link|get my link|send( me)?( the)? link|my link|done|finished?|generate|get my resume|i'?m done)$/i.test(low)) {
+      const data = haveData(state.data) ? state.data : await savedResume();
+      if (haveData(data)) { await finishAndLink(from, data, base); }
+      else { await send(from, "You haven't built a resume yet 🙂\n\nReply *new* to start — I'll ask a few quick questions — or send a PDF/photo of an existing resume and I'll import it."); }
+      return OK;
+    }
+    // Versions — list the user's saved resumes to pick one to edit.
+    if (/\b(versions?|my resumes?|other resumes?|saved resumes?|list( my)? resumes?|switch( resume)?)\b/i.test(low) || /share\s+(my\s+)?(resume|version)/i.test(low)) {
+      let vers = null;
+      if (linkedUid) { try { const vr = await redis(['GET', 'waversions:' + linkedUid]); vers = vr ? JSON.parse(vr) : null; } catch (e) {} }
+      if (Array.isArray(vers) && vers.length) {
+        const list = vers.slice(0, 9);
+        const lines = list.map((v, i) => (i + 1) + '. ' + (v.label || ('Resume ' + (i + 1))));
+        await setState(from, { step: 0, mode: 'pickversion', data: state.data, versions: list });
+        await send(from, '🗂️ Your saved resumes:\n\n' + lines.join('\n') + '\n\nReply with a number to open & edit that one.');
+        return OK;
+      }
+      const p = await savedResume();
+      if (haveData(p)) {
+        await setState(from, { step: 0, mode: 'edit', data: p });
+        await send(from, "Here's your saved resume:\n\n" + (p._src === 'web' ? summarizeCloud(p) : summarize(p)) +
+          '\n\nTell me what to change — e.g. "add skill: Figma" — or reply *link* to get it.');
+        return OK;
+      }
+      await send(from, "I don't have any saved resumes for this number yet.\n\nReply *new* to build one by chat, or send a PDF/photo to import an existing resume.");
+      return OK;
+    }
+    // New / fresh → start a build (falls through to the Q&A below)
+    if (/^(new|new resume|restart|reset|start over|build new|fresh|from scratch|scratch)$/i.test(low)) {
+      state = { step: 0, mode: 'build', data: { experiences: [] } };
+    }
+    // Edit → edit the saved resume
+    else if (/^(edit|edit resume|change|update)$/i.test(low)) {
+      const p = await savedResume();
+      if (haveData(p)) {
+        await setState(from, { step: 0, mode: 'edit', data: p });
+        await send(from, 'Editing your resume.\n\n' + (p._src === 'web' ? summarizeCloud(p) : summarize(p)) +
+          '\n\nTell me what to change — e.g. "add bullet: …", "add skill: Figma", "role: Product Manager". Reply *link* when done.');
+      } else {
+        await send(from, "I don't have a saved resume for you yet. Reply *new* to build one, or send a PDF to import.");
+      }
+      return OK;
     }
 
     // ---- Link a web account: user sends "LINK <code>" from the site ----
@@ -490,6 +562,23 @@ exports.handler = async (event) => {
       } else {
         await send(from, "✅ Linked! But I couldn't find a saved resume on your account yet. Build or save one on resume4u.help, then message me again — or send a PDF to import one here.");
       }
+      return { statusCode: 200, body: 'ok' };
+    }
+
+    // ---- Mode: pickversion (user replies with a number to open a saved version) ----
+    if (state.mode === 'pickversion') {
+      const vers = Array.isArray(state.versions) ? state.versions : [];
+      const idx = parseInt((low.match(/\d+/) || [])[0], 10);
+      if (idx >= 1 && idx <= vers.length) {
+        const chosen = vers[idx - 1];
+        const data = Object.assign({}, chosen.resume || chosen); data._src = 'web';
+        await setProfile(from, data);
+        await setState(from, { step: 0, mode: 'edit', data });
+        await send(from, 'Editing "' + (chosen.label || ('Resume ' + idx)) + '".\n\n' + summarizeCloud(data) +
+          '\n\nTell me what to change — e.g. "add skill: Figma". Reply "link" when done.');
+        return { statusCode: 200, body: 'ok' };
+      }
+      await send(from, 'Reply with a number from the list (1–' + vers.length + '), or "menu" for options.');
       return { statusCode: 200, body: 'ok' };
     }
 
