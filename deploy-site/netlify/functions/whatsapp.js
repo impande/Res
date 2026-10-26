@@ -343,8 +343,10 @@ function applyEditCloud(d, text) {
 /* ---- finish: stash the resume, remember it, hand back the finish link ---- */
 async function finishAndLink(from, data, base) {
   const isWeb = data && data._src === 'web';
+  const vid = (data && data._vid) ? String(data._vid) : null;      // the saved-version this edit belongs to
+  const vlabel = (data && data._vlabel) ? String(data._vlabel) : null;
   let store = data;
-  if (isWeb) { store = Object.assign({}, data); delete store._src; } // strip internal flag for the web loader
+  if (isWeb) { store = Object.assign({}, data); delete store._src; delete store._vid; delete store._vlabel; } // strip internal flags for the web loader
   const token = Math.random().toString(36).slice(2, 10);
   await redis(['SET', 'resume:' + token, JSON.stringify(store), 'EX', '604800']); // 7 days for the web loader
   await setProfile(from, data); // remember this person so they can edit later
@@ -355,7 +357,7 @@ async function finishAndLink(from, data, base) {
   if (isWeb) {
     try {
       const uid = await redis(['GET', 'wamap:' + from]);
-      if (uid) await redis(['SET', 'wapending:' + uid, JSON.stringify({ resume: store, ts: Date.now() }), 'EX', '604800']);
+      if (uid) await redis(['SET', 'wapending:' + uid, JSON.stringify({ resume: store, versionId: vid, versionLabel: vlabel, ts: Date.now() }), 'EX', '604800']);
     } catch (e) {}
   }
   await setState(from, { step: 0, mode: 'idle', data: { experiences: [] } });
@@ -736,6 +738,10 @@ exports.handler = async (event) => {
       if (idx >= 1 && idx <= vers.length) {
         const chosen = vers[idx - 1];
         const data = Object.assign({}, chosen.resume || chosen); data._src = 'web';
+        // Remember WHICH saved version this is (Firestore doc id), so the edit is
+        // written back to this exact version — not whatever is active on the web.
+        if (chosen.id) data._vid = String(chosen.id);
+        if (chosen.label) data._vlabel = String(chosen.label);
         await setProfile(from, data);
         await setState(from, { step: 0, mode: 'edit', data });
         await send(from, 'Editing "' + (chosen.label || ('Resume ' + idx)) + '".\n\n' + summarizeCloud(data) +
