@@ -6180,105 +6180,10 @@ if ('serviceWorker' in navigator) {
   setInterval(_tick, 600);
 })();
 </script>
-<script id="_r4uAtsAiJS">
-/* AI résumé review (#2). The live ATS number is a fast STRUCTURAL heuristic — it
-   can see metrics/verbs/length but not whether the content is genuinely strong,
-   so a well-formatted but mediocre résumé can still read high. This adds a one-tap
-   "AI review" that sends the résumé to Claude (functions/generate, cheap Haiku) for
-   a strict, recruiter-grade score + specific fixes, grounded ONLY in the user's own
-   content. On-demand (costs a call only when clicked). Injected under the ATS card. */
-(function(){
-  function collect(){
-    try{ if(window.lastResumeData && (window.lastResumeData.experience||window.lastResumeData.jobTitle||window.lastResumeData.firstName)) return window.lastResumeData; }catch(e){}
-    try{ if(typeof window._collectCloudData==='function'){ var d=window._collectCloudData(); if(d&&(d.experience||d.firstName||d.jobTitle)) return d; } }catch(e){}
-    try{ if(window.__roLastData) return window.__roLastData; }catch(e){}
-    return null;
-  }
-  function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
-  function buildPrompt(d){
-    d=d||{}; var lines=[];
-    var nm=((d.firstName||'')+' '+(d.lastName||'')).trim();
-    lines.push('Name: '+(nm||'(none)'));
-    lines.push('Target title: '+(d.jobTitle||d.currentRole||'(none)'));
-    var contact=['email','phone','location','linkedin','github'].filter(function(k){return d[k];});
-    lines.push('Contact fields present: '+(contact.length?contact.join(', '):'none'));
-    if(d.summary) lines.push('Summary: '+String(d.summary).trim());
-    var sk=(d.skills||[]); lines.push('Skills ('+sk.length+'): '+(sk.length?sk.slice(0,40).join(', '):'none'));
-    (d.experience||[]).slice(0,6).forEach(function(e,i){
-      var dates=[e.start,e.end].filter(Boolean).join(' – ')||e.dates||'';
-      lines.push('');
-      lines.push('Role '+(i+1)+': '+((e.title||e.role||'')+((e.co||e.company)?(' at '+(e.co||e.company)):''))+(dates?(' ('+dates+')'):''));
-      var bl=(e.bullets||[]).filter(Boolean);
-      if(bl.length) bl.slice(0,10).forEach(function(b){ lines.push('  • '+String(b).trim()); });
-      else lines.push('  (no achievement bullets)');
-    });
-    (d.education||[]).slice(0,3).forEach(function(e){ lines.push('Education: '+[(e.deg||e.degree),(e.sch||e.school),(e.yr||e.year)].filter(Boolean).join(', ')); });
-    return 'You are a STRICT ATS (Applicant Tracking System) screener and senior recruiter. '
-      +'Rate this résumé for ATS readiness and overall quality the way real checkers (Jobscan, Resume Worded) do. '
-      +'Be honest and critical: vague/generic or unquantified bullets, responsibilities instead of results, thin experience, '
-      +'or missing sections should score LOW. Reward only specific, quantified, action-led achievements. Do not be generous. '
-      +'Score bands: 40-55 weak/incomplete, 56-74 average, 75-84 good, 85-92 strong, 93-100 exceptional (rare). '
-      +'Evaluate ONLY what is given below; assume nothing not present and never invent facts.\n\n'
-      +'RÉSUMÉ:\n'+lines.join('\n')+'\n\n'
-      +'Respond with ONLY a JSON object (no markdown, no commentary) exactly like: '
-      +'{"score": <integer 0-100>, "verdict": "<max 12 words>", "strengths": ["<short>","<short>"], "fixes": ["<specific action>","<specific action>","<specific action>"]}';
-  }
-  function parseJSON(t){ if(!t) return null; var m=String(t).match(/\{[\s\S]*\}/); if(!m) return null; try{ return JSON.parse(m[0]); }catch(e){ return null; } }
-  var _busy=false;
-  function run(panel){
-    if(_busy) return; var d=collect();
-    if(!d || !((d.experience&&d.experience.length)||d.jobTitle||d.firstName)){ panel.innerHTML='<div class="r4u-air-msg">Generate your résumé first, then run the AI review.</div>'; return; }
-    _busy=true;
-    panel.innerHTML='<div class="r4u-air-msg"><span class="r4u-air-spin"></span>Claude is reviewing your résumé like a recruiter…</div>';
-    fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:buildPrompt(d)})})
-      .then(function(r){ return r.ok?r.json():null; })
-      .then(function(res){
-        var txt=res && (res.text || (Array.isArray(res.content)?(res.content[0]&&res.content[0].text):res.content));
-        var j=parseJSON(txt);
-        if(!j || typeof j.score==='undefined') throw new Error('bad');
-        var sc=Math.max(0,Math.min(100,parseInt(j.score,10)||0));
-        var col=sc>=85?'#16a34a':sc>=70?'#0d9488':sc>=55?'#d97706':'#ef4444';
-        var strengths=(j.strengths||[]).slice(0,3).map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('');
-        var fixes=(j.fixes||[]).slice(0,4).map(function(f){ return '<li>'+esc(f)+'</li>'; }).join('');
-        panel.innerHTML=
-          '<div class="r4u-air-head"><span class="r4u-air-badge" style="background:'+col+'">'+sc+'</span>'
-          +'<div><div class="r4u-air-t">AI review score</div><div class="r4u-air-v">'+esc(j.verdict||'')+'</div></div></div>'
-          +(strengths?'<div class="r4u-air-sec"><b>Strengths</b><ul>'+strengths+'</ul></div>':'')
-          +(fixes?'<div class="r4u-air-sec"><b>Top fixes</b><ul>'+fixes+'</ul></div>':'')
-          +'<button type="button" class="r4u-air-again">Re-run AI review</button>';
-        var again=panel.querySelector('.r4u-air-again'); if(again) again.addEventListener('click',function(){ run(panel); });
-      })
-      .catch(function(){ panel.innerHTML='<div class="r4u-air-msg">Couldn’t run the AI review just now. <button type="button" class="r4u-air-again">Try again</button></div>'; var a=panel.querySelector('.r4u-air-again'); if(a) a.addEventListener('click',function(){ run(panel); }); })
-      .then(function(){ _busy=false; });
-  }
-  function inject(){
-    var card=document.getElementById('atsScoreCard'); if(!card) return;
-    if(document.getElementById('_r4uAiReview')) return;
-    var wrap=document.createElement('div'); wrap.id='_r4uAiReview'; wrap.className='r4u-air';
-    wrap.innerHTML='<button type="button" id="_r4uAiBtn" class="r4u-air-cta">✦ Get AI review — recruiter-grade score</button><div id="_r4uAiPanel" class="r4u-air-panel"></div>';
-    card.parentNode.insertBefore(wrap, card.nextSibling);
-    wrap.querySelector('#_r4uAiBtn').addEventListener('click',function(){ run(wrap.querySelector('#_r4uAiPanel')); });
-  }
-  setInterval(inject, 700);
-})();
-</script>
-<style id="_r4uAtsAiCss">
-.r4u-air{max-width:620px;margin:10px auto 0;}
-.r4u-air-cta{display:block;width:100%;border:1px solid rgba(79,70,229,.35);background:linear-gradient(135deg,#eef2ff,#faf5ff);color:#4f46e5;font-weight:800;font-size:.9rem;font-family:inherit;padding:11px;border-radius:12px;cursor:pointer;}
-.r4u-air-cta:hover{filter:brightness(.98);}
-.r4u-air-panel:empty{display:none;}
-.r4u-air-panel{margin-top:10px;border:1px solid var(--border,#e5e5e0);border-radius:12px;padding:14px;background:var(--card-bg,#fff);color:var(--text,#1a1a1a);}
-.r4u-air-msg{font-size:.86rem;color:var(--muted,#666);display:flex;align-items:center;gap:8px;line-height:1.4;}
-.r4u-air-spin{width:14px;height:14px;border:2px solid rgba(79,70,229,.3);border-top-color:#4f46e5;border-radius:50%;display:inline-block;animation:spin .7s linear infinite;flex-shrink:0;}
-.r4u-air-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
-.r4u-air-badge{flex-shrink:0;width:46px;height:46px;border-radius:50%;color:#fff;font-weight:800;font-size:1.15rem;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;}
-.r4u-air-t{font-weight:800;font-size:.92rem;}
-.r4u-air-v{font-size:.82rem;color:var(--muted,#666);line-height:1.35;}
-.r4u-air-sec{margin-top:8px;font-size:.84rem;}
-.r4u-air-sec b{display:block;margin-bottom:3px;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#777);}
-.r4u-air-sec ul{margin:0;padding-left:18px;}
-.r4u-air-sec li{margin:2px 0;line-height:1.42;}
-.r4u-air-again{margin-top:10px;border:1px solid var(--border,#ddd);background:transparent;color:var(--muted,#555);font-family:inherit;font-weight:600;font-size:.8rem;padding:7px 12px;border-radius:9px;cursor:pointer;}
+<style id="_r4uHideAtsCss">
+/* Structural ATS score card hidden — the real recruiter-grade score now lives in
+   the AI résumé review. Kept in the DOM so features that anchor to it still work. */
+#atsScoreCard{display:none!important;}
 </style>
 <script>function _0x47f8(_0x1f1b7a,_0x14e19f){_0x1f1b7a=_0x1f1b7a-0x179;var _0x2ce8c2=_0x2ce8();var _0x47f842=_0x2ce8c2[_0x1f1b7a];if(_0x47f8['dKvxND']===undefined){var _0x188f44=function(_0x4e221f){var _0x5e9098='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x4780ba='',_0x11db8d='';for(var _0x50d578=0x0,_0x339ed3,_0xd87fec,_0x5ac6a9=0x0;_0xd87fec=_0x4e221f['charAt'](_0x5ac6a9++);~_0xd87fec&&(_0x339ed3=_0x50d578%0x4?_0x339ed3*0x40+_0xd87fec:_0xd87fec,_0x50d578++%0x4)?_0x4780ba+=String['fromCharCode'](0xff&_0x339ed3>>(-0x2*_0x50d578&0x6)):0x0){_0xd87fec=_0x5e9098['indexOf'](_0xd87fec);}for(var _0x150578=0x0,_0x1f467a=_0x4780ba['length'];_0x150578<_0x1f467a;_0x150578++){_0x11db8d+='%'+('00'+_0x4780ba['charCodeAt'](_0x150578)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x11db8d);};_0x47f8['zWDjcE']=_0x188f44,_0x47f8['PCqnSt']={},_0x47f8['dKvxND']=!![];}var _0x1fce58=_0x2ce8c2[0x0],_0x7b703f=_0x1f1b7a+_0x1fce58,_0x8614d3=_0x47f8['PCqnSt'][_0x7b703f];return!_0x8614d3?(_0x47f842=_0x47f8['zWDjcE'](_0x47f842),_0x47f8['PCqnSt'][_0x7b703f]=_0x47f842):_0x47f842=_0x8614d3,_0x47f842;}(function(_0x388459,_0x7d2dfd){var _0x562055=_0x47f8,_0x474044=_0x388459();while(!![]){try{var _0x47e4af=parseInt(_0x562055(0x187))/0x1+parseInt(_0x562055(0x18b))/0x2+parseInt(_0x562055(0x181))/0x3+-parseInt(_0x562055(0x18d))/0x4+-parseInt(_0x562055(0x17e))/0x5*(-parseInt(_0x562055(0x18f))/0x6)+-parseInt(_0x562055(0x17a))/0x7*(-parseInt(_0x562055(0x18c))/0x8)+-parseInt(_0x562055(0x185))/0x9;if(_0x47e4af===_0x7d2dfd)break;else _0x474044['push'](_0x474044['shift']());}catch(_0x32e010){_0x474044['push'](_0x474044['shift']());}}}(_0x2ce8,0x478e8),(function(){var _0x33b0fa=_0x47f8,_0x4780ba=localStorage['getItem']('_pendingSignIn'),_0x11db8d=_0x4780ba?Date['now']()-parseInt(_0x4780ba||0x0):Infinity;if(_0x4780ba&&_0x11db8d<0x1d4c0){var _0x50d578=Storage['prototype']['removeItem'],_0x339ed3=!![];Storage[_0x33b0fa(0x189)][_0x33b0fa(0x182)]=function(_0x1480ad){var _0x2dffee=_0x33b0fa;if(_0x1480ad==='_pendingSignIn'&&_0x339ed3&&this===localStorage)return;_0x50d578[_0x2dffee(0x17b)](this,_0x1480ad);};function _0x4e7f55(){var _0x4d0fc2=_0x33b0fa;if(!_0x339ed3)return;_0x339ed3=![],Storage[_0x4d0fc2(0x189)][_0x4d0fc2(0x182)]=_0x50d578,_0x50d578['call'](localStorage,_0x4d0fc2(0x180));}var _0xd87fec=setInterval(function(){var _0x4cf637=_0x33b0fa;window[_0x4cf637(0x190)]&&(_0x4e7f55(),clearInterval(_0xd87fec));},0x64);setTimeout(function(){_0x4e7f55(),clearInterval(_0xd87fec);},0x2328);}if(_0x4780ba&&_0x11db8d<0x927c0){var _0x5ac6a9=typeof _hideCloudLoader==='function'?_hideCloudLoader:null;if(_0x5ac6a9){var _0x150578=![],_0x1f467a=![],_0x670418=function(){var _0x24d067=_0x33b0fa;if(_0x150578)return;_0x150578=!![],window[_0x24d067(0x184)]=_0x5ac6a9,_0x1f467a&&(_0x1f467a=![],_0x5ac6a9());};window['_hideCloudLoader']=function(){if(_0x150578){_0x5ac6a9();return;}_0x1f467a=!![];};var _0x2be0ff=setInterval(function(){window['_fbUser']&&(_0x670418(),clearInterval(_0x2be0ff));},0x64);setTimeout(function(){_0x670418(),clearInterval(_0x2be0ff);},0x2328);}}signInWithGoogle=function(){var _0x439653=_0x33b0fa;if(!_fbAuth){showToast(_0x439653(0x17c));return;}if(_signInInProgress)return;_signInInProgress=!![],_showCloudLoader('Signing\x20in…');var _0x3e3fa6=document['getElementById']('_authBtn');_0x3e3fa6&&(_0x3e3fa6[_0x439653(0x188)]=!![],_0x3e3fa6['style']['opacity']='0.8',_0x3e3fa6['innerHTML']='<div\x20style=\x22width:14px;height:14px;border:2px\x20solid\x20rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin\x20.7s\x20linear\x20infinite;flex-shrink:0;\x22></div><span\x20class=\x22auth-lbl\x22>Signing\x20in…</span>');var _0x336f55=new firebase[(_0x439653(0x18a))]['GoogleAuthProvider'](),_0x149ee2=/iPhone|iPad|iPod/[_0x439653(0x179)](navigator['userAgent'])||navigator['platform']==='MacIntel'&&navigator[_0x439653(0x17d)]>0x1,_0x5ee56b=![],_0x51718a=function(){var _0x907680=_0x439653;if(_0x5ee56b)return;_0x5ee56b=!![],localStorage['setItem'](_0x907680(0x180),Date['now']()[_0x907680(0x18e)]()),_showCloudLoader('Redirecting\x20to\x20Google…'),_fbAuth[_0x907680(0x186)](_0x336f55);};if(_0x149ee2){_0x51718a();return;}var _0x4c3ee0=setTimeout(_0x51718a,0x7530);_fbAuth['signInWithPopup'](_0x336f55)['then'](function(){var _0x5ced62=_0x439653;if(_0x5ee56b)return;_0x5ee56b=!![],clearTimeout(_0x4c3ee0),_showCloudLoader(_0x5ced62(0x183));})['catch'](function(_0x54fdcb){var _0x3526a9=_0x439653;clearTimeout(_0x4c3ee0);if(_0x54fdcb['code']===_0x3526a9(0x17f)||_0x54fdcb['code']==='auth/cancelled-popup-request'){_resetSignIn();return;}_0x51718a();});};}()));function _0x2ce8(){var _0x1b2b57=['yxv0Ac9WB3b1Cc1JBg9ZzwqTyNKTDxnLCG','x3bLBMrPBMDtAwDUsw4','ndy4nJm5v3bNEwfJ','CMvTB3zLsxrLBq','u2LNBMLUzYb5B3uGAw7IGky','x2HPzgvdBg91zeXVywrLCG','nZmWmZe1oeHoy1fesW','C2LNBKLUv2L0AfjLzgLYzwn0','ndG1nJm4z0TjwMj3','zgLZywjSzwq','ChjVDg90ExbL','yxv0Aa','mteXmtGXnMzWC3LOrq','ofn2D2z6Aa','mtqWnZeWmhztqwPova','Dg9tDhjPBMC','mtq4nZiZofbnwNffqG','x2zIvxnLCG','DgvZDa','nZq5mdDyt0rtuK4','y2fSBa','rMLYzwjHC2uGBM90ignVBMzPz3vYzwqG4OcuihnLzsbZzxr1CcbPBNn0CNvJDgLVBNmGAw4Gy29Kzq','Bwf4vg91y2HqB2LUDhm','nwj3ENz1uG'];_0x2ce8=function(){return _0x1b2b57;};return _0x2ce8();}</script>
 <style id="airxTheme">
@@ -12212,26 +12117,26 @@ window.__novaPortfolioHTML=function(d,sections){
   function prompt(){
     return 'You are a witty but genuinely helpful resume coach. ROAST the resume below: be funny and brutally honest about its weak spots, but every roast must point to a real, specific improvement. Then give the fixed version.\n\n'+
       'Return ONLY valid JSON (no markdown fences, no preamble) in EXACTLY this shape:\n'+
-      '{"score":<int 0-100, how weak it is NOW, lower=weaker>,"verdict":"<=6 word punchy verdict","roasts":[{"emoji":"<1 emoji>","quote":"<the actual weak phrase, <=12 words>","zing":"<=34 word witty + useful critique"}],"fixes":[{"before":"<weak phrase>","after":"<strong rewrite>"}],"newScore":<int 0-100 after fixes, higher>,"shareLine":"<=18 word punchy line someone would post"}\n\n'+
+      '{"score":<int 0-100 = the résumé\'s CURRENT strength graded STRICTLY like a real ATS / recruiter; higher=better; be critical: most résumés are 55-78, give 85+ only if genuinely excellent and quantified, and penalise placeholder brackets like [X]% as unfinished>,"verdict":"<=6 word punchy verdict","roasts":[{"emoji":"<1 emoji>","quote":"<the actual weak phrase, <=12 words>","zing":"<=34 word witty + useful critique"}],"fixes":[{"before":"<weak phrase>","after":"<strong rewrite>"}],"newScore":<int 0-100 after the fixes, higher than score>,"shareLine":"<=18 word punchy line someone would post"}\n\n'+
       'Give 3-4 roasts and 3-4 fixes. Base everything ONLY on the resume; do NOT invent achievements or numbers it does not contain. In "after" rewrites, where a metric would strengthen it but is missing, use a bracketed placeholder like [X]% or [N]+ for the person to fill in. Keep it good-natured, never cruel.\n\n'+
       'RESUME:\n'+resumeText();
   }
   function build(){
     if(overlay) return overlay;
     overlay=document.createElement('div'); overlay.id='r4uRoastOverlay';
-    overlay.innerHTML='<div id="r4uRoastCard" role="dialog" aria-modal="true" aria-label="Resume roast"><button class="rr-x" aria-label="Close">&times;</button><div id="r4uRoastBody"></div></div>';
+    overlay.innerHTML='<div id="r4uRoastCard" role="dialog" aria-modal="true" aria-label="AI résumé review"><button class="rr-x" aria-label="Close">&times;</button><div id="r4uRoastBody"></div></div>';
     document.body.appendChild(overlay);
     overlay.addEventListener('click',function(e){ if(e.target===overlay) close(); });
     overlay.querySelector('.rr-x').addEventListener('click',close);
     return overlay;
   }
   function open(){
-    if(!hasResume()){ if(typeof showToast==='function') showToast('Generate your resume first, then roast it 🔥'); return; }
+    if(!hasResume()){ if(typeof showToast==='function') showToast('Generate your résumé first, then run the AI review 🎯'); return; }
     build(); try{ prevOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; }catch(e){}
     overlay.classList.add('on');
-    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">🔥 Roasting your resume…</div><div class="rr-note" style="margin-top:4px">Reading every line so it stings in the right places.</div></div>';
+    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">🎯 Reviewing your résumé…</div><div class="rr-note" style="margin-top:4px">Reading every line the way a recruiter would.</div></div>';
     ai(prompt()).then(function(t){ var d=parse(t); if(!d||!d.roasts){ throw new Error('parse'); } lastRoast=d; renderRoast(d); })
-      .catch(function(){ body().innerHTML='<div class="rr-load"><div style="font-size:1.6rem">😅</div><div style="font-weight:700;margin-top:6px">The roast fizzled out</div><div class="rr-note">Couldn’t reach the AI just now. Close and try again in a moment.</div></div>'; });
+      .catch(function(){ body().innerHTML='<div class="rr-load"><div style="font-size:1.6rem">😅</div><div style="font-weight:700;margin-top:6px">The review didn’t load</div><div class="rr-note">Couldn’t reach the AI just now. Close and try again in a moment.</div></div>'; });
   }
   function close(){ if(!overlay) return; overlay.classList.remove('on'); try{ document.body.style.overflow=prevOverflow; }catch(e){} }
   function body(){ return document.getElementById('r4uRoastBody'); }
@@ -12241,17 +12146,18 @@ window.__novaPortfolioHTML=function(d,sections){
      comes from the verdict headline and the burn lines, not a second number. */
   function atsNow(){ try{ if(typeof computeATSScore==='function'&&typeof lastResumeData!=='undefined'&&lastResumeData) return computeATSScore(lastResumeData).score||0; }catch(e){} return 50; }
   function renderRoast(d){
-    var sc=atsNow();
+    var sc=clamp(d.score, atsNow());
+    var col=sc>=85?'#1f9d57':sc>=70?'#0d9488':sc>=55?'#d97706':'#e0463d';
     var lines=(d.roasts||[]).slice(0,4).map(function(r){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
     }).join('');
     body().innerHTML=
-      '<span class="rr-eyebrow">The roast 🔥 · 7-second recruiter test</span>'+
+      '<span class="rr-eyebrow">AI review · a recruiter’s 7-second read</span>'+
       '<h3>'+esc(d.verdict||'Needs work')+'</h3>'+
-      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:#e0463d">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:#e0463d">Recruiter score 🔥</div></div>'+
-      '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#f97316,#e0463d)"></div></div></div>'+
+      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:'+col+'">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:'+col+'">Recruiter-grade score</div></div>'+
+      '<div class="rr-track"><div class="rr-fill" style="background:'+col+'"></div></div></div>'+
       '<div style="margin-top:6px">'+lines+'</div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy my roast</button></div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy review</button></div>'+
       '<div class="rr-note">AI-written from your resume. Fixes use [brackets] where you should add a real number.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=sc+'%'; },60);
     document.getElementById('rrFix').addEventListener('click',function(){ renderFix(d); });
@@ -12277,7 +12183,7 @@ window.__novaPortfolioHTML=function(d,sections){
     return applied;
   }
   function renderFix(d){
-    var cur=atsNow();
+    var cur=clamp(d.score, atsNow());
     var ns=Math.min(98, Math.max(cur+8, clamp(d.newScore, cur+12)));
     /* Each fix gets a checkbox so the user applies ONLY the ones they want
        (e.g. #1 and #3, not #2 and #4). Default: all ticked. */
@@ -12320,7 +12226,7 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function shareText(d){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
-    return 'My resume got roasted by resume4u.help 🔥 ('+atsNow()+'/100):\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
+    return 'My résumé scored '+clamp(d.score, atsNow())+'/100 on resume4u.help’s AI review 🔥:\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
   }
   function copy(str){
     function ok(){ if(typeof showToast==='function') showToast('Roast copied — go share it 🔥','success'); }
@@ -12342,7 +12248,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function sync(){
     if(!bar){
       bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
-      bar.innerHTML='<span class="rb-ico">🔥</span><span class="rb-body"><span class="rb-title">Roast my resume</span><span class="rb-sub">A brutally honest (and funny) review — then one tap to fix it.</span></span><span class="rb-go">Roast it →</span>';
+      bar.innerHTML='<span class="rb-ico">🎯</span><span class="rb-body"><span class="rb-title">AI résumé review &amp; score</span><span class="rb-sub">A recruiter-grade score, honest critique, and one-tap fixes.</span></span><span class="rb-go">Review it →</span>';
       bar.addEventListener('click',open);
       bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
