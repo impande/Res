@@ -5998,44 +5998,59 @@ if ('serviceWorker' in navigator) {
      length, single-column). For a TRUE job-specific match rate — keyword overlap
      against a pasted posting — the "ATS match to a job" tool does that JD-relative
      part; this standalone number is the JD-independent ATS readiness. Weights sum
-     to 100: contact/parse 18 · sections 15 · experience quality 30 · skills 12 ·
-     summary 8 · formatting & language 10 · length 7. */
+     to 100: contact/parse 15 · sections 10 · experience quality 40 · skills 12 ·
+     summary 8 · formatting & language 9 · length 6. Structure without real
+     achievements is hard-capped below, so an empty resume can't score as
+     "ready" — matching how real ATS / recruiter checkers rate it. */
   var _FILLER=/\b(responsible for|duties includ|hard[- ]?working|team player|detail[- ]?oriented|go[- ]?getter|think outside the box|synergy|results?[- ]?driven|proven track record|self[- ]?starter|works? well (with|under)|passionate about)\b/i;
   var _PRON=/\b(i|me|my|myself|we|our)\b/i;
   window.computeATSScore=function(d){
     d=d||{}; var items=[], score=0;
     function it(l,s){ items.push({label:l,status:s}); }
 
-    /* 1 · Contact & parseability (18) — the fields an ATS must extract */
+    /* 1 · Contact & parseability (15) — the fields an ATS must extract */
     var email=(d.email||'').trim(); var okEmail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
     if(okEmail){ score+=6; it('Email address','pass'); } else it('Email address', email?'warn':'fail');
-    if(String(d.phone||'').trim()){ score+=4; it('Phone number','pass'); } else it('Phone number','warn');
-    if(String(d.location||'').trim()){ score+=3; it('Location / City','pass'); } else it('Location / City','warn');
+    if(String(d.phone||'').trim()){ score+=3; it('Phone number','pass'); } else it('Phone number','warn');
+    if(String(d.location||'').trim()){ score+=2; it('Location / City','pass'); } else it('Location / City','warn');
     var title=String(d.jobTitle||d.currentRole||'').trim();
-    if(title){ score+=5; it('Target job title','pass'); } else it('Target job title','warn');
+    if(title){ score+=4; it('Target job title','pass'); } else it('Target job title','warn');
 
-    /* 2 · Core sections present (15) — ATS keys off standard section headings */
+    /* 2 · Core sections present (10) — ATS keys off standard section headings */
     var exp=d.experience||[]; var hasExp=exp.length>=1&&!!(exp[0].title||exp[0].co||exp[0].role||exp[0].company);
-    if(hasExp){ score+=7; it('Work experience section','pass'); } else it('Work experience section','fail');
-    var edu=d.education||[]; if(edu.length&&(edu[0].deg||edu[0].sch||edu[0].degree||edu[0].school)){ score+=4; it('Education section','pass'); } else it('Education section','warn');
+    if(hasExp){ score+=5; it('Work experience section','pass'); } else it('Work experience section','fail');
+    var edu=d.education||[]; if(edu.length&&(edu[0].deg||edu[0].sch||edu[0].degree||edu[0].school)){ score+=3; it('Education section','pass'); } else it('Education section','warn');
     var sk=(d.skills||[]).length;
-    if(sk>=1){ score+=4; it('Skills section','pass'); } else it('Skills section','fail');
+    if(sk>=1){ score+=2; it('Skills section','pass'); } else it('Skills section','fail');
 
-    /* 3 · Experience quality (30) */
+    /* 3 · Experience depth & quality (40) — the real substance. Gather every
+       non-empty bullet across roles, then score volume+coverage, quantification,
+       action verbs and clarity. This is the heaviest block on purpose: a resume's
+       readiness is its achievements, not its filled-in fields. */
     var hasDates=exp.some(function(e){ return String(e.dates||e.period||e.start||'').trim(); });
-    if(hasDates){ score+=6; it('Employment dates','pass'); } else it('Employment dates', hasExp?'warn':'fail');
-    var bullets=[]; exp.forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b) bullets.push(String(b).trim()); }); });
+    if(hasDates){ score+=4; it('Employment dates','pass'); } else it('Employment dates', hasExp?'warn':'fail');
+    var bullets=[]; exp.forEach(function(e){ (e.bullets||[]).forEach(function(b){ if(b&&String(b).trim()) bullets.push(String(b).trim()); }); });
+    var rolesWithBullets=exp.filter(function(e){ return (e.bullets||[]).some(function(b){ return b&&String(b).trim(); }); }).length;
     if(bullets.length){
+      /* (a) volume & coverage (10): ~2 bullets per role, and most roles covered */
+      var vol=Math.min(1, bullets.length/Math.max(2, exp.length*2));
+      var cover=exp.length?rolesWithBullets/exp.length:0; var cq=0.5*vol+0.5*cover;
+      score+=Math.round(10*cq); it('Achievement bullets ('+bullets.length+')', cq>=0.75?'pass':(cq>=0.4?'warn':'fail'));
+      /* (b) quantified (12): ~half the bullets carrying a number = full marks */
       var qn=bullets.filter(function(b){ return /\d/.test(b); }).length; var qp=qn/bullets.length;
-      score+=Math.round(qp*12); it('Quantified achievements', qp>=0.4?'pass':(qp>=0.15?'warn':'fail'));
+      score+=Math.round(12*Math.min(1,qp/0.5)); it('Quantified achievements', qp>=0.4?'pass':(qp>=0.15?'warn':'fail'));
+      /* (c) action verbs (8): ~70% strong-verb bullets = full marks */
       var av=bullets.filter(function(b){ return _STRONGV.test(b); }).length; var ap=av/bullets.length;
-      score+=Math.round(ap*8); it('Action-verb bullets', ap>=0.6?'pass':(ap>=0.3?'warn':'fail'));
+      score+=Math.round(8*Math.min(1,ap/0.7)); it('Action-verb bullets', ap>=0.6?'pass':(ap>=0.3?'warn':'fail'));
+      /* (d) clarity & length (6) */
       var wellLen=bullets.filter(function(b){ var w=b.split(/\s+/).length; return w>=6&&w<=32; }).length; var lp=wellLen/bullets.length;
-      score+=Math.round(lp*4); it('Bullet length & clarity', lp>=0.7?'pass':(lp>=0.4?'warn':'fail'));
-    } else { it('Quantified achievements','fail'); it('Action-verb bullets','fail'); it('Bullet length & clarity','fail'); }
+      score+=Math.round(6*lp); it('Bullet length & clarity', lp>=0.7?'pass':(lp>=0.4?'warn':'fail'));
+    } else {
+      it('Achievement bullets (0)','fail'); it('Quantified achievements','fail'); it('Action-verb bullets','fail'); it('Bullet length & clarity','fail');
+    }
 
     /* 4 · Skills depth (12) */
-    score += sk>=12?12 : sk>=8?10 : sk>=5?7 : sk>=3?3 : 0;
+    score += sk>=12?12 : sk>=8?10 : sk>=5?7 : sk>=3?4 : sk>=1?1 : 0;
     it('Skills ('+sk+' listed)', sk>=8?'pass':(sk>=5?'warn':'fail'));
 
     /* 5 · Professional summary (8) */
@@ -6044,21 +6059,29 @@ if ('serviceWorker' in navigator) {
     else if(sum.length>=40){ score+=4; it('Professional summary','warn'); }
     else it('Professional summary','fail');
 
-    /* 6 · ATS-friendly formatting & language (10) */
+    /* 6 · ATS-friendly formatting & language (9) */
     var twoCol=false; try{ twoCol=!!document.querySelector('#resumeOutput .r-2col, #resumeOutput .r-main-col'); }catch(e){}
     if(!twoCol){ score+=4; it('Single-column layout','pass'); } else { score+=2; it('Layout (single-column parses best)','warn'); }
     var corpus=(sum+' '+bullets.join(' ')).toLowerCase().trim();
     if(!corpus){ it('Clear, recruiter-ready language','fail'); }
-    else if(!_FILLER.test(corpus) && !_PRON.test(corpus)){ score+=6; it('Clear, recruiter-ready language','pass'); }
+    else if(!_FILLER.test(corpus) && !_PRON.test(corpus)){ score+=5; it('Clear, recruiter-ready language','pass'); }
     else { score+=2; it('Language (drop filler & "I / we")','warn'); }
 
-    /* 7 · Length appropriate (7) */
+    /* 7 · Length appropriate (6) */
     var pg=_atsPages();
-    if(pg<=2){ score+=7; it('Length ('+pg+' page'+(pg>1?'s':'')+')','pass'); }
+    if(pg<=2){ score+=6; it('Length ('+pg+' page'+(pg>1?'s':'')+')','pass'); }
     else if(pg===3){ score+=3; it('Length (3 pages — trim)','warn'); }
     else it('Length ('+pg+' pages — too long)','fail');
 
-    return { score: Math.max(0, Math.min(100, Math.round(score))), items: items };
+    /* Fairness caps — a resume with structure but no real achievements cannot
+       read as "ready", no matter how many fields are filled. This is what keeps
+       the score honest and in line with real ATS / recruiter checkers. */
+    score=Math.round(score);
+    if(!hasExp){ score=Math.min(score,28); it('Add work experience with achievements','fail'); }
+    else if(!bullets.length){ score=Math.min(score,40); it('Add achievement bullets to each role','fail'); }
+    else if(!bullets.some(function(b){ return /\d/.test(b); })){ score=Math.min(score,80); it('Add numbers / metrics to your achievements','warn'); }
+
+    return { score: Math.max(0, Math.min(100, score)), items: items };
   };
 
   /* Keep the ATS score live: refresh whenever the resume card re-renders
@@ -12856,7 +12879,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function clearServerPending(){
     getTok().then(function(tok){ fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending-clear',idToken:tok})})['catch'](function(){}); })['catch'](function(){});
   }
-  function showPendingSheet(resume){
+  function showPendingSheet(resume, versionId, versionLabel){
     if(document.getElementById('_r4uWaPendOv')) return;
     var ov=document.createElement('div'); ov.id='_r4uWaPendOv';
     ov.style.cssText='position:fixed;inset:0;z-index:10140;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,12,14,.55);';
@@ -12867,7 +12890,7 @@ window.__novaPortfolioHTML=function(d,sections){
     card.innerHTML=
       '<span style="width:46px;height:46px;border-radius:50%;margin:2px auto 10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 6px 16px -6px rgba(18,140,126,.7);"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="'+WA_PATH+'"/></svg></span>'+
       '<div style="font-weight:800;font-size:1.08rem;letter-spacing:-.01em;">You edited your resume on WhatsApp</div>'+
-      '<div style="font-size:.84rem;color:var(--muted,#777);margin:7px 0 15px;line-height:1.5;">Apply those changes to your saved resume'+(who?(' ('+who+role+')'):'')+'? We’ll save it to your account.</div>'+
+      '<div style="font-size:.84rem;color:var(--muted,#777);margin:7px 0 15px;line-height:1.5;">Apply those changes to '+(versionLabel?('“'+String(versionLabel).replace(/[<>]/g,'')+'”'):'your saved resume')+(who?(' ('+who+role+')'):'')+'? We’ll save it to your account.</div>'+
       '<button id="_r4uWaPendApply" style="display:block;width:100%;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;color:#fff;padding:13px;border-radius:12px;background:linear-gradient(145deg,#25d366,#128c7e);box-shadow:0 8px 20px -10px rgba(18,140,126,.8);">Apply &amp; save</button>'+
       '<button id="_r4uWaPendNo" style="display:block;width:100%;margin-top:9px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-weight:600;font-size:.84rem;color:var(--muted,#888);padding:8px;">Not now</button>';
     ov.appendChild(card); document.body.appendChild(ov);
@@ -12875,9 +12898,18 @@ window.__novaPortfolioHTML=function(d,sections){
     card.querySelector('#_r4uWaPendNo').addEventListener('click',function(){ try{ sessionStorage.setItem(DISMISS_SS,'1'); }catch(e){} close(); });
     card.querySelector('#_r4uWaPendApply').addEventListener('click',function(){
       var u=uid();
+      // Point the version pointer at the EXACT saved version this edit came from, so
+      // _saveCurrentVersion writes back to it (not whatever version is active) and a
+      // reload reopens the right one. Set before apply so any save it triggers is
+      // already aimed at the correct version.
+      if(versionId){ try{ window._currentVersionId=versionId; }catch(e){} }
       try{ if(typeof window._applyCloudDoc==='function') window._applyCloudDoc(null, resume, { template: resume.template }); }catch(e){}
       try{ if(window.__r4uWaReassert) window.__r4uWaReassert(resume); }catch(e){} // beat a late account-restore
       try{ if(typeof window.goToStep==='function') window.goToStep(8); }catch(e){}
+      if(versionId){ try{ window._currentVersionId=versionId; }catch(e){} } // re-assert after apply
+      // Belt-and-suspenders: write straight to the picked version's Firestore doc,
+      // so the correct version is updated even if _saveCurrentVersion is unavailable.
+      if(u && versionId && window._fbDb){ try{ window._fbDb.collection('users').doc(u).collection('resumes').doc(versionId).set({ resume: resume, savedAt: new Date().toISOString() }, { merge:true }); }catch(e){} }
       try{ if(u){ if(window.__r4uPersistAll) window.__r4uPersistAll(u); else window._saveToCloud(u, true); } }catch(e){} // main doc + current version (reload loads the version)
       clearServerPending();
       close();
@@ -12891,7 +12923,7 @@ window.__novaPortfolioHTML=function(d,sections){
     getTok().then(function(tok){
       return fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending-get',idToken:tok})});
     }).then(function(r){ return r.ok?r.json():null; }).then(function(j){
-      if(j&&j.ok&&j.pending&&j.pending.resume){ setTimeout(function(){ showPendingSheet(j.pending.resume); }, 1200); }
+      if(j&&j.ok&&j.pending&&j.pending.resume){ var _pd=j.pending; setTimeout(function(){ showPendingSheet(_pd.resume, _pd.versionId, _pd.versionLabel); }, 1200); }
     })['catch'](function(){ _pendChecked=false; });
   }
   var _cpn=0, _cpiv=setInterval(function(){ if(uid()&&window._fbDb){ checkPendingEdit(); clearInterval(_cpiv); } if(++_cpn>90) clearInterval(_cpiv); },1200);
