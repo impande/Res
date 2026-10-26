@@ -12388,6 +12388,67 @@ window.__novaPortfolioHTML=function(d,sections){
   var n=0, iv=setInterval(function(){ if(install()||++n>60) clearInterval(iv); }, 250);
 })();
 </script>
+<script id="_r4uPersonalizeJS">
+/* Personalization — make every AI generation sound like the user:
+   - persona(): their role (job title), chosen tone, and a few of their OWN
+     bullets as style examples, so output mirrors their voice. Because the
+     examples are read live from their resume, the AI "learns" from their input
+     as they edit. Sent with each /functions/generate text call; generate.js
+     folds it into the content-writer system prompt only (never parse/extract).
+   - A small writing-tone selector on the Generate screen (stored per browser). */
+(function(){
+  var TONES=[['professional','Professional'],['concise','Concise & punchy'],['impactful','Bold & impactful'],['friendly','Warm & friendly']];
+  function tone(){ try{ return localStorage.getItem('_r4uTone')||''; }catch(e){ return ''; } }
+  function setTone(v){ try{ localStorage.setItem('_r4uTone', v); }catch(e){} }
+  function toneLabel(t){ for(var i=0;i<TONES.length;i++){ if(TONES[i][0]===t) return TONES[i][1]; } return ''; }
+
+  function persona(){
+    try{
+      var d=(typeof window._collectCloudData==='function')?window._collectCloudData():null;
+      var role=(d&&d.jobTitle)||'';
+      var ex=[];
+      if(d&&Array.isArray(d.experience)){ d.experience.forEach(function(e){ ((e&&e.bullets)||[]).forEach(function(b){ if(ex.length<3&&b&&String(b).trim().length>18) ex.push(String(b).trim()); }); }); }
+      var tl=toneLabel(tone());
+      if(!role&&!tl&&!ex.length) return null;
+      return { role:role, tone:tl, examples:ex };
+    }catch(e){ return null; }
+  }
+
+  /* Attach persona to every AI text generation (skips orders / action calls). */
+  var _of=window.fetch;
+  window.fetch=function(url,opts){
+    try{
+      if(typeof url==='string'&&url.indexOf('functions/generate')>=0&&opts&&typeof opts.body==='string'){
+        var b=JSON.parse(opts.body);
+        if(b&&typeof b.prompt==='string'&&!b.action&&!b.persona){
+          var p=persona();
+          if(p){ b.persona=p; var no={}; for(var k in opts) no[k]=opts[k]; no.body=JSON.stringify(b); return _of.call(this,url,no); }
+        }
+      }
+    }catch(e){}
+    return _of.apply(this,arguments);
+  };
+
+  /* Compact writing-tone selector, right above the Generate button. */
+  function injectTone(){
+    var step8=document.getElementById('step8');
+    var active=document.querySelector('.step-content.active');
+    var ex=document.getElementById('_r4uToneRow');
+    if(!step8||active!==step8){ if(ex&&ex.parentNode) ex.parentNode.removeChild(ex); return; }
+    if(ex) return;
+    var nav=step8.querySelector('.nav-buttons'); if(!nav) return;
+    var cur=tone()||'professional';
+    var row=document.createElement('div'); row.id='_r4uToneRow';
+    row.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:7px;max-width:620px;margin:6px auto 10px;';
+    row.innerHTML='<span style="color:var(--muted,#6b7280);font-weight:600;font-size:.8rem;margin-right:2px;">✍️ Writing tone</span>'+
+      TONES.map(function(t){ var on=(t[0]===cur); return '<button type="button" data-t="'+t[0]+'" style="border:1px solid '+(on?'rgba(217,119,6,.6)':'var(--border,#e5e5e0)')+';background:'+(on?'rgba(217,119,6,.08)':'var(--card-bg,#fff)')+';color:'+(on?'var(--accent,#b45309)':'var(--text,#333)')+';font-family:inherit;font-size:.78rem;font-weight:'+(on?'700':'500')+';padding:5px 12px;border-radius:999px;cursor:pointer;">'+t[1]+'</button>'; }).join('')+
+      '<span style="flex-basis:100%;color:var(--muted,#9aa1ab);font-size:.7rem;">AI writes in this tone — matched to your role & your own wording.</span>';
+    Array.prototype.forEach.call(row.querySelectorAll('button'),function(btn){ btn.addEventListener('click',function(){ setTone(btn.getAttribute('data-t')); var r=document.getElementById('_r4uToneRow'); if(r&&r.parentNode) r.parentNode.removeChild(r); injectTone(); try{ if(typeof showToast==='function') showToast('Tone set — Generate or Refine to apply ✍️','success'); }catch(e){} }); });
+    nav.parentNode.insertBefore(row,nav);
+  }
+  setInterval(injectTone,900);
+})();
+</script>
 <script id="_r4uIncomingResumeJS">
 /* WhatsApp co-pilot handoff: open resume4u.help/?r=<token> and this fetches the
    resume the bot built (GET /.netlify/functions/resume?token=…), maps it to the
