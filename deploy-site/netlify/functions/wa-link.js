@@ -12,7 +12,7 @@
  * apiKey — no service account. The returned localId is the trusted uid.
  */
 const FB_KEY = process.env.WEB_FIREBASE_API_KEY || 'AIzaSyDUgpJQ8PbQgwqj1EUAe9Va4iG8BnNQm10';
-const BOT = process.env.WA_BOT_NUMBER || '15556758306';
+const BOT = process.env.WA_BOT_NUMBER || '919309014196';
 
 function redisUrl(path) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
