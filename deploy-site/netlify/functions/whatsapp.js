@@ -577,14 +577,23 @@ exports.handler = async (event) => {
     //      message to the ticket (the owner reads/replies from the admin page) until
     //      they explicitly exit or the owner resolves. No resume processing here. ----
     if (state.mode === 'support') {
-      if (/^(exit|end|close|stop|cancel|back|leave)(\s+(support|chat|help|this))?$|^(menu|resume builder|build)$/i.test(low)) {
+      // Explicit exit → back to the bot with a confirmation.
+      if (/^(exit|end|close|stop|cancel|leave|back|done)(\s+(support|chat|help|this))?$|^(menu|resume builder)$/i.test(low)) {
         await setState(from, { step: 0, mode: 'idle', data: state.data || { experiences: [] } });
         await send(from, "👍 Closed the support chat. Message anytime to build or edit your resume — or say \"support\" to reach our team again.");
         return { statusCode: 200, body: 'ok' };
       }
-      const _pf = await getProfile(from);
-      await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
-      return { statusCode: 200, body: 'ok' };   // silent — a human replies from the admin page
+      // "I want the bot now" — a build / edit / new / versions request (incl. the
+      // Build CTA) leaves support and is handled by the normal flow below.
+      const wantsBot = /\b(build|make|create|start)\s+(a\s+|an\s+|my\s+)?(new\s+)?(resume|r[eé]sum[eé]|cv)\b/i.test(low)
+        || /^(new|restart|reset|start over|build new|fresh|edit|edit resume|update resume|versions?|my resumes?|switch resume)$/i.test(low);
+      if (!wantsBot) {
+        const _pf = await getProfile(from);
+        await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
+        return { statusCode: 200, body: 'ok' };   // silent — a human replies from the desk
+      }
+      // leaving support → clear the marker and fall through to the normal handlers
+      state = { step: 0, mode: 'idle', data: state.data || { experiences: [] } };
     }
 
     // ---- Global intents: understood in ANY mode, so a command is never
