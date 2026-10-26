@@ -632,6 +632,23 @@ exports.handler = async (event) => {
       await send(from, "🙋 You're connected to Resume4U support. Tell us what you need — a human from our team will reply right here.\n\n(Type \"exit\" anytime to go back to building your resume.)");
       return OK;
     }
+    // Build CTA → start the resume flow right away (the "Build my resume on WhatsApp"
+    // link lands here). Checked BEFORE "versions" because "my resume" would match it.
+    if (/\b(build|make|create|start)\s+(a\s+|an\s+|my\s+)?(new\s+)?(resume|r[eé]sum[eé]|cv)\b/i.test(low)) {
+      const prof = await getProfile(from);
+      const pn = prof && (prof.name || prof.firstName);
+      if (pn) {
+        // returning user with a saved resume → build-focused choice (not the plain menu)
+        await setState(from, { step: 0, mode: 'menu', data: state.data });
+        await send(from, '👋 Welcome back, ' + firstName(pn) + "! Let's work on your resume.\n\nReply *edit* to update your saved one, or *new* to start fresh. (Or send a PDF to import a different resume.)");
+        return OK;
+      }
+      // new user → kick off the build Q&A immediately
+      const d = { experiences: [] };
+      await setState(from, { step: 1, mode: 'build', data: d });
+      await send(from, typeof STEPS[0].ask === 'function' ? STEPS[0].ask(d) : STEPS[0].ask);
+      return OK;
+    }
     // Finish & get link — wrap up the resume in progress (or the saved one).
     // "link <code>" (account linking) has its own handler below and won't match this.
     if (/^(link|get ?link|get my link|send( me)?( the)? link|my link|done|finished?|generate|get my resume|i'?m done)$/i.test(low)) {
