@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Support desk</title>
+<style>
+  :root{--bg:#f5f6f8;--card:#fff;--border:#e4e6ea;--text:#13161a;--muted:#6b7280;--accent:#1aa851;--accent2:#128c7e;--me:#dcf8c6;--them:#fff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;height:100vh;height:100dvh;display:flex;flex-direction:column;}
+  header{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+  header h1{font-size:1.02rem;font-weight:800;letter-spacing:-.01em;}
+  header .sp{flex:1;}
+  header .pill{background:rgba(255,255,255,.2);border-radius:999px;font-size:.72rem;font-weight:700;padding:3px 10px;}
+  header button{border:0;background:rgba(255,255,255,.18);color:#fff;font:inherit;font-size:.78rem;font-weight:700;padding:6px 11px;border-radius:9px;cursor:pointer;}
+  .wrap{flex:1;display:flex;min-height:0;}
+  .list{width:300px;max-width:40%;border-right:1px solid var(--border);background:var(--card);overflow-y:auto;flex-shrink:0;}
+  .chat{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .t{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .t:hover{background:#f0fdf4;}
+  .t.sel{background:#e7f8ef;border-left:3px solid var(--accent);}
+  .t .nm{font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:6px;}
+  .t .nm .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+  .t .ph{font-size:.72rem;color:var(--muted);}
+  .t .last{font-size:.78rem;color:var(--muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .t .ago{font-size:.66rem;color:#9aa1ab;margin-top:3px;}
+  .empty{padding:30px 16px;color:var(--muted);font-size:.85rem;text-align:center;}
+  .chat-hd{padding:11px 15px;border-bottom:1px solid var(--border);background:var(--card);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .chat-hd .nm{font-weight:800;font-size:.95rem;}
+  .chat-hd .ph{font-size:.74rem;color:var(--muted);}
+  .chat-hd .sp{flex:1;}
+  .chat-hd .resolve{border:1px solid rgba(220,38,38,.4);background:#fff;color:#dc2626;font:inherit;font-size:.78rem;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;}
+  .msgs{flex:1;overflow-y:auto;padding:16px;background:#eae6df;display:flex;flex-direction:column;gap:8px;}
+  .bub{max-width:76%;padding:8px 11px;border-radius:10px;font-size:.88rem;line-height:1.4;box-shadow:0 1px 1px rgba(0,0,0,.08);white-space:pre-wrap;word-break:break-word;}
+  .bub.user{align-self:flex-start;background:var(--them);border-top-left-radius:3px;}
+  .bub.agent{align-self:flex-end;background:var(--me);border-top-right-radius:3px;}
+  .bub .ts{display:block;font-size:.62rem;color:#8a9199;margin-top:3px;text-align:right;}
+  .composer{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--border);flex-shrink:0;}
+  .composer textarea{flex:1;resize:none;border:1px solid var(--border);border-radius:20px;padding:9px 14px;font:inherit;font-size:.9rem;max-height:120px;outline:none;}
+  .composer textarea:focus{border-color:var(--accent2);}
+  .composer button{border:0;background:linear-gradient(145deg,#25d366,#128c7e);color:#fff;font:inherit;font-weight:800;padding:0 18px;border-radius:20px;cursor:pointer;flex-shrink:0;}
+  .composer button:disabled{opacity:.5;cursor:default;}
+  .center{flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.9rem;padding:20px;text-align:center;}
+  /* token gate */
+  .gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;}
+  .gate .box{width:min(360px,100%);background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 20px;box-shadow:0 20px 50px -20px rgba(0,0,0,.35);text-align:center;}
+  .gate h2{font-size:1.1rem;font-weight:800;margin-bottom:6px;}
+  .gate p{font-size:.82rem;color:var(--muted);margin-bottom:14px;}
+  .gate input{width:100%;border:1px solid var(--border);border-radius:10px;padding:11px 13px;font:inherit;margin-bottom:10px;outline:none;}
+  .gate input:focus{border-color:var(--accent2);}
+  .gate button{width:100%;border:0;background:linear-gradient(145deg,#25d366,#128c7e);color:#fff;font:inherit;font-weight:800;padding:12px;border-radius:11px;cursor:pointer;}
+  .gate .err{color:#dc2626;font-size:.78rem;margin-bottom:8px;min-height:1em;}
+  @media(max-width:640px){
+    .list{position:absolute;inset:0;top:52px;width:100%;max-width:100%;z-index:5;}
+    body.viewing .list{display:none;}
+    .chat{display:none;}
+    body.viewing .chat{display:flex;}
+    .chat-hd .back{display:inline-flex;}
+  }
+  .chat-hd .back{display:none;border:0;background:transparent;font-size:1.3rem;cursor:pointer;color:var(--text);padding:2px 6px;}
+</style>
+</head>
+<body>
+<div class="gate" id="gate"><div class="box">
+  <h2>🛟 Support desk</h2>
+  <p>Enter the admin token to read &amp; reply to WhatsApp support chats.</p>
+  <div class="err" id="gateErr"></div>
+  <input id="tokIn" type="password" placeholder="Admin token" autocomplete="off">
+  <button id="tokGo">Open desk</button>
+</div></div>
+
+<header>
+  <h1>🛟 Support desk</h1>
+  <span class="pill" id="openCount">0 open</span>
+  <span class="sp"></span>
+  <button id="refreshBtn">↻ Refresh</button>
+  <button id="logoutBtn">Lock</button>
+</header>
+<div class="wrap">
+  <div class="list" id="list"><div class="empty">Loading…</div></div>
+  <div class="chat" id="chat">
+    <div class="center" id="chatEmpty">Select a conversation to reply.</div>
+    <div id="chatOpen" style="display:none;flex:1;flex-direction:column;min-height:0;">
+      <div class="chat-hd">
+        <button class="back" id="backBtn">‹</button>
+        <div><div class="nm" id="cName">—</div><div class="ph" id="cPhone"></div></div>
+        <span class="sp"></span>
+        <button class="resolve" id="resolveBtn">Resolve</button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="composer">
+        <textarea id="reply" rows="1" placeholder="Type a reply…"></textarea>
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var API='/.netlify/functions/support-admin';
+var TOKEN=''; var cur=null; var pollTimer=null;
+function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+function ago(ts){ if(!ts) return ''; var s=Math.floor((Date.now()-ts)/1000); if(s<60)return s+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+function hhmm(ts){ try{ var d=new Date(ts); return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+
+function api(action, extra, method){
+  var opts={ method: method||'GET', headers:{} };
+  var url=API;
+  if((method||'GET')==='POST'){ opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(Object.assign({action:action,token:TOKEN}, extra||{})); }
+  else { url+='?action='+encodeURIComponent(action)+'&token='+encodeURIComponent(TOKEN); for(var k in (extra||{})) url+='&'+k+'='+encodeURIComponent(extra[k]); }
+  return fetch(url,opts).then(function(r){ if(r.status===401) throw new Error('unauthorized'); return r.json(); });
+}
+
+function showGate(msg){ document.getElementById('gate').style.display='flex'; if(msg) document.getElementById('gateErr').textContent=msg; }
+function hideGate(){ document.getElementById('gate').style.display='none'; }
+
+function loadList(){
+  return api('list').then(function(j){
+    var el=document.getElementById('list'); var ts=(j&&j.tickets)||[];
+    document.getElementById('openCount').textContent=ts.length+' open';
+    if(!ts.length){ el.innerHTML='<div class="empty">No open support chats. 🎉</div>'; return; }
+    el.innerHTML=ts.map(function(t){
+      var sel=(cur===t.from)?' sel':'';
+      var who=t.lastWho==='agent'?'You: ':'';
+      return '<div class="t'+sel+'" data-from="'+esc(t.from)+'"><div class="nm"><span class="dot"></span>'+esc(t.name||'WhatsApp user')+'</div>'+
+        '<div class="ph">+'+esc(t.from)+'</div>'+
+        '<div class="last">'+esc(who)+esc(t.lastText||'')+'</div>'+
+        '<div class="ago">'+ago(t.updatedAt)+' · '+t.count+' msg</div></div>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.t'),function(n){ n.addEventListener('click',function(){ openTicket(n.getAttribute('data-from')); }); });
+  }).catch(function(e){ if((''+e.message).indexOf('unauthorized')>=0){ TOKEN=''; try{localStorage.removeItem('_supTok');}catch(_){ } showGate('Token rejected.'); } });
+}
+function renderMsgs(t){
+  var m=document.getElementById('msgs');
+  m.innerHTML=(t.messages||[]).map(function(x){
+    return '<div class="bub '+(x.who==='agent'?'agent':'user')+'">'+esc(x.text)+'<span class="ts">'+hhmm(x.ts)+'</span></div>';
+  }).join('');
+  m.scrollTop=m.scrollHeight;
+}
+function openTicket(from){
+  cur=from; document.body.classList.add('viewing');
+  document.getElementById('chatEmpty').style.display='none';
+  document.getElementById('chatOpen').style.display='flex';
+  loadList();
+  return api('get',{from:from}).then(function(j){
+    if(!j||!j.ticket) return;
+    document.getElementById('cName').textContent=j.ticket.name||'WhatsApp user';
+    document.getElementById('cPhone').textContent='+'+from;
+    renderMsgs(j.ticket);
+  });
+}
+function send(){
+  var ta=document.getElementById('reply'); var text=ta.value.trim(); if(!text||!cur) return;
+  var btn=document.getElementById('sendBtn'); btn.disabled=true;
+  api('reply',{from:cur,text:text},'POST').then(function(j){
+    ta.value=''; btn.disabled=false; autoGrow();
+    openTicket(cur);
+  }).catch(function(){ btn.disabled=false; alert('Could not send — try again.'); });
+}
+function resolve(){
+  if(!cur) return; if(!confirm('Close this support chat and hand it back to the bot?')) return;
+  api('resolve',{from:cur},'POST').then(function(){ cur=null; document.body.classList.remove('viewing'); document.getElementById('chatOpen').style.display='none'; document.getElementById('chatEmpty').style.display='flex'; loadList(); });
+}
+function autoGrow(){ var ta=document.getElementById('reply'); ta.style.height='auto'; ta.style.height=Math.min(120,ta.scrollHeight)+'px'; }
+
+function startPolling(){ if(pollTimer) clearInterval(pollTimer); pollTimer=setInterval(function(){ loadList(); if(cur) api('get',{from:cur}).then(function(j){ if(j&&j.ticket) renderMsgs(j.ticket); }); }, 8000); }
+function boot(){ hideGate(); loadList(); startPolling(); }
+
+document.getElementById('tokGo').addEventListener('click',function(){
+  var v=document.getElementById('tokIn').value.trim(); if(!v) return;
+  TOKEN=v;
+  api('list').then(function(){ try{localStorage.setItem('_supTok',v);}catch(_){ } boot(); })
+    .catch(function(){ showGate('Token rejected.'); });
+});
+document.getElementById('tokIn').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('tokGo').click(); });
+document.getElementById('refreshBtn').addEventListener('click',function(){ loadList(); if(cur) openTicket(cur); });
+document.getElementById('logoutBtn').addEventListener('click',function(){ TOKEN=''; try{localStorage.removeItem('_supTok');}catch(_){ } cur=null; if(pollTimer)clearInterval(pollTimer); showGate(''); });
+document.getElementById('backBtn').addEventListener('click',function(){ document.body.classList.remove('viewing'); });
+document.getElementById('resolveBtn').addEventListener('click',resolve);
+document.getElementById('sendBtn').addEventListener('click',send);
+document.getElementById('reply').addEventListener('input',autoGrow);
+document.getElementById('reply').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
+
+(function(){ var saved=''; try{ saved=localStorage.getItem('_supTok')||''; }catch(_){ } if(saved){ TOKEN=saved; api('list').then(boot).catch(function(){ showGate(''); }); } else showGate(''); })();
+</script>
+</body></html>

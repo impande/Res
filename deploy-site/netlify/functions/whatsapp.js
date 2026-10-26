@@ -75,6 +75,27 @@ async function setProfile(from, data) {
   await redis(['SET', 'profile:' + from, JSON.stringify(data), 'EX', '7776000']); // 90 days
 }
 
+/* ---- Support tickets (one number serves the bot AND human support) ----
+   A support conversation is stored at ticket:<from> and the open ones are tracked
+   in the set tickets:open, so the owner can read/reply from the admin page. */
+async function getTicket(from) {
+  const v = await redis(['GET', 'ticket:' + from]);
+  if (v) { try { return JSON.parse(v); } catch (e) {} }
+  return null;
+}
+async function appendTicket(from, who, text, name) {
+  let t = await getTicket(from);
+  if (!t) t = { from: from, name: name || '', status: 'open', messages: [], createdAt: Date.now() };
+  if (name && !t.name) t.name = name;
+  t.status = 'open';
+  t.messages.push({ who: who, text: text, ts: Date.now() });
+  if (t.messages.length > 100) t.messages = t.messages.slice(-100);
+  t.updatedAt = Date.now();
+  await redis(['SET', 'ticket:' + from, JSON.stringify(t), 'EX', '2592000']); // 30 days
+  await redis(['SADD', 'tickets:open', from]);
+  return t;
+}
+
 /* ---- the conversation script ---- */
 // Each step: a question to send, and how to store the user's answer.
 const STEPS = [
@@ -552,6 +573,20 @@ exports.handler = async (event) => {
 
     if (type !== 'text') return { statusCode: 200, body: 'ok' };
 
+    // ---- Support mode (sticky): the user reached a human-support chat. Route every
+    //      message to the ticket (the owner reads/replies from the admin page) until
+    //      they explicitly exit or the owner resolves. No resume processing here. ----
+    if (state.mode === 'support') {
+      if (/^(exit|end|close|stop|cancel|back|leave)(\s+(support|chat|help|this))?$|^(menu|resume builder|build)$/i.test(low)) {
+        await setState(from, { step: 0, mode: 'idle', data: state.data || { experiences: [] } });
+        await send(from, "👍 Closed the support chat. Message anytime to build or edit your resume — or say \"support\" to reach our team again.");
+        return { statusCode: 200, body: 'ok' };
+      }
+      const _pf = await getProfile(from);
+      await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
+      return { statusCode: 200, body: 'ok' };   // silent — a human replies from the admin page
+    }
+
     // ---- Global intents: understood in ANY mode, so a command is never
     //      swallowed as the answer to a build question (the old bot only caught
     //      restart/menu, so "link", "versions", "hi" got saved as answers).
@@ -587,6 +622,14 @@ exports.handler = async (event) => {
       const p = await getProfile(from); const pn = p && (p.name || p.firstName);
       await setState(from, { step: 0, mode: 'menu', data: state.data });
       await send(from, (pn ? 'Hi again, ' + firstName(pn) + '! ' : '') + MENU);
+      return OK;
+    }
+    // Support / contact → connect to a human (enters sticky support mode + ticket).
+    if (/^(support|contact\s*us?|customer\s*(support|care|service)|talk to (a\s+)?(human|person|agent|someone|team)|speak to (a\s+)?(human|person|agent)|raise (a\s+)?ticket|report (a|an) (issue|bug|problem)|get help|need help with)\b/i.test(low)) {
+      const _pf = await getProfile(from);
+      await setState(from, { step: 0, mode: 'support', data: state.data });
+      await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
+      await send(from, "🙋 You're connected to Resume4U support. Tell us what you need — a human from our team will reply right here.\n\n(Type \"exit\" anytime to go back to building your resume.)");
       return OK;
     }
     // Finish & get link — wrap up the resume in progress (or the saved one).
