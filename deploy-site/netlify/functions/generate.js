@@ -282,6 +282,19 @@ exports.handler = async function(event) {
       requestBody.system = isParseTask
         ? 'You are a precise data extraction assistant. When given a resume, extract all information faithfully into the requested JSON structure. Never invent or omit data. Output valid JSON only.'
         : 'You are an expert resume writer who creates ATS-optimised, professional resumes. Write in clear, action-oriented language with quantified achievements where possible. Output plain text without markdown formatting.';
+      // Personalization: fold in the candidate's role, preferred tone and their OWN
+      // sample phrasings so content is written in their voice. Content-writing tasks
+      // only — never extraction/parse (so JSON parsing stays untouched).
+      if (!isParseTask && body.persona && typeof body.persona === 'object') {
+        const pz = body.persona; let note = '';
+        if (pz.role) note += ' The candidate targets a "' + String(pz.role).slice(0, 80) + '" role.';
+        if (pz.tone) note += ' Preferred tone: ' + String(pz.tone).slice(0, 40) + '.';
+        if (Array.isArray(pz.examples) && pz.examples.length) {
+          note += ' Mirror the wording, rhythm and seniority of these lines the candidate wrote (do NOT copy them verbatim, and never invent facts or numbers): ' +
+            pz.examples.slice(0, 3).map((e) => '"' + String(e).slice(0, 180) + '"').join('; ') + '.';
+        }
+        if (note) requestBody.system += '\n\nPERSONALIZATION —' + note;
+      }
       requestBody.messages = [{ role: 'user', content: prompt }];
     }
 
