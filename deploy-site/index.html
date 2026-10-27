@@ -12266,7 +12266,7 @@ window.__novaPortfolioHTML=function(d,sections){
       rows+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrDone" style="flex:1 1 100%">Done</button></div>';
     Array.prototype.forEach.call(document.querySelectorAll('#r4uRoastCard .rr-copy-one'),function(btn){
-      btn.addEventListener('click',function(){ var idx=parseInt(btn.getAttribute('data-i'),10); if(manual[idx]) copy(manual[idx].after); btn.textContent='Copied ✓'; btn.style.opacity='.7'; });
+      btn.addEventListener('click',function(){ var idx=parseInt(btn.getAttribute('data-i'),10); if(manual[idx]) copy(manual[idx].after, 'Rewrite copied — paste it into your resume'); btn.textContent='Copied ✓'; btn.style.opacity='.7'; });
     });
     var done=document.getElementById('rrDone'); if(done) done.addEventListener('click',close);
   }
@@ -12274,11 +12274,11 @@ window.__novaPortfolioHTML=function(d,sections){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
     return 'My resume scored '+clamp(d.score, atsNow())+'/100 on resume4u.help’s AI review 🔥:\n\n'+lines+'\n\nThen it fixed everything for free → https://resume4u.help';
   }
-  function copy(str){
-    function ok(){ if(typeof showToast==='function') showToast('Roast copied — go share it 🔥','success'); }
+  function copy(str, msg){
+    function ok(){ if(typeof showToast==='function') showToast(msg||'Copied ✓','success'); }
     try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(str).then(ok,fb); return; } }catch(e){}
     fb();
-    function fb(){ try{ var ta=document.createElement('textarea'); ta.value=str; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){ if(typeof showToast==='function') showToast('Select and copy the roast text'); } }
+    function fb(){ try{ var ta=document.createElement('textarea'); ta.value=str; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){ if(typeof showToast==='function') showToast('Copied — paste it into your resume'); } }
   }
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&overlay&&overlay.classList.contains('on')) close(); });
   window._r4uShowRoast=open;
