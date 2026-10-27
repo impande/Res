@@ -12133,17 +12133,61 @@ window.__novaPortfolioHTML=function(d,sections){
     var inp=document.getElementById('skillInput');
     if(inp && !inp.__r4uPasteClean){
       inp.__r4uPasteClean=true;
-      inp.addEventListener('paste',function(e){
-        var t=''; try{ t=(e.clipboardData||window.clipboardData).getData('text')||''; }catch(err){}
-        if(!(/%[0-9a-fA-F]{2}/.test(t) || /^\s*(add\s+)?skills?\s*:/i.test(t) || /[,;\n]/.test(t))) return; /* let normal single-word paste through */
-        e.preventDefault();
-        var list=toks(t);
-        if(list.length && window.__r4uAddSkillOne){ list.forEach(window.__r4uAddSkillOne); }
-        else { inp.value=clean(t).trim(); }
-      });
+      /* Let the paste LAND in the field first (reading clipboardData inside the
+         paste event is unreliable on iOS Safari), then on the next tick read the
+         field's value and, only if it's a list / URL-encoded / "skills:"-prefixed,
+         split it into chips. A plain single skill is left as-is for Add/Enter. */
+      var splitFromValue=function(){
+        var v=(inp.value||'');
+        if(!(/%[0-9a-fA-F]{2}/.test(v) || /^\s*(add\s+)?skills?\s*:/i.test(v) || /[,;\n\t•|]/.test(v))) return;
+        var list=toks(v); inp.value='';
+        if(list.length && window.__r4uAddSkillOne){ list.forEach(function(tk){ window.__r4uAddSkillOne(tk); }); }
+        else { inp.value=clean(v).trim(); }
+      };
+      inp.addEventListener('paste',function(){ setTimeout(splitFromValue,0); });
+      inp.addEventListener('drop',function(){ setTimeout(splitFromValue,0); });
     }
     return !!(inp);
   }
+  /* ---- sanitize skills that synced in malformed (from WhatsApp / AI / imports):
+     URL-encoded blobs, a leaked "skills:" command, or a section header like
+     "CORE COMPETENCIES: …" showing up as a skill. Cleans the suggestion history
+     and removes junk chips using the app's own removeSkill. Idempotent. ---- */
+  function isJunkSkill(s){
+    s=String(s||'').trim();
+    if(!s) return true;
+    if(/%[0-9a-fA-F]{2}/.test(s)) return true;                 // URL-encoded
+    if(/^\s*(add\s+)?skills?\s*:/i.test(s)) return true;        // "skills:" command text
+    if(/\bcompetenc(y|ies)\b/i.test(s)) return true;           // section header leaked
+    if(/^(technical skills|key skills|professional summary|work experience|education)\b/i.test(s)) return true;
+    if(s.length>45) return true;                                // a sentence/blob, not a skill
+    return false;
+  }
+  function sanitizeHistory(){
+    try{
+      var h=JSON.parse(localStorage.getItem('skillHistory')||'[]'); if(!Array.isArray(h)) return;
+      var out=[], seen={};
+      h.forEach(function(e){ toks(e).forEach(function(t){ if(isJunkSkill(t)) return; var k=t.toLowerCase(); if(seen[k]) return; seen[k]=1; out.push(t); }); });
+      if(JSON.stringify(out.slice(0,50))!==JSON.stringify(h)) localStorage.setItem('skillHistory', JSON.stringify(out.slice(0,50)));
+    }catch(e){}
+  }
+  function sanitizeChips(){
+    var tags=document.getElementById('skillTags'); if(!tags) return;
+    var bad=[];
+    Array.prototype.forEach.call(tags.querySelectorAll('.skill-tag'),function(chip){
+      var sp=chip.querySelector('span'); var name=sp?(sp.textContent||''):'';
+      if(isJunkSkill(name)) bad.push({name:name, chip:chip});
+    });
+    if(!bad.length) return;
+    bad.forEach(function(x){
+      var done=false;
+      try{ if(typeof window.removeSkill==='function'){ window.removeSkill(x.name); done=true; } }catch(e){}
+      if(!done){ try{ var btn=x.chip.querySelector('button[aria-label^="Remove"]'); if(btn) btn.click(); }catch(e){} }
+    });
+    try{ if(typeof window.renderSuggestions==='function') window.renderSuggestions(); }catch(e){}
+  }
+  sanitizeHistory();
+  setInterval(function(){ sanitizeHistory(); sanitizeChips(); }, 1800);
   var n=0, iv=setInterval(function(){ if(install() || ++n>60) clearInterval(iv); }, 300);
 })();
 </script>
