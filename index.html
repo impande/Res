@@ -4248,12 +4248,7 @@ if ('serviceWorker' in navigator) {
       if(_chg){ var _sn=(window._snapResumeStyles?window._snapResumeStyles():null); if(typeof renderOutput==='function') renderOutput(lastResumeData); if(window._applyResumeStyles)window._applyResumeStyles(_sn); }
     }
     var analysis=_analyzeResume();
-    var s=analysis.score, lvl=s>=75?'Strong — ATS ready':s>=50?'Good — room to improve':'Needs work';
-    var ring=s>=75?'#16a34a':s>=50?'#d97706':'#dc2626';
-    wrap.appendChild(av('Hi'+nm+' 👋 I read through your resume — here’s my quick take:'));
-    var sc=group();
-    sc.innerHTML='<div class="airx-score"><div class="airx-ring" style="background:conic-gradient('+ring+' '+(s*3.6)+'deg,#e6e8ec 0)"><div class="airx-ring-in"><b>'+s+'</b><i>/100</i></div></div><div class="airx-score-txt"><div class="airx-score-hd">ATS Score</div><div class="airx-score-lv" style="color:'+ring+'">'+lvl+'</div><div class="airx-score-sub">Updates live as you refine</div></div></div>';
-    wrap.appendChild(sc);
+    wrap.appendChild(av('Hi'+nm+' 👋 I read through your resume — here’s what I’d improve:'));
     if(analysis.suggestions.length){
       wrap.appendChild(say('Here’s what I’d tackle first — tap one and I’ll help:'));
       var rc=group();
@@ -4311,7 +4306,7 @@ if ('serviceWorker' in navigator) {
     }
     var sk=(d.skills||[]).length;
     if(sk<6) sugg.push({pri:'med',ico:'🧩',lbl:'Add more skills',ai:true,sub:'Only '+sk+' skill'+(sk===1?'':'s')+' — boost keyword coverage.',action:_aiSuggestSkills});
-    if(score<75) sugg.push({pri:'med',ico:'🎯',lbl:'Boost ATS score',ai:false,sub:'Close gaps so tracking systems parse it cleanly.',action:_atsBreakdown});
+    /* ATS-score suggestion removed from Refine — the score lives in the dedicated ATS Score card. */
     var _ti=_templateInfo();
     if(_ti.twoCol){
       var _maxB=0; (d.experience||[]).forEach(function(e){ var n=(e.bullets||[]).length; if(n>_maxB)_maxB=n; });
@@ -6159,23 +6154,8 @@ if ('serviceWorker' in navigator) {
     var panel=document.getElementById('aiChatPanel');
     var open=panel&&panel.classList.contains('ai-panel-open');
     _tickCta(open);
-    var b=document.getElementById('aiAtsBadge');
-    if(!open){ if(b) b.style.display='none'; return; }
-    var pv=document.getElementById('previewModalOverlay');
-    if(pv&&pv.classList.contains('open')){ if(b) b.style.display='none'; return; }
-    if(panel.querySelector('.airx-home')){ if(b) b.style.display='none'; return; }
-    b=_ensureBadge(); if(!b) return;
-    try{
-      if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits();
-      if(typeof computeATSScore==='function' && typeof lastResumeData!=='undefined' && lastResumeData){
-        var s=computeATSScore(lastResumeData).score;
-        b.textContent='ATS Score: '+s+'/100';
-        var good=s>=75, ok=s>=50;
-        b.style.color= good?'#166534':ok?'#92400e':'#991b1b';
-        b.style.background= good?'#dcfce7':ok?'#fef3c7':'#fee2e2';
-        b.style.display='';
-      } else { b.style.display='none'; }
-    }catch(e){}
+    /* ATS score badge removed from Refine — the dedicated ATS Score card owns it. */
+    var b=document.getElementById('aiAtsBadge'); if(b) b.style.display='none';
   }
   setInterval(_tick, 600);
 })();
@@ -12061,48 +12041,60 @@ window.__novaPortfolioHTML=function(d,sections){
 #r4uRoastOverlay{position:fixed;inset:0;z-index:10090;display:none;align-items:center;justify-content:center;padding:16px;
   background:rgba(15,10,8,0.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);overflow-y:auto;overscroll-behavior:contain;}
 #r4uRoastOverlay.on{display:flex;}
-#r4uRoastCard{width:min(560px,100%);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card-bg,#fff);
-  color:var(--text);border:1px solid var(--border,#e5e5e0);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.35);
-  padding:22px 20px 20px;position:relative;font-family:inherit;}
-#r4uRoastCard .rr-x{position:absolute;top:11px;right:13px;border:0;background:transparent;font-size:1.4rem;line-height:1;color:var(--muted);cursor:pointer;}
+#r4uRoastCard{width:min(500px,100%);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card-bg,#fff);
+  color:var(--text);border:1px solid var(--border,#e5e5e0);border-radius:20px;box-shadow:0 30px 80px -20px rgba(15,10,8,.5);
+  padding:24px 22px 20px;position:relative;font-family:inherit;}
+#r4uRoastCard .rr-x{position:absolute;top:12px;right:14px;width:30px;height:30px;border:0;background:var(--surface,#f4f4ef);border-radius:50%;font-size:1.2rem;line-height:1;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+#r4uRoastCard .rr-x:hover{background:var(--border,#e5e5e0);}
 #r4uRoastCard h3{font-size:1.2rem;font-weight:800;margin:0 2px 2px;letter-spacing:-.01em;}
-#r4uRoastCard .rr-eyebrow{font-size:0.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+#r4uRoastCard .rr-eyebrow{display:block;font-size:0.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent,#b45309);}
+#r4uRoastCard .rr-hero{display:flex;align-items:center;gap:17px;margin:15px 0 4px;}
+#r4uRoastCard .rr-ring{position:relative;width:96px;height:96px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+#r4uRoastCard .rr-ring::before{content:'';position:absolute;inset:8px;border-radius:50%;background:var(--card-bg,#fff);box-shadow:inset 0 0 0 1px var(--border,#efede7);}
+#r4uRoastCard .rr-ring-in{position:relative;text-align:center;line-height:1;}
+#r4uRoastCard .rr-ring-in b{display:block;font-size:2rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
+#r4uRoastCard .rr-ring-in i{display:block;margin-top:3px;font-size:.52rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-style:normal;}
+#r4uRoastCard .rr-hero-txt{flex:1;min-width:0;}
+#r4uRoastCard .rr-band{font-size:1.12rem;font-weight:800;letter-spacing:-.01em;line-height:1.2;}
+#r4uRoastCard .rr-hero-sub{font-size:.8rem;color:var(--muted);margin-top:4px;line-height:1.4;font-variant-numeric:tabular-nums;}
+#r4uRoastCard .rr-sect-h{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 2px;}
 #r4uRoastCard .rr-meter{margin:12px 0 4px;}
 #r4uRoastCard .rr-meter-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;gap:10px;}
 #r4uRoastCard .rr-score{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
 #r4uRoastCard .rr-score small{font-size:.85rem;color:var(--muted);font-weight:600;}
 #r4uRoastCard .rr-verdict{font-weight:800;font-size:.85rem;text-align:right;}
-#r4uRoastCard .rr-track{height:11px;border-radius:99px;background:var(--input-bg,#f1efe9);overflow:hidden;box-shadow:inset 0 0 0 1px var(--border,#e5e5e0);}
+#r4uRoastCard .rr-track{height:11px;border-radius:99px;background:var(--surface,#f1efe9);overflow:hidden;box-shadow:inset 0 0 0 1px var(--border,#e5e5e0);}
 #r4uRoastCard .rr-fill{height:100%;width:0;border-radius:99px;transition:width .9s cubic-bezier(.3,1,.4,1);}
-#r4uRoastCard .rr-line{display:flex;gap:11px;padding:12px 0;border-top:1px solid var(--border,#eee);}
+#r4uRoastCard .rr-line{display:flex;gap:12px;padding:13px 0;border-top:1px solid var(--border,#eee);}
 #r4uRoastCard .rr-line:first-child{border-top:0;}
-#r4uRoastCard .rr-emoji{font-size:1.25rem;line-height:1.3;flex-shrink:0;}
+#r4uRoastCard .rr-emoji{font-size:1.05rem;width:32px;height:32px;border-radius:9px;background:var(--surface,#f4f4ef);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #r4uRoastCard .rr-quote{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:3px;}
-#r4uRoastCard .rr-zing{font-size:.93rem;font-weight:600;line-height:1.5;}
+#r4uRoastCard .rr-zing{font-size:.92rem;font-weight:600;line-height:1.5;}
 #r4uRoastCard .rr-fix{padding:12px 0;border-top:1px solid var(--border,#eee);}
 #r4uRoastCard .rr-fix:first-of-type{border-top:0;}
 #r4uRoastCard .rr-before{font-size:.82rem;color:var(--muted);text-decoration:line-through;margin-bottom:6px;}
 #r4uRoastCard .rr-after{font-size:.92rem;display:flex;gap:8px;line-height:1.5;}
-#r4uRoastCard .rr-after .rr-arw{color:#1f9d57;font-weight:800;flex-shrink:0;}
+#r4uRoastCard .rr-after .rr-arw{color:#0d9488;font-weight:800;flex-shrink:0;}
 #r4uRoastCard .rr-fix-pick{display:flex;align-items:flex-start;gap:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-#r4uRoastCard .rr-fix-cb{margin:2px 0 0;width:19px;height:19px;flex-shrink:0;accent-color:#1f9d57;cursor:pointer;}
+#r4uRoastCard .rr-fix-cb{margin:2px 0 0;width:19px;height:19px;flex-shrink:0;accent-color:#0d9488;cursor:pointer;}
 #r4uRoastCard .rr-fix-content{flex:1;min-width:0;}
 #r4uRoastCard .rr-fix-pick:has(.rr-fix-cb:not(:checked)){opacity:.5;}
 #r4uRoastCard .rr-pick-hint{font-size:.75rem;color:var(--muted);margin:2px 0 2px;}
-#r4uRoastCard .rr-share{background:linear-gradient(145deg,#2a1510,#3a1d13);color:#fff5ef;border-radius:14px;padding:18px 18px 16px;margin-top:16px;position:relative;overflow:hidden;}
-#r4uRoastCard .rr-share::after{content:"🔥";position:absolute;right:-8px;bottom:-16px;font-size:5rem;opacity:.15;}
-#r4uRoastCard .rr-share .rr-st{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#f7b36a;}
-#r4uRoastCard .rr-share .rr-sq{font-size:1.08rem;font-weight:800;line-height:1.3;margin:7px 0 10px;max-width:30ch;}
-#r4uRoastCard .rr-share .rr-sf{font-size:.74rem;color:#e9c5a8;}
-#r4uRoastCard .rr-btns{display:flex;gap:9px;margin-top:15px;flex-wrap:wrap;}
+#r4uRoastCard .rr-share{background:linear-gradient(135deg,#0f766e,#0d9488);color:#ecfdf9;border-radius:14px;padding:16px 17px 15px;margin-top:16px;position:relative;overflow:hidden;}
+#r4uRoastCard .rr-share::after{content:"";position:absolute;right:-26px;bottom:-34px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);}
+#r4uRoastCard .rr-share .rr-st{position:relative;font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#99f6e4;}
+#r4uRoastCard .rr-share .rr-sq{position:relative;font-size:1.05rem;font-weight:800;line-height:1.3;margin:7px 0 10px;max-width:30ch;}
+#r4uRoastCard .rr-share .rr-sf{position:relative;font-size:.74rem;color:#cffafe;font-variant-numeric:tabular-nums;}
+#r4uRoastCard .rr-btns{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;}
 #r4uRoastCard .rr-btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;color:#fff;
   padding:13px 18px;border-radius:12px;flex:1 1 150px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .1s;}
+#r4uRoastCard .rr-btn:hover{filter:brightness(1.04);}
 #r4uRoastCard .rr-btn:active{transform:translateY(1px);}
-#r4uRoastCard .rr-btn-fix{background:linear-gradient(135deg,#22b765,#128a4a);}
-#r4uRoastCard .rr-btn-copy{background:transparent;color:var(--accent,#b45309);border:1.5px solid var(--border,#ddd);font-weight:700;}
-#r4uRoastCard .rr-note{font-size:.76rem;color:var(--muted);margin-top:10px;}
-#r4uRoastCard .rr-load{text-align:center;padding:30px 10px;}
-#r4uRoastCard .rr-spin{width:34px;height:34px;border:3px solid var(--border,#eee);border-top-color:#e0463d;border-radius:50%;margin:0 auto 14px;animation:rrSpin .8s linear infinite;}
+#r4uRoastCard .rr-btn-fix{background:linear-gradient(135deg,#14b8a6,#0d9488);box-shadow:0 8px 20px -10px rgba(13,148,136,.9);}
+#r4uRoastCard .rr-btn-copy{background:transparent;color:var(--text);border:1.5px solid var(--border,#ddd);font-weight:700;}
+#r4uRoastCard .rr-note{font-size:.76rem;color:var(--muted);margin-top:12px;line-height:1.45;}
+#r4uRoastCard .rr-load{text-align:center;padding:34px 10px;}
+#r4uRoastCard .rr-spin{width:34px;height:34px;border:3px solid var(--border,#eee);border-top-color:#0d9488;border-radius:50%;margin:0 auto 14px;animation:rrSpin .8s linear infinite;}
 @keyframes rrSpin{to{transform:rotate(360deg);}}
 @media(prefers-reduced-motion:reduce){#r4uRoastCard .rr-fill,#r4uRoastCard .rr-spin{transition:none;animation:none;}}
 </style>
@@ -12167,15 +12159,15 @@ window.__novaPortfolioHTML=function(d,sections){
     var lines=(d.roasts||[]).slice(0,4).map(function(r){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
     }).join('');
+    var bandLabel=sc>=85?'Excellent':sc>=70?'Strong':sc>=55?'Fair':'Needs work';
     body().innerHTML=
       '<span class="rr-eyebrow">ATS readiness · how parsers &amp; recruiters read it</span>'+
-      '<h3>'+esc(d.verdict||'Needs work')+'</h3>'+
-      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:'+col+'">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:'+col+'">ATS score</div></div>'+
-      '<div class="rr-track"><div class="rr-fill" style="background:'+col+'"></div></div></div>'+
-      '<div style="margin-top:6px">'+lines+'</div>'+
+      '<div class="rr-hero"><div class="rr-ring" style="background:conic-gradient('+col+' '+(sc*3.6)+'deg,var(--border,#e9e7e0) 0)"><div class="rr-ring-in"><b style="color:'+col+'">'+sc+'</b><i>ATS score</i></div></div>'+
+      '<div class="rr-hero-txt"><div class="rr-band">'+esc(d.verdict||bandLabel)+'</div><div class="rr-hero-sub">'+sc+' / 100 · '+bandLabel+' ATS readiness</div></div></div>'+
+      '<div class="rr-sect-h">What’s holding your score down</div>'+
+      '<div>'+lines+'</div>'+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy review</button></div>'+
-      '<div class="rr-note">AI-written from your resume. Fixes use [brackets] where you should add a real number.</div>';
-    setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=sc+'%'; },60);
+      '<div class="rr-note">AI-reviewed from your résumé. Fixes use [brackets] where you should add a real number.</div>';
     document.getElementById('rrFix').addEventListener('click',function(){ renderFix(d); });
     document.getElementById('rrCopy').addEventListener('click',function(){ copy(shareText(d)); });
   }
@@ -12216,8 +12208,8 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-track"><div class="rr-fill" style="background:linear-gradient(90deg,#22b765,#128a4a)"></div></div></div>'+
       '<div class="rr-pick-hint">Tick the changes you want, then apply — untick any you’d rather keep as-is.</div>'+
       '<div style="margin-top:4px">'+fixes+'</div>'+
-      '<div class="rr-share"><div class="rr-st">My resume got roasted</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply selected</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share 🔥</button></div>'+
+      '<div class="rr-share"><div class="rr-st">Your ATS score boost</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply selected</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share</button></div>'+
       '<div class="rr-note">Applies only the ticked changes. You can still tap any line in your resume to edit it, or use “Refine with AI”.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
 
