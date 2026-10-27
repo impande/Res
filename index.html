@@ -12096,6 +12096,8 @@ window.__novaPortfolioHTML=function(d,sections){
 #r4uRoastCard .rr-manual{border:1px solid rgba(180,83,9,0.35);background:rgba(180,83,9,0.06);border-radius:12px;padding:13px 14px;margin-top:10px;}
 #r4uRoastCard .rr-manual-h{font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#b45309);margin-bottom:7px;}
 #r4uRoastCard .rr-copy-one{margin-top:9px;border:1px solid rgba(180,83,9,0.45);background:transparent;color:var(--accent,#b45309);font-family:inherit;font-weight:700;font-size:.78rem;padding:6px 13px;border-radius:9px;cursor:pointer;}
+#r4uRoastCard .rr-add-one{margin-top:9px;border:0;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;font-family:inherit;font-weight:800;font-size:.78rem;padding:7px 15px;border-radius:9px;cursor:pointer;}
+#r4uRoastCard .rr-add-one:disabled{opacity:.7;}
 #r4uRoastCard .rr-load{text-align:center;padding:34px 10px;}
 #r4uRoastCard .rr-spin{width:34px;height:34px;border:3px solid var(--border,#eee);border-top-color:#0d9488;border-radius:50%;margin:0 auto 14px;animation:rrSpin .8s linear infinite;}
 @keyframes rrSpin{to{transform:rotate(360deg);}}
@@ -12325,38 +12327,62 @@ window.__novaPortfolioHTML=function(d,sections){
     applyBtn.addEventListener('click',function(){
       if(applyBtn.disabled) return;
       var sel=picked(); if(!sel.length) return;
-      var n=(typeof window._r4uApplyBulletFixes==='function')?window._r4uApplyBulletFixes(sel):applyRoastFixes({fixes:sel});
-      var manual=sel.filter(function(f){ return f.__applied===false; });
-      if(n>0 && !manual.length){
-        if(typeof showToast==='function') showToast('✅ Applied '+n+' change'+(n>1?'s':''),'success');
-        close();
-      } else if(n>0){
-        if(typeof showToast==='function') showToast('✅ Applied '+n+' — '+manual.length+' need'+(manual.length>1?'':'s')+' a manual tap','success');
-        renderManual(manual);
-      } else {
-        if(typeof showToast==='function') showToast('These need a manual tap — here’s how','');
-        renderManual(manual.length?manual:sel);
-      }
+      /* Apply skills-type fixes DIRECTLY as chips (no copy/paste) */
+      var skillFixes=sel.filter(isSkillsFix), skillsAdded=0;
+      skillFixes.forEach(function(f){ skillsAdded+=addSkillsFromFix(f); });
+      var rest=sel.filter(function(f){ return !f.__applied; });
+      var n=rest.length ? ((typeof window._r4uApplyBulletFixes==='function')?window._r4uApplyBulletFixes(rest):applyRoastFixes({fixes:rest})) : 0;
+      var manual=rest.filter(function(f){ return f.__applied===false; });
+      var parts=[];
+      if(n>0) parts.push(n+' change'+(n>1?'s':''));
+      if(skillsAdded>0) parts.push(skillsAdded+' skill'+(skillsAdded>1?'s':''));
+      function t(m,k){ if(typeof showToast==='function') showToast(m,k); }
+      if(parts.length && !manual.length){ t('✅ Applied '+parts.join(' + '),'success'); close(); }
+      else if(parts.length){ t('✅ Applied '+parts.join(' + ')+' — '+manual.length+' need'+(manual.length>1?'':'s')+' a manual tap','success'); renderManual(manual); }
+      else { t('These need a manual tap — here’s how',''); renderManual(manual.length?manual:sel); }
     });
+  }
+  /* A fix whose rewrite is really a skills list (e.g. "skills: OKRs, Product
+     Roadmap, …" or a comma list of short noun-phrases) — apply it by adding each
+     as a skill chip, instead of trying to match it to a bullet / needing a paste. */
+  function isSkillsFix(f){
+    var a=String((f&&f.after)||'').trim(); if(!a) return false;
+    if(/^\s*(add\s+)?skills?\s*:/i.test(a)) return true;
+    var parts=a.replace(/^\s*(add\s+)?skills?\s*:\s*/i,'').split(/\s*[,;]\s*/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if(parts.length<3) return false;
+    return parts.every(function(p){ return p.split(/\s+/).length<=4 && !/[.!?]$/.test(p) && p.length<=40; });
+  }
+  function addSkillsFromFix(f){
+    var a=String((f&&f.after)||'').replace(/^\s*(add\s+)?skills?\s*:\s*/i,'');
+    var parts=a.split(/\s*[,;]\s*/).map(function(s){ return s.trim(); }).filter(Boolean);
+    var added=0;
+    parts.forEach(function(p){ try{ if(window.__r4uAddSkillOne){ window.__r4uAddSkillOne(p); added++; } }catch(e){} });
+    try{ if(added && typeof window.renderOutput==='function' && typeof lastResumeData!=='undefined' && lastResumeData) window.renderOutput(lastResumeData); }catch(e){}
+    if(f) f.__applied=true;
+    return added;
   }
   /* Fixes whose "before" line couldn't be auto-matched to a bullet (wording drifted):
      show them separately, highlighted, with a copy button + how-to, instead of a
      silent "needed a manual tap" toast. */
   function renderManual(manual){
     var rows=(manual||[]).map(function(f,i){
-      return '<div class="rr-manual"><div class="rr-manual-h">✎ apply this one manually</div>'+
-        '<div class="rr-before">'+esc(f.before||'')+'</div>'+
-        '<div class="rr-after"><span class="rr-arw">→</span><span>'+esc(f.after||'')+'</span></div>'+
-        '<button type="button" class="rr-copy-one" data-i="'+i+'">Copy rewrite</button></div>';
+      var sk=isSkillsFix(f);
+      return '<div class="rr-manual"><div class="rr-manual-h">'+(sk?'➕ add these skills':'✎ apply this one manually')+'</div>'+
+        (sk?'':'<div class="rr-before">'+esc(f.before||'')+'</div>')+
+        '<div class="rr-after">'+(sk?'':'<span class="rr-arw">→</span>')+'<span>'+esc(f.after||'')+'</span></div>'+
+        '<button type="button" class="'+(sk?'rr-add-one':'rr-copy-one')+'" data-i="'+i+'">'+(sk?'Add skills':'Copy rewrite')+'</button></div>';
     }).join('');
     body().innerHTML=
       '<span class="rr-eyebrow">A few need your tap</span>'+
-      '<h3>Apply these manually</h3>'+
-      '<div class="rr-note" style="margin:6px 0 2px">We couldn’t auto-match these to a line (the wording had drifted). Copy the rewrite, close this, then tap the matching line in your resume to paste it.</div>'+
+      '<h3>Apply these</h3>'+
+      '<div class="rr-note" style="margin:6px 0 2px">Skills add straight to your resume. For a line rewrite we couldn’t auto-match, copy it and tap the matching line in your resume.</div>'+
       rows+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrDone" style="flex:1 1 100%">Done</button></div>';
     Array.prototype.forEach.call(document.querySelectorAll('#r4uRoastCard .rr-copy-one'),function(btn){
       btn.addEventListener('click',function(){ var idx=parseInt(btn.getAttribute('data-i'),10); if(manual[idx]) copy(manual[idx].after, 'Rewrite copied — paste it into your resume'); btn.textContent='Copied ✓'; btn.style.opacity='.7'; });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#r4uRoastCard .rr-add-one'),function(btn){
+      btn.addEventListener('click',function(){ var idx=parseInt(btn.getAttribute('data-i'),10); var c=manual[idx]?addSkillsFromFix(manual[idx]):0; btn.textContent=c?('Added '+c+' ✓'):'Added ✓'; btn.style.opacity='.7'; btn.disabled=true; if(typeof showToast==='function'&&c) showToast('✅ Added '+c+' skill'+(c>1?'s':''),'success'); });
     });
     var done=document.getElementById('rrDone'); if(done) done.addEventListener('click',close);
   }
