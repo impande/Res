@@ -12215,7 +12215,7 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-pick-hint">Tick the changes you want, then apply — untick any you’d rather keep as-is.</div>'+
       '<div style="margin-top:4px">'+fixes+'</div>'+
       '<div class="rr-share"><div class="rr-st">Your ATS score boost</div><div class="rr-sq">“'+esc(d.shareLine||'')+'”</div><div class="rr-sf">Score '+cur+' → '+ns+' · fixed free on resume4u.help</div></div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply selected</button><button class="rr-btn rr-btn-copy" id="rrCopy2" style="flex:1 1 100%">Copy to share</button></div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrApply" style="flex:1 1 100%">✅ Apply selected</button></div>'+
       '<div class="rr-note">Applies only the ticked changes. You can still tap any line in your resume to edit it, or use “Refine with AI”.</div>';
     setTimeout(function(){ var f=document.querySelector('#r4uRoastCard .rr-fill'); if(f) f.style.width=ns+'%'; },60);
 
@@ -12236,7 +12236,6 @@ window.__novaPortfolioHTML=function(d,sections){
       if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' change'+(n>1?'s':'')+(n<sel.length?(' ('+(sel.length-n)+' needed a manual tap)'):''),'success'); close(); }
       else if(typeof showToast==='function') showToast('Couldn’t auto-match those lines — tap a bullet in your resume to edit it.');
     });
-    document.getElementById('rrCopy2').addEventListener('click',function(){ copy(shareText(d)); });
   }
   function shareText(d){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
