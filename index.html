@@ -12101,6 +12101,52 @@ window.__novaPortfolioHTML=function(d,sections){
 @keyframes rrSpin{to{transform:rotate(360deg);}}
 @media(prefers-reduced-motion:reduce){#r4uRoastCard .rr-fill,#r4uRoastCard .rr-spin{transition:none;animation:none;}}
 </style>
+<script id="_r4uSkillSplitJS">
+/* Skills input: accept pasted / comma-separated skills and add each as its own
+   chip. The core addSkill() adds the whole input value as ONE skill and does no
+   decoding — so pasting a copied list (often URL-encoded, e.g.
+   "skills:%20OKRs,%20Product%20Roadmap,%20A/B%20Testing") landed as a single
+   broken chip. Here we URL-decode, strip a leading "skills:"/"add skill:" prefix,
+   split on commas/semicolons/newlines, and add each token. Works on paste and on
+   the Add button / Enter (both route through the global addSkill we wrap). */
+(function(){
+  function clean(s){
+    s=String(s||'');
+    if(/%[0-9a-fA-F]{2}/.test(s)){ try{ s=decodeURIComponent(s.replace(/\+/g,' ')); }catch(e){ try{ s=unescape(s); }catch(e2){} } }
+    return s.replace(/^\s*(add\s+)?skills?\s*:\s*/i,'');
+  }
+  function toks(s){ return clean(s).split(/\s*[,;\n\r\t•|]+\s*/).map(function(x){ return x.trim(); }).filter(Boolean); }
+  function install(){
+    if(typeof window.addSkill!=='function') return false;
+    if(!window.addSkill.__r4uSkillSplit){
+      var orig=window.addSkill;
+      var addOne=function(t){ var i=document.getElementById('skillInput'); if(!i) return; i.value=t; orig.call(window); };
+      window.addSkill=function(){
+        var inp=document.getElementById('skillInput'); if(!inp) return orig.apply(this,arguments);
+        var list=toks(inp.value);
+        if(list.length<=1){ inp.value=(list.length?list[0]:clean(inp.value).trim()); return orig.call(window); }
+        list.forEach(addOne); var i2=document.getElementById('skillInput'); if(i2) i2.value='';
+      };
+      window.addSkill.__r4uSkillSplit=true;
+      window.__r4uAddSkillOne=addOne;
+    }
+    var inp=document.getElementById('skillInput');
+    if(inp && !inp.__r4uPasteClean){
+      inp.__r4uPasteClean=true;
+      inp.addEventListener('paste',function(e){
+        var t=''; try{ t=(e.clipboardData||window.clipboardData).getData('text')||''; }catch(err){}
+        if(!(/%[0-9a-fA-F]{2}/.test(t) || /^\s*(add\s+)?skills?\s*:/i.test(t) || /[,;\n]/.test(t))) return; /* let normal single-word paste through */
+        e.preventDefault();
+        var list=toks(t);
+        if(list.length && window.__r4uAddSkillOne){ list.forEach(window.__r4uAddSkillOne); }
+        else { inp.value=clean(t).trim(); }
+      });
+    }
+    return !!(inp);
+  }
+  var n=0, iv=setInterval(function(){ if(install() || ++n>60) clearInterval(iv); }, 300);
+})();
+</script>
 <script id="_r4uRoastJS">
 /* Roast my resume: additive feature. Reads the generated resume, asks the AI
    (same /generate endpoint) for a witty-but-useful roast + fixes as JSON, shows
