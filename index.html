@@ -12032,16 +12032,16 @@ window.__novaPortfolioHTML=function(d,sections){
    generated resume, asks the AI for a witty-but-useful roast + fixes, and offers a
    copyable share line (the growth loop). Additive; self-contained modal. */
 #_r4uRoastBar{display:none;margin:12px 0 0;align-items:center;gap:13px;padding:13px 15px;border-radius:14px;
-  cursor:pointer;border:1px solid rgba(224,70,61,0.35);background:var(--card-bg,#fff);position:relative;overflow:hidden;
+  cursor:pointer;border:1px solid rgba(13,148,136,0.35);background:var(--card-bg,#fff);position:relative;overflow:hidden;
   transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;}
 #_r4uRoastBar.show{display:flex;}
-#_r4uRoastBar:hover{transform:translateY(-1px);box-shadow:0 10px 24px -14px rgba(224,70,61,.5);border-color:rgba(224,70,61,.6);}
+#_r4uRoastBar:hover{transform:translateY(-1px);box-shadow:0 10px 24px -14px rgba(13,148,136,.5);border-color:rgba(13,148,136,.6);}
 #_r4uRoastBar .rb-ico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:1.25rem;background:linear-gradient(135deg,#f97316,#e0463d);box-shadow:0 6px 14px -6px rgba(224,70,61,.6);}
+  font-size:1.25rem;background:linear-gradient(135deg,#14b8a6,#0d9488);box-shadow:0 6px 14px -6px rgba(13,148,136,.6);}
 #_r4uRoastBar .rb-body{flex:1;min-width:0;}
 #_r4uRoastBar .rb-title{display:block;font-weight:800;font-size:0.96rem;color:var(--text);}
 #_r4uRoastBar .rb-sub{display:block;font-size:0.78rem;color:var(--muted);margin-top:1px;}
-#_r4uRoastBar .rb-go{flex-shrink:0;font-weight:800;font-size:0.82rem;color:#e0463d;white-space:nowrap;}
+#_r4uRoastBar .rb-go{flex-shrink:0;font-weight:800;font-size:0.82rem;color:#0d9488;white-space:nowrap;}
 #r4uRoastOverlay{position:fixed;inset:0;z-index:10090;display:none;align-items:center;justify-content:center;padding:16px;
   background:rgba(15,10,8,0.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);overflow-y:auto;overscroll-behavior:contain;}
 #r4uRoastOverlay.on{display:flex;}
@@ -12115,9 +12115,9 @@ window.__novaPortfolioHTML=function(d,sections){
       '\nSkills: '+((d.skills||[]).join(', ')||'(none)');
   }
   function prompt(){
-    return 'You are a witty but genuinely helpful resume coach. ROAST the resume below: be funny and brutally honest about its weak spots, but every roast must point to a real, specific improvement. Then give the fixed version.\n\n'+
+    return 'You are a strict ATS résumé checker and senior recruiter. Review the résumé below and compute its ATS SCORE — how a résumé-only ATS / recruiter would rate it on parse-ability, quantified impact, strong action verbs, relevant skills & keyword density, standard sections and length. Be direct and specific about every weakness that lowers the score; each point must map to a concrete fix. Then give the fixed version.\n\n'+
       'Return ONLY valid JSON (no markdown fences, no preamble) in EXACTLY this shape:\n'+
-      '{"score":<int 0-100 = the résumé\'s CURRENT strength graded STRICTLY like a real ATS / recruiter; higher=better; be critical: most résumés are 55-78, give 85+ only if genuinely excellent and quantified, and penalise placeholder brackets like [X]% as unfinished>,"verdict":"<=6 word punchy verdict","roasts":[{"emoji":"<1 emoji>","quote":"<the actual weak phrase, <=12 words>","zing":"<=34 word witty + useful critique"}],"fixes":[{"before":"<weak phrase>","after":"<strong rewrite>"}],"newScore":<int 0-100 after the fixes, higher than score>,"shareLine":"<=18 word punchy line someone would post"}\n\n'+
+      '{"score":<int 0-100 = the résumé\'s ATS SCORE (ATS readiness / compatibility) graded STRICTLY like a résumé-only ATS checker; higher=better; be critical: most résumés are 55-78, give 85+ only if genuinely excellent and quantified, and penalise placeholder brackets like [X]% as unfinished>,"verdict":"<=6 word punchy verdict","roasts":[{"emoji":"<1 emoji>","quote":"<the actual weak phrase, <=12 words>","zing":"<=34 word specific, useful critique"}],"fixes":[{"before":"<weak phrase>","after":"<strong rewrite>"}],"newScore":<int 0-100 after the fixes, higher than score>,"shareLine":"<=18 word punchy line someone would post"}\n\n'+
       'Give 3-4 roasts and 3-4 fixes. Base everything ONLY on the resume; do NOT invent achievements or numbers it does not contain. In "after" rewrites, where a metric would strengthen it but is missing, use a bracketed placeholder like [X]% or [N]+ for the person to fill in. Keep it good-natured, never cruel.\n\n'+
       'RESUME:\n'+resumeText();
   }
@@ -12131,10 +12131,10 @@ window.__novaPortfolioHTML=function(d,sections){
     return overlay;
   }
   function open(){
-    if(!hasResume()){ if(typeof showToast==='function') showToast('Generate your résumé first, then run the AI review 🎯'); return; }
+    if(!hasResume()){ if(typeof showToast==='function') showToast('Generate your résumé first, then check your ATS score 📊'); return; }
     build(); try{ prevOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; }catch(e){}
     overlay.classList.add('on');
-    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">🎯 Reviewing your résumé…</div><div class="rr-note" style="margin-top:4px">Reading every line the way a recruiter would.</div></div>';
+    body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">📊 Scoring your résumé…</div><div class="rr-note" style="margin-top:4px">Checking it the way an ATS parser and recruiter would.</div></div>';
     ai(prompt()).then(function(t){ var d=parse(t); if(!d||!d.roasts){ throw new Error('parse'); } lastRoast=d; renderRoast(d); })
       .catch(function(){ body().innerHTML='<div class="rr-load"><div style="font-size:1.6rem">😅</div><div style="font-weight:700;margin-top:6px">The review didn’t load</div><div class="rr-note">Couldn’t reach the AI just now. Close and try again in a moment.</div></div>'; });
   }
@@ -12152,9 +12152,9 @@ window.__novaPortfolioHTML=function(d,sections){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
     }).join('');
     body().innerHTML=
-      '<span class="rr-eyebrow">AI review · a recruiter’s 7-second read</span>'+
+      '<span class="rr-eyebrow">ATS readiness · how parsers &amp; recruiters read it</span>'+
       '<h3>'+esc(d.verdict||'Needs work')+'</h3>'+
-      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:'+col+'">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:'+col+'">Recruiter-grade score</div></div>'+
+      '<div class="rr-meter"><div class="rr-meter-top"><div class="rr-score" style="color:'+col+'">'+sc+'<small>/100</small></div><div class="rr-verdict" style="color:'+col+'">ATS score</div></div>'+
       '<div class="rr-track"><div class="rr-fill" style="background:'+col+'"></div></div></div>'+
       '<div style="margin-top:6px">'+lines+'</div>'+
       '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy review</button></div>'+
@@ -12248,7 +12248,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function sync(){
     if(!bar){
       bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
-      bar.innerHTML='<span class="rb-ico">🎯</span><span class="rb-body"><span class="rb-title">AI résumé review &amp; score</span><span class="rb-sub">A recruiter-grade score, honest critique, and one-tap fixes.</span></span><span class="rb-go">Review it →</span>';
+      bar.innerHTML='<span class="rb-ico">📊</span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="rb-sub">Instant ATS readiness score for your résumé — with one-tap fixes to raise it.</span></span><span class="rb-go">Check score →</span>';
       bar.addEventListener('click',open);
       bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
