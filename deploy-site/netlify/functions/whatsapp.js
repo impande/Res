@@ -900,14 +900,18 @@ exports.handler = async (event) => {
       // ---- remove a role / experience ----
       if (state.awaiting === 'rmRolePick') {
         const exps = expsOf(state.data, isWeb);
-        const idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        let idx = parseInt((low.match(/\d+/) || [])[0], 10) - 1;
+        if (!(idx >= 0 && idx < exps.length)) {
+          const lw = (text || '').trim().toLowerCase();
+          if (lw) idx = exps.findIndex((e) => (((e.title || e.role || '') + ' ' + (e.co || e.company || '')).toLowerCase()).includes(lw));
+        }
         if (idx >= 0 && idx < exps.length) {
           const removed = exps.splice(idx, 1)[0];
           await setState(from, { step: 0, mode: 'edit', data: state.data });
           await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".');
           return OK;
         }
-        await send(from, 'Reply with a number from the list (1–' + exps.length + ').'); return OK;
+        await send(from, 'Reply with a number from the list (1–' + exps.length + '), or the role / company name.'); return OK;
       }
       // ---- remove a skill (by number or name) ----
       if (state.awaiting === 'rmSkillPick') {
@@ -978,12 +982,17 @@ exports.handler = async (event) => {
         await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'editBulletRole' });
         await send(from, 'Which role?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
       }
-      // remove a role / experience
-      if (/^(remove|delete|drop)\s+(a\s+|an\s+|the\s+)?(experience|role|job|position)$/i.test(low)) {
+      // remove a role / experience — by bare keyword, by number, or by role/company name
+      if (/^(remove|delete|drop)\b/i.test(low) && /\b(experience|role|job|position)\b/i.test(low)) {
         if (!_exps.length) { await send(from, 'No roles to remove.'); return OK; }
-        if (_exps.length === 1) { const removed = _exps.splice(0, 1)[0]; await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".'); return OK; }
+        const target = low.replace(/^(remove|delete|drop)\s+/i, '').replace(/\b(a|an|the|my)\b/gi, '').replace(/\b(experiences?|roles?|jobs?|positions?)\b/gi, '').replace(/\bnumber\b|#/gi, '').trim();
+        let idx = -1;
+        if (/^\d+$/.test(target)) { const n = parseInt(target, 10); if (n >= 1 && n <= _exps.length) idx = n - 1; }
+        else if (target) { const lw = target.toLowerCase(); idx = _exps.findIndex((e) => (((e.title || e.role || '') + ' ' + (e.co || e.company || '')).toLowerCase()).includes(lw)); }
+        if (idx >= 0) { const removed = _exps.splice(idx, 1)[0]; await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".'); return OK; }
+        if (!target && _exps.length === 1) { const removed = _exps.splice(0, 1)[0]; await setState(from, { step: 0, mode: 'edit', data: state.data }); await send(from, '🗑️ Removed role: *' + roleLabel(removed, isWeb) + '*\n\n' + summ() + '\n\nAnything else? Or reply "link".'); return OK; }
         await setState(from, { step: 0, mode: 'edit', data: state.data, awaiting: 'rmRolePick' });
-        await send(from, 'Which role should I remove?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
+        await send(from, (target ? ('Couldn\'t find a role matching "' + target + '". ') : '') + 'Which role should I remove?\n\n' + _roleList() + '\n\nReply with the number.'); return OK;
       }
       // remove a skill (bare → list & pick). "remove skill: X" one-liner still works below.
       if (/^(remove|delete|drop)\s+(a\s+)?skills?$/i.test(low)) {

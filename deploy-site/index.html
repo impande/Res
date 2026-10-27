@@ -12113,17 +12113,21 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function parse(t){ try{ return JSON.parse(t); }catch(e){} var a=t.indexOf('{'),b=t.lastIndexOf('}'); if(a>=0&&b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(e2){} } return null; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function pages(){ try{ var n=document.querySelectorAll('#resumeOutput .resume-a4-page').length; return n||1; }catch(e){ return 1; } }
   function resumeText(){
     var d=data();
-    var exp=(d.experience||[]).slice(0,4).map(function(e){ return (e.title||e.role||'')+(e.co||e.company?(' at '+(e.co||e.company)):'')+': '+((e.bullets||[]).join(' | ')); }).join('\n');
-    return 'Name: '+((d.firstName||'')+' '+(d.lastName||'')).trim()+
+    var all=(d.experience||[]);
+    var exp=all.slice(0,6).map(function(e){ return (e.title||e.role||'')+(e.co||e.company?(' at '+(e.co||e.company)):'')+': '+((e.bullets||[]).join(' | ')); }).join('\n');
+    return 'Printed length: '+pages()+' page(s)'+
+      '\nName: '+((d.firstName||'')+' '+(d.lastName||'')).trim()+
       '\nTitle: '+(d.jobTitle||'')+
       '\nSummary: '+(d.summary||'(none)')+
-      '\nExperience:\n'+(exp||'(none)')+
+      '\nExperience ('+all.length+' roles):\n'+(exp||'(none)')+
       '\nSkills: '+((d.skills||[]).join(', ')||'(none)');
   }
   function prompt(){
     return 'You are a strict ATS résumé checker and senior recruiter. Review the résumé below and compute its ATS SCORE — how a résumé-only ATS / recruiter would rate it on parse-ability, quantified impact, strong action verbs, relevant skills & keyword density, standard sections and length. Be direct and specific about every weakness that lowers the score; each point must map to a concrete fix. Then give the fixed version.\n\n'+
+      'LENGTH RULE (the printed page count is given below): 1 page is ideal; 2 pages are acceptable ONLY for a genuinely senior / 10+ year profile; a résumé of 3 pages must score in the low-to-mid 70s at best, and 4+ pages is a serious ATS problem that must score well below 70. Always flag an over-length résumé as a top issue with "trim to 1–2 pages" as the fix.\n\n'+
       'Return ONLY valid JSON (no markdown fences, no preamble) in EXACTLY this shape:\n'+
       '{"score":<int 0-100 = the résumé\'s ATS SCORE (ATS readiness / compatibility) graded STRICTLY like a résumé-only ATS checker; higher=better; be critical: most résumés are 55-78, give 85+ only if genuinely excellent and quantified, and penalise placeholder brackets like [X]% as unfinished>,"verdict":"<=6 word punchy verdict","roasts":[{"emoji":"<1 emoji>","quote":"<the actual weak phrase, <=12 words>","zing":"<=34 word specific, useful critique"}],"fixes":[{"before":"<weak phrase>","after":"<strong rewrite>"}],"newScore":<int 0-100 after the fixes, higher than score>,"shareLine":"<=18 word punchy line someone would post"}\n\n'+
       'Give 3-4 roasts and 3-4 fixes. Base everything ONLY on the resume; do NOT invent achievements or numbers it does not contain. In "after" rewrites, where a metric would strengthen it but is missing, use a bracketed placeholder like [X]% or [N]+ for the person to fill in. Keep it good-natured, never cruel.\n\n'+
@@ -12155,6 +12159,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function atsNow(){ try{ if(typeof computeATSScore==='function'&&typeof lastResumeData!=='undefined'&&lastResumeData) return computeATSScore(lastResumeData).score||0; }catch(e){} return 50; }
   function renderRoast(d){
     var sc=clamp(d.score, atsNow());
+    var _pg=pages(); if(_pg>=4) sc=Math.min(sc,62); else if(_pg>=3) sc=Math.min(sc,78); /* over-length cap */
     var col=sc>=85?'#1f9d57':sc>=70?'#0d9488':sc>=55?'#d97706':'#e0463d';
     var lines=(d.roasts||[]).slice(0,4).map(function(r){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
@@ -12191,7 +12196,9 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function renderFix(d){
     var cur=clamp(d.score, atsNow());
+    var _pg=pages(); if(_pg>=4) cur=Math.min(cur,62); else if(_pg>=3) cur=Math.min(cur,78); /* over-length cap */
     var ns=Math.min(98, Math.max(cur+8, clamp(d.newScore, cur+12)));
+    if(_pg>=4) ns=Math.min(ns,72); else if(_pg>=3) ns=Math.min(ns,85); /* still over length until trimmed */
     /* Each fix gets a checkbox so the user applies ONLY the ones they want
        (e.g. #1 and #3, not #2 and #4). Default: all ticked. */
     var fixArr=(d.fixes||[]).filter(function(f){ return f&&f.after&&f.before; }).slice(0,4);
