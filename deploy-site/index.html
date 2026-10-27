@@ -4671,11 +4671,12 @@ if ('serviceWorker' in navigator) {
     var list=(fixes||[]).filter(function(f){ return f&&f.after&&f.before; });
     var exps=lastResumeData.experience||[]; var applied=0;
     list.forEach(function(f){
+      f.__applied=false; /* let callers see which fixes auto-matched vs need a manual tap */
       var best=null,bs=0;
       exps.forEach(function(e){ (e.bullets||[]).forEach(function(b,i){ var sc=sim(f.before,b); if(sc>bs){ bs=sc; best={e:e,i:i}; } }); });
       var sumSc=sim(f.before, lastResumeData.summary||'');   // a fix can also target the summary
-      if(best&&bs>=0.5&&bs>=sumSc){ best.e.bullets[best.i]=f.after; applied++; }
-      else if((lastResumeData.summary||'')&&sumSc>=0.4&&sumSc>bs){ lastResumeData.summary=f.after; applied++; }
+      if(best&&bs>=0.5&&bs>=sumSc){ best.e.bullets[best.i]=f.after; applied++; f.__applied=true; }
+      else if((lastResumeData.summary||'')&&sumSc>=0.4&&sumSc>bs){ lastResumeData.summary=f.after; applied++; f.__applied=true; }
     });
     exps.forEach(function(e){ if(Array.isArray(e.bullets)) e.desc=e.bullets.join('\n'); });
     if(applied){
@@ -12092,6 +12093,9 @@ window.__novaPortfolioHTML=function(d,sections){
 #r4uRoastCard .rr-btn-fix{background:linear-gradient(135deg,#14b8a6,#0d9488);box-shadow:0 8px 20px -10px rgba(13,148,136,.9);}
 #r4uRoastCard .rr-btn-copy{background:transparent;color:var(--text);border:1.5px solid var(--border,#ddd);font-weight:700;}
 #r4uRoastCard .rr-note{font-size:.76rem;color:var(--muted);margin-top:12px;line-height:1.45;}
+#r4uRoastCard .rr-manual{border:1px solid rgba(180,83,9,0.35);background:rgba(180,83,9,0.06);border-radius:12px;padding:13px 14px;margin-top:10px;}
+#r4uRoastCard .rr-manual-h{font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#b45309);margin-bottom:7px;}
+#r4uRoastCard .rr-copy-one{margin-top:9px;border:1px solid rgba(180,83,9,0.45);background:transparent;color:var(--accent,#b45309);font-family:inherit;font-weight:700;font-size:.78rem;padding:6px 13px;border-radius:9px;cursor:pointer;}
 #r4uRoastCard .rr-load{text-align:center;padding:34px 10px;}
 #r4uRoastCard .rr-spin{width:34px;height:34px;border:3px solid var(--border,#eee);border-top-color:#0d9488;border-radius:50%;margin:0 auto 14px;animation:rrSpin .8s linear infinite;}
 @keyframes rrSpin{to{transform:rotate(360deg);}}
@@ -12232,9 +12236,39 @@ window.__novaPortfolioHTML=function(d,sections){
       if(applyBtn.disabled) return;
       var sel=picked(); if(!sel.length) return;
       var n=(typeof window._r4uApplyBulletFixes==='function')?window._r4uApplyBulletFixes(sel):applyRoastFixes({fixes:sel});
-      if(n>0){ if(typeof showToast==='function') showToast('✅ Applied '+n+' change'+(n>1?'s':'')+(n<sel.length?(' ('+(sel.length-n)+' needed a manual tap)'):''),'success'); close(); }
-      else if(typeof showToast==='function') showToast('Couldn’t auto-match those lines — tap a bullet in your resume to edit it.');
+      var manual=sel.filter(function(f){ return f.__applied===false; });
+      if(n>0 && !manual.length){
+        if(typeof showToast==='function') showToast('✅ Applied '+n+' change'+(n>1?'s':''),'success');
+        close();
+      } else if(n>0){
+        if(typeof showToast==='function') showToast('✅ Applied '+n+' — '+manual.length+' need'+(manual.length>1?'':'s')+' a manual tap','success');
+        renderManual(manual);
+      } else {
+        if(typeof showToast==='function') showToast('These need a manual tap — here’s how','');
+        renderManual(manual.length?manual:sel);
+      }
     });
+  }
+  /* Fixes whose "before" line couldn't be auto-matched to a bullet (wording drifted):
+     show them separately, highlighted, with a copy button + how-to, instead of a
+     silent "needed a manual tap" toast. */
+  function renderManual(manual){
+    var rows=(manual||[]).map(function(f,i){
+      return '<div class="rr-manual"><div class="rr-manual-h">✎ apply this one manually</div>'+
+        '<div class="rr-before">'+esc(f.before||'')+'</div>'+
+        '<div class="rr-after"><span class="rr-arw">→</span><span>'+esc(f.after||'')+'</span></div>'+
+        '<button type="button" class="rr-copy-one" data-i="'+i+'">Copy rewrite</button></div>';
+    }).join('');
+    body().innerHTML=
+      '<span class="rr-eyebrow">A few need your tap</span>'+
+      '<h3>Apply these manually</h3>'+
+      '<div class="rr-note" style="margin:6px 0 2px">We couldn’t auto-match these to a line (the wording had drifted). Copy the rewrite, close this, then tap the matching line in your resume to paste it.</div>'+
+      rows+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrDone" style="flex:1 1 100%">Done</button></div>';
+    Array.prototype.forEach.call(document.querySelectorAll('#r4uRoastCard .rr-copy-one'),function(btn){
+      btn.addEventListener('click',function(){ var idx=parseInt(btn.getAttribute('data-i'),10); if(manual[idx]) copy(manual[idx].after); btn.textContent='Copied ✓'; btn.style.opacity='.7'; });
+    });
+    var done=document.getElementById('rrDone'); if(done) done.addEventListener('click',close);
   }
   function shareText(d){
     var lines=(d.roasts||[]).slice(0,3).map(function(r){ return '• '+(r.zing||r.quote||''); }).join('\n');
