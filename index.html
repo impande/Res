@@ -12166,10 +12166,9 @@ window.__novaPortfolioHTML=function(d,sections){
       '<div class="rr-hero-txt"><div class="rr-band">'+esc(d.verdict||bandLabel)+'</div><div class="rr-hero-sub">'+sc+' / 100 · '+bandLabel+' ATS readiness</div></div></div>'+
       '<div class="rr-sect-h">What’s holding your score down</div>'+
       '<div>'+lines+'</div>'+
-      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix">✨ Fix it for me</button><button class="rr-btn rr-btn-copy" id="rrCopy">Copy review</button></div>'+
+      '<div class="rr-btns"><button class="rr-btn rr-btn-fix" id="rrFix" style="flex:1 1 100%">✨ Fix it for me</button></div>'+
       '<div class="rr-note">AI-reviewed from your résumé. Fixes use [brackets] where you should add a real number.</div>';
     document.getElementById('rrFix').addEventListener('click',function(){ renderFix(d); });
-    document.getElementById('rrCopy').addEventListener('click',function(){ copy(shareText(d)); });
   }
   /* Apply the roast's before→after rewrites straight into the resume's bullets.
      Each fix.before is (roughly) an existing bullet; match it to the closest real
