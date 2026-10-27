@@ -1,6 +1,6 @@
-/* resume.js — serve a WhatsApp-built résumé to the website.
+/* resume.js — serve a WhatsApp-built resume to the website.
  *
- * The WhatsApp co-pilot stashes a finished résumé in Upstash under
+ * The WhatsApp co-pilot stashes a finished resume in Upstash under
  * `resume:<token>` (7-day TTL) and hands the user a link:
  *   https://resume4u.help/?r=<token>
  * The site's `?r=` loader fetches GET /.netlify/functions/resume?token=<token>
