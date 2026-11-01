@@ -217,6 +217,7 @@ const PROMPTS = {
 
   linkedin: (i) => [
     'Optimise this person\'s LinkedIn profile from their resume.',
+    'The text below may be a resume OR an export of their current LinkedIn profile (sections like "Top Skills", "Summary", "Experience" with durations such as "2 years 3 months"). Treat either as their career facts; if it is a LinkedIn export, improve on what they already have rather than repeating it.',
     'Target role: ' + (i.targetRole || 'infer it from the resume') + '.' + (i.tone ? ' Preferred tone: ' + i.tone + '.' : ''),
     '',
     '- headlines: exactly 3 options, each max 220 characters, styles "Keyword-rich", "Value-led", "Story". Use the "Role | Specialism | Proof point" pattern where it fits.',

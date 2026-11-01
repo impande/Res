@@ -37,7 +37,7 @@
 
 <main class="wrap">
   <section class="tool" aria-label="LinkedIn optimizer">
-    <div class="field"><label>Your resume</label><div id="resume"></div></div>
+    <div class="field"><label>Your resume or current LinkedIn profile</label><div id="resume"></div></div>
     <div class="row2">
       <div class="field"><label for="role">Role you want to be found for</label><input type="text" id="role" placeholder="e.g. Product Manager — Fintech"></div>
       <div class="field"><label for="tone">Tone</label><select id="tone"><option value="">Professional</option><option>Warm and approachable</option><option>Bold and confident</option><option>Concise and technical</option></select></div>
@@ -77,7 +77,11 @@
 <script>
 (function () {
   var RT = window.R4UTools, esc = RT.esc;
-  var input = RT.mountResumeInput(document.getElementById('resume'));
+  var input = RT.mountResumeInput(document.getElementById('resume'), {
+    uploadLabel: 'Upload your resume or LinkedIn profile PDF',
+    helpTitle: 'How do I get my LinkedIn profile as a PDF?',
+    help: '<ol><li>Open your LinkedIn profile on a computer (the app can\'t do this).</li><li>Click <b>Resources</b> (or <b>More</b>) under your name.</li><li>Choose <b>Save to PDF</b>, then upload that file here.</li></ol>'
+  });
   var out = document.getElementById('out');
   function copyBlock(text, extra) {
     return '<div class="copyrow"><div class="txt">' + esc(text) + '</div><button class="copy" type="button" data-copy="' + esc(text) + '">Copy</button></div>' + (extra || '');
