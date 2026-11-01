@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Interview Prep – Questions From Your Resume &amp; the Job Post | Resume For You</title>
+<meta name="description" content="Paste a job post and upload your resume: get the 12 questions an interviewer for that role will likely ask you, with STAR answer outlines built from your real experience. Free.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://resume4u.help/interview-prep/">
+<meta property="og:title" content="Free AI Interview Prep – Your Likely Interview Questions">
+<meta property="og:description" content="The 12 questions you're most likely to be asked for this job, with answer outlines from your own resume.">
+<meta property="og:url" content="https://resume4u.help/interview-prep/">
+<meta property="og:image" content="https://resume4u.help/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/tools/tools.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebApplication","name":"AI Interview Prep","url":"https://resume4u.help/interview-prep/","applicationCategory":"EducationalApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"description":"Predicts likely interview questions from your resume and a job post, with STAR answer outlines."},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How does it know what I'll be asked?","acceptedAnswer":{"@type":"Answer","text":"It reads the job post's requirements and your resume, then predicts the role, resume deep-dive, behavioural, situational and HR questions an interviewer for that role is most likely to ask you."}},
+{"@type":"Question","name":"What is the STAR method?","acceptedAnswer":{"@type":"Answer","text":"Situation, Task, Action, Result — a simple structure for answering behavioural questions with a real example and a measurable outcome."}},
+{"@type":"Question","name":"Can I practise on WhatsApp?","acceptedAnswer":{"@type":"Answer","text":"Yes. Message our WhatsApp with \"interview\" and your target role to get practice questions in chat."}}
+]}]}
+</script>
+</head>
+<body>
+<nav class="nav"><div class="nav-logo">R</div><a class="nav-name" href="/">Resume For You</a><a class="cta" href="/">Build Free Resume →</a></nav>
+
+<header class="hero">
+  <div class="badge">FREE · NO SIGN-UP</div>
+  <h1>Interview Prep From Your Resume</h1>
+  <p class="sub">Paste the job post and upload your resume. Get the 12 questions you're most likely to be asked for that job — with answer outlines built from your real experience.</p>
+  <div class="trust"><span>✓ 12 tailored questions</span><span>✓ STAR answer outlines</span><span>✓ Gaps to prepare</span></div>
+</header>
+
+<main class="wrap">
+  <section class="tool" aria-label="Interview prep">
+    <div class="field"><label>Your resume</label><div id="resume"></div></div>
+    <div class="field"><label for="jd">Job post <span class="hint">(paste the description — or just the job title)</span></label><textarea id="jd" placeholder="Paste the job description here…"></textarea></div>
+    <button class="btn full" id="go" type="button">Get my interview questions</button>
+    <p class="fine">Answers are built only from your resume — add your own numbers where you see [X].</p>
+    <div class="status" id="status" role="status"><div class="spin"></div><span class="lbl"></span></div>
+    <div class="error" id="err" role="alert"></div>
+  </section>
+  <section class="results" id="out" aria-live="polite"></section>
+</main>
+
+<article class="prose">
+  <h2>How to use your questions</h2>
+  <ol>
+    <li><b>Say each answer out loud</b> — interviews are spoken. Aim for 60–90 seconds per answer.</li>
+    <li><b>Fill in every [X]</b> with your real numbers. Specific results are what make an answer memorable.</li>
+    <li><b>Prepare the gaps</b> listed below your questions — that's where interviewers will probe.</li>
+    <li><b>End with a question</b> of your own. We give you four that show genuine interest.</li>
+  </ol>
+</article>
+
+<section class="faq">
+  <h2>Interview prep FAQ</h2>
+  <div class="faq-item"><h3>What is the STAR method?</h3><p>Situation, Task, Action, Result — a structure for behavioural answers that ends on a measurable outcome.</p></div>
+  <div class="faq-item"><h3>Do I need the full job post?</h3><p>It works best with the full description, but just the job title works too — you'll get questions for that role in general.</p></div>
+  <div class="faq-item"><h3>Can I practise on WhatsApp?</h3><p>Yes — message us "interview" with your role and practise in chat.</p></div>
+</section>
+
+<section class="related"><h2>More free career tools</h2>
+  <a href="/ats-score-checker/">Free ATS Score Checker</a><a href="/linkedin-profile-optimizer/">LinkedIn Profile Optimizer</a><a href="/resume-in-hindi/">Resume in Hindi &amp; Indian languages</a><a href="/govt-job-biodata-maker/">Govt Job Biodata Maker</a><a href="/">Free Resume Builder</a>
+</section>
+<footer class="foot">© 2026 Resume For You · <a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/">resume4u.help</a></footer>
+
+<script src="/tools/tools.js"></script>
+<script>
+(function () {
+  var RT = window.R4UTools, esc = RT.esc;
+  var input = RT.mountResumeInput(document.getElementById('resume'));
+  var out = document.getElementById('out');
+  RT.wire({
+    tool: 'interview',
+    button: document.getElementById('go'), status: document.getElementById('status'),
+    error: document.getElementById('err'), results: out,
+    messages: ['Reading the job post…', 'Matching it against your resume…', 'Predicting your questions…', 'Writing answer outlines…', 'Almost there…'],
+    collect: function () {
+      var r = input.get(); var jd = document.getElementById('jd').value.trim();
+      if (!jd) throw new Error('Paste the job post (or at least the job title).');
+      if (jd.length < 60) r.targetRole = jd; else r.jobPost = jd;
+      return r;
+    },
+    render: function (d) {
+      var groups = {}, order = [];
+      (d.questions || []).forEach(function (q) { var c = q.category || 'Questions'; if (!groups[c]) { groups[c] = []; order.push(c); } groups[c].push(q); });
+      var qs = order.map(function (c) {
+        return '<div class="cat">' + esc(c) + '</div>' + groups[c].map(function (q) {
+          return '<details class="qa"><summary>' + esc(q.question) + '</summary><div class="body"><p class="why">Why they ask: ' + esc(q.why_asked) + '</p><p>' + esc(q.answer_outline) + '</p></div></details>';
+        }).join('');
+      }).join('');
+      var title = [d.role, d.company].filter(Boolean).join(' · ');
+      var wa = 'https://wa.me/919309014196?text=' + encodeURIComponent('interview ' + (d.role || ''));
+      out.innerHTML =
+        '<div class="card"><span class="eyebrow">' + esc(title || 'Your interview') + '</span><h2>How you fit this role</h2><p>' + esc(d.fit_summary) + '</p></div>' +
+        '<div class="card"><h2>Your likely questions</h2><p class="muted" style="margin-bottom:6px">Tap a question to see why it\'s asked and an answer outline.</p>' + qs + '</div>' +
+        ((d.gaps_to_prepare || []).length ? '<div class="card"><h2>Gaps to prepare</h2><ul class="list">' + d.gaps_to_prepare.map(function (s) { return '<li>⚠️ ' + esc(s) + '</li>'; }).join('') + '</ul></div>' : '') +
+        ((d.questions_to_ask || []).length ? '<div class="card"><h2>Questions to ask them</h2><ul class="list">' + d.questions_to_ask.map(function (s) { return '<li>💬 ' + esc(s) + '</li>'; }).join('') + '</ul></div>' : '') +
+        '<div class="cta-band"><h2>Practise every day on WhatsApp</h2><p>Message us and get interview questions for your role right in chat.</p><a class="btn" href="' + wa + '" target="_blank" rel="noopener">Practise on WhatsApp →</a></div>';
+    }
+  });
+})();
+</script>
+</body>
+</html>
