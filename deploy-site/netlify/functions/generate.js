@@ -255,37 +255,53 @@ exports.handler = async function(event) {
       return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: 'Add ANTHROPIC_API_KEY to your Netlify environment variables, then redeploy' }) };
     }
 
-    // Vision path: use Sonnet for better image reading accuracy
-    // Text path:   use Haiku for speed and cost efficiency
-    const model = images.length ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
+    // ── Task-aware model routing (Claude 5 family) ────────────────────────────
+    // The right model for each job: quality where it matters, cost where it
+    // doesn't. Routed server-side so no client change is needed — the task is
+    // detected from the prompt (or an explicit `body.task` hint).
+    //   • score    → Opus 5.5   — sharpest, most consistent ATS/recruiter judgment
+    //   • generate → Sonnet 5.5 — bullets, summaries, cover letters (great, cheap)
+    //   • parse    → Sonnet 5.5 — faithful extraction (text or vision)
+    //   • skills   → Haiku 5.5  — fast, very cheap suggestions
+    const hasImages = images.length > 0;
+    let task = String(body.task || '').toLowerCase();
+    if (!['score', 'generate', 'parse', 'skills', 'rewrite'].includes(task)) {
+      if (hasImages) task = 'parse';
+      else if (/\bATS\s*SCORE\b|ATS readiness|"roasts"\s*:/i.test(prompt || '')) task = 'score';
+      else if (/\bParse resume\b|\bExtract\b|JSON object/i.test(prompt || '')) task = 'parse';
+      else if (/suggest[^.]*\bskills\b|\bskills\b[^.]*suggest|ATS-?friendly skills/i.test(prompt || '')) task = 'skills';
+      else task = 'generate';
+    }
+    const PRIMARY = { score: 'claude-opus-5-5', generate: 'claude-sonnet-5-5', rewrite: 'claude-sonnet-5-5', parse: 'claude-sonnet-5-5', skills: 'claude-haiku-5-5' };
+    // Known-good fallback if a Claude 5 model isn't enabled on this API key.
+    const FALLBACK = { score: 'claude-sonnet-4-6', generate: 'claude-sonnet-4-6', rewrite: 'claude-haiku-4-5-20251001', parse: 'claude-sonnet-4-6', skills: 'claude-haiku-4-5-20251001' };
+    const primaryModel = hasImages ? 'claude-sonnet-5-5' : (PRIMARY[task] || 'claude-sonnet-5-5');
+    const fallbackModel = hasImages ? 'claude-sonnet-4-6' : (FALLBACK[task] || 'claude-sonnet-4-6');
 
-    const requestBody = { model, max_tokens: 8192 };
+    // Purpose-built system prompts: a strict grader for scoring, a faithful
+    // extractor for parsing, an elite writer for generation.
+    const SYS = {
+      score:    'You are a strict ATS (Applicant Tracking System) screener and veteran recruiter. Grade resumes rigorously, consistently and honestly: reward specific, quantified, action-led achievements; penalise vagueness, filler, missing metrics, unfinished placeholder brackets and over-length. Follow the scoring rubric and exact JSON shape in the user message. Output only that JSON — no prose, no markdown, no code fences.',
+      parse:    'You are a precise resume data-extraction assistant. Extract every field faithfully into the requested JSON structure. Never invent, infer or omit data. Output valid JSON only.',
+      skills:   'You are a career expert. Suggest relevant, specific, ATS-friendly skills matched to the candidate\'s role and experience. No duplicates, no generic filler. Be concise.',
+      generate: 'You are an elite resume writer. Produce ATS-optimised, recruiter-ready content: strong action verbs, quantified achievements, tight lines, zero cliches or filler. Never invent employers, titles, metrics or tools the candidate did not supply — where a number would clearly strengthen a line but is missing, use a [X] placeholder for the candidate to fill. Output plain text, no markdown.'
+    };
 
-    if (images.length) {
+    const requestBody = { model: primaryModel, max_tokens: 8192, system: SYS[task] || SYS.generate };
+
+    if (hasImages) {
       const mimeType = imageMimeType || 'image/jpeg';
       requestBody.messages = [{
         role: 'user',
         content: [
-          // All pages as separate image blocks
-          ...images.map(b64 => ({
-            type: 'image',
-            source: { type: 'base64', media_type: mimeType, data: b64 }
-          })),
-          {
-            type: 'text',
-            text: prompt || 'Extract all resume data from this image as JSON.'
-          }
+          ...images.map(b64 => ({ type: 'image', source: { type: 'base64', media_type: mimeType, data: b64 } })),
+          { type: 'text', text: prompt || 'Extract all resume data from this image as JSON.' }
         ]
       }];
     } else {
-      const isParseTask = prompt && (prompt.includes('Parse resume') || prompt.includes('Extract') || prompt.includes('JSON object'));
-      requestBody.system = isParseTask
-        ? 'You are a precise data extraction assistant. When given a resume, extract all information faithfully into the requested JSON structure. Never invent or omit data. Output valid JSON only.'
-        : 'You are an expert resume writer who creates ATS-optimised, professional resumes. Write in clear, action-oriented language with quantified achievements where possible. Output plain text without markdown formatting.';
-      // Personalization: fold in the candidate's role, preferred tone and their OWN
-      // sample phrasings so content is written in their voice. Content-writing tasks
-      // only — never extraction/parse (so JSON parsing stays untouched).
-      if (!isParseTask && body.persona && typeof body.persona === 'object') {
+      // Personalization (content-writing only): fold in the candidate's role, tone
+      // and their OWN sample phrasings so content is written in their voice.
+      if ((task === 'generate' || task === 'rewrite') && body.persona && typeof body.persona === 'object') {
         const pz = body.persona; let note = '';
         if (pz.role) note += ' The candidate targets a "' + String(pz.role).slice(0, 80) + '" role.';
         if (pz.tone) note += ' Preferred tone: ' + String(pz.tone).slice(0, 40) + '.';
@@ -298,28 +314,33 @@ exports.handler = async function(event) {
       requestBody.messages = [{ role: 'user', content: prompt }];
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ text: '', error: data.error?.message || 'API error' }) };
+    async function callClaude(reqBody) {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify(reqBody)
+      });
+      const j = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, data: j };
     }
 
-    const text = data.content?.[0]?.text;
-    // Return only `text` (a plain string). Every client reader falls back to `text`,
-    // so this one shape works for all of them. Do NOT also return a `content` field:
-    // some callers read `(content || text).trim()` / `_extractJSON(content || text)`
-    // (which throw on a non-string) while others read `content[0].text` (which needs an
-    // array) — no single `content` shape satisfies both, so we omit it entirely and let
-    // every caller use `text`.
+    let res = await callClaude(requestBody);
+    // If the primary (Claude 5) model errors for any reason — not enabled on this
+    // key, transient, etc. — retry once with a known-good model so the feature
+    // never hard-fails.
+    if (!res.ok && primaryModel !== fallbackModel) {
+      requestBody.model = fallbackModel;
+      res = await callClaude(requestBody);
+    }
+    if (!res.ok) {
+      return { statusCode: res.status, headers: CORS, body: JSON.stringify({ text: '', error: (res.data && res.data.error && res.data.error.message) || 'API error' }) };
+    }
+
+    // Find the TEXT block. Claude 5 models can emit a thinking block first, so
+    // content[0] is not guaranteed to be the text. Return just `text` (a string) —
+    // every client reader falls back to `text`.
+    const blocks = Array.isArray(res.data.content) ? res.data.content : [];
+    const text = (blocks.find(b => b && b.type === 'text') || {}).text || '';
     return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) };
   } catch (err) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ text: '', error: err.message }) };
