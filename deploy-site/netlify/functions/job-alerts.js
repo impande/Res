@@ -67,7 +67,7 @@ exports.handler = async (event) => {
       const search = { role: pref.role, city: pref.city, skills: pref.skills || [] };
       const res = await JOBS.fetchJobs(search, { maxDays: 2 });
       let fresh = res.jobs;
-      if (res.source === 'adzuna') {
+      if (res.source !== 'links') {
         const seen = new Set((await redis(['SMEMBERS', 'jobseen:' + from])) || []);
         fresh = fresh.filter((j) => !seen.has(j.id));
         if (!fresh.length) { report.no_new++; continue; }

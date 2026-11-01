@@ -1,12 +1,14 @@
 /* jobs.js — job matching for WhatsApp ("jobs", "job alerts") and the daily
  * job-alerts function.
  *
- * Source: Adzuna's India job search API when ADZUNA_APP_ID + ADZUNA_APP_KEY are
- * set (free key at developer.adzuna.com). Results are ranked by how well they
- * match the user's resume (skills found in the listing + title similarity).
- * Without keys it falls back to fresh, pre-filtered search links on Naukri,
- * LinkedIn, Indeed and foundit for the user's role + city — still useful, never
- * fake listings.
+ * Sources, first one configured wins:
+ *   1. Jooble     JOOBLE_API_KEY (free, no card: jooble.org/api/about).
+ *                 Optional JOOBLE_HOST (default in.jooble.org, India listings).
+ *   2. Adzuna     ADZUNA_APP_ID + ADZUNA_APP_KEY.
+ * Results are ranked by how well they match the user's resume (skills found in
+ * the listing + title similarity). With no keys it falls back to fresh,
+ * pre-filtered search links on Naukri, LinkedIn, Indeed and foundit for the
+ * user's role + city — still useful, never fake listings.
  */
 
 const STOP = new Set(['and', 'the', 'of', 'for', 'in', 'at', 'a', 'an', 'to', 'with', 'senior', 'junior', 'sr', 'jr', 'lead', 'ii', 'iii', 'i']);
@@ -44,11 +46,50 @@ function scoreJob(job, s) {
   return { score: Math.round(titleHit * 60 + Math.min(matched.length, 8) * 5), matched: matched.slice(0, 4) };
 }
 
+function rank(jobs, s) {
+  jobs = jobs.filter((x) => x.title && x.url);
+  jobs.forEach((job) => { const m = scoreJob(job, s); job.match = m.score; job.matched = m.matched; });
+  const seen = new Set();
+  jobs = jobs.filter((x) => { const k = (x.title + '|' + x.company).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+  jobs.sort((a, b) => (b.match - a.match) || String(b.created).localeCompare(String(a.created)));
+  // Prefer listings that actually match; only pad with unmatched ones if few match.
+  const good = jobs.filter((x) => x.match > 0);
+  return good.length >= 3 ? good : good.concat(jobs.filter((x) => x.match === 0));
+}
+const strip = (h) => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+
+async function fetchJooble(s, opts) {
+  const key = process.env.JOOBLE_API_KEY;
+  const host = (process.env.JOOBLE_HOST || 'in.jooble.org').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetch('https://' + host + '/api/' + encodeURIComponent(key), {
+      method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
+      body: JSON.stringify({ keywords: s.role, location: s.city || 'India', page: '1' })
+    });
+    if (!r.ok) { console.error('[jobs] jooble', r.status); return null; }
+    const j = await r.json();
+    const maxMs = ((opts && opts.maxDays) || 3) * 864e5;
+    const jobs = (j.jobs || []).map((x) => ({
+      id: 'jb:' + String(x.id || x.link || ''),
+      title: strip(x.title), company: strip(x.company), location: strip(x.location),
+      url: x.link || '', description: strip(x.snippet), created: x.updated || ''
+    })).filter((x) => { const d = Date.parse(x.created); return !d || Date.now() - d < maxMs; });
+    return rank(jobs, s);
+  } catch (e) { console.error('[jobs] jooble failed', e && e.message); return null; }
+  finally { clearTimeout(t); }
+}
+
 async function fetchJobs(search, opts) {
   const s = search || {};
-  const id = process.env.ADZUNA_APP_ID, key = process.env.ADZUNA_APP_KEY;
   const links = searchLinks(s.role, s.city);
-  if (!id || !key || !s.role) return { source: 'links', jobs: [], links };
+  if (!s.role) return { source: 'links', jobs: [], links };
+  if (process.env.JOOBLE_API_KEY) {
+    const jobs = await fetchJooble(s, opts);
+    if (jobs && jobs.length) return { source: 'jooble', jobs, links };
+  }
+  const id = process.env.ADZUNA_APP_ID, key = process.env.ADZUNA_APP_KEY;
+  if (!id || !key) return { source: 'links', jobs: [], links };
   const params = new URLSearchParams({
     app_id: id, app_key: key, results_per_page: '30', what: s.role, max_days_old: String((opts && opts.maxDays) || 3),
     sort_by: 'date', 'content-type': 'application/json'
@@ -58,24 +99,13 @@ async function fetchJobs(search, opts) {
     const r = await fetch('https://api.adzuna.com/v1/api/jobs/in/search/1?' + params.toString());
     if (!r.ok) { console.error('[jobs] adzuna', r.status); return { source: 'links', jobs: [], links }; }
     const j = await r.json();
-    const jobs = (j.results || []).map((x) => {
-      const job = {
-        id: String(x.id || x.redirect_url || ''),
-        title: String(x.title || '').replace(/<[^>]+>/g, '').trim(),
-        company: (x.company && x.company.display_name) || '',
-        location: (x.location && x.location.display_name) || '',
-        url: x.redirect_url || '',
-        description: String(x.description || '').replace(/<[^>]+>/g, ' '),
-        created: x.created || ''
-      };
-      const m = scoreJob(job, s);
-      job.match = m.score; job.matched = m.matched;
-      return job;
-    }).filter((x) => x.title && x.url);
-    jobs.sort((a, b) => (b.match - a.match) || String(b.created).localeCompare(String(a.created)));
-    // Prefer listings that actually match; only pad with unmatched ones if few match.
-    const good = jobs.filter((x) => x.match > 0);
-    return { source: 'adzuna', jobs: good.length >= 3 ? good : good.concat(jobs.filter((x) => x.match === 0)), links };
+    const jobs = (j.results || []).map((x) => ({
+      id: String(x.id || x.redirect_url || ''),
+      title: strip(x.title), company: (x.company && x.company.display_name) || '',
+      location: (x.location && x.location.display_name) || '', url: x.redirect_url || '',
+      description: strip(x.description), created: x.created || ''
+    }));
+    return { source: 'adzuna', jobs: rank(jobs, s), links };
   } catch (e) {
     console.error('[jobs] adzuna failed', e && e.message);
     return { source: 'links', jobs: [], links };
