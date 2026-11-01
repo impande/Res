@@ -23,6 +23,7 @@
  */
 
 const GRAPH = 'https://graph.facebook.com/v21.0';
+const JOBS = require('../lib/jobs.js');
 // Base URL for the finish link. Derive it from the host the webhook was called
 // on, so the ?r= loader that handles the handoff is always on the SAME deploy as
 // this function: a UAT branch-deploy keeps the link on UAT, production keeps it
@@ -117,18 +118,39 @@ const STEPS = [
 
 function firstName(n) { return (n || '').trim().split(/\s+/)[0] || 'there'; }
 
-/* ---- AI polish (Anthropic) ---- */
-async function claude(prompt, maxTokens) {
+/* ---- AI (Anthropic): Haiku 5.5 at low effort — fast enough for a webhook ----
+   Returns the TEXT block (Claude 5 may emit a thinking block first). If the
+   primary call fails, retries once on the older known-good model. */
+async function anthropicText(body, fallbackModel) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return '';
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: maxTokens || 400, messages: [{ role: 'user', content: prompt }] })
-  });
-  const j = await r.json().catch(() => ({}));
-  const c = j && j.content;
-  return (Array.isArray(c) ? (c[0] && c[0].text) || '' : '').trim();
+  async function call(b) {
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify(b)
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { console.error('[whatsapp] AI call failed', b.model, r.status, j.error && j.error.message); return null; }
+      const blocks = Array.isArray(j.content) ? j.content : [];
+      return ((blocks.find((x) => x && x.type === 'text') || {}).text || '').trim();
+    } catch (e) { console.error('[whatsapp] AI call error', e && e.message); return null; }
+  }
+  let t = await call(body);
+  if (t === null && fallbackModel) {
+    const fb = Object.assign({}, body, { model: fallbackModel });
+    delete fb.output_config; // older models reject the effort setting
+    t = await call(fb);
+  }
+  return t || '';
+}
+async function claude(prompt, maxTokens) {
+  // Thinking tokens count toward max_tokens on Claude 5, so leave headroom.
+  return anthropicText({
+    model: 'claude-haiku-5-5', max_tokens: (maxTokens || 400) + 2000, output_config: { effort: 'low' },
+    messages: [{ role: 'user', content: prompt }]
+  }, 'claude-haiku-4-5-20251001');
 }
 async function polishBullets(raw, role) {
   const out = await claude(
@@ -165,14 +187,10 @@ async function claudeExtractResume(base64, mime) {
     'role = the person\'s current or target job title. years = total years of experience as a short string. ' +
     'experiences: one object per job (most recent first), role = "Title at Company", bullets = 2-4 concise achievement bullets keeping the resume\'s own wording. ' +
     'skills = flat array of individual skills. Use "" or [] where unknown. Output ONLY the JSON object — no markdown, no preamble.' };
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: [fileBlock, instruction] }] })
-  });
-  const j = await r.json().catch(() => ({}));
-  const c = j && j.content;
-  let txt = (Array.isArray(c) ? (c[0] && c[0].text) || '' : '').trim();
+  const txt = await anthropicText({
+    model: 'claude-haiku-5-5', max_tokens: 4000, output_config: { effort: 'low' },
+    messages: [{ role: 'user', content: [fileBlock, instruction] }]
+  }, 'claude-haiku-4-5-20251001');
   const m = txt.match(/\{[\s\S]*\}/);
   if (!m) return null;
   try {
@@ -548,8 +566,11 @@ exports.handler = async (event) => {
   const low = text.toLowerCase();
   console.log('[whatsapp] inbound from', from, 'type', type, ':', JSON.stringify(text));
   const base = siteBase(event); // finish link lives on the same deploy as this webhook
+  // Last time this user messaged us: WhatsApp only allows free-form messages
+  // within 24h of it, so the daily job alerts check this before sending.
+  await redis(['SET', 'lastseen:' + from, String(Date.now()), 'EX', '172800']);
 
-  const MENU = 'Reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)';
+  const MENU = 'Reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n\nAlso try: *jobs* · *job alerts* · *interview*';
 
   try {
     let state = await getState(from);
@@ -588,7 +609,8 @@ exports.handler = async (event) => {
       // "I want the bot now" — a build / edit / new / versions request (incl. the
       // Build CTA) leaves support and is handled by the normal flow below.
       const wantsBot = /\b(build|make|create|start)\s+(a\s+|an\s+|my\s+)?(new\s+)?(resume|r[eé]sum[eé]|cv)\b/i.test(low)
-        || /^(new|restart|reset|start over|build new|fresh|edit|edit resume|update resume|versions?|my resumes?|switch resume)$/i.test(low);
+        || /^(new|restart|reset|start over|build new|fresh|edit|edit resume|update resume|versions?|my resumes?|switch resume)$/i.test(low)
+        || /^(jobs?|job\s*alerts?|stop(\s+job)?\s+alerts?|interview|mock interview|interview prep)\b/i.test(low);
       if (!wantsBot) {
         const _pf = await getProfile(from);
         await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
@@ -641,6 +663,54 @@ exports.handler = async (event) => {
       await setState(from, { step: 0, mode: 'support', data: state.data });
       await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
       await send(from, "🙋 You're connected to Resume4U support. Tell us what you need — a human from our team will reply right here.\n\n(Type \"exit\" anytime to go back to building your resume.)");
+      return OK;
+    }
+    // ---- Jobs matched to the resume: "jobs" / "jobs data analyst in pune" ----
+    if (/^(jobs?|find jobs?|search jobs?|jobs for me|show jobs|job search)(\s+.*)?$/i.test(low) && !/^jobs?\s*alerts?\b/i.test(low)) {
+      const prof = await savedResume();
+      const search = JOBS.deriveSearch(prof, JOBS.parseJobQuery(text));
+      if (!search.role) { await send(from, "Tell me the role to search — e.g. *jobs data analyst in Pune*.\n\n(Or build your resume first and I'll match jobs to it automatically.)"); return OK; }
+      const res = await JOBS.fetchJobs(search);
+      await send(from, JOBS.formatJobs(search, res));
+      return OK;
+    }
+    // ---- Daily job alerts: "job alerts" / "job alerts data analyst in pune" ----
+    if (/^(job\s*alerts?|daily\s*jobs|alerts?\s*on|subscribe(\s+to)?\s+jobs?)(\s+.*)?$/i.test(low)) {
+      const prof = await savedResume();
+      const rest = text.replace(/^(job\s*alerts?|daily\s*jobs|alerts?\s*on|subscribe(\s+to)?\s+jobs?)\s*/i, '');
+      const search = JOBS.deriveSearch(prof, JOBS.parseJobQuery('jobs ' + rest));
+      if (!search.role) { await send(from, 'Which role should I watch for? Reply like: *job alerts data analyst in Pune*'); return OK; }
+      await redis(['SET', 'jobalert:' + from, JSON.stringify({ role: search.role, city: search.city, skills: search.skills, name: (prof && (prof.name || prof.firstName)) || '', since: Date.now() }), 'EX', String(60 * 60 * 24 * 120)]);
+      await redis(['SADD', 'jobalerts:subs', from]);
+      const res = await JOBS.fetchJobs(search);
+      if (res.jobs.length) { await redis(['SADD', 'jobseen:' + from].concat(res.jobs.slice(0, 5).map((j) => j.id))); await redis(['EXPIRE', 'jobseen:' + from, '1209600']); }
+      await send(from, '🔔 *Job alerts ON* for ' + search.role + (search.city ? ' in ' + search.city : '') + ". I'll send fresh matches every morning.\n\nHere's today's list:\n\n" +
+        JOBS.formatJobs(search, res, { footer: false }) + '\n\nReply *stop alerts* anytime · *job alerts <role> in <city>* to change it.');
+      return OK;
+    }
+    if (/^(stop(\s+job)?\s+alerts?|alerts?\s+off|unsubscribe(\s+jobs?)?|stop\s+jobs)$/i.test(low)) {
+      await redis(['SREM', 'jobalerts:subs', from]);
+      await redis(['DEL', 'jobalert:' + from]);
+      await send(from, '🔕 Job alerts turned off. Reply *job alerts* anytime to turn them back on.');
+      return OK;
+    }
+    // ---- Interview practice: "interview" / "interview data analyst" ----
+    if (/^(interview|interview prep|mock interview|practi[cs]e interview)(\s+.*)?$/i.test(low)) {
+      const prof = await savedResume();
+      const rest = text.replace(/^(interview prep|mock interview|practi[cs]e interview|interview)\s*(for\s+)?/i, '').trim();
+      const role = rest || JOBS.deriveSearch(prof).role;
+      if (!role) { await send(from, 'Which role are you interviewing for? Reply like: *interview data analyst*'); return OK; }
+      const summary = haveData(prof) ? (prof._src === 'web' ? summarizeCloud(prof) : summarize(prof)) : '';
+      const prev = (await redis(['GET', 'ivq:' + from])) || '';
+      const out = await claude(
+        'You are a senior interviewer. Write 5 likely interview questions for a "' + role + '" role' +
+        (summary ? ', tailored to this candidate:\n' + summary + '\n' : '.\n') +
+        'Mix: 2 role/technical, 1 about their experience, 1 behavioural (STAR), 1 situational. Under each, one line on what a strong answer includes — use only facts from the candidate summary, never invent.\n' +
+        (prev ? 'Do NOT repeat any of these earlier questions:\n' + prev.slice(0, 1500) + '\n' : '') +
+        'Format exactly like this, nothing else:\n1. *Question*\n   💡 Tip', 700);
+      if (out) await redis(['SET', 'ivq:' + from, (prev + '\n' + out).slice(-3000), 'EX', '604800']);
+      await send(from, (out ? '🎯 *Interview practice — ' + role + '*\n\n' + out : "Sorry, I couldn't prepare questions just now. Please try again.") +
+        '\n\nReply *interview* for 5 more · full prep with answer outlines: ' + base + '/interview-prep/');
       return OK;
     }
     // Build CTA → start the resume flow right away (the "Build my resume on WhatsApp"

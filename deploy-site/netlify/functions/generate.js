@@ -362,17 +362,27 @@ exports.handler = async function(event) {
       } } };
     }
 
-    async function callClaude(reqBody) {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-        body: JSON.stringify(reqBody)
-      });
-      const j = await r.json().catch(() => ({}));
-      return { ok: r.ok, status: r.status, data: j };
+    // ms = deadline for this call. The function has a 26s limit, so the primary
+    // (Claude 5, which may think first) gets a deadline that leaves room for the
+    // fallback to answer — otherwise a slow Opus score would end in a 504.
+    async function callClaude(reqBody, ms) {
+      const ac = new AbortController();
+      const timer = ms ? setTimeout(() => ac.abort(), ms) : null;
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+          body: JSON.stringify(reqBody),
+          signal: ac.signal
+        });
+        const j = await r.json().catch(() => ({}));
+        return { ok: r.ok, status: r.status, data: j };
+      } catch (e) {
+        return { ok: false, status: 504, data: { error: { message: (e && e.name === 'AbortError') ? 'timed out' : (e && e.message) || 'network error' } } };
+      } finally { if (timer) clearTimeout(timer); }
     }
 
-    let res = await callClaude(requestBody);
+    let res = await callClaude(requestBody, primaryModel !== fallbackModel ? 17000 : 0);
     // On any error, retry once: drop the structured-output constraint (the schema
     // could be the cause) and fall back to a known-good model — so the feature
     // never hard-fails on a key without Claude 5 or a transient issue.

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Profile Optimizer – Free AI Headline &amp; About Generator | Resume For You</title>
+<meta name="description" content="Turn your resume into a recruiter-ready LinkedIn profile: 3 headline options, a keyword-rich About section, top skills and experience descriptions. Free, no sign-up.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://resume4u.help/linkedin-profile-optimizer/">
+<meta property="og:title" content="Free LinkedIn Profile Optimizer – Headline, About &amp; Skills">
+<meta property="og:description" content="Upload your resume and get a LinkedIn headline, About section, top skills and experience descriptions written for recruiter search.">
+<meta property="og:url" content="https://resume4u.help/linkedin-profile-optimizer/">
+<meta property="og:image" content="https://resume4u.help/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/tools/tools.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebApplication","name":"LinkedIn Profile Optimizer","url":"https://resume4u.help/linkedin-profile-optimizer/","applicationCategory":"BusinessApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"description":"Generates LinkedIn headlines, an About section, top skills and experience descriptions from your resume."},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How long should a LinkedIn headline be?","acceptedAnswer":{"@type":"Answer","text":"LinkedIn allows 220 characters. Lead with your role and specialism, then a proof point — the first words are what shows in search results."}},
+{"@type":"Question","name":"How long should the LinkedIn About section be?","acceptedAnswer":{"@type":"Answer","text":"Up to 2,600 characters are allowed; 1,300–2,000 works best. Make the first two lines a hook because they show before \"see more\"."}},
+{"@type":"Question","name":"Will it make things up?","acceptedAnswer":{"@type":"Answer","text":"No. It only uses facts in your resume. Where a number would help but isn't there, it leaves an [X] for you to fill in."}}
+]}]}
+</script>
+</head>
+<body>
+<nav class="nav"><div class="nav-logo">R</div><a class="nav-name" href="/">Resume For You</a><a class="cta" href="/">Build Free Resume →</a></nav>
+
+<header class="hero">
+  <div class="badge">FREE · NO SIGN-UP</div>
+  <h1>LinkedIn Profile Optimizer</h1>
+  <p class="sub">Turn your resume into a LinkedIn profile recruiters find: headline options, an About section that hooks, your top skills and experience descriptions — ready to paste.</p>
+  <div class="trust"><span>✓ 3 headline styles</span><span>✓ About section</span><span>✓ Top 10 skills</span></div>
+</header>
+
+<main class="wrap">
+  <section class="tool" aria-label="LinkedIn optimizer">
+    <div class="field"><label>Your resume</label><div id="resume"></div></div>
+    <div class="row2">
+      <div class="field"><label for="role">Role you want to be found for</label><input type="text" id="role" placeholder="e.g. Product Manager — Fintech"></div>
+      <div class="field"><label for="tone">Tone</label><select id="tone"><option value="">Professional</option><option>Warm and approachable</option><option>Bold and confident</option><option>Concise and technical</option></select></div>
+    </div>
+    <button class="btn full" id="go" type="button">Optimise my LinkedIn</button>
+    <p class="fine">Uses only facts from your resume — no made-up claims.</p>
+    <div class="status" id="status" role="status"><div class="spin"></div><span class="lbl"></span></div>
+    <div class="error" id="err" role="alert"></div>
+  </section>
+  <section class="results" id="out" aria-live="polite"></section>
+</main>
+
+<article class="prose">
+  <h2>What makes a LinkedIn profile show up in recruiter search</h2>
+  <p>Recruiters search LinkedIn by job title and skills. Your <b>headline</b>, <b>About</b> section, <b>skills</b> and <b>experience</b> are what that search reads. This tool writes each of them from your resume:</p>
+  <ul>
+    <li><b>Headline</b> (220 characters) — role, specialism and a proof point, in three styles to choose from.</li>
+    <li><b>About</b> — a hook in the first two lines, your real achievements with numbers, and the keywords recruiters type.</li>
+    <li><b>Top skills</b> — 10 skills in LinkedIn's own naming, so they match recruiter filters.</li>
+    <li><b>Experience</b> — short, action-led descriptions for each role.</li>
+  </ul>
+</article>
+
+<section class="faq">
+  <h2>LinkedIn optimizer FAQ</h2>
+  <div class="faq-item"><h3>How long should a LinkedIn headline be?</h3><p>Up to 220 characters. Put your role and specialism first — that's what shows in search results.</p></div>
+  <div class="faq-item"><h3>How long should the About section be?</h3><p>1,300–2,000 characters works best (2,600 max). The first two lines show before "see more", so they need to hook.</p></div>
+  <div class="faq-item"><h3>Will it invent achievements?</h3><p>No. It only uses facts from your resume and leaves [X] where you should add a real number.</p></div>
+</section>
+
+<section class="related"><h2>More free career tools</h2>
+  <a href="/ats-score-checker/">Free ATS Score Checker</a><a href="/interview-prep/">Interview Prep</a><a href="/resume-in-hindi/">Resume in Hindi &amp; Indian languages</a><a href="/govt-job-biodata-maker/">Govt Job Biodata Maker</a><a href="/">Free Resume Builder</a>
+</section>
+<footer class="foot">© 2026 Resume For You · <a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/">resume4u.help</a></footer>
+
+<script src="/tools/tools.js"></script>
+<script>
+(function () {
+  var RT = window.R4UTools, esc = RT.esc;
+  var input = RT.mountResumeInput(document.getElementById('resume'));
+  var out = document.getElementById('out');
+  function copyBlock(text, extra) {
+    return '<div class="copyrow"><div class="txt">' + esc(text) + '</div><button class="copy" type="button" data-copy="' + esc(text) + '">Copy</button></div>' + (extra || '');
+  }
+  out.addEventListener('click', function (e) { var b = e.target.closest('[data-copy]'); if (b) RT.copy(b.getAttribute('data-copy'), b); });
+  RT.wire({
+    tool: 'linkedin',
+    button: document.getElementById('go'), status: document.getElementById('status'),
+    error: document.getElementById('err'), results: out,
+    messages: ['Reading your resume…', 'Finding the keywords recruiters search…', 'Writing your headline and About…', 'Polishing your experience…', 'Almost there…'],
+    collect: function () { var r = input.get(); r.targetRole = document.getElementById('role').value.trim(); r.tone = document.getElementById('tone').value; return r; },
+    render: function (d) {
+      var heads = (d.headlines || []).map(function (h) {
+        return '<li><span class="eyebrow">' + esc(h.style) + '</span>' + copyBlock(h.text, '<span class="count">' + (h.text || '').length + ' / 220 characters</span>') + '</li>';
+      }).join('');
+      var exp = (d.experience || []).map(function (x) {
+        return '<li><b>' + esc(x.title) + '</b>' + (x.company ? ' <span class="muted">· ' + esc(x.company) + '</span>' : '') + copyBlock(x.description) + '</li>';
+      }).join('');
+      var skills = (d.top_skills || []);
+      out.innerHTML =
+        '<div class="card"><h2>Headline options</h2><ul class="list">' + heads + '</ul></div>' +
+        '<div class="card"><h2>About section</h2>' + copyBlock(d.about, '<span class="count">' + (d.about || '').length + ' / 2,600 characters</span>') + '</div>' +
+        '<div class="card"><h2>Top skills</h2><div class="chips" style="margin-bottom:10px">' + skills.map(function (s) { return '<span class="chip">' + esc(s) + '</span>'; }).join('') + '</div><button class="copy" type="button" data-copy="' + esc(skills.join(', ')) + '">Copy all skills</button></div>' +
+        (exp ? '<div class="card"><h2>Experience descriptions</h2><ul class="list">' + exp + '</ul></div>' : '') +
+        ((d.featured_ideas || []).length ? '<div class="card"><h2>Pin these in Featured</h2><ul class="list">' + d.featured_ideas.map(function (s) { return '<li>📌 ' + esc(s) + '</li>'; }).join('') + '</ul></div>' : '') +
+        ((d.profile_tips || []).length ? '<div class="card"><h2>Quick profile wins</h2><ul class="list">' + d.profile_tips.map(function (s) { return '<li>✓ ' + esc(s) + '</li>'; }).join('') + '</ul></div>' : '') +
+        '<div class="cta-band"><h2>Your resume should match your LinkedIn</h2><p>Check your resume\'s ATS score next, or polish it in the free builder.</p><a class="btn" href="/ats-score-checker/">Check my ATS score →</a></div>';
+    }
+  });
+})();
+</script>
+</body>
+</html>

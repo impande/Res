@@ -18,6 +18,17 @@
 [functions."share-portfolio"]
   timeout = 15
 
+# Free career tools: poll endpoint + fast synchronous fallback. The heavy work
+# runs in career-tools-background (Netlify background function, no 26s cap).
+[functions."career-tools"]
+  timeout = 26
+
+# Daily WhatsApp job alerts at 09:00 IST (03:30 UTC). Scheduled functions only
+# fire on the PUBLISHED (production) deploy; on UAT use the manual trigger:
+#   /.netlify/functions/job-alerts?key=<WHATSAPP_VERIFY_TOKEN>&to=<number>
+[functions."job-alerts"]
+  schedule = "30 3 * * *"
+
 # SEO landing pages — serve homepage content at keyword-rich URLs (200 = proxy, not redirect)
 [[redirects]]
   from = "/free-resume-builder"
