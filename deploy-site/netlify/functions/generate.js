@@ -341,6 +341,27 @@ exports.handler = async function(event) {
       requestBody.messages = [{ role: 'user', content: prompt }];
     }
 
+    // Structured output for the ATS score: a grammar-enforced JSON shape so the
+    // score can NEVER mis-parse (no stray prose / markdown fence breaking it).
+    // Works on claude-opus-5-5 and the fallback models; no beta header needed
+    // (output_config, not the deprecated output_format). We only constrain the
+    // score task — its shape is known — never parsing (client-defined shape).
+    if (task === 'score') {
+      requestBody.output_config = { format: { type: 'json_schema', schema: {
+        type: 'object',
+        properties: {
+          score: { type: 'integer' },
+          verdict: { type: 'string' },
+          roasts: { type: 'array', items: { type: 'object', properties: { emoji: { type: 'string' }, quote: { type: 'string' }, zing: { type: 'string' } }, required: ['emoji', 'quote', 'zing'], additionalProperties: false } },
+          fixes: { type: 'array', items: { type: 'object', properties: { before: { type: 'string' }, after: { type: 'string' } }, required: ['before', 'after'], additionalProperties: false } },
+          newScore: { type: 'integer' },
+          shareLine: { type: 'string' }
+        },
+        required: ['score', 'verdict', 'roasts', 'fixes', 'newScore', 'shareLine'],
+        additionalProperties: false
+      } } };
+    }
+
     async function callClaude(reqBody) {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -352,12 +373,14 @@ exports.handler = async function(event) {
     }
 
     let res = await callClaude(requestBody);
-    // If the primary (Claude 5) model errors for any reason — not enabled on this
-    // key, transient, etc. — retry once with a known-good model so the feature
-    // never hard-fails.
-    if (!res.ok && primaryModel !== fallbackModel) {
-      requestBody.model = fallbackModel;
-      res = await callClaude(requestBody);
+    // On any error, retry once: drop the structured-output constraint (the schema
+    // could be the cause) and fall back to a known-good model — so the feature
+    // never hard-fails on a key without Claude 5 or a transient issue.
+    if (!res.ok) {
+      let changed = false;
+      if (requestBody.output_config) { delete requestBody.output_config; changed = true; }
+      if (primaryModel !== fallbackModel) { requestBody.model = fallbackModel; changed = true; }
+      if (changed) res = await callClaude(requestBody);
     }
     if (!res.ok) {
       return { statusCode: res.status, headers: CORS, body: JSON.stringify({ text: '', error: (res.data && res.data.error && res.data.error.message) || 'API error' }) };
