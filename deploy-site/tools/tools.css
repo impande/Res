@@ -31,6 +31,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);
 .drop span{font-size:.82rem;color:var(--muted);}
 .drop .ok{color:var(--good);font-weight:700;}
 .drop .err{color:var(--bad);font-weight:700;}
+.field label.saved,.saved{display:flex;align-items:center;gap:12px;margin:0;font-size:inherit;font-weight:inherit;color:var(--text);position:relative;border:2px solid var(--border);background:var(--card);border-radius:14px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;}
+.saved input{position:absolute;opacity:0;pointer-events:none;}
+.saved .sv-ic{flex:0 0 26px;width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-size:.85rem;font-weight:800;color:transparent;transition:all .15s;}
+.field label.saved.on,.saved.on{border-color:var(--teal);background:#f0fdfa;}
+.saved.on .sv-ic{background:var(--teal);border-color:var(--teal);color:#fff;}
+.saved .sv-tx{display:flex;flex-direction:column;min-width:0;}
+.saved .sv-tx b{font-size:.98rem;line-height:1.3;}
+.saved .sv-tx span{font-size:.8rem;margin-top:2px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.saved:focus-within{outline:3px solid rgba(13,148,136,.35);outline-offset:2px;}
+.or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:.78rem;}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border);}
+.howto{margin-top:8px;font-size:.84rem;color:var(--muted);}
+.howto summary{cursor:pointer;color:var(--accent);font-weight:700;}
+.howto div{margin-top:6px;line-height:1.55;}
+.howto ol{margin:4px 0 0 18px;}
 .linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:1rem;color:#fff;background:linear-gradient(135deg,#d97706,#b45309);padding:14px 26px;border-radius:12px;box-shadow:0 8px 20px -10px rgba(180,83,9,.8);text-decoration:none;}
 .btn:hover{filter:brightness(1.05);}
