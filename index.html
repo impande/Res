@@ -14186,7 +14186,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     iv:['linear-gradient(135deg,#f59e0b,#d97706)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"/></svg>'],
     hi:['linear-gradient(135deg,#f97316,#c2410c)','<span aria-hidden="true">अ</span>'],
     bio:['linear-gradient(135deg,#8b5cf6,#6d28d9)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7"/></svg>'],
-    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/></svg>']
+    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/></svg>'],
+    alert:['linear-gradient(145deg,#25d366,#128c7e)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>']
   };
   function chip(k,href,t){ return '<a class="mf-chip" href="'+href+'"><span class="mf-ic" style="background:'+IC[k][0]+'">'+IC[k][1]+'</span><span>'+t+'</span></a>'; }
   function mk(){
@@ -14194,6 +14195,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     var main=document.getElementById('main'); if(!main) return false;
     var f=document.createElement('footer'); f.id='r4uMobLegal';
     f.innerHTML='<div class="mf-tools">'
+      +'<a class="mf-chip" href="/#job-alerts" onclick="if(window._r4uJobAlerts){window._r4uJobAlerts();return false;}"><span class="mf-ic" style="background:'+IC.alert[0]+'">'+IC.alert[1]+'</span><span>Job alerts</span></a>'
       +chip('ats','/ats-score-checker/','ATS check')+chip('li','/linkedin-profile-optimizer/','LinkedIn')
       +chip('iv','/interview-prep/','Interview prep')+chip('hi','/resume-in-hindi/','Hindi resume')
       +chip('bio','/govt-job-biodata-maker/','Biodata')+chip('sova','/sova/','Sova')
@@ -14856,7 +14858,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   +'#_r4uToolsRow a .r4u-ic{width:38px;height:38px;border-radius:11px;}#_r4uToolsRow a .r4u-ic svg{width:20px;height:20px;}'
   +'#_r4uToolsRow a b{display:block;font-size:.84rem;color:var(--text,#1a1a1a);line-height:1.25;margin-top:9px;}'
   +'#_r4uToolsRow a span.s{display:block;font-size:.7rem;color:var(--muted,#6b7280);margin-top:2px;line-height:1.3;}'
-  +'@media (min-width:700px){#_r4uToolsRow .tr-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;margin:0;padding:10px 0;}#_r4uToolsRow a{flex:none;}}'
+  +'#_r4uToolsRow a.feat{border-color:#bfe8cf;background:linear-gradient(160deg,#f0fdf4,#fff 70%);}'
+  +'@media (min-width:700px){#_r4uToolsRow .tr-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;margin:0;padding:10px 0;}#_r4uToolsRow a{flex:none;}'
+  +'#_r4uToolsRow a.feat{grid-column:span 2;display:flex;align-items:center;gap:14px;}#_r4uToolsRow a.feat .r4u-ic{width:46px;height:46px;border-radius:13px;}#_r4uToolsRow a.feat .r4u-ic svg{width:24px;height:24px;}#_r4uToolsRow a.feat b{margin-top:0;font-size:.95rem;}#_r4uToolsRow a.feat span.s{font-size:.76rem;}}'
   +'@media (prefers-reduced-motion:reduce){.r4u-tl,#_r4uToolsRow a{transition:none;}}';
   var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
 
@@ -14866,7 +14870,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     iv:['linear-gradient(135deg,#f59e0b,#d97706)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"/><path d="M12 15.5h.01"/></svg>'],
     hi:['linear-gradient(135deg,#f97316,#c2410c)','<span aria-hidden="true">अ</span>'],
     bio:['linear-gradient(135deg,#8b5cf6,#6d28d9)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7M8.5 18h5"/></svg>'],
-    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/><circle cx="18" cy="19" r="2.2" fill="#fff"/><circle cx="30" cy="19" r="2.2" fill="#fff"/></svg>']
+    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/><circle cx="18" cy="19" r="2.2" fill="#fff"/><circle cx="30" cy="19" r="2.2" fill="#fff"/></svg>'],
+    alert:['linear-gradient(145deg,#25d366,#128c7e)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>']
   };
   function ic(k){ return '<span class="r4u-ic" style="background:'+IC[k][0]+'">'+IC[k][1]+'</span>'; }
 
@@ -14934,9 +14939,10 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(document.getElementById('_r4uToolsRow')) return true;
     var wa=document.getElementById('_r4uWaLandingCta'); if(!wa||!wa.parentNode) return false;
     var r=document.createElement('div'); r.id='_r4uToolsRow';
-    function c(k,href,t,s){ return '<a href="'+href+'">'+ic(k)+'<b>'+t+'</b><span class="s">'+s+'</span></a>'; }
+    function c(k,href,t,s){ return '<a href="'+href+'"'+(k==='alert'?' class="feat"':'')+'>'+ic(k)+'<span class="tx"><b>'+t+'</b><span class="s">'+s+'</span></span></a>'; }
     r.innerHTML='<div class="tr-h"><span class="tr-t">Free career tools</span></div>'
       +'<div class="tr-row" role="list">'
+      +c('alert','/#job-alerts','Daily Job Alerts','On WhatsApp, for your role')
       +c('ats','/ats-score-checker/','ATS Score Checker','Upload &amp; get your score')
       +c('li','/linkedin-profile-optimizer/','LinkedIn Optimizer','Headline &amp; About')
       +c('iv','/interview-prep/','Interview Prep','Questions for your role')
@@ -14944,9 +14950,83 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +c('bio','/govt-job-biodata-maker/','Govt Job Biodata','Hindi / English')
       +c('sova','/sova/','Sova Prompt Maker','Perfect AI prompts')
       +'</div>';
+    r.querySelector('a.feat').addEventListener('click',function(e){ e.preventDefault(); openAlerts(); });
     wa.parentNode.insertBefore(r, wa.nextSibling);
     return true;
   }
+
+  /* ----- Daily job alerts: role + city → WhatsApp with "job alerts <role> in <city>"
+     ready to send. Sending it IS the subscription (and opens WhatsApp's 24h window). */
+  var WA_BOT='919309014196';
+  var acss=''
+  +'#_r4uAlertOv{position:fixed;inset:0;z-index:10070;display:none;align-items:flex-end;justify-content:center;background:rgba(15,15,26,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}'
+  +'#_r4uAlertOv.on{display:flex;}'
+  +'#_r4uAlertCard{width:100%;max-width:440px;background:var(--card-bg,#fff);color:var(--text,#1a1a1a);border-radius:18px 18px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -14px 50px rgba(0,0,0,.25);animation:r4uAlUp .22s cubic-bezier(.4,0,.2,1);font-family:inherit;}'
+  +'@media(min-width:769px){#_r4uAlertOv{align-items:center;}#_r4uAlertCard{border-radius:18px;}}'
+  +'@keyframes r4uAlUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}'
+  +'#_r4uAlertCard .al-grip{width:38px;height:4px;border-radius:99px;background:var(--border,#e5e5e0);margin:0 auto 14px;}'
+  +'#_r4uAlertCard .al-hd{display:flex;align-items:center;gap:12px;}'
+  +'#_r4uAlertCard .al-hd .r4u-ic{width:42px;height:42px;border-radius:12px;}#_r4uAlertCard .al-hd .r4u-ic svg{width:21px;height:21px;}'
+  +'#_r4uAlertCard h3{font-size:1.02rem;font-weight:800;margin:0;line-height:1.25;}'
+  +'#_r4uAlertCard .al-sub{font-size:.8rem;color:var(--muted,#6b7280);margin:2px 0 0;line-height:1.4;}'
+  +'#_r4uAlertCard label{display:block;font-size:.78rem;font-weight:600;margin:14px 0 6px;color:var(--text,#1a1a1a);}'
+  +'#_r4uAlertCard label i{font-style:normal;font-weight:400;color:var(--muted,#6b7280);}'
+  +'#_r4uAlertCard input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;border:1.5px solid var(--border,#ddd8ce);border-radius:11px;padding:11px 12px;background:var(--input-bg,#fff);color:var(--text,#1a1a1a);}'
+  +'#_r4uAlertCard input:focus{outline:none;border-color:#128c7e;box-shadow:0 0 0 3px rgba(18,140,126,.15);}'
+  +'#_r4uAlertCard .al-err{display:none;color:#b91c1c;font-size:.76rem;margin-top:6px;}#_r4uAlertCard .al-err.on{display:block;}'
+  +'#_r4uAlertCard .al-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;border:0;cursor:pointer;font:inherit;font-weight:700;font-size:.95rem;color:#fff;background:linear-gradient(145deg,#25d366,#1aa851);padding:13px;border-radius:12px;box-shadow:0 10px 22px -12px rgba(26,168,81,.9);}'
+  +'#_r4uAlertCard .al-fine{text-align:center;font-size:.72rem;color:var(--muted,#6b7280);margin-top:8px;line-height:1.4;}'
+  +'#_r4uAlertCard .al-x{float:right;border:0;background:none;color:var(--muted,#6b7280);font-size:1.3rem;line-height:1;cursor:pointer;margin:-4px -4px 0 0;padding:4px;}'
+  +'#_r4uAlertCard button:focus-visible{outline:3px solid rgba(18,140,126,.4);outline-offset:2px;}';
+  var ast=document.createElement('style'); ast.textContent=acss; document.head.appendChild(ast);
+  function guess(){
+    var r='',c='';
+    try{ var d=JSON.parse(localStorage.getItem('_r4uResumeData')||'null')||JSON.parse(localStorage.getItem('_preSignInDraft')||'null')||{};
+      r=d.jobTitle||d.title||d.role||((d.experience||[])[0]||{}).title||''; c=String(d.location||d.city||'').split(',')[0]; }catch(e){}
+    return {role:String(r).trim().slice(0,60), city:String(c).trim().slice(0,40)};
+  }
+  function waOpen(url){
+    var desk=false; try{ desk=window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){}
+    if(desk && typeof window._r4uShowQR==='function') window._r4uShowQR(url,{title:'Job alerts on WhatsApp',sub:'Scan to open WhatsApp on your phone — your request is ready, just tap Send.',file:'job-alerts-qr.png'});
+    else window.open(url,'_blank','noopener');
+  }
+  function closeAlerts(){ var o=document.getElementById('_r4uAlertOv'); if(o) o.classList.remove('on'); }
+  function openAlerts(){
+    var o=document.getElementById('_r4uAlertOv');
+    if(!o){
+      o=document.createElement('div'); o.id='_r4uAlertOv'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-labelledby','_r4uAlertT');
+      o.innerHTML='<div id="_r4uAlertCard"><div class="al-grip"></div><button type="button" class="al-x" aria-label="Close">\u00d7</button>'
+        +'<div class="al-hd">'+ic('alert')+'<div><h3 id="_r4uAlertT">Daily job alerts on WhatsApp</h3><p class="al-sub">Fresh jobs for your role every morning at 9 AM. Free \u00b7 stop anytime.</p></div></div>'
+        +'<label for="_r4uAlRole">Role</label><input id="_r4uAlRole" type="text" autocomplete="organization-title" placeholder="e.g. Data Analyst, Product Owner" maxlength="60">'
+        +'<label for="_r4uAlCity">City <i>(optional)</i></label><input id="_r4uAlCity" type="text" autocomplete="address-level2" placeholder="e.g. Pune, Bangalore" maxlength="40">'
+        +'<div class="al-err" id="_r4uAlErr">Enter the role you want jobs for.</div>'
+        +'<button type="button" class="al-go">'+'<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Get alerts on WhatsApp</button>'
+        +'<p class="al-fine">WhatsApp opens with your request ready \u2014 just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.</p></div>';
+      document.body.appendChild(o);
+      o.addEventListener('click',function(e){ if(e.target===o) closeAlerts(); });
+      o.querySelector('.al-x').addEventListener('click',closeAlerts);
+      document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAlerts(); });
+      o.querySelector('.al-go').addEventListener('click',function(){
+        var role=o.querySelector('#_r4uAlRole').value.trim(), city=o.querySelector('#_r4uAlCity').value.trim();
+        var err=o.querySelector('#_r4uAlErr');
+        if(role.length<2){ err.classList.add('on'); o.querySelector('#_r4uAlRole').focus(); return; }
+        err.classList.remove('on');
+        var msg='job alerts '+role+(city?' in '+city:'');
+        waOpen('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent(msg));
+        closeAlerts();
+      });
+      o.querySelector('#_r4uAlCity').addEventListener('keydown',function(e){ if(e.key==='Enter') o.querySelector('.al-go').click(); });
+      o.querySelector('#_r4uAlRole').addEventListener('input',function(){ o.querySelector('#_r4uAlErr').classList.remove('on'); });
+    }
+    var g=guess(), R=o.querySelector('#_r4uAlRole'), C=o.querySelector('#_r4uAlCity');
+    if(!R.value) R.value=g.role; if(!C.value) C.value=g.city;
+    o.classList.add('on');
+    setTimeout(function(){ try{ (R.value?C:R).focus({preventScroll:true}); }catch(e){} },60);
+  }
+  window._r4uJobAlerts=openAlerts;
+  function fromLink(){ if(/^#job-alerts$/i.test(location.hash||'')){ openAlerts(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} } }
+  window.addEventListener('hashchange',fromLink);
+  setTimeout(fromLink,600);
 
   function tick(){ try{ sync(); }catch(e){} try{ row(); }catch(e){} }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
