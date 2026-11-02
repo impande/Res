@@ -52,6 +52,22 @@ exports.handler = async (event) => {
     const tok = process.env.WHATSAPP_VERIFY_TOKEN || '';
     if (!tok || q.key !== tok) return { statusCode: 401, body: 'unauthorized' };
   }
+  // Preview (token-guarded, sends nothing): check the job source and see the exact
+  // message, e.g. ?key=<token>&preview=1&role=Product%20Owner&city=Pune
+  if (!scheduled && q.preview) {
+    const search = JOBS.deriveSearch({}, { role: JOBS.titleCase(q.role || 'Data Analyst'), city: JOBS.titleCase(q.city || '') });
+    const res = await JOBS.fetchJobs(search, { maxDays: 3 });
+    return {
+      statusCode: 200, headers: { 'content-type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({
+        source: res.source,
+        jooble_key_set: !!process.env.JOOBLE_API_KEY,
+        template_set: process.env.WA_JOB_ALERT_TEMPLATE || null,
+        listings: res.jobs.length,
+        message: '☀️ Good morning! ' + JOBS.formatJobs(search, res)
+      }, null, 2)
+    };
+  }
   const t0 = Date.now();
   const only = q.to ? String(q.to).replace(/\D/g, '') : '';
   const subs = only ? [only] : ((await redis(['SMEMBERS', 'jobalerts:subs'])) || []);

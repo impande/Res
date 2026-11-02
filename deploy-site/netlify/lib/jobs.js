@@ -119,7 +119,7 @@ function formatJobs(search, res, opts) {
   const lines = [];
   const list = (res.jobs || []).slice(0, o.limit || 5);
   if (list.length) {
-    lines.push('💼 *' + list.length + ' fresh jobs for ' + search.role + where + '* — matched to your resume\n');
+    lines.push('💼 *' + list.length + ' fresh job' + (list.length === 1 ? '' : 's') + ' for ' + search.role + where + '* — matched to your resume\n');
     list.forEach((j, i) => {
       lines.push((i + 1) + '. *' + j.title + '*' + (j.company ? ' — ' + j.company : '') + (j.location ? ' · ' + j.location : ''));
       if (j.matched && j.matched.length) lines.push('   ✅ Matches: ' + j.matched.join(', '));
