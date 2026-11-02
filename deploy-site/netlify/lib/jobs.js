@@ -38,23 +38,29 @@ function searchLinks(role, city) {
   ];
 }
 
+/* The role's "head" word (Owner in "Product Owner", Analyst in "Data Analyst") must
+ * be in the job title for it to count as a real match; a shared modifier alone
+ * ("Product Designer" for a Product Owner) does not. */
+const HEAD_SYN = { developer: ['engineer', 'programmer'], engineer: ['developer'], manager: ['lead', 'head'], executive: ['associate', 'officer'] };
 function scoreJob(job, s) {
   const text = (job.title + ' ' + job.description).toLowerCase();
   const matched = s.skills.filter((k) => k.length > 1 && text.includes(k.toLowerCase()));
   const rw = words(s.role), tw = new Set(words(job.title));
   const titleHit = rw.length ? rw.filter((w) => tw.has(w)).length / rw.length : 0;
-  return { score: Math.round(titleHit * 60 + Math.min(matched.length, 8) * 5), matched: matched.slice(0, 4) };
+  const head = rw[rw.length - 1];
+  const headHit = !head || tw.has(head) || (HEAD_SYN[head] || []).some((w) => tw.has(w));
+  return { score: Math.round(titleHit * 60 + Math.min(matched.length, 8) * 5) + (headHit ? 40 : 0), matched: matched.slice(0, 4), head: headHit };
 }
 
 function rank(jobs, s) {
   jobs = jobs.filter((x) => x.title && x.url);
-  jobs.forEach((job) => { const m = scoreJob(job, s); job.match = m.score; job.matched = m.matched; });
+  jobs.forEach((job) => { const m = scoreJob(job, s); job.match = m.score; job.matched = m.matched; job.head = m.head; });
   const seen = new Set();
   jobs = jobs.filter((x) => { const k = (x.title + '|' + x.company).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
   jobs.sort((a, b) => (b.match - a.match) || String(b.created).localeCompare(String(a.created)));
-  // Prefer listings that actually match; only pad with unmatched ones if few match.
-  const good = jobs.filter((x) => x.match > 0);
-  return good.length >= 3 ? good : good.concat(jobs.filter((x) => x.match === 0));
+  // Real matches first; only pad with near matches when there are fewer than 3.
+  const good = jobs.filter((x) => x.head);
+  return good.length >= 3 ? good : good.concat(jobs.filter((x) => !x.head && x.match > 0));
 }
 const strip = (h) => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 
