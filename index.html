@@ -12018,12 +12018,12 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   /* Keep the card right under the resume actions and directly ABOVE the ATS
      score card (which renderATSScore inserts after .resume-bar on generation). */
+  /* Fixed order under the resume actions: Tailor → ATS Score → "Use this resume for".
+     (It used to chase #atsScoreCard, which is hidden and moves, so it fought the
+     ATS Score card's own placement and the cards swapped places every tick.) */
   function place(bar){
-    var ats=document.getElementById('atsScoreCard');
     var resumeBar=document.querySelector('#step8 .resume-bar');
-    if(ats && ats.parentNode){
-      if(bar.nextSibling!==ats) ats.parentNode.insertBefore(bar, ats);
-    } else if(resumeBar && resumeBar.parentNode){
+    if(resumeBar && resumeBar.parentNode){
       if(resumeBar.nextSibling!==bar) resumeBar.parentNode.insertBefore(bar, resumeBar.nextSibling);
     }
   }
@@ -14831,6 +14831,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   +'.r4u-tl{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#fff;border:1px solid #ece6db;border-radius:12px;text-decoration:none;cursor:pointer;transition:border-color .15s,transform .15s;}'
   +'.r4u-tl:hover{border-color:#e7c79a;transform:translateY(-1px);}.r4u-tl:focus-visible{outline:3px solid rgba(180,83,9,.4);outline-offset:2px;}'
   +'.r4u-tl b{font-size:.74rem;color:var(--text,#1a1a1a);text-align:center;line-height:1.2;}'
+  +'@media (max-width:420px){#_r4uNextBar .nb-row{gap:6px;}.r4u-tl{padding:9px 2px;}.r4u-tl b{font-size:.68rem;}}'
   +'.r4u-ic{flex:0 0 auto;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;line-height:1;}'
   +'.r4u-ic svg{width:17px;height:17px;display:block;}'
   +'#_r4uToolsRow{margin:22px 0 4px;}'
@@ -14898,11 +14899,16 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     bar=document.createElement('div'); bar.id='_r4uNextBar';
     bar.innerHTML='<div class="nb-h"><span class="nb-ok" aria-hidden="true">✓</span><span class="nb-t">Use this resume for:</span></div>'
       +'<div class="nb-row">'
+      +'<a class="r4u-tl r4u-tl-alert" href="/whatsapp-job-alerts/" target="_blank" rel="noopener">'+ic('alert')+'<b>Job alerts</b></a>'
       +'<a class="r4u-tl" href="/linkedin-profile-optimizer/" target="_blank" rel="noopener">'+ic('li')+'<b>LinkedIn</b></a>'
       +'<a class="r4u-tl" href="/interview-prep/" target="_blank" rel="noopener">'+ic('iv')+'<b>Interview prep</b></a>'
       +'<a class="r4u-tl" href="/resume-in-hindi/" target="_blank" rel="noopener">'+ic('hi')+'<b>Hindi resume</b></a>'
       +'</div>';
-    bar.addEventListener('click',function(e){ if(e.target.closest('a')) stash(); });
+    bar.addEventListener('click',function(e){
+      var a=e.target.closest('a'); if(!a) return;
+      stash();
+      if(a.classList.contains('r4u-tl-alert') && window._r4uJobAlerts){ e.preventDefault(); window._r4uJobAlerts(); }
+    });
   }
   function place(){
     var after=document.getElementById('_r4uRoastBar')||document.getElementById('_r4uJdTailorBar');
