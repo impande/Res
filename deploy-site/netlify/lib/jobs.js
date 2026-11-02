@@ -135,14 +135,17 @@ function formatJobs(search, res, opts) {
   return lines.join('\n');
 }
 
+/* "product manager" -> "Product Manager" (leaves "UX lead at SaaS" etc. alone if the user typed capitals) */
+function titleCase(t) { t = String(t || '').trim(); return /[A-Z]/.test(t) ? t : t.replace(/(^|[\s\-\/])([a-z])/g, (m, a, b) => a + b.toUpperCase()); }
+
 /* "jobs data analyst in pune" -> { role, city } */
 function parseJobQuery(text) {
   const t = String(text || '').trim().replace(/^(job alerts?|find jobs?|search jobs?|daily jobs|jobs?)\b\s*(for|of)?\b\s*/i, '');
   if (!t) return {};
   const onlyCity = t.match(/^in\s+(.+)$/i);           // "jobs in pune" -> keep the resume's role
-  if (onlyCity) return { city: onlyCity[1].trim() };
+  if (onlyCity) return { city: titleCase(onlyCity[1]) };
   const m = t.match(/^(.+?)\s+in\s+(.+)$/i);
-  return m ? { role: m[1].trim(), city: m[2].trim() } : { role: t };
+  return m ? { role: titleCase(m[1]), city: titleCase(m[2]) } : { role: titleCase(t) };
 }
 
-module.exports = { deriveSearch, fetchJobs, formatJobs, searchLinks, parseJobQuery, scoreJob };
+module.exports = { deriveSearch, fetchJobs, formatJobs, searchLinks, parseJobQuery, scoreJob, titleCase };

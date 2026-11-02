@@ -698,7 +698,7 @@ exports.handler = async (event) => {
     if (/^(interview|interview prep|mock interview|practi[cs]e interview)(\s+.*)?$/i.test(low)) {
       const prof = await savedResume();
       const rest = text.replace(/^(interview prep|mock interview|practi[cs]e interview|interview)\s*(for\s+)?/i, '').trim();
-      const role = rest || JOBS.deriveSearch(prof).role;
+      const role = JOBS.titleCase(rest) || JOBS.deriveSearch(prof).role;
       if (!role) { await send(from, 'Which role are you interviewing for? Reply like: *interview data analyst*'); return OK; }
       const summary = haveData(prof) ? (prof._src === 'web' ? summarizeCloud(prof) : summarize(prof)) : '';
       const prev = (await redis(['GET', 'ivq:' + from])) || '';
