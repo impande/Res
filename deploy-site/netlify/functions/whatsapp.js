@@ -727,6 +727,12 @@ exports.handler = async (event) => {
       return p;
     };
 
+    // While a resume question is being answered, only BARE commands count — so a
+    // job-title answer like "Interview Coordinator" or "Mock Test Engineer" is saved
+    // as the answer instead of starting interview practice / a job search.
+    const answering = state.mode === 'build' && state.step > 0;
+    const bareCmd = /^(jobs?|find jobs?|job\s*alerts?|daily\s*jobs|interview|interview prep|mock|mock interview|practi[cs]e\s+interview|interview\s+practi[cs]e)[.!\s]*$/i.test(low.trim());
+    const cmdOK = !answering || bareCmd;
     // ---- Mock interview (sticky): one question at a time; each typed answer is
     //      scored with feedback, then the next question. Commands still work and
     //      end the interview; "stop" ends it with a summary. ----
@@ -811,7 +817,7 @@ exports.handler = async (event) => {
       return OK;
     }
     // ---- Jobs matched to the resume: "jobs" / "jobs data analyst in pune" ----
-    if (/^(jobs?|find jobs?|search jobs?|jobs for me|show jobs|job search)(\s+.*)?$/i.test(low) && !/^jobs?\s*alerts?\b/i.test(low)) {
+    if (cmdOK && /^(jobs?|find jobs?|search jobs?|jobs for me|show jobs|job search)(\s+.*)?$/i.test(low) && !/^jobs?\s*alerts?\b/i.test(low)) {
       const prof = await savedResume();
       const search = JOBS.deriveSearch(prof, JOBS.parseJobQuery(text));
       if (!search.role) { await send(from, "Tell me the role to search — e.g. *jobs data analyst in Pune*.\n\n(Or build your resume first and I'll match jobs to it automatically.)"); return OK; }
@@ -820,7 +826,7 @@ exports.handler = async (event) => {
       return OK;
     }
     // ---- Daily job alerts: "job alerts" / "job alerts data analyst in pune" ----
-    if (/^(job\s*alerts?|daily\s*jobs|alerts?\s*on|subscribe(\s+to)?\s+jobs?)(\s+.*)?$/i.test(low)) {
+    if (cmdOK && /^(job\s*alerts?|daily\s*jobs|alerts?\s*on|subscribe(\s+to)?\s+jobs?)(\s+.*)?$/i.test(low)) {
       const prof = await savedResume();
       const rest = text.replace(/^(job\s*alerts?|daily\s*jobs|alerts?\s*on|subscribe(\s+to)?\s+jobs?)\s*/i, '');
       const search = JOBS.deriveSearch(prof, JOBS.parseJobQuery('jobs ' + rest));
@@ -841,7 +847,7 @@ exports.handler = async (event) => {
     }
     // ---- Mock interview: "mock interview" / "mock interview product owner" ----
     {
-      const mm = text.match(MOCK_START);
+      const mm = cmdOK ? text.match(MOCK_START) : null;
       if (mm) {
         const prof = await savedResume();
         const role = JOBS.titleCase((mm[6] || '').trim()) || JOBS.deriveSearch(prof).role;
@@ -859,7 +865,7 @@ exports.handler = async (event) => {
       }
     }
     // ---- Interview practice: "interview" / "interview data analyst" ----
-    if (/^(interview|interview prep)(\s+.*)?$/i.test(low)) {
+    if (cmdOK && /^(interview|interview prep)(\s+.*)?$/i.test(low)) {
       const prof = await savedResume();
       const rest = text.replace(/^(interview prep|interview)\s*(for\s+)?/i, '').trim();
       const role = JOBS.titleCase(rest) || JOBS.deriveSearch(prof).role;
