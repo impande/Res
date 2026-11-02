@@ -14830,13 +14830,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   +'#_r4uToolsRow{margin:22px 0 4px;}'
   +'#_r4uToolsRow .tr-h{display:flex;align-items:center;justify-content:space-between;padding:0 2px;}'
   +'#_r4uToolsRow .tr-t{font-size:.7rem;font-weight:800;letter-spacing:.12em;color:#b45309;text-transform:uppercase;}'
-  +'#_r4uToolsRow .tr-row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 2px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}'
+  +'#_r4uToolsRow .tr-row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:2px;padding:10px 2px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}'
   +'#_r4uToolsRow .tr-row::-webkit-scrollbar{display:none;}'
   +'#_r4uToolsRow a{flex:0 0 132px;scroll-snap-align:start;background:#fff;border:1px solid #ebe7df;border-radius:14px;padding:12px;text-decoration:none;box-shadow:0 6px 16px -12px rgba(0,0,0,.25);transition:border-color .15s,transform .15s;}'
   +'#_r4uToolsRow a:hover{border-color:#e7c79a;transform:translateY(-1px);}#_r4uToolsRow a:focus-visible{outline:3px solid rgba(180,83,9,.4);outline-offset:2px;}'
   +'#_r4uToolsRow a .r4u-ic{width:38px;height:38px;border-radius:11px;}#_r4uToolsRow a .r4u-ic svg{width:20px;height:20px;}'
   +'#_r4uToolsRow a b{display:block;font-size:.84rem;color:var(--text,#1a1a1a);line-height:1.25;margin-top:9px;}'
   +'#_r4uToolsRow a span.s{display:block;font-size:.7rem;color:var(--muted,#6b7280);margin-top:2px;line-height:1.3;}'
+  +'@media (min-width:700px){#_r4uToolsRow .tr-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;margin:0;padding:10px 0;}#_r4uToolsRow a{flex:none;}}'
   +'@media (prefers-reduced-motion:reduce){.r4u-tl,#_r4uToolsRow a{transition:none;}}';
   var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
 
@@ -14845,7 +14846,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     li:['linear-gradient(135deg,#0a66c2,#004182)','<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6.2 8.6H3V21h3.2V8.6zM4.6 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM21 13.9c0-3.3-1.8-5.6-4.9-5.6-1.6 0-2.7.9-3.2 1.7V8.6H9.8V21H13v-6.4c0-1.6.6-2.9 2.3-2.9 1.6 0 2.1 1.3 2.1 3V21H21v-7.1z"/></svg>'],
     iv:['linear-gradient(135deg,#f59e0b,#d97706)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"/><path d="M12 15.5h.01"/></svg>'],
     hi:['linear-gradient(135deg,#f97316,#c2410c)','<span aria-hidden="true">अ</span>'],
-    bio:['linear-gradient(135deg,#8b5cf6,#6d28d9)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7M8.5 18h5"/></svg>']
+    bio:['linear-gradient(135deg,#8b5cf6,#6d28d9)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7M8.5 18h5"/></svg>'],
+    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/><circle cx="18" cy="19" r="2.2" fill="#fff"/><circle cx="30" cy="19" r="2.2" fill="#fff"/></svg>']
   };
   function ic(k){ return '<span class="r4u-ic" style="background:'+IC[k][0]+'">'+IC[k][1]+'</span>'; }
 
@@ -14921,6 +14923,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +c('iv','/interview-prep/','Interview Prep','Questions for your role')
       +c('hi','/resume-in-hindi/','Resume in Hindi','+ 9 Indian languages')
       +c('bio','/govt-job-biodata-maker/','Govt Job Biodata','Hindi / English')
+      +c('sova','/sova/','Sova Prompt Maker','Perfect AI prompts')
       +'</div>';
     wa.parentNode.insertBefore(r, wa.nextSibling);
     return true;

@@ -115,6 +115,7 @@
    * opts.uploadLabel  drop-zone title (default "Upload your resume (PDF)")
    * opts.help         optional HTML shown in a "How?" disclosure under the drop zone
    * If the builder saved a resume on this device it is offered first and selected. */
+  var DROP_MSG = 'PDF, read privately in your browser';
   RT.mountResumeInput = function (el, opts) {
     opts = opts || {};
     var state = { text: '', pageCount: 0, name: '' };
@@ -125,7 +126,9 @@
         '<span>' + RT.esc(saved.name) + (saved.when ? ' · ' + ago(saved.when) : '') + '</span></span></label>' +
         '<div class="or"><span>or use a different one</span></div>' : '') +
       '<div class="drop" tabindex="0" role="button" aria-label="' + RT.esc(opts.uploadLabel || 'Upload your resume (PDF)') + '">' +
-        '<b>📄 ' + RT.esc(opts.uploadLabel || 'Upload your resume (PDF)') + '</b><span class="dmsg">Tap to choose a file, or drop it here · read in your browser</span>' +
+        '<span class="drop-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m7 8 5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg></span>' +
+        '<span class="drop-tx"><b>' + RT.esc(opts.uploadLabel || 'Upload your resume (PDF)') + '</b><span class="dmsg">' + DROP_MSG + '</span></span>' +
+        '<span class="drop-go" aria-hidden="true">Browse</span>' +
         '<input type="file" accept="application/pdf,.pdf,.txt,text/plain" hidden>' +
       '</div>' +
       (opts.help ? '<details class="howto"><summary>' + RT.esc(opts.helpTitle || 'How?') + '</summary><div>' + opts.help + '</div></details>' : '') +
@@ -135,7 +138,7 @@
     var ta = el.querySelector('.paste'), tg = el.querySelector('.tg');
     var sv = el.querySelector('.saved'), svBox = sv && sv.querySelector('input');
     function setSaved(on) { useSaved = !!(saved && on); if (sv) { sv.classList.toggle('on', useSaved); svBox.checked = useSaved; } }
-    if (svBox) svBox.addEventListener('change', function () { setSaved(svBox.checked); if (svBox.checked) { state = { text: '', pageCount: 0, name: '' }; msg.textContent = 'Tap to choose a file, or drop it here · read in your browser'; showPaste(false); } });
+    if (svBox) svBox.addEventListener('change', function () { setSaved(svBox.checked); if (svBox.checked) { state = { text: '', pageCount: 0, name: '' }; msg.textContent = DROP_MSG; showPaste(false); } });
     function showPaste(open) { ta.hidden = !open; tg.textContent = open ? 'or upload a PDF instead' : 'or paste your resume text instead'; if (open) { setSaved(false); ta.focus(); } }
     tg.addEventListener('click', function () { showPaste(ta.hidden); });
     drop.addEventListener('click', function () { file.click(); });
