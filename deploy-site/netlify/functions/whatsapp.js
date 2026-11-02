@@ -195,6 +195,38 @@ async function polishBullets(raw, role) {
              : [raw];
 }
 
+/* ---- voice notes → text (mock interview answers) ----
+   Any OpenAI-compatible transcription API. Defaults to Groq's free Whisper:
+     STT_API_KEY   key (required to enable voice answers)
+     STT_BASE_URL  default https://api.groq.com/openai/v1
+     STT_MODEL     default whisper-large-v3-turbo */
+const VOICE_ON = () => !!process.env.STT_API_KEY;
+async function transcribe(mediaId, hint) {
+  const key = process.env.STT_API_KEY;
+  if (!key || !mediaId) return { err: 'off' };
+  const media = await fetchMedia(mediaId);
+  if (!media) return { err: 'fetch' };
+  const buf = Buffer.from(media.base64, 'base64');
+  if (buf.length > 20 * 1024 * 1024) return { err: 'big' };
+  const mime = String(media.mime || 'audio/ogg').split(';')[0].trim();
+  const ext = /mpeg|mp3/.test(mime) ? 'mp3' : /mp4|m4a|aac/.test(mime) ? 'm4a' : /wav/.test(mime) ? 'wav' : /webm/.test(mime) ? 'webm' : 'ogg';
+  const fd = new FormData();
+  fd.append('file', new Blob([buf], { type: mime }), 'answer.' + ext);
+  fd.append('model', process.env.STT_MODEL || 'whisper-large-v3-turbo');
+  fd.append('response_format', 'json');
+  fd.append('temperature', '0');
+  if (hint) fd.append('prompt', String(hint).slice(0, 200));
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 12000);
+  try {
+    const base = (process.env.STT_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
+    const r = await fetch(base + '/audio/transcriptions', { method: 'POST', headers: { Authorization: 'Bearer ' + key }, body: fd, signal: ctl.signal });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { console.error('[whatsapp] transcription failed', r.status, j.error && (j.error.message || j.error)); return { err: 'api' }; }
+    return { text: String(j.text || '').trim() };
+  } catch (e) { console.error('[whatsapp] transcription error', e && e.message); return { err: 'api' }; }
+  finally { clearTimeout(t); }
+}
+
 /* ---- import an existing resume (PDF or photo) via Claude ---- */
 async function fetchMedia(mediaId) {
   const token = process.env.WHATSAPP_TOKEN;
@@ -595,8 +627,9 @@ exports.handler = async (event) => {
 
   const from = msg.from;
   const type = msg.type;
-  const text = (msg.text && msg.text.body || '').trim();
-  const low = text.toLowerCase();
+  let text = (msg.text && msg.text.body || '').trim();
+  let low = text.toLowerCase();
+  let heard = '';   // transcript, when a voice note is answering a mock interview question
   console.log('[whatsapp] inbound from', from, 'type', type, ':', JSON.stringify(text));
   const base = siteBase(event); // finish link lives on the same deploy as this webhook
   // Last time this user messaged us: WhatsApp only allows free-form messages
@@ -627,11 +660,25 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: 'ok' };
     }
 
-    if (type === 'audio' && await getMock(from)) {
-      await send(from, '🎙️ Voice answers are coming soon — for now, please *type* your answer (2–5 sentences, the way you\'d say it in the room).');
-      return { statusCode: 200, body: 'ok' };
+    if (type === 'audio') {
+      const m = await getMock(from);
+      if (!m) {
+        if (VOICE_ON()) await send(from, '🎙️ Voice notes work in *mock interview* — send *mock interview* to practise answering out loud.');
+        return { statusCode: 200, body: 'ok' };
+      }
+      if (!VOICE_ON()) {
+        await send(from, '🎙️ Please *type* your answer for now (2–5 sentences, the way you\'d say it in the room).');
+        return { statusCode: 200, body: 'ok' };
+      }
+      const tr = await transcribe(msg.audio && msg.audio.id, 'Interview answer for a ' + m.role + ' role.');
+      if (!tr.text) {
+        await send(from, tr.err === 'big' ? '🎙️ That voice note is too long — keep answers under 2 minutes, or type it.'
+          : "🎙️ I couldn't hear that clearly. Please send the voice note again, or type your answer.");
+        return { statusCode: 200, body: 'ok' };
+      }
+      heard = tr.text; text = tr.text; low = text.toLowerCase();
     }
-    if (type !== 'text') return { statusCode: 200, body: 'ok' };
+    if (type !== 'text' && !heard) return { statusCode: 200, body: 'ok' };
 
     // ---- Support mode (sticky): the user reached a human-support chat. Route every
     //      message to the ticket (the owner reads/replies from the admin page) until
@@ -686,17 +733,17 @@ exports.handler = async (event) => {
     const MOCK_START = /^(mock(\s+interview)?|practi[cs]e\s+interview|interview\s+practi[cs]e|start\s+mock(\s+interview)?)(\s+(for\s+)?(.+))?$/i;
     const MOCK_BREAK = /^(hi+|hey+|hello+|namaste|menu|help|options|commands|link|my link|edit|new|restart|reset|versions?|support|contact(\s+us)?|stop\s+(job\s+)?alerts?|job\s*alerts?(\s+.*)?|jobs?(\s+.*)?|interview(\s+.*)?)[.!\s]*$/i;
     let mock = await getMock(from);
-    if (mock && !MOCK_START.test(text)) {
-      if (/^(stop|end|exit|quit|finish|done|cancel)(\s+(the\s+)?(interview|mock|practice))?[.!\s]*$/i.test(low)) {
+    if (mock && (heard || !MOCK_START.test(text))) {
+      if (/^(stop|end|exit|quit|finish|done|cancel)(\s+(the\s+)?(interview|mock|practice))?[.!\s]*$/i.test(low.trim())) {
         await clearMock(from);
         await send(from, mockSummary(mock, base));
         return OK;
       }
-      if (MOCK_BREAK.test(text)) { await clearMock(from); mock = null; }   // a command → leave the interview, handle it below
+      if (!heard && MOCK_BREAK.test(text)) { await clearMock(from); mock = null; }   // a command → leave the interview, handle it below
       else {
-        const skip = /^(skip|next|pass|next question)[.!\s]*$/i.test(low);
+        const skip = /^(skip|next|pass|next question)[.!\s]*$/i.test(low.trim());
         if (!skip && text.split(/\s+/).filter(Boolean).length < 4) {
-          await send(from, 'Give it a proper go — answer in 2–5 sentences, the way you\'d say it in the room.\n\nReply *skip* for the next question · *stop* to end');
+          await send(from, (heard ? '🗣️ I only heard: “' + heard + '”\n\n' : '') + 'Give it a proper go — answer in 2–5 sentences, the way you\'d say it in the room.\n\nReply *skip* for the next question · *stop* to end');
           return OK;
         }
         const n = mock.scores.length + 1;               // the question being answered
@@ -725,7 +772,8 @@ exports.handler = async (event) => {
         mock.tips.push(skip ? '' : String(ev.improve || ''));
         let out = '';
         if (ev) {
-          out = '📝 *Feedback — ' + mock.scores[mock.scores.length - 1] + '/10*\n' +
+          out = (heard ? '🗣️ *I heard:* “' + (heard.length > 320 ? heard.slice(0, 317) + '…' : heard) + '”\n\n' : '') +
+            '📝 *Feedback — ' + mock.scores[mock.scores.length - 1] + '/10*\n' +
             (ev.good ? '✅ ' + ev.good + '\n' : '') + '🔧 ' + ev.improve + '\n💡 *Stronger answer:* ' + ev.better_answer;
         } else out = '⏭️ Skipped.';
         if (last || !next) {
@@ -735,7 +783,7 @@ exports.handler = async (event) => {
         }
         mock.cur = String(next).trim(); mock.asked.push(mock.cur);
         await setMock(from, mock);
-        await send(from, out + '\n\n*Q' + (n + 1) + '/' + MOCK_N + ':* ' + mock.cur + '\n\nType your answer · *skip* · *stop*');
+        await send(from, out + '\n\n*Q' + (n + 1) + '/' + MOCK_N + ':* ' + mock.cur + '\n\n' + (VOICE_ON() ? 'Type or 🎙️ voice-note your answer' : 'Type your answer') + ' · *skip* · *stop*');
         return OK;
       }
     }
@@ -806,7 +854,7 @@ exports.handler = async (event) => {
         if (!q || !q.question) { await send(from, "Sorry, I couldn't start the interview just now. Please try again."); return OK; }
         const m = { role, summary: summary.slice(0, 1500), cur: q.question.trim(), asked: [q.question.trim()], scores: [], tips: [], at: Date.now() };
         await setMock(from, m);
-        await send(from, '🎤 *Mock interview — ' + role + '*\n\n' + MOCK_N + ' questions, one at a time. Answer each in 2–5 sentences, the way you\'d say it in the room — I\'ll score it and show you a stronger version.\n\n*Q1/' + MOCK_N + ':* ' + m.cur + '\n\nType your answer · *skip* · *stop*');
+        await send(from, '🎤 *Mock interview — ' + role + '*\n\n' + MOCK_N + ' questions, one at a time. Answer each in 2–5 sentences, the way you\'d say it in the room' + (VOICE_ON() ? ' — type it or send a 🎙️ voice note' : '') + '. I\'ll score it and show you a stronger version.\n\n*Q1/' + MOCK_N + ':* ' + m.cur + '\n\n' + (VOICE_ON() ? 'Type or 🎙️ voice-note your answer' : 'Type your answer') + ' · *skip* · *stop*');
         return OK;
       }
     }
