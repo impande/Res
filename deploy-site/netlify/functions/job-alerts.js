@@ -54,6 +54,21 @@ exports.handler = async (event) => {
   }
   // Preview (token-guarded, sends nothing): check the job source and see the exact
   // message, e.g. ?key=<token>&preview=1&role=Product%20Owner&city=Pune
+  // Voice-answer key check (token-guarded): ?key=<token>&stt=1
+  if (!scheduled && q.stt) {
+    const key = process.env.STT_API_KEY, base = (process.env.STT_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
+    let status = 'no STT_API_KEY set', models = [];
+    if (key) {
+      try {
+        const r = await fetch(base + '/models', { headers: { Authorization: 'Bearer ' + key } });
+        const j = await r.json().catch(() => ({}));
+        models = (j.data || []).map((m) => m.id).filter((id) => /whisper/i.test(id));
+        const want = process.env.STT_MODEL || 'whisper-large-v3-turbo';
+        status = !r.ok ? 'key rejected (HTTP ' + r.status + ')' : models.includes(want) ? 'OK — ' + want + ' available' : 'key works, but ' + want + ' not listed';
+      } catch (e) { status = 'could not reach ' + base + ': ' + (e && e.message); }
+    }
+    return { statusCode: 200, headers: { 'content-type': 'text/plain; charset=utf-8' }, body: JSON.stringify({ voice_answers: status, whisper_models: models }, null, 2) };
+  }
   if (!scheduled && q.preview) {
     const search = JOBS.deriveSearch({}, { role: JOBS.titleCase(q.role || 'Data Analyst'), city: JOBS.titleCase(q.city || '') });
     const res = await JOBS.fetchJobs(search, { maxDays: 3 });
