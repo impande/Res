@@ -152,6 +152,39 @@ async function claude(prompt, maxTokens) {
     messages: [{ role: 'user', content: prompt }]
   }, 'claude-haiku-4-5-20251001');
 }
+/* Structured reply (JSON schema) — used by the mock interview. Falls back to
+   parsing the first {...} if the fallback model ignores the schema. */
+async function claudeJSON(prompt, maxTokens, schema) {
+  const t = await anthropicText({
+    model: 'claude-haiku-5-5', max_tokens: (maxTokens || 600) + 2000,
+    output_config: { effort: 'low', format: { type: 'json_schema', schema: schema } },
+    messages: [{ role: 'user', content: prompt + '\n\nReply with only a JSON object with these keys: ' + Object.keys(schema.properties).join(', ') + '.' }]
+  }, 'claude-haiku-4-5-20251001');
+  if (!t) return null;
+  try { return JSON.parse(t); } catch (e) {}
+  const m = t.match(/\{[\s\S]*\}/); if (!m) return null;
+  try { return JSON.parse(m[0]); } catch (e) { return null; }
+}
+const MOCK_N = 5;
+const MOCK_Q_SCHEMA = { type: 'object', properties: { question: { type: 'string' } }, required: ['question'], additionalProperties: false };
+const MOCK_EVAL_SCHEMA = { type: 'object', properties: {
+  score: { type: 'integer' }, good: { type: 'string' }, improve: { type: 'string' },
+  better_answer: { type: 'string' }, next_question: { type: 'string' }
+}, required: ['score', 'good', 'improve', 'better_answer', 'next_question'], additionalProperties: false };
+const MOCK_MIX = 'Vary the type across the interview: experience walk-through, behavioural (STAR), situational, role/technical, motivation.';
+async function getMock(from) { const v = await redis(['GET', 'mock:' + from]); try { return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+async function setMock(from, m) { await redis(['SET', 'mock:' + from, JSON.stringify(m), 'EX', '21600']); }
+async function clearMock(from) { await redis(['DEL', 'mock:' + from]); }
+function mockSummary(m, base) {
+  const done = m.scores.filter((x) => typeof x === 'number');
+  if (!done.length) return "Mock interview ended. Reply *mock interview* anytime to practise again.";
+  const avg = done.reduce((a, b) => a + b, 0) / done.length;
+  const per = m.scores.map((x, i) => 'Q' + (i + 1) + ' ' + (typeof x === 'number' ? x : '–')).join(' · ');
+  let low = -1; m.scores.forEach((x, i) => { if (typeof x === 'number' && (low < 0 || x < m.scores[low])) low = i; });
+  const focus = low >= 0 && m.tips[low] ? '\n🎯 *Work on:* ' + m.tips[low] : '';
+  return '🏁 *Mock interview done — ' + m.role + '*\n\nYour average: *' + avg.toFixed(1) + '/10* (' + done.length + ' answered)\n' + per + focus +
+    '\n\nReply *mock interview* to practise again · full prep with model answers: ' + base + '/interview-prep/';
+}
 async function polishBullets(raw, role) {
   const out = await claude(
     `Turn the candidate's plain-language notes into 1-3 strong resume bullet points for a "${role || 'professional'}" role. ` +
@@ -570,7 +603,7 @@ exports.handler = async (event) => {
   // within 24h of it, so the daily job alerts check this before sending.
   await redis(['SET', 'lastseen:' + from, String(Date.now()), 'EX', '172800']);
 
-  const MENU = 'Reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n\nAlso try: *jobs* · *job alerts* · *interview*';
+  const MENU = 'Reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n\nAlso try: *jobs* · *job alerts* · *interview* · *mock interview*';
 
   try {
     let state = await getState(from);
@@ -594,6 +627,10 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: 'ok' };
     }
 
+    if (type === 'audio' && await getMock(from)) {
+      await send(from, '🎙️ Voice answers are coming soon — for now, please *type* your answer (2–5 sentences, the way you\'d say it in the room).');
+      return { statusCode: 200, body: 'ok' };
+    }
     if (type !== 'text') return { statusCode: 200, body: 'ok' };
 
     // ---- Support mode (sticky): the user reached a human-support chat. Route every
@@ -610,7 +647,7 @@ exports.handler = async (event) => {
       // Build CTA) leaves support and is handled by the normal flow below.
       const wantsBot = /\b(build|make|create|start)\s+(a\s+|an\s+|my\s+)?(new\s+)?(resume|r[eé]sum[eé]|cv)\b/i.test(low)
         || /^(new|restart|reset|start over|build new|fresh|edit|edit resume|update resume|versions?|my resumes?|switch resume)$/i.test(low)
-        || /^(jobs?|job\s*alerts?|stop(\s+job)?\s+alerts?|interview|mock interview|interview prep)\b/i.test(low);
+        || /^(jobs?|job\s*alerts?|stop(\s+job)?\s+alerts?|interview|mock(\s+interview)?|practi[cs]e\s+interview|interview prep)\b/i.test(low);
       if (!wantsBot) {
         const _pf = await getProfile(from);
         await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
@@ -642,6 +679,66 @@ exports.handler = async (event) => {
       }
       return p;
     };
+
+    // ---- Mock interview (sticky): one question at a time; each typed answer is
+    //      scored with feedback, then the next question. Commands still work and
+    //      end the interview; "stop" ends it with a summary. ----
+    const MOCK_START = /^(mock(\s+interview)?|practi[cs]e\s+interview|interview\s+practi[cs]e|start\s+mock(\s+interview)?)(\s+(for\s+)?(.+))?$/i;
+    const MOCK_BREAK = /^(hi+|hey+|hello+|namaste|menu|help|options|commands|link|my link|edit|new|restart|reset|versions?|support|contact(\s+us)?|stop\s+(job\s+)?alerts?|job\s*alerts?(\s+.*)?|jobs?(\s+.*)?|interview(\s+.*)?)[.!\s]*$/i;
+    let mock = await getMock(from);
+    if (mock && !MOCK_START.test(text)) {
+      if (/^(stop|end|exit|quit|finish|done|cancel)(\s+(the\s+)?(interview|mock|practice))?[.!\s]*$/i.test(low)) {
+        await clearMock(from);
+        await send(from, mockSummary(mock, base));
+        return OK;
+      }
+      if (MOCK_BREAK.test(text)) { await clearMock(from); mock = null; }   // a command → leave the interview, handle it below
+      else {
+        const skip = /^(skip|next|pass|next question)[.!\s]*$/i.test(low);
+        if (!skip && text.split(/\s+/).filter(Boolean).length < 4) {
+          await send(from, 'Give it a proper go — answer in 2–5 sentences, the way you\'d say it in the room.\n\nReply *skip* for the next question · *stop* to end');
+          return OK;
+        }
+        const n = mock.scores.length + 1;               // the question being answered
+        const last = n >= MOCK_N;
+        let ev = null;
+        if (!skip) {
+          ev = await claudeJSON(
+            'You are a senior interviewer hiring for a "' + mock.role + '" role, running a mock interview on WhatsApp.\n' +
+            (mock.summary ? 'Candidate background (from their resume):\n' + mock.summary + '\n' : '') +
+            'Question ' + n + ' of ' + MOCK_N + ': "' + mock.cur + '"\nCandidate\'s answer: "' + text.slice(0, 1500) + '"\n\n' +
+            'Evaluate honestly, like a real interviewer would. score: 1-10 (5 = weak, 7 = solid, 9+ is rare). ' +
+            'good: one short sentence on what worked ("" if nothing did). improve: the single most important, specific fix. ' +
+            'better_answer: a stronger version of THEIR answer in 2-3 sentences, first person, using only facts from their answer or background — use [X] where a number would help, never invent achievements. ' +
+            (last ? 'next_question: "" (this was the last question).' :
+              'next_question: question ' + (n + 1) + ', max 30 words. ' + MOCK_MIX + ' Do not repeat: ' + mock.asked.join(' | ').slice(0, 1200)),
+            700, MOCK_EVAL_SCHEMA);
+          if (!ev) { await send(from, "Sorry, I couldn't score that one just now — please send your answer again."); return OK; }
+        }
+        let next = ev && ev.next_question;
+        if (!last && !next) {
+          const q = await claudeJSON('You are interviewing a candidate for a "' + mock.role + '" role. Write interview question ' + (n + 1) + ' of ' + MOCK_N + ', max 30 words. ' + MOCK_MIX +
+            ' Do not repeat: ' + mock.asked.join(' | ').slice(0, 1200), 200, MOCK_Q_SCHEMA);
+          next = q && q.question;
+        }
+        mock.scores.push(skip ? null : Math.max(1, Math.min(10, Number(ev.score) || 5)));
+        mock.tips.push(skip ? '' : String(ev.improve || ''));
+        let out = '';
+        if (ev) {
+          out = '📝 *Feedback — ' + mock.scores[mock.scores.length - 1] + '/10*\n' +
+            (ev.good ? '✅ ' + ev.good + '\n' : '') + '🔧 ' + ev.improve + '\n💡 *Stronger answer:* ' + ev.better_answer;
+        } else out = '⏭️ Skipped.';
+        if (last || !next) {
+          await clearMock(from);
+          await send(from, out + '\n\n' + mockSummary(mock, base));
+          return OK;
+        }
+        mock.cur = String(next).trim(); mock.asked.push(mock.cur);
+        await setMock(from, mock);
+        await send(from, out + '\n\n*Q' + (n + 1) + '/' + MOCK_N + ':* ' + mock.cur + '\n\nType your answer · *skip* · *stop*');
+        return OK;
+      }
+    }
 
     // Greeting → friendly menu (even mid-build, so "hi" isn't taken as an answer)
     if (/^(hi+|hey+|hello+|yo|hola|namaste|hii+|start|get started)[.!\s]*$/i.test(low)) {
@@ -694,10 +791,29 @@ exports.handler = async (event) => {
       await send(from, '🔕 Job alerts turned off. Reply *job alerts* anytime to turn them back on.');
       return OK;
     }
+    // ---- Mock interview: "mock interview" / "mock interview product owner" ----
+    {
+      const mm = text.match(MOCK_START);
+      if (mm) {
+        const prof = await savedResume();
+        const role = JOBS.titleCase((mm[6] || '').trim()) || JOBS.deriveSearch(prof).role;
+        if (!role) { await send(from, 'Which role should I interview you for? Reply like: *mock interview data analyst*'); return OK; }
+        const summary = haveData(prof) ? (prof._src === 'web' ? summarizeCloud(prof) : summarize(prof)) : '';
+        const q = await claudeJSON(
+          'You are a senior interviewer hiring for a "' + role + '" role. Ask question 1 of ' + MOCK_N + ' of a realistic mock interview: ' +
+          'a common opener tailored to this candidate (e.g. walk me through your experience as it relates to this role). Max 30 words, no preamble.' +
+          (summary ? '\nCandidate background:\n' + summary.slice(0, 1500) : ''), 200, MOCK_Q_SCHEMA);
+        if (!q || !q.question) { await send(from, "Sorry, I couldn't start the interview just now. Please try again."); return OK; }
+        const m = { role, summary: summary.slice(0, 1500), cur: q.question.trim(), asked: [q.question.trim()], scores: [], tips: [], at: Date.now() };
+        await setMock(from, m);
+        await send(from, '🎤 *Mock interview — ' + role + '*\n\n' + MOCK_N + ' questions, one at a time. Answer each in 2–5 sentences, the way you\'d say it in the room — I\'ll score it and show you a stronger version.\n\n*Q1/' + MOCK_N + ':* ' + m.cur + '\n\nType your answer · *skip* · *stop*');
+        return OK;
+      }
+    }
     // ---- Interview practice: "interview" / "interview data analyst" ----
-    if (/^(interview|interview prep|mock interview|practi[cs]e interview)(\s+.*)?$/i.test(low)) {
+    if (/^(interview|interview prep)(\s+.*)?$/i.test(low)) {
       const prof = await savedResume();
-      const rest = text.replace(/^(interview prep|mock interview|practi[cs]e interview|interview)\s*(for\s+)?/i, '').trim();
+      const rest = text.replace(/^(interview prep|interview)\s*(for\s+)?/i, '').trim();
       const role = JOBS.titleCase(rest) || JOBS.deriveSearch(prof).role;
       if (!role) { await send(from, 'Which role are you interviewing for? Reply like: *interview data analyst*'); return OK; }
       const summary = haveData(prof) ? (prof._src === 'web' ? summarizeCloud(prof) : summarize(prof)) : '';
@@ -710,7 +826,7 @@ exports.handler = async (event) => {
         'Format exactly like this, nothing else:\n1. *Question*\n   💡 Tip', 700);
       if (out) await redis(['SET', 'ivq:' + from, (prev + '\n' + out).slice(-3000), 'EX', '604800']);
       await send(from, (out ? '🎯 *Interview practice — ' + role + '*\n\n' + out : "Sorry, I couldn't prepare questions just now. Please try again.") +
-        '\n\nReply *interview* for 5 more · full prep with answer outlines: ' + base + '/interview-prep/');
+        '\n\nReply *mock interview* to practise answering with feedback · *interview* for 5 more · full prep: ' + base + '/interview-prep/');
       return OK;
     }
     // Build CTA → start the resume flow right away (the "Build my resume on WhatsApp"
