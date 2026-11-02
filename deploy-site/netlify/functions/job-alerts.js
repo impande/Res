@@ -58,7 +58,7 @@ exports.handler = async (event) => {
     const search = JOBS.deriveSearch({}, { role: JOBS.titleCase(q.role || 'Data Analyst'), city: JOBS.titleCase(q.city || '') });
     const res = await JOBS.fetchJobs(search, { maxDays: 3 });
     return {
-      statusCode: 200, headers: { 'content-type': 'application/json; charset=utf-8' },
+      statusCode: 200, headers: { 'content-type': 'text/plain; charset=utf-8' },
       body: JSON.stringify({
         source: res.source,
         host: res.host || null,
