@@ -2686,6 +2686,12 @@
       </div>
     </details>
     <details class="sl-acc">
+      <summary>Free tools <svg class="sl-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="sl-acc-body">
+        <a href="/whatsapp-job-alerts/">Daily Job Alerts</a><a href="/ats-score-checker/">ATS Score Checker</a><a href="/linkedin-profile-optimizer/">LinkedIn Optimizer</a><a href="/interview-prep/">Interview Prep</a><a href="/resume-in-hindi/">Resume in Hindi</a><a href="/govt-job-biodata-maker/">Govt Job Biodata</a>
+      </div>
+    </details>
+    <details class="sl-acc">
       <summary>Rating <svg class="sl-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
       <div class="sl-acc-body">
         <div id="r4uRatingBadgeSb"></div>
@@ -3391,12 +3397,43 @@ window.__iosPdfSave = function(blobUrl, filename){
     var a=document.createElement('a'); a.href=blobUrl; a.download=name; a.setAttribute('type','application/pdf');
     a.textContent='⬇  Save PDF';
     a.style.cssText='display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-weight:800;font-size:1.02rem;padding:15px 30px;border-radius:99px;text-decoration:none;box-shadow:0 6px 24px rgba(245,158,11,0.55);letter-spacing:0.2px;';
-    var hint=document.createElement('div'); hint.textContent='If it opens instead of saving, tap Share ⬆ then “Save to Files”.';
+    var hint=document.createElement('div'); hint.textContent='Choose “Save to Files” to keep it on your phone — or send it straight to WhatsApp or Mail.';
     hint.style.cssText='color:rgba(255,255,255,0.5);font-size:0.72rem;max-width:300px;line-height:1.5;';
     var close=document.createElement('button'); close.textContent='Close';
     close.style.cssText='background:none;border:none;color:rgba(255,255,255,0.65);font-size:0.85rem;cursor:pointer;padding:10px;font-family:inherit;margin-top:2px;';
     close.onclick=function(){ ov.remove(); };
-    a.addEventListener('click', function(){ setTimeout(function(){ try{ ov.remove(); }catch(e){} }, 1200); });
+    /* Open the iOS share sheet over the page (Save to Files / WhatsApp / Mail) instead of
+       navigating to the blob: a plain blob link can open the PDF full-screen in place of
+       the site (Safari "View", Chrome / in-app browsers), stranding the user on the PDF.
+       The file is prepared up front so share() runs inside the tap gesture. */
+    var _file=null;
+    try{ fetch(blobUrl).then(function(r){ return r.blob(); }).then(function(b){ _file=new File([b], name, {type:'application/pdf'}); }).catch(function(){}); }catch(e){}
+    function _finish(saved){
+      try{ ov.remove(); }catch(e){}
+      try{ if(window._r4uMarkDownloaded) window._r4uMarkDownloaded(); }catch(e){}
+      if(saved){ try{ if(typeof showToast==='function') showToast('PDF saved','success'); }catch(e){} }
+      try{ var nb=document.getElementById('_r4uNextBar'); if(nb) nb.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+    }
+    /* After a share-sheet failure (not a cancel) the next tap uses the plain link,
+       so the user always has a working way to save — and we never claim "saved"
+       unless the share sheet actually completed. */
+    var _linkMode=false;
+    a.addEventListener('click', function(e){
+      if(!_linkMode && _file && navigator.share && navigator.canShare){
+        var can=false; try{ can=navigator.canShare({files:[_file]}); }catch(er){}
+        if(can){
+          e.preventDefault();
+          var pr; try{ pr=navigator.share({files:[_file], title:name.replace(/\.pdf$/i,'')}); }catch(er){ pr=Promise.reject(er); }
+          Promise.resolve(pr).then(function(){ _finish(true); }, function(er){
+            if(er && er.name==='AbortError') return;          /* user closed the sheet — stay here, they can tap again */
+            _linkMode=true;
+            hint.textContent='Tap \u201cSave PDF\u201d again to download it.';
+          });
+          return;
+        }
+      }
+      setTimeout(function(){ _finish(false); }, 1200);      /* plain download link (older iPhones / no share sheet) */
+    });
     ov.appendChild(h); ov.appendChild(p); ov.appendChild(a); ov.appendChild(hint); ov.appendChild(close);
     document.body.appendChild(ov);
   }catch(e){
@@ -11988,12 +12025,12 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   /* Keep the card right under the resume actions and directly ABOVE the ATS
      score card (which renderATSScore inserts after .resume-bar on generation). */
+  /* Fixed order under the resume actions: Tailor → ATS Score → "Use this resume for".
+     (It used to chase #atsScoreCard, which is hidden and moves, so it fought the
+     ATS Score card's own placement and the cards swapped places every tick.) */
   function place(bar){
-    var ats=document.getElementById('atsScoreCard');
     var resumeBar=document.querySelector('#step8 .resume-bar');
-    if(ats && ats.parentNode){
-      if(bar.nextSibling!==ats) ats.parentNode.insertBefore(bar, ats);
-    } else if(resumeBar && resumeBar.parentNode){
+    if(resumeBar && resumeBar.parentNode){
       if(resumeBar.nextSibling!==bar) resumeBar.parentNode.insertBefore(bar, resumeBar.nextSibling);
     }
   }
@@ -12590,10 +12627,11 @@ window.__novaPortfolioHTML=function(d,sections){
      examples are read live from their resume, the AI "learns" from their input
      as they edit. Sent with each /functions/generate text call; generate.js
      folds it into the content-writer system prompt only (never parse/extract).
-   - A small writing-tone selector on the Generate screen (stored per browser). */
+   - Tone is fixed to Professional (the on-screen tone picker was removed). */
 (function(){
   var TONES=[['professional','Professional'],['concise','Concise & punchy'],['impactful','Bold & impactful'],['friendly','Warm & friendly']];
-  function tone(){ try{ return localStorage.getItem('_r4uTone')||''; }catch(e){ return ''; } }
+  /* Tone picker removed from the UI: always write in the professional tone. */
+  function tone(){ return 'professional'; }
   function setTone(v){ try{ localStorage.setItem('_r4uTone', v); }catch(e){} }
   function toneLabel(t){ for(var i=0;i<TONES.length;i++){ if(TONES[i][0]===t) return TONES[i][1]; } return ''; }
 
@@ -12624,24 +12662,8 @@ window.__novaPortfolioHTML=function(d,sections){
     return _of.apply(this,arguments);
   };
 
-  /* Compact writing-tone selector, right above the Generate button. */
-  function injectTone(){
-    var step8=document.getElementById('step8');
-    var active=document.querySelector('.step-content.active');
-    var ex=document.getElementById('_r4uToneRow');
-    if(!step8||active!==step8){ if(ex&&ex.parentNode) ex.parentNode.removeChild(ex); return; }
-    if(ex) return;
-    var nav=step8.querySelector('.nav-buttons'); if(!nav) return;
-    var cur=tone()||'professional';
-    var row=document.createElement('div'); row.id='_r4uToneRow';
-    row.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:7px;max-width:620px;margin:6px auto 10px;';
-    row.innerHTML='<span style="color:var(--muted,#6b7280);font-weight:600;font-size:.8rem;margin-right:2px;">✍️ Writing tone</span>'+
-      TONES.map(function(t){ var on=(t[0]===cur); return '<button type="button" data-t="'+t[0]+'" style="border:1px solid '+(on?'rgba(217,119,6,.6)':'var(--border,#e5e5e0)')+';background:'+(on?'rgba(217,119,6,.08)':'var(--card-bg,#fff)')+';color:'+(on?'var(--accent,#b45309)':'var(--text,#333)')+';font-family:inherit;font-size:.78rem;font-weight:'+(on?'700':'500')+';padding:5px 12px;border-radius:999px;cursor:pointer;">'+t[1]+'</button>'; }).join('')+
-      '<span style="flex-basis:100%;color:var(--muted,#9aa1ab);font-size:.7rem;">AI writes in this tone — matched to your role & your own wording.</span>';
-    Array.prototype.forEach.call(row.querySelectorAll('button'),function(btn){ btn.addEventListener('click',function(){ setTone(btn.getAttribute('data-t')); var r=document.getElementById('_r4uToneRow'); if(r&&r.parentNode) r.parentNode.removeChild(r); injectTone(); try{ if(typeof showToast==='function') showToast('Tone set — Generate or Refine to apply ✍️','success'); }catch(e){} }); });
-    nav.parentNode.insertBefore(row,nav);
-  }
-  setInterval(injectTone,900);
+  /* Clean up a tone row left on screen by an older version of this script. */
+  try{ var _tr=document.getElementById('_r4uToneRow'); if(_tr&&_tr.parentNode) _tr.parentNode.removeChild(_tr); }catch(e){}
 })();
 </script>
 <script id="_r4uIncomingResumeJS">
@@ -14129,28 +14151,51 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 <style>
 #r4uMobLegal{display:none;}
 @media(max-width:768px){
-  #r4uMobLegal{display:block;margin:26px 2px 10px;padding:16px 4px 4px;border-top:1px solid var(--border,#e5e5e0);text-align:center;font-size:clamp(0.58rem,2.8vw,0.75rem);line-height:1.9;white-space:nowrap;}
-  #r4uMobLegal a{color:var(--muted,#6b7280);text-decoration:none;margin:0 clamp(3px,1.3vw,7px);font-weight:600;white-space:nowrap;}
-  #r4uMobLegal a:hover{color:var(--accent,#b45309);}
-  #r4uMobLegal .r4u-ml-cp{display:block;margin-top:5px;color:var(--muted,#6b7280);opacity:.8;font-size:0.7rem;font-weight:400;}
+  #r4uMobLegal{display:block;margin:26px 0 4px;padding:14px 0 calc(6px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border,#e7e3db);font-family:inherit;text-align:center;}
+  #r4uMobLegal .mf-tools{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+  #r4uMobLegal .mf-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border:1px solid var(--border,#e7e3db);background:var(--card-bg,#fff);border-radius:99px;text-decoration:none;color:var(--text,#1a1a1a);font-size:.68rem;font-weight:600;line-height:1.3;white-space:nowrap;}
+  #r4uMobLegal .mf-ic{flex:0 0 16px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:8.5px;font-weight:800;}
+  #r4uMobLegal .mf-ic svg{width:9px;height:9px;display:block;}
+  #r4uMobLegal .mf-links{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 0;margin:11px 0 0;font-size:.7rem;}
+  #r4uMobLegal .mf-links a{color:var(--muted,#6b7280);text-decoration:none;font-weight:500;}
+  #r4uMobLegal .mf-links a+a::before{content:"·";margin:0 7px;color:#c9c3b8;}
+  #r4uMobLegal .mf-links a:hover,#r4uMobLegal .mf-chip:hover{color:var(--accent,#b45309);}
+  #r4uMobLegal .mf-star{color:#f59e0b;}
+  #r4uMobLegal .mf-cp{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;font-size:.64rem;color:var(--muted,#6b7280);}
+  #r4uMobLegal .mf-logo{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;font-weight:900;font-size:8px;display:grid;place-items:center;}
+  #r4uMobLegal a:focus-visible{outline:2px solid rgba(180,83,9,.45);outline-offset:2px;border-radius:6px;}
 }
 </style>
 <script id="_r4uMobLegalJS">
-/* Mobile-only legal footer. The desktop sidebar carries Privacy/Terms/Refund
-   links, but the sidebar is display:none on mobile — so mobile users (most of
-   our traffic, and Razorpay reviewers) had no way to reach the policies. This
-   appends a slim legal strip to the bottom of the scrollable #main content,
-   shown only <=768px. Purely additive DOM; hidden on desktop. */
+/* Mobile-only footer. The desktop sidebar carries the policy links, tools and
+   rating, but the sidebar is display:none on mobile — so mobile users (most of
+   our traffic, and Razorpay reviewers) need them here. Appended to the bottom of
+   the scrollable #main content, shown only <=768px. Purely additive DOM. */
 (function(){
+  var IC={
+    ats:['linear-gradient(135deg,#14b8a6,#0d9488)','<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="8" rx="1.5"/><rect x="10" y="7" width="4" height="13" rx="1.5"/><rect x="16" y="10" width="4" height="10" rx="1.5"/></svg>'],
+    li:['linear-gradient(135deg,#0a66c2,#004182)','<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6.2 8.6H3V21h3.2V8.6zM4.6 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM21 13.9c0-3.3-1.8-5.6-4.9-5.6-1.6 0-2.7.9-3.2 1.7V8.6H9.8V21H13v-6.4c0-1.6.6-2.9 2.3-2.9 1.6 0 2.1 1.3 2.1 3V21H21v-7.1z"/></svg>'],
+    iv:['linear-gradient(135deg,#f59e0b,#d97706)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"/></svg>'],
+    hi:['linear-gradient(135deg,#f97316,#c2410c)','<span aria-hidden="true">अ</span>'],
+    bio:['linear-gradient(135deg,#8b5cf6,#6d28d9)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7"/></svg>'],
+    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/></svg>'],
+    alert:['linear-gradient(145deg,#25d366,#128c7e)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>']
+  };
+  function chip(k,href,t){ return '<a class="mf-chip" href="'+href+'"><span class="mf-ic" style="background:'+IC[k][0]+'">'+IC[k][1]+'</span><span>'+t+'</span></a>'; }
   function mk(){
     if(document.getElementById('r4uMobLegal')) return true;
     var main=document.getElementById('main'); if(!main) return false;
-    var f=document.createElement('div'); f.id='r4uMobLegal';
-    f.innerHTML='<a href="/about/">About</a>\u00b7<a href="/privacy/">Privacy</a>·<a href="/terms/">Terms</a>·'
-      +'<a href="/refund/">Refunds</a>·'
-      +'<a href="#" onclick="window._r4uShowContact&&window._r4uShowContact();return false;">Contact</a>\u00b7'
-      +'<a href="#" onclick="window._r4uShowRating(true);return false;">Rate us \u2605</a>'
-      +'<span class="r4u-ml-cp">\u00a9 2026 Resume For You \u00b7 resume4u.help</span>';
+    var f=document.createElement('footer'); f.id='r4uMobLegal';
+    f.innerHTML='<div class="mf-tools">'
+      +'<a class="mf-chip" href="/whatsapp-job-alerts/" onclick="if(window._r4uJobAlerts){window._r4uJobAlerts();return false;}"><span class="mf-ic" style="background:'+IC.alert[0]+'">'+IC.alert[1]+'</span><span>Job alerts</span></a>'
+      +chip('ats','/ats-score-checker/','ATS check')+chip('li','/linkedin-profile-optimizer/','LinkedIn')
+      +chip('iv','/interview-prep/','Interview prep')+chip('hi','/resume-in-hindi/','Hindi resume')
+      +chip('bio','/govt-job-biodata-maker/','Biodata')+chip('sova','/sova/','Sova')
+      +'</div>'
+      +'<nav class="mf-links" aria-label="Company"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/refund/">Refunds</a>'
+      +'<a href="#" onclick="window._r4uShowContact&&window._r4uShowContact();return false;">Contact</a>'
+      +'<a href="#" onclick="window._r4uShowRating&&window._r4uShowRating(true);return false;">Rate us <span class="mf-star">\u2605</span></a></nav>'
+      +'<div class="mf-cp"><span class="mf-logo" aria-hidden="true">R</span>\u00a9 2026 Resume For You \u00b7 resume4u.help</div>';
     main.appendChild(f); return true;
   }
   if(!mk()){ var n=0,iv=setInterval(function(){ if(mk()||++n>40) clearInterval(iv); },300); }
@@ -14772,6 +14817,218 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     return ok;
   }
   if(!install()){ var n=0,iv=setInterval(function(){ if(install()||++n>120) clearInterval(iv); },100); }
+})();
+</script>
+<script id="_r4uToolsHub">
+/* Free career tools, surfaced in the builder:
+ *  - step 8: a compact "Use this resume for" card under the ATS Score card. It is
+ *    shown whenever a resume exists; after a PDF/DOC download its heading becomes
+ *    "Downloaded — next, use this resume for".
+ *  - landing: a swipeable "Free career tools" row under the four main options.
+ * The tool pages read the resume this app keeps in localStorage, so it is refreshed
+ * right before a tool opens (one tap, no upload). */
+(function(){
+  var css=''
+  +'#_r4uNextBar{display:none;position:relative;margin:16px 0 0;border:1.5px solid #e7d9c4;background:linear-gradient(180deg,#fffbf3,#fff);border-radius:16px;padding:12px;}'
+  +'#_r4uNextBar.show{display:block;}#_r4uNextBar.dl{border-color:#bfe7df;background:linear-gradient(180deg,#f0fdfa,#fff);}'
+  +'#_r4uNextBar .nb-h{display:flex;align-items:center;gap:8px;margin:0 2px 10px;font-size:.84rem;font-weight:800;color:var(--text,#1a1a1a);}'
+  +'#_r4uNextBar .nb-ok{display:none;flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:#0d9488;color:#fff;place-items:center;font-size:11px;font-weight:800;}'
+  +'#_r4uNextBar.dl .nb-ok{display:grid;}'
+  +'#_r4uNextBar .nb-row{display:flex;gap:8px;}'
+  +'.r4u-tl{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#fff;border:1px solid #ece6db;border-radius:12px;text-decoration:none;cursor:pointer;transition:border-color .15s,transform .15s;}'
+  +'.r4u-tl:hover{border-color:#e7c79a;transform:translateY(-1px);}.r4u-tl:focus-visible{outline:3px solid rgba(180,83,9,.4);outline-offset:2px;}'
+  +'.r4u-tl b{font-size:.74rem;color:var(--text,#1a1a1a);text-align:center;line-height:1.2;}'
+  +'@media (max-width:420px){#_r4uNextBar .nb-row{gap:6px;}.r4u-tl{padding:9px 2px;}.r4u-tl b{font-size:.68rem;}}'
+  +'.r4u-ic{flex:0 0 auto;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;line-height:1;}'
+  +'.r4u-ic svg{width:17px;height:17px;display:block;}'
+  +'#_r4uToolsRow{margin:22px 0 4px;}'
+  +'#_r4uToolsRow .tr-h{display:flex;align-items:center;justify-content:space-between;padding:0 2px;}'
+  +'#_r4uToolsRow .tr-t{font-size:.7rem;font-weight:800;letter-spacing:.12em;color:#b45309;text-transform:uppercase;}'
+  +'#_r4uToolsRow .tr-row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:2px;padding:10px 2px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}'
+  +'#_r4uToolsRow .tr-row::-webkit-scrollbar{display:none;}'
+  +'#_r4uToolsRow a{flex:0 0 132px;scroll-snap-align:start;background:#fff;border:1px solid #ebe7df;border-radius:14px;padding:12px;text-decoration:none;box-shadow:0 6px 16px -12px rgba(0,0,0,.25);transition:border-color .15s,transform .15s;}'
+  +'#_r4uToolsRow a:hover{border-color:#e7c79a;transform:translateY(-1px);}#_r4uToolsRow a:focus-visible{outline:3px solid rgba(180,83,9,.4);outline-offset:2px;}'
+  +'#_r4uToolsRow a .r4u-ic{width:38px;height:38px;border-radius:11px;}#_r4uToolsRow a .r4u-ic svg{width:20px;height:20px;}'
+  +'#_r4uToolsRow a b{display:block;font-size:.84rem;color:var(--text,#1a1a1a);line-height:1.25;margin-top:9px;}'
+  +'#_r4uToolsRow a span.s{display:block;font-size:.7rem;color:var(--muted,#6b7280);margin-top:2px;line-height:1.3;}'
+  +'#_r4uToolsRow a.feat{border-color:#bfe8cf;background:linear-gradient(160deg,#f0fdf4,#fff 70%);}'
+  +'@media (min-width:700px){#_r4uToolsRow .tr-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;margin:0;padding:10px 0;}#_r4uToolsRow a{flex:none;}'
+  +'#_r4uToolsRow a.feat{grid-column:span 2;display:flex;align-items:center;gap:14px;}#_r4uToolsRow a.feat .r4u-ic{width:46px;height:46px;border-radius:13px;}#_r4uToolsRow a.feat .r4u-ic svg{width:24px;height:24px;}#_r4uToolsRow a.feat b{margin-top:0;font-size:.95rem;}#_r4uToolsRow a.feat span.s{font-size:.76rem;}}'
+  +'@media (prefers-reduced-motion:reduce){.r4u-tl,#_r4uToolsRow a{transition:none;}}';
+  var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  var IC={
+    ats:['linear-gradient(135deg,#14b8a6,#0d9488)','<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="8" rx="1.5"/><rect x="10" y="7" width="4" height="13" rx="1.5"/><rect x="16" y="10" width="4" height="10" rx="1.5"/></svg>'],
+    li:['linear-gradient(135deg,#0a66c2,#004182)','<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6.2 8.6H3V21h3.2V8.6zM4.6 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM21 13.9c0-3.3-1.8-5.6-4.9-5.6-1.6 0-2.7.9-3.2 1.7V8.6H9.8V21H13v-6.4c0-1.6.6-2.9 2.3-2.9 1.6 0 2.1 1.3 2.1 3V21H21v-7.1z"/></svg>'],
+    iv:['linear-gradient(135deg,#f59e0b,#d97706)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"/><path d="M12 15.5h.01"/></svg>'],
+    hi:['linear-gradient(135deg,#f97316,#c2410c)','<span aria-hidden="true">अ</span>'],
+    bio:['linear-gradient(135deg,#8b5cf6,#6d28d9)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7M8.5 18h5"/></svg>'],
+    sova:['linear-gradient(135deg,#d97706,#92400e)','<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/><circle cx="18" cy="19" r="2.2" fill="#fff"/><circle cx="30" cy="19" r="2.2" fill="#fff"/></svg>'],
+    alert:['linear-gradient(145deg,#25d366,#128c7e)','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>']
+  };
+  function ic(k){ return '<span class="r4u-ic" style="background:'+IC[k][0]+'">'+IC[k][1]+'</span>'; }
+
+  function page(){ var o=document.getElementById('resumeOutput'); return o&&o.querySelector('.resume-a4-page'); }
+  /* Refresh the copy of the resume the tool pages read, so they get the latest edits. */
+  function stash(){
+    try{
+      var pg=page(); if(!pg) return;
+      localStorage.setItem('_lastResumeOutput', pg.outerHTML);
+      localStorage.setItem('_r4uSnapTime', ''+Date.now());
+      if(typeof window._collectCloudData==='function'){ var d=window._collectCloudData(); if(d&&(d.summary||(d.experience&&d.experience.length))) localStorage.setItem('_r4uResumeData', JSON.stringify(d)); }
+    }catch(e){}
+  }
+
+  /* ----- "downloaded" state ----- */
+  var dl=false; try{ dl=sessionStorage.getItem('_r4uDl')==='1'; }catch(e){}
+  window._r4uMarkDownloaded=function(){ dl=true; try{ sessionStorage.setItem('_r4uDl','1'); }catch(e){} sync(); };
+  try{
+    var _click=HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click=function(){
+      try{ var n=this.getAttribute('download'); if(n!==null&&/\.(pdf|docx?)$/i.test(n||this.href||'')) setTimeout(window._r4uMarkDownloaded,0); }catch(e){}
+      return _click.apply(this, arguments);
+    };
+  }catch(e){}
+  try{
+    if(navigator.share){
+      var _share=navigator.share.bind(navigator);
+      navigator.share=function(d){
+        var p=_share(d);
+        try{ if(d&&d.files&&d.files.length&&/\.(pdf|docx?)$/i.test(d.files[0].name||'')) p.then(function(){ window._r4uMarkDownloaded(); },function(){}); }catch(e){}
+        return p;
+      };
+    }
+  }catch(e){}
+
+  /* ----- step 8 card ----- */
+  var bar=null;
+  function mk(){
+    bar=document.createElement('div'); bar.id='_r4uNextBar';
+    bar.innerHTML='<div class="nb-h"><span class="nb-ok" aria-hidden="true">✓</span><span class="nb-t">Use this resume for:</span></div>'
+      +'<div class="nb-row">'
+      +'<a class="r4u-tl r4u-tl-alert" href="/whatsapp-job-alerts/" target="_blank" rel="noopener">'+ic('alert')+'<b>Job alerts</b></a>'
+      +'<a class="r4u-tl" href="/linkedin-profile-optimizer/" target="_blank" rel="noopener">'+ic('li')+'<b>LinkedIn</b></a>'
+      +'<a class="r4u-tl" href="/interview-prep/" target="_blank" rel="noopener">'+ic('iv')+'<b>Interview prep</b></a>'
+      +'<a class="r4u-tl" href="/resume-in-hindi/" target="_blank" rel="noopener">'+ic('hi')+'<b>Hindi resume</b></a>'
+      +'</div>';
+    bar.addEventListener('click',function(e){
+      var a=e.target.closest('a'); if(!a) return;
+      stash();
+      if(a.classList.contains('r4u-tl-alert') && window._r4uJobAlerts){ e.preventDefault(); window._r4uJobAlerts(); }
+    });
+  }
+  function place(){
+    var after=document.getElementById('_r4uRoastBar')||document.getElementById('_r4uJdTailorBar');
+    if(after&&after.parentNode){ if(after.nextSibling!==bar) after.parentNode.insertBefore(bar, after.nextSibling); return true; }
+    var ats=document.getElementById('atsScoreCard');
+    if(ats&&ats.parentNode){ if(ats.nextSibling!==bar) ats.parentNode.insertBefore(bar, ats.nextSibling); return true; }
+    return false;
+  }
+  function sync(){
+    if(!bar) mk();
+    if(!place()) return;
+    var on=!!page(); bar.classList.toggle('show',on); bar.classList.toggle('dl',on&&dl);
+    var t=bar.querySelector('.nb-t'), want=dl?'Downloaded — next, use this resume for:':'Use this resume for:';
+    if(t.textContent!==want) t.textContent=want;
+  }
+
+  /* ----- landing tools row ----- */
+  function row(){
+    if(document.getElementById('_r4uToolsRow')) return true;
+    var wa=document.getElementById('_r4uWaLandingCta'); if(!wa||!wa.parentNode) return false;
+    var r=document.createElement('div'); r.id='_r4uToolsRow';
+    function c(k,href,t,s){ return '<a href="'+href+'"'+(k==='alert'?' class="feat"':'')+'>'+ic(k)+'<span class="tx"><b>'+t+'</b><span class="s">'+s+'</span></span></a>'; }
+    r.innerHTML='<div class="tr-h"><span class="tr-t">Free career tools</span></div>'
+      +'<div class="tr-row" role="list">'
+      +c('alert','/whatsapp-job-alerts/','Daily Job Alerts','On WhatsApp, for your role')
+      +c('ats','/ats-score-checker/','ATS Score Checker','Upload &amp; get your score')
+      +c('li','/linkedin-profile-optimizer/','LinkedIn Optimizer','Headline &amp; About')
+      +c('iv','/interview-prep/','Interview Prep','Questions for your role')
+      +c('hi','/resume-in-hindi/','Resume in Hindi','+ 9 Indian languages')
+      +c('bio','/govt-job-biodata-maker/','Govt Job Biodata','Hindi / English')
+      +c('sova','/sova/','Sova Prompt Maker','Perfect AI prompts')
+      +'</div>';
+    r.querySelector('a.feat').addEventListener('click',function(e){ e.preventDefault(); openAlerts(); });
+    wa.parentNode.insertBefore(r, wa.nextSibling);
+    return true;
+  }
+
+  /* ----- Daily job alerts: role + city → WhatsApp with "job alerts <role> in <city>"
+     ready to send. Sending it IS the subscription (and opens WhatsApp's 24h window). */
+  var WA_BOT='919309014196';
+  var acss=''
+  +'#_r4uAlertOv{position:fixed;inset:0;z-index:10070;display:none;align-items:flex-end;justify-content:center;background:rgba(15,15,26,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}'
+  +'#_r4uAlertOv.on{display:flex;}'
+  +'#_r4uAlertCard{width:100%;max-width:440px;background:var(--card-bg,#fff);color:var(--text,#1a1a1a);border-radius:18px 18px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -14px 50px rgba(0,0,0,.25);animation:r4uAlUp .22s cubic-bezier(.4,0,.2,1);font-family:inherit;}'
+  +'@media(min-width:769px){#_r4uAlertOv{align-items:center;}#_r4uAlertCard{border-radius:18px;}}'
+  +'@keyframes r4uAlUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}'
+  +'#_r4uAlertCard .al-grip{width:38px;height:4px;border-radius:99px;background:var(--border,#e5e5e0);margin:0 auto 14px;}'
+  +'#_r4uAlertCard .al-hd{display:flex;align-items:center;gap:12px;}'
+  +'#_r4uAlertCard .al-hd .r4u-ic{width:42px;height:42px;border-radius:12px;}#_r4uAlertCard .al-hd .r4u-ic svg{width:21px;height:21px;}'
+  +'#_r4uAlertCard h3{font-size:1.02rem;font-weight:800;margin:0;line-height:1.25;}'
+  +'#_r4uAlertCard .al-sub{font-size:.8rem;color:var(--muted,#6b7280);margin:2px 0 0;line-height:1.4;}'
+  +'#_r4uAlertCard label{display:block;font-size:.78rem;font-weight:600;margin:14px 0 6px;color:var(--text,#1a1a1a);}'
+  +'#_r4uAlertCard label i{font-style:normal;font-weight:400;color:var(--muted,#6b7280);}'
+  +'#_r4uAlertCard input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;border:1.5px solid var(--border,#ddd8ce);border-radius:11px;padding:11px 12px;background:var(--input-bg,#fff);color:var(--text,#1a1a1a);}'
+  +'#_r4uAlertCard input:focus{outline:none;border-color:#128c7e;box-shadow:0 0 0 3px rgba(18,140,126,.15);}'
+  +'#_r4uAlertCard .al-err{display:none;color:#b91c1c;font-size:.76rem;margin-top:6px;}#_r4uAlertCard .al-err.on{display:block;}'
+  +'#_r4uAlertCard .al-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;border:0;cursor:pointer;font:inherit;font-weight:700;font-size:.95rem;color:#fff;background:linear-gradient(145deg,#25d366,#1aa851);padding:13px;border-radius:12px;box-shadow:0 10px 22px -12px rgba(26,168,81,.9);}'
+  +'#_r4uAlertCard .al-fine{text-align:center;font-size:.72rem;color:var(--muted,#6b7280);margin-top:8px;line-height:1.4;}'
+  +'#_r4uAlertCard .al-x{float:right;border:0;background:none;color:var(--muted,#6b7280);font-size:1.3rem;line-height:1;cursor:pointer;margin:-4px -4px 0 0;padding:4px;}'
+  +'#_r4uAlertCard button:focus-visible{outline:3px solid rgba(18,140,126,.4);outline-offset:2px;}';
+  var ast=document.createElement('style'); ast.textContent=acss; document.head.appendChild(ast);
+  function guess(){
+    var r='',c='';
+    try{ var d=JSON.parse(localStorage.getItem('_r4uResumeData')||'null')||JSON.parse(localStorage.getItem('_preSignInDraft')||'null')||{};
+      r=d.jobTitle||d.title||d.role||((d.experience||[])[0]||{}).title||''; c=String(d.location||d.city||'').split(',')[0]; }catch(e){}
+    return {role:String(r).trim().slice(0,60), city:String(c).trim().slice(0,40)};
+  }
+  function waOpen(url){
+    var desk=false; try{ desk=window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){}
+    if(desk && typeof window._r4uShowQR==='function') window._r4uShowQR(url,{title:'Job alerts on WhatsApp',sub:'Scan to open WhatsApp on your phone — your request is ready, just tap Send.',file:'job-alerts-qr.png'});
+    else window.open(url,'_blank','noopener');
+  }
+  function closeAlerts(){ var o=document.getElementById('_r4uAlertOv'); if(o) o.classList.remove('on'); }
+  function openAlerts(){
+    var o=document.getElementById('_r4uAlertOv');
+    if(!o){
+      o=document.createElement('div'); o.id='_r4uAlertOv'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-labelledby','_r4uAlertT');
+      o.innerHTML='<div id="_r4uAlertCard"><div class="al-grip"></div><button type="button" class="al-x" aria-label="Close">\u00d7</button>'
+        +'<div class="al-hd">'+ic('alert')+'<div><h3 id="_r4uAlertT">Daily job alerts on WhatsApp</h3><p class="al-sub">Fresh jobs for your role every morning at 9 AM. Free \u00b7 stop anytime.</p></div></div>'
+        +'<label for="_r4uAlRole">Role</label><input id="_r4uAlRole" type="text" autocomplete="organization-title" placeholder="e.g. Data Analyst, Product Owner" maxlength="60">'
+        +'<label for="_r4uAlCity">City <i>(optional)</i></label><input id="_r4uAlCity" type="text" autocomplete="address-level2" placeholder="e.g. Pune, Bangalore" maxlength="40">'
+        +'<div class="al-err" id="_r4uAlErr">Enter the role you want jobs for.</div>'
+        +'<button type="button" class="al-go">'+'<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Get alerts on WhatsApp</button>'
+        +'<p class="al-fine">WhatsApp opens with your request ready \u2014 just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.</p></div>';
+      document.body.appendChild(o);
+      o.addEventListener('click',function(e){ if(e.target===o) closeAlerts(); });
+      o.querySelector('.al-x').addEventListener('click',closeAlerts);
+      document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAlerts(); });
+      o.querySelector('.al-go').addEventListener('click',function(){
+        var role=o.querySelector('#_r4uAlRole').value.trim(), city=o.querySelector('#_r4uAlCity').value.trim();
+        var err=o.querySelector('#_r4uAlErr');
+        if(role.length<2){ err.classList.add('on'); o.querySelector('#_r4uAlRole').focus(); return; }
+        err.classList.remove('on');
+        var msg='job alerts '+role+(city?' in '+city:'');
+        waOpen('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent(msg));
+        closeAlerts();
+      });
+      o.querySelector('#_r4uAlCity').addEventListener('keydown',function(e){ if(e.key==='Enter') o.querySelector('.al-go').click(); });
+      o.querySelector('#_r4uAlRole').addEventListener('input',function(){ o.querySelector('#_r4uAlErr').classList.remove('on'); });
+    }
+    var g=guess(), R=o.querySelector('#_r4uAlRole'), C=o.querySelector('#_r4uAlCity');
+    if(!R.value) R.value=g.role; if(!C.value) C.value=g.city;
+    o.classList.add('on');
+    setTimeout(function(){ try{ (R.value?C:R).focus({preventScroll:true}); }catch(e){} },60);
+  }
+  window._r4uJobAlerts=openAlerts;
+  function fromLink(){ if(/^#job-alerts$/i.test(location.hash||'')){ openAlerts(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} } }
+  window.addEventListener('hashchange',fromLink);
+  setTimeout(fromLink,600);
+
+  function tick(){ try{ sync(); }catch(e){} try{ row(); }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
+  setInterval(tick, 800);
 })();
 </script>
 </body>
