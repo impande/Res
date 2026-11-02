@@ -14,23 +14,34 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/tools/tools.css">
 <style>
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;}
   .grid .wide{grid-column:1/-1;}
   @media(max-width:620px){.grid{grid-template-columns:1fr;}}
-  .grid label{display:block;font-size:.76rem;font-weight:700;color:#374151;margin-bottom:4px;}
-  .sec-h{font-size:.74rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:22px 0 10px;padding-top:14px;border-top:1px solid #f0eee9;}
+  .grid label{display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:4px;}
+  .sec-h{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:22px 0 10px;padding-top:14px;border-top:1px solid #f0eee9;}
   .rows .rw{display:grid;grid-template-columns:1.1fr 1.4fr .7fr .7fr 1.2fr 32px;gap:6px;margin-bottom:6px;}
   .rows.exp .rw{grid-template-columns:1.3fr 1.5fr .8fr .8fr 32px;}
   .rows input{padding:8px 9px;font-size:.85rem;}
   .rows .x{border:0;background:#fef2f2;color:#991b1b;border-radius:8px;cursor:pointer;font-weight:800;}
   @media(max-width:620px){.rows .rw,.rows.exp .rw{grid-template-columns:1fr 1fr;}.rows .x{grid-column:1/-1;height:30px;}}
-  .add{border:1.5px dashed #e7c79a;background:var(--soft);color:var(--accent);border-radius:10px;padding:8px 14px;font:inherit;font-weight:700;font-size:.84rem;cursor:pointer;}
-  .autofill{background:#f0fdfa;border:1px solid #99f6e4;border-radius:14px;padding:14px 16px;margin-bottom:18px;}
-  .autofill summary{cursor:pointer;font-weight:800;color:#0f766e;list-style:none;}
+  .add{border:1.5px dashed #e3cfae;background:#fff;color:var(--accent);border-radius:10px;padding:8px 14px;font:inherit;font-weight:600;font-size:.84rem;cursor:pointer;}
+  .autofill{background:#f0fdfa;border:1.5px solid #bfe7df;border-radius:14px;padding:12px 14px;margin-bottom:18px;}
+  .autofill summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;}
+  .autofill summary b{display:block;font-size:.95rem;color:var(--text);line-height:1.3;}
+  .autofill summary i{display:block;font-style:normal;font-size:.78rem;color:var(--muted);}
+  .af-ic{flex:0 0 38px;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:grid;place-items:center;}
+  .af-ic svg{width:19px;height:19px;}
+  .af-chev{margin-left:auto;color:#0f766e;font-size:1.3rem;font-weight:700;transition:transform .15s;}
+  .autofill[open] .af-chev{transform:rotate(90deg);}
+  .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
+  .grid label.photo-btn{display:inline-flex;margin:0;padding:9px 14px;font-size:.86rem;font-weight:600;border-radius:11px;color:var(--text);}
+  .photo-btn svg{width:16px;height:16px;}
+  .photo-in:focus-within .photo-btn{outline:3px solid rgba(180,83,9,.4);outline-offset:2px;}
   .autofill summary::-webkit-details-marker{display:none;}
   .autofill[open] summary{margin-bottom:12px;}
   .photo-in{display:flex;align-items:center;gap:12px;}
@@ -62,19 +73,14 @@
 </script>
 </head>
 <body>
-<nav class="nav"><div class="nav-logo">R</div><a class="nav-name" href="/">Resume For You</a><a class="cta" href="/">Build Free Resume →</a></nav>
+<header class="topbar"><div class="topbar-in"><a class="brand" href="/"><span class="logo">R</span><span><b>Resume For You</b><i>Free career tools</i></span></a><a class="tb-btn" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15h6"/></svg>Build resume</a></div></header>
 
-<header class="hero">
-  <div class="badge">ENGLISH · हिन्दी · BILINGUAL</div>
-  <h1>Biodata Maker for Government Jobs</h1>
-  <p class="sub">Fill a clean, standard biodata for government and PSU applications — with photo, education table and declaration — in English, Hindi or both. Download as PDF, free.</p>
-  <div class="trust"><span>✓ Standard govt format</span><span>✓ English / हिन्दी</span><span>✓ Autofill from resume</span></div>
-</header>
+<header class="thead wrap"><div class="th-row"><span class="th-ic" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="9" r="2.2"/><path d="M8.5 15h7M8.5 18h5"/></svg></span><div><span class="eyebrow">Free tool · English / हिन्दी</span><h1>Biodata Maker for Government Jobs</h1></div></div><p class="sub">Fill a clean, standard biodata for government and PSU applications — with photo, education table and declaration — in English, Hindi or both. Download as PDF, free.</p><ul class="facts"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Standard govt format</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>English / हिन्दी</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Autofill from resume</li></ul></header>
 
 <main class="wrap">
   <section class="tool" aria-label="Biodata form">
     <details class="autofill">
-      <summary>✨ Fill it from my resume (optional, AI)</summary>
+      <summary><span class="af-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z"/></svg></span><span><b>Fill it from my resume</b><i>Optional · AI fills the form, you check it</i></span><span class="af-chev" aria-hidden="true">›</span></summary>
       <div id="resume"></div>
       <button class="btn teal full" id="go" type="button" style="margin-top:10px">Fill the form from my resume</button>
       <div class="status" id="status" role="status"><div class="spin"></div><span class="lbl"></span></div>
@@ -84,7 +90,7 @@
 
     <div class="grid">
       <div><label for="mode">Biodata language</label><select id="mode"><option value="en">English</option><option value="hi">हिन्दी (Hindi)</option><option value="both">Bilingual — English / हिन्दी</option></select></div>
-      <div><label>Photo <span class="hint">(passport size)</span></label><div class="photo-in"><img id="phprev" alt="" hidden><input type="file" id="photo" accept="image/*"></div></div>
+      <div><label>Photo <span class="hint">(passport size)</span></label><div class="photo-in"><img id="phprev" alt="" hidden><label class="btn ghost photo-btn" for="photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg>Add photo</label><input type="file" id="photo" accept="image/*" class="vh"></div></div>
     </div>
 
     <div class="sec-h">Personal details</div>
@@ -102,7 +108,7 @@
 
   <section style="margin-top:22px">
     <div class="toolbar" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:14px">
-      <button class="btn" type="button" id="pdf">⬇ Download PDF</button>
+      <button class="btn" type="button" id="pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>Download PDF</button>
       <button class="btn ghost" type="button" id="reset">Clear form</button>
     </div>
     <div class="doc print-doc bio" id="doc" aria-label="Biodata preview"></div>
@@ -131,9 +137,7 @@
   <div class="faq-item"><h3>How do I add my signature?</h3><p>Print or save the PDF and sign above the "Signature" line, or sign the printed copy.</p></div>
 </section>
 
-<section class="related"><h2>More free career tools</h2>
-  <a href="/resume-in-hindi/">Resume in Hindi &amp; Indian languages</a><a href="/ats-score-checker/">Free ATS Score Checker</a><a href="/linkedin-profile-optimizer/">LinkedIn Profile Optimizer</a><a href="/interview-prep/">Interview Prep</a><a href="/biodata-format-for-job/">Biodata Format Guide</a><a href="/">Free Resume Builder</a>
-</section>
+<section class="more" aria-label="More free tools"><h2>More free tools</h2><div class="tiles"><a class="tile" href="/ats-score-checker/"><span class="ti" style="background:linear-gradient(135deg,#14b8a6,#0d9488)"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="8" rx="1.5"/><rect x="10" y="7" width="4" height="13" rx="1.5"/><rect x="16" y="10" width="4" height="10" rx="1.5"/></svg></span><b>ATS Score Checker</b><span class="s">Upload &amp; get your score</span></a><a class="tile" href="/linkedin-profile-optimizer/"><span class="ti" style="background:linear-gradient(135deg,#0a66c2,#004182)"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6.2 8.6H3V21h3.2V8.6zM4.6 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM21 13.9c0-3.3-1.8-5.6-4.9-5.6-1.6 0-2.7.9-3.2 1.7V8.6H9.8V21H13v-6.4c0-1.6.6-2.9 2.3-2.9 1.6 0 2.1 1.3 2.1 3V21H21v-7.1z"/></svg></span><b>LinkedIn Optimizer</b><span class="s">Headline &amp; About</span></a><a class="tile" href="/interview-prep/"><span class="ti" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"/><path d="M12 15.5h.01"/></svg></span><b>Interview Prep</b><span class="s">Questions for your role</span></a><a class="tile" href="/resume-in-hindi/"><span class="ti" style="background:linear-gradient(135deg,#f97316,#c2410c)"><span aria-hidden="true">अ</span></span><b>Resume in Hindi</b><span class="s">+ 9 Indian languages</span></a><a class="tile" href="/sova/"><span class="ti" style="background:linear-gradient(135deg,#d97706,#92400e)"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"/><circle cx="18" cy="19" r="5.6" fill="#b45309"/><circle cx="30" cy="19" r="5.6" fill="#b45309"/><circle cx="18" cy="19" r="2.2" fill="#fff"/><circle cx="30" cy="19" r="2.2" fill="#fff"/></svg></span><b>Sova Prompt Maker</b><span class="s">Perfect AI prompts</span></a></div></section>
 <footer class="foot">© 2026 Resume For You · <a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/">resume4u.help</a></footer>
 
 <script src="/tools/tools.js"></script>
