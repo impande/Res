@@ -10,33 +10,6 @@ exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS, body: '' };
   }
-  // ── Diagnostic: which Claude models does this API key have access to? ──────────
-  // Open in a browser (UAT):
-  //   /.netlify/functions/generate?diag=models&key=<WHATSAPP_VERIFY_TOKEN>
-  // Lists whether Opus 5.5 / Sonnet 5.5 / Haiku 5.5 are enabled on the key, so you
-  // know if the backend is running on Claude 5 or falling back to 4.x.
-  if (event.httpMethod === 'GET') {
-    const q = event.queryStringParameters || {};
-    if (q.diag === 'models') {
-      const tok = process.env.MODEL_CHECK_TOKEN || process.env.WHATSAPP_VERIFY_TOKEN || '';
-      if (!tok || q.key !== tok) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'unauthorized' }) };
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY not set' }) };
-      try {
-        const r = await fetch('https://api.anthropic.com/v1/models?limit=1000', { headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' } });
-        const j = await r.json().catch(() => ({}));
-        if (!r.ok) return { statusCode: r.status, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: (j.error && j.error.message) || 'models API error' }) };
-        const ids = (j.data || []).map((m) => m.id);
-        const want = ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
-        const available = want.filter((w) => ids.includes(w));
-        const missing = want.filter((w) => !ids.includes(w));
-        return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ claude5_ready: missing.length === 0, available, missing, all_model_ids: ids.sort() }, null, 2) };
-      } catch (e) {
-        return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
-      }
-    }
-    return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
