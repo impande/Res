@@ -3408,24 +3408,31 @@ window.__iosPdfSave = function(blobUrl, filename){
        The file is prepared up front so share() runs inside the tap gesture. */
     var _file=null;
     try{ fetch(blobUrl).then(function(r){ return r.blob(); }).then(function(b){ _file=new File([b], name, {type:'application/pdf'}); }).catch(function(){}); }catch(e){}
-    function _done(){
+    function _finish(saved){
       try{ ov.remove(); }catch(e){}
       try{ if(window._r4uMarkDownloaded) window._r4uMarkDownloaded(); }catch(e){}
-      try{ if(typeof showToast==='function') showToast('✓ PDF saved','success'); }catch(e){}
+      if(saved){ try{ if(typeof showToast==='function') showToast('PDF saved','success'); }catch(e){} }
       try{ var nb=document.getElementById('_r4uNextBar'); if(nb) nb.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
     }
+    /* After a share-sheet failure (not a cancel) the next tap uses the plain link,
+       so the user always has a working way to save — and we never claim "saved"
+       unless the share sheet actually completed. */
+    var _linkMode=false;
     a.addEventListener('click', function(e){
-      try{
-        if(_file && navigator.canShare && navigator.share && navigator.canShare({files:[_file]})){
+      if(!_linkMode && _file && navigator.share && navigator.canShare){
+        var can=false; try{ can=navigator.canShare({files:[_file]}); }catch(er){}
+        if(can){
           e.preventDefault();
-          navigator.share({files:[_file], title:name.replace(/\.pdf$/i,'')}).then(_done).catch(function(er){
-            if(er && er.name==='AbortError') return;            /* user closed the sheet — stay on the overlay */
-            var t=document.createElement('a'); t.href=blobUrl; t.download=name; document.body.appendChild(t); t.click(); t.remove(); _done();
+          var pr; try{ pr=navigator.share({files:[_file], title:name.replace(/\.pdf$/i,'')}); }catch(er){ pr=Promise.reject(er); }
+          Promise.resolve(pr).then(function(){ _finish(true); }, function(er){
+            if(er && er.name==='AbortError') return;          /* user closed the sheet — stay here, they can tap again */
+            _linkMode=true;
+            hint.textContent='Tap \u201cSave PDF\u201d again to download it.';
           });
           return;
         }
-      }catch(er){}
-      setTimeout(_done, 1200);
+      }
+      setTimeout(function(){ _finish(false); }, 1200);      /* plain download link (older iPhones / no share sheet) */
     });
     ov.appendChild(h); ov.appendChild(p); ov.appendChild(a); ov.appendChild(hint); ov.appendChild(close);
     document.body.appendChild(ov);
