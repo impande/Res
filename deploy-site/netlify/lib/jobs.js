@@ -58,26 +58,39 @@ function rank(jobs, s) {
 }
 const strip = (h) => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 
-async function fetchJooble(s, opts) {
-  const key = process.env.JOOBLE_API_KEY;
-  const host = (process.env.JOOBLE_HOST || 'in.jooble.org').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+/* Jooble keys are issued per site, so try the India site first, then the global
+ * one (with ", India" in the location). JOOBLE_HOST pins a single host. */
+async function joobleCall(host, key, s, location) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 7000);
   try {
     const r = await fetch('https://' + host + '/api/' + encodeURIComponent(key), {
       method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
-      body: JSON.stringify({ keywords: s.role, location: s.city || 'India', page: '1' })
+      body: JSON.stringify({ keywords: s.role, location: location, page: '1' })
     });
-    if (!r.ok) { console.error('[jobs] jooble', r.status); return null; }
+    if (!r.ok) { console.error('[jobs] jooble', host, r.status); return null; }
     const j = await r.json();
-    const maxMs = ((opts && opts.maxDays) || 3) * 864e5;
-    const jobs = (j.jobs || []).map((x) => ({
+    return Array.isArray(j.jobs) ? j.jobs : [];
+  } catch (e) { console.error('[jobs] jooble failed', host, e && e.message); return null; }
+  finally { clearTimeout(t); }
+}
+async function fetchJooble(s, opts) {
+  const key = process.env.JOOBLE_API_KEY;
+  const pinned = (process.env.JOOBLE_HOST || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const tries = pinned ? [[pinned, s.city || 'India']]
+    : [['in.jooble.org', s.city || 'India'], ['jooble.org', s.city ? s.city + ', India' : 'India']];
+  const maxMs = ((opts && opts.maxDays) || 3) * 864e5;
+  for (const [host, loc] of tries) {
+    const raw = await joobleCall(host, key, s, loc);
+    if (!raw || !raw.length) continue;
+    const jobs = raw.map((x) => ({
       id: 'jb:' + String(x.id || x.link || ''),
       title: strip(x.title), company: strip(x.company), location: strip(x.location),
       url: x.link || '', description: strip(x.snippet), created: x.updated || ''
     })).filter((x) => { const d = Date.parse(x.created); return !d || Date.now() - d < maxMs; });
-    return rank(jobs, s);
-  } catch (e) { console.error('[jobs] jooble failed', e && e.message); return null; }
-  finally { clearTimeout(t); }
+    const ranked = rank(jobs, s);
+    if (ranked.length) return { jobs: ranked, host: host };
+  }
+  return null;
 }
 
 async function fetchJobs(search, opts) {
@@ -85,8 +98,8 @@ async function fetchJobs(search, opts) {
   const links = searchLinks(s.role, s.city);
   if (!s.role) return { source: 'links', jobs: [], links };
   if (process.env.JOOBLE_API_KEY) {
-    const jobs = await fetchJooble(s, opts);
-    if (jobs && jobs.length) return { source: 'jooble', jobs, links };
+    const jb = await fetchJooble(s, opts);
+    if (jb) return { source: 'jooble', host: jb.host, jobs: jb.jobs, links };
   }
   const id = process.env.ADZUNA_APP_ID, key = process.env.ADZUNA_APP_KEY;
   if (!id || !key) return { source: 'links', jobs: [], links };

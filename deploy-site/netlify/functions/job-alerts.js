@@ -61,6 +61,7 @@ exports.handler = async (event) => {
       statusCode: 200, headers: { 'content-type': 'application/json; charset=utf-8' },
       body: JSON.stringify({
         source: res.source,
+        host: res.host || null,
         jooble_key_set: !!process.env.JOOBLE_API_KEY,
         template_set: process.env.WA_JOB_ALERT_TEMPLATE || null,
         listings: res.jobs.length,
