@@ -13,8 +13,10 @@
  * resume are ready. Reply JOBS to see them." Without a template, users outside
  * the 24h window are skipped (never an error).
  *
- * Scheduled functions only fire on the PUBLISHED deploy. To test on UAT:
- *   GET /.netlify/functions/job-alerts?key=<WHATSAPP_VERIFY_TOKEN>&to=<phone>
+ * Scheduled functions only fire on the PUBLISHED deploy, and Netlify blocks calling a
+ * scheduled function by URL (403). Manual / preview links therefore go through
+ * functions/job-alerts-check.js, e.g.
+ *   GET /.netlify/functions/job-alerts-check?key=<WHATSAPP_VERIFY_TOKEN>&to=<phone>
  */
 const JOBS = require('../lib/jobs.js');
 const GRAPH = 'https://graph.facebook.com/v21.0';
@@ -71,7 +73,7 @@ exports.handler = async (event) => {
   }
   if (!scheduled && q.preview) {
     const search = JOBS.deriveSearch({}, { role: JOBS.titleCase(q.role || 'Data Analyst'), city: JOBS.titleCase(q.city || '') });
-    const res = await JOBS.fetchJobs(search, { maxDays: 3 });
+    const res = await JOBS.fetchJobs(search, { maxDays: 1.5 });   // same window as the 9 AM alert
     return {
       statusCode: 200, headers: { 'content-type': 'text/plain; charset=utf-8' },
       body: JSON.stringify({
@@ -90,6 +92,7 @@ exports.handler = async (event) => {
   const TEMPLATE = process.env.WA_JOB_ALERT_TEMPLATE || '', TLANG = process.env.WA_JOB_ALERT_TEMPLATE_LANG || 'en';
   const report = { subscribers: subs.length, sent: 0, template: 0, skipped_window: 0, no_new: 0, errors: 0, stopped_early: false };
 
+  const memo = {};
   for (const from of subs) {
     if (Date.now() - t0 > 24000) { report.stopped_early = true; break; } // scheduled fns have a short time limit
     try {
@@ -97,7 +100,10 @@ exports.handler = async (event) => {
       if (!raw) { await redis(['SREM', 'jobalerts:subs', from]); continue; }
       const pref = JSON.parse(raw);
       const search = { role: pref.role, city: pref.city, skills: pref.skills || [] };
-      const res = await JOBS.fetchJobs(search, { maxDays: 2 });
+      // Daily alerts: only listings seen in the last ~36h (fresher = far fewer "job expired").
+      // Subscribers with the same role + city share one search per run.
+      const mk = (search.role + '|' + (search.city || '')).toLowerCase();
+      const res = memo[mk] || (memo[mk] = await JOBS.fetchJobs(search, { maxDays: 1.5 }));
       let fresh = res.jobs;
       if (res.source !== 'links') {
         const seen = new Set((await redis(['SMEMBERS', 'jobseen:' + from])) || []);
