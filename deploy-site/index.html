@@ -3,6 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="facebook-domain-verification" content="z75dvbk14mwrdvot8qmiqhcudibb0r" />
+  <script id="_r4uSignOutClean">
+  /* Sign-out leaves NO resume behind on this device. Runs first on every load:
+     after a sign-out (flag set by the wrapped _doSignOut) it wipes the resume
+     drafts/snapshots BEFORE any restore logic runs, so the app opens signed out on
+     the landing page (step 0) — not on the previous user's resume. Payment flags,
+     rating and visit counters are kept (they are not resume data). */
+  (function(){
+    var KEYS=['_preSignInDraft','_lastResumeOutput','_r4uResumeData','_r4uSnapTime','_keyAchiev','_kaSeeded','_kaAutoGen','_kaIncludeResume',
+      '_r4uSecOrder','_pfCustomize','_pfCustomSections','_pfExtraLinks','_r4uResumeSlug','_r4uLastPubSig','skillHistory','r4u_biodata_v1','_pendingSignIn'];
+    var SKEYS=['_r4uDl','_r4uIncomingResumeTok','_r4uIncomingJd'];
+    function wipe(){
+      try{ KEYS.forEach(function(k){ localStorage.removeItem(k); });
+        for(var i=localStorage.length-1;i>=0;i--){ var k=localStorage.key(i); if(k&&k.indexOf('_pfCard_')===0) localStorage.removeItem(k); } }catch(e){}
+      try{ SKEYS.forEach(function(k){ sessionStorage.removeItem(k); }); }catch(e){}
+    }
+    window._r4uWipeLocalResume=wipe;
+    try{ if(sessionStorage.getItem('_r4uSignedOut')==='1'){ wipe(); sessionStorage.removeItem('_r4uSignedOut');
+      try{ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} } }catch(e){}
+    /* Wrap the app's sign-out once it exists: stop the unload snapshot from
+       re-saving the resume, wipe now, and flag the next load to wipe again. */
+    function hook(){
+      if(typeof window._doSignOut!=='function') return false;
+      if(window._doSignOut.__r4uClean) return true;
+      var orig=window._doSignOut;
+      window._doSignOut=function(){
+        window._r4uSigningOut=true;
+        try{ sessionStorage.setItem('_r4uSignedOut','1'); }catch(e){}
+        wipe();
+        return orig.apply(this,arguments);
+      };
+      window._doSignOut.__r4uClean=true;
+      return true;
+    }
+    if(!hook()){ var n=0,iv=setInterval(function(){ if(hook()||++n>80) clearInterval(iv); },250); }
+  })();
+  </script>
   <script id="_r4uPerfPause">
   /* Performance / battery: when the tab or app is in the BACKGROUND, skip the
      repeated work of interval timers and (via the data-bg attribute + CSS) pause
@@ -6824,6 +6860,7 @@ if ('serviceWorker' in navigator) {
       ||(d.education&&d.education.length)||(d.awards&&d.awards.length));
   }
   function _snap(){
+    if(window._r4uSigningOut) return;   /* signing out: leave nothing behind */
     try{
       if(typeof collectData==='function'){
         var d=collectData();
@@ -7188,8 +7225,53 @@ if ('serviceWorker' in navigator) {
      (the main doc still saves, but reload restores from the stale version).
      Forcing both here on real input keeps version saves working. User typing
      means we are not mid-load, so clearing _applyingVersion is safe. */
-  function _armEdit(){ window.__r4uEdited=!![]; try{ window._applyingVersion=![]; window._versionDirty=!![]; }catch(_e){} }
+  function _armEdit(){ window.__r4uEdited=!![]; try{ window._applyingVersion=![]; window._versionDirty=!![]; }catch(_e){} _scheduleSave(); }
+  /* Save ~2.5s after the user STOPS editing (debounced), instead of waiting up to
+     15s for the autosave timer — so a quick refresh no longer shows the older cloud
+     copy. Runs the exact same steps as the core 15s autosave tick (main doc, then
+     the current version), so the multi-device gate below still decides write/skip.
+     Signed-in only; a burst of typing becomes ONE save; the 15s timer stays as the
+     backstop during continuous typing. */
+  var _saveT=null;
+  function _scheduleSave(){
+    try{ if(!(window._fbUser&&window._fbUser.uid)) return; }catch(e){ return; }
+    clearTimeout(_saveT);
+    _saveT=setTimeout(function(){
+      try{
+        var u=window._fbUser; if(!u||!u.uid||typeof window._saveToCloud!=='function') return;
+        window._saveToCloud(u.uid,![]);
+        if(window._versionDirty && (typeof lastResumeData!=='undefined'&&lastResumeData)){
+          if(window._currentVersionId && typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(u.uid,null);
+          else if(typeof window._saveVersionSnapshot==='function') window._saveVersionSnapshot(u.uid,null,null,function(){});
+        }
+      }catch(e){}
+    },2500);
+  }
   ['input','change'].forEach(function(ev){ document.addEventListener(ev,function(e){ try{ var t=e&&e.target; if(!t) return; var tag=t.tagName; if(t.isContentEditable||tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') _armEdit(); }catch(_e){} },!![]); });
+  /* Click-only edits (Remove an experience / education / skill, Apply ATS fix,
+     AI rewrites, reorders) change the resume WITHOUT an input/change event, so they
+     never armed the edit flag — the autosave then treated this device as idle and
+     skipped the save, and a reload brought the deleted item back from the cloud.
+     Arm on any resume change that follows a REAL user gesture (tap / click / key)
+     within the last minute. An idle device has no gestures, so it still writes
+     nothing — the multi-device protection is unchanged. */
+  var _lastGesture=0;
+  ['pointerdown','touchstart','keydown','click'].forEach(function(ev){ document.addEventListener(ev,function(){ _lastGesture=Date.now(); },true); });
+  function _userChange(){ try{ return !window._applyingVersion && (Date.now()-_lastGesture)<60000; }catch(e){ return false; } }
+  (function wrapRegen(tries){
+    var f=window.markNeedsRegen;
+    if(typeof f==='function'&&!f.__r4uEd){
+      window.markNeedsRegen=function(){ if(_userChange()) _armEdit(); return f.apply(this,arguments); };
+      window.markNeedsRegen.__r4uEd=!![]; return;
+    }
+    if(tries<100) setTimeout(function(){ wrapRegen(tries+1); },100);
+  })(0);
+  (function watchCard(tries){
+    var ro=document.getElementById('resumeOutput');
+    if(!ro){ if(tries<100) setTimeout(function(){ watchCard(tries+1); },200); return; }
+    try{ new MutationObserver(function(){ if(_userChange()&&document.querySelector('#resumeOutput .resume-a4-page')) _armEdit(); })
+      .observe(ro,{childList:true,subtree:true,characterData:true}); }catch(e){}
+  })(0);
   /* Template switch changes content without firing input → arm it too. */
   (function wrapTpl(tries){ var f=window.selectTemplate; if(typeof f==='function'&&!f.__r4uEd){ window.selectTemplate=function(){ _armEdit(); return f.apply(this,arguments); }; window.selectTemplate.__r4uEd=!![]; return; } if(tries<100) setTimeout(function(){ wrapTpl(tries+1); },100); })(0);
 
@@ -12245,7 +12327,54 @@ window.__novaPortfolioHTML=function(d,sections){
   }
   function parse(t){ try{ return JSON.parse(t); }catch(e){} var a=t.indexOf('{'),b=t.lastIndexOf('}'); if(a>=0&&b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(e2){} } return null; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function pages(){ try{ var n=document.querySelectorAll('#resumeOutput .resume-a4-page').length; return n||1; }catch(e){ return 1; } }
+  /* Printed page count: the measured "N pages" chip (the preview is ONE long
+     .resume-a4-page element, so counting elements always said 1). */
+  function pages(){
+    var n=0; try{ var chip=document.getElementById('pageCountChip'); var mm=chip&&(chip.textContent||'').match(/\d+/); if(mm) n=parseInt(mm[0],10); }catch(e){}
+    if(!n){ try{ n=document.querySelectorAll('#resumeOutput .resume-a4-page').length; }catch(e){} }
+    return Math.max(1,n||1);
+  }
+  /* ---- The ATS SCORE comes from the same engine as the free upload checker
+     (/ats-score-checker/): same model, 7-area rubric, fixed weights and caps,
+     graded on the resume's actual TEXT + printed length — and cached against a
+     fingerprint of that text, so the builder and an upload of the same resume
+     show the same number. The AI review below still writes the roasts/fixes. */
+  function plainText(){
+    try{ return Array.prototype.map.call(document.querySelectorAll('#resumeOutput .resume-a4-page'),function(p){ return p.innerText||p.textContent||''; }).join('\n\n').trim(); }catch(e){ return ''; }
+  }
+  function hexId(){ var a=new Uint8Array(20); (window.crypto||window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a,function(b){ return ('0'+b.toString(16)).slice(-2); }).join(''); }
+  function engineSync(input){
+    return fetch('/.netlify/functions/career-tools',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:'ats_check',input:input})})
+      .then(function(r){ return r.json(); }).then(function(j){ return j&&j.status==='done'?j.result:null; }).catch(function(){ return null; });
+  }
+  function enginePoll(id,input){
+    var t0=Date.now(), sawRunning=false;
+    return new Promise(function(resolve){
+      (function tick(){
+        setTimeout(function(){
+          fetch('/.netlify/functions/career-tools?job='+id,{cache:'no-store'}).then(function(r){ return r.json(); }).then(function(j){
+            if(j&&j.status==='done') return resolve(j.result);
+            if(j&&j.status==='error') return resolve(null);
+            if(j&&j.status==='running') sawRunning=true;
+            if(!sawRunning&&Date.now()-t0>25000) return engineSync(input).then(resolve);   /* background never started */
+            if(Date.now()-t0>120000) return resolve(null);
+            tick();
+          }).catch(function(){ if(Date.now()-t0>120000) resolve(null); else tick(); });
+        }, Date.now()-t0<4000?1200:2000);
+      })();
+    });
+  }
+  function engineScore(){
+    var text=plainText(); if(text.length<120) return Promise.resolve(null);
+    var input={resumeText:text.slice(0,24000), pageCount:pages(), source:'builder'}, id=hexId();
+    return fetch('/.netlify/functions/career-tools-background',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobId:id,tool:'ats_check',input:input})})
+      .then(function(r){
+        if(r.status===202) return enginePoll(id,input);
+        if(r.status===200) return r.json().then(function(j){ return j&&j.status==='done'?j.result:enginePoll(id,input); }).catch(function(){ return enginePoll(id,input); });
+        if(r.status===429) return null;
+        return engineSync(input);
+      }).catch(function(){ return engineSync(input); });
+  }
   function resumeText(){
     var d=data();
     var all=(d.experience||[]);
@@ -12279,7 +12408,9 @@ window.__novaPortfolioHTML=function(d,sections){
     build(); try{ prevOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; }catch(e){}
     overlay.classList.add('on');
     body().innerHTML='<div class="rr-load"><div class="rr-spin"></div><div style="font-weight:700">📊 Scoring your resume…</div><div class="rr-note" style="margin-top:4px">Checking it the way an ATS parser and recruiter would.</div></div>';
-    ai(prompt()).then(function(t){ var d=parse(t); if(!d||!d.roasts){ throw new Error('parse'); } lastRoast=d; renderRoast(d); })
+    var eng=engineScore();
+    ai(prompt()).then(function(t){ var d=parse(t); if(!d||!d.roasts){ throw new Error('parse'); }
+      return eng.then(function(e){ if(e&&typeof e.score==='number'){ d.score=e.score; d._engine=e; } lastRoast=d; renderRoast(d); }); })
       .catch(function(){ body().innerHTML='<div class="rr-load"><div style="font-size:1.6rem">😅</div><div style="font-weight:700;margin-top:6px">The review didn’t load</div><div class="rr-note">Couldn’t reach the AI just now. Close and try again in a moment.</div></div>'; });
   }
   function close(){ if(!overlay) return; overlay.classList.remove('on'); try{ document.body.style.overflow=prevOverflow; }catch(e){} }
@@ -12291,12 +12422,13 @@ window.__novaPortfolioHTML=function(d,sections){
   function atsNow(){ try{ if(typeof computeATSScore==='function'&&typeof lastResumeData!=='undefined'&&lastResumeData) return computeATSScore(lastResumeData).score||0; }catch(e){} return 50; }
   function renderRoast(d){
     var sc=clamp(d.score, atsNow());
-    var _pg=pages(); if(_pg>=4) sc=Math.min(sc,62); else if(_pg>=3) sc=Math.min(sc,78); /* over-length cap */
-    var col=sc>=85?'#1f9d57':sc>=70?'#0d9488':sc>=55?'#d97706':'#e0463d';
+    if(!d._engine){ var _pg=pages(); if(_pg>=4) sc=Math.min(sc,62); else if(_pg>=3) sc=Math.min(sc,78); } /* over-length cap (engine applies its own) */
+    /* Same bands + colours as the upload checker when the shared engine scored it. */
+    var col=d._engine?(sc>=85?'#1f9d57':sc>=75?'#0d9488':sc>=56?'#d97706':'#e0463d'):(sc>=85?'#1f9d57':sc>=70?'#0d9488':sc>=55?'#d97706':'#e0463d');
     var lines=(d.roasts||[]).slice(0,4).map(function(r){
       return '<div class="rr-line"><div class="rr-emoji">'+esc(r.emoji||'🔥')+'</div><div>'+(r.quote?'<div class="rr-quote">“'+esc(r.quote)+'”</div>':'')+'<div class="rr-zing">'+esc(r.zing||'')+'</div></div></div>';
     }).join('');
-    var bandLabel=sc>=85?'Excellent':sc>=70?'Strong':sc>=55?'Fair':'Needs work';
+    var bandLabel=(d._engine&&d._engine.band)?d._engine.band:(sc>=85?'Excellent':sc>=70?'Strong':sc>=55?'Fair':'Needs work');
     body().innerHTML=
       '<span class="rr-eyebrow">ATS readiness · how parsers &amp; recruiters read it</span>'+
       '<div class="rr-hero"><div class="rr-ring" style="background:conic-gradient('+col+' '+(sc*3.6)+'deg,var(--border,#e9e7e0) 0)"><div class="rr-ring-in"><b style="color:'+col+'">'+sc+'</b><i>ATS score</i></div></div>'+

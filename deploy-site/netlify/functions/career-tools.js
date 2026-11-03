@@ -19,7 +19,11 @@ exports.handler = async (event) => {
 
   let body = {};
   try { body = JSON.parse(event.body || '{}'); } catch (e) {}
-  const rl = await core.rateLimit(event);
+  if (body.tool === 'ats_check') {
+    const hit = await core.cachedAts(body.input || {});
+    if (hit) return { statusCode: 200, headers: H, body: JSON.stringify({ status: 'done', result: hit }) };
+  }
+  const rl = await core.rateLimit(event, { mult: body.input && body.input.source === 'builder' ? 3 : 1 });
   if (!rl.ok) return { statusCode: 429, headers: H, body: JSON.stringify({ status: 'error', error: rl.message }) };
   const out = await core.runTool(String(body.tool || ''), body.input || {}, 'fast');
   return {
