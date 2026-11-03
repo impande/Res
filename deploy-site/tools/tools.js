@@ -100,7 +100,8 @@
     if (data) name = data.name || data.fullName || (data.personal && data.personal.name) || '';
     if (!name) name = text.split('\n')[0];
     try { when = Number(ls.getItem('_r4uSnapTime')) || 0; } catch (e) {}
-    return { text: text.slice(0, 24000), name: String(name).slice(0, 60), when: when };
+    var role = data ? String(data.jobTitle || '').trim().slice(0, 120) : '';
+    return { text: text.slice(0, 24000), name: String(name).slice(0, 60), when: when, role: role };
   };
   function ago(t) {
     if (!t) return '';
