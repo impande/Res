@@ -17,6 +17,7 @@
  */
 
 const API = 'https://api.anthropic.com/v1/messages';
+const crypto = require('crypto');
 
 /* ------------------------------------------------------------------ redis */
 async function rcmd(cmd) {
@@ -59,12 +60,13 @@ function clientIp(event) {
   return String(ip).trim() || 'unknown';
 }
 // Fails OPEN if Redis is unavailable (the tools keep working; logged).
-async function rateLimit(event) {
+async function rateLimit(event, opts) {
   const ip = clientIp(event).replace(/[^0-9a-fA-F:.]/g, '').slice(0, 64) || 'unknown';
   const now = new Date();
   const hour = now.toISOString().slice(0, 13), day = now.toISOString().slice(0, 10);
-  const PER_HOUR = parseInt(process.env.TOOLS_PER_HOUR || '8', 10);
-  const PER_DAY = parseInt(process.env.TOOLS_PER_DAY || '25', 10);
+  const mult = (opts && opts.mult) || 1;   // builder users re-score after edits
+  const PER_HOUR = parseInt(process.env.TOOLS_PER_HOUR || '8', 10) * mult;
+  const PER_DAY = parseInt(process.env.TOOLS_PER_DAY || '25', 10) * mult;
   const GLOBAL = parseInt(process.env.TOOLS_DAILY_CAP || '3000', 10);
   const kh = 'ct:rl:h:' + hour + ':' + ip, kd = 'ct:rl:d:' + day + ':' + ip, kg = 'ct:rl:g:' + day;
   const res = await rpipe([
@@ -86,6 +88,27 @@ async function setJob(id, obj) { if (JOB_RE.test(id)) await rcmd(['SET', 'ct:job
 async function getJob(id) {
   if (!JOB_RE.test(id || '')) return null;
   const r = await rcmd(['GET', 'ct:job:' + id]);
+  if (!r.result) return null;
+  try { return JSON.parse(r.result); } catch (e) { return null; }
+}
+
+/* ------------------------------------------------------- ATS score cache
+ * One engine scores both the builder (step 8) and the upload checker. A result
+ * is cached against a fingerprint of the resume TEXT that ignores order,
+ * spacing, line breaks, bullets and case (the characters, sorted) — so the same
+ * resume read from the builder page or extracted from its PDF gets the SAME
+ * score, and re-checking an unchanged resume never drifts. Any real edit changes
+ * the fingerprint and re-grades. */
+function atsKey(i) {
+  const chars = String(i.resumeText || '').normalize('NFKD').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+  const fp = Array.from(chars).sort().join('');
+  return 'ct:ats:v1:' + crypto.createHash('sha256')
+    .update(fp + '|' + (i.pageCount || 0) + '|' + String(i.targetRole || '').toLowerCase().trim()).digest('hex');
+}
+async function cachedAts(rawInput) {
+  const i = cleanInput(rawInput);
+  if (i.resumeText.length < 120) return null;
+  const r = await rcmd(['GET', atsKey(i)]);
   if (!r.result) return null;
   try { return JSON.parse(r.result); } catch (e) { return null; }
 }
@@ -346,6 +369,7 @@ async function runTool(tool, rawInput, mode) {
   const json = extractJson(res.data);
   if (!json) return { ok: false, status: 502, error: stop === 'max_tokens' ? 'Your resume is very long; please trim it and try again.' : 'Could not read the AI response. Please try again.' };
   const result = tool === 'ats_check' ? finalizeAts(json, i) : json;
+  if (tool === 'ats_check') await rcmd(['SET', atsKey(i), JSON.stringify(result), 'EX', String(60 * 60 * 24 * 30)]);
   return { ok: true, result, model: res.data.model || body.model };
 }
 
@@ -387,4 +411,4 @@ function finalizeAts(j, i) {
   };
 }
 
-module.exports = { TOOLS, runTool, rateLimit, setJob, getJob, JOB_RE, finalizeAts, cleanInput, validate, SCHEMAS, PROMPTS, MODELS };
+module.exports = { TOOLS, runTool, rateLimit, setJob, getJob, JOB_RE, finalizeAts, cleanInput, validate, SCHEMAS, PROMPTS, MODELS, cachedAts, atsKey };
