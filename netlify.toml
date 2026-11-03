@@ -25,7 +25,7 @@
 
 # Daily WhatsApp job alerts at 09:00 IST (03:30 UTC). Scheduled functions only run on
 # the published production deploy; on UAT trigger it manually:
-#   /.netlify/functions/job-alerts?key=<WHATSAPP_VERIFY_TOKEN>&to=<number>
+#   /.netlify/functions/job-alerts-check?key=<WHATSAPP_VERIFY_TOKEN>&to=<number>  (scheduled fns cannot be called by URL)
 [functions."job-alerts"]
   schedule = "30 3 * * *"
 
