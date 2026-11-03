@@ -13,8 +13,10 @@
  * resume are ready. Reply JOBS to see them." Without a template, users outside
  * the 24h window are skipped (never an error).
  *
- * Scheduled functions only fire on the PUBLISHED deploy. To test on UAT:
- *   GET /.netlify/functions/job-alerts?key=<WHATSAPP_VERIFY_TOKEN>&to=<phone>
+ * Scheduled functions only fire on the PUBLISHED deploy, and Netlify blocks calling a
+ * scheduled function by URL (403). Manual / preview links therefore go through
+ * functions/job-alerts-check.js, e.g.
+ *   GET /.netlify/functions/job-alerts-check?key=<WHATSAPP_VERIFY_TOKEN>&to=<phone>
  */
 const JOBS = require('../lib/jobs.js');
 const GRAPH = 'https://graph.facebook.com/v21.0';
