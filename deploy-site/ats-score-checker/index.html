@@ -227,6 +227,8 @@
 (function () {
   var RT = window.R4UTools, esc = RT.esc;
   var input = RT.mountResumeInput(document.getElementById('resume'));
+  // Same role the builder scores against (its Professional Title), so both show the same number.
+  (function () { var sv = RT.savedResume(), el = document.getElementById('role'); if (sv && sv.role && el && !el.value) el.value = sv.role; })();
   var out = document.getElementById('out');
   RT.wire({
     tool: 'ats_check',
