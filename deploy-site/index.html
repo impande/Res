@@ -1220,6 +1220,8 @@
     .rte-field p:empty::before{content:'\200B';}
     /* ── Mobile Style A header ── */
     #mobileHdr{display:none;padding:10px 14px 0;background:var(--sidebar-bg);border-bottom:1px solid var(--border);}
+    /* Show the phone header from the very first paint (it used to wait ~for the whole app script to run goToStep(0)). */
+    @media(max-width:768px){#mobileHdr{display:block;}}
     .mhdr-row1{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
     .mhdr-logo{width:32px;height:32px;background:linear-gradient(135deg,#f59e0b,#b45309);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:900;color:#fff;flex-shrink:0;cursor:pointer;}
     .mhdr-section{flex:1;font-size:0.88rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2649,6 +2651,36 @@
     window._r4uLoadFB();
   })();
   </script>
+<style id="_r4uToolsRowCss">
+/* Free career tools row: rendered in the HTML so it paints with the landing cards. */
+.r4u-ic { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: rgb(255, 255, 255); font-weight: 800; font-size: 15px; line-height: 1; }
+.r4u-ic svg { width: 17px; height: 17px; display: block; }
+#_r4uToolsRow { margin: 22px 0px 4px; }
+#_r4uToolsRow .tr-h { display: flex; align-items: center; justify-content: space-between; padding: 0px 2px; }
+#_r4uToolsRow .tr-t { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; color: rgb(180, 83, 9); text-transform: uppercase; }
+#_r4uToolsRow .tr-row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 2px; padding: 10px 2px; margin: 0px -2px; scrollbar-width: none; }
+#_r4uToolsRow .tr-row::-webkit-scrollbar { display: none; }
+#_r4uToolsRow a { flex: 0 0 132px; scroll-snap-align: start; background: rgb(255, 255, 255); border: 1px solid rgb(235, 231, 223); border-radius: 14px; padding: 12px; text-decoration: none; box-shadow: rgba(0, 0, 0, 0.25) 0px 6px 16px -12px; transition: border-color 0.15s, transform 0.15s; }
+#_r4uToolsRow a:hover { border-color: rgb(231, 199, 154); transform: translateY(-1px); }
+#_r4uToolsRow a:focus-visible { outline: rgba(180, 83, 9, 0.4) solid 3px; outline-offset: 2px; }
+#_r4uToolsRow a .r4u-ic { width: 38px; height: 38px; border-radius: 11px; }
+#_r4uToolsRow a .r4u-ic svg { width: 20px; height: 20px; }
+#_r4uToolsRow a b { display: block; font-size: 0.84rem; color: var(--text,#1a1a1a); line-height: 1.25; margin-top: 9px; }
+#_r4uToolsRow a span.s { display: block; font-size: 0.7rem; color: var(--muted,#6b7280); margin-top: 2px; line-height: 1.3; }
+#_r4uToolsRow a.feat { border-color: rgb(191, 232, 207); background: linear-gradient(160deg, rgb(240, 253, 244), rgb(255, 255, 255) 70%); }
+@media (min-width: 700px) {
+  #_r4uToolsRow .tr-row { display: grid; grid-template-columns: repeat(4, minmax(0px, 1fr)); overflow: visible; margin: 0px; padding: 10px 0px; }
+  #_r4uToolsRow a { flex: 0 0 auto; }
+  #_r4uToolsRow a.feat { grid-column: span 2; display: flex; align-items: center; gap: 14px; }
+  #_r4uToolsRow a.feat .r4u-ic { width: 46px; height: 46px; border-radius: 13px; }
+  #_r4uToolsRow a.feat .r4u-ic svg { width: 24px; height: 24px; }
+  #_r4uToolsRow a.feat b { margin-top: 0px; font-size: 0.95rem; }
+  #_r4uToolsRow a.feat span.s { font-size: 0.76rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .r4u-tl, #_r4uToolsRow a { transition: none; }
+}
+</style>
 </head>
 <body>
 
@@ -2657,14 +2689,11 @@
 <div id="mobileHdr">
   <div class="mhdr-row1">
     <div class="mhdr-logo" onclick="goToStep(1)">R</div>
-    <div class="mhdr-section" id="mhdrSection">Basic Info</div>
-    <button class="mhdr-save-btn" id="mhdrSaveBtn" onclick="signInWithGoogle()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Save progress
-    </button>
+    <div id="_r4uMhdrBrandLbl" class="mhdr-section" style="font-style:normal;opacity:1;cursor:pointer;" onclick="try{goToStep(1)}catch(e){}">Resume For You</div><div class="mhdr-section" id="mhdrSection" style="display:none">Basic Info</div>
+    <button class="mhdr-save-btn landing-signin" id="mhdrSaveBtn" onclick="signInWithGoogle()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Sign In to Save</button>
     <div class="mhdr-avatar" id="mhdrAvatar" style="display:none" onclick="_mobileAuthMenu(_fbUser)"></div>
   </div>
-  <div class="mhdr-row2">
+  <div class="mhdr-row2" style="display:none">
     <span class="mhdr-step" id="mhdrStep">Step 1 of 7</span>
     <div class="mhdr-bar-track"><div class="mhdr-bar-fill" id="mhdrBarFill" style="width:14.28%"></div></div>
   </div>
@@ -2781,6 +2810,7 @@
         <span class="r4u-cta-body"><span class="r4u-cta-title">Build resume on WhatsApp</span><span class="r4u-cta-desc">No form — answer a few quick questions by chat</span></span>
         <span class="r4u-cta-arr" aria-hidden="true">→</span>
       </button>
+      <div id="_r4uToolsRow"><div class="tr-h"><span class="tr-t">Free career tools</span></div><div class="tr-row" role="list"><a href="/whatsapp-job-alerts/" class="feat"><span class="r4u-ic" style="background:linear-gradient(145deg,#25d366,#128c7e)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg></span><span class="tx"><b>Daily Job Alerts</b><span class="s">On WhatsApp, for your role</span></span></a><a href="/ats-score-checker/"><span class="r4u-ic" style="background:linear-gradient(135deg,#14b8a6,#0d9488)"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="8" rx="1.5"></rect><rect x="10" y="7" width="4" height="13" rx="1.5"></rect><rect x="16" y="10" width="4" height="10" rx="1.5"></rect></svg></span><span class="tx"><b>ATS Score Checker</b><span class="s">Upload &amp; get your score</span></span></a><a href="/linkedin-profile-optimizer/"><span class="r4u-ic" style="background:linear-gradient(135deg,#0a66c2,#004182)"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6.2 8.6H3V21h3.2V8.6zM4.6 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM21 13.9c0-3.3-1.8-5.6-4.9-5.6-1.6 0-2.7.9-3.2 1.7V8.6H9.8V21H13v-6.4c0-1.6.6-2.9 2.3-2.9 1.6 0 2.1 1.3 2.1 3V21H21v-7.1z"></path></svg></span><span class="tx"><b>LinkedIn Optimizer</b><span class="s">Headline &amp; About</span></span></a><a href="/interview-prep/"><span class="r4u-ic" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5"></path><path d="M12 15.5h.01"></path></svg></span><span class="tx"><b>Interview Prep</b><span class="s">Questions for your role</span></span></a><a href="/resume-in-hindi/"><span class="r4u-ic" style="background:linear-gradient(135deg,#f97316,#c2410c)"><span aria-hidden="true">अ</span></span><span class="tx"><b>Resume in Hindi</b><span class="s">+ 9 Indian languages</span></span></a><a href="/govt-job-biodata-maker/"><span class="r4u-ic" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><circle cx="12" cy="9" r="2.2"></circle><path d="M8.5 15h7M8.5 18h5"></path></svg></span><span class="tx"><b>Govt Job Biodata</b><span class="s">Hindi / English</span></span></a><a href="/sova/"><span class="r4u-ic" style="background:linear-gradient(135deg,#d97706,#92400e)"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 5h30a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H20l-9 7v-7H9a5 5 0 0 1-5-5V10a5 5 0 0 1 5-5z" fill="#fff"></path><circle cx="18" cy="19" r="5.6" fill="#b45309"></circle><circle cx="30" cy="19" r="5.6" fill="#b45309"></circle><circle cx="18" cy="19" r="2.2" fill="#fff"></circle><circle cx="30" cy="19" r="2.2" fill="#fff"></circle></svg></span><span class="tx"><b>Sova Prompt Maker</b><span class="s">Perfect AI prompts</span></span></a></div></div>
     </div>
     <p class="hero-note">Free to build · Sign in anytime to save your progress</p>
   </div>
@@ -14895,13 +14925,16 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 (function(){
   var sec=document.getElementById('mhdrSection');
   if(!sec || !sec.parentNode) return;
-  var brand=document.createElement('div');
-  brand.id='_r4uMhdrBrandLbl';
-  brand.className='mhdr-section';
-  brand.textContent='Resume For You';
-  brand.style.cssText='font-style:normal;opacity:1;cursor:pointer;';
+  var brand=document.getElementById('_r4uMhdrBrandLbl');   /* now rendered in the HTML (first paint) */
+  if(!brand){
+    brand=document.createElement('div');
+    brand.id='_r4uMhdrBrandLbl';
+    brand.className='mhdr-section';
+    brand.textContent='Resume For You';
+    brand.style.cssText='font-style:normal;opacity:1;cursor:pointer;';
+    sec.parentNode.insertBefore(brand, sec);
+  }
   brand.onclick=function(){ try{ goToStep(1); }catch(e){} };
-  sec.parentNode.insertBefore(brand, sec);
   function onLanding(){
     var s0=document.getElementById('step0');
     return !!(s0 && s0.classList.contains('active') && !s0.classList.contains('flow-started'));
@@ -15066,7 +15099,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 
   /* ----- landing tools row ----- */
   function row(){
-    if(document.getElementById('_r4uToolsRow')) return true;
+    var ex=document.getElementById('_r4uToolsRow');
+    if(ex){ var fa=ex.querySelector('a.feat'); if(fa&&!fa.__r4uWired){ fa.__r4uWired=true; fa.addEventListener('click',function(e){ e.preventDefault(); openAlerts(); }); } return true; }
     var wa=document.getElementById('_r4uWaLandingCta'); if(!wa||!wa.parentNode) return false;
     var r=document.createElement('div'); r.id='_r4uToolsRow';
     function c(k,href,t,s){ return '<a href="'+href+'"'+(k==='alert'?' class="feat"':'')+'>'+ic(k)+'<span class="tx"><b>'+t+'</b><span class="s">'+s+'</span></span></a>'; }
