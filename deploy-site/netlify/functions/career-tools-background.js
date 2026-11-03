@@ -12,7 +12,12 @@ exports.handler = async (event) => {
   const jobId = String(body.jobId || '');
   if (!core.JOB_RE.test(jobId)) return { statusCode: 400, body: JSON.stringify({ error: 'bad job id' }) };
 
-  const rl = await core.rateLimit(event);
+  // Same resume already scored → same score, instantly (and not counted against limits).
+  if (body.tool === 'ats_check') {
+    const hit = await core.cachedAts(body.input || {});
+    if (hit) { await core.setJob(jobId, { status: 'done', result: hit }); return { statusCode: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: 'done', result: hit }) }; }
+  }
+  const rl = await core.rateLimit(event, { mult: body.input && body.input.source === 'builder' ? 3 : 1 });
   if (!rl.ok) { await core.setJob(jobId, { status: 'error', error: rl.message }); return { statusCode: 429, body: '' }; }
 
   await core.setJob(jobId, { status: 'running', at: Date.now() });
