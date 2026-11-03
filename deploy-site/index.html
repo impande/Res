@@ -7225,7 +7225,28 @@ if ('serviceWorker' in navigator) {
      (the main doc still saves, but reload restores from the stale version).
      Forcing both here on real input keeps version saves working. User typing
      means we are not mid-load, so clearing _applyingVersion is safe. */
-  function _armEdit(){ window.__r4uEdited=!![]; try{ window._applyingVersion=![]; window._versionDirty=!![]; }catch(_e){} }
+  function _armEdit(){ window.__r4uEdited=!![]; try{ window._applyingVersion=![]; window._versionDirty=!![]; }catch(_e){} _scheduleSave(); }
+  /* Save ~2.5s after the user STOPS editing (debounced), instead of waiting up to
+     15s for the autosave timer — so a quick refresh no longer shows the older cloud
+     copy. Runs the exact same steps as the core 15s autosave tick (main doc, then
+     the current version), so the multi-device gate below still decides write/skip.
+     Signed-in only; a burst of typing becomes ONE save; the 15s timer stays as the
+     backstop during continuous typing. */
+  var _saveT=null;
+  function _scheduleSave(){
+    try{ if(!(window._fbUser&&window._fbUser.uid)) return; }catch(e){ return; }
+    clearTimeout(_saveT);
+    _saveT=setTimeout(function(){
+      try{
+        var u=window._fbUser; if(!u||!u.uid||typeof window._saveToCloud!=='function') return;
+        window._saveToCloud(u.uid,![]);
+        if(window._versionDirty && (typeof lastResumeData!=='undefined'&&lastResumeData)){
+          if(window._currentVersionId && typeof window._saveCurrentVersion==='function') window._saveCurrentVersion(u.uid,null);
+          else if(typeof window._saveVersionSnapshot==='function') window._saveVersionSnapshot(u.uid,null,null,function(){});
+        }
+      }catch(e){}
+    },2500);
+  }
   ['input','change'].forEach(function(ev){ document.addEventListener(ev,function(e){ try{ var t=e&&e.target; if(!t) return; var tag=t.tagName; if(t.isContentEditable||tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') _armEdit(); }catch(_e){} },!![]); });
   /* Click-only edits (Remove an experience / education / skill, Apply ATS fix,
      AI rewrites, reorders) change the resume WITHOUT an input/change event, so they
