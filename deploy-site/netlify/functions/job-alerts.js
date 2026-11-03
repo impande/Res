@@ -73,7 +73,7 @@ exports.handler = async (event) => {
   }
   if (!scheduled && q.preview) {
     const search = JOBS.deriveSearch({}, { role: JOBS.titleCase(q.role || 'Data Analyst'), city: JOBS.titleCase(q.city || '') });
-    const res = await JOBS.fetchJobs(search, { maxDays: 3 });
+    const res = await JOBS.fetchJobs(search, { maxDays: 1.5 });   // same window as the 9 AM alert
     return {
       statusCode: 200, headers: { 'content-type': 'text/plain; charset=utf-8' },
       body: JSON.stringify({
