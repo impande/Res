@@ -90,6 +90,7 @@ exports.handler = async (event) => {
   const TEMPLATE = process.env.WA_JOB_ALERT_TEMPLATE || '', TLANG = process.env.WA_JOB_ALERT_TEMPLATE_LANG || 'en';
   const report = { subscribers: subs.length, sent: 0, template: 0, skipped_window: 0, no_new: 0, errors: 0, stopped_early: false };
 
+  const memo = {};
   for (const from of subs) {
     if (Date.now() - t0 > 24000) { report.stopped_early = true; break; } // scheduled fns have a short time limit
     try {
@@ -97,7 +98,10 @@ exports.handler = async (event) => {
       if (!raw) { await redis(['SREM', 'jobalerts:subs', from]); continue; }
       const pref = JSON.parse(raw);
       const search = { role: pref.role, city: pref.city, skills: pref.skills || [] };
-      const res = await JOBS.fetchJobs(search, { maxDays: 2 });
+      // Daily alerts: only listings seen in the last ~36h (fresher = far fewer "job expired").
+      // Subscribers with the same role + city share one search per run.
+      const mk = (search.role + '|' + (search.city || '')).toLowerCase();
+      const res = memo[mk] || (memo[mk] = await JOBS.fetchJobs(search, { maxDays: 1.5 }));
       let fresh = res.jobs;
       if (res.source !== 'links') {
         const seen = new Set((await redis(['SMEMBERS', 'jobseen:' + from])) || []);

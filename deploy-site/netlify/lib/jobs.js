@@ -57,7 +57,10 @@ function rank(jobs, s) {
   jobs.forEach((job) => { const m = scoreJob(job, s); job.match = m.score; job.matched = m.matched; job.head = m.head; });
   const seen = new Set();
   jobs = jobs.filter((x) => { const k = (x.title + '|' + x.company).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
-  jobs.sort((a, b) => (b.match - a.match) || String(b.created).localeCompare(String(a.created)));
+  // Freshness matters as much as fit: listings Jooble saw in the last 24-48h are far
+  // less likely to be closed on the source site (e.g. "job expired" on Naukri).
+  jobs.forEach((x) => { const d = Date.parse(x.created); x.ageH = d ? Math.max(0, (Date.now() - d) / 36e5) : null; x.rank = x.match + (x.ageH == null ? 0 : x.ageH < 24 ? 25 : x.ageH < 48 ? 12 : 0); });
+  jobs.sort((a, b) => (b.rank - a.rank) || String(b.created).localeCompare(String(a.created)));
   // Real matches first; only pad with near matches when there are fewer than 3.
   const good = jobs.filter((x) => x.head);
   return good.length >= 3 ? good : good.concat(jobs.filter((x) => !x.head && x.match > 0));
@@ -79,6 +82,30 @@ async function joobleCall(host, key, s, location) {
   } catch (e) { console.error('[jobs] jooble failed', host, e && e.message); return null; }
   finally { clearTimeout(t); }
 }
+/* Best-effort liveness check on the listing pages we are about to send (Jooble's own
+ * pages; we never scrape the source boards). Drops listings Jooble has removed (404/410)
+ * or marks as closed. Unknown / slow / redirecting pages are kept — we can't confirm
+ * them either way. Checks the top N in parallel with a short timeout. */
+const CLOSED_RE = /no longer (available|active|accepting)|job (has )?expired|this (job|vacancy|position) (is|has been) (closed|filled|removed)|vacancy (is )?closed|position (has been )?filled/i;
+async function alive(url) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500);
+  try {
+    const r = await fetch(url, { method: 'GET', redirect: 'manual', signal: ctl.signal, headers: { 'user-agent': 'Mozilla/5.0 (compatible; Resume4uJobAlerts/1.0)' } });
+    if (r.status === 404 || r.status === 410) return false;
+    if (r.status === 200) { const html = (await r.text()).slice(0, 60000); return !CLOSED_RE.test(html); }
+    return true;                                   // redirects to the source / other: can't tell → keep
+  } catch (e) { return true; }                     // timeout / network: keep
+  finally { clearTimeout(t); }
+}
+async function verifyLinks(jobs, n) {
+  if (!jobs.length) return jobs;
+  const head = jobs.slice(0, n), rest = jobs.slice(n);
+  const ok = await Promise.all(head.map((j) => alive(j.url)));
+  const dropped = ok.filter((x) => !x).length;
+  if (dropped) console.log('[jobs] dropped', dropped, 'closed listing(s)');
+  return head.filter((j, i) => ok[i]).concat(rest);
+}
+
 async function fetchJooble(s, opts) {
   const key = process.env.JOOBLE_API_KEY;
   const pinned = (process.env.JOOBLE_HOST || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
@@ -93,7 +120,7 @@ async function fetchJooble(s, opts) {
       title: strip(x.title), company: strip(x.company), location: strip(x.location),
       url: x.link || '', description: strip(x.snippet), created: x.updated || ''
     })).filter((x) => { const d = Date.parse(x.created); return !d || Date.now() - d < maxMs; });
-    const ranked = rank(jobs, s);
+    const ranked = await verifyLinks(rank(jobs, s), (opts && opts.verify) || 8);
     if (ranked.length) return { jobs: ranked, host: host };
   }
   return null;
@@ -142,6 +169,7 @@ function formatJobs(search, res, opts) {
     list.forEach((j, i) => {
       lines.push((i + 1) + '. *' + j.title + '*' + (j.company ? ' — ' + j.company : '') + (j.location ? ' · ' + j.location : ''));
       if (j.matched && j.matched.length) lines.push('   ✅ Matches: ' + j.matched.join(', '));
+      if (j.ageH != null) lines.push('   🕒 ' + (j.ageH < 24 ? 'Posted today' : j.ageH < 48 ? 'Posted yesterday' : 'Posted ' + Math.round(j.ageH / 24) + ' days ago'));
       lines.push('   🔗 ' + j.url);
     });
     lines.push('\nMore (posted in the last 24h): ' + res.links.slice(0, 2).map((l) => l[0] + ' ' + l[1]).join('\n'));
