@@ -7227,6 +7227,30 @@ if ('serviceWorker' in navigator) {
      means we are not mid-load, so clearing _applyingVersion is safe. */
   function _armEdit(){ window.__r4uEdited=!![]; try{ window._applyingVersion=![]; window._versionDirty=!![]; }catch(_e){} }
   ['input','change'].forEach(function(ev){ document.addEventListener(ev,function(e){ try{ var t=e&&e.target; if(!t) return; var tag=t.tagName; if(t.isContentEditable||tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') _armEdit(); }catch(_e){} },!![]); });
+  /* Click-only edits (Remove an experience / education / skill, Apply ATS fix,
+     AI rewrites, reorders) change the resume WITHOUT an input/change event, so they
+     never armed the edit flag — the autosave then treated this device as idle and
+     skipped the save, and a reload brought the deleted item back from the cloud.
+     Arm on any resume change that follows a REAL user gesture (tap / click / key)
+     within the last minute. An idle device has no gestures, so it still writes
+     nothing — the multi-device protection is unchanged. */
+  var _lastGesture=0;
+  ['pointerdown','touchstart','keydown','click'].forEach(function(ev){ document.addEventListener(ev,function(){ _lastGesture=Date.now(); },true); });
+  function _userChange(){ try{ return !window._applyingVersion && (Date.now()-_lastGesture)<60000; }catch(e){ return false; } }
+  (function wrapRegen(tries){
+    var f=window.markNeedsRegen;
+    if(typeof f==='function'&&!f.__r4uEd){
+      window.markNeedsRegen=function(){ if(_userChange()) _armEdit(); return f.apply(this,arguments); };
+      window.markNeedsRegen.__r4uEd=!![]; return;
+    }
+    if(tries<100) setTimeout(function(){ wrapRegen(tries+1); },100);
+  })(0);
+  (function watchCard(tries){
+    var ro=document.getElementById('resumeOutput');
+    if(!ro){ if(tries<100) setTimeout(function(){ watchCard(tries+1); },200); return; }
+    try{ new MutationObserver(function(){ if(_userChange()&&document.querySelector('#resumeOutput .resume-a4-page')) _armEdit(); })
+      .observe(ro,{childList:true,subtree:true,characterData:true}); }catch(e){}
+  })(0);
   /* Template switch changes content without firing input → arm it too. */
   (function wrapTpl(tries){ var f=window.selectTemplate; if(typeof f==='function'&&!f.__r4uEd){ window.selectTemplate=function(){ _armEdit(); return f.apply(this,arguments); }; window.selectTemplate.__r4uEd=!![]; return; } if(tries<100) setTimeout(function(){ wrapTpl(tries+1); },100); })(0);
 
