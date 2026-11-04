@@ -622,6 +622,18 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || '{}');
     const v = body.entry && body.entry[0] && body.entry[0].changes && body.entry[0].changes[0] && body.entry[0].changes[0].value;
     msg = v && v.messages && v.messages[0];
+    // Delivery receipts (sent / delivered / read / failed). Keep the last few per
+    // number so a missed job alert can be explained: job-alerts-check?key=..&status=1
+    const sts = (v && v.statuses) || [];
+    for (const s of sts) {
+      const e = s.errors && s.errors[0];
+      const rec = { t: Number(s.timestamp) * 1000 || Date.now(), status: s.status, id: s.id,
+        err: e ? { code: e.code, title: e.title, details: (e.error_data && e.error_data.details) || e.message || "" } : null };
+      if (e) console.error("[whatsapp] delivery FAILED to", s.recipient_id, JSON.stringify(rec.err));
+      await redis(["LPUSH", "wastatus:" + s.recipient_id, JSON.stringify(rec)]);
+      await redis(["LTRIM", "wastatus:" + s.recipient_id, "0", "14"]);
+      await redis(["EXPIRE", "wastatus:" + s.recipient_id, "604800"]);
+    }
   } catch (e) { return { statusCode: 200, body: 'ok' }; } // always 200 so Meta doesn't retry-storm
   if (!msg) return { statusCode: 200, body: 'ok' };
 

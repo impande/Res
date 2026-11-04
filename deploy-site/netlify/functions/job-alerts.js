@@ -37,7 +37,8 @@ async function wa(payload) {
     method: 'POST', headers: { Authorization: 'Bearer ' + token, 'content-type': 'application/json' },
     body: JSON.stringify(Object.assign({ messaging_product: 'whatsapp' }, payload))
   });
-  if (!r.ok) console.error('[job-alerts] send failed', r.status, (await r.text().catch(() => '')).slice(0, 300));
+  wa.lastErr = '';
+  if (!r.ok) { wa.lastErr = r.status + ' ' + (await r.text().catch(() => '')).slice(0, 300); console.error('[job-alerts] send failed', wa.lastErr); }
   return r.ok;
 }
 const sendText = (to, body) => wa({ to, type: 'text', text: { body } });
@@ -71,6 +72,25 @@ exports.handler = async (event) => {
     }
     return { statusCode: 200, headers: { 'content-type': 'text/plain; charset=utf-8' }, body: JSON.stringify({ voice_answers: status, whisper_models: models }, null, 2) };
   }
+  // Why did (or didn't) an alert arrive? ?key=<token>&status=1[&to=<phone>]
+  // Shows the last run's report and WhatsApp's delivery receipts per subscriber.
+  if (!scheduled && q.status) {
+    const last = await redis(['GET', 'jobalerts:lastrun']);
+    const who = q.to ? [String(q.to).replace(/\D/g, '')] : ((await redis(['SMEMBERS', 'jobalerts:subs'])) || []);
+    const subs = {};
+    for (const p of who) {
+      const pref = await redis(['GET', 'jobalert:' + p]);
+      const lastSeen = Number(await redis(['GET', 'lastseen:' + p])) || 0;
+      const rec = ((await redis(['LRANGE', 'wastatus:' + p, '0', '14'])) || []).map((x) => { try { const r = JSON.parse(x); r.at = new Date(r.t).toISOString(); return r; } catch (e) { return x; } });
+      subs[p.slice(0, -4).replace(/\d/g, '•') + p.slice(-4)] = {
+        alert: pref ? JSON.parse(pref) : null,
+        last_message_from_user: lastSeen ? new Date(lastSeen).toISOString() : null,
+        inside_24h_window: Date.now() - lastSeen < 23.5 * 3600 * 1000,
+        delivery_receipts: rec
+      };
+    }
+    return { statusCode: 200, headers: { 'content-type': 'text/plain; charset=utf-8' }, body: JSON.stringify({ last_run: last ? JSON.parse(last) : null, template: process.env.WA_JOB_ALERT_TEMPLATE || null, subscribers: subs }, null, 2) };
+  }
   if (!scheduled && q.preview) {
     const search = JOBS.deriveSearch({}, { role: JOBS.titleCase(q.role || 'Data Analyst'), city: JOBS.titleCase(q.city || '') });
     const res = await JOBS.fetchJobs(search, { maxDays: 1.5 });   // same window as the 9 AM alert
@@ -90,7 +110,8 @@ exports.handler = async (event) => {
   const only = q.to ? String(q.to).replace(/\D/g, '') : '';
   const subs = only ? [only] : ((await redis(['SMEMBERS', 'jobalerts:subs'])) || []);
   const TEMPLATE = process.env.WA_JOB_ALERT_TEMPLATE || '', TLANG = process.env.WA_JOB_ALERT_TEMPLATE_LANG || 'en';
-  const report = { subscribers: subs.length, sent: 0, template: 0, skipped_window: 0, no_new: 0, errors: 0, stopped_early: false };
+  const report = { at: new Date().toISOString(), manual: !scheduled, subscribers: subs.length, sent: 0, template: 0, skipped_window: 0, no_new: 0, errors: 0, stopped_early: false, each: {} };
+  const mark = (p, what) => { report.each['…' + String(p).slice(-4)] = what; };
 
   const memo = {};
   for (const from of subs) {
@@ -108,7 +129,7 @@ exports.handler = async (event) => {
       if (res.source !== 'links') {
         const seen = new Set((await redis(['SMEMBERS', 'jobseen:' + from])) || []);
         fresh = fresh.filter((j) => !seen.has(j.id));
-        if (!fresh.length) { report.no_new++; continue; }
+        if (!fresh.length) { report.no_new++; mark(from, 'no new jobs (all already sent)'); continue; }
       }
       const last = Number(await redis(['GET', 'lastseen:' + from])) || 0;
       const inWindow = Date.now() - last < 23.5 * 3600 * 1000;
@@ -116,18 +137,21 @@ exports.handler = async (event) => {
       if (inWindow) {
         ok = await sendText(from, '☀️ Good morning! ' + JOBS.formatJobs(search, { source: res.source, jobs: fresh, links: res.links }));
         if (ok) report.sent++;
+        mark(from, ok ? 'sent job list (' + fresh.length + ' jobs)' : 'job list send FAILED: ' + wa.lastErr);
       } else if (TEMPLATE) {
         const first = String(pref.name || '').trim().split(/\s+/)[0] || 'there';
         ok = await sendTemplate(from, TEMPLATE, TLANG, [first, fresh.length ? String(Math.min(fresh.length, 5)) : 'New', search.role]);
         if (ok) report.template++;
-      } else { report.skipped_window++; continue; }
+        mark(from, ok ? 'sent template (outside 24h window)' : 'template send FAILED: ' + wa.lastErr);
+      } else { report.skipped_window++; mark(from, 'skipped: outside 24h window and no template'); continue; }
       if (ok && fresh.length) {
         await redis(['SADD', 'jobseen:' + from].concat(fresh.slice(0, 5).map((j) => j.id)));
         await redis(['EXPIRE', 'jobseen:' + from, '1209600']);
       }
       if (!ok) report.errors++;
-    } catch (e) { report.errors++; console.error('[job-alerts] subscriber failed', e && e.message); }
+    } catch (e) { report.errors++; mark(from, 'error: ' + (e && e.message)); console.error('[job-alerts] subscriber failed', e && e.message); }
   }
   console.log('[job-alerts] run', JSON.stringify(report));
+  await redis(['SET', 'jobalerts:lastrun', JSON.stringify(report), 'EX', '604800']);
   return { statusCode: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify(report) };
 };
