@@ -6953,11 +6953,44 @@ if ('serviceWorker' in navigator) {
   var orig=renderResumeHTML;
   window.renderResumeHTML=renderResumeHTML=function(d){
     var id=currentTemplate;
-    if(!TWO_COL[id]) return orig.apply(this,arguments);
+    if(!TWO_COL[id]){
+      var h0=orig.apply(this,arguments);
+      return IDS[id]?h0:refresh(String(h0),id);
+    }
     try{ currentTemplate='azure'; var h=orig.apply(this,arguments); }
     finally{ currentTemplate=id; }
     return String(h).replace('class="tpl-azure"','class="tpl-'+id+'"');
   };
+
+  /* ── Refresh for the classic templates (2026 rework) ─────────────────────
+     Every older template keeps its layout and colour but gets the modern type
+     and spacing system: the wrapper is tagged with its family (r4-rf + group)
+     and accent tones derived from its own colour, and _r4uTplRefreshCss (end of
+     document) does the rest. Groups were measured from the rendered templates. */
+  var GROUP={}, FONT={}, SENT={};
+  function put(map,ids,v){ ids.split(' ').forEach(function(k){ map[k]=v; }); }
+  function fam(f,list){ return list.split(' ').map(function(c){ return f+'-'+c; }).join(' '); }
+  put(GROUP,'blush verdant lilac azure','pastel');
+  put(GROUP,'modern corporate executive','band2');
+  put(GROUP,'elegant bold tech sky purple warm slate pink indigo forest graphite midnight copper noir emerald denim ruby stone sunset ocean '+fam('meridian','navy emerald burgundy slate charcoal plum teal forest'),'band');
+  put(FONT,'classic academic paper warm elegant '+fam('oxford','ink wine navy forest sepia charcoal')+' '+fam('executive','black navy bronze burgundy forest'),'serif');
+  put(FONT,'retro','mono');
+  put(SENT,fam('meridian','navy emerald burgundy slate charcoal plum teal forest')+' '+fam('chronicle','teal indigo rose amber slate green')+' '+fam('ledger','navy green maroon indigo bronze')+' '+fam('cascade','coral teal blue violet amber')+' '+fam('vertex','indigo teal orange rose slate')+' '+fam('aria','rose sky mint amber violet coral'),1);
+  var PASTEL_ACC={blush:'#b0473c',verdant:'#3f6b52',lilac:'#6d4aa3',azure:'#2e6da4'};
+  function rgb(hex){ var m=String(hex||'').match(/#([0-9a-f]{6}|[0-9a-f]{3})\b/i); if(!m) return [51,65,85]; var x=m[1]; if(x.length===3) x=x.replace(/./g,'$&$&'); return [0,2,4].map(function(i){ return parseInt(x.substr(i,2),16); }); }
+  function lum(c){ return c.map(function(v){ v/=255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); }).reduce(function(a,v,i){ return a+v*[0.2126,0.7152,0.0722][i]; },0); }
+  function hex(c){ return '#'+c.map(function(v){ return ('0'+Math.round(v).toString(16)).slice(-2); }).join(''); }
+  function tones(id){
+    var c=rgb(PASTEL_ACC[id]||TPL_COLORS[id]);
+    for(var i=0;i<12&&(1.05/(lum(c)+0.05))<4.6;i++) c=c.map(function(v){ return v*0.86; });   /* readable on white */
+    var soft=c.map(function(v){ return 255-(255-v)*0.1; });
+    return '--rf-a:'+hex(c)+';--rf-soft:'+hex(soft);
+  }
+  function refresh(h,id){
+    if(!TPL_META[id]) return h;
+    var cls='tpl-'+id+' r4-rf rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'');
+    return h.replace('class="tpl-'+id+'"','class="'+cls+'" style="'+tones(id)+'"');
+  }
 
   function fillSelect(sel){
     if(!sel) return; var have={};
@@ -15474,5 +15507,79 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   setInterval(tick, 800);
 })();
 </script>
+<style id="_r4uTplRefreshCss">
+/* ══ CLASSIC TEMPLATES · 2026 REFRESH ══════════════════════════════════════
+   Applies to every pre-2026 template (wrapper tagged .r4-rf by the renderer).
+   Each keeps its layout family and colour; this layer brings the type and
+   spacing system up to date: embedded fonts only (PDF = preview), larger names,
+   regular-weight bullets, plain dates (no pills), consistent awards/education,
+   soft skill chips tinted from the template's own colour, full-bleed header
+   bands. Loaded last so it wins over the original template CSS; the accent
+   picker (#resumeOutput … !important) still overrides it. ═══════════════════ */
+.resume-a4-page .r4-rf{--rf-ink:#0f172a;--rf-body:#334155;--rf-mut:#64748b;--rf-line:#e2e8f0;font-size:10.75px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.resume-a4-page .r4-rf.rf-f-sans{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif!important;}
+.resume-a4-page .r4-rf.rf-f-serif{font-family:RSerif,Georgia,serif!important;--rf-ink:#1c1917;--rf-body:#3b3633;--rf-mut:#78716c;}
+.resume-a4-page .r4-rf.rf-f-sans :is(.r-name,.r-title,.r-sec-t,.r-role,.r-co,.r-sum,.r-ul li,.r-sk,.r-deg,.r-sch,.r-award-name,.r-award-org,.r-contact){font-family:inherit!important;}
+.resume-a4-page .r4-rf.rf-f-serif :is(.r-name,.r-sec-t,.r-role,.r-sum,.r-ul li,.r-deg,.r-sch,.r-award-name){font-family:RSerif,Georgia,serif!important;}
+.resume-a4-page .r4-rf.rf-f-serif :is(.r-contact,.r-period,.r-yr,.r-award-year){font-family:Inter,system-ui,sans-serif!important;}
+
+/* header */
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-head .r-name{font-size:26px!important;line-height:1.15!important;font-weight:700!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-head .r-name{font-weight:600!important;font-size:28px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-head .r-title{font-size:12.5px!important;margin-top:4px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-contact{font-size:10px!important;margin-top:9px!important;gap:4px 14px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-contact .r-sep{display:none!important;}
+.resume-a4-page .r4-rf .r-ci{gap:5px!important;}
+
+/* full-bleed header bands (the old ones were inset boxes) */
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head{margin:-10mm -16mm 20px!important;padding:26px 16mm 22px!important;border-radius:0!important;box-shadow:none!important;width:auto!important;max-width:none!important;box-sizing:border-box!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head .r-contact,.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head .r-ci{opacity:.92;}
+
+/* sidebar layouts with a band (Modern, Corporate, Executive): a calm tinted panel */
+.resume-a4-page .r4-rf.rf-band2 .r-2col{margin:0!important;gap:22px;min-height:0!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside{flex:0 0 186px!important;width:186px!important;min-width:186px!important;padding:15px!important;background:#f5f7fa!important;border:0!important;border-radius:10px;align-self:flex-start;}
+.resume-a4-page .r4-rf.rf-band2 .r-main-col{padding:2px 0 0!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside .r-sk{background:#fff!important;color:var(--rf-ink)!important;box-shadow:inset 0 0 0 1px var(--rf-line)!important;}
+
+/* sections */
+.resume-a4-page .r4-rf .r-sec{margin-bottom:15px;}
+.resume-a4-page .r4-rf .r-sec-t{font-size:10.5px!important;font-weight:700!important;}
+.resume-a4-page .r4-rf.rf-sc .r-sec-t{font-size:13px!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-sec-t{font-size:12px!important;font-weight:600!important;}
+.resume-a4-page .r4-rf .r-sum{font-size:10.75px!important;line-height:1.62!important;}
+
+/* experience */
+.resume-a4-page .r4-rf .r-exp{margin-bottom:11px;}
+.resume-a4-page .r4-rf .r-role{font-size:12px!important;font-weight:600!important;}
+.resume-a4-page .r4-rf .r-co{font-size:10.75px!important;font-weight:500!important;}
+.resume-a4-page .r4-rf .r-ul li{font-weight:400!important;font-size:10.6px!important;line-height:1.55!important;color:var(--rf-body)!important;margin-bottom:3px!important;}
+.resume-a4-page .r4-rf.rf-f-mono .r-ul li{font-size:10.4px!important;}
+/* one drawn marker, aligned to the first line whatever the font (the old text
+   glyphs ▸ ◆ ▶ // were pinned at fixed pixel offsets and drifted) */
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-ul{list-style:none!important;padding-left:0!important;margin-left:0!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-ul li{list-style:none!important;position:relative!important;padding:0 0 0 14px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-ul li::before{content:""!important;position:absolute!important;left:3px!important;top:6.4px!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--rf-a)!important;font-size:0!important;line-height:0!important;margin:0!important;color:transparent!important;}
+.resume-a4-page .r4-rf.rf-f-serif:not(.rf-pastel) .r-ul li::before{width:6px!important;height:1px!important;border-radius:0!important;top:8.4px!important;left:1px!important;}
+.resume-a4-page .r4-rf.rf-f-serif :is(.r-period,.r-yr,.r-award-year){font-style:normal!important;}
+.resume-a4-page .r4-rf :is(.r-period,.r-yr,.r-award-year){background:none!important;border:0!important;padding:0!important;border-radius:0!important;box-shadow:none!important;font-size:10px!important;font-weight:500!important;color:var(--rf-mut)!important;white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+/* awards + education: one consistent layout (title, issuer, year on the right) */
+.resume-a4-page .r4-rf .r-award{display:flex!important;justify-content:space-between;align-items:baseline;gap:3px 14px;margin:0 0 7px!important;}
+.resume-a4-page .r4-rf .r-award-left{min-width:0;}
+.resume-a4-page .r4-rf .r-award-name{font-size:11px!important;font-weight:600!important;color:var(--rf-ink)!important;}
+.resume-a4-page .r4-rf :is(.r-award-org,.r-sch){font-size:10.5px!important;font-weight:400!important;color:var(--rf-mut)!important;font-style:normal!important;}
+.resume-a4-page .r4-rf .r-award-desc{font-size:10.5px!important;color:var(--rf-body)!important;}
+.resume-a4-page .r4-rf .r-deg{font-size:11.25px!important;font-weight:600!important;color:var(--rf-ink)!important;}
+.resume-a4-page .r4-rf .r-edu{margin-bottom:7px;}
+
+/* skills: soft chips in the template's own colour (pastel sidebars keep their list) */
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-skills{gap:5px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-sk{font-size:10px!important;font-weight:500!important;line-height:1.35!important;padding:3px 9px!important;border-radius:5px!important;background:var(--rf-soft)!important;color:var(--rf-a)!important;border:0!important;box-shadow:none!important;text-transform:none!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-sk::before{content:none!important;}
+
+/* pastel sidebars: tidy typography only (their tuned layout stays) */
+.resume-a4-page .r4-rf.rf-pastel .r-head .r-name{font-size:21px!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-sk{font-size:10.25px!important;}
+</style>
 </body>
 </html>
