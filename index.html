@@ -8436,10 +8436,24 @@ if ('serviceWorker' in navigator) {
       var out=rootEl||document.getElementById('resumeOutput'); if(!out) return;
       var page=out.querySelector('.resume-a4-page'); if(!page) return;
       var aside=page.querySelector('.r-aside'), main=page.querySelector('.r-main-col');
+      // Layout changed since the order was saved (e.g. Modern / the pastels were
+      // two-column and are single-column now): a sidebar order would put Skills and
+      // Education above the summary, so use the template's default order instead.
+      var savedCols=secsArr.some(function(o){ return o.col==='aside'||o.col==='main'; });
+      if(savedCols !== !!(aside||main)) return;
       var byTitle={};
       Array.prototype.forEach.call(page.querySelectorAll('.r-sec'),function(s){
         var t=s.querySelector('.r-sec-t'); var k=(t?t.textContent:'').trim();
         if(k && !(k in byTitle)) byTitle[k]=s;
+      });
+      // Sections NOT in the saved list (Key Achievements, a custom section added
+      // later) stay anchored after the listed section they followed — otherwise
+      // re-appending the listed ones floats them to the top, above the summary.
+      var listed={}; secsArr.forEach(function(o){ if(byTitle[o.title]) listed[o.title]=1; });
+      var anchors=[], lastListed=null;
+      Array.prototype.forEach.call(page.querySelectorAll('.r-sec'),function(s){
+        var t=s.querySelector('.r-sec-t'); var k=(t?t.textContent:'').trim();
+        if(listed[k] && byTitle[k]===s) lastListed=s; else anchors.push([s,lastListed]);
       });
       secsArr.forEach(function(o){
         var el=byTitle[o.title]; if(!el) return;
@@ -8456,6 +8470,10 @@ if ('serviceWorker' in navigator) {
         var move=[el], sib=el.nextElementSibling;
         while(sib && sib.classList && sib.classList.contains('r-div')){ var nx=sib.nextElementSibling; move.push(sib); sib=nx; }
         move.forEach(function(n){ target.appendChild(n); });
+      });
+      anchors.forEach(function(a){
+        var s=a[0], after=a[1];
+        if(after && after.parentNode){ after.parentNode.insertBefore(s, after.nextSibling); }
       });
       /* NOTE: no "pin summary to top" here — that would override an intentional
          reorder (e.g. moving Experience above the summary). Fresh renders are
