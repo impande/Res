@@ -7004,10 +7004,12 @@ if ('serviceWorker' in navigator) {
   function tagCards(cat){
     var grid=document.getElementById('tplGrid'); if(!grid) return;
     var cards=Array.prototype.slice.call(grid.querySelectorAll('.tpl-card')), firsts=[];
-    cards.forEach(function(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m&&IDS[m[1]]){ c.classList.add('r4n-card'); firsts.push(c); } });
+    cards.forEach(function(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m&&IDS[m[1]]){ c.classList.add('r4n-card'); firsts.push(c); flag(c,m[1]); } });
     if(cat==='all') firsts.slice().reverse().forEach(function(c){ grid.insertBefore(c,grid.firstChild); });
     if(cat==='new'){ firsts.sort(function(a,b){ return order(a)-order(b); }).forEach(function(c){ grid.appendChild(c); }); }
   }
+  var FLAGS={atlas:[['Popular','pop'],['ATS-friendly','']],harbor:[['Popular','pop']],regent:[['ATS-friendly','']],linea:[['ATS-friendly','']],carbon:[['ATS-friendly','']]};
+  function flag(c,id){ var meta=c.querySelector('.tpl-card-meta'); if(!meta||meta.querySelector('.r4n-flag')||!FLAGS[id]) return; FLAGS[id].forEach(function(f){ var sp=document.createElement('span'); sp.className='r4n-flag '+f[1]; sp.textContent=f[0]; meta.appendChild(sp); }); }
   function order(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); for(var i=0;i<NEW.length;i++){ if(m&&NEW[i][0]===m[1]) return i; } return 99; }
   if(typeof renderTemplateGrid==='function'){
     var rg=renderTemplateGrid;
@@ -15609,5 +15611,169 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 .resume-a4-page .r4-rf.rf-pastel .r-sec-t{font-size:12px!important;}
 .resume-a4-page .r4-rf.rf-pastel .r-sk{font-size:10.25px!important;}
 </style>
+<style id="_r4uTplPremiumCss">
+/* ══ PREMIUM DETAILS (2026) ═══════════════════════════════════════════════
+   Signature touches layered on the 2026 collection and the refreshed classics:
+   section icon badges (picked by what a section contains, via :has, so they
+   work in any language and add no text to the PDF/ATS), a split header with
+   contact details in a right-hand column (only without a photo), and
+   classical centred rules for the serif CVs. Browsers without :has simply
+   show the plain headings. ═══════════════════════════════════════════════ */
+
+/* ── icon badges ───────────────────────────────────────────────────────── */
+.resume-a4-page :is(.tpl-harbor,.tpl-pulse,.tpl-summit,.tpl-sierra,.tpl-vista,.r4-rf.rf-band:not(.rf-hb),.r4-rf.rf-band2,.tpl-fresh.r4-rf,.tpl-sage.r4-rf,.tpl-lime.r4-rf) .r-sec>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E");}
+.resume-a4-page :is(.tpl-harbor,.tpl-pulse,.tpl-summit,.tpl-sierra,.tpl-vista,.r4-rf.rf-band:not(.rf-hb),.r4-rf.rf-band2,.tpl-fresh.r4-rf,.tpl-sage.r4-rf,.tpl-lime.r4-rf) .r-sec>.r-sec-t::before{content:""!important;display:block!important;position:static!important;flex:0 0 22px!important;width:22px!important;height:22px!important;border-radius:6px!important;margin:0!important;padding:0!important;border:0!important;opacity:1!important;background:var(--a,var(--rf-a)) var(--ico) center/13px 13px no-repeat!important;box-shadow:none!important;}
+.resume-a4-page :is(.tpl-harbor,.tpl-pulse,.tpl-summit,.tpl-sierra,.tpl-vista,.r4-rf.rf-band:not(.rf-hb),.r4-rf.rf-band2,.tpl-fresh.r4-rf,.tpl-sage.r4-rf,.tpl-lime.r4-rf) .r-sec>.r-sec-t{display:flex!important;align-items:center!important;gap:9px!important;padding-left:0!important;}
+.resume-a4-page .r-sec:has(>.r-sum)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-exp)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='7' width='18' height='13' rx='2'/%3E%3Cpath d='M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-edu)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10 12 5 2 10l10 5 10-5z'/%3E%3Cpath d='M6 12v5c3 2 9 2 12 0v-5'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-skills)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z'/%3E%3Cpath d='M19 17v4M17 19h4'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-award)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='6'/%3E%3Cpath d='M8.5 14 7 22l5-3 5 3-1.5-8'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec.r-keyachiev>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z'/%3E%3C/svg%3E")!important;}
+/* sidebar headings stay quiet (no badges in narrow columns) */
+.resume-a4-page :is(.tpl-harbor,.tpl-sierra,.r4-rf.rf-band2) .r-aside .r-sec>.r-sec-t::before{content:none!important;display:none!important;}
+/* Pulse: the badge replaces its old accent bar */
+.resume-a4-page .tpl-pulse .r-sec-t{padding-left:0!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside .r-skills{flex-direction:row!important;flex-wrap:wrap!important;gap:4px!important;}
+
+/* ── split header: name/title left, contact column right (no photo) ────── */
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child{display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:32px;align-items:end;}
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>:is(.r-name,.r-title){grid-column:1;}
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>.r-contact{grid-column:2;grid-row:1 / span 2;flex-direction:column!important;align-items:flex-end!important;justify-content:flex-end;gap:5px!important;margin:0!important;text-align:right;}
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>.r-contact .r-ci{flex-direction:row-reverse;}
+.resume-a4-page .tpl-folio .r-head:not(:has(img))::after{margin-top:18px;}
+/* narrow on-screen page (phones reflow the resume): stack the header again */
+#resumeOutput .resume-a4-page,#previewModalBody .resume-a4-page{container-type:inline-size;}
+@container (max-width:600px){
+  .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head>div:first-child{display:block!important;}
+  .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head>div:first-child>.r-contact{flex-direction:row!important;align-items:center!important;flex-wrap:wrap!important;margin-top:9px!important;text-align:left;}
+  .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head>div:first-child>.r-contact .r-ci{flex-direction:row;}
+  /* two-column layouts: sidebar stacks above the main column on a phone screen */
+  .resume-a4-page [class*="tpl-"]:not(.rf-pastel)>.r-2col{flex-direction:column!important;gap:16px!important;margin:0!important;}
+  .resume-a4-page [class*="tpl-"]:not(.rf-pastel)>.r-2col>.r-aside{flex:none!important;width:auto!important;min-width:0!important;align-self:stretch!important;border-right:0!important;padding-right:15px!important;}
+  .resume-a4-page [class*="tpl-"]:not(.rf-pastel)>.r-2col>.r-main-col{padding:0!important;}
+}
+
+/* ── classical centred rules: Regent + the serif CVs ───────────────────── */
+.resume-a4-page :is(.tpl-regent,.tpl-classic.r4-rf,.tpl-academic.r4-rf,[class*="tpl-oxford-"].r4-rf,[class*="tpl-executive-"].r4-rf) .r-sec>.r-sec-t{justify-content:center!important;gap:14px!important;text-align:center;background:none!important;padding:0!important;display:flex!important;}
+.resume-a4-page :is(.tpl-regent,.tpl-classic.r4-rf,.tpl-academic.r4-rf,[class*="tpl-oxford-"].r4-rf,[class*="tpl-executive-"].r4-rf) .r-sec>.r-sec-t::before,
+.resume-a4-page :is(.tpl-regent,.tpl-classic.r4-rf,.tpl-academic.r4-rf,[class*="tpl-oxford-"].r4-rf,[class*="tpl-executive-"].r4-rf) .r-sec>.r-sec-t::after{content:""!important;display:block!important;flex:1 1 auto!important;height:1px!important;background:var(--a,var(--rf-a))!important;opacity:.38!important;position:static!important;width:auto!important;margin:0!important;order:0;}
+.resume-a4-page .tpl-regent .r-sec>.r-sec-t{font-size:13px;letter-spacing:normal;}
+.resume-a4-page :is(.tpl-classic,.tpl-academic).r4-rf .r-head{border-bottom-width:1px!important;}
+
+/* ── refined classics: a little more presence ──────────────────────────── */
+.resume-a4-page .r4-rf:not(.rf-pastel):not(.rf-f-mono) .r-head .r-name{font-size:28px!important;letter-spacing:normal!important;}
+.resume-a4-page .r4-rf .r-role{font-size:12.25px!important;}
+.resume-a4-page .r4-rf .r-sec{margin-bottom:16px;}
+</style>
+<style id="_r4uTryNewCss">
+#r4tn{display:none;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:linear-gradient(180deg,#fffaf3,#fff);border:1px solid rgba(180,83,9,.18);box-shadow:0 1px 2px rgba(0,0,0,.03);font-family:Inter,system-ui,sans-serif;}
+#r4tn.on{display:block;}
+#r4tn .tn-row{display:flex;align-items:center;gap:14px;}
+#r4tn .tn-txt{flex:1 1 auto;min-width:0;}
+#r4tn .tn-k{display:inline-block;font-size:.66rem;font-weight:700;color:#b45309;background:#fef3c7;border-radius:5px;padding:2px 7px;margin-bottom:4px;}
+#r4tn .tn-h{font-size:.92rem;font-weight:700;color:var(--text,#1a1a1a);line-height:1.3;}
+#r4tn .tn-s{font-size:.78rem;color:var(--muted,#6b7280);margin-top:2px;}
+#r4tn .tn-picks{display:flex;gap:10px;flex:0 0 auto;}
+#r4tn .tn-pick{display:flex;flex-direction:column;align-items:center;gap:5px;border:0;background:none;padding:0;cursor:pointer;font:inherit;}
+#r4tn .tn-th{width:64px;height:90px;border-radius:7px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 4px 10px -6px rgba(0,0,0,.35);position:relative;transition:transform .15s,box-shadow .15s;}
+#r4tn .tn-th>.resume-a4-page{position:absolute;left:0;top:0;width:794px!important;min-height:1123px!important;max-width:none!important;transform:scale(.0806);transform-origin:0 0;box-shadow:none!important;margin:0!important;pointer-events:none;}
+#r4tn .tn-pick:hover .tn-th,#r4tn .tn-pick:focus-visible .tn-th{transform:translateY(-2px);box-shadow:0 0 0 2px #b45309,0 8px 16px -8px rgba(180,83,9,.6);}
+#r4tn .tn-pick:focus-visible{outline:none;}
+#r4tn .tn-nm{font-size:.72rem;font-weight:600;color:var(--text,#1a1a1a);}
+#r4tn .tn-x{flex:0 0 auto;align-self:flex-start;border:0;background:none;color:var(--muted,#9ca3af);font-size:1.15rem;line-height:1;cursor:pointer;padding:2px 4px;margin:-4px -4px 0 0;}
+#r4tn .tn-more{border:0;background:none;color:#b45309;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;padding:0;margin-top:6px;}
+#r4tn .tn-done{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#r4tn .tn-done b{font-weight:700;}
+#r4tn .tn-btn{border:1.5px solid rgba(180,83,9,.35);background:#fff;color:#92400e;border-radius:9px;padding:6px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;}
+#r4tn .tn-btn.pri{background:#b45309;border-color:#b45309;color:#fff;}
+@media (max-width:640px){#r4tn .tn-row{flex-wrap:wrap;}#r4tn .tn-picks{width:100%;justify-content:space-between;}#r4tn .tn-x{position:absolute;right:10px;top:10px;}#r4tn{position:relative;}}
+@media (prefers-reduced-motion:reduce){#r4tn .tn-th{transition:none;}}
+/* gallery: hover call-to-action + quick labels on the 2026 cards */
+.tpl-card .tpl-card-thumb{position:relative;}
+.tpl-card .tpl-card-thumb::after{content:"Use this design";position:absolute;left:50%;bottom:14px;transform:translate(-50%,6px);padding:7px 14px;border-radius:999px;background:#111827;color:#fff;font:600 .72rem Inter,system-ui,sans-serif;opacity:0;transition:opacity .15s,transform .15s;pointer-events:none;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(0,0,0,.5);}
+.tpl-card:hover .tpl-card-thumb::after{opacity:1;transform:translate(-50%,0);}
+.tpl-card.tpl-active .tpl-card-thumb::after{content:"In use";background:#b45309;}
+@media (hover:none){.tpl-card .tpl-card-thumb::after{display:none;}}
+.tpl-card .r4n-flag{display:inline-block;margin:4px 4px 0 0;padding:1px 6px;border-radius:4px;font-size:.6rem;font-weight:700;background:#eef2ff;color:#3730a3;}
+.tpl-card .r4n-flag.pop{background:#fff7ed;color:#c2410c;}
+</style>
+<script id="_r4uTryNewJS">
+/* "Try a new look": after a resume is generated in an older template, offer
+   the 2026 designs as tiny live previews of the user's own resume. One tap
+   switches (with Undo / Keep it). Dismissed or kept = not shown again on this
+   device. Watches #resumeOutput instead of wrapping the engine. */
+(function(){
+  var PICKS=['atlas','harbor','regent','sierra'], KEY='_r4uTryNew';
+  var bar=null, prev=null, busy=false, built='';
+  function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+  function cur(){ try{ return currentTemplate; }catch(e){ return ''; } }
+  function data(){ try{ return lastResumeData; }catch(e){ return null; } }
+  function isNew(id){ return (window._r4uNewTpls||[]).indexOf(id)>=0; }
+  function label(id){ try{ return TPL_META[id].label; }catch(e){ return id; } }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function thumb(id,d){
+    var h=''; try{ var sv=currentTemplate; currentTemplate=id; h=renderResumeHTML(JSON.parse(JSON.stringify(d))); currentTemplate=sv; }catch(e){ try{ currentTemplate=sv; }catch(_){} }
+    return '<span class="tn-th" aria-hidden="true"><div class="resume-a4-page">'+h+'</div></span>';
+  }
+  function ensure(){
+    if(bar) return bar;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.parentNode) return null;
+    bar=document.createElement('section'); bar.id='r4tn'; bar.setAttribute('aria-label','Try a new resume design');
+    out.parentNode.parentNode.insertBefore(bar,out.parentNode);
+    bar.addEventListener('click',onClick);
+    return bar;
+  }
+  function render(){
+    var d=data(); if(!d) return;
+    var sig=JSON.stringify([d.firstName,d.lastName,d.jobTitle,(d.experience||[]).length,(d.skills||[]).length]);
+    if(built===sig && bar.querySelector('.tn-picks')) return;
+    built=sig;
+    bar.innerHTML='<div class="tn-row"><div class="tn-txt"><span class="tn-k">NEW · 2026 DESIGNS</span>'
+      +'<div class="tn-h">See your resume in a fresh, premium design</div>'
+      +'<div class="tn-s">One tap to try — your content stays the same, and you can undo.</div>'
+      +'<button type="button" class="tn-more">Browse all 10 new designs →</button></div>'
+      +'<div class="tn-picks">'+PICKS.map(function(id){ return '<button type="button" class="tn-pick" data-id="'+id+'" title="Try '+esc(label(id))+'">'+thumb(id,d)+'<span class="tn-nm">'+esc(label(id))+'</span></button>'; }).join('')+'</div>'
+      +'<button type="button" class="tn-x" aria-label="Dismiss">×</button></div>';
+  }
+  function done(id){
+    built='';
+    bar.innerHTML='<div class="tn-done"><span>✨ Now showing <b>'+esc(label(id))+'</b>. Like it?</span>'
+      +'<button type="button" class="tn-btn pri" data-act="keep">Keep it</button>'
+      +'<button type="button" class="tn-btn" data-act="undo">Undo</button>'
+      +'<button type="button" class="tn-btn" data-act="other">Try another</button></div>';
+  }
+  function hide(forever){ if(bar) bar.classList.remove('on'); if(forever) ls(KEY,'done'); }
+  function onClick(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.classList.contains('tn-x')){ hide(true); return; }
+    if(t.classList.contains('tn-more')){ var b=document.querySelector('.tpl-filter-btn[data-cat="new"]'); if(b) b.click(); var s=document.getElementById('tplSection'); if(s) s.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+    var act=t.getAttribute('data-act');
+    if(act==='keep'){ hide(true); if(typeof showToast==='function') showToast('Design saved — download any time.','success'); return; }
+    if(act==='undo'){ if(prev){ busy=true; try{ selectTemplate(prev); }finally{ busy=false; } } prev=null; render(); return; }
+    if(act==='other'){ render(); return; }
+    var id=t.getAttribute('data-id'); if(!id) return;
+    if(!prev||!isNew(cur())) prev=cur();
+    busy=true; try{ selectTemplate(id); }finally{ busy=false; }
+    done(id);
+    var o=document.getElementById('resumeOutput'); if(o) o.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function update(){
+    if(busy) return;
+    var out=document.getElementById('resumeOutput'), has=!!(out&&out.querySelector('.resume-a4-page'));
+    if(!has||ls(KEY)==='done'){ hide(false); return; }
+    if(!ensure()) return;
+    if(isNew(cur())&&!prev){ hide(false); return; }      /* already on a new design, not mid-trial */
+    if(!bar.classList.contains('on')){ bar.classList.add('on'); }
+    if(!prev) render();
+  }
+  function start(){
+    var out=document.getElementById('resumeOutput'); if(!out) return;
+    var t=null; new MutationObserver(function(){ clearTimeout(t); t=setTimeout(update,250); }).observe(out,{childList:true});
+    update();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
 </body>
 </html>
