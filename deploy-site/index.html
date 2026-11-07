@@ -6944,23 +6944,35 @@ if ('serviceWorker' in navigator) {
     ['sierra','Sierra','Navy header · Sidebar','#1e3a5f'],
     ['vista','Vista','Timeline · Rose','#be123c']
   ];
-  var IDS={}, TWO_COL={harbor:1,sierra:1};
+  var IDS={};
   NEW.forEach(function(t){ IDS[t[0]]=1; TPL_META[t[0]]={label:t[1],tag:t[2],cat:'new'}; TPL_COLORS[t[0]]=t[3]; });
   window._r4uNewTpls=Object.keys(IDS);
 
-  /* Sidebar layouts reuse the engine's two-column markup: render as a two-column
-     id, then swap the wrapper class. currentTemplate is the engine's global. */
+  /* ATS-friendly only: every design renders as ONE column. Two-column layouts
+     (sidebars) were measured to interleave in ATS text extraction (sidebar
+     skills spliced into experience bullets), so these ids are rendered with the
+     engine's single-column markup (via a neutral id) and keep their own
+     colours/headers through CSS. currentTemplate is the engine's global. */
+  var SINGLE={blush:1,verdant:1,lilac:1,azure:1,modern:1,corporate:1,executive:1,harbor:1,sierra:1};
   var orig=renderResumeHTML;
   window.renderResumeHTML=renderResumeHTML=function(d){
-    var id=currentTemplate;
-    if(!TWO_COL[id]){
-      var h0=orig.apply(this,arguments);
-      return IDS[id]?h0:refresh(String(h0),id);
-    }
-    try{ currentTemplate='azure'; var h=orig.apply(this,arguments); }
-    finally{ currentTemplate=id; }
-    return String(h).replace('class="tpl-azure"','class="tpl-'+id+'"');
+    var id=currentTemplate, h;
+    if(SINGLE[id]){
+      try{ currentTemplate='monoline-ink'; h=String(orig.apply(this,arguments)); }
+      finally{ currentTemplate=id; }
+      h=h.replace('class="tpl-monoline-ink"','class="tpl-'+id+'"');
+    } else h=String(orig.apply(this,arguments));
+    h=atsLinks(h);
+    return IDS[id]?h:refresh(h,id);
   };
+  /* ATS: print the actual profile URL, not the word "LinkedIn" (parsers read
+     text, not link targets). */
+  function atsLinks(h){
+    return h.replace(/(<a href="(https?:\/\/[^"]+)"[^>]*>)(LinkedIn|GitHub|Portfolio|Website)(<\/a>)/g,function(m,open,url,word,close){
+      var t=url.replace(/^https?:\/\/(www\.)?/i,'').replace(/\/$/,'');
+      return open+(t.length>48?t.slice(0,46)+'\u2026':t)+close;
+    });
+  }
 
   /* ── Refresh for the classic templates (2026 rework) ─────────────────────
      Every older template keeps its layout and colour but gets the modern type
@@ -6990,7 +7002,7 @@ if ('serviceWorker' in navigator) {
   }
   function refresh(h,id){
     if(!TPL_META[id]) return h;
-    var cls='tpl-'+id+' r4-rf rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'')+(HB[id]?' rf-hb':'');
+    var cls='tpl-'+id+' r4-rf'+(SINGLE[id]?' rf-single':'')+' rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'')+(HB[id]?' rf-hb':'');
     return h.replace('class="tpl-'+id+'"','class="'+cls+'" style="'+tones(id)+'"');
   }
 
@@ -7008,7 +7020,7 @@ if ('serviceWorker' in navigator) {
     if(cat==='all') firsts.slice().reverse().forEach(function(c){ grid.insertBefore(c,grid.firstChild); });
     if(cat==='new'){ firsts.sort(function(a,b){ return order(a)-order(b); }).forEach(function(c){ grid.appendChild(c); }); }
   }
-  var FLAGS={atlas:[['Popular','pop'],['ATS-friendly','']],harbor:[['Popular','pop']],regent:[['ATS-friendly','']],linea:[['ATS-friendly','']],carbon:[['ATS-friendly','']]};
+  var FLAGS={atlas:[['Popular','pop']],harbor:[['Popular','pop']]};
   function flag(c,id){ var meta=c.querySelector('.tpl-card-meta'); if(!meta||meta.querySelector('.r4n-flag')||!FLAGS[id]) return; FLAGS[id].forEach(function(f){ var sp=document.createElement('span'); sp.className='r4n-flag '+f[1]; sp.textContent=f[0]; meta.appendChild(sp); }); }
   function order(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); for(var i=0;i<NEW.length;i++){ if(m&&NEW[i][0]===m[1]) return i; } return 99; }
   if(typeof renderTemplateGrid==='function'){
@@ -7026,7 +7038,7 @@ if ('serviceWorker' in navigator) {
         b.classList.add('active');
       }
       var all=row&&row.querySelector('[data-cat="all"]'); if(all) all.textContent='All 100+';
-      var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='100+ designs';
+      var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='\u2713 All ATS-friendly';
       var grid=document.getElementById('tplGrid'), act=document.querySelector('.tpl-filter-btn.active');
       if(grid&&typeof renderTemplateGrid==='function') renderTemplateGrid(act?act.getAttribute('data-cat'):'new');
     }catch(e){}
@@ -15775,5 +15787,46 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
 </script>
+<style id="_r4uTplSingleCss">
+/* ══ ATS-FRIENDLY: single-column versions of the former sidebar designs ════
+   Blush/Verdant/Lilac/Azure keep their pastel as a full-width header band;
+   Modern/Corporate/Executive keep their dark band; Harbor gets a tinted skills
+   panel; Sierra keeps its navy band. Content flows in one column, the order
+   an ATS reads it. ══════════════════════════════════════════════════════ */
+.resume-a4-page:has(>.rf-single.rf-pastel){padding:10mm 16mm!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel{display:block!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head{display:block!important;grid-area:auto!important;background:var(--pt-side)!important;margin:-10mm -16mm 22px!important;padding:28px 16mm 24px!important;border-radius:0!important;width:auto!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head:has(img){display:flex!important;flex-direction:row-reverse!important;justify-content:space-between!important;align-items:center!important;gap:20px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head img{margin:0!important;order:0!important;flex:0 0 auto;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-name{font-size:28px!important;line-height:1.15!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-title{font-size:12.5px!important;letter-spacing:normal!important;margin-top:4px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-contact{flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;gap:6px 18px!important;margin-top:12px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-sec{grid-area:auto!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-skills{flex-direction:row!important;flex-wrap:wrap!important;gap:5px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sk{font-size:10px!important;font-weight:500!important;padding:3px 9px!important;border-radius:5px!important;background:var(--pt-side)!important;color:var(--pt-ink)!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sk::before{content:none!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel :is(.r-exp-top,.r-edu){display:flex!important;justify-content:space-between!important;align-items:baseline!important;gap:3px 14px!important;flex-wrap:wrap!important;flex-direction:row!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel :is(.r-period,.r-yr){margin-left:auto!important;text-align:right!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-skills{display:flex!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sk{display:inline-block!important;white-space:nowrap!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-ul{list-style:none!important;padding-left:0!important;margin:0!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-ul li{list-style:none!important;padding:0 0 0 14px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-ul li::before{content:""!important;position:absolute!important;left:3px!important;top:6.4px!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--pt-acc)!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-exp{margin-bottom:11px!important;padding-left:0!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-exp::before{content:none!important;}
+/* Harbor: skills in a tinted panel instead of a sidebar */
+.resume-a4-page .tpl-harbor .r-sec:has(>.r-skills){background:#f3f8f7;border-radius:10px;padding:13px 15px 14px;}
+.resume-a4-page .tpl-harbor .r-sec:has(>.r-skills) .r-sk{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+.resume-a4-page .tpl-harbor .r-head{border-bottom:2px solid var(--a);}
+/* Sierra: crisp square skill tags under the navy band */
+.resume-a4-page .tpl-sierra .r-sk{border-radius:3px;background:var(--soft);color:var(--a);}
+/* ATS reading order: Chrome writes PDF text in PAINT order, and positioned
+   elements paint after normal-flow ones, so a template that made (say) its
+   bullets or header position:relative emitted them out of order (experience
+   after Skills, name after the summary). Making every resume block positioned
+   restores document order in the PDF text. No block in any template uses
+   absolute positioning, so layout is unchanged. */
+.resume-a4-page [class*="tpl-"] :is([class^="r-"],[class*=" r-"],ul,li){position:relative;}
+</style>
 </body>
 </html>
