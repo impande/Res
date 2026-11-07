@@ -651,7 +651,9 @@ exports.handler = async (event) => {
   // IVR-style main menu: one number per thing the bot can do. Typed commands
   // ("jobs", "job alerts data analyst in pune", "mock interview", "support")
   // still work; 0 / "menu" always comes back here.
-  const MAIN = (name) => (name ? '👋 Hi ' + firstName(name) + '! ' : '👋 Hi! ') + 'Welcome to *Resume For You*.\n\n' +
+  // Names saved in capitals ("ASHISH") are shown as "Ashish".
+  const niceName = (n) => { const f = firstName(n); return /^[A-Z]{2,}$/.test(f) ? f.charAt(0) + f.slice(1).toLowerCase() : f; };
+  const MAIN = (name) => (name ? '👋 Hi ' + niceName(name) + '! ' : '👋 Hi! ') + 'Welcome to *Resume For You*.\n\n' +
     'Reply with a number:\n1️⃣  Build or edit my resume\n2️⃣  Find jobs for me\n3️⃣  Daily job alerts\n4️⃣  Interview practice\n5️⃣  Talk to support\n\n' +
     '_Reply *menu* anytime to see this again._';
   const MENU = '📝 *Your resume* — reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n0️⃣  Main menu';
