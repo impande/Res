@@ -15771,7 +15771,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #tplSection .tpl-fcount{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:#f3f1ec;color:var(--muted);font-variant-numeric:tabular-nums;}
 #tplSection .tpl-filter-btn.active .tpl-fcount{background:rgba(255,255,255,.22);color:#fff;}
 #tplSection .tpl-filter-btn[data-cat="twocol"] small{margin-left:0!important;}
-@media (max-width:768px){#tplSection .tpl-filter-btn{padding:7px 12px!important;font-size:.78rem!important;}}
+/* phones: wrap so every tab (incl. Two-column) is visible without swiping */
+@media (max-width:768px){#tplSection .tpl-filter-row{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none!important;mask-image:none!important;gap:7px;}#tplSection .tpl-filter-btn{padding:6px 11px!important;font-size:.76rem!important;gap:6px;}#tplSection .tpl-fcount{font-size:.64rem;padding:1px 6px;}#tplSection .tpl-filter-btn[data-cat="twocol"] small{font-size:.58rem;}}
 /* gallery: hover call-to-action + quick labels on the 2026 cards */
 .tpl-card .tpl-card-thumb{position:relative;}
 .tpl-card .tpl-card-thumb::after{content:"Use this design";position:absolute;left:50%;bottom:14px;transform:translate(-50%,6px);padding:7px 14px;border-radius:999px;background:#111827;color:#fff;font:600 .72rem Inter,system-ui,sans-serif;opacity:0;transition:opacity .15s,transform .15s;pointer-events:none;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(0,0,0,.5);}
