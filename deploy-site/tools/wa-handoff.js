@@ -67,7 +67,10 @@
     '@media (max-width:480px){.r4wa-card{padding:22px 18px 18px}.r4wa-alt{grid-template-columns:1fr}}';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function isDesktop() { try { return window.matchMedia('(min-width:769px) and (pointer:fine)').matches; } catch (e) { return false; } }
+  // Big screen = laptop/desktop or tablet (iPad reports a touch pointer, so it must not
+  // be treated as a phone). Phones have a short side under ~500px.
+  function isDesktop() { try { return Math.min(screen.width, screen.height) >= 700 || window.matchMedia('(min-width:769px) and (pointer:fine)').matches; } catch (e) { return false; } }
+  function isTouch() { try { return window.matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 1; } catch (e) { return false; } }
   function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function digits(v) { return String(v || '').replace(/\D/g, ''); }
@@ -105,6 +108,7 @@
     }
   }
   function qrFallback(o) {
+    if (isTouch()) { close(); window.open(o.url, '_blank', 'noopener'); return true; }
     if (typeof window._r4uShowQR === 'function') {
       close();
       window._r4uShowQR(o.url, { title: o.title || 'Continue on WhatsApp', sub: 'Scan with your phone’s camera to open WhatsApp — your message is ready, just tap Send.', file: 'whatsapp-qr.png' });
@@ -119,7 +123,7 @@
     if (!document.getElementById('r4wa-css')) { var st = document.createElement('style'); st.id = 'r4wa-css'; st.textContent = CSS; document.head.appendChild(st); }
     close();
     lastFocus = document.activeElement;
-    var saved = lsGet('_r4uWaPhone'), canQR = typeof window._r4uShowQR === 'function';
+    var saved = lsGet('_r4uWaPhone'), touch = isTouch(), canQR = !touch && typeof window._r4uShowQR === 'function';
     ov = document.createElement('div');
     ov.className = 'r4wa-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'r4wa-t');
     ov.innerHTML =
@@ -137,7 +141,7 @@
         '<div class="r4wa-or"><span>or</span></div>' +
         '<div class="r4wa-alt' + (canQR ? '' : ' one') + '">' +
           (canQR ? '<button type="button" class="r4wa-qr">' + QR_SVG + 'Scan a QR code</button>' : '') +
-          '<a class="r4wa-web" href="' + esc(o.url) + '" target="_blank" rel="noopener">' + PC_SVG + 'Use WhatsApp Web</a>' +
+          '<a class="r4wa-web" href="' + esc(o.url) + '" target="_blank" rel="noopener">' + (touch ? WA_SVG.replace('fill="#fff"', 'fill="#128c7e"') + 'Open WhatsApp on this ' + (/iPad|Macintosh/.test(navigator.userAgent) ? 'iPad' : 'tablet') : PC_SVG + 'Use WhatsApp Web') + '</a>' +
         '</div>' +
       '</div></div>';
     document.body.appendChild(ov);
@@ -189,5 +193,5 @@
     }
   }
 
-  window.R4UWa = { open: open, close: close, isDesktop: isDesktop, valid: valid, optin: optin };
+  window.R4UWa = { open: open, close: close, isDesktop: isDesktop, isTouch: isTouch, valid: valid, optin: optin };
 })();
