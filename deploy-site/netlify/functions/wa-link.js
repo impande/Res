@@ -113,7 +113,7 @@ exports.handler = async (event) => {
   const code = code6();
   await redisSet('walink:' + code, uid, 600); // 10 minutes to use the code
 
-  const waText = encodeURIComponent('LINK ' + code);
+  const waText = encodeURIComponent('Hello Resume4U, LINK ' + code);
   return {
     statusCode: 200, headers,
     body: JSON.stringify({ ok: true, code: code, bot: BOT, waUrl: 'https://wa.me/' + BOT + '?text=' + waText })
