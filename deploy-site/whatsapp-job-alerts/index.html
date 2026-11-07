@@ -174,7 +174,7 @@
     <p class="fine" id="fine">WhatsApp opens with your request typed — just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.</p>
     <script>try{if((Math.min(screen.width,screen.height)>=700||window.matchMedia('(min-width:769px) and (pointer:fine)').matches))document.getElementById('fine').innerHTML='On a computer? Next, enter your WhatsApp number \u2014 we\u2019ll message you. Reply <b>stop alerts</b> anytime.';}catch(e){}</script>
     <div class="error" id="err" role="alert">Enter the role you want jobs for.</div>
-    <div class="ok-note" id="ok" role="status">WhatsApp should be opening. If it didn't, send <b id="okmsg"></b> to <a href="https://wa.me/919309014196" rel="noopener">+91 93090 14196</a>.</div>
+    <div class="ok-note" id="ok" role="status">WhatsApp should be opening. If it didn't, send <b id="okmsg"></b> to <a href="https://wa.me/919309014196?text=Hello%20Resume4U" rel="noopener">+91 93090 14196</a>.</div>
   </section>
 
   <section aria-label="Example alert">
@@ -240,7 +240,7 @@
   function go() {
     var r = role.value.trim(), c = city.value.trim();
     if (r.length < 2) { err.classList.add('on'); role.focus(); return; }
-    var msg = 'job alerts ' + r + (c ? ' in ' + c : '');
+    var msg = 'Hello Resume4U, job alerts ' + r + (c ? ' in ' + c : '');
     document.getElementById('okmsg').textContent = '"' + msg + '"';
     ok.classList.add('on');
     var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);

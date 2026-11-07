@@ -90,7 +90,7 @@
         }).join('');
       }).join('');
       var title = [d.role, d.company].filter(Boolean).join(' · ');
-      var wa = 'https://wa.me/919309014196?text=' + encodeURIComponent('interview ' + (d.role || ''));
+      var wa = 'https://wa.me/919309014196?text=' + encodeURIComponent('Hello Resume4U, interview ' + (d.role || ''));
       out.innerHTML =
         '<div class="card"><span class="eyebrow">' + esc(title || 'Your interview') + '</span><h2>How you fit this role</h2><p>' + esc(d.fit_summary) + '</p></div>' +
         '<div class="card"><h2>Your likely questions</h2><p class="muted" style="margin-bottom:6px">Tap a question to see why it\'s asked and an answer outline.</p>' + qs + '</div>' +
@@ -108,7 +108,7 @@ document.addEventListener('click', function (e) {
   var a = e.target.closest && e.target.closest('.cta-band a[href*="wa.me/"]');
   if (!a || !window.R4UWa || !window.R4UWa.isDesktop()) return;
   e.preventDefault();
-  var role = ''; try { role = decodeURIComponent((a.href.split('text=')[1] || '')).replace(/^interview\s*/i, '').trim(); } catch (x) {}
+  var role = ''; try { role = decodeURIComponent((a.href.split('text=')[1] || '')).replace(/^hello resume4u,?\s*/i, '').replace(/^hello resume4u,?\s*/i, '').replace(/^interview\s*/i, '').trim(); } catch (x) {}
   window.R4UWa.open({ intent: 'interview', url: a.href, role: role, title: 'Practise interviews on WhatsApp',
     sub: 'We\u2019ll message you \u2014 answer real questions by text or voice note and get instant feedback.',
     done: 'Reply <b>mock interview</b> to get your first practice question.' });
