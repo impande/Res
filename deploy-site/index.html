@@ -2681,7 +2681,7 @@
   .r4u-tl, #_r4uToolsRow a { transition: none; }
 }
 </style>
-<script src="/tools/wa-handoff.js?v=1" defer></script>
+<script src="/tools/wa-handoff.js?v=2" defer></script>
 </head>
 <body>
 
@@ -6976,19 +6976,21 @@ if ('serviceWorker' in navigator) {
   put(FONT,'classic academic paper warm elegant '+fam('oxford','ink wine navy forest sepia charcoal')+' '+fam('executive','black navy bronze burgundy forest'),'serif');
   put(FONT,'retro','mono');
   put(SENT,fam('meridian','navy emerald burgundy slate charcoal plum teal forest')+' '+fam('chronicle','teal indigo rose amber slate green')+' '+fam('ledger','navy green maroon indigo bronze')+' '+fam('cascade','coral teal blue violet amber')+' '+fam('vertex','indigo teal orange rose slate')+' '+fam('aria','rose sky mint amber violet coral'),1);
-  var PASTEL_ACC={blush:'#b0473c',verdant:'#3f6b52',lilac:'#6d4aa3',azure:'#2e6da4'};
+  /* accent = the template's own heading colour (measured), else its swatch colour */
+  var ACC={"blush":"#b0473c","verdant":"#3f6b52","lilac":"#6d4aa3","azure":"#2e6da4","modern":"#f59e0b","minimal":"#999999","corporate":"#0f2d5e","fresh":"#0d9488","elegant":"#7f1d1d","tech":"#22d3ee","sky":"#1e40af","purple":"#4c1d95","warm":"#78350f","slate":"#0891b2","pink":"#be185d","indigo":"#4338ca","forest":"#047857","graphite":"#ea580c","midnight":"#7c3aed","copper":"#c2410c","emerald":"#047857","denim":"#1d4ed8","ruby":"#be123c","stone":"#57534e","sunset":"#ea580c","ocean":"#0369a1","sage":"#4d7c0f","lime":"#4d7c0f","paper":"#2c1a0e","meridian-navy":"#1e3a5f","meridian-emerald":"#0f766e","meridian-burgundy":"#7f1d3a","meridian-slate":"#334155","meridian-charcoal":"#1f2937","meridian-plum":"#5b2a86","meridian-teal":"#115e59","meridian-forest":"#14532d","oxford-wine":"#7b2d3a","oxford-navy":"#1f3a5f","oxford-forest":"#1f4d2e","oxford-sepia":"#6b4423","chronicle-teal":"#0d9488","chronicle-indigo":"#4f46e5","chronicle-rose":"#be123c","chronicle-amber":"#b45309","chronicle-slate":"#475569","chronicle-green":"#15803d","monoline-blue":"#2563eb","monoline-plum":"#7c3aed","monoline-teal":"#0d9488","monoline-crimson":"#dc2626","ledger-navy":"#1e3a5f","ledger-green":"#15803d","ledger-maroon":"#7f1d1d","ledger-indigo":"#3730a3","ledger-bronze":"#92600f","vertex-indigo":"#4338ca","vertex-teal":"#0f766e","vertex-orange":"#c2410c","vertex-rose":"#be123c","vertex-slate":"#334155","spine-blue":"#2563eb","spine-red":"#dc2626","spine-green":"#16a34a","spine-gray":"#4b5563","spine-purple":"#7c3aed"};
+  var HB={}; put(HB,'bold academic coral retro creative '+fam('ledger','navy green maroon indigo bronze')+' '+fam('cascade','coral teal blue violet amber'),1);
   function rgb(hex){ var m=String(hex||'').match(/#([0-9a-f]{6}|[0-9a-f]{3})\b/i); if(!m) return [51,65,85]; var x=m[1]; if(x.length===3) x=x.replace(/./g,'$&$&'); return [0,2,4].map(function(i){ return parseInt(x.substr(i,2),16); }); }
   function lum(c){ return c.map(function(v){ v/=255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); }).reduce(function(a,v,i){ return a+v*[0.2126,0.7152,0.0722][i]; },0); }
   function hex(c){ return '#'+c.map(function(v){ return ('0'+Math.round(v).toString(16)).slice(-2); }).join(''); }
   function tones(id){
-    var c=rgb(PASTEL_ACC[id]||TPL_COLORS[id]);
+    var c=rgb(ACC[id]||TPL_COLORS[id]);
     for(var i=0;i<12&&(1.05/(lum(c)+0.05))<4.6;i++) c=c.map(function(v){ return v*0.86; });   /* readable on white */
     var soft=c.map(function(v){ return 255-(255-v)*0.1; });
     return '--rf-a:'+hex(c)+';--rf-soft:'+hex(soft);
   }
   function refresh(h,id){
     if(!TPL_META[id]) return h;
-    var cls='tpl-'+id+' r4-rf rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'');
+    var cls='tpl-'+id+' r4-rf rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'')+(HB[id]?' rf-hb':'');
     return h.replace('class="tpl-'+id+'"','class="'+cls+'" style="'+tones(id)+'"');
   }
 
@@ -13355,7 +13357,7 @@ window.__novaPortfolioHTML=function(d,sections){
   var WA_URL='https://wa.me/'+WA_BOT+'?text='+WA_TEXT;
   var WIC='<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
   var BADGE='<span class="r4u-wa-badge">'+WIC+'</span>';
-  function isDesktop(){ try{ return window.matchMedia && window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
+  function isDesktop(){ try{ return (window.R4UWa&&window.R4UWa.isDesktop()) || window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
   function launch(){
     if(isDesktop() && window.R4UWa){
       window.R4UWa.open({intent:'resume',url:WA_URL,title:'Build your resume on WhatsApp',sub:'We\u2019ll message you on WhatsApp \u2014 answer a few quick questions by chat and get a polished resume.',done:'Reply <b>Hi</b> to the message to start. It takes about 5 minutes.'});
@@ -15469,7 +15471,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         +'<label for="_r4uAlCity">City <i>(optional)</i></label><input id="_r4uAlCity" type="text" autocomplete="address-level2" placeholder="e.g. Pune, Bangalore" maxlength="40">'
         +'<div class="al-err" id="_r4uAlErr">Enter the role you want jobs for.</div>'
         +'<button type="button" class="al-go">'+'<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Get alerts on WhatsApp</button>'
-        +'<p class="al-fine">'+((window.matchMedia&&window.matchMedia('(min-width:769px) and (pointer:fine)').matches)?'Next, enter your WhatsApp number \u2014 we\u2019ll message you. Reply <b>stop alerts</b> anytime.':'WhatsApp opens with your request ready \u2014 just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.')+'</p></div>';
+        +'<p class="al-fine">'+((window.R4UWa?window.R4UWa.isDesktop():(Math.min(screen.width,screen.height)>=700||window.matchMedia('(min-width:769px) and (pointer:fine)').matches))?'Next, enter your WhatsApp number \u2014 we\u2019ll message you. Reply <b>stop alerts</b> anytime.':'WhatsApp opens with your request ready \u2014 just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.')+'</p></div>';
       document.body.appendChild(o);
       o.addEventListener('click',function(e){ if(e.target===o) closeAlerts(); });
       o.querySelector('.al-x').addEventListener('click',closeAlerts);
@@ -15577,8 +15579,34 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 .resume-a4-page .r4-rf:not(.rf-pastel) .r-sk{font-size:10px!important;font-weight:500!important;line-height:1.35!important;padding:3px 9px!important;border-radius:5px!important;background:var(--rf-soft)!important;color:var(--rf-a)!important;border:0!important;box-shadow:none!important;text-transform:none!important;}
 .resume-a4-page .r4-rf:not(.rf-pastel) .r-sk::before{content:none!important;}
 
+/* ── 2026 headings: sentence case + hairline (the biggest "dated" tell was the
+   tiny all-caps labels and solid heading bars) ── */
+.resume-a4-page .r4-rf .r-sec-t{text-transform:none!important;font-size:12.5px!important;font-weight:700!important;color:var(--rf-a)!important;display:flex!important;align-items:center;gap:10px;background:none!important;border:0!important;padding:0!important;border-radius:0!important;margin:0 0 9px!important;box-shadow:none!important;width:auto!important;line-height:1.3!important;}
+.resume-a4-page .r4-rf:not(.rf-sc) .r-sec-t::before{content:none!important;}
+.resume-a4-page .r4-rf .r-sec-t::after{content:""!important;order:2;flex:1 1 auto!important;height:1px!important;background:var(--rf-line)!important;display:block!important;position:static!important;width:auto!important;margin:0!important;opacity:1!important;border:0!important;}
+.resume-a4-page :is(.r4-rf,.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sec-t .r-yr{order:3;margin-left:0!important;float:none!important;font-weight:500;}
+/* templates that had solid heading bars: a soft tinted label instead */
+.resume-a4-page .r4-rf.rf-hb .r-sec-t{display:inline-flex!important;background:var(--rf-soft)!important;padding:3px 10px!important;border-radius:5px!important;}
+.resume-a4-page .r4-rf.rf-hb .r-sec-t::after{content:none!important;}
+/* serif families: serif headings, accent rule */
+.resume-a4-page .r4-rf.rf-f-serif .r-sec-t{font-family:RSerif,Georgia,serif!important;font-size:14px!important;font-weight:600!important;color:var(--rf-ink)!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-sec-t::after{background:var(--rf-a)!important;opacity:.35!important;}
+.resume-a4-page .r4-rf.rf-f-serif.rf-hb .r-sec-t{color:var(--rf-a)!important;}
+.resume-a4-page .r4-rf.rf-f-mono .r-sec-t{font-family:"Courier New",Courier,monospace!important;font-size:12px!important;}
+/* names, titles, roles: no shouting caps (Retro keeps its typewriter caps) */
+.resume-a4-page .r4-rf:not(.rf-f-mono) :is(.r-name,.r-title,.r-role,.r-deg,.r-award-name){text-transform:none!important;}
+.resume-a4-page .r4-rf :is(.r-sec-t,.r-name,.r-title,.r-role,.r-deg){letter-spacing:normal!important;word-spacing:normal!important;}
+.resume-a4-page .r4-rf .r-co{color:var(--rf-a)!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-co{color:var(--rf-mut)!important;}
+/* awards: plain entries (the old tinted boxes looked like alerts) */
+.resume-a4-page .r4-rf .r-award{background:none!important;border:0!important;padding:0!important;border-radius:0!important;box-shadow:none!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside .r-sec-t::after{content:none!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head-accent{margin:-20px -16mm 20px!important;height:4px!important;border-radius:0!important;}
+
 /* pastel sidebars: tidy typography only (their tuned layout stays) */
-.resume-a4-page .r4-rf.rf-pastel .r-head .r-name{font-size:21px!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-head .r-name{font-size:23px!important;line-height:1.2!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-head .r-title{font-size:12px!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-sec-t{font-size:12px!important;}
 .resume-a4-page .r4-rf.rf-pastel .r-sk{font-size:10.25px!important;}
 </style>
 </body>
