@@ -6947,6 +6947,16 @@ if ('serviceWorker' in navigator) {
   var IDS={};
   NEW.forEach(function(t){ IDS[t[0]]=1; TPL_META[t[0]]={label:t[1],tag:t[2],cat:'new'}; TPL_COLORS[t[0]]=t[3]; });
   window._r4uNewTpls=Object.keys(IDS);
+  /* Two-column extras: separate from the 106 ATS-friendly designs, shown only in
+     the "Two-column" tab and labelled less ATS-safe. Each renders the sidebar
+     layout of its single-column namesake. */
+  var TC={};
+  [['modern','Modern'],['corporate','Corporate'],['executive','Executive'],['harbor','Harbor'],['sierra','Sierra'],['blush','Blush'],['verdant','Verdant'],['lilac','Lilac'],['azure','Azure']].forEach(function(t){
+    var id='tc-'+t[0]; TC[id]=t[0];   /* tc- prefix: never collides with family selectors like [class*="tpl-executive-"] */
+    TPL_META[id]={label:t[1]+' Two-column',tag:'Sidebar \u00b7 Less ATS-safe',cat:'twocol'};
+    TPL_COLORS[id]=TPL_COLORS[t[0]];
+  });
+  window._r4uTwoColTpls=Object.keys(TC);
 
   /* ATS-friendly only: every design renders as ONE column. Two-column layouts
      (sidebars) were measured to interleave in ATS text extraction (sidebar
@@ -6957,6 +6967,14 @@ if ('serviceWorker' in navigator) {
   var orig=renderResumeHTML;
   window.renderResumeHTML=renderResumeHTML=function(d){
     var id=currentTemplate, h;
+    if(TC[id]){
+      var base=TC[id];
+      try{ currentTemplate=(base==='harbor'||base==='sierra')?'azure':base; h=String(orig.apply(this,arguments)); }
+      finally{ currentTemplate=id; }
+      h=atsLinks(h.replace(/class="tpl-[a-z0-9-]+"/,'class="tpl-'+base+'"'));
+      if(!IDS[base]) h=refresh(h,base,true);
+      return h.replace('class="tpl-'+base,'class="tpl-'+id+' r4-tc tpl-'+base);
+    }
     if(SINGLE[id]){
       try{ currentTemplate='monoline-ink'; h=String(orig.apply(this,arguments)); }
       finally{ currentTemplate=id; }
@@ -7000,9 +7018,9 @@ if ('serviceWorker' in navigator) {
     var soft=c.map(function(v){ return 255-(255-v)*0.1; });
     return '--rf-a:'+hex(c)+';--rf-soft:'+hex(soft);
   }
-  function refresh(h,id){
+  function refresh(h,id,twoCol){
     if(!TPL_META[id]) return h;
-    var cls='tpl-'+id+' r4-rf'+(SINGLE[id]?' rf-single':'')+' rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'')+(HB[id]?' rf-hb':'');
+    var cls='tpl-'+id+' r4-rf'+(SINGLE[id]&&!twoCol?' rf-single':'')+' rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'')+(HB[id]?' rf-hb':'');
     return h.replace('class="tpl-'+id+'"','class="'+cls+'" style="'+tones(id)+'"');
   }
 
@@ -7017,6 +7035,11 @@ if ('serviceWorker' in navigator) {
     var grid=document.getElementById('tplGrid'); if(!grid) return;
     var cards=Array.prototype.slice.call(grid.querySelectorAll('.tpl-card')), firsts=[];
     cards.forEach(function(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m&&IDS[m[1]]){ c.classList.add('r4n-card'); firsts.push(c); flag(c,m[1]); } });
+    if(cat!=='twocol') cards.forEach(function(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m&&TC[m[1]]) c.remove(); });
+    var note=document.getElementById('r4tcNote');
+    if(cat==='twocol'){ if(!note){ note=document.createElement('div'); note.id='r4tcNote'; note.setAttribute('role','note'); note.innerHTML='<b>Less ATS-safe.</b> Two-column layouts look great printed or shared directly, but some applicant tracking systems read the columns out of order. For online applications, use a single-column design.'; } grid.parentNode.insertBefore(note,grid); }
+    else if(note) note.remove();
+    var bdg=document.querySelector('.tpl-section-badge'); if(bdg) bdg.textContent=(cat==='twocol')?'Two-column \u00b7 less ATS-safe':'\u2713 All ATS-friendly';
     if(cat==='all') firsts.slice().reverse().forEach(function(c){ grid.insertBefore(c,grid.firstChild); });
     if(cat==='new'){ firsts.sort(function(a,b){ return order(a)-order(b); }).forEach(function(c){ grid.appendChild(c); }); }
   }
@@ -7037,11 +7060,23 @@ if ('serviceWorker' in navigator) {
         var all0=row.querySelector('[data-cat="all"]'); if(all0) all0.classList.remove('active');
         b.classList.add('active');
       }
+      if(row&&!row.querySelector('[data-cat="twocol"]')){
+        var t2=document.createElement('button'); t2.className='tpl-filter-btn'; t2.setAttribute('data-cat','twocol');
+        t2.innerHTML='Two-column <small>Less ATS-safe</small>'; t2.setAttribute('onclick',"filterTpls(this,'twocol')"); row.appendChild(t2);
+      }
       var all=row&&row.querySelector('[data-cat="all"]'); if(all) all.textContent='All 100+';
       var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='\u2713 All ATS-friendly';
       var grid=document.getElementById('tplGrid'), act=document.querySelector('.tpl-filter-btn.active');
       if(grid&&typeof renderTemplateGrid==='function') renderTemplateGrid(act?act.getAttribute('data-cat'):'new');
     }catch(e){}
+  }
+  if(typeof selectTemplate==='function'){
+    var st=selectTemplate;
+    window.selectTemplate=selectTemplate=function(id){
+      var r=st.apply(this,arguments);
+      try{ if(TC[id]&&typeof showToast==='function') showToast('Two-column design \u2014 for online applications, a single-column design is safer with ATS.','info'); }catch(e){}
+      return r;
+    };
   }
   /* Brand-new users (never picked a template, nothing generated or saved on
      this device) start on the flagship. Saved résumés keep their template. */
@@ -15701,6 +15736,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4tn .tn-btn.pri{background:#b45309;border-color:#b45309;color:#fff;}
 @media (max-width:640px){#r4tn .tn-row{flex-wrap:wrap;}#r4tn .tn-picks{width:100%;justify-content:space-between;}#r4tn .tn-x{position:absolute;right:10px;top:10px;}#r4tn{position:relative;}}
 @media (prefers-reduced-motion:reduce){#r4tn .tn-th{transition:none;}}
+.tpl-filter-btn[data-cat="twocol"] small{font-size:.62rem;font-weight:700;color:#b45309;background:#fff7ed;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:1px;}
+.tpl-filter-btn.active[data-cat="twocol"] small{background:rgba(255,255,255,.22);color:#fff;}
+#r4tcNote{margin:0 0 12px;padding:10px 13px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;font-size:.8rem;line-height:1.45;}
 /* gallery: hover call-to-action + quick labels on the 2026 cards */
 .tpl-card .tpl-card-thumb{position:relative;}
 .tpl-card .tpl-card-thumb::after{content:"Use this design";position:absolute;left:50%;bottom:14px;transform:translate(-50%,6px);padding:7px 14px;border-radius:999px;background:#111827;color:#fff;font:600 .72rem Inter,system-ui,sans-serif;opacity:0;transition:opacity .15s,transform .15s;pointer-events:none;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(0,0,0,.5);}
@@ -15738,12 +15776,13 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }
   function render(){
     var d=data(); if(!d) return;
-    var sig=JSON.stringify([d.firstName,d.lastName,d.jobTitle,(d.experience||[]).length,(d.skills||[]).length]);
+    var sig=JSON.stringify([cur(),d.firstName,d.lastName,d.jobTitle,(d.experience||[]).length,(d.skills||[]).length]);
     if(built===sig && bar.querySelector('.tn-picks')) return;
     built=sig;
-    bar.innerHTML='<div class="tn-row"><div class="tn-txt"><span class="tn-k">NEW · 2026 DESIGNS</span>'
-      +'<div class="tn-h">See your resume in a fresh, premium design</div>'
-      +'<div class="tn-s">One tap to try — your content stays the same, and you can undo.</div>'
+    var two=(window._r4uTwoColTpls||[]).indexOf(cur())>=0;
+    bar.innerHTML='<div class="tn-row"><div class="tn-txt"><span class="tn-k">'+(two?'APPLYING ONLINE?':'NEW · 2026 DESIGNS')+'</span>'
+      +'<div class="tn-h">'+(two?'Switch to an ATS-friendly design':'See your resume in a fresh, premium design')+'</div>'
+      +'<div class="tn-s">'+(two?'Two-column layouts can be read out of order by applicant tracking systems. One tap to switch — you can undo.':'One tap to try — your content stays the same, and you can undo.')+'</div>'
       +'<button type="button" class="tn-more">Browse all 10 new designs →</button></div>'
       +'<div class="tn-picks">'+PICKS.map(function(id){ return '<button type="button" class="tn-pick" data-id="'+id+'" title="Try '+esc(label(id))+'">'+thumb(id,d)+'<span class="tn-nm">'+esc(label(id))+'</span></button>'; }).join('')+'</div>'
       +'<button type="button" class="tn-x" aria-label="Dismiss">×</button></div>';
@@ -15815,9 +15854,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 .resume-a4-page .r4-rf.rf-single.rf-pastel .r-exp{margin-bottom:11px!important;padding-left:0!important;}
 .resume-a4-page .r4-rf.rf-single.rf-pastel .r-exp::before{content:none!important;}
 /* Harbor: skills in a tinted panel instead of a sidebar */
-.resume-a4-page .tpl-harbor .r-sec:has(>.r-skills){background:#f3f8f7;border-radius:10px;padding:13px 15px 14px;}
-.resume-a4-page .tpl-harbor .r-sec:has(>.r-skills) .r-sk{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
-.resume-a4-page .tpl-harbor .r-head{border-bottom:2px solid var(--a);}
+.resume-a4-page .tpl-harbor:not(.r4-tc) .r-sec:has(>.r-skills){background:#f3f8f7;border-radius:10px;padding:13px 15px 14px;}
+.resume-a4-page .tpl-harbor:not(.r4-tc) .r-sec:has(>.r-skills) .r-sk{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+.resume-a4-page .tpl-harbor:not(.r4-tc) .r-head{border-bottom:2px solid var(--a);}
 /* Sierra: crisp square skill tags under the navy band */
 .resume-a4-page .tpl-sierra .r-sk{border-radius:3px;background:var(--soft);color:var(--a);}
 /* ATS reading order: Chrome writes PDF text in PAINT order, and positioned
