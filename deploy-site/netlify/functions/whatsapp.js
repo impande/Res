@@ -648,12 +648,32 @@ exports.handler = async (event) => {
   // within 24h of it, so the daily job alerts check this before sending.
   await redis(['SET', 'lastseen:' + from, String(Date.now()), 'EX', '172800']);
 
-  const MENU = 'Reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n\nAlso try: *jobs* · *job alerts* · *interview* · *mock interview*';
+  // IVR-style main menu: one number per thing the bot can do. Typed commands
+  // ("jobs", "job alerts data analyst in pune", "mock interview", "support")
+  // still work; 0 / "menu" always comes back here.
+  // Names saved in capitals ("ASHISH") are shown as "Ashish".
+  const niceName = (n) => { const f = firstName(n); return /^[A-Z]{2,}$/.test(f) ? f.charAt(0) + f.slice(1).toLowerCase() : f; };
+  const MAIN = (name) => (name ? '👋 Hi ' + niceName(name) + '! ' : '👋 Hi! ') + 'Welcome to *Resume For You*.\n\n' +
+    'Reply with a number:\n1️⃣  Build or edit my resume\n2️⃣  Find jobs for me\n3️⃣  Daily job alerts\n4️⃣  Interview practice\n5️⃣  Talk to support\n\n' +
+    '_Reply *menu* anytime to see this again._';
+  const MENU = '📝 *Your resume* — reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n0️⃣  Main menu';
+  const MENU_NEW = '📝 *Your resume* — reply with a number:\n1️⃣  Build it by chat (about 5 minutes)\n2️⃣  Import a PDF or photo of an existing resume\n0️⃣  Main menu';
+  const IV_MENU = '🎤 *Interview practice* — reply with a number:\n1️⃣  Mock interview (I ask, you answer, I score it)\n2️⃣  5 likely questions + tips\n0️⃣  Main menu';
 
   try {
     let state = await getState(from);
     if (!state.data) state.data = { experiences: [] };
     if (!state.mode) state.mode = state.step > 0 ? 'build' : 'idle'; // migrate older states
+
+    // ---- "Hello Resume4U": every website entry point opens the chat with it
+    //      (optionally followed by the request, e.g. "Hello Resume4U, job alerts
+    //      Data Analyst in Pune"). Strip it; on its own it always lands on the main
+    //      menu — from any mode, including a support chat or an unfinished build. ----
+    const HELLO_RE = /^\s*(hello|hi+|hey)[\s,!.]*resume\s*(4|for)\s*(u|you)\b[\s,!.:;\u2014\u2013-]*/i;
+    if (type === 'text' && HELLO_RE.test(text)) {
+      text = text.replace(HELLO_RE, '').trim(); low = text.toLowerCase();
+      if (!text) { text = 'hi'; low = 'hi'; if (state.mode === 'support') state.mode = 'idle'; }
+    }
 
     // ---- Document / photo upload: import an existing resume (any time) ----
     if (type === 'document' || type === 'image') {
@@ -698,8 +718,9 @@ exports.handler = async (event) => {
     if (state.mode === 'support') {
       // Explicit exit → back to the bot with a confirmation.
       if (/^(exit|end|close|stop|cancel|leave|back|done)(\s+(support|chat|help|this))?$|^(menu|resume builder)$/i.test(low)) {
-        await setState(from, { step: 0, mode: 'idle', data: state.data || { experiences: [] } });
-        await send(from, "👍 Closed the support chat. Message anytime to build or edit your resume — or say \"support\" to reach our team again.");
+        await setState(from, { step: 0, mode: 'main', data: state.data || { experiences: [] } });
+        const _cp = await getProfile(from);
+        await send(from, "👍 Closed the support chat. Reply *5* from the menu anytime to reach our team again.\n\n" + MAIN(_cp && (_cp.name || _cp.firstName)));
         return { statusCode: 200, body: 'ok' };
       }
       // "I want the bot now" — a build / edit / new / versions request (incl. the
@@ -809,15 +830,15 @@ exports.handler = async (event) => {
     // Greeting → friendly menu (even mid-build, so "hi" isn't taken as an answer)
     if (/^(hi+|hey+|hello+|yo|hola|namaste|hii+|start|get started)[.!\s]*$/i.test(low)) {
       const p = await getProfile(from); const pn = p && (p.name || p.firstName);
-      await setState(from, { step: 0, mode: 'menu', data: state.data });
-      await send(from, (pn ? 'Hi again, ' + firstName(pn) + '! 👋\n\n' : "Hi! 👋 I'm your Resume4U co-pilot.\n\n") + MENU);
+      await setState(from, { step: 0, mode: 'main', data: state.data });
+      await send(from, MAIN(pn));
       return OK;
     }
     // Menu / help
-    if (/^(menu|help|options|commands|\?)$/i.test(low)) {
+    if (/^(menu|main menu|help|options|commands|\?)$/i.test(low) || (/^0$/.test(low.trim()) && /^(main|menu|ivmenu|ask|alertmenu)$/.test(state.mode))) {
       const p = await getProfile(from); const pn = p && (p.name || p.firstName);
-      await setState(from, { step: 0, mode: 'menu', data: state.data });
-      await send(from, (pn ? 'Hi again, ' + firstName(pn) + '! ' : '') + MENU);
+      await setState(from, { step: 0, mode: 'main', data: state.data });
+      await send(from, MAIN(pn));
       return OK;
     }
     // Support / contact → connect to a human (enters sticky support mode + ticket).
@@ -825,8 +846,62 @@ exports.handler = async (event) => {
       const _pf = await getProfile(from);
       await setState(from, { step: 0, mode: 'support', data: state.data });
       await appendTicket(from, 'user', text, _pf && (_pf.name || _pf.firstName));
-      await send(from, "🙋 You're connected to Resume4U support. Tell us what you need — a human from our team will reply right here.\n\n(Type \"exit\" anytime to go back to building your resume.)");
+      await send(from, "🙋 You're connected to Resume For You support. Tell us what you need — a human from our team will reply right here.\n\n(Type \"exit\" anytime to go back to the menu.)");
       return OK;
+    }
+    // ---- IVR main menu & sub-menus (numbers) ----
+    const roleFromResume = async () => { try { return JOBS.deriveSearch(await savedResume()).role || ''; } catch (e) { return ''; } };
+    const askFor = async (what, prompt) => { await setState(from, { step: 0, mode: 'ask', ask: what, data: state.data }); await send(from, prompt + '\n\n_0 = main menu_'); return OK; };
+    const digit = (low.trim().match(/^([0-9])[.)]?$/) || [])[1];
+    if (state.mode === 'main' && digit) {
+      if (digit === '1') {
+        const prof = await savedResume();
+        if (haveData(prof)) { await setState(from, { step: 0, mode: 'menu', data: state.data }); await send(from, MENU); }
+        else { await setState(from, { step: 0, mode: 'menu', data: state.data, fresh: 1 }); await send(from, MENU_NEW); }
+        return OK;
+      }
+      if (digit === '2') {
+        const role = await roleFromResume();
+        if (!role) return askFor('jobs', '🔎 Which role should I search for? Add a city if you like — e.g. *Data Analyst in Pune*.');
+        text = 'jobs'; low = 'jobs';
+      } else if (digit === '3') {
+        let cur = null; try { cur = JSON.parse((await redis(['GET', 'jobalert:' + from])) || 'null'); } catch (e) {}
+        if (cur && cur.role) {
+          await setState(from, { step: 0, mode: 'alertmenu', data: state.data });
+          await send(from, '🔔 Your daily job alerts are *on* for ' + cur.role + (cur.city ? ' in ' + cur.city : '') + ' (every morning at 9 AM).\n\nReply with a number:\n1️⃣  Show today\'s jobs\n2️⃣  Change the role or city\n3️⃣  Stop alerts\n0️⃣  Main menu');
+          return OK;
+        }
+        return askFor('job alerts', '🔔 *Daily job alerts* — fresh jobs every morning at 9 AM, free.\n\nWhich role should I watch for? Add a city if you like — e.g. *Data Analyst in Pune*.');
+      } else if (digit === '4') {
+        await setState(from, { step: 0, mode: 'ivmenu', data: state.data });
+        await send(from, IV_MENU);
+        return OK;
+      } else if (digit === '5') {
+        const _pf = await getProfile(from);
+        await setState(from, { step: 0, mode: 'support', data: state.data });
+        await appendTicket(from, 'user', '[Opened support from the menu]', _pf && (_pf.name || _pf.firstName));
+        await send(from, "🙋 You're connected to Resume For You support. Tell us what you need — a human from our team will reply right here.\n\n(Type \"exit\" anytime to go back to the menu.)");
+        return OK;
+      } else { await send(from, MAIN((await getProfile(from) || {}).name)); return OK; }
+    }
+    if (state.mode === 'alertmenu' && digit) {
+      if (digit === '1') { let cur = null; try { cur = JSON.parse((await redis(['GET', 'jobalert:' + from])) || 'null'); } catch (e) {} text = 'jobs' + (cur && cur.role ? ' ' + cur.role + (cur.city ? ' in ' + cur.city : '') : ''); low = text.toLowerCase(); }
+      else if (digit === '2') return askFor('job alerts', 'Which role (and city) should I watch for instead? e.g. *Product Manager in Bangalore*.');
+      else if (digit === '3') { text = 'stop alerts'; low = 'stop alerts'; }
+      else { await send(from, 'Reply 1, 2 or 3 — or 0 for the main menu.'); return OK; }
+      await setState(from, { step: 0, mode: 'idle', data: state.data });
+    }
+    if (state.mode === 'ivmenu' && digit) {
+      const role = await roleFromResume();
+      if (digit === '1') { if (!role) return askFor('mock interview', '🎤 Which role should I interview you for? e.g. *Data Analyst*.'); text = 'mock interview ' + role; low = text.toLowerCase(); }
+      else if (digit === '2') { if (!role) return askFor('interview', '🎯 Which role are you interviewing for? e.g. *Data Analyst*.'); text = 'interview ' + role; low = text.toLowerCase(); }
+      else { await send(from, IV_MENU); return OK; }
+      await setState(from, { step: 0, mode: 'idle', data: state.data });
+    }
+    // We asked a question (role / city): this message is the answer.
+    if (state.mode === 'ask' && state.ask && !digit && !/^(stop|cancel|exit)$/i.test(low.trim())) {
+      text = state.ask + ' ' + text.replace(/^\s*(for|as)\s+/i, ''); low = text.toLowerCase();
+      await setState(from, { step: 0, mode: 'idle', data: state.data });
     }
     // ---- Jobs matched to the resume: "jobs" / "jobs data analyst in pune" ----
     if (cmdOK && /^(jobs?|find jobs?|search jobs?|jobs for me|show jobs|job search)(\s+.*)?$/i.test(low) && !/^jobs?\s*alerts?\b/i.test(low)) {
@@ -1005,7 +1080,15 @@ exports.handler = async (event) => {
     }
 
     // ---- Mode: menu (returning user picking an option) ----
-    if (state.mode === 'menu') {
+    if (state.mode === 'menu' && state.fresh) {
+      if (/^1\b/.test(low) || /\b(build|new|fresh|chat)\b/i.test(low)) { state = { step: 0, mode: 'build', data: { experiences: [] } }; }
+      else if (/^2\b/.test(low) || /\b(pdf|import|upload|photo)\b/i.test(low)) {
+        await setState(from, { step: 0, mode: 'review', data: { experiences: [] } });
+        await send(from, '📎 Great — send your resume as a PDF (or a clear photo) right here and I\'ll import it.');
+        return OK;
+      } else { await send(from, MENU_NEW); return OK; }
+    }
+    else if (state.mode === 'menu') {
       if (/^1\b/.test(low) || /\bedit\b/i.test(low)) {
         const prof = await getProfile(from);
         if (prof) {
@@ -1373,13 +1456,9 @@ exports.handler = async (event) => {
         }
       } catch (e) {}
       const pName = prof && (prof.name || prof.firstName);
-      if (prof && pName) {
-        await setState(from, { step: 0, mode: 'menu', data: { experiences: [] } });
-        await send(from, '👋 Welcome back, ' + firstName(pName) + '! Your resume is saved with me.\n\n' + MENU +
-          '\n\nOr just send a PDF to import a different one.');
-        return { statusCode: 200, body: 'ok' };
-      }
-      state = { step: 0, mode: 'build', data: { experiences: [] } }; // brand-new → build
+      await setState(from, { step: 0, mode: 'main', data: { experiences: [] } });
+      await send(from, MAIN(pName));
+      return { statusCode: 200, body: 'ok' };
     }
 
     // ---- Mode: build (the linear Q&A) ----

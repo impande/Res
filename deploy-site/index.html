@@ -11,7 +11,7 @@
      rating and visit counters are kept (they are not resume data). */
   (function(){
     var KEYS=['_preSignInDraft','_lastResumeOutput','_r4uResumeData','_r4uSnapTime','_keyAchiev','_kaSeeded','_kaAutoGen','_kaIncludeResume',
-      '_r4uSecOrder','_pfCustomize','_pfCustomSections','_pfExtraLinks','_r4uResumeSlug','_r4uLastPubSig','skillHistory','r4u_biodata_v1','_pendingSignIn'];
+      '_r4uSecOrder','_pfCustomize','_pfCustomSections','_pfExtraLinks','_r4uResumeSlug','_r4uLastPubSig','skillHistory','r4u_biodata_v1','_pendingSignIn','_r4uWaPhone'];
     var SKEYS=['_r4uDl','_r4uIncomingResumeTok','_r4uIncomingJd'];
     function wipe(){
       try{ KEYS.forEach(function(k){ localStorage.removeItem(k); });
@@ -95,7 +95,7 @@
   <title>Free AI Resume Builder – ATS-Optimised, No Sign-Up | resume4u.help</title>
 
   <!-- ── SEO Core ──────────────────────────────────────────────────────── -->
-  <meta name="description" content="Free AI resume builder. Make an ATS-optimised resume in minutes with 50+ templates, AI bullet points and a free portfolio site. PDF from ₹9 / $0.99.">
+  <meta name="description" content="Free AI resume builder. Make an ATS-optimised resume in minutes with 100+ templates, AI bullet points and a free portfolio site. PDF from ₹9 / $0.99.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="Resume For You">
   <link rel="canonical" href="https://resume4u.help/">
@@ -107,7 +107,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://resume4u.help/">
   <meta property="og:title" content="Resume For You – Free AI Resume &amp; Portfolio Builder">
-  <meta property="og:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 50+ templates. Free — download PDF from ₹9 / $0.99. No sign-up needed.">
+  <meta property="og:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 100+ templates. Free — download PDF from ₹9 / $0.99. No sign-up needed.">
   <meta property="og:image" content="https://resume4u.help/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -118,7 +118,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://resume4u.help/">
   <meta name="twitter:title" content="Resume For You – Free AI Resume &amp; Portfolio Builder">
-  <meta name="twitter:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 50+ templates. Free — no sign-up needed.">
+  <meta name="twitter:description" content="Create a job-winning resume and portfolio website in minutes. AI-powered, ATS-optimised, 100+ templates. Free — no sign-up needed.">
   <meta name="twitter:image" content="https://resume4u.help/og-image.png">
 
   <!-- ── Favicon ──────────────────────────────────────────────────────────── -->
@@ -138,7 +138,7 @@
         "name": "Resume For You",
         "url": "https://resume4u.help/",
         "image": "https://resume4u.help/og-image.png",
-        "description": "Free AI-powered resume and portfolio builder. Generate ATS-optimised resumes with 50+ professional templates, build a portfolio website, and share it live — all in minutes. No sign-up required.",
+        "description": "Free AI-powered resume and portfolio builder. Generate ATS-optimised resumes with 100+ professional templates, build a portfolio website, and share it live — all in minutes. No sign-up required.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
         "offers": [
@@ -172,7 +172,7 @@
         "featureList": [
           "AI-generated resume content",
           "ATS score checker",
-          "50+ professional templates",
+          "100+ professional templates",
           "PDF download",
           "Portfolio website builder",
           "AI-generated portfolio content",
@@ -244,7 +244,7 @@
             "name": "How many resume templates are available?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Resume For You offers 50+ professional resume templates across different styles — from clean and minimal to creative and tech-focused. All templates are ATS-friendly and optimised for PDF output."
+              "text": "Resume For You offers 100+ professional resume templates across different styles — from clean and minimal to creative and tech-focused. All templates are ATS-friendly and optimised for PDF output."
             }
           },
           {
@@ -450,7 +450,7 @@
             "@type": "HowToStep",
             "position": 7,
             "name": "Generate & Download",
-            "text": "Choose from 50+ professional templates, click 'Generate Resume', review the AI-crafted content, make any edits inline, and download as PDF or Word document."
+            "text": "Choose from 100+ professional templates, click 'Generate Resume', review the AI-crafted content, make any edits inline, and download as PDF or Word document."
           }
         ]
       },
@@ -2681,6 +2681,7 @@
   .r4u-tl, #_r4uToolsRow a { transition: none; }
 }
 </style>
+<script src="/tools/wa-handoff.js?v=4" defer></script>
 </head>
 <body>
 
@@ -2766,7 +2767,7 @@
     <details class="sl-acc">
       <summary>Contact <svg class="sl-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
       <div class="sl-acc-body">
-        <a class="sl-wa" href="https://wa.me/919309014196?text=Support%3A%20I%20need%20help%20from%20the%20Resume4U%20team" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2z"/></svg>WhatsApp us</a>
+        <a class="sl-wa" href="https://wa.me/919309014196?text=Hello%20Resume4U%2C%20support%3A%20I%20need%20help%20from%20the%20Resume4U%20team" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2z"/></svg>WhatsApp us</a>
         <a class="sl-email" href="mailto:contact@resume4u.help"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>contact@resume4u.help</a>
       </div>
     </details>
@@ -2830,7 +2831,7 @@
     <h1 class="hero-title">Build your <span class="hero-title-grad">resume</span><br>with AI</h1>
     <p class="hero-sub">Create and save your resume online in minutes — no physical resume required. Fill in your details, our AI handles the rest.</p>
     <div class="hero-feat-grid">
-      <div class="hero-feat-card"><div class="hero-feat-card-ico">🎨</div><div class="hero-feat-card-lbl">50+ Templates</div></div>
+      <div class="hero-feat-card"><div class="hero-feat-card-ico">🎨</div><div class="hero-feat-card-lbl">100+ Templates</div></div>
       <div class="hero-feat-card"><div class="hero-feat-card-ico">🤖</div><div class="hero-feat-card-lbl">AI-Powered</div></div>
       <div class="hero-feat-card"><div class="hero-feat-card-ico">☁️</div><div class="hero-feat-card-lbl">Save Online</div></div>
       <div class="hero-feat-card"><div class="hero-feat-card-ico">✅</div><div class="hero-feat-card-lbl">ATS Score</div></div>
@@ -2838,7 +2839,7 @@
     <div class="hero-stats">
       <div class="hero-stat"><span class="hero-stat-num">10K+</span><span class="hero-stat-sub">Resumes</span></div>
       <div class="hero-stat-sep"></div>
-      <div class="hero-stat"><span class="hero-stat-num">50+</span><span class="hero-stat-sub">Templates</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">100+</span><span class="hero-stat-sub">Templates</span></div>
       <div class="hero-stat-sep"></div>
       <div class="hero-stat"><span class="hero-stat-num">Free</span><span class="hero-stat-sub">No Signup</span></div>
     </div>
@@ -2864,8 +2865,8 @@
             <p>Instantly see how your resume scores against ATS (Applicant Tracking System) criteria and get specific suggestions to improve your pass rate.</p>
           </div>
           <div class="seo-feat-card">
-            <h3>🎨 50+ Templates</h3>
-            <p>Choose from 35+ professionally designed, ATS-friendly resume templates — from clean and minimal to creative and modern layouts.</p>
+            <h3>🎨 100+ Templates</h3>
+            <p>Choose from 100+ professionally designed, ATS-friendly resume templates — from clean and minimal to creative and modern layouts.</p>
           </div>
           <div class="seo-feat-card">
             <h3>🌐 Portfolio Website</h3>
@@ -2908,7 +2909,7 @@
             <div class="seo-step-num">3</div>
             <div class="seo-step-body">
               <h3>Download or share</h3>
-              <p>Download your resume as a PDF, choose from 50+ templates, check your ATS score, and optionally build a portfolio website — all for free.</p>
+              <p>Download your resume as a PDF, choose from 100+ templates, check your ATS score, and optionally build a portfolio website — all for free.</p>
             </div>
           </div>
         </div>
@@ -2944,7 +2945,7 @@
           </details>
           <details>
             <summary>How many templates are available?</summary>
-            <div class="faq-answer">35+ professionally designed, ATS-friendly resume templates — from clean and minimal to creative and tech-focused. All are optimised for PDF output and recruiter readability.</div>
+            <div class="faq-answer">100+ professionally designed, ATS-friendly resume templates — from clean and minimal to creative and tech-focused. All are optimised for PDF output and recruiter readability.</div>
           </details>
           <details>
             <summary>Is my data private?</summary>
@@ -3226,10 +3227,10 @@
     <div id="tplSection" class="tpl-section-card">
       <div class="tpl-section-header">
         <span class="tpl-section-title">🎨 Choose Template</span>
-        <span class="tpl-section-badge">50+ designs</span>
+        <span class="tpl-section-badge">100+ designs</span>
       </div>
       <div class="tpl-filter-row">
-        <button class="tpl-filter-btn active" data-cat="all" onclick="filterTpls(this,'all')">All 50+</button>
+        <button class="tpl-filter-btn active" data-cat="all" onclick="filterTpls(this,'all')">All</button>
         <button class="tpl-filter-btn" data-cat="dark" onclick="filterTpls(this,'dark')">Dark</button>
         <button class="tpl-filter-btn" data-cat="light" onclick="filterTpls(this,'light')">Light</button>
         <button class="tpl-filter-btn" data-cat="creative" onclick="filterTpls(this,'creative')">Creative</button>
@@ -3299,7 +3300,7 @@
               <span style="font-size:1.3rem;flex-shrink:0;margin-top:1px;">🎨</span>
               <div>
                 <div style="font-size:0.83rem;font-weight:700;color:var(--text);margin-bottom:4px;">Try different templates</div>
-                <div style="font-size:0.73rem;color:var(--muted);line-height:1.55;">Not happy with the look? Tap <strong style="color:var(--accent);">Preview Resume</strong> to browse 50+ templates and instantly see how your resume looks in each style — same content, new design.</div>
+                <div style="font-size:0.73rem;color:var(--muted);line-height:1.55;">Not happy with the look? Tap <strong style="color:var(--accent);">Preview Resume</strong> to browse 100+ templates and instantly see how your resume looks in each style — same content, new design.</div>
               </div>
             </div>
             <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;">
@@ -3423,7 +3424,7 @@ _anchor();})();}setTimeout(function(){URL['revokeObjectURL'](_0x231d60);},0x1d4c
     </div>
     <div class="pay-feats">
       <div class="pay-feat"><span>✓</span> ATS-optimised PDF</div>
-      <div class="pay-feat"><span>✓</span> All 50+ templates</div>
+      <div class="pay-feat"><span>✓</span> All 100+ templates</div>
       <div class="pay-feat"><span>✓</span> Instant download</div>
       <div class="pay-feat"><span>✓</span> Card · UPI · Netbanking</div>
     </div>
@@ -3538,7 +3539,7 @@ window.__iosPdfSave = function(blobUrl, filename){
 </div>
 
 <!-- WhatsApp Contact Us — landing page (step 0) only -->
-<a class="wa-fab" id="waFab" href="https://wa.me/919309014196?text=Support%3A%20I%20need%20help%20from%20the%20Resume4U%20team" target="_blank" rel="noopener" aria-label="Contact us on WhatsApp">
+<a class="wa-fab" id="waFab" href="https://wa.me/919309014196?text=Hello%20Resume4U%2C%20support%3A%20I%20need%20help%20from%20the%20Resume4U%20team" target="_blank" rel="noopener" aria-label="Contact us on WhatsApp">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   Contact Us
 </a>
@@ -6726,8 +6727,8 @@ if ('serviceWorker' in navigator) {
   }
   function refreshUI(){
     try{
-      var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='50+ designs';
-      var allBtn=document.querySelector('.tpl-filter-btn[data-cat="all"]'); if(allBtn) allBtn.textContent='All 50+';
+      var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='\u2713 All ATS-friendly';
+      
       fillSelect(document.getElementById('previewTplSelect'));
       fillSelect(document.getElementById('tplSelect'));
       var grid=document.getElementById('tplGrid');
@@ -6739,6 +6740,370 @@ if ('serviceWorker' in navigator) {
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',refreshUI); else refreshUI();
   setTimeout(refreshUI,800);
+})();
+</script>
+<style id="_r4uTpl26Css">
+/* ══ 2026 COLLECTION ═══════════════════════════════════════════════════════
+   Ten curated templates, pure CSS over the shared .r-* markup (so PDF export,
+   the hosted /r/ link, ATS text, inline editing, section order and fit tools
+   all keep working). Fonts: only the embedded Inter + RSerif, so the PDF
+   paginates exactly like the preview. Headings stay sentence-case with normal
+   letter-spacing (the app's ATS rule), hierarchy comes from size/weight/colour.
+   Two-column ids (harbor, sierra) get the sidebar markup via the renderer
+   wrapper in the script below. ═══════════════════════════════════════════ */
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista){
+  --ink:#0f172a;--body:#334155;--mut:#64748b;--line:#e2e8f0;--a:#1d4ed8;--a2:#1e40af;--soft:#eef3ff;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--body);font-size:10.75px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;background:transparent;padding:0;margin:0;
+}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) a{color:inherit;text-decoration:none;}
+/* header */
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-head{background:none;border:0;padding:0 0 16px;margin:0 0 18px;color:var(--ink);border-radius:0;box-shadow:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-head .r-name{font-size:29px!important;line-height:1.12!important;font-weight:700;color:var(--ink);text-transform:none;margin:0;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-head .r-title{font-size:13px!important;font-weight:600;color:var(--a);text-transform:none;margin:5px 0 0!important;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-contact{font-size:10px!important;color:var(--mut);margin-top:10px!important;gap:5px 16px!important;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-contact .r-sep{display:none!important;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-ci{gap:5px;color:var(--mut);}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-ci svg{width:11px;height:11px;color:var(--a);stroke:currentColor;opacity:.9;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-head img{border:0!important;box-shadow:0 0 0 3px #fff,0 0 0 4px var(--line)!important;width:76px!important;height:76px!important;}
+/* sections */
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sec{margin:0 0 16px;padding:0;border:0;background:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sec-t{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700;color:var(--ink);text-transform:none;margin:0 0 9px;padding:0;border:0;background:none;border-radius:0;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sec-t::before{content:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sec-t::after{content:"";flex:1;height:1px;background:var(--line);display:block;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sum{font-size:10.75px;line-height:1.62;color:var(--body);background:none;border:0;padding:0;margin:0;border-radius:0;font-style:normal;}
+/* experience */
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-exp{margin:0 0 12px;padding:0;border:0;background:none;position:relative;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-exp:last-child{margin-bottom:0;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-exp::before{content:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-exp-top{display:flex;align-items:baseline;gap:4px 14px;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-role{font-size:12px;font-weight:650;color:var(--ink);text-transform:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-period{font-size:10px;font-weight:500;color:var(--mut);background:none;padding:0;border:0;border-radius:0;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-co{font-size:10.75px;font-weight:600;color:var(--a2);margin:1px 0 5px;font-style:normal;text-transform:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-ul{margin:0;padding:0;list-style:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-ul li{position:relative;padding:0 0 0 14px;margin:0 0 3px;font-size:10.6px;font-weight:400!important;line-height:1.55;color:var(--body);list-style:none;background:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-ul li::before{content:"";position:absolute;left:3px;top:.66em;width:4px;height:4px;border-radius:50%;background:var(--a);}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-desc{font-size:10.6px;color:var(--body);}
+/* awards, education, skills */
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-award{display:flex;justify-content:space-between;align-items:baseline;gap:4px 14px;margin:0 0 7px;padding:0;background:none;border:0;border-radius:0;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-award-name{font-size:11px;font-weight:600;color:var(--ink);}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-award-org{font-size:10.5px;color:var(--mut);font-weight:400;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-award-desc{font-size:10.5px;color:var(--body);}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) :is(.r-award-year,.r-yr){font-size:10px;font-weight:500;color:var(--mut);white-space:nowrap;font-variant-numeric:tabular-nums;background:none;padding:0;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-edu{display:flex;justify-content:space-between;align-items:baseline;gap:4px 14px;margin:0 0 7px;padding:0;border:0;background:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-deg{font-size:11.25px;font-weight:600;color:var(--ink);}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sch{font-size:10.6px;color:var(--mut);font-style:normal;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-skills{display:flex;flex-wrap:wrap;gap:5px;padding:0;margin:0;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sk{display:inline-block;font-size:10px;font-weight:500;line-height:1.35;padding:3px 9px;border-radius:5px;background:var(--soft);color:var(--a2);border:0;margin:0;box-shadow:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sk::before{content:none;}
+.resume-a4-page :is(.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-linea,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-ka-item{border-color:var(--line);}
+
+/* ── Atlas · flagship, ATS-first, cobalt ── */
+.resume-a4-page .tpl-atlas .r-head{border-bottom:2px solid var(--ink);padding-bottom:16px;}
+.resume-a4-page .tpl-atlas .r-head .r-name{font-size:31px!important;}
+
+/* ── Harbor · sidebar, deep teal ── */
+.resume-a4-page .tpl-harbor{--a:#0f766e;--a2:#115e59;--soft:#e7f3f1;--line:#dbe5e3;}
+.resume-a4-page .tpl-harbor .r-head{padding-bottom:18px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+.resume-a4-page .tpl-harbor .r-2col{display:flex;gap:22px;margin:0!important;min-height:0;}
+.resume-a4-page .tpl-harbor .r-aside{flex:0 0 188px;width:188px;min-width:188px;padding:16px 15px;background:#f3f8f7;border:0;border-radius:10px;align-self:flex-start;}
+.resume-a4-page .tpl-harbor .r-main-col{padding:2px 0 0;}
+.resume-a4-page .tpl-harbor .r-aside .r-sec-t{font-size:11.5px;color:var(--a2);}
+.resume-a4-page .tpl-harbor .r-aside .r-sec-t::after{display:none;}
+.resume-a4-page .tpl-harbor .r-aside .r-skills{gap:4px;}
+.resume-a4-page .tpl-harbor .r-aside .r-sk{background:#fff;color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--line);}
+.resume-a4-page .tpl-harbor .r-aside .r-edu{margin-bottom:9px;}
+.resume-a4-page .tpl-harbor .r-aside .r-deg{font-size:10.75px;}
+
+/* ── Regent · executive serif, bronze ── */
+.resume-a4-page .tpl-regent{--ink:#1c1917;--body:#3f3a36;--mut:#78716c;--line:#e7e1d8;--a:#8a6a3b;--a2:#6f532c;--soft:#f6f1e9;font-family:RSerif,Georgia,serif;font-size:11px;}
+.resume-a4-page .tpl-regent .r-head{text-align:center;padding-bottom:14px;border-bottom:3px double var(--a);}
+.resume-a4-page .tpl-regent .r-head .r-name{font-family:RSerif,Georgia,serif;font-size:32px!important;font-weight:600;}
+.resume-a4-page .tpl-regent .r-head .r-title{font-family:Inter,sans-serif;font-size:11.5px!important;font-weight:600;color:var(--a);}
+.resume-a4-page .tpl-regent .r-contact{justify-content:center;font-family:Inter,sans-serif;}
+.resume-a4-page .tpl-regent .r-sec-t{font-family:RSerif,Georgia,serif;font-size:14px;font-weight:600;color:var(--ink);}
+.resume-a4-page .tpl-regent .r-sec-t::after{background:var(--a);opacity:.45;}
+.resume-a4-page .tpl-regent .r-role{font-family:RSerif,Georgia,serif;font-size:12.5px;font-weight:600;}
+.resume-a4-page .tpl-regent .r-co{color:var(--a2);font-family:Inter,sans-serif;font-size:10.25px;}
+.resume-a4-page .tpl-regent :is(.r-period,.r-yr,.r-award-year){font-family:Inter,sans-serif;}
+.resume-a4-page .tpl-regent .r-ul li{font-size:11px;}
+.resume-a4-page .tpl-regent .r-ul li::before{width:5px;height:1px;border-radius:0;top:.8em;left:2px;}
+.resume-a4-page .tpl-regent .r-sk{background:none;color:var(--body);padding:0;border-radius:0;font-size:10.75px;font-family:RSerif,Georgia,serif;}
+.resume-a4-page .tpl-regent .r-sk:not(:last-child)::after{content:"·";margin-left:7px;color:var(--a);}
+.resume-a4-page .tpl-regent .r-skills{gap:2px 7px;}
+
+/* ── Pulse · modern, indigo accent bars ── */
+.resume-a4-page .tpl-pulse{--a:#4f46e5;--a2:#4338ca;--soft:#eef0ff;--line:#e6e8f2;}
+.resume-a4-page .tpl-pulse .r-head{padding-bottom:0;margin-bottom:20px;}
+.resume-a4-page .tpl-pulse .r-head .r-name{font-size:30px!important;}
+.resume-a4-page .tpl-pulse .r-head .r-title{display:inline-block;background:var(--soft);color:var(--a2);padding:3px 10px;border-radius:6px;font-size:12px!important;}
+.resume-a4-page .tpl-pulse .r-sec-t{padding-left:11px;position:relative;font-size:13px;}
+.resume-a4-page .tpl-pulse .r-sec-t::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:3px;border-radius:2px;background:var(--a);}
+.resume-a4-page .tpl-pulse .r-sec-t::after{display:none;}
+.resume-a4-page .tpl-pulse .r-sk{background:#fff;color:var(--a2);box-shadow:inset 0 0 0 1px #c7cbf5;border-radius:20px;padding:3px 10px;}
+
+/* ── Linea · Swiss, label column, monochrome ── */
+.resume-a4-page .tpl-linea{--ink:#111111;--body:#2b2b2b;--mut:#6b6b6b;--line:#d9d9d9;--a:#111111;--a2:#111111;--soft:#f2f2f2;}
+.resume-a4-page .tpl-linea .r-head{padding-bottom:20px;margin-bottom:6px;}
+.resume-a4-page .tpl-linea .r-head .r-name{font-size:34px!important;font-weight:600;}
+.resume-a4-page .tpl-linea .r-head .r-title{color:var(--mut);font-weight:500;font-size:13.5px!important;}
+.resume-a4-page .tpl-linea .r-head .r-ci svg{color:var(--ink);}
+.resume-a4-page .tpl-linea .r-sec{display:grid;grid-template-columns:118px 1fr;column-gap:18px;border-top:1px solid var(--ink);padding-top:10px;margin-bottom:14px;}
+.resume-a4-page .tpl-linea .r-sec-t{grid-column:1;grid-row:1 / span 50;align-self:start;font-size:11px;font-weight:600;margin:0;display:block;}
+.resume-a4-page .tpl-linea .r-sec-t::after{display:none;}
+.resume-a4-page .tpl-linea .r-sec>:not(.r-sec-t){grid-column:2;}
+.resume-a4-page .tpl-linea .r-co{color:var(--mut);font-weight:500;}
+.resume-a4-page .tpl-linea .r-ul li::before{width:6px;height:1px;border-radius:0;top:.78em;left:1px;}
+.resume-a4-page .tpl-linea .r-sk{background:none;padding:0;color:var(--body);font-size:10.6px;border-radius:0;}
+.resume-a4-page .tpl-linea .r-sk:not(:last-child)::after{content:",";}
+.resume-a4-page .tpl-linea .r-skills{gap:2px 6px;}
+
+/* ── Summit · soft header band, emerald ── */
+.resume-a4-page .tpl-summit{--a:#047857;--a2:#065f46;--soft:#e6f4ee;--line:#dfe9e4;}
+.resume-a4-page .tpl-summit .r-head{background:#eef7f2;margin:-10mm -16mm 20px!important;padding:28px 16mm 24px!important;border-bottom:3px solid var(--a);}
+.resume-a4-page .tpl-summit .r-head .r-name{font-size:30px!important;}
+.resume-a4-page .tpl-summit .r-sec-t{color:var(--a2);}
+
+/* ── Folio · editorial serif headings, copper ── */
+.resume-a4-page .tpl-folio{--ink:#1f1a17;--body:#3d3632;--mut:#7a6f68;--line:#ece4dc;--a:#b4532a;--a2:#9a3f1c;--soft:#fbefe8;}
+.resume-a4-page .tpl-folio .r-head{padding-bottom:18px;}
+/* accent rule sits under the name block (not on .r-head, which becomes a
+   side-by-side row when there is a photo and pushed the rule beside it) */
+.resume-a4-page .tpl-folio .r-head>div:first-child::after{content:"";display:block;width:56px;height:3px;background:var(--a);margin-top:16px;border-radius:2px;grid-column:1;}
+.resume-a4-page .tpl-folio .r-head .r-name{font-family:RSerif,Georgia,serif;font-size:36px!important;font-weight:500;line-height:1.08!important;}
+.resume-a4-page .tpl-folio .r-head .r-title{color:var(--a2);font-weight:500;font-size:13.5px!important;}
+.resume-a4-page .tpl-folio .r-sec-t{font-family:RSerif,Georgia,serif;font-size:15px;font-weight:500;color:var(--a2);}
+.resume-a4-page .tpl-folio .r-sec-t::after{display:none;}
+.resume-a4-page .tpl-folio .r-co{color:var(--mut);font-weight:500;}
+.resume-a4-page .tpl-folio .r-sk{border-radius:20px;}
+
+/* ── Carbon · dense, fits more on a page ── */
+.resume-a4-page .tpl-carbon{--ink:#18181b;--body:#3f3f46;--mut:#71717a;--line:#e4e4e7;--a:#27272a;--a2:#27272a;--soft:#f4f4f5;font-size:10.25px;line-height:1.48;}
+.resume-a4-page .tpl-carbon .r-head{padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--ink);}
+.resume-a4-page .tpl-carbon .r-head .r-name{font-size:25px!important;}
+.resume-a4-page .tpl-carbon .r-head .r-title{color:var(--mut);font-size:12px!important;}
+.resume-a4-page .tpl-carbon .r-contact{margin-top:6px!important;}
+.resume-a4-page .tpl-carbon .r-sec{margin-bottom:11px;}
+.resume-a4-page .tpl-carbon .r-sec-t{background:var(--soft);padding:4px 8px;border-radius:4px;font-size:11px;margin-bottom:7px;}
+.resume-a4-page .tpl-carbon .r-sec-t::after{display:none;}
+.resume-a4-page .tpl-carbon .r-exp{margin-bottom:8px;}
+.resume-a4-page .tpl-carbon .r-role{font-size:11.25px;}
+.resume-a4-page .tpl-carbon .r-co{margin:0 0 3px;font-size:10.25px;color:var(--body);}
+.resume-a4-page .tpl-carbon .r-ul li{font-size:10.1px;margin-bottom:1px;line-height:1.48;}
+.resume-a4-page .tpl-carbon .r-ul li::before{background:var(--mut);}
+.resume-a4-page .tpl-carbon .r-sk{background:none;padding:0;color:var(--body);border-radius:0;}
+.resume-a4-page .tpl-carbon .r-sk:not(:last-child)::after{content:"·";margin-left:6px;color:var(--mut);}
+.resume-a4-page .tpl-carbon .r-skills{gap:1px 6px;}
+
+/* ── Sierra · navy header band + sidebar ── */
+.resume-a4-page .tpl-sierra{--ink:#0f1e33;--a:#1e3a5f;--a2:#1e3a5f;--soft:#e9eef5;--line:#dde3eb;}
+.resume-a4-page .tpl-sierra .r-head{background:#1e3a5f;color:#fff;margin:-10mm -16mm 22px!important;padding:30px 16mm 26px!important;}
+.resume-a4-page .tpl-sierra .r-head .r-name{color:#fff;font-size:30px!important;}
+.resume-a4-page .tpl-sierra .r-head .r-title{color:#b9cde6;}
+.resume-a4-page .tpl-sierra .r-head .r-contact,.resume-a4-page .tpl-sierra .r-head .r-ci{color:#dbe5f1;}
+.resume-a4-page .tpl-sierra .r-head .r-ci svg{color:#9fbce0;}
+.resume-a4-page .tpl-sierra .r-head img{box-shadow:0 0 0 3px rgba(255,255,255,.9)!important;}
+.resume-a4-page .tpl-sierra .r-2col{display:flex;gap:24px;margin:0!important;min-height:0;}
+.resume-a4-page .tpl-sierra .r-aside{flex:0 0 180px;width:180px;min-width:180px;padding:0 20px 0 0;background:none;border:0;border-right:1px solid var(--line);}
+.resume-a4-page .tpl-sierra .r-main-col{padding:0;}
+.resume-a4-page .tpl-sierra .r-aside .r-sec-t{font-size:11.5px;color:var(--a);}
+.resume-a4-page .tpl-sierra .r-aside .r-sec-t::after{display:none;}
+.resume-a4-page .tpl-sierra .r-aside .r-skills{flex-direction:column;gap:5px;}
+.resume-a4-page .tpl-sierra .r-aside .r-sk{background:none;padding:0 0 0 12px;color:var(--body);position:relative;border-radius:0;}
+.resume-a4-page .tpl-sierra .r-aside .r-sk::before{content:"";position:absolute;left:0;top:.55em;width:5px;height:5px;border-radius:1px;background:var(--a);opacity:.75;}
+
+/* ── Vista · timeline, rose ── */
+.resume-a4-page .tpl-vista{--a:#be123c;--a2:#9f1239;--soft:#fdecef;--line:#f0e2e5;}
+.resume-a4-page .tpl-vista .r-head .r-name{font-size:30px!important;}
+.resume-a4-page .tpl-vista .r-head{border-bottom:1px solid var(--line);}
+.resume-a4-page .tpl-vista .r-sec-t{color:var(--a2);}
+.resume-a4-page .tpl-vista .r-exp{padding-left:18px;margin-bottom:0;padding-bottom:12px;}
+.resume-a4-page .tpl-vista .r-exp::before{content:"";position:absolute;left:3px;top:6px;bottom:-6px;width:1.5px;background:var(--line);}
+.resume-a4-page .tpl-vista .r-exp:last-child::before{bottom:6px;}
+.resume-a4-page .tpl-vista .r-exp::after{content:"";position:absolute;left:0;top:4px;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 2px var(--a);}
+.resume-a4-page .tpl-vista .r-ul li::before{background:#e8a1b1;}
+.resume-a4-page .tpl-vista .r-sk{border-radius:20px;}
+
+/* gallery: "New" badge on the 2026 cards */
+.tpl-card.r4n-card .tpl-card-name::after{content:"New";margin-left:6px;padding:1px 6px;border-radius:4px;background:#ecfdf5;color:#047857;font-size:.62rem;font-weight:700;vertical-align:1px;}
+</style>
+<script>
+/* Register the 2026 collection: metadata, sidebar markup for harbor/sierra,
+   gallery "New" filter (default) and ordering, and the default template for
+   brand-new users. Must run after the main engine (TPL_META, renderResumeHTML,
+   currentTemplate are its globals), so this is an attribute-less block. */
+(function(){
+  if(typeof TPL_META==='undefined'||typeof TPL_COLORS==='undefined'||typeof renderResumeHTML!=='function') return;
+  var NEW=[
+    ['atlas','Atlas','ATS-first · Classic modern','#1d4ed8'],
+    ['harbor','Harbor','Sidebar · Teal','#0f766e'],
+    ['regent','Regent','Executive · Serif','#8a6a3b'],
+    ['pulse','Pulse','Modern · Indigo','#4f46e5'],
+    ['linea','Linea','Swiss · Minimal','#111111'],
+    ['summit','Summit','Header band · Emerald','#047857'],
+    ['folio','Folio','Editorial · Copper','#b4532a'],
+    ['carbon','Carbon','Compact · One page','#27272a'],
+    ['sierra','Sierra','Navy header · Sidebar','#1e3a5f'],
+    ['vista','Vista','Timeline · Rose','#be123c']
+  ];
+  var IDS={};
+  NEW.forEach(function(t){ IDS[t[0]]=1; TPL_META[t[0]]={label:t[1],tag:t[2],cat:'new'}; TPL_COLORS[t[0]]=t[3]; });
+  window._r4uNewTpls=Object.keys(IDS);
+  /* Two-column extras: separate from the 106 ATS-friendly designs, shown only in
+     the "Two-column" tab and labelled less ATS-safe. Each renders the sidebar
+     layout of its single-column namesake. */
+  var TC={};
+  [['modern','Modern'],['corporate','Corporate'],['executive','Executive'],['harbor','Harbor'],['sierra','Sierra'],['blush','Blush'],['verdant','Verdant'],['lilac','Lilac'],['azure','Azure']].forEach(function(t){
+    var id='tc-'+t[0]; TC[id]=t[0];   /* tc- prefix: never collides with family selectors like [class*="tpl-executive-"] */
+    TPL_META[id]={label:t[1]+' Two-column',tag:'Sidebar \u00b7 Less ATS-safe',cat:'twocol'};
+    TPL_COLORS[id]=TPL_COLORS[t[0]];
+  });
+  window._r4uTwoColTpls=Object.keys(TC);
+
+  /* ATS-friendly only: every design renders as ONE column. Two-column layouts
+     (sidebars) were measured to interleave in ATS text extraction (sidebar
+     skills spliced into experience bullets), so these ids are rendered with the
+     engine's single-column markup (via a neutral id) and keep their own
+     colours/headers through CSS. currentTemplate is the engine's global. */
+  var SINGLE={blush:1,verdant:1,lilac:1,azure:1,modern:1,corporate:1,executive:1,harbor:1,sierra:1};
+  var orig=renderResumeHTML;
+  window.renderResumeHTML=renderResumeHTML=function(d){
+    var id=currentTemplate, h;
+    if(TC[id]){
+      var base=TC[id];
+      try{ currentTemplate=(base==='harbor'||base==='sierra')?'azure':base; h=String(orig.apply(this,arguments)); }
+      finally{ currentTemplate=id; }
+      h=atsLinks(h.replace(/class="tpl-[a-z0-9-]+"/,'class="tpl-'+base+'"'));
+      if(!IDS[base]) h=refresh(h,base,true);
+      return h.replace('class="tpl-'+base,'class="tpl-'+id+' r4-tc tpl-'+base);
+    }
+    if(SINGLE[id]){
+      try{ currentTemplate='monoline-ink'; h=String(orig.apply(this,arguments)); }
+      finally{ currentTemplate=id; }
+      h=h.replace('class="tpl-monoline-ink"','class="tpl-'+id+'"');
+    } else h=String(orig.apply(this,arguments));
+    h=atsLinks(h);
+    return IDS[id]?h:refresh(h,id);
+  };
+  /* ATS: print the actual profile URL, not the word "LinkedIn" (parsers read
+     text, not link targets). */
+  function atsLinks(h){
+    return h.replace(/(<a href="(https?:\/\/[^"]+)"[^>]*>)(LinkedIn|GitHub|Portfolio|Website)(<\/a>)/g,function(m,open,url,word,close){
+      var t=url.replace(/^https?:\/\/(www\.)?/i,'').replace(/\/$/,'');
+      return open+(t.length>48?t.slice(0,46)+'\u2026':t)+close;
+    });
+  }
+
+  /* ── Refresh for the classic templates (2026 rework) ─────────────────────
+     Every older template keeps its layout and colour but gets the modern type
+     and spacing system: the wrapper is tagged with its family (r4-rf + group)
+     and accent tones derived from its own colour, and _r4uTplRefreshCss (end of
+     document) does the rest. Groups were measured from the rendered templates. */
+  var GROUP={}, FONT={}, SENT={};
+  function put(map,ids,v){ ids.split(' ').forEach(function(k){ map[k]=v; }); }
+  function fam(f,list){ return list.split(' ').map(function(c){ return f+'-'+c; }).join(' '); }
+  put(GROUP,'blush verdant lilac azure','pastel');
+  put(GROUP,'modern corporate executive','band2');
+  put(GROUP,'elegant bold tech sky purple warm slate pink indigo forest graphite midnight copper noir emerald denim ruby stone sunset ocean '+fam('meridian','navy emerald burgundy slate charcoal plum teal forest'),'band');
+  put(FONT,'classic academic paper warm elegant '+fam('oxford','ink wine navy forest sepia charcoal')+' '+fam('executive','black navy bronze burgundy forest'),'serif');
+  put(FONT,'retro','mono');
+  put(SENT,fam('meridian','navy emerald burgundy slate charcoal plum teal forest')+' '+fam('chronicle','teal indigo rose amber slate green')+' '+fam('ledger','navy green maroon indigo bronze')+' '+fam('cascade','coral teal blue violet amber')+' '+fam('vertex','indigo teal orange rose slate')+' '+fam('aria','rose sky mint amber violet coral'),1);
+  /* accent = the template's own heading colour (measured), else its swatch colour */
+  var ACC={"blush":"#b0473c","verdant":"#3f6b52","lilac":"#6d4aa3","azure":"#2e6da4","modern":"#f59e0b","minimal":"#999999","corporate":"#0f2d5e","fresh":"#0d9488","elegant":"#7f1d1d","tech":"#22d3ee","sky":"#1e40af","purple":"#4c1d95","warm":"#78350f","slate":"#0891b2","pink":"#be185d","indigo":"#4338ca","forest":"#047857","graphite":"#ea580c","midnight":"#7c3aed","copper":"#c2410c","emerald":"#047857","denim":"#1d4ed8","ruby":"#be123c","stone":"#57534e","sunset":"#ea580c","ocean":"#0369a1","sage":"#4d7c0f","lime":"#4d7c0f","paper":"#2c1a0e","meridian-navy":"#1e3a5f","meridian-emerald":"#0f766e","meridian-burgundy":"#7f1d3a","meridian-slate":"#334155","meridian-charcoal":"#1f2937","meridian-plum":"#5b2a86","meridian-teal":"#115e59","meridian-forest":"#14532d","oxford-wine":"#7b2d3a","oxford-navy":"#1f3a5f","oxford-forest":"#1f4d2e","oxford-sepia":"#6b4423","chronicle-teal":"#0d9488","chronicle-indigo":"#4f46e5","chronicle-rose":"#be123c","chronicle-amber":"#b45309","chronicle-slate":"#475569","chronicle-green":"#15803d","monoline-blue":"#2563eb","monoline-plum":"#7c3aed","monoline-teal":"#0d9488","monoline-crimson":"#dc2626","ledger-navy":"#1e3a5f","ledger-green":"#15803d","ledger-maroon":"#7f1d1d","ledger-indigo":"#3730a3","ledger-bronze":"#92600f","vertex-indigo":"#4338ca","vertex-teal":"#0f766e","vertex-orange":"#c2410c","vertex-rose":"#be123c","vertex-slate":"#334155","spine-blue":"#2563eb","spine-red":"#dc2626","spine-green":"#16a34a","spine-gray":"#4b5563","spine-purple":"#7c3aed"};
+  var HB={}; put(HB,'bold academic coral retro creative '+fam('ledger','navy green maroon indigo bronze')+' '+fam('cascade','coral teal blue violet amber'),1);
+  function rgb(hex){ var m=String(hex||'').match(/#([0-9a-f]{6}|[0-9a-f]{3})\b/i); if(!m) return [51,65,85]; var x=m[1]; if(x.length===3) x=x.replace(/./g,'$&$&'); return [0,2,4].map(function(i){ return parseInt(x.substr(i,2),16); }); }
+  function lum(c){ return c.map(function(v){ v/=255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); }).reduce(function(a,v,i){ return a+v*[0.2126,0.7152,0.0722][i]; },0); }
+  function hex(c){ return '#'+c.map(function(v){ return ('0'+Math.round(v).toString(16)).slice(-2); }).join(''); }
+  function tones(id){
+    var c=rgb(ACC[id]||TPL_COLORS[id]);
+    var soft=c.map(function(v){ return 255-(255-v)*0.1; });   /* tint from the template colour */
+    function ratio(a,b){ var x=lum(a)+0.05,y=lum(b)+0.05; return Math.max(x,y)/Math.min(x,y); }
+    /* darken the accent until it reads (WCAG AA 4.5:1) on BOTH white and its own tint */
+    for(var i=0;i<16&&(ratio(c,[255,255,255])<4.6||ratio(c,soft)<4.6);i++) c=c.map(function(v){ return v*0.88; });
+    return '--rf-a:'+hex(c)+';--rf-soft:'+hex(soft);
+  }
+  function refresh(h,id,twoCol){
+    if(!TPL_META[id]) return h;
+    var cls='tpl-'+id+' r4-rf'+(SINGLE[id]&&!twoCol?' rf-single':'')+' rf-'+(GROUP[id]||'light')+' rf-f-'+(FONT[id]||'sans')+(SENT[id]?' rf-sc':'')+(HB[id]?' rf-hb':'');
+    return h.replace('class="tpl-'+id+'"','class="'+cls+'" style="'+tones(id)+'"');
+  }
+
+  function fillSelect(sel){
+    if(!sel) return; var have={};
+    Array.prototype.forEach.call(sel.options,function(o){ have[o.value]=1; });
+    NEW.slice().reverse().forEach(function(t){ if(have[t[0]]) return; var o=document.createElement('option'); o.value=t[0]; o.textContent=t[1]; sel.insertBefore(o,sel.firstChild); });
+  }
+  /* Gallery: a "New" filter first and active by default; in "All", new cards
+     lead. Cards are tagged so CSS can badge them. */
+  function tagCards(cat){
+    var grid=document.getElementById('tplGrid'); if(!grid) return;
+    var cards=Array.prototype.slice.call(grid.querySelectorAll('.tpl-card')), firsts=[];
+    cards.forEach(function(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m&&IDS[m[1]]){ c.classList.add('r4n-card'); firsts.push(c); flag(c,m[1]); } });
+    if(cat!=='twocol') cards.forEach(function(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); if(m&&TC[m[1]]) c.remove(); });
+    var note=document.getElementById('r4tcNote');
+    if(cat==='twocol'){ if(!note){ note=document.createElement('div'); note.id='r4tcNote'; note.setAttribute('role','note'); note.innerHTML='<b>Less ATS-safe.</b> Two-column layouts look great printed or shared directly, but some applicant tracking systems read the columns out of order. For online applications, use a single-column design.'; } grid.parentNode.insertBefore(note,grid); }
+    else if(note) note.remove();
+    var bdg=document.querySelector('.tpl-section-badge'); if(bdg){ bdg.textContent=(cat==='twocol')?'Two-column \u00b7 less ATS-safe':'\u2713 All ATS-friendly'; bdg.classList.toggle('warn',cat==='twocol'); }
+    if(cat==='all') firsts.slice().reverse().forEach(function(c){ grid.insertBefore(c,grid.firstChild); });
+    if(cat==='new'){ firsts.sort(function(a,b){ return order(a)-order(b); }).forEach(function(c){ grid.appendChild(c); }); }
+  }
+  var FLAGS={atlas:[['Popular','pop']],harbor:[['Popular','pop']]};
+  function flag(c,id){ var meta=c.querySelector('.tpl-card-meta'); if(!meta||meta.querySelector('.r4n-flag')||!FLAGS[id]) return; FLAGS[id].forEach(function(f){ var sp=document.createElement('span'); sp.className='r4n-flag '+f[1]; sp.textContent=f[0]; meta.appendChild(sp); }); }
+  function order(c){ var m=(c.getAttribute('onclick')||'').match(/selectTemplate\((?:'|")([^'"]+)/); for(var i=0;i<NEW.length;i++){ if(m&&NEW[i][0]===m[1]) return i; } return 99; }
+  if(typeof renderTemplateGrid==='function'){
+    var rg=renderTemplateGrid;
+    window.renderTemplateGrid=renderTemplateGrid=function(cat){ var r=rg.apply(this,arguments); try{ tagCards(cat||'all'); }catch(e){} return r; };
+  }
+  function ui(){
+    try{
+      fillSelect(document.getElementById('tplSelect')); fillSelect(document.getElementById('previewTplSelect'));
+      var row=document.querySelector('.tpl-filter-row');
+      if(row&&!row.querySelector('[data-cat="new"]')){
+        var b=document.createElement('button'); b.className='tpl-filter-btn'; b.setAttribute('data-cat','new'); b.textContent='New ✦';
+        b.setAttribute('onclick',"filterTpls(this,'new')"); row.insertBefore(b,row.firstChild);
+        var all0=row.querySelector('[data-cat="all"]'); if(all0) all0.classList.remove('active');
+        b.classList.add('active');
+      }
+      if(row&&!row.querySelector('[data-cat="twocol"]')){
+        var t2=document.createElement('button'); t2.className='tpl-filter-btn'; t2.setAttribute('data-cat','twocol');
+        t2.innerHTML='Two-column <small>Less ATS-safe</small>'; t2.setAttribute('onclick',"filterTpls(this,'twocol')"); row.appendChild(t2);
+      }
+      var title=document.querySelector('#tplSection .tpl-section-title');
+      if(title&&!title.querySelector('small')) title.innerHTML='Choose a template<small>Switch anytime \u2014 your content stays the same.</small>';
+      if(row){
+        var cnt={all:0}; Object.keys(TPL_META).forEach(function(k){ var c=TPL_META[k].cat; cnt[c]=(cnt[c]||0)+1; if(c!=='twocol') cnt.all++; });
+        var NAMES={new:'\u2726 New',all:'All',dark:'Dark',light:'Light',creative:'Creative',minimal:'Minimal',twocol:'Two-column'};
+        Array.prototype.forEach.call(row.querySelectorAll('.tpl-filter-btn'),function(b){
+          var c=b.getAttribute('data-cat'); if(!NAMES[c]) return;
+          b.innerHTML=NAMES[c]+(c==='twocol'?' <small>Less ATS-safe</small>':'')+'<span class="tpl-fcount">'+(cnt[c]||0)+'</span>';
+          b.setAttribute('aria-label',NAMES[c].replace('\u2726 ','')+' templates, '+(cnt[c]||0)+(c==='twocol'?', less ATS-safe':''));
+        });
+        var fade=function(){ row.classList.toggle('r4-more', row.scrollWidth-row.clientWidth-row.scrollLeft>8); row.classList.toggle('r4-less', row.scrollLeft>8); };
+        if(!row.__r4f){ row.__r4f=1; row.addEventListener('scroll',fade,{passive:true}); window.addEventListener('resize',fade);
+          row.addEventListener('click',function(e){ var b=e.target.closest('.tpl-filter-btn'); if(b) setTimeout(function(){ try{ b.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'}); }catch(_){} setTimeout(fade,350); },0); }); }
+        fade();
+      }
+      var badge=document.querySelector('.tpl-section-badge'); if(badge) badge.textContent='\u2713 All ATS-friendly';
+      var grid=document.getElementById('tplGrid'), act=document.querySelector('.tpl-filter-btn.active');
+      if(grid&&typeof renderTemplateGrid==='function') renderTemplateGrid(act?act.getAttribute('data-cat'):'new');
+    }catch(e){}
+  }
+  if(typeof selectTemplate==='function'){
+    var st=selectTemplate;
+    window.selectTemplate=selectTemplate=function(id){
+      var r=st.apply(this,arguments);
+      try{ if(TC[id]&&typeof showToast==='function') showToast('Two-column design \u2014 for online applications, a single-column design is safer with ATS.','info'); }catch(e){}
+      return r;
+    };
+  }
+  /* Brand-new users (never picked a template, nothing generated or saved on
+     this device) start on the flagship. Saved résumés keep their template. */
+  try{
+    var fresh=!localStorage.getItem('tplUsage')&&!localStorage.getItem('_r4uResumeData')&&!localStorage.getItem('_lastResumeOutput')&&!localStorage.getItem('_preSignInDraft');
+    if(fresh&&currentTemplate==='modern'){ currentTemplate='atlas'; var s=document.getElementById('tplSelect'); if(s){ fillSelect(s); s.value='atlas'; } }
+  }catch(e){}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ui); else ui();
+  setTimeout(ui,900);
 })();
 </script>
 <script>
@@ -8075,10 +8440,24 @@ if ('serviceWorker' in navigator) {
       var out=rootEl||document.getElementById('resumeOutput'); if(!out) return;
       var page=out.querySelector('.resume-a4-page'); if(!page) return;
       var aside=page.querySelector('.r-aside'), main=page.querySelector('.r-main-col');
+      // Layout changed since the order was saved (e.g. Modern / the pastels were
+      // two-column and are single-column now): a sidebar order would put Skills and
+      // Education above the summary, so use the template's default order instead.
+      var savedCols=secsArr.some(function(o){ return o.col==='aside'||o.col==='main'; });
+      if(savedCols !== !!(aside||main)) return;
       var byTitle={};
       Array.prototype.forEach.call(page.querySelectorAll('.r-sec'),function(s){
         var t=s.querySelector('.r-sec-t'); var k=(t?t.textContent:'').trim();
         if(k && !(k in byTitle)) byTitle[k]=s;
+      });
+      // Sections NOT in the saved list (Key Achievements, a custom section added
+      // later) stay anchored after the listed section they followed — otherwise
+      // re-appending the listed ones floats them to the top, above the summary.
+      var listed={}; secsArr.forEach(function(o){ if(byTitle[o.title]) listed[o.title]=1; });
+      var anchors=[], lastListed=null;
+      Array.prototype.forEach.call(page.querySelectorAll('.r-sec'),function(s){
+        var t=s.querySelector('.r-sec-t'); var k=(t?t.textContent:'').trim();
+        if(listed[k] && byTitle[k]===s) lastListed=s; else anchors.push([s,lastListed]);
       });
       secsArr.forEach(function(o){
         var el=byTitle[o.title]; if(!el) return;
@@ -8095,6 +8474,10 @@ if ('serviceWorker' in navigator) {
         var move=[el], sib=el.nextElementSibling;
         while(sib && sib.classList && sib.classList.contains('r-div')){ var nx=sib.nextElementSibling; move.push(sib); sib=nx; }
         move.forEach(function(n){ target.appendChild(n); });
+      });
+      anchors.forEach(function(a){
+        var s=a[0], after=a[1];
+        if(after && after.parentNode){ after.parentNode.insertBefore(s, after.nextSibling); }
       });
       /* NOTE: no "pin summary to top" here — that would override an intentional
          reorder (e.g. moving Experience above the summary). Fresh renders are
@@ -8833,6 +9216,9 @@ if ('serviceWorker' in navigator) {
     + '.r-aside,.r-main-col{overflow:visible !important;}'
     + '[class*="tpl-"]{padding-bottom:0 !important;}'
     + '.r-main-col{padding-bottom:0 !important;}'
+    /* Repeat the page padding on every printed page: without this, page 2 starts
+       flush against the top edge and page 1 runs into the bottom edge. */
+    + '.resume-a4-page{-webkit-box-decoration-break:clone !important;box-decoration-break:clone !important;}'
     + '</style>';
   function injectPdfFix(html){
     try{
@@ -13052,13 +13438,15 @@ window.__novaPortfolioHTML=function(d,sections){
    the production WhatsApp number before going live on prod. */
 (function(){
   var WA_BOT='919309014196';  /* Production WhatsApp bot number (resume making). */
-  var WA_TEXT='Build%20my%20resume%20on%20WhatsApp';
+  var WA_TEXT='Hello%20Resume4U%2C%20build%20my%20resume%20on%20WhatsApp';
   var WA_URL='https://wa.me/'+WA_BOT+'?text='+WA_TEXT;
   var WIC='<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
   var BADGE='<span class="r4u-wa-badge">'+WIC+'</span>';
-  function isDesktop(){ try{ return window.matchMedia && window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
+  function isDesktop(){ try{ return (window.R4UWa&&window.R4UWa.isDesktop()) || window.matchMedia('(min-width:769px) and (pointer:fine)').matches; }catch(e){ return false; } }
   function launch(){
-    if(isDesktop() && typeof window._r4uShowQR==='function'){
+    if(isDesktop() && window.R4UWa){
+      window.R4UWa.open({intent:'resume',url:WA_URL,title:'Build your resume on WhatsApp',sub:'We\u2019ll message you on WhatsApp \u2014 answer a few quick questions by chat and get a polished resume.',done:'Reply <b>Hi</b> to the message to start. It takes about 5 minutes.'});
+    } else if(isDesktop() && typeof window._r4uShowQR==='function'){
       window._r4uShowQR(WA_URL,{title:'Build on WhatsApp',sub:'Scan to open WhatsApp on your phone and build your resume by chat — one quick question at a time.',file:'whatsapp-qr.png'});
     } else { window.open(WA_URL,'_blank','noopener'); }
   }
@@ -13202,7 +13590,7 @@ window.__novaPortfolioHTML=function(d,sections){
       return fetch('/.netlify/functions/wa-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',idToken:tok,resume:resume})});
     }).then(function(r){ return r.ok?r.json():null; }).then(function(j){
       reset();
-      if(j&&j.ok&&j.code){ mirrorVersions(true); showSheet(j.code, j.waUrl||('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent('LINK '+j.code))); }
+      if(j&&j.ok&&j.code){ mirrorVersions(true); showSheet(j.code, j.waUrl||('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent('Hello Resume4U, LINK '+j.code))); }
       else if(typeof showToast==='function') showToast('Couldn’t start the connect just now — try again.');
     })['catch'](function(){ reset(); if(typeof showToast==='function') showToast('Couldn’t reach the server — try again.'); });
   }
@@ -14393,7 +14781,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 </style>
 <script id="_r4uContactSheetJS">
 (function(){
-  var WA='https://wa.me/919309014196?text=Support%3A%20I%20need%20help%20from%20the%20Resume4U%20team';
+  var WA='https://wa.me/919309014196?text=Hello%20Resume4U%2C%20support%3A%20I%20need%20help%20from%20the%20Resume4U%20team';
   var EMAIL='contact@resume4u.help';
   var ov=null, prevOverflow='';
   function build(){
@@ -14458,7 +14846,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    so unhappy users reach us instead of posting a public low rating. Stored via
    the submit-rating function. Shown once (localStorage); dismissal has a cooldown. */
 (function(){
-  var WA='https://wa.me/919309014196?text=Support%3A%20I%20have%20feedback%20on%20Resume4U';
+  var WA='https://wa.me/919309014196?text=Hello%20Resume4U%2C%20support%3A%20I%20have%20feedback%20on%20Resume4U';
   function rated(){ try{ return localStorage.getItem('_r4uRated')==='1'; }catch(e){ return false; } }
   function cooldownActive(){ try{ var t=+localStorage.getItem('_r4uRateSeen')||0; return (Date.now()-t) < 60*24*3600*1000; }catch(e){ return false; } }
   function markSeen(){ try{ localStorage.setItem('_r4uRateSeen', String(Date.now())); }catch(e){} }
@@ -15168,7 +15556,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         +'<label for="_r4uAlCity">City <i>(optional)</i></label><input id="_r4uAlCity" type="text" autocomplete="address-level2" placeholder="e.g. Pune, Bangalore" maxlength="40">'
         +'<div class="al-err" id="_r4uAlErr">Enter the role you want jobs for.</div>'
         +'<button type="button" class="al-go">'+'<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Get alerts on WhatsApp</button>'
-        +'<p class="al-fine">WhatsApp opens with your request ready \u2014 just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.</p></div>';
+        +'<p class="al-fine">'+((window.R4UWa?window.R4UWa.isDesktop():(Math.min(screen.width,screen.height)>=700||window.matchMedia('(min-width:769px) and (pointer:fine)').matches))?((window.R4UWa&&window.R4UWa.numberOn('alerts'))?'Next, enter your WhatsApp number \u2014 we\u2019ll message you. Reply <b>stop alerts</b> anytime.':(window.R4UWa&&window.R4UWa.isTouch())?'Next, open WhatsApp (or scan a QR code with your phone) \u2014 your request is ready, just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.':'Next, scan a QR code with your phone \u2014 your request is ready, just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.'):'WhatsApp opens with your request ready \u2014 just tap <b>Send</b>. Reply <b>stop alerts</b> anytime.')+'</p></div>';
       document.body.appendChild(o);
       o.addEventListener('click',function(e){ if(e.target===o) closeAlerts(); });
       o.querySelector('.al-x').addEventListener('click',closeAlerts);
@@ -15178,9 +15566,15 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         var err=o.querySelector('#_r4uAlErr');
         if(role.length<2){ err.classList.add('on'); o.querySelector('#_r4uAlRole').focus(); return; }
         err.classList.remove('on');
-        var msg='job alerts '+role+(city?' in '+city:'');
-        waOpen('https://wa.me/'+WA_BOT+'?text='+encodeURIComponent(msg));
+        var msg='Hello Resume4U, job alerts '+role+(city?' in '+city:'');
+        var url='https://wa.me/'+WA_BOT+'?text='+encodeURIComponent(msg);
         closeAlerts();
+        if(window.R4UWa && window.R4UWa.isDesktop()){
+          var nm=''; try{ var dd=JSON.parse(localStorage.getItem('_r4uResumeData')||'null')||{}; nm=dd.firstName||dd.name||''; }catch(e){}
+          window.R4UWa.open({intent:'alerts',url:url,role:role,city:city,name:nm,title:'Send job alerts to your WhatsApp',
+            sub:role+(city?' jobs in '+city:' jobs')+', every morning at 9 AM. Free \u00b7 stop anytime.',
+            done:'Open the message and reply <b>JOBS</b> to see today\u2019s matches. Fresh ones arrive every morning at 9 AM.'});
+        } else waOpen(url);
       });
       o.querySelector('#_r4uAlCity').addEventListener('keydown',function(e){ if(e.key==='Enter') o.querySelector('.al-go').click(); });
       o.querySelector('#_r4uAlRole').addEventListener('input',function(){ o.querySelector('#_r4uAlErr').classList.remove('on'); });
@@ -15200,5 +15594,350 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   setInterval(tick, 800);
 })();
 </script>
+<style id="_r4uTplRefreshCss">
+/* ══ CLASSIC TEMPLATES · 2026 REFRESH ══════════════════════════════════════
+   Applies to every pre-2026 template (wrapper tagged .r4-rf by the renderer).
+   Each keeps its layout family and colour; this layer brings the type and
+   spacing system up to date: embedded fonts only (PDF = preview), larger names,
+   regular-weight bullets, plain dates (no pills), consistent awards/education,
+   soft skill chips tinted from the template's own colour, full-bleed header
+   bands. Loaded last so it wins over the original template CSS; the accent
+   picker (#resumeOutput … !important) still overrides it. ═══════════════════ */
+.resume-a4-page .r4-rf{--rf-ink:#0f172a;--rf-body:#334155;--rf-mut:#64748b;--rf-line:#e2e8f0;font-size:10.75px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.resume-a4-page .r4-rf.rf-f-sans{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif!important;}
+.resume-a4-page .r4-rf.rf-f-serif{font-family:RSerif,Georgia,serif!important;--rf-ink:#1c1917;--rf-body:#3b3633;--rf-mut:#78716c;}
+.resume-a4-page .r4-rf.rf-f-sans :is(.r-name,.r-title,.r-sec-t,.r-role,.r-co,.r-sum,.r-ul li,.r-sk,.r-deg,.r-sch,.r-award-name,.r-award-org,.r-contact){font-family:inherit!important;}
+.resume-a4-page .r4-rf.rf-f-serif :is(.r-name,.r-sec-t,.r-role,.r-sum,.r-ul li,.r-deg,.r-sch,.r-award-name){font-family:RSerif,Georgia,serif!important;}
+.resume-a4-page .r4-rf.rf-f-serif :is(.r-contact,.r-period,.r-yr,.r-award-year){font-family:Inter,system-ui,sans-serif!important;}
+
+/* header */
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-head .r-name{font-size:26px!important;line-height:1.15!important;font-weight:700!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-head .r-name{font-weight:600!important;font-size:28px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-head .r-title{font-size:12.5px!important;margin-top:4px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-contact{font-size:10px!important;margin-top:9px!important;gap:4px 14px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-contact .r-sep{display:none!important;}
+.resume-a4-page .r4-rf .r-ci{gap:5px!important;}
+
+/* full-bleed header bands (the old ones were inset boxes) */
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head{margin:-10mm -16mm 20px!important;padding:26px 16mm 22px!important;border-radius:0!important;box-shadow:none!important;width:auto!important;max-width:none!important;box-sizing:border-box!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head .r-contact,.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head .r-ci{opacity:.92;}
+
+/* sidebar layouts with a band (Modern, Corporate, Executive): a calm tinted panel */
+.resume-a4-page .r4-rf.rf-band2 .r-2col{margin:0!important;gap:22px;min-height:0!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside{flex:0 0 186px!important;width:186px!important;min-width:186px!important;padding:15px!important;background:#f5f7fa!important;border:0!important;border-radius:10px;align-self:flex-start;}
+.resume-a4-page .r4-rf.rf-band2 .r-main-col{padding:2px 0 0!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside .r-sk{background:#fff!important;color:var(--rf-ink)!important;box-shadow:inset 0 0 0 1px var(--rf-line)!important;}
+
+/* sections */
+.resume-a4-page .r4-rf .r-sec{margin-bottom:15px;}
+.resume-a4-page .r4-rf .r-sec-t{font-size:10.5px!important;font-weight:700!important;}
+.resume-a4-page .r4-rf.rf-sc .r-sec-t{font-size:13px!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-sec-t{font-size:12px!important;font-weight:600!important;}
+.resume-a4-page .r4-rf .r-sum{font-size:10.75px!important;line-height:1.62!important;}
+
+/* experience */
+.resume-a4-page .r4-rf .r-exp{margin-bottom:11px;}
+.resume-a4-page .r4-rf .r-role{font-size:12px!important;font-weight:600!important;}
+.resume-a4-page .r4-rf .r-co{font-size:10.75px!important;font-weight:500!important;}
+.resume-a4-page .r4-rf .r-ul li{font-weight:400!important;font-size:10.6px!important;line-height:1.55!important;color:var(--rf-body)!important;margin-bottom:3px!important;}
+.resume-a4-page .r4-rf.rf-f-mono .r-ul li{font-size:10.4px!important;}
+/* one drawn marker, aligned to the first line whatever the font (the old text
+   glyphs ▸ ◆ ▶ // were pinned at fixed pixel offsets and drifted) */
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-ul{list-style:none!important;padding-left:0!important;margin-left:0!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-ul li{list-style:none!important;position:relative!important;padding:0 0 0 14px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-ul li::before{content:""!important;position:absolute!important;left:3px!important;top:6.4px!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--rf-a)!important;font-size:0!important;line-height:0!important;margin:0!important;color:transparent!important;}
+.resume-a4-page .r4-rf.rf-f-serif:not(.rf-pastel) .r-ul li::before{width:6px!important;height:1px!important;border-radius:0!important;top:8.4px!important;left:1px!important;}
+.resume-a4-page .r4-rf.rf-f-serif :is(.r-period,.r-yr,.r-award-year){font-style:normal!important;}
+.resume-a4-page .r4-rf :is(.r-period,.r-yr,.r-award-year){background:none!important;border:0!important;padding:0!important;border-radius:0!important;box-shadow:none!important;font-size:10px!important;font-weight:500!important;color:var(--rf-mut)!important;white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+/* awards + education: one consistent layout (title, issuer, year on the right) */
+.resume-a4-page .r4-rf .r-award{display:flex!important;justify-content:space-between;align-items:baseline;gap:3px 14px;margin:0 0 7px!important;}
+.resume-a4-page .r4-rf .r-award-left{min-width:0;}
+.resume-a4-page .r4-rf .r-award-name{font-size:11px!important;font-weight:600!important;color:var(--rf-ink)!important;}
+.resume-a4-page .r4-rf :is(.r-award-org,.r-sch){font-size:10.5px!important;font-weight:400!important;color:var(--rf-mut)!important;font-style:normal!important;}
+.resume-a4-page .r4-rf .r-award-desc{font-size:10.5px!important;color:var(--rf-body)!important;}
+.resume-a4-page .r4-rf .r-deg{font-size:11.25px!important;font-weight:600!important;color:var(--rf-ink)!important;}
+.resume-a4-page .r4-rf .r-edu{margin-bottom:7px;}
+
+/* skills: soft chips in the template's own colour (pastel sidebars keep their list) */
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-skills{gap:5px!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-sk{font-size:10px!important;font-weight:500!important;line-height:1.35!important;padding:3px 9px!important;border-radius:5px!important;background:var(--rf-soft)!important;color:var(--rf-a)!important;border:0!important;box-shadow:none!important;text-transform:none!important;}
+.resume-a4-page .r4-rf:not(.rf-pastel) .r-sk::before{content:none!important;}
+
+/* ── 2026 headings: sentence case + hairline (the biggest "dated" tell was the
+   tiny all-caps labels and solid heading bars) ── */
+.resume-a4-page .r4-rf .r-sec-t{text-transform:none!important;font-size:12.5px!important;font-weight:700!important;color:var(--rf-a)!important;display:flex!important;align-items:center;gap:10px;background:none!important;border:0!important;padding:0!important;border-radius:0!important;margin:0 0 9px!important;box-shadow:none!important;width:auto!important;line-height:1.3!important;}
+.resume-a4-page .r4-rf:not(.rf-sc) .r-sec-t::before{content:none!important;}
+.resume-a4-page .r4-rf .r-sec-t::after{content:""!important;order:2;flex:1 1 auto!important;height:1px!important;background:var(--rf-line)!important;display:block!important;position:static!important;width:auto!important;margin:0!important;opacity:1!important;border:0!important;}
+.resume-a4-page :is(.r4-rf,.tpl-atlas,.tpl-harbor,.tpl-regent,.tpl-pulse,.tpl-summit,.tpl-folio,.tpl-carbon,.tpl-sierra,.tpl-vista) .r-sec-t .r-yr{order:3;margin-left:0!important;float:none!important;font-weight:500;}
+/* templates that had solid heading bars: a soft tinted label instead */
+.resume-a4-page .r4-rf.rf-hb .r-sec-t{display:inline-flex!important;background:var(--rf-soft)!important;padding:3px 10px!important;border-radius:5px!important;}
+.resume-a4-page .r4-rf.rf-hb .r-sec-t::after{content:none!important;}
+/* serif families: serif headings, accent rule */
+.resume-a4-page .r4-rf.rf-f-serif .r-sec-t{font-family:RSerif,Georgia,serif!important;font-size:14px!important;font-weight:600!important;color:var(--rf-ink)!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-sec-t::after{background:var(--rf-a)!important;opacity:.35!important;}
+.resume-a4-page .r4-rf.rf-f-serif.rf-hb .r-sec-t{color:var(--rf-a)!important;}
+.resume-a4-page .r4-rf.rf-f-mono .r-sec-t{font-family:"Courier New",Courier,monospace!important;font-size:12px!important;}
+/* names, titles, roles: no shouting caps (Retro keeps its typewriter caps) */
+.resume-a4-page .r4-rf:not(.rf-f-mono) :is(.r-name,.r-title,.r-role,.r-deg,.r-award-name){text-transform:none!important;}
+.resume-a4-page .r4-rf :is(.r-sec-t,.r-name,.r-title,.r-role,.r-deg){letter-spacing:normal!important;word-spacing:normal!important;}
+.resume-a4-page .r4-rf .r-co{color:var(--rf-a)!important;}
+.resume-a4-page .r4-rf.rf-f-serif .r-co{color:var(--rf-mut)!important;}
+/* awards: plain entries (the old tinted boxes looked like alerts) */
+.resume-a4-page .r4-rf .r-award{background:none!important;border:0!important;padding:0!important;border-radius:0!important;box-shadow:none!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside .r-sec-t::after{content:none!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head-accent{margin:-20px -16mm 20px!important;height:4px!important;border-radius:0!important;}
+
+/* pastel sidebars: tidy typography only (their tuned layout stays) */
+.resume-a4-page .r4-rf.rf-pastel .r-head .r-name{font-size:23px!important;line-height:1.2!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-head .r-title{font-size:12px!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-sec-t{font-size:12px!important;}
+.resume-a4-page .r4-rf.rf-pastel .r-sk{font-size:10.25px!important;}
+/* ── readability (WCAG AA): measured on every template ── */
+.resume-a4-page .r4-rf:not(.rf-band):not(.rf-band2):not(.rf-pastel) .r-head .r-title{color:var(--rf-a)!important;}
+.resume-a4-page .r4-rf:not(.rf-band):not(.rf-band2):not(.rf-pastel) .r-head :is(.r-contact,.r-ci,.r-ci a){color:#475569!important;opacity:1!important;}
+.resume-a4-page .r4-rf.rf-f-serif:not(.rf-band):not(.rf-band2) .r-head :is(.r-contact,.r-ci,.r-ci a){color:#57534e!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head :is(.r-contact,.r-ci){color:rgba(255,255,255,.9)!important;opacity:1!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2):not(.tpl-tech) .r-head .r-ci a{color:rgba(255,255,255,.9)!important;}
+.resume-a4-page :is(.tpl-sunset,.tpl-ocean,.tpl-sky,.tpl-emerald).r4-rf .r-head .r-title{color:rgba(255,255,255,.95)!important;}
+.resume-a4-page :is(.tpl-bold,.tpl-sunset).r4-rf.r4-rf .r-head.r-head :is(.r-contact,.r-ci,.r-ci a){color:#fff!important;}
+.resume-a4-page :is(.tpl-bold,.tpl-meridian-emerald).r4-rf .r-head .r-title{color:#fff!important;}
+.resume-a4-page .tpl-summit .r-head :is(.r-contact,.r-ci,.r-ci a){color:#475569!important;}
+.resume-a4-page .tpl-sunset.r4-rf .r-head{background:linear-gradient(135deg,#c2410c,#b91c1c)!important;}
+.resume-a4-page .tpl-ocean.r4-rf .r-head{background:linear-gradient(135deg,#0e7490,#1e3a8a)!important;}
+.resume-a4-page .tpl-sky.r4-rf .r-head{background:linear-gradient(135deg,#1e40af,#2563eb)!important;}
+.resume-a4-page .r-edu [style*="#888"]{color:#5b6474!important;}
+.resume-a4-page .r-sec-t .r-yr{color:inherit!important;opacity:.85;}
+.resume-a4-page [class*="tpl-"] .r-aside :is(.r-sch,.r-yr,.r-award-org,.r-period){color:#4b5563!important;}
+</style>
+<style id="_r4uTplPremiumCss">
+/* ══ PREMIUM DETAILS (2026) ═══════════════════════════════════════════════
+   Signature touches layered on the 2026 collection and the refreshed classics:
+   section icon badges (picked by what a section contains, via :has, so they
+   work in any language and add no text to the PDF/ATS), a split header with
+   contact details in a right-hand column (only without a photo), and
+   classical centred rules for the serif CVs. Browsers without :has simply
+   show the plain headings. ═══════════════════════════════════════════════ */
+
+/* ── icon badges ───────────────────────────────────────────────────────── */
+.resume-a4-page :is(.tpl-harbor,.tpl-pulse,.tpl-summit,.tpl-sierra,.tpl-vista,.r4-rf.rf-band:not(.rf-hb),.r4-rf.rf-band2,.tpl-fresh.r4-rf,.tpl-sage.r4-rf,.tpl-lime.r4-rf) .r-sec>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E");}
+.resume-a4-page :is(.tpl-harbor,.tpl-pulse,.tpl-summit,.tpl-sierra,.tpl-vista,.r4-rf.rf-band:not(.rf-hb),.r4-rf.rf-band2,.tpl-fresh.r4-rf,.tpl-sage.r4-rf,.tpl-lime.r4-rf) .r-sec>.r-sec-t::before{content:""!important;display:block!important;position:static!important;flex:0 0 22px!important;width:22px!important;height:22px!important;border-radius:6px!important;margin:0!important;padding:0!important;border:0!important;opacity:1!important;background:var(--a,var(--rf-a)) var(--ico) center/13px 13px no-repeat!important;box-shadow:none!important;}
+.resume-a4-page :is(.tpl-harbor,.tpl-pulse,.tpl-summit,.tpl-sierra,.tpl-vista,.r4-rf.rf-band:not(.rf-hb),.r4-rf.rf-band2,.tpl-fresh.r4-rf,.tpl-sage.r4-rf,.tpl-lime.r4-rf) .r-sec>.r-sec-t{display:flex!important;align-items:center!important;gap:9px!important;padding-left:0!important;}
+.resume-a4-page .r-sec:has(>.r-sum)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-exp)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='7' width='18' height='13' rx='2'/%3E%3Cpath d='M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-edu)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10 12 5 2 10l10 5 10-5z'/%3E%3Cpath d='M6 12v5c3 2 9 2 12 0v-5'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-skills)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z'/%3E%3Cpath d='M19 17v4M17 19h4'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec:has(>.r-award)>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='6'/%3E%3Cpath d='M8.5 14 7 22l5-3 5 3-1.5-8'/%3E%3C/svg%3E")!important;}
+.resume-a4-page .r-sec.r-keyachiev>.r-sec-t{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z'/%3E%3C/svg%3E")!important;}
+/* sidebar headings stay quiet (no badges in narrow columns) */
+.resume-a4-page :is(.tpl-harbor,.tpl-sierra,.r4-rf.rf-band2) .r-aside .r-sec>.r-sec-t::before{content:none!important;display:none!important;}
+/* Pulse: the badge replaces its old accent bar */
+.resume-a4-page .tpl-pulse .r-sec-t{padding-left:0!important;}
+.resume-a4-page .r4-rf.rf-band2 .r-aside .r-skills{flex-direction:row!important;flex-wrap:wrap!important;gap:4px!important;}
+
+/* ── split header: name/title left, contact column right (no photo) ────── */
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child{display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:32px;align-items:end;}
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>:is(.r-name,.r-title){grid-column:1;}
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>.r-contact{grid-column:2;grid-row:1 / span 2;flex-direction:column!important;align-items:flex-end!important;justify-content:flex-end;gap:5px!important;margin:0!important;text-align:right;}
+.resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>.r-contact .r-ci{flex-direction:row-reverse;}
+.resume-a4-page .tpl-folio .r-head:not(:has(img))>div:first-child::after{margin-top:18px;}
+/* narrow on-screen page (phones reflow the resume): stack the header again */
+#resumeOutput .resume-a4-page,#previewModalBody .resume-a4-page{container-type:inline-size;}
+@container (max-width:600px){
+  .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head>div:first-child{display:block!important;}
+  .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head>div:first-child>.r-contact{flex-direction:row!important;align-items:center!important;flex-wrap:wrap!important;margin-top:9px!important;text-align:left;}
+  .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head>div:first-child>.r-contact .r-ci{flex-direction:row;}
+  /* two-column layouts: sidebar stacks above the main column on a phone screen */
+  .resume-a4-page [class*="tpl-"]:not(.rf-pastel)>.r-2col{flex-direction:column!important;gap:16px!important;margin:0!important;}
+  .resume-a4-page [class*="tpl-"]:not(.rf-pastel)>.r-2col>.r-aside{flex:none!important;width:auto!important;min-width:0!important;align-self:stretch!important;border-right:0!important;padding-right:15px!important;}
+  .resume-a4-page [class*="tpl-"]:not(.rf-pastel)>.r-2col>.r-main-col{padding:0!important;}
+}
+
+/* ── classical centred rules: Regent + the serif CVs ───────────────────── */
+.resume-a4-page :is(.tpl-regent,.tpl-classic.r4-rf,.tpl-academic.r4-rf,[class*="tpl-oxford-"].r4-rf,[class*="tpl-executive-"].r4-rf) .r-sec>.r-sec-t{justify-content:center!important;gap:14px!important;text-align:center;background:none!important;padding:0!important;display:flex!important;}
+.resume-a4-page :is(.tpl-regent,.tpl-classic.r4-rf,.tpl-academic.r4-rf,[class*="tpl-oxford-"].r4-rf,[class*="tpl-executive-"].r4-rf) .r-sec>.r-sec-t::before,
+.resume-a4-page :is(.tpl-regent,.tpl-classic.r4-rf,.tpl-academic.r4-rf,[class*="tpl-oxford-"].r4-rf,[class*="tpl-executive-"].r4-rf) .r-sec>.r-sec-t::after{content:""!important;display:block!important;flex:1 1 auto!important;height:1px!important;background:var(--a,var(--rf-a))!important;opacity:.38!important;position:static!important;width:auto!important;margin:0!important;order:0;}
+.resume-a4-page .tpl-regent .r-sec>.r-sec-t{font-size:13px;letter-spacing:normal;}
+.resume-a4-page :is(.tpl-classic,.tpl-academic).r4-rf .r-head{border-bottom-width:1px!important;}
+
+/* ── refined classics: a little more presence ──────────────────────────── */
+.resume-a4-page .r4-rf:not(.rf-pastel):not(.rf-f-mono) .r-head .r-name{font-size:28px!important;letter-spacing:normal!important;}
+.resume-a4-page .r4-rf .r-role{font-size:12.25px!important;}
+.resume-a4-page .r4-rf .r-sec{margin-bottom:16px;}
+</style>
+<style id="_r4uTryNewCss">
+#r4tn{display:none;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:linear-gradient(180deg,#fffaf3,#fff);border:1px solid rgba(180,83,9,.18);box-shadow:0 1px 2px rgba(0,0,0,.03);font-family:Inter,system-ui,sans-serif;}
+#r4tn.on{display:block;}
+#r4tn .tn-row{display:flex;align-items:center;gap:14px;}
+#r4tn .tn-txt{flex:1 1 auto;min-width:0;}
+#r4tn .tn-k{display:inline-block;font-size:.66rem;font-weight:700;color:#b45309;background:#fef3c7;border-radius:5px;padding:2px 7px;margin-bottom:4px;}
+#r4tn .tn-h{font-size:.92rem;font-weight:700;color:var(--text,#1a1a1a);line-height:1.3;}
+#r4tn .tn-s{font-size:.78rem;color:var(--muted,#6b7280);margin-top:2px;}
+#r4tn .tn-picks{display:flex;gap:10px;flex:0 0 auto;}
+#r4tn .tn-pick{display:flex;flex-direction:column;align-items:center;gap:5px;border:0;background:none;padding:0;cursor:pointer;font:inherit;}
+#r4tn .tn-th{width:64px;height:90px;border-radius:7px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 4px 10px -6px rgba(0,0,0,.35);position:relative;transition:transform .15s,box-shadow .15s;}
+#r4tn .tn-th>.resume-a4-page{position:absolute;left:0;top:0;width:794px!important;min-height:1123px!important;max-width:none!important;transform:scale(.0806);transform-origin:0 0;box-shadow:none!important;margin:0!important;pointer-events:none;}
+#r4tn .tn-pick:hover .tn-th,#r4tn .tn-pick:focus-visible .tn-th{transform:translateY(-2px);box-shadow:0 0 0 2px #b45309,0 8px 16px -8px rgba(180,83,9,.6);}
+#r4tn .tn-pick:focus-visible{outline:none;}
+#r4tn .tn-nm{font-size:.72rem;font-weight:600;color:var(--text,#1a1a1a);}
+#r4tn .tn-x{flex:0 0 auto;align-self:flex-start;border:0;background:none;color:var(--muted,#9ca3af);font-size:1.15rem;line-height:1;cursor:pointer;padding:2px 4px;margin:-4px -4px 0 0;}
+#r4tn .tn-more{border:0;background:none;color:#b45309;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;padding:0;margin-top:6px;}
+#r4tn .tn-done{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#r4tn .tn-done b{font-weight:700;}
+#r4tn .tn-btn{border:1.5px solid rgba(180,83,9,.35);background:#fff;color:#92400e;border-radius:9px;padding:6px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;}
+#r4tn .tn-btn.pri{background:#b45309;border-color:#b45309;color:#fff;}
+@media (max-width:640px){#r4tn .tn-row{flex-wrap:wrap;}#r4tn .tn-picks{width:100%;justify-content:space-between;}#r4tn .tn-x{position:absolute;right:10px;top:10px;}#r4tn{position:relative;}}
+@media (prefers-reduced-motion:reduce){#r4tn .tn-th{transition:none;}}
+.tpl-filter-btn[data-cat="twocol"] small{font-size:.62rem;font-weight:700;color:#b45309;background:#fff7ed;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:1px;}
+.tpl-filter-btn.active[data-cat="twocol"] small{background:rgba(255,255,255,.22);color:#fff;}
+#r4tcNote{margin:0 0 12px;padding:10px 13px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;font-size:.8rem;line-height:1.45;}
+/* ── template picker: header + filter chips ── */
+#tplSection .tpl-section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+#tplSection .tpl-section-title{display:block;font-size:1.05rem;font-weight:700;letter-spacing:-.01em;color:var(--text);}
+#tplSection .tpl-section-title small{display:block;margin-top:3px;font-size:.78rem;font-weight:500;color:var(--muted);letter-spacing:0;}
+#tplSection .tpl-section-badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem!important;font-weight:700;color:#047857!important;background:#ecfdf5!important;border:1px solid #a7f3d0;border-radius:999px;padding:4px 10px!important;white-space:nowrap;}
+#tplSection .tpl-section-badge.warn{color:#9a3412!important;background:#fff7ed!important;border-color:#fed7aa;}
+#tplSection .tpl-filter-row{display:flex;gap:8px;background:none!important;border:0!important;border-radius:0!important;padding:2px 2px 6px!important;margin:0 0 14px!important;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+#tplSection .tpl-filter-row::-webkit-scrollbar{display:none;}
+#tplSection .tpl-filter-row.r4-more{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);}
+#tplSection .tpl-filter-row.r4-less{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px);}
+#tplSection .tpl-filter-row.r4-more.r4-less{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);}
+#tplSection .tpl-filter-btn{display:inline-flex!important;align-items:center;gap:7px;flex:0 0 auto;padding:8px 13px!important;border-radius:999px!important;border:1px solid var(--border)!important;background:var(--card-bg)!important;color:var(--text)!important;font-size:.8rem!important;font-weight:600!important;line-height:1.1;scroll-snap-align:start;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;}
+#tplSection .tpl-filter-btn:hover{border-color:#d4cfc4!important;background:#fbfaf6!important;}
+#tplSection .tpl-filter-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#tplSection .tpl-filter-btn.active{background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important;box-shadow:0 4px 12px -6px rgba(180,83,9,.7);}
+#tplSection .tpl-fcount{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:#f3f1ec;color:var(--muted);font-variant-numeric:tabular-nums;}
+#tplSection .tpl-filter-btn.active .tpl-fcount{background:rgba(255,255,255,.22);color:#fff;}
+#tplSection .tpl-filter-btn[data-cat="twocol"] small{margin-left:0!important;}
+/* phones: wrap so every tab (incl. Two-column) is visible without swiping */
+@media (max-width:768px){#tplSection .tpl-filter-row{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none!important;mask-image:none!important;gap:7px;}#tplSection .tpl-filter-btn{padding:6px 11px!important;font-size:.76rem!important;gap:6px;}#tplSection .tpl-fcount{font-size:.64rem;padding:1px 6px;}#tplSection .tpl-filter-btn[data-cat="twocol"] small{font-size:.58rem;}}
+/* gallery: hover call-to-action + quick labels on the 2026 cards */
+.tpl-card .tpl-card-thumb{position:relative;}
+.tpl-card .tpl-card-thumb::after{content:"Use this design";position:absolute;left:50%;bottom:14px;transform:translate(-50%,6px);padding:7px 14px;border-radius:999px;background:#111827;color:#fff;font:600 .72rem Inter,system-ui,sans-serif;opacity:0;transition:opacity .15s,transform .15s;pointer-events:none;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(0,0,0,.5);}
+.tpl-card:hover .tpl-card-thumb::after{opacity:1;transform:translate(-50%,0);}
+.tpl-card.tpl-active .tpl-card-thumb::after{content:"In use";background:#b45309;}
+@media (hover:none){.tpl-card .tpl-card-thumb::after{display:none;}}
+.tpl-card .r4n-flag{display:inline-block;margin:4px 4px 0 0;padding:1px 6px;border-radius:4px;font-size:.6rem;font-weight:700;background:#eef2ff;color:#3730a3;}
+.tpl-card .r4n-flag.pop{background:#fff7ed;color:#c2410c;}
+</style>
+<script id="_r4uTryNewJS">
+/* "Try a new look": after a resume is generated in an older template, offer
+   the 2026 designs as tiny live previews of the user's own resume. One tap
+   switches (with Undo / Keep it). Dismissed or kept = not shown again on this
+   device. Watches #resumeOutput instead of wrapping the engine. */
+(function(){
+  var PICKS=['atlas','harbor','regent','sierra'], KEY='_r4uTryNew';
+  var bar=null, prev=null, busy=false, built='';
+  function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+  function cur(){ try{ return currentTemplate; }catch(e){ return ''; } }
+  function data(){ try{ return lastResumeData; }catch(e){ return null; } }
+  function isNew(id){ return (window._r4uNewTpls||[]).indexOf(id)>=0; }
+  function label(id){ try{ return TPL_META[id].label; }catch(e){ return id; } }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function thumb(id,d){
+    var h=''; try{ var sv=currentTemplate; currentTemplate=id; h=renderResumeHTML(JSON.parse(JSON.stringify(d))); currentTemplate=sv; }catch(e){ try{ currentTemplate=sv; }catch(_){} }
+    return '<span class="tn-th" aria-hidden="true"><div class="resume-a4-page">'+h+'</div></span>';
+  }
+  function ensure(){
+    if(bar) return bar;
+    var out=document.getElementById('resumeOutput'); if(!out||!out.parentNode) return null;
+    bar=document.createElement('section'); bar.id='r4tn'; bar.setAttribute('aria-label','Try a new resume design');
+    out.parentNode.parentNode.insertBefore(bar,out.parentNode);
+    bar.addEventListener('click',onClick);
+    return bar;
+  }
+  function render(){
+    var d=data(); if(!d) return;
+    var sig=JSON.stringify([cur(),d.firstName,d.lastName,d.jobTitle,(d.experience||[]).length,(d.skills||[]).length]);
+    if(built===sig && bar.querySelector('.tn-picks')) return;
+    built=sig;
+    var two=(window._r4uTwoColTpls||[]).indexOf(cur())>=0;
+    bar.innerHTML='<div class="tn-row"><div class="tn-txt"><span class="tn-k">'+(two?'APPLYING ONLINE?':'NEW · 2026 DESIGNS')+'</span>'
+      +'<div class="tn-h">'+(two?'Switch to an ATS-friendly design':'See your resume in a fresh, premium design')+'</div>'
+      +'<div class="tn-s">'+(two?'Two-column layouts can be read out of order by applicant tracking systems. One tap to switch — you can undo.':'One tap to try — your content stays the same, and you can undo.')+'</div>'
+      +'<button type="button" class="tn-more">Browse all 10 new designs →</button></div>'
+      +'<div class="tn-picks">'+PICKS.map(function(id){ return '<button type="button" class="tn-pick" data-id="'+id+'" title="Try '+esc(label(id))+'">'+thumb(id,d)+'<span class="tn-nm">'+esc(label(id))+'</span></button>'; }).join('')+'</div>'
+      +'<button type="button" class="tn-x" aria-label="Dismiss">×</button></div>';
+  }
+  function done(id){
+    built='';
+    bar.innerHTML='<div class="tn-done"><span>✨ Now showing <b>'+esc(label(id))+'</b>. Like it?</span>'
+      +'<button type="button" class="tn-btn pri" data-act="keep">Keep it</button>'
+      +'<button type="button" class="tn-btn" data-act="undo">Undo</button>'
+      +'<button type="button" class="tn-btn" data-act="other">Try another</button></div>';
+  }
+  function hide(forever){ if(bar) bar.classList.remove('on'); if(forever) ls(KEY,'done'); }
+  function onClick(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.classList.contains('tn-x')){ hide(true); return; }
+    if(t.classList.contains('tn-more')){ var b=document.querySelector('.tpl-filter-btn[data-cat="new"]'); if(b) b.click(); var s=document.getElementById('tplSection'); if(s) s.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+    var act=t.getAttribute('data-act');
+    if(act==='keep'){ hide(true); if(typeof showToast==='function') showToast('Design saved — download any time.','success'); return; }
+    if(act==='undo'){ if(prev){ busy=true; try{ selectTemplate(prev); }finally{ busy=false; } } prev=null; render(); return; }
+    if(act==='other'){ render(); return; }
+    var id=t.getAttribute('data-id'); if(!id) return;
+    if(!prev||!isNew(cur())) prev=cur();
+    busy=true; try{ selectTemplate(id); }finally{ busy=false; }
+    done(id);
+    var o=document.getElementById('resumeOutput'); if(o) o.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function update(){
+    if(busy) return;
+    var out=document.getElementById('resumeOutput'), has=!!(out&&out.querySelector('.resume-a4-page'));
+    if(!has||ls(KEY)==='done'){ hide(false); return; }
+    if(!ensure()) return;
+    if(isNew(cur())&&!prev){ hide(false); return; }      /* already on a new design, not mid-trial */
+    if(!bar.classList.contains('on')){ bar.classList.add('on'); }
+    if(!prev) render();
+  }
+  function start(){
+    var out=document.getElementById('resumeOutput'); if(!out) return;
+    var t=null; new MutationObserver(function(){ clearTimeout(t); t=setTimeout(update,250); }).observe(out,{childList:true});
+    update();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
+<style id="_r4uTplSingleCss">
+/* ══ ATS-FRIENDLY: single-column versions of the former sidebar designs ════
+   Blush/Verdant/Lilac/Azure keep their pastel as a full-width header band;
+   Modern/Corporate/Executive keep their dark band; Harbor gets a tinted skills
+   panel; Sierra keeps its navy band. Content flows in one column, the order
+   an ATS reads it. ══════════════════════════════════════════════════════ */
+.resume-a4-page:has(>.rf-single.rf-pastel){padding:10mm 16mm!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel{display:block!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head{display:block!important;grid-area:auto!important;background:var(--pt-side)!important;margin:-10mm -16mm 22px!important;padding:28px 16mm 24px!important;border-radius:0!important;width:auto!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head:has(img){display:flex!important;flex-direction:row-reverse!important;justify-content:space-between!important;align-items:center!important;gap:20px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head img{margin:0!important;order:0!important;flex:0 0 auto;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-name{font-size:28px!important;line-height:1.15!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-title{font-size:12.5px!important;letter-spacing:normal!important;margin-top:4px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-contact{flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;gap:6px 18px!important;margin-top:12px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-sec{grid-area:auto!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-skills{flex-direction:row!important;flex-wrap:wrap!important;gap:5px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sk{font-size:10px!important;font-weight:500!important;padding:3px 9px!important;border-radius:5px!important;background:var(--pt-side)!important;color:var(--pt-ink)!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sk::before{content:none!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel :is(.r-exp-top,.r-edu){display:flex!important;justify-content:space-between!important;align-items:baseline!important;gap:3px 14px!important;flex-wrap:wrap!important;flex-direction:row!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel :is(.r-period,.r-yr){margin-left:auto!important;text-align:right!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-skills{display:flex!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sk{display:inline-block!important;white-space:nowrap!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-ul{list-style:none!important;padding-left:0!important;margin:0!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-ul li{list-style:none!important;padding:0 0 0 14px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-ul li::before{content:""!important;position:absolute!important;left:3px!important;top:6.4px!important;width:4px!important;height:4px!important;border-radius:50%!important;background:var(--pt-acc)!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-exp{margin-bottom:11px!important;padding-left:0!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-exp::before{content:none!important;}
+/* Harbor: skills in a tinted panel instead of a sidebar */
+.resume-a4-page .tpl-harbor:not(.r4-tc) .r-sec:has(>.r-skills){background:#f3f8f7;border-radius:10px;padding:13px 15px 14px;}
+.resume-a4-page .tpl-harbor:not(.r4-tc) .r-sec:has(>.r-skills) .r-sk{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+.resume-a4-page .tpl-harbor:not(.r4-tc) .r-head{border-bottom:2px solid var(--a);}
+/* Sierra: crisp square skill tags under the navy band */
+.resume-a4-page .tpl-sierra .r-sk{border-radius:3px;background:var(--soft);color:var(--a);}
+/* ATS reading order: Chrome writes PDF text in PAINT order, and positioned
+   elements paint after normal-flow ones, so a template that made (say) its
+   bullets or header position:relative emitted them out of order (experience
+   after Skills, name after the summary). Making every resume block positioned
+   restores document order in the PDF text. No block in any template uses
+   absolute positioning, so layout is unchanged. */
+.resume-a4-page [class*="tpl-"] :is([class^="r-"],[class*=" r-"],ul,li){position:relative;}
+</style>
 </body>
 </html>
