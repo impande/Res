@@ -7014,8 +7014,10 @@ if ('serviceWorker' in navigator) {
   function hex(c){ return '#'+c.map(function(v){ return ('0'+Math.round(v).toString(16)).slice(-2); }).join(''); }
   function tones(id){
     var c=rgb(ACC[id]||TPL_COLORS[id]);
-    for(var i=0;i<12&&(1.05/(lum(c)+0.05))<4.6;i++) c=c.map(function(v){ return v*0.86; });   /* readable on white */
-    var soft=c.map(function(v){ return 255-(255-v)*0.1; });
+    var soft=c.map(function(v){ return 255-(255-v)*0.1; });   /* tint from the template colour */
+    function ratio(a,b){ var x=lum(a)+0.05,y=lum(b)+0.05; return Math.max(x,y)/Math.min(x,y); }
+    /* darken the accent until it reads (WCAG AA 4.5:1) on BOTH white and its own tint */
+    for(var i=0;i<16&&(ratio(c,[255,255,255])<4.6||ratio(c,soft)<4.6);i++) c=c.map(function(v){ return v*0.88; });
     return '--rf-a:'+hex(c)+';--rf-soft:'+hex(soft);
   }
   function refresh(h,id,twoCol){
@@ -15689,6 +15691,22 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 .resume-a4-page .r4-rf.rf-pastel .r-head .r-title{font-size:12px!important;}
 .resume-a4-page .r4-rf.rf-pastel .r-sec-t{font-size:12px!important;}
 .resume-a4-page .r4-rf.rf-pastel .r-sk{font-size:10.25px!important;}
+/* ── readability (WCAG AA): measured on every template ── */
+.resume-a4-page .r4-rf:not(.rf-band):not(.rf-band2):not(.rf-pastel) .r-head .r-title{color:var(--rf-a)!important;}
+.resume-a4-page .r4-rf:not(.rf-band):not(.rf-band2):not(.rf-pastel) .r-head :is(.r-contact,.r-ci,.r-ci a){color:#475569!important;opacity:1!important;}
+.resume-a4-page .r4-rf.rf-f-serif:not(.rf-band):not(.rf-band2) .r-head :is(.r-contact,.r-ci,.r-ci a){color:#57534e!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2) .r-head :is(.r-contact,.r-ci){color:rgba(255,255,255,.9)!important;opacity:1!important;}
+.resume-a4-page .r4-rf:is(.rf-band,.rf-band2):not(.tpl-tech) .r-head .r-ci a{color:rgba(255,255,255,.9)!important;}
+.resume-a4-page :is(.tpl-sunset,.tpl-ocean,.tpl-sky,.tpl-emerald).r4-rf .r-head .r-title{color:rgba(255,255,255,.95)!important;}
+.resume-a4-page :is(.tpl-bold,.tpl-sunset).r4-rf.r4-rf .r-head.r-head :is(.r-contact,.r-ci,.r-ci a){color:#fff!important;}
+.resume-a4-page :is(.tpl-bold,.tpl-meridian-emerald).r4-rf .r-head .r-title{color:#fff!important;}
+.resume-a4-page .tpl-summit .r-head :is(.r-contact,.r-ci,.r-ci a){color:#475569!important;}
+.resume-a4-page .tpl-sunset.r4-rf .r-head{background:linear-gradient(135deg,#c2410c,#b91c1c)!important;}
+.resume-a4-page .tpl-ocean.r4-rf .r-head{background:linear-gradient(135deg,#0e7490,#1e3a8a)!important;}
+.resume-a4-page .tpl-sky.r4-rf .r-head{background:linear-gradient(135deg,#1e40af,#2563eb)!important;}
+.resume-a4-page .r-edu [style*="#888"]{color:#5b6474!important;}
+.resume-a4-page .r-sec-t .r-yr{color:inherit!important;opacity:.85;}
+.resume-a4-page [class*="tpl-"] .r-aside :is(.r-sch,.r-yr,.r-award-org,.r-period){color:#4b5563!important;}
 </style>
 <style id="_r4uTplPremiumCss">
 /* ══ PREMIUM DETAILS (2026) ═══════════════════════════════════════════════
