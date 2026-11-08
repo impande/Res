@@ -13,6 +13,11 @@
  * template). Without the needed template we answer {status:"unavailable"} and
  * the page falls back to the QR code.
  *
+ * Switch: number sign-up is OFF until WA_OPTIN_ENABLED=1 (Meta charges for every
+ * message the bot starts, so it needs a payment method on the WhatsApp account).
+ * While off, the page leads with the QR code (the user sends the first message,
+ * which is free). GET returns which intents are available.
+ *
  * Abuse guard: 5 requests / hour / IP, and one message per number per intent
  * every 12 h. The message itself tells the recipient how to stop.
  */
@@ -62,6 +67,11 @@ async function sendTemplate(to, name, lang, params) {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: H, body: '' };
+  const ON = process.env.WA_OPTIN_ENABLED === '1';
+  if (event.httpMethod === 'GET') {
+    return { statusCode: 200, headers: Object.assign({}, H, { 'cache-control': 'public, max-age=300' }),
+      body: JSON.stringify({ alerts: ON && !!process.env.WA_JOB_ALERT_TEMPLATE, resume: ON && !!process.env.WA_START_TEMPLATE, interview: ON && !!process.env.WA_START_TEMPLATE }) };
+  }
   if (event.httpMethod !== 'POST') return out(405, { status: 'error', error: 'POST only' });
   let b = {}; try { b = JSON.parse(event.body || '{}'); } catch (e) { return out(400, { status: 'error', error: 'Bad request' }); }
 
@@ -73,7 +83,7 @@ exports.handler = async (event) => {
   if (intent === 'alerts' && role.length < 2) return out(400, { status: 'error', error: 'Enter the role you want jobs for.' });
 
   const ALERT_T = process.env.WA_JOB_ALERT_TEMPLATE || '', START_T = process.env.WA_START_TEMPLATE || '';
-  if (intent === 'alerts' ? !ALERT_T : !START_T) return out(200, { status: 'unavailable' });
+  if (!ON || (intent === 'alerts' ? !ALERT_T : !START_T)) return out(200, { status: 'unavailable' });
 
   // Rate limits
   const h = event.headers || {};
