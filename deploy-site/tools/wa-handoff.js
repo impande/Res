@@ -20,14 +20,14 @@
   var CSS =
     '.r4wa-ov{position:fixed;inset:0;z-index:100000;background:rgba(17,24,39,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .18s ease;}' +
     '.r4wa-ov.on{opacity:1;}' +
-    '.r4wa-card{position:relative;width:100%;max-width:420px;background:var(--card-bg,var(--card,#fff));color:var(--text,#1a1a1a);border-radius:20px;padding:26px 26px 22px;box-shadow:0 24px 70px -20px rgba(0,0,0,.45);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transform:translateY(8px) scale(.98);transition:transform .2s ease;}' +
+    '.r4wa-card{position:relative;width:100%;max-width:468px;background:var(--card-bg,var(--card,#fff));color:var(--text,#1a1a1a);border-radius:20px;padding:26px 26px 22px;box-shadow:0 24px 70px -20px rgba(0,0,0,.45);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transform:translateY(8px) scale(.98);transition:transform .2s ease;}' +
     '.r4wa-ov.on .r4wa-card{transform:none;}' +
     '.r4wa-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--muted,#6b7280);font-size:22px;line-height:1;cursor:pointer;}' +
     '.r4wa-x:hover{background:rgba(0,0,0,.05);}' +
     '.r4wa-hd{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;padding-right:22px;}' +
     '.r4wa-ic{flex:0 0 46px;width:46px;height:46px;border-radius:13px;background:linear-gradient(145deg,#25d366,#128c7e);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -6px rgba(18,140,126,.6);}' +
     '.r4wa-ic svg{width:25px;height:25px;}' +
-    '.r4wa-hd h3{margin:0 0 3px;font-size:1.12rem;font-weight:700;letter-spacing:-.01em;line-height:1.3;text-wrap:balance;}' +
+    '.r4wa-hd h3{margin:0 0 3px;font-size:1.1rem;font-weight:700;letter-spacing:-.01em;line-height:1.3;text-wrap:balance;}' +
     '.r4wa-hd p{margin:0;font-size:.88rem;color:var(--muted,#6b7280);}' +
     '.r4wa-lbl{display:block;font-size:.8rem;font-weight:600;margin:0 0 6px;}' +
     '.r4wa-ph{display:flex;align-items:stretch;border:1.5px solid var(--input-border,#d5d5cf);border-radius:12px;background:var(--input-bg,#fff);overflow:hidden;transition:border-color .15s,box-shadow .15s;}' +
