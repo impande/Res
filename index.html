@@ -15939,5 +15939,38 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    absolute positioning, so layout is unchanged. */
 .resume-a4-page [class*="tpl-"] :is([class^="r-"],[class*=" r-"],ul,li){position:relative;}
 </style>
+<style id="_r4uPastelSoftCss">
+/* ══ PASTEL "SOFT" FAMILY (Blush, Verdant, Lilac, Azure) — single column ══
+   Distinct from Summit (left name + contact column + icon badges): centred
+   name in the pastel band, a pastel stripe down the left edge of the page,
+   soft tinted section labels, a tinted summary card and a skills panel.
+   Two-column versions (tc-*) are not affected. ════════════════════════════ */
+.resume-a4-page:has(>.rf-single.rf-pastel){background:linear-gradient(90deg,var(--r4p-edge,#e5e7eb) 0 7px,#fff 7px)!important;}
+.resume-a4-page:has(>.tpl-blush.rf-single){--r4p-edge:#f2c4bc;}
+.resume-a4-page:has(>.tpl-verdant.rf-single){--r4p-edge:#bfd6c4;}
+.resume-a4-page:has(>.tpl-lilac.rf-single){--r4p-edge:#d2c6ec;}
+.resume-a4-page:has(>.tpl-azure.rf-single){--r4p-edge:#bcd3ec;}
+/* header: centred */
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head{text-align:center!important;margin:-10mm -16mm 22px -16mm!important;padding:30px 16mm 24px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head:has(img){flex-direction:column!important;justify-content:center!important;gap:12px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head:has(img) img{order:-1!important;margin:0 auto!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head>div:first-child{display:block!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-name{font-size:29px!important;letter-spacing:normal!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-title{color:var(--rf-a)!important;font-size:12.5px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-title::after{margin:12px auto 0!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel>.r-head .r-contact{justify-content:center!important;flex-direction:row!important;align-items:center!important;}
+/* section labels: soft tinted pill */
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sec>.r-sec-t{display:inline-flex!important;background:var(--pt-side)!important;color:var(--rf-a)!important;padding:4px 12px!important;border-radius:999px!important;font-size:11.5px!important;margin:0 0 10px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sec>.r-sec-t::after,.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sec>.r-sec-t::before{content:none!important;display:none!important;}
+/* summary card */
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sum{background:color-mix(in srgb,var(--pt-side) 45%,#fff)!important;border-left:3px solid var(--rf-a)!important;border-radius:0 10px 10px 0!important;padding:11px 15px!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-skills.r-sum{background:none!important;border:0!important;padding:0!important;}
+/* skills panel */
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sec:has(>.r-skills){background:color-mix(in srgb,var(--pt-side) 45%,#fff);border-radius:12px;padding:12px 14px 13px;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sec:has(>.r-skills)>.r-sec-t{background:#fff!important;}
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-sec:has(>.r-skills) .r-sk{background:#fff!important;color:var(--pt-ink)!important;box-shadow:inset 0 0 0 1px var(--pt-side)!important;}
+/* role + company accents */
+.resume-a4-page .r4-rf.rf-single.rf-pastel .r-co{color:var(--rf-a)!important;}
+</style>
 </body>
 </html>
