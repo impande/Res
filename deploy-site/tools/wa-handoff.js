@@ -63,6 +63,14 @@
     '.r4wa-done .r4wa-step svg{width:20px;height:20px;flex:0 0 20px;}' +
     '.r4wa-done .r4wa-ok{margin-top:16px;width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border,#e5e5e0);background:transparent;font:inherit;font-weight:700;cursor:pointer;color:var(--text,#1a1a1a);}' +
     '.r4wa-card button:focus-visible,.r4wa-card a:focus-visible{outline:3px solid rgba(18,140,126,.45);outline-offset:2px;}' +
+    '.r4wa-qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;margin:2px 0 4px;}' +
+    '.r4wa-qrfr{padding:12px;border-radius:16px;background:#fff;border:1.5px solid var(--border,#e5e5e0);box-shadow:0 8px 24px -16px rgba(0,0,0,.35);line-height:0;}' +
+    '.r4wa-qrfr canvas{width:196px;height:196px;image-rendering:pixelated;display:block;}' +
+    '.r4wa-steps{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:.86rem;}' +
+    '.r4wa-steps li{display:flex;gap:10px;align-items:center;}' +
+    '.r4wa-steps b.n{flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:rgba(37,211,102,.14);color:#0f7a5f;font-size:.72rem;display:flex;align-items:center;justify-content:center;}' +
+    '.r4wa-free{margin:12px 0 0;text-align:center;font-size:.74rem;color:var(--muted,#6b7280);}' +
+    'a.r4wa-go{text-decoration:none;}' +
     '@media (prefers-reduced-motion:reduce){.r4wa-ov,.r4wa-card{transition:none}.r4wa-spin{animation-duration:1.6s}}' +
     '@media (max-width:480px){.r4wa-card{padding:22px 18px 18px}.r4wa-alt{grid-template-columns:1fr}}';
 
@@ -83,6 +91,33 @@
     return d.length === 10 && /^[6-9]/.test(d);
   }
 
+  /* Which intents can use "send to my number" (needs a Meta payment method and
+     the template; the server says so). Fetched once per tab; until known, or when
+     off, the dialog leads with the QR code — the user sends the first message,
+     which is free. */
+  var avail = null;
+  try { avail = JSON.parse(sessionStorage.getItem('_r4uWaAvail') || 'null'); } catch (e) {}
+  function loadAvail() {
+    if (avail) return Promise.resolve(avail);
+    return fetch('/.netlify/functions/wa-optin', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
+      .catch(function () { return {}; }).then(function (j) { avail = j || {}; try { sessionStorage.setItem('_r4uWaAvail', JSON.stringify(avail)); } catch (e) {} return avail; });
+  }
+  function numberOn(intent) { return !!(avail && avail[intent]); }
+  function qrLib() {
+    if (window._r4uQRlib) return Promise.resolve(window._r4uQRlib);
+    return new Promise(function (res) { var sc = document.createElement('script'); sc.src = '/tools/qrlib.js?v=1'; sc.onload = function () { res(window._r4uQRlib || null); }; sc.onerror = function () { res(null); }; document.head.appendChild(sc); });
+  }
+  function drawQR(host, text) {
+    qrLib().then(function (L) {
+      if (!L || !host) return;
+      var q; try { q = L(0, 'M'); q.addData(String(text)); q.make(); } catch (e) { return; }
+      var n = q.getModuleCount(), qz = 4, cell = 8, size = (n + qz * 2) * cell;
+      var cv = document.createElement('canvas'); cv.width = cv.height = size; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'QR code to open WhatsApp');
+      var g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, size, size); g.fillStyle = '#111';
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (q.isDark(y, x)) g.fillRect((x + qz) * cell, (y + qz) * cell, cell, cell);
+      host.innerHTML = ''; host.appendChild(cv);
+    });
+  }
   function optin(payload) {
     return fetch('/.netlify/functions/wa-optin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       .then(function (r) { return r.json().catch(function () { return { status: 'error' }; }); })
@@ -120,12 +155,37 @@
   function open(o) {
     o = o || {};
     if (!isDesktop()) { window.open(o.url, '_blank', 'noopener'); return; }
+    if (!o.mode) o.mode = numberOn(o.intent) ? 'form' : 'qr';
     if (!document.getElementById('r4wa-css')) { var st = document.createElement('style'); st.id = 'r4wa-css'; st.textContent = CSS; document.head.appendChild(st); }
     close();
     lastFocus = document.activeElement;
     var saved = lsGet('_r4uWaPhone'), touch = isTouch(), canQR = !touch && typeof window._r4uShowQR === 'function';
     ov = document.createElement('div');
     ov.className = 'r4wa-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'r4wa-t');
+    var deviceName = /iPad|Macintosh/.test(navigator.userAgent) ? 'iPad' : 'tablet';
+    var qrBody =
+        '<div class="r4wa-hd"><span class="r4wa-ic">' + WA_SVG + '</span><div><h3 id="r4wa-t">' + esc(o.title || 'Continue on WhatsApp') + '</h3><p>' + esc(o.qrSub || o.sub || '') + '</p></div></div>' +
+        (touch
+          ? '<a class="r4wa-go" href="' + esc(o.url) + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Open WhatsApp on this ' + deviceName + '</span></a>' +
+            '<div class="r4wa-or"><span>or scan with your phone</span></div><div class="r4wa-qrbox"><div class="r4wa-qrfr" id="r4wa-qr"></div></div>'
+          : '<div class="r4wa-qrbox"><div class="r4wa-qrfr" id="r4wa-qr"></div></div>' +
+            '<ol class="r4wa-steps"><li><b class="n">1</b><span>Scan with your phone\u2019s camera</span></li><li><b class="n">2</b><span>WhatsApp opens with your message ready \u2014 tap <b>Send</b></span></li></ol>' +
+            '<div class="r4wa-or"><span>or</span></div><div class="r4wa-alt one"><a class="r4wa-web" href="' + esc(o.url) + '" target="_blank" rel="noopener">' + PC_SVG + 'Use WhatsApp Web on this computer</a></div>') +
+        '<p class="r4wa-free">Free \u00b7 you send the first message, so you stay in control.' + (o.intent === 'alerts' ? ' Reply <b>stop alerts</b> anytime.' : '') + '</p>';
+    if (o.mode === 'qr') {
+      ov = document.createElement('div');
+      ov.className = 'r4wa-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'r4wa-t');
+      ov.innerHTML = '<div class="r4wa-card"><button type="button" class="r4wa-x" aria-label="Close">\u00d7</button><div class="r4wa-body">' + qrBody + '</div></div>';
+      document.body.appendChild(ov);
+      requestAnimationFrame(function () { if (ov) ov.classList.add('on'); });
+      document.addEventListener('keydown', onKey, true);
+      ov.addEventListener('mousedown', function (e) { if (e.target === ov) close(); });
+      ov.querySelector('.r4wa-x').addEventListener('click', close);
+      drawQR(ov.querySelector('#r4wa-qr'), o.url);
+      setTimeout(function () { try { ov.querySelector('.r4wa-x').focus(); } catch (e) {} }, 60);
+      return;
+    }
+    canQR = !touch;
     ov.innerHTML =
       '<div class="r4wa-card"><button type="button" class="r4wa-x" aria-label="Close">×</button>' +
       '<div class="r4wa-body">' +
@@ -156,7 +216,7 @@
     input.addEventListener('input', function () { intl(); err.classList.remove('on'); box.classList.remove('bad'); });
     ov.addEventListener('mousedown', function (e) { if (e.target === ov) close(); });
     ov.querySelector('.r4wa-x').addEventListener('click', close);
-    var qb = ov.querySelector('.r4wa-qr'); if (qb) qb.addEventListener('click', function () { qrFallback(o); });
+    var qb = ov.querySelector('.r4wa-qr'); if (qb) qb.addEventListener('click', function () { o.mode = 'qr'; open(o); });
     setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
 
     ov.querySelector('form').addEventListener('submit', function (e) {
@@ -171,7 +231,7 @@
         var st = r && r.status;
         if (st === 'sent' || st === 'already') { done(st, r.masked); return; }
         go.disabled = false; go.innerHTML = WA_SVG + '<span>Send to my WhatsApp</span>';
-        if (st === 'unavailable') { if (!qrFallback(o)) showErr('Sending to your number isn’t available right now. Use “WhatsApp on this computer” or open WhatsApp on your phone.'); return; }
+        if (st === 'unavailable') { avail = null; try { sessionStorage.removeItem('_r4uWaAvail'); } catch (e) {} o.mode = 'qr'; open(o); return; } if (false) { showErr('Sending to your number isn’t available right now. Use “WhatsApp on this computer” or open WhatsApp on your phone.'); return; }
         if (st === 'network') { showErr('No connection. Check your internet and try again.'); return; }
         showErr((r && r.error) || 'Something went wrong. Please try again.');
       });
@@ -193,5 +253,6 @@
     }
   }
 
-  window.R4UWa = { open: open, close: close, isDesktop: isDesktop, isTouch: isTouch, valid: valid, optin: optin };
+  window.R4UWa = { open: open, close: close, isDesktop: isDesktop, isTouch: isTouch, valid: valid, optin: optin, numberOn: numberOn, loadAvail: loadAvail };
+  if (isDesktop()) loadAvail();
 })();
