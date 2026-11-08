@@ -6867,7 +6867,9 @@ if ('serviceWorker' in navigator) {
 /* ── Folio · editorial serif headings, copper ── */
 .resume-a4-page .tpl-folio{--ink:#1f1a17;--body:#3d3632;--mut:#7a6f68;--line:#ece4dc;--a:#b4532a;--a2:#9a3f1c;--soft:#fbefe8;}
 .resume-a4-page .tpl-folio .r-head{padding-bottom:18px;}
-.resume-a4-page .tpl-folio .r-head::after{content:"";display:block;width:56px;height:3px;background:var(--a);margin-top:16px;border-radius:2px;}
+/* accent rule sits under the name block (not on .r-head, which becomes a
+   side-by-side row when there is a photo and pushed the rule beside it) */
+.resume-a4-page .tpl-folio .r-head>div:first-child::after{content:"";display:block;width:56px;height:3px;background:var(--a);margin-top:16px;border-radius:2px;grid-column:1;}
 .resume-a4-page .tpl-folio .r-head .r-name{font-family:RSerif,Georgia,serif;font-size:36px!important;font-weight:500;line-height:1.08!important;}
 .resume-a4-page .tpl-folio .r-head .r-title{color:var(--a2);font-weight:500;font-size:13.5px!important;}
 .resume-a4-page .tpl-folio .r-sec-t{font-family:RSerif,Georgia,serif;font-size:15px;font-weight:500;color:var(--a2);}
@@ -15738,7 +15740,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>:is(.r-name,.r-title){grid-column:1;}
 .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>.r-contact{grid-column:2;grid-row:1 / span 2;flex-direction:column!important;align-items:flex-end!important;justify-content:flex-end;gap:5px!important;margin:0!important;text-align:right;}
 .resume-a4-page :is(.tpl-atlas,.tpl-folio,.tpl-carbon,.tpl-summit,.tpl-sierra,.r4-rf.rf-band,.r4-rf.rf-band2) .r-head:not(:has(img))>div:first-child>.r-contact .r-ci{flex-direction:row-reverse;}
-.resume-a4-page .tpl-folio .r-head:not(:has(img))::after{margin-top:18px;}
+.resume-a4-page .tpl-folio .r-head:not(:has(img))>div:first-child::after{margin-top:18px;}
 /* narrow on-screen page (phones reflow the resume): stack the header again */
 #resumeOutput .resume-a4-page,#previewModalBody .resume-a4-page{container-type:inline-size;}
 @container (max-width:600px){
