@@ -15996,13 +15996,24 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4tut.paused .tt-play{display:flex;}
 #r4tut .tt-prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.25);}
 #r4tut .tt-prog i{display:block;height:100%;width:0;background:#f59e0b;}
-#r4tut.big{left:50%;right:auto;top:50%;bottom:auto;width:min(1100px,calc(100vw - 32px),calc((100vh - 120px) * 1.7778));transform:translate(-50%,-50%);z-index:10001;}
-#r4tut.big video{max-height:calc(100vh - 48px);aspect-ratio:auto;object-fit:contain;}
+#r4tut.big{left:50%;right:auto;top:50%;bottom:auto;width:min(1400px,calc(100vw - 32px),calc((100vh - 96px) * 1.7778));width:min(1400px,calc(100vw - 32px),calc((100dvh - 96px) * 1.7778));transform:translate(-50%,-50%);z-index:10001;}
+#r4tut.big video{object-fit:contain;background:#faf8f4;}
+#r4tut.big .tt-bar{display:none!important;}
+#r4tut.big .tt-play{display:none!important;}
+#r4tut.big{opacity:1!important;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);}
+/* portrait cut (9:16) */
+#r4tut.pt{width:184px;}
+#r4tut.pt video{aspect-ratio:9/16;}
+#r4tut.pt .tt-bar em{display:none;}
+#r4tut.big.pt{width:min(520px,calc(100vw - 24px),calc((100vh - 88px) * .5625));width:min(520px,calc(100vw - 24px),calc((100dvh - 88px) * .5625));}
 #r4tutBack{position:fixed;inset:0;z-index:10000;background:rgba(17,24,39,.6);backdrop-filter:blur(2px);display:none;}
 #r4tutBack.on{display:block;}
 #r4tutLink{display:inline-flex;align-items:center;gap:6px;margin-top:6px;border:0;background:none;color:#b45309;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;padding:2px 4px;}
 #r4tutLink svg{width:16px;height:16px;}
 @media (max-width:768px){#r4tut .tt-bar em{display:none;}#r4tut{width:232px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));border-radius:14px;}#r4tut .tt-bar{font-size:.64rem;padding:6px 6px 14px 9px;}#r4tut button:not(.tt-x){width:26px;height:26px;}}
+@media (max-width:768px){#r4tut.pt{width:136px;}#r4tut.pt .tt-bar span:first-child{display:none;}#r4tut.pt .tt-bar{justify-content:flex-end;padding:6px 6px 14px;}}
+/* phones held sideways: short screens */
+@media (max-height:500px) and (orientation:landscape){#r4tut{width:236px;right:12px;bottom:12px;}#r4tut .tt-bar em{display:none;}#r4tutX{top:10px;right:10px;width:40px;height:40px;}}
 @media (prefers-reduced-motion:reduce){#r4tut{transition:none;}}
 </style>
 <script id="_r4uTutJS">
@@ -16014,7 +16025,17 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
      "Watch how it works" under the landing cards replays it anytime
    - reduced-motion / data-saver: card shows paused (no auto download+play) */
 (function(){
-  var SRC=(function(){ try{ var v=document.createElement('video'); if(v.canPlayType('video/mp4; codecs="avc1.42E01E"')) return '/media/tutorial.mp4?v=9'; }catch(e){} return '/media/tutorial.webm?v=9'; })(), POSTER='/media/poster.jpg?v=9', KEY='_r4uTutSeen', DELAY=2500;
+  /* Two cuts of the film: 16:9 for landscape screens (desktop, laptop, tablet or
+     phone held sideways) and 9:16 for portrait screens (phones, upright tablets).
+     H.264 MP4 where supported (all iPhones/iPads/Safari), WebM/VP9 otherwise.
+     Only the cut that matches the screen is downloaded; rotating swaps it and
+     keeps the playback position. */
+  var EXT=(function(){ try{ var v=document.createElement('video'); if(v.canPlayType('video/mp4; codecs="avc1.640029"')||v.canPlayType('video/mp4; codecs="avc1.42E01E"')) return 'mp4'; }catch(e){} return 'webm'; })();
+  var VER='v=10', KEY='_r4uTutSeen', DELAY=2500;
+  function portrait(){ try{ return matchMedia('(orientation: portrait)').matches; }catch(e){ return innerHeight>innerWidth; } }
+  function SRCF(){ return '/media/tutorial'+(portrait()?'-v':'')+'.'+EXT+'?'+VER; }
+  function POSTERF(){ return '/media/poster'+(portrait()?'-v':'')+'.jpg?'+VER; }
+  var SRC=SRCF(), POSTER=POSTERF();
   var card=null, back=null, vid=null, timer=null;
   var SND_OFF='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m22 9-6 6M16 9l6 6"/></svg>', SND_ON='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
@@ -16030,11 +16051,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     if(card) return;
     back=document.createElement('div'); back.id='r4tutBack'; document.body.appendChild(back);
     card=document.createElement('section'); card.id='r4tut'; card.setAttribute('aria-label','How Resume For You works — short video');
-    card.innerHTML='<video muted playsinline preload="none" poster="'+POSTER+'" aria-label="Tutorial: build a resume in minutes"></video>'
+    card.innerHTML='<video muted playsinline webkit-playsinline preload="none" poster="'+POSTER+'" aria-label="Tutorial: build a resume in minutes"></video>'
       +'<div class="tt-bar"><span>How it works<em> · 1 min</em></span><span class="tt-r"><button type="button" class="tt-snd" aria-label="Turn sound on">'+SND_OFF+'<b>Sound</b></button><button type="button" class="tt-x" aria-label="Close video">×</button></span></div>'
       +'<button type="button" class="tt-play" aria-label="Play video">'+PLAY+'</button><div class="tt-prog"><i></i></div>';
     document.body.appendChild(card);
-    vid=card.querySelector('video');
+    vid=card.querySelector('video'); card.classList.toggle('pt',portrait());
+    try{ var mq=matchMedia('(orientation: portrait)'); var on=function(){ swap(); }; mq.addEventListener?mq.addEventListener('change',on):mq.addListener(on); }catch(e){} window.addEventListener('resize',function(){ clearTimeout(window.__r4tutRs); window.__r4tutRs=setTimeout(swap,250); });
     vid.addEventListener('timeupdate',function(){ var i=card.querySelector('.tt-prog i'); if(vid.duration) i.style.width=(vid.currentTime/vid.duration*100)+'%'; });
     vid.addEventListener('play',function(){ card.classList.remove('paused'); });
     vid.addEventListener('pause',function(){ card.classList.add('paused'); });
@@ -16047,6 +16069,15 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&card&&card.classList.contains('big')) shrink(); });
   }
   var bigX=null;
+  function swap(){
+    if(!card) return; var want=SRCF(); card.classList.toggle('pt',portrait());
+    if(SRC===want) return; SRC=want; POSTER=POSTERF(); vid.poster=POSTER;
+    if(!vid.getAttribute('src')) return;
+    var t=vid.currentTime||0, playing=!vid.paused;
+    vid.preload='auto'; vid.src=SRC;
+    vid.addEventListener('loadedmetadata',function f(){ vid.removeEventListener('loadedmetadata',f); try{ vid.currentTime=Math.min(t,(vid.duration||t)-0.1); }catch(e){} if(playing) vid.play().catch(function(){}); });
+    vid.load();
+  }
   function sound(on){ vid.muted=!on; var b=card.querySelector('.tt-snd'); if(b){ b.innerHTML=(on?SND_ON:SND_OFF)+'<b>'+(on?'On':'Sound')+'</b>'; b.setAttribute('aria-label',on?'Mute':'Turn sound on'); b.classList.toggle('on',on); } }
   function enlarge(){ card.classList.add('big'); back.classList.add('on'); sound(true); setTimeout(function(){ if(card.classList.contains('big')) vid.controls=true; },250);
     if(!bigX){ bigX=document.createElement('button'); bigX.type='button'; bigX.id='r4tutX'; bigX.setAttribute('aria-label','Close video'); bigX.textContent='\u00d7'; bigX.addEventListener('click',function(){ close(true); }); document.body.appendChild(bigX); }
