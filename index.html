@@ -16012,7 +16012,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   var card=null, back=null, vid=null, timer=null;
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
   function step(){ try{ return currentStep; }catch(e){ return 0; } }
-  function signedIn(){ try{ return !!(window._fbUser || (window._fbAuth && window._fbAuth.currentUser) || (typeof _fbUser!=='undefined' && _fbUser)); }catch(e){ return false; } }
+  /* _r4uHadAccount is kept in sync with Firebase auth, so returning signed-in
+     users are recognised before the SDK has finished loading. */
+  function signedIn(){ try{ if(localStorage.getItem('_r4uHadAccount')==='1') return true; }catch(e){} try{ return !!(window._fbUser || (window._fbAuth && window._fbAuth.currentUser) || (typeof _fbUser!=='undefined' && _fbUser)); }catch(e){ return false; } }
   function onLanding(){ return step()===0 && !document.body.classList.contains('r4u-in-step'); }
   function recent(){ var t=+ls(KEY)||0; return t && Date.now()-t < 7*864e5; }
   function quiet(){ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches || (navigator.connection && (navigator.connection.saveData || /2g/.test(navigator.connection.effectiveType||''))); }catch(e){ return false; } }
