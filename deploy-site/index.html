@@ -15981,6 +15981,12 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4tut .tt-bar span{pointer-events:none;white-space:nowrap;}#r4tut .tt-bar em{font-style:normal;opacity:.85;}#r4tut.big .tt-bar span{visibility:hidden;}
 #r4tut button{pointer-events:auto;border:0;cursor:pointer;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;}
 #r4tut button:focus-visible{outline:2px solid #f59e0b;outline-offset:2px;}
+#r4tut .tt-r{display:flex;align-items:center;gap:8px;pointer-events:auto;}
+#r4tut .tt-snd{width:auto!important;height:32px!important;padding:0 11px 0 9px!important;border-radius:999px!important;gap:5px;background:rgba(17,24,39,.72)!important;color:#fff;font:700 12px/1 Inter,system-ui,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.25);animation:r4snd 2.4s ease-in-out 1.2s 2;}
+#r4tut .tt-snd b{font-weight:700;}
+#r4tut .tt-snd.on{background:#f59e0b!important;color:#111827;animation:none;}
+@keyframes r4snd{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media (max-width:768px){#r4tut .tt-snd b{display:none;}#r4tut .tt-snd{width:32px!important;padding:0!important;justify-content:center;}}
 #r4tut .tt-x{font-size:20px;line-height:1;width:32px!important;height:32px!important;background:#fff!important;color:#111827!important;box-shadow:0 4px 12px rgba(0,0,0,.35);position:relative;z-index:3;font-weight:600;}
 #r4tutX{position:fixed;top:max(16px,env(safe-area-inset-top));right:16px;z-index:10002;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#111827;font-size:26px;line-height:1;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);}
 #r4tutX.on{display:flex;}
@@ -16008,8 +16014,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
      "Watch how it works" under the landing cards replays it anytime
    - reduced-motion / data-saver: card shows paused (no auto download+play) */
 (function(){
-  var SRC=(function(){ try{ var v=document.createElement('video'); if(v.canPlayType('video/mp4; codecs="avc1.42E01E"')) return '/media/tutorial.mp4?v=6'; }catch(e){} return '/media/tutorial.webm?v=6'; })(), POSTER='/media/poster.jpg?v=6', KEY='_r4uTutSeen', DELAY=2500;
+  var SRC=(function(){ try{ var v=document.createElement('video'); if(v.canPlayType('video/mp4; codecs="avc1.42E01E"')) return '/media/tutorial.mp4?v=7'; }catch(e){} return '/media/tutorial.webm?v=7'; })(), POSTER='/media/poster.jpg?v=7', KEY='_r4uTutSeen', DELAY=2500;
   var card=null, back=null, vid=null, timer=null;
+  var SND_OFF='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m22 9-6 6M16 9l6 6"/></svg>', SND_ON='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
   function step(){ try{ return currentStep; }catch(e){ return 0; } }
   /* _r4uHadAccount is kept in sync with Firebase auth, so returning signed-in
@@ -16024,7 +16031,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     back=document.createElement('div'); back.id='r4tutBack'; document.body.appendChild(back);
     card=document.createElement('section'); card.id='r4tut'; card.setAttribute('aria-label','How Resume For You works — short video');
     card.innerHTML='<video muted playsinline preload="none" poster="'+POSTER+'" aria-label="Tutorial: build a resume in minutes"></video>'
-      +'<div class="tt-bar"><span>How it works<em> · 1 min</em></span><button type="button" class="tt-x" aria-label="Close video">×</button></div>'
+      +'<div class="tt-bar"><span>How it works<em> · 1 min</em></span><span class="tt-r"><button type="button" class="tt-snd" aria-label="Turn sound on">'+SND_OFF+'<b>Sound</b></button><button type="button" class="tt-x" aria-label="Close video">×</button></span></div>'
       +'<button type="button" class="tt-play" aria-label="Play video">'+PLAY+'</button><div class="tt-prog"><i></i></div>';
     document.body.appendChild(card);
     vid=card.querySelector('video');
@@ -16032,14 +16039,16 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     vid.addEventListener('play',function(){ card.classList.remove('paused'); });
     vid.addEventListener('pause',function(){ card.classList.add('paused'); });
     vid.addEventListener('ended',function(){ ls(KEY,String(Date.now())); card.classList.add('paused'); if(card.classList.contains('big')) shrink(); });
-    vid.addEventListener('click',function(){ if(card.classList.contains('big')){ vid.paused?vid.play():vid.pause(); } else enlarge(); });
+    vid.addEventListener('click',function(e){ if(card.classList.contains('big')){ if(vid.controls) return; vid.paused?vid.play():vid.pause(); } else { e.preventDefault(); enlarge(); } });
     card.querySelector('.tt-play').addEventListener('click',function(e){ e.stopPropagation(); if(!vid.src) vid.src=SRC; vid.play().catch(function(){}); });
     card.querySelector('.tt-x').addEventListener('click',function(e){ e.stopPropagation(); close(true); });
+    card.querySelector('.tt-snd').addEventListener('click',function(e){ e.stopPropagation(); var on=vid.muted; sound(on); if(on){ if(!vid.src) vid.src=SRC; vid.play().catch(function(){}); } });
     back.addEventListener('click',shrink);
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&card&&card.classList.contains('big')) shrink(); });
   }
   var bigX=null;
-  function enlarge(){ card.classList.add('big'); back.classList.add('on'); vid.controls=true;
+  function sound(on){ vid.muted=!on; var b=card.querySelector('.tt-snd'); if(b){ b.innerHTML=(on?SND_ON:SND_OFF)+'<b>'+(on?'On':'Sound')+'</b>'; b.setAttribute('aria-label',on?'Mute':'Turn sound on'); b.classList.toggle('on',on); } }
+  function enlarge(){ card.classList.add('big'); back.classList.add('on'); sound(true); setTimeout(function(){ if(card.classList.contains('big')) vid.controls=true; },250);
     if(!bigX){ bigX=document.createElement('button'); bigX.type='button'; bigX.id='r4tutX'; bigX.setAttribute('aria-label','Close video'); bigX.textContent='\u00d7'; bigX.addEventListener('click',function(){ close(true); }); document.body.appendChild(bigX); }
     bigX.classList.add('on'); if(!vid.src) vid.src=SRC; vid.play().catch(function(){}); }
   function shrink(){ card.classList.remove('big'); back.classList.remove('on'); vid.controls=false; if(bigX) bigX.classList.remove('on'); }
@@ -16047,16 +16056,16 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
     build(); shrink();
     card.classList.add('on','paused');
     if(auto && quiet()) return;            // poster only; tap to play
-    vid.src=SRC; vid.muted=true;
+    vid.src=SRC; sound(false);
     var p=vid.play(); if(p&&p.catch) p.catch(function(){ card.classList.add('paused'); });
   }
   function close(remember){
     if(!card) return;
-    try{ vid.pause(); }catch(e){}
+    try{ vid.pause(); sound(false); }catch(e){}
     shrink(); card.classList.remove('on');
     if(remember) ls(KEY,String(Date.now()));
   }
-  window._r4uTutorial={ show:function(){ show(false); enlarge(); }, close:close };
+  window._r4uTutorial={ show:function(){ show(false); vid.currentTime=0; enlarge(); }, close:close };
   function schedule(){
     clearTimeout(timer);
     timer=setTimeout(function(){ if(onLanding() && !signedIn()) show(true); }, DELAY);
