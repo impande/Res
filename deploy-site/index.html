@@ -16004,8 +16004,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    - appears 2.5 s after the page has fully loaded, plays muted (browsers only
      allow muted autoplay); tap to enlarge; × closes it
    - never on other steps or for signed-in users; hides if they leave landing
-   - closed or watched to the end → not auto-played again on this device for
-     7 days; "Watch how it works" under the landing cards replays it anytime
+   - shows on every page load (closing hides it for that page view only);
+     "Watch how it works" under the landing cards replays it anytime
    - reduced-motion / data-saver: card shows paused (no auto download+play) */
 (function(){
   var SRC=(function(){ try{ var v=document.createElement('video'); if(v.canPlayType('video/mp4; codecs="avc1.42E01E"')) return '/media/tutorial.mp4?v=6'; }catch(e){} return '/media/tutorial.webm?v=6'; })(), POSTER='/media/poster.jpg?v=6', KEY='_r4uTutSeen', DELAY=2500;
@@ -16059,7 +16059,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   window._r4uTutorial={ show:function(){ show(false); enlarge(); }, close:close };
   function schedule(){
     clearTimeout(timer);
-    timer=setTimeout(function(){ if(onLanding() && !signedIn() && !recent()) show(true); }, DELAY);
+    timer=setTimeout(function(){ if(onLanding() && !signedIn()) show(true); }, DELAY);
   }
   // leaving the landing page (any step) or signing in hides it
   function watch(){
