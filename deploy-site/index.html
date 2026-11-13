@@ -15988,8 +15988,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 </style>
 <style id="_r4uTutCss">
 /* Landing tutorial video: floats in 2.5s after full load, muted autoplay. */
-#r4tut{position:fixed;right:18px;bottom:18px;z-index:9990;width:340px;border-radius:16px;overflow:hidden;background:#111827;box-shadow:0 18px 44px -14px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.06);opacity:0;transform:translateY(16px) scale(.97);transition:opacity .35s ease,transform .35s ease;font-family:Inter,system-ui,sans-serif;}
-#r4tut.on{opacity:1;transform:none;}
+#r4tut{position:fixed;right:18px;bottom:18px;z-index:9990;width:340px;border-radius:16px;overflow:hidden;background:#111827;box-shadow:0 18px 44px -14px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.06);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(16px) scale(.97);transition:opacity .35s ease,transform .35s ease,visibility 0s linear .35s;font-family:Inter,system-ui,sans-serif;}
+#r4tut.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .35s ease,transform .35s ease,visibility 0s;}
+#r4tut:not(.on) *{pointer-events:none!important;}
 #r4tut video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#f5f4f0;cursor:pointer;}
 #r4tut .tt-bar{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;justify-content:space-between;padding:8px 8px 18px 11px;background:linear-gradient(180deg,rgba(0,0,0,.6),transparent);color:#fff;font-size:.72rem;font-weight:700;pointer-events:none;}
 #r4tut .tt-bar span{pointer-events:none;white-space:nowrap;}#r4tut .tt-bar em{font-style:normal;opacity:.85;}#r4tut.big .tt-bar span{visibility:hidden;}
