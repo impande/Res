@@ -654,10 +654,16 @@ exports.handler = async (event) => {
   // Names saved in capitals ("ASHISH") are shown as "Ashish".
   const niceName = (n) => { const f = firstName(n); return /^[A-Z]{2,}$/.test(f) ? f.charAt(0) + f.slice(1).toLowerCase() : f; };
   const MAIN = (name) => (name ? '👋 Hi ' + niceName(name) + '! ' : '👋 Hi! ') + 'Welcome to *Resume For You*.\n\n' +
-    'Reply with a number:\n1️⃣  Build or edit my resume\n2️⃣  Find jobs for me\n3️⃣  Daily job alerts\n4️⃣  Interview practice\n5️⃣  Talk to support\n\n' +
+    'Reply with a number:\n1️⃣  Build or edit my resume\n2️⃣  Find jobs for me\n3️⃣  Daily job alerts\n4️⃣  Interview practice\n5️⃣  Talk to support\n6️⃣  Video guides — how it works\n\n' +
     '_Reply *menu* anytime to see this again._';
   const MENU = '📝 *Your resume* — reply with a number:\n1️⃣  Edit my saved resume\n2️⃣  Start a fresh one\n3️⃣  Import a PDF (just send it here)\n0️⃣  Main menu';
   const MENU_NEW = '📝 *Your resume* — reply with a number:\n1️⃣  Build it by chat (about 5 minutes)\n2️⃣  Import a PDF or photo of an existing resume\n0️⃣  Main menu';
+  const GUIDES = () => '🎬 *Video guides* — short videos, one feature at a time:\n\n' +
+    [['Build your resume', 'build-your-resume', '0:49'], ['AI bullet points', 'ai-bullet-points', '0:46'], ['Choose a template', 'templates', '0:40'],
+     ['Check your ATS score', 'ats-score', '0:53'], ['Download & share', 'download-and-share', '0:49'], ['Daily job alerts', 'job-alerts', '0:53'],
+     ['Interview practice', 'interview-practice', '1:11']]
+      .map((g, i) => (i + 1) + '. *' + g[0] + '* (' + g[2] + ')\n' + base + '/how-it-works/' + g[1] + '/').join('\n') +
+    '\n\nAll guides: ' + base + '/how-it-works/\n\n_Reply *menu* for the main menu._';
   const IV_MENU = '🎤 *Interview practice* — reply with a number:\n1️⃣  Mock interview (I ask, you answer, I score it)\n2️⃣  5 likely questions + tips\n0️⃣  Main menu';
 
   try {
@@ -834,6 +840,12 @@ exports.handler = async (event) => {
       await send(from, MAIN(pn));
       return OK;
     }
+    // Video guides ("guides", "tutorial", "how it works", "how to use", "video")
+    if (/^(video\s*)?(guides?|tutorials?|videos?)[.!?\s]*$|^how\s+(does\s+(it|this)\s+work|it\s+works|to\s+use(\s+(it|this|resume4u|resume for you))?|do\s+i\s+use\s+(it|this))[.!?\s]*$/i.test(low.trim())) {
+      await setState(from, { step: 0, mode: 'main', data: state.data });
+      await send(from, GUIDES());
+      return OK;
+    }
     // Menu / help
     if (/^(menu|main menu|help|options|commands|\?)$/i.test(low) || (/^0$/.test(low.trim()) && /^(main|menu|ivmenu|ask|alertmenu)$/.test(state.mode))) {
       const p = await getProfile(from); const pn = p && (p.name || p.firstName);
@@ -875,6 +887,9 @@ exports.handler = async (event) => {
       } else if (digit === '4') {
         await setState(from, { step: 0, mode: 'ivmenu', data: state.data });
         await send(from, IV_MENU);
+        return OK;
+      } else if (digit === '6') {
+        await send(from, GUIDES());
         return OK;
       } else if (digit === '5') {
         const _pf = await getProfile(from);
