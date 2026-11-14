@@ -126,7 +126,7 @@
         '<span class="sv-ic" aria-hidden="true">✓</span><span class="sv-tx"><b>Use my Resume For You resume</b>' +
         '<span>' + RT.esc(saved.name) + (saved.when ? ' · ' + ago(saved.when) : '') + '</span></span></label>' +
         '<div class="or"><span>or use a different one</span></div>' : '') +
-      '<div class="drop" tabindex="0" role="button" aria-label="' + RT.esc(opts.uploadLabel || 'Upload your resume (PDF)') + '">' +
+      '<div class="drop" tabindex="0" role="button">' +
         '<span class="drop-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m7 8 5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg></span>' +
         '<span class="drop-tx"><b>' + RT.esc(opts.uploadLabel || 'Upload your resume (PDF)') + '</b><span class="dmsg">' + DROP_MSG + '</span></span>' +
         '<span class="drop-go" aria-hidden="true">Browse</span>' +

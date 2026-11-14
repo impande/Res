@@ -75,7 +75,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);
 .or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:.76rem;}
 .or::before,.or::after{content:"";flex:1;height:1px;background:var(--border);}
 .howto{margin-top:8px;font-size:.84rem;color:var(--muted);}
-.howto summary{cursor:pointer;color:var(--accent);font-weight:600;}
+.howto summary{cursor:pointer;color:var(--accent);font-weight:600;display:inline-block;min-height:24px;padding:4px 0;}
 .howto div{margin-top:6px;line-height:1.55;}
 .howto ol{margin:4px 0 0 18px;}
 .linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;padding:8px 0 2px;text-decoration:underline;text-decoration-color:#efcfa6;text-underline-offset:3px;}
@@ -219,3 +219,15 @@ footer.foot a{color:var(--muted);margin:0 6px;}
 /* WhatsApp buttons keep WhatsApp green with white text */
 .btn.wa{color:#fff;border-color:transparent;text-shadow:0 1px 1px rgba(0,0,0,.12);}
 @media (hover:hover){.btn.wa:not(:disabled):hover{box-shadow:0 16px 28px -14px rgba(26,168,81,.9);}}
+
+/* Guide chip styles (also injected by guides.js) — here so the static chip paints at its final size (no layout shift). */
+.r4g-chip{display:inline-flex;align-items:center;gap:6px;margin:8px 0 0;padding:5px 11px 5px 6px;border:1px solid #f3d9b5;border-radius:99px;background:#fff8ef;color:#9a4a0b;font:inherit;font-size:.78rem;font-weight:700;line-height:1.2;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.r4g-chip:hover{background:#ffefd9;border-color:#e9b97a;box-shadow:0 4px 12px -8px rgba(217,119,6,.8)}
+.r4g-chip:focus-visible{outline:3px solid rgba(217,119,6,.45);outline-offset:2px}
+.r4g-chip i{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:linear-gradient(145deg,#f59e0b,#ea580c);flex:0 0 auto}
+.r4g-chip i svg{width:9px;height:9px;margin-left:1px}
+.r4g-chip em{font-style:normal;font-weight:600;color:#8a4210}
+
+/* Reserve the upload box's height before tools.js fills it (no layout shift). */
+#resume:empty{min-height:124px;}
+@media (min-width:600px){#resume:empty{min-height:104px;}}

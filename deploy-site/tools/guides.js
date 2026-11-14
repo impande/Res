@@ -30,7 +30,7 @@
     + '.r4g-chip:focus-visible{outline:3px solid rgba(217,119,6,.45);outline-offset:2px}'
     + '.r4g-chip i{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:linear-gradient(145deg,#f59e0b,#ea580c);flex:0 0 auto}'
     + '.r4g-chip i svg{width:9px;height:9px;margin-left:1px}'
-    + '.r4g-chip em{font-style:normal;font-weight:600;color:#b4651f;opacity:.85}'
+    + '.r4g-chip em{font-style:normal;font-weight:600;color:#8a4210}'
     + '#r4gOv{position:fixed;inset:0;z-index:100060;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(17,14,10,.72);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:0;transition:opacity .2s}'
     + '#r4gOv.on{opacity:1}'
     + '#r4gBox{position:relative;width:min(960px,100%);max-height:100%;overflow:auto;background:#faf8f4;color:#1a1a1a;border-radius:18px;box-shadow:0 40px 90px -30px rgba(0,0,0,.6);font-family:inherit;transform:translateY(10px);transition:transform .2s}'
