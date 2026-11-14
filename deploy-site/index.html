@@ -12650,7 +12650,7 @@ window.__novaPortfolioHTML=function(d,sections){
     bar.setAttribute('tabindex','0');
     bar.innerHTML='<span class="jdt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="#fff" stroke="none"/></svg></span>'
       +'<span class="jdt-body"><span class="jdt-title">Tailor to a job description</span><span class="r4m-t">Match a job</span>'
-      +'<span class="jdt-sub">Paste a job post — see your ATS keyword match and add what’s missing.</span><span class="r4m-sub">Match your resume to a job post</span></span>'
+      +'<span class="jdt-sub">Paste a job post — see your ATS keyword match and add what’s missing.</span><span class="r4m-sub">JD keywords</span></span>'
       +'<span class="jdt-go"><span class="r4go-w">Check</span><span class="r4go-w r4go-l">match</span><span class="r4go-ar">→</span></span>';
     bar.addEventListener('click',openJdMatch);
     bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openJdMatch(); } });
@@ -13134,7 +13134,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function sync(){
     if(!bar){
       bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
-      bar.innerHTML='<span class="rb-ico"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg></span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="r4m-t">ATS score</span><span class="rb-sub">Instant ATS readiness score for your resume — see what’s weak and fix it in one tap.</span><span class="r4m-sub">See what’s weak, fix in 1 tap</span></span><span class="rb-go"><span class="r4go-w">Check</span><span class="r4go-w r4go-l">score</span><span class="r4go-ar">→</span></span>';
+      bar.innerHTML='<span class="rb-ico"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg></span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="r4m-t">ATS score</span><span class="rb-sub">Instant ATS readiness score for your resume — see what’s weak and fix it in one tap.</span><span class="r4m-sub">Fix in 1 tap</span></span><span class="rb-go"><span class="r4go-w">Check</span><span class="r4go-w r4go-l">score</span><span class="r4go-ar">→</span></span>';
       bar.addEventListener('click',open);
       bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
@@ -16378,9 +16378,24 @@ html body #_r4uRoastBar .r4m-sub, html body #_r4uJdTailorBar .r4m-sub, html body
   html body #_r4uRoastBar .rb-go .r4go-w, html body #_r4uJdTailorBar .jdt-go .r4go-w{display:none;}
 }
 @media (max-width:768px){ html body #step8 .resume-bar{padding-bottom:4px !important;} }
+@media (max-width:768px){
+  /* give each tile its own colour so they stand out (purple = job match, teal = ATS) */
+  html body #_r4uJdTailorBar{background:linear-gradient(135deg,#f3efff,#ffffff 85%) !important;border:1.5px solid #c9b8fb !important;box-shadow:0 10px 20px -14px rgba(109,40,217,.65) !important;}
+  html body #_r4uRoastBar{background:linear-gradient(135deg,#e9fbf6,#ffffff 85%) !important;border:1.5px solid #8fe3d2 !important;box-shadow:0 10px 20px -14px rgba(13,148,136,.65) !important;}
+  html body #_r4uJdTailorBar::before, html body #_r4uRoastBar::before{display:none !important;}
+  html body #_r4uJdTailorBar .r4m-t{color:#5b21b6 !important;}
+  html body #_r4uRoastBar .r4m-t{color:#0f766e !important;}
+  html body #_r4uRoastBar .r4m-sub, html body #_r4uJdTailorBar .r4m-sub{display:block !important;font-size:.66rem;font-weight:600;margin-top:1px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  html body #_r4uJdTailorBar .r4m-sub{color:#7c3aed;}
+  html body #_r4uRoastBar .r4m-sub{color:#0d9488;}
+  html body #_r4uJdTailorBar .jdt-go{background:linear-gradient(135deg,#8b5cf6,#6d28d9) !important;color:#fff !important;box-shadow:0 6px 12px -6px rgba(109,40,217,.8) !important;}
+  html body #_r4uRoastBar .rb-go{background:linear-gradient(135deg,#2dd4bf,#0d9488) !important;color:#fff !important;box-shadow:0 6px 12px -6px rgba(13,148,136,.8) !important;}
+  html body #_r4uJdTailorBar .jdt-ico{box-shadow:0 6px 12px -6px rgba(109,40,217,.8) !important;}
+}
 @media (max-width:374px){
   html body #_r4uRoastBar, html body #_r4uJdTailorBar{gap:6px !important;padding:8px 7px 8px 8px !important;}
   html body #_r4uRoastBar .r4m-t, html body #_r4uJdTailorBar .r4m-t{font-size:.74rem;white-space:nowrap;}
+  html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{flex-basis:24px !important;width:24px !important;height:24px !important;font-size:.76rem !important;}
 }
 @media (max-width:768px){
   /* "Use this resume for": smaller tiles */
