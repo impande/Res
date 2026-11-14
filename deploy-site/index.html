@@ -12649,9 +12649,9 @@ window.__novaPortfolioHTML=function(d,sections){
     bar.setAttribute('role','button');
     bar.setAttribute('tabindex','0');
     bar.innerHTML='<span class="jdt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="#fff" stroke="none"/></svg></span>'
-      +'<span class="jdt-body"><span class="jdt-title">Tailor to a job description</span>'
+      +'<span class="jdt-body"><span class="jdt-title">Tailor to a job description</span><span class="r4m-t">Match a job</span>'
       +'<span class="jdt-sub">Paste a job post — see your ATS keyword match and add what’s missing.</span><span class="r4m-sub">Match your resume to a job post</span></span>'
-      +'<span class="jdt-go">Check<span class="r4go-l">&nbsp;match</span> <span class="r4go-ar">→</span></span>';
+      +'<span class="jdt-go"><span class="r4go-w">Check</span><span class="r4go-w r4go-l">match</span><span class="r4go-ar">→</span></span>';
     bar.addEventListener('click',openJdMatch);
     bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openJdMatch(); } });
     place(bar);
@@ -13134,7 +13134,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function sync(){
     if(!bar){
       bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
-      bar.innerHTML='<span class="rb-ico"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg></span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="rb-sub">Instant ATS readiness score for your resume — see what’s weak and fix it in one tap.</span><span class="r4m-sub">See what’s weak, fix in 1 tap</span></span><span class="rb-go">Check<span class="r4go-l">&nbsp;score</span> <span class="r4go-ar">→</span></span>';
+      bar.innerHTML='<span class="rb-ico"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg></span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="r4m-t">ATS score</span><span class="rb-sub">Instant ATS readiness score for your resume — see what’s weak and fix it in one tap.</span><span class="r4m-sub">See what’s weak, fix in 1 tap</span></span><span class="rb-go"><span class="r4go-w">Check</span><span class="r4go-w r4go-l">score</span><span class="r4go-ar">→</span></span>';
       bar.addEventListener('click',open);
       bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
@@ -16361,17 +16361,35 @@ html body #_r4uRoastBar .rb-go .r4go-ar, html body #_r4uJdTailorBar .jdt-go .r4g
 @keyframes r4GoNudge{0%,60%,100%{transform:translateX(0)}30%{transform:translateX(3px)}}
 html body #_r4uRoastBar:active, html body #_r4uJdTailorBar:active{transform:scale(.985) !important;}
 @media (hover:hover){html body #_r4uRoastBar:hover .rb-go, html body #_r4uJdTailorBar:hover .jdt-go{background:linear-gradient(135deg,var(--r4-a2),var(--r4-a3)) !important;}}
-html body #_r4uRoastBar .r4m-sub, html body #_r4uJdTailorBar .r4m-sub{display:none;}
-@media (max-width:520px){
-  /* phones: one compact row — small icon, title + short line, small amber button on the right */
-  html body #_r4uRoastBar, html body #_r4uJdTailorBar{flex-wrap:nowrap !important;align-items:center !important;gap:10px !important;padding:9px 10px 9px 11px !important;margin-top:10px !important;border-radius:12px !important;}
-  html body #_r4uRoastBar .rb-ico, html body #_r4uJdTailorBar .jdt-ico{width:30px !important;height:30px !important;border-radius:9px !important;}
-  html body #_r4uRoastBar .rb-ico svg, html body #_r4uJdTailorBar .jdt-ico svg{width:16px !important;height:16px !important;}
-  html body #_r4uRoastBar .rb-title, html body #_r4uJdTailorBar .jdt-title{font-size:.84rem !important;}
-  html body #_r4uRoastBar .rb-sub, html body #_r4uJdTailorBar .jdt-sub{display:none !important;}
-  html body #_r4uRoastBar .r4m-sub, html body #_r4uJdTailorBar .r4m-sub{display:block;font-size:.72rem;color:var(--muted,#6b7280);margin-top:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{margin-left:0 !important;padding:7px 11px 7px 13px !important;font-size:.76rem !important;gap:4px !important;}
-  html body #_r4uRoastBar .r4go-l, html body #_r4uJdTailorBar .r4go-l{display:none;}
+html body #_r4uRoastBar .r4m-sub, html body #_r4uJdTailorBar .r4m-sub, html body #_r4uRoastBar .r4m-t, html body #_r4uJdTailorBar .r4m-t{display:none;}
+@media (max-width:768px){
+  /* phones: two small tiles side by side — icon + short title, amber "Check" chip */
+  html body #_r4uRoastBar.show, html body #_r4uJdTailorBar.show{display:inline-flex !important;}
+  html body #_r4uRoastBar, html body #_r4uJdTailorBar{box-sizing:border-box !important;width:calc(50% - 4px) !important;vertical-align:top !important;flex-wrap:wrap !important;align-items:center !important;align-content:flex-start !important;
+    gap:8px !important;padding:10px !important;margin:12px 0 0 !important;border-radius:14px !important;}
+  html body #_r4uJdTailorBar{margin-right:8px !important;}
+  html body #_r4uRoastBar .rb-ico, html body #_r4uJdTailorBar .jdt-ico{width:28px !important;height:28px !important;border-radius:8px !important;margin:0 !important;}
+  html body #_r4uRoastBar .rb-ico svg, html body #_r4uJdTailorBar .jdt-ico svg{width:15px !important;height:15px !important;}
+  html body #_r4uRoastBar .rb-body, html body #_r4uJdTailorBar .jdt-body{flex:1 1 0 !important;min-width:0 !important;}
+  html body #_r4uRoastBar .rb-title, html body #_r4uJdTailorBar .jdt-title, html body #_r4uRoastBar .rb-sub, html body #_r4uJdTailorBar .jdt-sub{display:none !important;}
+  html body #_r4uRoastBar .r4m-t, html body #_r4uJdTailorBar .r4m-t{display:block;font-size:.8rem;font-weight:800;line-height:1.2;color:var(--text,#1a1a1a);}
+  html body #_r4uRoastBar, html body #_r4uJdTailorBar{flex-wrap:nowrap !important;padding:9px 9px 9px 10px !important;}
+  html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{flex:0 0 28px !important;width:28px !important;height:28px !important;margin:0 !important;padding:0 !important;justify-content:center !important;border-radius:50% !important;font-size:.85rem !important;}
+  html body #_r4uRoastBar .rb-go .r4go-w, html body #_r4uJdTailorBar .jdt-go .r4go-w{display:none;}
+}
+@media (max-width:768px){ html body #step8 .resume-bar{padding-bottom:4px !important;} }
+@media (max-width:374px){
+  html body #_r4uRoastBar, html body #_r4uJdTailorBar{gap:6px !important;padding:8px 7px 8px 8px !important;}
+  html body #_r4uRoastBar .r4m-t, html body #_r4uJdTailorBar .r4m-t{font-size:.74rem;white-space:nowrap;}
+}
+@media (max-width:768px){
+  /* "Use this resume for": smaller tiles */
+  html body #_r4uNextBar{padding:10px !important;margin-top:12px !important;}
+  html body #_r4uNextBar .nb-h{margin:0 2px 8px !important;font-size:.8rem !important;}
+  html body #_r4uNextBar .r4u-tl{padding:8px 2px !important;gap:5px !important;}
+  html body #_r4uNextBar .r4u-tl .r4u-ic{width:28px !important;height:28px !important;border-radius:8px !important;}
+  html body #_r4uNextBar .r4u-tl .r4u-ic svg{width:15px !important;height:15px !important;}
+  html body #_r4uNextBar .r4u-tl b{font-size:.68rem !important;}
 }
 @media (prefers-reduced-motion:reduce){html body #_r4uRoastBar .r4go-ar, html body #_r4uJdTailorBar .r4go-ar{animation:none !important;}}
 html body #aiChatCta svg path{stroke:#ea580c !important;}
@@ -16431,13 +16449,24 @@ html body #dlActions .btn-dl.btn-dl-pdf{animation:r4PdfShine 5s ease-in-out 1.2s
 html body #dlActions .btn-dl:active .dli{transform:scale(.9);}
 /* tablets: a tidy 2x2 grid instead of 3 + 1 */
 @media (min-width:769px) and (max-width:980px){html body #dlActions:not([style*="none"]){display:grid !important;grid-template-columns:1fr 1fr !important;width:100% !important;flex-direction:initial !important;} html body #dlActions .btn-dl{width:100%;}}
-/* phones: stacked full-width tiles, content left, arrow right */
+/* phones: one main action (Download PDF, full width) + a row of three small tiles */
 @media (max-width:768px){
-  html body #dlActions .btn-dl{padding:10px 14px 10px 10px !important;}
-  html body #dlActions .dli{width:38px;height:38px;border-radius:12px;}
-  html body #dlActions .dlt b{font-size:.95rem;} html body #dlActions .dlt small{font-size:.72rem;}
-  html body #dlActions .btn-dl::after{content:"\2192";margin-left:auto;font-weight:800;opacity:.55;transition:transform .2s;}
-  html body #dlActions .btn-dl:active::after{transform:translateX(3px);}
+  html body #dlActions:not([style*="none"]){display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:8px !important;width:100% !important;}
+  html body #dlActions .btn-dl{width:100% !important;min-width:0 !important;flex-direction:column !important;justify-content:center !important;gap:5px !important;padding:9px 4px 8px !important;border-radius:14px !important;}
+  html body #dlActions .dli{width:30px;height:30px;border-radius:9px;}
+  html body #dlActions .dli svg{width:15px;height:15px;}
+  html body #dlActions .dlt{align-items:center;}
+  html body #dlActions .dlt b{font-size:.74rem;white-space:normal;text-align:center;}
+  html body #dlActions .dlt small{display:none;}
+  html body #dlActions .btn-dl.btn-dl-pdf{grid-column:1 / -1;order:-1;flex-direction:row !important;justify-content:flex-start !important;gap:10px !important;padding:9px 14px 9px 9px !important;}
+  html body #dlActions .btn-dl-pdf .dli{width:34px;height:34px;border-radius:10px;}
+  html body #dlActions .btn-dl-pdf .dlt{align-items:flex-start;}
+  html body #dlActions .btn-dl-pdf .dlt b{font-size:.95rem;}
+  html body #dlActions .btn-dl-pdf .dlt small{display:block;font-size:.7rem;}
+  html body #dlActions .btn-dl-pdf::after{content:"\2192";margin-left:auto;font-weight:800;opacity:.6;transition:transform .2s;}
+  html body #dlActions .btn-dl-pdf:active::after{transform:translateX(3px);}
+  html body .resume-bar-left .r4g-chip{background:none !important;border:0 !important;padding:2px 0 !important;margin-top:6px !important;font-size:.74rem !important;box-shadow:none !important;}
+  html body .resume-bar-left .r4g-chip i{width:18px;height:18px;}
 }
 @media (prefers-reduced-motion:reduce){html body #dlActions .btn-dl.btn-dl-pdf{animation:none;} html body #dlActions .btn-dl:hover .dli{animation:none;}}
 
