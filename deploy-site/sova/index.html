@@ -10,17 +10,17 @@
 <meta property="og:title" content="Sova — Create the perfect prompt for anything">
 <meta property="og:description" content="Turn any question into a ready-to-use AI prompt with Sova. Type it or add a photo, get an expert prompt for ChatGPT, Claude or Gemini. Free, by resume4u.help.">
 <meta property="og:url" content="https://resume4u.help/sova/">
-<meta property="og:image" content="https://resume4u.help/og-image.png">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Sova — Create the perfect prompt for anything">
 <meta name="twitter:description" content="Turn any question into a ready-to-use AI prompt with Sova, for ChatGPT, Claude or Gemini. Free, by resume4u.help.">
-<meta name="twitter:image" content="https://resume4u.help/og-image.png">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2048%2048'%3E%3Cpath%20d='M9%205%20h30%20a5%205%200%200%201%205%205%20v20%20a5%205%200%200%201%20-5%205%20h-19%20l-9%207%20v-7%20h-2%20a5%205%200%200%201%20-5%20-5%20v-20%20a5%205%200%200%201%205%20-5%20z'%20fill='%23b45309'/%3E%3Ccircle%20cx='18'%20cy='19'%20r='5.6'%20fill='%23fff'/%3E%3Ccircle%20cx='30'%20cy='19'%20r='5.6'%20fill='%23fff'/%3E%3Ccircle%20cx='18'%20cy='19'%20r='2.2'%20fill='%23b45309'/%3E%3Ccircle%20cx='30'%20cy='19'%20r='2.2'%20fill='%23b45309'/%3E%3Cpath%20d='M24%2023%20l-2.4%202.8%20h4.8%20z'%20fill='%23fbe4cd'/%3E%3C/svg%3E">
 <style>
   /* Professional, authentic, light. Warm-neutral paper, hairline rules,
      one restrained deep-amber accent (the resume4u note). No emoji chrome. */
   :root{
-    --paper:#faf9f7; --panel:#ffffff; --ink:#1b1a17; --muted:#6f6a61; --faint:#98928a;
+    --paper:#faf9f7; --panel:#ffffff; --ink:#1b1a17; --muted:#6f6a61; --faint:#6f6a62;
     --line:#e7e2da; --line-soft:#efeae2;
     --accent:#b45309; --accent-ink:#ffffff; --tint:#f6efe3;
     --radius:14px;
@@ -58,8 +58,8 @@
   .photochip b{color:var(--ink);font-weight:600}
   .photochip a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600}
   .try{margin:14px 2px 0;font-size:13.5px;color:var(--faint);text-align:center}
-  .try a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);cursor:pointer;display:inline-block;margin:3px 6px;padding-bottom:1px}
-  .try a:hover{border-color:var(--accent);color:var(--accent)}
+  .try a,.try button{color:var(--ink);text-decoration:none;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;cursor:pointer;display:inline-block;margin:3px 6px;padding:0 0 1px}
+  .try a:hover,.try button:hover{border-color:var(--accent);color:var(--accent)}
 
   .result{margin-top:20px;display:none}
   .result.show{display:block;animation:fade .45s ease}
@@ -74,10 +74,11 @@
   .dlwrap{padding:0 18px 18px}
 
   .tabs{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
-  .tabs a{color:var(--ink);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;
+  .tabs button{font-family:inherit;background:none;}
+  .tabs a,.tabs button{color:var(--ink);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;
     border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 15px;transition:.15s}
-  .tabs a:hover{border-color:var(--ink)}
-  .tabs a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tabs a:hover,.tabs button:hover{border-color:var(--ink)}
+  .tabs a.on,.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
   .drawer{display:none;margin-top:12px;padding:18px}
   .drawer.show{display:block}
@@ -184,9 +185,9 @@
     </div>
 
     <div class="tabs">
-      <a id="tabLook" onclick="only('drawerLook')">Edit image</a>
-      <a id="tabChat" onclick="only('drawerChat')">Refine</a>
-      <a onclick="startOver()">New question</a>
+      <button type="button" id="tabLook" onclick="only('drawerLook')">Edit image</button>
+      <button type="button" id="tabChat" onclick="only('drawerChat')">Refine</button>
+      <button type="button" onclick="startOver()">New question</button>
     </div>
 
     <!-- EDIT -->
@@ -247,7 +248,7 @@ const EXAMPLES=[
   'How do I answer “tell me about yourself” in an interview?',
   'A simple morning routine to feel more energetic',
 ];
-$('examples').innerHTML=EXAMPLES.map((e,i)=>`<a data-i="${i}">${e.length>28?e.slice(0,28)+'…':e}</a>`).join('');
+$('examples').innerHTML=EXAMPLES.map((e,i)=>`<button type="button" data-i="${i}">${e.length>28?e.slice(0,28)+'…':e}</button>`).join('');
 $('examples').addEventListener('click',e=>{const a=e.target.closest('[data-i]');if(a){$('q').value=EXAMPLES[+a.getAttribute('data-i')];run();}});
 
 function role(t){t=t.toLowerCase();
