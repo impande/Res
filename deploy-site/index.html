@@ -67,6 +67,55 @@
     }catch(e){}
   })();
   </script>
+  <script id="_r4uGenBgJS">
+  /* Long AI requests (writing a full resume, whole-resume rewrites) run as a
+     background job so they are never cut off by the 26 s function limit (that was
+     the "Server error 504"). The page code still calls /.netlify/functions/generate
+     as before; this wrapper sends long requests to generate-background, polls for
+     the result and hands back an identical { text } response. Short requests and
+     anything unusual go straight through unchanged. Installed before the app's own
+     fetch wrappers, so they still see a normal response. */
+  (function(){
+    var nf=window.fetch; if(!nf||window.__r4uGenBg) return; window.__r4uGenBg=1;
+    var GEN=/\/\.netlify\/functions\/generate(\?|$)/;
+    function isLong(b){ return b && typeof b.prompt==='string' && !b.action && !b.imageBase64 && !b.imageBase64Array &&
+      (b.prompt.length>=1200 || /Generate a complete,? interview-winning resume/i.test(b.prompt)); }
+    function hex(n){ var a=new Uint8Array(n); (window.crypto||window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a,function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }
+    function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+    function reply(status,obj){ return new Response(JSON.stringify(obj),{status:status,headers:{'Content-Type':'application/json'}}); }
+    async function viaBackground(b,input,init){
+      var id; try{ id=hex(16); }catch(e){ return nf(input,init); }
+      var started=false;
+      try{
+        var r=await nf('/.netlify/functions/generate-background',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},b,{jobId:id}))});
+        if(r.status===200){ var j0=await r.json().catch(function(){return null;});   // ran synchronously
+          if(j0&&j0.status==='done') return reply(200,j0.result||{text:''});
+          if(j0&&j0.status==='error') return reply(j0.code||502,{text:'',error:j0.error}); }
+        if(r.status!==202&&r.status!==200) return nf(input,init);                   // no background support → old path
+        started=true;
+        var t0=Date.now();
+        while(Date.now()-t0<180000){
+          await sleep(Date.now()-t0<20000?1500:2500);
+          var p; try{ p=await nf('/.netlify/functions/career-tools?job='+id,{cache:'no-store'}); }catch(e){ continue; }
+          if(!p.ok) continue;
+          var j=await p.json().catch(function(){return null;}); if(!j) continue;
+          if(j.status==='done') return reply(200,j.result||{text:''});
+          if(j.status==='error') return reply(j.code||502,{text:'',error:j.error||'AI error'});
+        }
+        return reply(504,{text:'',error:'This is taking longer than usual. Please try again.'});
+      }catch(e){ return started ? reply(502,{text:'',error:'Connection problem. Please try again.'}) : nf(input,init); }
+    }
+    window.fetch=function(input,init){
+      try{
+        var url=typeof input==='string'?input:(input&&input.url)||'';
+        if(GEN.test(url)&&init&&/post/i.test(init.method||'')&&typeof init.body==='string'){
+          var b=JSON.parse(init.body); if(isLong(b)) return viaBackground(b,input,init);
+        }
+      }catch(e){}
+      return nf.apply(this,arguments);
+    };
+  })();
+  </script>
   <!-- Perf: warm up TLS/DNS to Firebase & Google auth hosts that sit on the sign-in + cloud-restore critical path -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
