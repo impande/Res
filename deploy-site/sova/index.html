@@ -20,7 +20,7 @@
   /* Professional, authentic, light. Warm-neutral paper, hairline rules,
      one restrained deep-amber accent (the resume4u note). No emoji chrome. */
   :root{
-    --paper:#faf9f7; --panel:#ffffff; --ink:#1b1a17; --muted:#6f6a61; --faint:#98928a;
+    --paper:#faf9f7; --panel:#ffffff; --ink:#1b1a17; --muted:#6f6a61; --faint:#6f6a62;
     --line:#e7e2da; --line-soft:#efeae2;
     --accent:#b45309; --accent-ink:#ffffff; --tint:#f6efe3;
     --radius:14px;
@@ -58,8 +58,8 @@
   .photochip b{color:var(--ink);font-weight:600}
   .photochip a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600}
   .try{margin:14px 2px 0;font-size:13.5px;color:var(--faint);text-align:center}
-  .try a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);cursor:pointer;display:inline-block;margin:3px 6px;padding-bottom:1px}
-  .try a:hover{border-color:var(--accent);color:var(--accent)}
+  .try a,.try button{color:var(--ink);text-decoration:none;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;cursor:pointer;display:inline-block;margin:3px 6px;padding:0 0 1px}
+  .try a:hover,.try button:hover{border-color:var(--accent);color:var(--accent)}
 
   .result{margin-top:20px;display:none}
   .result.show{display:block;animation:fade .45s ease}
@@ -74,10 +74,11 @@
   .dlwrap{padding:0 18px 18px}
 
   .tabs{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
-  .tabs a{color:var(--ink);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;
+  .tabs button{font-family:inherit;background:none;}
+  .tabs a,.tabs button{color:var(--ink);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;
     border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 15px;transition:.15s}
-  .tabs a:hover{border-color:var(--ink)}
-  .tabs a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tabs a:hover,.tabs button:hover{border-color:var(--ink)}
+  .tabs a.on,.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
   .drawer{display:none;margin-top:12px;padding:18px}
   .drawer.show{display:block}
@@ -184,9 +185,9 @@
     </div>
 
     <div class="tabs">
-      <a id="tabLook" onclick="only('drawerLook')">Edit image</a>
-      <a id="tabChat" onclick="only('drawerChat')">Refine</a>
-      <a onclick="startOver()">New question</a>
+      <button type="button" id="tabLook" onclick="only('drawerLook')">Edit image</button>
+      <button type="button" id="tabChat" onclick="only('drawerChat')">Refine</button>
+      <button type="button" onclick="startOver()">New question</button>
     </div>
 
     <!-- EDIT -->
@@ -247,7 +248,7 @@ const EXAMPLES=[
   'How do I answer “tell me about yourself” in an interview?',
   'A simple morning routine to feel more energetic',
 ];
-$('examples').innerHTML=EXAMPLES.map((e,i)=>`<a data-i="${i}">${e.length>28?e.slice(0,28)+'…':e}</a>`).join('');
+$('examples').innerHTML=EXAMPLES.map((e,i)=>`<button type="button" data-i="${i}">${e.length>28?e.slice(0,28)+'…':e}</button>`).join('');
 $('examples').addEventListener('click',e=>{const a=e.target.closest('[data-i]');if(a){$('q').value=EXAMPLES[+a.getAttribute('data-i')];run();}});
 
 function role(t){t=t.toLowerCase();
