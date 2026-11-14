@@ -3272,10 +3272,10 @@
         <p id="resumeStatus">Ready to generate</p>
       </div>
       <div class="resume-bar-actions" id="dlActions" style="display:none">
-        <button class="btn-dl btn-dl-qr" onclick="_r4uShareResumeQR()" title="Get a QR code that links to your online profile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="17"/><line x1="17" y1="14" x2="17" y2="14"/><line x1="21" y1="14" x2="21" y2="17"/><line x1="14" y1="21" x2="17" y2="21"/><line x1="21" y1="20" x2="21" y2="21"/></svg>Share / QR</button>
-        <button class="btn-dl btn-dl-pdf" onclick="downloadPDF()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download PDF</button>
-        <button class="btn-dl btn-dl-cl" onclick="openCoverLetter()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Cover Letter</button>
-        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Download DOC</button>
+        <button class="btn-dl btn-dl-qr" onclick="_r4uShareResumeQR()" title="Get a QR code that links to your online profile"><span class="dli" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="17"/><line x1="17" y1="14" x2="17" y2="14"/><line x1="21" y1="14" x2="21" y2="17"/><line x1="14" y1="21" x2="17" y2="21"/><line x1="21" y1="20" x2="21" y2="21"/></svg></span><span class="dlt"><b>Share / QR</b><small>Link + scan code</small></span></button>
+        <button class="btn-dl btn-dl-pdf" onclick="downloadPDF()"><span class="dli" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span><span class="dlt"><b>Download PDF</b><small>Print-ready · ATS</small></span></button>
+        <button class="btn-dl btn-dl-cl" onclick="openCoverLetter()"><span class="dli" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="dlt"><b>Cover Letter</b><small>AI writes it</small></span></button>
+        <button class="btn-dl btn-dl-doc" onclick="downloadDoc()"><span class="dli" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span><span class="dlt"><b>Download DOC</b><small>Editable Word file</small></span></button>
       </div>
     </div>
     <div id="pageCountStrip">
@@ -16246,6 +16246,49 @@ html body .btn-primary:disabled, html body #generateBtn:disabled, html body .btn
 html body .btn-primary:focus-visible, html body #generateBtn:focus-visible, html body .btn-dl:focus-visible, html body #payNowBtn:focus-visible, html body .btn-secondary:focus-visible,
 html body .btn-gen-bullets:focus-visible, html body #aiSkillsBtn:focus-visible, html body #aiChatCta:focus-visible, html body #mhdrSaveBtn:focus-visible, html body .btn-portfolio-hero:focus-visible{
   outline:3px solid rgba(249,115,22,.45) !important; outline-offset:2px !important;}
+
+/* ---------- Generate step: the 4 main actions as playful feature tiles ---------- */
+html body #dlActions{gap:10px !important;}
+html body #dlActions .btn-dl{display:inline-flex !important;align-items:center !important;gap:10px !important;padding:8px 14px 8px 8px !important;border-radius:14px !important;text-align:left !important;justify-content:flex-start !important;font-weight:800 !important;}
+html body #dlActions .dli{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;color:#fff;transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+html body #dlActions .dli svg{width:17px;height:17px;stroke:#fff;}
+html body #dlActions .dlt{display:flex;flex-direction:column;min-width:0;}
+html body #dlActions .dlt b{font-size:.86rem;line-height:1.15;font-weight:800;white-space:nowrap;}
+html body #dlActions .dlt small{font-size:.66rem;line-height:1.2;font-weight:600;opacity:.78;margin-top:2px;white-space:nowrap;}
+/* Share / QR — fresh teal */
+html body #dlActions .btn-dl.btn-dl-qr{background:linear-gradient(135deg,#ecfdf9,#ffffff 70%) !important;border:1.5px solid #a7f3e4 !important;color:#0f5e57 !important;box-shadow:0 8px 18px -14px rgba(13,148,136,.7) !important;}
+html body #dlActions .btn-dl-qr .dli{background:linear-gradient(135deg,#2dd4bf,#0d9488);box-shadow:0 6px 12px -6px rgba(13,148,136,.8);}
+/* Cover Letter — violet-pink */
+html body #dlActions .btn-dl.btn-dl-cl{background:linear-gradient(135deg,#fbf3ff,#ffffff 70%) !important;border:1.5px solid #f0d4fb !important;color:#7e1f86 !important;box-shadow:0 8px 18px -14px rgba(168,85,247,.7) !important;}
+html body #dlActions .btn-dl-cl .dli{background:linear-gradient(135deg,#f472b6,#a855f7);box-shadow:0 6px 12px -6px rgba(168,85,247,.8);}
+/* Download DOC — Word blue */
+html body #dlActions .btn-dl.btn-dl-doc{background:linear-gradient(135deg,#eff6ff,#ffffff 70%) !important;border:1.5px solid #c7dcfd !important;color:#1e3a8a !important;box-shadow:0 8px 18px -14px rgba(37,99,235,.7) !important;}
+html body #dlActions .btn-dl-doc .dli{background:linear-gradient(135deg,#60a5fa,#2563eb);box-shadow:0 6px 12px -6px rgba(37,99,235,.8);}
+/* Download PDF — the hero: amber with a periodic shine */
+html body #dlActions .btn-dl-pdf .dli{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px rgba(154,52,18,.15);}
+html body #dlActions .btn-dl-pdf .dli svg{stroke:#9a3412;}
+html body #dlActions .btn-dl.btn-dl-pdf{animation:r4PdfShine 5s ease-in-out 1.2s infinite;}
+@keyframes r4PdfShine{0%,70%{background-position:160% 0,0 0}90%,100%{background-position:-60% 0,0 0}}
+@media (hover:hover){
+  html body #dlActions .btn-dl:hover{transform:translateY(-3px) !important;}
+  html body #dlActions .btn-dl-qr:hover{border-color:#5eead4 !important;box-shadow:0 14px 24px -14px rgba(13,148,136,.75) !important;}
+  html body #dlActions .btn-dl-cl:hover{border-color:#e9a8f7 !important;box-shadow:0 14px 24px -14px rgba(168,85,247,.75) !important;}
+  html body #dlActions .btn-dl-doc:hover{border-color:#93c5fd !important;box-shadow:0 14px 24px -14px rgba(37,99,235,.75) !important;}
+  html body #dlActions .btn-dl:hover .dli{animation:r4Wiggle .55s ease;}
+}
+@keyframes r4Wiggle{0%{transform:none}30%{transform:rotate(-10deg) scale(1.12)}60%{transform:rotate(7deg) scale(1.08)}100%{transform:none}}
+html body #dlActions .btn-dl:active .dli{transform:scale(.9);}
+/* tablets: a tidy 2x2 grid instead of 3 + 1 */
+@media (min-width:769px) and (max-width:980px){html body #dlActions:not([style*="none"]){display:grid !important;grid-template-columns:1fr 1fr !important;width:100% !important;flex-direction:initial !important;} html body #dlActions .btn-dl{width:100%;}}
+/* phones: stacked full-width tiles, content left, arrow right */
+@media (max-width:768px){
+  html body #dlActions .btn-dl{padding:10px 14px 10px 10px !important;}
+  html body #dlActions .dli{width:38px;height:38px;border-radius:12px;}
+  html body #dlActions .dlt b{font-size:.95rem;} html body #dlActions .dlt small{font-size:.72rem;}
+  html body #dlActions .btn-dl::after{content:"\2192";margin-left:auto;font-weight:800;opacity:.55;transition:transform .2s;}
+  html body #dlActions .btn-dl:active::after{transform:translateX(3px);}
+}
+@media (prefers-reduced-motion:reduce){html body #dlActions .btn-dl.btn-dl-pdf{animation:none;} html body #dlActions .btn-dl:hover .dli{animation:none;}}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
