@@ -11,7 +11,7 @@
      rating and visit counters are kept (they are not resume data). */
   (function(){
     var KEYS=['_preSignInDraft','_lastResumeOutput','_r4uResumeData','_r4uSnapTime','_keyAchiev','_kaSeeded','_kaAutoGen','_kaIncludeResume',
-      '_r4uSecOrder','_pfCustomize','_pfCustomSections','_pfExtraLinks','_r4uResumeSlug','_r4uLastPubSig','skillHistory','r4u_biodata_v1','_pendingSignIn','_r4uWaPhone'];
+      '_r4uSecOrder','_pfCustomize','_pfCustomSections','_pfExtraLinks','_r4uResumeSlug','_r4uLastPubSig','skillHistory','r4u_biodata_v1','_pendingSignIn','_r4uWaPhone','_r4uCarryOver'];
     var SKEYS=['_r4uDl','_r4uIncomingResumeTok','_r4uIncomingJd'];
     function wipe(){
       try{ KEYS.forEach(function(k){ localStorage.removeItem(k); });
@@ -16792,6 +16792,98 @@ html body #step0 .seo-links a:focus-visible{outline:3px solid rgba(217,119,6,.45
       clip.appendChild(s); setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },600);
     }catch(x){}
   },{passive:true});
+})();
+</script>
+<script>
+/* Keep the resume a visitor built BEFORE signing in.
+   Problem: sign-in loads the account's latest saved version, so a resume made while
+   signed out was replaced (returning users) or only its form fields came back
+   (first-time users), and it never became a saved version.
+   Fix: when sign-in starts with a generated resume on screen, remember it
+   (_r4uCarryOver). Once the account has loaded, put that resume back on screen and
+   save it as a NEW version (selected). Older versions are never touched.
+   First-time users: it simply becomes their first saved version. */
+(function(){
+  var KEY='_r4uCarryOver', MAXAGE=30*60*1000;
+  function signedIn(){ try{ return !!(window._fbUser&&window._fbUser.uid); }catch(e){ return false; } }
+  function hasResume(d){ return !!(d&&(d.summary||(d.experience&&d.experience.length))); }
+  function remember(){
+    try{
+      if(signedIn()) return;
+      if(!document.querySelector('#resumeOutput .resume-a4-page')) return;
+      try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+      var d=null;
+      try{ if(typeof window._collectCloudData==='function') d=window._collectCloudData(); }catch(e){}
+      if(!hasResume(d)){ try{ if(typeof lastResumeData!=='undefined'&&lastResumeData) d=lastResumeData; }catch(e){} }
+      if(!hasResume(d)) return;
+      var tpl=(typeof currentTemplate!=='undefined'&&currentTemplate)||d.template||null;
+      if(tpl) d.template=tpl;
+      localStorage.setItem(KEY,JSON.stringify({at:Date.now(),template:tpl,data:d}));
+      lastCloudApply=0; signedAt=0;   /* a fresh sign-in starts now */
+    }catch(e){}
+  }
+  function read(){
+    try{ var c=JSON.parse(localStorage.getItem(KEY)||'null'); if(!c||!hasResume(c.data)||(Date.now()-(c.at||0))>MAXAGE){ localStorage.removeItem(KEY); return null; } return c; }catch(e){ return null; }
+  }
+  /* 1) remember on every sign-in entry point (popup, redirect, lazy-Firebase path) */
+  function wrapSignIn(){
+    var f=window.signInWithGoogle;
+    if(typeof f!=='function'||f.__r4uCarry) return;
+    window.signInWithGoogle=function(){ remember(); return f.apply(this,arguments); };
+    window.signInWithGoogle.__r4uCarry=true;
+  }
+  wrapSignIn(); setTimeout(wrapSignIn,1500); setTimeout(wrapSignIn,5000);
+  /* 2) notice when the account's own data has been applied */
+  var lastCloudApply=0, busy=false, signedAt=0;
+  function hookApply(){
+    var f=window._applyCloudDoc;
+    if(typeof f!=='function'||f.__r4uCarrySeen) return;
+    window._applyCloudDoc=function(uid){ if(uid&&!busy) lastCloudApply=Date.now(); return f.apply(this,arguments); };
+    window._applyCloudDoc.__r4uCarrySeen=true;
+  }
+  hookApply(); setTimeout(hookApply,1500); setTimeout(hookApply,5000);
+  /* 3) after sign-in settles, restore the carried resume and save it as a new version */
+  function restore(c){
+    var uid=window._fbUser&&window._fbUser.uid; if(!uid) return;
+    busy=true;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    try{ window._applyingVersion=true; }catch(e){}
+    try{ window._applyCloudDoc(null,c.data,{template:c.template||c.data.template}); }catch(e){}
+    try{ window._versionDirty=false; }catch(e){}
+    var d=c.data, nm=[d.firstName,d.lastName].filter(Boolean).join(' ').trim();
+    var base=(d.jobTitle||nm||'Resume')+' — '+new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    var label=base; try{ if(typeof _getUniqueVersionLabel==='function') label=_getUniqueVersionLabel(base); }catch(e){}
+    var finished=false;
+    function done(ok){
+      if(finished) return; finished=true; busy=false;
+      try{ window._applyingVersion=false; }catch(e){}
+      /* also write the account's main document so a reload opens this resume */
+      try{ window.__r4uEdited=true; if(typeof window._saveToCloud==='function') window._saveToCloud(uid,true); }catch(e){}
+      try{ if(typeof goToStep==='function'&&typeof currentStep!=='undefined'&&currentStep!==8) goToStep(8); }catch(e){}
+      try{ if(typeof showToast==='function') showToast(ok?'✅ Your new resume is saved to your account. Earlier versions are in your profile menu.':'✅ Your new resume is on screen — tap Save now in your profile menu to keep it.','success'); }catch(e){}
+    }
+    try{
+      if(typeof window._saveVersionSnapshot==='function') window._saveVersionSnapshot(uid,label,'✨ New',function(){ done(true); });
+      else done(false);
+    }catch(e){ done(false); }
+    setTimeout(function(){ done(true); },6000);   /* slow network: still release the guards */
+  }
+  (function watch(){
+    try{
+      if(!signedIn()){ signedAt=0; return setTimeout(watch,600); }
+      if(!localStorage.getItem(KEY)){ setTimeout(watch,1500); return; }   /* nothing carried yet */
+      var c=read(); if(!c){ setTimeout(watch,1500); return; }
+      var now=Date.now(); if(!signedAt) signedAt=now;
+      var since=now-signedAt, quiet=lastCloudApply?(now-lastCloudApply):0;
+      /* returning user: wait until the account's resume has applied and settled;
+         first-time user (nothing to apply): go after a short wait */
+      /* and never while the "Signing you in… / Loading your account…" loader is still up */
+      var lo=document.getElementById('_cloudLoader'), loaderUp=!!(lo&&getComputedStyle(lo).display!=='none');
+      var settled=(!loaderUp && ((lastCloudApply&&quiet>1500&&since>2000) || (!lastCloudApply&&since>6000))) || since>25000;
+      if(settled) return restore(c);
+    }catch(e){}
+    setTimeout(watch,400);
+  })();
 })();
 </script>
 </body>
