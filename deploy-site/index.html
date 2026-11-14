@@ -521,7 +521,7 @@
       },
       {
         "@type": "Speakable",
-        "cssSelector": [".hero-title", ".hero-sub", ".hero-note"]
+        "cssSelector": ["#r4uHero .rh-h", ".seo-intro p"]
       }
     ]
   }
@@ -1225,6 +1225,7 @@
     #step0.flow-started .hero-feat-grid,
     #step0.flow-started .hero-stats,
     #step0.flow-started .hero-social-wrap,
+    #step0.flow-started .seo-intro,
     #step0.flow-started .seo-rich-wrap { display:none !important; }
     /* ── Hero section redesign ── */
     .hero-badge{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1.5px solid var(--accent-btn);color:var(--accent-btn);font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:99px;margin-bottom:20px;}
@@ -2925,8 +2926,7 @@
   <!-- Always-visible sticky bar: Generate Resume CTA + portfolio CTA + import existing resume -->
   <div id="top-sticky-bar">
     <div id="r4uHero">
-      <span class="rh-badge"><i aria-hidden="true"></i>Free AI resume builder</span>
-      <p class="rh-h">Get hired faster with an <em>AI&#8209;written resume</em></p>
+      <h1 class="rh-h1"><span class="rh-badge"><i aria-hidden="true"></i>Free AI resume builder</span><span class="rh-sep">: </span><span class="rh-h">Get hired faster with an <em>AI&#8209;written resume</em></span></h1>
       <p class="rh-sub"><span>ATS-friendly</span><span>100+ templates</span><span>Ready in minutes</span></p>
     </div>
     <div class="r4u-cta-stack">
@@ -2963,26 +2963,12 @@
   </div>
 
   <div class="step-content active" id="step0">
-    <div class="hero-badge">✦ AI-Powered Resume Builder</div>
-    <div class="hero-icon-wrap">
-      <div class="hero-icon">R</div>
-      <div class="hero-icon-ring"></div>
-    </div>
-    <h1 class="hero-title">Build your <span class="hero-title-grad">resume</span><br>with AI</h1>
-    <p class="hero-sub">Create and save your resume online in minutes — no physical resume required. Fill in your details, our AI handles the rest.</p>
-    <div class="hero-feat-grid">
-      <div class="hero-feat-card"><div class="hero-feat-card-ico">🎨</div><div class="hero-feat-card-lbl">100+ Templates</div></div>
-      <div class="hero-feat-card"><div class="hero-feat-card-ico">🤖</div><div class="hero-feat-card-lbl">AI-Powered</div></div>
-      <div class="hero-feat-card"><div class="hero-feat-card-ico">☁️</div><div class="hero-feat-card-lbl">Save Online</div></div>
-      <div class="hero-feat-card"><div class="hero-feat-card-ico">✅</div><div class="hero-feat-card-lbl">ATS Score</div></div>
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><span class="hero-stat-num">10K+</span><span class="hero-stat-sub">Resumes</span></div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat"><span class="hero-stat-num">100+</span><span class="hero-stat-sub">Templates</span></div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat"><span class="hero-stat-num">Free</span><span class="hero-stat-sub">No Signup</span></div>
-    </div>
+    <section class="seo-intro" aria-labelledby="seoIntroH">
+      <h2 id="seoIntroH">Free AI resume builder &amp; CV maker for India</h2>
+      <p>Resume For You is a free online resume maker that writes your resume with AI. Pick from 100+ ATS-friendly resume templates, let AI turn your experience into strong, quantified bullet points, check your ATS score and download a print-ready PDF or an editable Word file — on your phone or laptop, with no sign-up needed.</p>
+      <p>It works for freshers and students making their first resume or CV, experienced professionals changing jobs, and government job applicants who need a biodata. Build it in English or Hindi (plus 9 Indian languages), turn it into a portfolio website, or simply answer a few questions on WhatsApp.</p>
+      <nav class="seo-links" aria-label="Popular resume guides"><span class="seo-links-h">Popular guides</span><a href="/resume-format-for-freshers/">Resume format for freshers</a><a href="/resume-format-for-experienced/">Resume format for experienced</a><a href="/cv-format-for-freshers/">CV format for freshers</a><a href="/resume-templates/">Resume templates</a><a href="/ats-resume-builder-india/">ATS resume builder</a><a href="/resume-in-hindi/">Resume in Hindi</a><a href="/biodata-format-for-job/">Biodata format for job</a><a href="/resume-for-internship/">Resume for internship</a><a href="/career-objective-for-freshers/">Career objective for freshers</a><a href="/skills-to-put-on-a-resume/">Skills to put on a resume</a><a href="/how-to-make-resume-for-first-job/">Resume for your first job</a></nav>
+    </section>
     <div class="hero-social-wrap">
       <div class="hero-avatars">
         <div class="hero-av">A</div><div class="hero-av">R</div><div class="hero-av">S</div><div class="hero-av">P</div><div class="hero-av">K</div>
@@ -16676,6 +16662,22 @@ html body #top-sticky-bar{background:radial-gradient(70% 210px at 50% 0,rgba(251
   html body #top-sticky-bar .r4u-cta-stack{gap:6px;}
 }
 @media (prefers-reduced-motion:reduce){html body #r4uHero, html body #r4uHero .rh-badge i, html body #top-sticky-bar .r4u-cta-primary::after{animation:none !important;}}
+
+/* H1 = badge + headline (keeps the same look) */
+html body #r4uHero .rh-h1{margin:0;padding:0;font:inherit;display:flex;flex-direction:column;align-items:center;}
+html body #r4uHero .rh-h{display:block;}
+html body #r4uHero .rh-sep{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:pre;}
+/* SEO intro that replaced the duplicate hero */
+html body #step0 .seo-intro{max-width:720px;margin:8px auto 6px;padding:22px 20px;text-align:left;background:var(--card-bg,#fff);border:1px solid #f1e6d6;border-radius:18px;}
+html body #step0 .seo-intro h2{margin:0 0 10px;font-size:clamp(1.15rem,2.4vw,1.45rem);font-weight:800;letter-spacing:-.015em;line-height:1.25;color:var(--text,#1a1a1a);text-wrap:balance;}
+html body #step0 .seo-intro p{margin:0 0 10px;font-size:.9rem;line-height:1.7;color:var(--muted,#5b6270);}
+html body #step0 .seo-links{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;align-items:center;}
+html body #step0 .seo-links-h{width:100%;font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#b45309;margin-bottom:2px;}
+html body #step0 .seo-links a{font-size:.78rem;font-weight:600;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;border-radius:99px;padding:5px 11px;text-decoration:none;transition:background .15s,border-color .15s;}
+html body #step0 .seo-links a:hover{background:#ffedd5;border-color:#fdba74;}
+html body #step0 .seo-links a:focus-visible{outline:3px solid rgba(217,119,6,.45);outline-offset:2px;}
+html body #step0 .hero-social-wrap{margin-top:14px;}
+@media (max-width:768px){html body #step0 .seo-intro{padding:18px 16px;border-radius:16px;} html body #step0 .seo-intro p{font-size:.86rem;} html body #step0 .seo-links{gap:6px;} html body #step0 .seo-links a{font-size:.72rem;padding:4px 9px;}}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
