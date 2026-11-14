@@ -12651,7 +12651,7 @@ window.__novaPortfolioHTML=function(d,sections){
     bar.innerHTML='<span class="jdt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="#fff" stroke="none"/></svg></span>'
       +'<span class="jdt-body"><span class="jdt-title">Tailor to a job description</span>'
       +'<span class="jdt-sub">Paste a job post — see your ATS keyword match and add what’s missing.</span></span>'
-      +'<span class="jdt-go">Check match →</span>';
+      +'<span class="jdt-go">Check match <span class="r4go-ar">→</span></span>';
     bar.addEventListener('click',openJdMatch);
     bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openJdMatch(); } });
     place(bar);
@@ -13134,7 +13134,7 @@ window.__novaPortfolioHTML=function(d,sections){
   function sync(){
     if(!bar){
       bar=document.createElement('div'); bar.id='_r4uRoastBar'; bar.setAttribute('role','button'); bar.setAttribute('tabindex','0');
-      bar.innerHTML='<span class="rb-ico"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg></span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="rb-sub">Instant ATS readiness score for your resume — see what’s weak and fix it in one tap.</span></span><span class="rb-go">Check score →</span>';
+      bar.innerHTML='<span class="rb-ico"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg></span><span class="rb-body"><span class="rb-title">ATS Score</span><span class="rb-sub">Instant ATS readiness score for your resume — see what’s weak and fix it in one tap.</span></span><span class="rb-go">Check score <span class="r4go-ar">→</span></span>';
       bar.addEventListener('click',open);
       bar.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
@@ -16354,6 +16354,20 @@ html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{background:va
   html body #_r4uRoastBar:hover, html body #_r4uJdTailorBar:hover{border-color:var(--r4-line) !important;transform:translateY(-2px);box-shadow:0 14px 26px -18px rgba(154,52,18,.55) !important;}
   html body #_r4uRoastBar:hover .rb-go, html body #_r4uJdTailorBar:hover .jdt-go{background:var(--r4-cream2) !important;border-color:var(--r4-line) !important;}
 }
+/* make them read as actions: solid amber button (also on phones, below the text), chevron nudge, press feedback */
+html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{display:inline-flex !important;align-items:center;gap:6px;background:linear-gradient(135deg,var(--r4-a1),var(--r4-a2) 45%,var(--r4-a3)) !important;color:var(--r4-ink) !important;border:0 !important;
+  padding:8px 14px 8px 16px !important;font-size:.8rem !important;box-shadow:0 6px 14px -8px rgba(234,88,12,.75),inset 0 1px 0 rgba(255,255,255,.5) !important;}
+html body #_r4uRoastBar .rb-go .r4go-ar, html body #_r4uJdTailorBar .jdt-go .r4go-ar{display:inline-block;animation:r4GoNudge 1.8s ease-in-out infinite;}
+@keyframes r4GoNudge{0%,60%,100%{transform:translateX(0)}30%{transform:translateX(3px)}}
+html body #_r4uRoastBar:active, html body #_r4uJdTailorBar:active{transform:scale(.985) !important;}
+@media (hover:hover){html body #_r4uRoastBar:hover .rb-go, html body #_r4uJdTailorBar:hover .jdt-go{background:linear-gradient(135deg,var(--r4-a2),var(--r4-a3)) !important;}}
+@media (max-width:520px){
+  html body #_r4uRoastBar, html body #_r4uJdTailorBar{flex-wrap:wrap !important;align-items:flex-start !important;row-gap:10px !important;}
+  html body #_r4uRoastBar .rb-ico, html body #_r4uJdTailorBar .jdt-ico{margin-top:2px;}
+  html body #_r4uRoastBar .rb-body, html body #_r4uJdTailorBar .jdt-body{flex:1 1 calc(100% - 60px) !important;}
+  html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{margin-left:47px !important;padding:9px 16px 9px 18px !important;font-size:.82rem !important;}
+}
+@media (prefers-reduced-motion:reduce){html body #_r4uRoastBar .r4go-ar, html body #_r4uJdTailorBar .r4go-ar{animation:none !important;}}
 html body #aiChatCta svg path{stroke:#ea580c !important;}
 @keyframes r4Twinkle{0%,100%{filter:none}50%{filter:drop-shadow(0 0 4px rgba(251,191,36,.9))}}
 /* ---------- hover / press (pointer devices only for hover) ---------- */
