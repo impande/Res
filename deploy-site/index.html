@@ -2745,7 +2745,76 @@
 @media (prefers-reduced-motion: reduce) {
   .r4u-tl, #_r4uToolsRow a { transition: none; }
 }
+/* phones: make the row read as swipeable — bleeds to the screen edge, soft edge fades,
+   a "Swipe" hint, a position bar, and a one-time peek of the next cards */
+#_r4uToolsRow .tr-sw, #_r4uToolsRow .tr-prog { display: none; }
+@media (max-width: 699.98px) {
+  html body #_r4uToolsRow .tr-row { margin-inline: calc(50% - 50vw); padding-inline: calc(50vw - 50%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--trl, 0px), #000 calc(100% - var(--trr, 34px)), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 var(--trl, 0px), #000 calc(100% - var(--trr, 34px)), transparent 100%); }
+  #_r4uToolsRow.tr-mid .tr-row { --trl: 22px; }
+  #_r4uToolsRow.tr-end .tr-row { --trl: 22px; --trr: 0px; }
+  #_r4uToolsRow .tr-sw { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; color: #b45309; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 99px; padding: 3px 9px 3px 10px; transition: opacity .3s; }
+  #_r4uToolsRow .tr-sw svg { width: 14px; height: 14px; animation: r4TrArrow 1.4s ease-in-out infinite; }
+  #_r4uToolsRow.tr-swiped .tr-sw { opacity: 0; pointer-events: none; }
+  #_r4uToolsRow .tr-prog { display: block; position: relative; width: 56px; height: 4px; margin: 2px auto 0; border-radius: 99px; background: #f1e6d6; overflow: hidden; }
+  #_r4uToolsRow .tr-prog i { position: absolute; top: 0; bottom: 0; left: 0; width: var(--trw, 30%); border-radius: inherit; background: linear-gradient(90deg, #fbbf24, #f59e0b); transform: translateX(var(--trx, 0%)); }
+  #_r4uToolsRow.tr-peek .tr-row > a { animation: r4TrPeek 1.25s cubic-bezier(.45,0,.25,1) both; }
+}
+@keyframes r4TrArrow { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+@keyframes r4TrPeek { 0%, 100% { transform: translateX(0); } 45%, 55% { transform: translateX(-64px); } }
+@media (prefers-reduced-motion: reduce) {
+  #_r4uToolsRow .tr-sw svg, #_r4uToolsRow.tr-peek .tr-row > a { animation: none; }
+}
 </style>
+<script id="_r4uToolsSwipe">
+(function(){
+  function wire(){
+    var root=document.getElementById('_r4uToolsRow'); if(!root) return false; if(root.__sw) return true;
+    var row=root.querySelector('.tr-row'), hd=root.querySelector('.tr-h'); if(!row||!hd) return false;
+    root.__sw=true;
+    var sw=document.createElement('span'); sw.className='tr-sw'; sw.setAttribute('aria-hidden','true');
+    sw.innerHTML='Swipe<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    hd.appendChild(sw);
+    var pr=document.createElement('div'); pr.className='tr-prog'; pr.setAttribute('aria-hidden','true'); pr.innerHTML='<i></i>';
+    row.parentNode.insertBefore(pr,row.nextSibling);
+    var bar=pr.firstChild, raf=0;
+    function upd(){ raf=0;
+      // snap the first card to the page gutter (a % scroll-padding would resolve against the row itself)
+      var g=parseFloat(getComputedStyle(row).paddingLeft)||0; if(row.__g!==g){ row.__g=g; row.style.scrollPaddingInline=g+'px'; }
+      var max=row.scrollWidth-row.clientWidth, x=row.scrollLeft;
+      if(max<=2){ root.classList.remove('tr-mid','tr-end'); return; }
+      var vis=Math.max(.15,Math.min(1,row.clientWidth/row.scrollWidth)), f=Math.min(1,Math.max(0,x/max));
+      bar.style.setProperty('--trw',(vis*100)+'%'); bar.style.setProperty('--trx',(f*(1/vis-1)*100)+'%');
+      root.classList.toggle('tr-end',x>=max-4); root.classList.toggle('tr-mid',x>4&&x<max-4);
+      if(x>24) root.classList.add('tr-swiped');
+    }
+    row.addEventListener('scroll',function(){ if(!raf) raf=requestAnimationFrame(upd); },{passive:true});
+    window.addEventListener('resize',function(){ if(!raf) raf=requestAnimationFrame(upd); });
+    upd();
+    // one gentle peek of the next cards, once per session, when the row comes into view
+    var seen=false; try{ seen=sessionStorage.getItem('_r4uToolsPeek')==='1'; }catch(e){}
+    var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!seen&&!still&&'IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(es){
+        if(!es[0].isIntersecting||es[0].intersectionRatio<.6) return;
+        io.disconnect(); if(innerWidth>=700) return;
+        // wait until the row is really on top (no splash / tutorial / sheet covering it)
+        var tries=0, t=setInterval(function(){
+          if(++tries>40||row.scrollLeft>4||root.classList.contains('tr-swiped')){ clearInterval(t); return; }
+          var b=row.getBoundingClientRect(), y=b.top+b.height/2; if(y<0||y>innerHeight) return;
+          var el=document.elementFromPoint(Math.min(innerWidth-2,b.left+b.width/2),y); if(!el||!row.contains(el)) return;
+          clearInterval(t); try{ sessionStorage.setItem('_r4uToolsPeek','1'); }catch(e){}
+          setTimeout(function(){ root.classList.add('tr-peek'); setTimeout(function(){ root.classList.remove('tr-peek'); },1300); },400);
+        },500);
+      },{threshold:[.6]});
+      io.observe(row);
+    }
+    return true;
+  }
+  if(!wire()){ var n=0, t=setInterval(function(){ if(wire()||++n>40) clearInterval(t); },250); }
+})();
+</script>
 <script src="/tools/wa-handoff.js?v=4" defer></script>
 </head>
 <body>
