@@ -11794,9 +11794,10 @@ window.__novaPortfolioHTML=function(d,sections){
      single-column templates apply their two-column .r-award layout (name | year)
      to KA items, pushing the description into the "year" column — the cramped
      horizontal "strip" bug. High specificity + !important beats template rules. */
-  .r-sec.r-keyachiev .r-ka-item{display:block !important;grid-template-columns:none !important;}
-  .r-sec.r-keyachiev .r-ka-item .r-award-name{display:block !important;float:none !important;width:auto !important;grid-column:1 / -1 !important;margin:0 0 2px !important;}
-  .r-sec.r-keyachiev .r-ka-item .r-award-desc{display:block !important;float:none !important;width:auto !important;grid-column:1 / -1 !important;margin-top:2px !important;}
+  /* doubled classes = higher specificity, so later template rules (e.g. .resume-a4-page .r4-rf .r-award{display:flex!important}) can't put the description beside the title */
+  .r-sec.r-keyachiev.r-keyachiev .r-ka-item.r-ka-item{display:block !important;grid-template-columns:none !important;text-align:left !important;}
+  .r-sec.r-keyachiev.r-keyachiev .r-ka-item.r-ka-item .r-award-name{display:block !important;float:none !important;width:auto !important;max-width:none !important;flex:none !important;grid-column:1 / -1 !important;margin:0 0 2px !important;text-align:left !important;}
+  .r-sec.r-keyachiev.r-keyachiev .r-ka-item.r-ka-item .r-award-desc{display:block !important;float:none !important;width:auto !important;max-width:none !important;flex:none !important;grid-column:1 / -1 !important;margin:2px 0 0 !important;padding-left:0 !important;text-align:left !important;}
   .r-ka-item .r-ka-link{display:inline-block;margin-top:3px;font-size:0.82em;color:var(--accent,#1f2a44);word-break:break-word;}
   .r4u-sb .r-aside .r-ka-item .r-ka-link{color:#fff !important;text-decoration:underline;opacity:0.92;}
 </style>
