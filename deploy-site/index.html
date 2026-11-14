@@ -16170,5 +16170,111 @@ window.addEventListener('load',function(){
   ]);
 });
 </script>
+<style id="_r4uCtaTheme">
+/* ══ CTA theme — one light, warm system for every button ═════════════════════
+   Primary  : bright amber gradient, deep-brown text (high contrast), shine on hover
+   Secondary: cream + orange ink + soft border
+   AI       : white with an amber→orange→pink gradient border that shimmers
+   Neutral  : white, warms to cream on hover
+   WhatsApp buttons keep WhatsApp green on purpose. */
+:root{--r4-a1:#fcd34d;--r4-a2:#fbbf24;--r4-a3:#f59e0b;--r4-o:#f97316;--r4-ink:#431407;--r4-ink2:#9a3412;--r4-cream:#fff7ed;--r4-cream2:#ffedd5;--r4-line:#fdba74;--r4-line2:#fed7aa;}
+/* ---------- primary ---------- */
+html body .btn-primary, html body #generateBtn, html body .btn-accent, html body .btn-dl.btn-dl-pdf, html body #payNowBtn,
+html body #previewFab, html body #mobPreviewBtn, html body .upload-tab.active, html body #tplSection .tpl-filter-btn.active{
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 66%) 160% 0/250% 100% no-repeat,
+             linear-gradient(135deg,var(--r4-a1) 0%,var(--r4-a2) 45%,var(--r4-a3) 100%) !important;
+  color:var(--r4-ink) !important; border:1px solid rgba(217,119,6,.35) !important; font-weight:800 !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 8px 18px -10px rgba(217,119,6,.75) !important;
+  text-shadow:none !important; opacity:1;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease,background-position .7s ease,filter .2s !important;}
+html body #tplSection .tpl-filter-btn.active .tpl-fcount{background:rgba(67,20,7,.12) !important;color:var(--r4-ink) !important;}
+html body .btn-primary svg, html body #generateBtn svg, html body .btn-dl-pdf svg, html body #payNowBtn svg, html body #mobPreviewBtn svg, html body #previewFab svg{stroke:currentColor;}
+/* ---------- secondary (cream) ---------- */
+html body .btn-dl.btn-dl-qr, html body .btn-dl.btn-dl-cl, html body .btn-dl.btn-dl-doc, html body #mhdrSaveBtn:not(.landing-signin), html body .btn-portfolio-hero{
+  background:var(--r4-cream) !important; color:var(--r4-ink2) !important; border:1.5px solid var(--r4-line2) !important;
+  box-shadow:0 1px 0 #fff inset,0 6px 14px -12px rgba(154,52,18,.6) !important; font-weight:700 !important;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background-color .2s,border-color .2s !important;}
+/* ---------- neutral ---------- */
+html body .btn-secondary{background:#fff !important;color:#44403c !important;border:1.5px solid #e7e5e4 !important;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),background-color .2s,border-color .2s,color .2s !important;}
+/* ---------- AI (gradient border that shimmers) ---------- */
+html body .btn-gen-bullets, html body #aiSkillsBtn, html body #aiChatCta{
+  background:linear-gradient(#fff,#fff) padding-box,
+             linear-gradient(120deg,#fbbf24,#f97316,#ec4899,#f97316,#fbbf24) border-box !important;
+  background-size:100% 100%,300% 100% !important; background-position:0 0,0% 0 !important;
+  border:1.6px solid transparent !important; color:var(--r4-ink2) !important; font-weight:800 !important;
+  box-shadow:0 6px 16px -10px rgba(236,72,153,.55),0 4px 10px -8px rgba(249,115,22,.6) !important;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background-position 1.2s ease !important;}
+html body #aiChatCta *{color:var(--r4-ink2) !important;}
+html body #aiChatCta svg{stroke:#ea580c !important;color:#ea580c !important;}
+/* ---------- feature cards on the Generate step: warm, with orange pills ---------- */
+html body #_r4uRoastBar, html body #_r4uJdTailorBar{background:#fff !important;border-color:#f3e3cf !important;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,border-color .2s !important;}
+html body #_r4uRoastBar::before, html body #_r4uJdTailorBar::before{background:linear-gradient(135deg,rgba(251,191,36,.10),rgba(249,115,22,.04)) !important;}
+html body #_r4uRoastBar .rb-go, html body #_r4uJdTailorBar .jdt-go{background:var(--r4-cream) !important;color:var(--r4-ink2) !important;border:1.5px solid var(--r4-line2) !important;box-shadow:none !important;font-weight:800 !important;transition:background-color .2s,border-color .2s,transform .18s !important;}
+@media (hover:hover){
+  html body #_r4uRoastBar:hover, html body #_r4uJdTailorBar:hover{border-color:var(--r4-line) !important;transform:translateY(-2px);box-shadow:0 14px 26px -18px rgba(154,52,18,.55) !important;}
+  html body #_r4uRoastBar:hover .rb-go, html body #_r4uJdTailorBar:hover .jdt-go{background:var(--r4-cream2) !important;border-color:var(--r4-line) !important;}
+}
+html body #aiChatCta svg path{stroke:#ea580c !important;}
+@keyframes r4Twinkle{0%,100%{filter:none}50%{filter:drop-shadow(0 0 4px rgba(251,191,36,.9))}}
+/* ---------- hover / press (pointer devices only for hover) ---------- */
+@media (hover:hover){
+  html body .btn-primary:not(:disabled):hover, html body #generateBtn:not(:disabled):hover, html body .btn-accent:not(:disabled):hover,
+  html body .btn-dl.btn-dl-pdf:hover, html body #payNowBtn:not(:disabled):hover, html body #previewFab:hover, html body #mobPreviewBtn:hover{
+    background-position:-60% 0,0 0 !important; transform:translateY(-2px); filter:saturate(1.08);
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 14px 26px -12px rgba(217,119,6,.8) !important;}
+  html body .btn-dl.btn-dl-qr:hover, html body .btn-dl.btn-dl-cl:hover, html body .btn-dl.btn-dl-doc:hover, html body #mhdrSaveBtn:not(.landing-signin):hover, html body .btn-portfolio-hero:hover{
+    background:var(--r4-cream2) !important; border-color:var(--r4-line) !important; transform:translateY(-2px);
+    box-shadow:0 1px 0 #fff inset,0 12px 20px -14px rgba(154,52,18,.7) !important;}
+  html body .btn-secondary:hover{background:#fffbf5 !important;border-color:var(--r4-line) !important;color:var(--r4-ink2) !important;transform:translateY(-1px);}
+  html body .btn-gen-bullets:not(:disabled):hover, html body #aiSkillsBtn:not(:disabled):hover, html body #aiChatCta:hover{
+    background-position:0 0,100% 0 !important; transform:translateY(-2px) rotate(-.4deg); animation:r4Twinkle 1.1s ease-in-out infinite;
+    box-shadow:0 10px 22px -10px rgba(236,72,153,.6),0 6px 14px -8px rgba(249,115,22,.7) !important;}
+}
+html body .btn-primary:active, html body #generateBtn:active, html body .btn-accent:active, html body .btn-dl:active, html body #payNowBtn:active,
+html body #mhdrSaveBtn:active, html body .btn-portfolio-hero:active, html body .btn-secondary:active, html body .btn-gen-bullets:active, html body #aiSkillsBtn:active,
+html body #aiChatCta:active, html body #mobPreviewBtn:active, html body #previewFab:active{transform:translateY(0) scale(.97) !important;transition-duration:.08s !important;}
+html body .btn-primary:disabled, html body #generateBtn:disabled, html body .btn-gen-bullets:disabled, html body #aiSkillsBtn:disabled{opacity:.55 !important;transform:none !important;filter:grayscale(.2);cursor:not-allowed;}
+html body .btn-primary:focus-visible, html body #generateBtn:focus-visible, html body .btn-dl:focus-visible, html body #payNowBtn:focus-visible, html body .btn-secondary:focus-visible,
+html body .btn-gen-bullets:focus-visible, html body #aiSkillsBtn:focus-visible, html body #aiChatCta:focus-visible, html body #mhdrSaveBtn:focus-visible, html body .btn-portfolio-hero:focus-visible{
+  outline:3px solid rgba(249,115,22,.45) !important; outline-offset:2px !important;}
+/* tap ripple */
+.r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
+.r4rip.dk{background:radial-gradient(circle,rgba(249,115,22,.35),rgba(249,115,22,0) 70%);}
+@keyframes r4Rip{to{transform:scale(1);opacity:0}}
+/* ---------- payment sheet: light ---------- */
+#payOverlay{background:rgba(41,24,10,.45) !important;}
+#payModal{background:#fff !important;border:1px solid #fde7c8 !important;box-shadow:0 40px 80px -30px rgba(124,45,18,.45) !important;}
+.pay-drawer-pill{background:#e7e5e4 !important;}
+.pay-hdr{background:radial-gradient(120% 90% at 50% 0%,#fff3e0 0%,#fff 70%) !important;border-bottom:1px solid #f5ead9 !important;}
+.pay-badge{background:#fef3c7 !important;border-color:#fde68a !important;color:#b45309 !important;}
+#payDisplayPrice{color:#1c1917 !important;}
+.pay-once{color:#78716c !important;}
+.pay-feat{background:#fffaf3 !important;border-color:#f5ead9 !important;color:#44403c !important;}
+.pay-feat span{color:#16a34a !important;}
+.pay-cancel{color:#78716c !important;} .pay-cancel:hover{color:#b45309 !important;}
+@media (prefers-reduced-motion:reduce){
+  html body .btn-primary, html body #generateBtn, html body .btn-dl, html body #payNowBtn, html body .btn-gen-bullets, html body #aiSkillsBtn, html body #aiChatCta, html body .btn-secondary{transition:none !important;animation:none !important;}
+  .r4rip{display:none;}
+}
+</style>
+<script id="_r4uCtaFx">
+/* Tap ripple on the themed buttons (playful feedback on touch + click). */
+(function(){
+  var SEL='.btn-primary,#generateBtn,.btn-accent,.btn-dl,#payNowBtn,#mobPreviewBtn,#previewFab,#mhdrSaveBtn,.btn-portfolio-hero,.btn-secondary,.btn-gen-bullets,#aiSkillsBtn,#aiChatCta';
+  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return; }catch(e){}
+  document.addEventListener('pointerdown',function(e){
+    var b=e.target&&e.target.closest&&e.target.closest(SEL); if(!b||b.disabled) return;
+    try{
+      var cs=getComputedStyle(b); if(cs.position==='static') b.style.position='relative';
+      if(cs.overflow!=='hidden') b.style.overflow='hidden';
+      var r=b.getBoundingClientRect(), d=Math.max(r.width,r.height)*2.2, s=document.createElement('span');
+      s.className='r4rip'+(/btn-dl-(qr|cl|doc)|btn-secondary|btn-gen-bullets|aiSkillsBtn|aiChatCta|mhdrSaveBtn|btn-portfolio-hero/.test(b.className+' '+b.id)?' dk':'');
+      s.style.width=s.style.height=d+'px'; s.style.left=(e.clientX-r.left-d/2)+'px'; s.style.top=(e.clientY-r.top-d/2)+'px';
+      b.appendChild(s); setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },600);
+    }catch(x){}
+  },{passive:true});
+})();
+</script>
 </body>
 </html>

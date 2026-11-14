@@ -196,3 +196,26 @@ footer.foot a{color:var(--muted);margin:0 6px;}
 }
 @media(prefers-reduced-motion:reduce){.spin{animation:none;}html{scroll-behavior:auto;}.btn,.tile,.drop{transition:none;}}
 @media(max-width:600px){h1{font-size:1.45rem;}.thead{padding-top:20px;padding-bottom:14px;}.th-ic{flex-basis:46px;width:46px;height:46px;border-radius:13px;}.th-ic svg{width:23px;height:23px;}.thead .sub{font-size:.92rem;}.tool{padding:16px;border-radius:16px;}.brand i{display:none;}}
+
+/* ══ CTA theme (matches the builder): light amber primary, cream secondary ══ */
+.btn{color:#431407;border:1px solid rgba(217,119,6,.35);font-weight:800;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 66%) 160% 0/250% 100% no-repeat,linear-gradient(135deg,#fcd34d,#fbbf24 45%,#f59e0b);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 10px 22px -12px rgba(217,119,6,.8);
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background-position .7s ease,filter .2s;}
+.btn.teal{background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 66%) 160% 0/250% 100% no-repeat,linear-gradient(135deg,#fcd34d,#fbbf24 45%,#f59e0b);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 10px 22px -12px rgba(217,119,6,.8);}
+.btn.ghost{background:#fff;color:#44403c;border:1.5px solid #e7e5e4;box-shadow:none;}
+@media (hover:hover){
+  .btn:not(:disabled):hover{background-position:-60% 0,0 0;transform:translateY(-2px);filter:saturate(1.08);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 16px 28px -14px rgba(217,119,6,.85);}
+  .btn.ghost:hover{background:#fffbf5;border-color:#fdba74;color:#9a3412;filter:none;}
+}
+.btn:active{transform:translateY(0) scale(.97);transition-duration:.08s;}
+.btn:disabled{opacity:.55;transform:none;cursor:not-allowed;}
+.btn:focus-visible{outline:3px solid rgba(249,115,22,.45);outline-offset:2px;}
+.cta-band{background:radial-gradient(120% 120% at 0% 0%,#fff3e0,#fff7ed 55%,#ffedd5);color:#431407;border:1px solid #fed7aa;}
+.cta-band h2{color:#431407;}
+.cta-band p{color:#9a3412;}
+.cta-band .btn{color:#431407;}
+@media (prefers-reduced-motion:reduce){.btn{transition:none;}}
+/* WhatsApp buttons keep WhatsApp green with white text */
+.btn.wa{color:#fff;border-color:transparent;text-shadow:0 1px 1px rgba(0,0,0,.12);}
+@media (hover:hover){.btn.wa:not(:disabled):hover{box-shadow:0 16px 28px -14px rgba(26,168,81,.9);}}
