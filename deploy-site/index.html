@@ -16206,6 +16206,14 @@ html body .btn-gen-bullets, html body #aiSkillsBtn, html body #aiChatCta{
   box-shadow:0 6px 16px -10px rgba(236,72,153,.55),0 4px 10px -8px rgba(249,115,22,.6) !important;
   transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background-position 1.2s ease !important;}
 html body #aiChatCta *{color:var(--r4-ink2) !important;}
+/* quick-wins badge on Refine with AI: red with white number, never clipped */
+html body #aiChatCta{overflow:visible !important;}
+html body #aiChatCta #aiCtaBadge, html body #aiChatCta .airx-cta-badge{position:absolute !important;top:-8px !important;right:-8px !important;min-width:20px !important;height:20px !important;padding:0 5px !important;
+  border-radius:99px !important;background:linear-gradient(135deg,#fb7185,#ef4444) !important;color:#fff !important;border:2px solid #fff !important;font-size:.66rem !important;font-weight:800 !important;line-height:16px !important;
+  display:flex;align-items:center !important;justify-content:center !important;box-shadow:0 4px 10px -4px rgba(239,68,68,.7) !important;}
+html body #aiChatCta .r4rip{background:radial-gradient(circle,rgba(249,115,22,.35),rgba(249,115,22,0) 70%) !important;}
+html body #aiChatCta.airx-cta-glow{animation:r4AiGlow 2.2s ease-in-out infinite !important;}
+@keyframes r4AiGlow{0%,100%{box-shadow:0 6px 16px -10px rgba(236,72,153,.55),0 4px 10px -8px rgba(249,115,22,.6)}50%{box-shadow:0 10px 24px -8px rgba(249,115,22,.55),0 0 0 5px rgba(251,191,36,.18)}}
 html body #aiChatCta svg{stroke:#ea580c !important;color:#ea580c !important;}
 /* ---------- feature cards on the Generate step: warm, with orange pills ---------- */
 html body #_r4uRoastBar, html body #_r4uJdTailorBar{background:#fff !important;border-color:#f3e3cf !important;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,border-color .2s !important;}
@@ -16239,6 +16247,7 @@ html body .btn-primary:focus-visible, html body #generateBtn:focus-visible, html
 html body .btn-gen-bullets:focus-visible, html body #aiSkillsBtn:focus-visible, html body #aiChatCta:focus-visible, html body #mhdrSaveBtn:focus-visible, html body .btn-portfolio-hero:focus-visible{
   outline:3px solid rgba(249,115,22,.45) !important; outline-offset:2px !important;}
 /* tap ripple */
+.r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
 .r4rip.dk{background:radial-gradient(circle,rgba(249,115,22,.35),rgba(249,115,22,0) 70%);}
 @keyframes r4Rip{to{transform:scale(1);opacity:0}}
@@ -16267,11 +16276,14 @@ html body .btn-gen-bullets:focus-visible, html body #aiSkillsBtn:focus-visible, 
     var b=e.target&&e.target.closest&&e.target.closest(SEL); if(!b||b.disabled) return;
     try{
       var cs=getComputedStyle(b); if(cs.position==='static') b.style.position='relative';
-      if(cs.overflow!=='hidden') b.style.overflow='hidden';
+      /* ripple lives in its own clipped layer, so badges that stick out of a
+         button (e.g. the quick-wins count on Refine with AI) are never cut off */
+      var clip=b.querySelector(':scope > .r4rip-clip');
+      if(!clip){ clip=document.createElement('span'); clip.className='r4rip-clip'; clip.setAttribute('aria-hidden','true'); b.appendChild(clip); }
       var r=b.getBoundingClientRect(), d=Math.max(r.width,r.height)*2.2, s=document.createElement('span');
       s.className='r4rip'+(/btn-dl-(qr|cl|doc)|btn-secondary|btn-gen-bullets|aiSkillsBtn|aiChatCta|mhdrSaveBtn|btn-portfolio-hero/.test(b.className+' '+b.id)?' dk':'');
       s.style.width=s.style.height=d+'px'; s.style.left=(e.clientX-r.left-d/2)+'px'; s.style.top=(e.clientY-r.top-d/2)+'px';
-      b.appendChild(s); setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },600);
+      clip.appendChild(s); setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },600);
     }catch(x){}
   },{passive:true});
 })();
