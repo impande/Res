@@ -3351,7 +3351,7 @@
       <div class="tpl-grid" id="tplGrid" tabindex="0" role="region" aria-label="Resume templates"></div>
       <div id="tplGuide" class="tpl-guide">
         <div class="tpl-guide-check">✓</div>
-        <span class="tpl-guide-text">Template chosen! Now click <strong>Generate Resume</strong> below to build your resume</span>
+        <span class="tpl-guide-text">Template chosen — now tap <strong>Generate Resume</strong> below</span>
         <span class="tpl-guide-caret">↓</span>
       </div>
       <!-- hidden select kept for JS compatibility -->
@@ -15225,7 +15225,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
         _io=new IntersectionObserver(function(entries){
           if(token!==_mirrorRun){ try{ _io.disconnect(); }catch(e){} return; }
           for(var k=0;k<entries.length;k++){ if(entries[k].isIntersecting){ var card=entries[k].target.closest('.tpl-card'); renderCard(card, data, token); _io.unobserve(entries[k].target); } }
-        }, { root: document.getElementById('tplGrid'), rootMargin:'600px 0px' });
+        }, { root: document.getElementById('tplGrid'), rootMargin:'600px 700px' });
         for(var i=0;i<cards.length;i++){ var th=cards[i].querySelector('.tpl-card-thumb'); if(th) _io.observe(th); }
       } else {
         /* Fallback (no IO): chunked render of all cards, 6 per frame. */
@@ -16752,6 +16752,60 @@ html body #step0 .seo-links a:focus-visible{outline:3px solid rgba(217,119,6,.45
   html body #step0 .hero-social-wrap{margin-top:28px !important;}
 }
 @media (prefers-reduced-motion:reduce){html body #step0 .seo-feat-card,html body #step0 .seo-audience-card,html body #step0 .seo-step{transition:none;}}
+
+/* ══ Choose a template: compact on every screen (it was ~925px tall) ══
+   one sideways strip of small cards, filters on one line, one-line hint;
+   after the resume is generated the section folds to "Template: X · Change". */
+html body #tplGrid{display:flex !important;flex-wrap:nowrap !important;grid-template-columns:none !important;overflow-x:auto !important;overflow-y:hidden !important;max-height:none !important;
+  gap:12px !important;padding:4px 2px 12px !important;scroll-snap-type:x proximity !important;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#e7d3b8 transparent;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);}
+html body #tplGrid.at-end{-webkit-mask-image:none;mask-image:none;}
+html body #tplGrid::-webkit-scrollbar{height:6px;} html body #tplGrid::-webkit-scrollbar-thumb{background:#ead9c2;border-radius:99px;}
+html body #tplSection #tplGrid > .tpl-card{flex:0 0 156px !important;width:156px !important;min-width:0 !important;max-width:156px !important;scroll-snap-align:start;}
+html body #tplGrid .tpl-card-meta{padding:7px 10px 8px !important;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+html body #tplGrid .tpl-card-name{font-size:.78rem !important;}
+html body #tplGrid .tpl-card-tag{display:none !important;}
+html body #tplGrid .tpl-card .r4n-flag{font-size:.6rem !important;padding:1px 6px !important;margin:0 !important;}
+html body #tplGrid .tpl-card:hover{transform:translateY(-2px) !important;}
+html body #tplSection .tpl-filter-row{flex-wrap:nowrap !important;overflow-x:auto !important;scrollbar-width:none;margin-bottom:10px !important;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent) !important;mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent) !important;}
+html body #tplSection .tpl-filter-row::-webkit-scrollbar{display:none;}
+html body #tplSection .tpl-filter-btn{flex:0 0 auto;white-space:nowrap;}
+html body #tplSection .tpl-section-header{margin-bottom:8px !important;}
+html body #tplGuide.visible{padding:8px 12px !important;margin-top:4px !important;gap:8px !important;}
+html body #tplGuide .tpl-guide-text{font-size:.82rem !important;line-height:1.35 !important;}
+html body #tplGuide .tpl-guide-check{width:20px !important;height:20px !important;font-size:.7rem !important;flex:0 0 20px !important;}
+/* desktop arrows for the strip */
+html body #tplSection .tpl-nav{position:relative;height:0;}
+html body #tplSection .tpl-nav button{position:absolute;top:-150px;width:36px;height:36px;border-radius:50%;border:1px solid #ead9c2;background:#fff;color:#9a3412;font-size:18px;font-weight:800;line-height:1;
+  display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px -8px rgba(120,60,10,.5);z-index:3;transition:opacity .2s,transform .15s;}
+html body #tplSection .tpl-nav button:hover{transform:scale(1.06);background:#fff7ed;}
+html body #tplSection .tpl-nav .prev{left:-10px;} html body #tplSection .tpl-nav .next{right:-10px;}
+html body #tplSection .tpl-nav button[disabled]{opacity:0;pointer-events:none;}
+@media (hover:none),(max-width:768px){html body #tplSection .tpl-nav{display:none;}}
+/* folded summary (after the resume is generated) */
+html body #tplSum{display:none;}
+html body #tplSection.tpl-folded > *:not(#tplSum){display:none !important;}
+html body #tplSection.tpl-folded{padding-top:12px !important;padding-bottom:12px !important;}
+html body #tplSection.tpl-folded #tplSum{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer;color:var(--text,#1a1a1a);}
+html body #tplSum .ts-ico{width:36px;height:36px;border-radius:10px;flex:0 0 36px;display:grid;place-items:center;background:#fff4dc;color:#c2410c;}
+html body #tplSum .ts-ico svg{width:18px;height:18px;}
+html body #tplSum .ts-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;}
+html body #tplSum .ts-t small{font-size:.72rem;color:var(--muted,#6b7280);font-weight:600;}
+html body #tplSum .ts-t b{font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+html body #tplSum .ts-go{flex:0 0 auto;font-size:.8rem;font-weight:800;color:#431407;background:linear-gradient(135deg,var(--r4-a1,#fcd34d),var(--r4-a2,#fbbf24) 45%,var(--r4-a3,#f59e0b));border-radius:99px;padding:8px 14px;box-shadow:0 6px 14px -8px rgba(234,88,12,.75);}
+html body .tpl-hide{display:none;margin-left:auto;border:0;background:none;color:#9a3412;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:4px 2px;}
+html body #tplSection.tpl-can-fold .tpl-hide{display:inline-flex;}
+@media (max-width:768px){
+  html body #tplSection #tplGrid > .tpl-card{flex:0 0 128px !important;width:128px !important;min-width:0 !important;max-width:128px !important;}
+  html body #tplGrid .tpl-card-meta{padding:6px 8px 7px !important;}
+  html body #tplGrid .tpl-card-name{font-size:.74rem !important;}
+  html body #tplSection .tpl-section-header{flex-wrap:nowrap !important;}
+  html body #tplSection .tpl-section-badge{display:none !important;}
+  html body #tplSection.tpl-can-fold .tpl-section-header .tpl-hide{margin-left:auto;}
+  html body #tplSection .tpl-section-title small{display:none !important;}
+  html body #tplSection .tpl-section-header{align-items:center !important;}
+}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
@@ -16884,6 +16938,58 @@ html body #step0 .seo-links a:focus-visible{outline:3px solid rgba(217,119,6,.45
     }catch(e){}
     setTimeout(watch,400);
   })();
+})();
+</script>
+<script>
+/* Compact template picker: arrows for the sideways strip (desktop), end-fade, and
+   the folded "Template: X · Change" summary once a resume has been generated. */
+(function(){
+  var userOpen=false, lastHad=false;
+  function sec(){ return document.getElementById('tplSection'); }
+  function grid(){ return document.getElementById('tplGrid'); }
+  function hasResume(){ return !!document.querySelector('#resumeOutput .resume-a4-page'); }
+  function curName(){
+    try{ if(typeof TPL_META!=='undefined'&&typeof currentTemplate!=='undefined'&&TPL_META[currentTemplate]) return TPL_META[currentTemplate].label||currentTemplate; }catch(e){}
+    var a=document.querySelector('#tplGrid .tpl-card.tpl-active .tpl-card-name'); return a?a.textContent.trim():'Template';
+  }
+  function build(){
+    var s=sec(), g=grid(); if(!s||!g) return false;
+    if(!document.getElementById('tplSum')){
+      var b=document.createElement('button'); b.type='button'; b.id='tplSum'; b.setAttribute('aria-label','Change template');
+      b.innerHTML='<span class="ts-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9h17M9.5 20.5V9"/></svg></span><span class="ts-t"><small>Template</small><b></b></span><span class="ts-go">Change</span>';
+      b.addEventListener('click',function(){ userOpen=true; sync(); try{ var gg=grid(); var act=gg&&gg.querySelector('.tpl-active'); if(act) gg.scrollLeft=Math.max(0,act.offsetLeft-gg.offsetLeft-20); }catch(e){} });
+      s.insertBefore(b,s.firstChild);
+    }
+    var h=s.querySelector('.tpl-section-header');
+    if(h&&!h.querySelector('.tpl-hide')){ var x=document.createElement('button'); x.type='button'; x.className='tpl-hide'; x.textContent='Hide ▴'; x.addEventListener('click',function(){ userOpen=false; sync(); }); h.appendChild(x); }
+    if(!s.querySelector('.tpl-nav')){
+      var nav=document.createElement('div'); nav.className='tpl-nav';
+      nav.innerHTML='<button type="button" class="prev" aria-label="Previous templates">‹</button><button type="button" class="next" aria-label="More templates">›</button>';
+      g.parentNode.insertBefore(nav,g.nextSibling);
+      nav.querySelector('.prev').addEventListener('click',function(){ g.scrollBy({left:-g.clientWidth*0.8,behavior:'smooth'}); });
+      nav.querySelector('.next').addEventListener('click',function(){ g.scrollBy({left:g.clientWidth*0.8,behavior:'smooth'}); });
+      g.addEventListener('scroll',edges,{passive:true});
+    }
+    return true;
+  }
+  function edges(){
+    var g=grid(), s=sec(); if(!g||!s) return; var max=g.scrollWidth-g.clientWidth;
+    g.classList.toggle('at-end', g.scrollLeft>=max-4);
+    var nav=s.querySelector('.tpl-nav'); if(nav){ nav.querySelector('.prev').disabled=g.scrollLeft<=4; nav.querySelector('.next').disabled=g.scrollLeft>=max-4; var top=-(g.offsetHeight/2+18); nav.querySelectorAll('button').forEach(function(b){ b.style.top=top+'px'; }); }
+  }
+  function sync(){
+    var s=sec(); if(!s||!build()) return;
+    var had=hasResume();
+    if(had&&!lastHad) userOpen=false;           /* a new resume was just generated: fold */
+    lastHad=had;
+    var fold=had&&!userOpen;
+    s.classList.toggle('tpl-folded',fold);
+    s.classList.toggle('tpl-can-fold',had&&userOpen);
+    var nm=s.querySelector('#tplSum b'); if(nm){ var t=curName(); if(nm.textContent!==t) nm.textContent=t; }
+    if(!fold) edges();
+  }
+  setInterval(sync,700); document.addEventListener('DOMContentLoaded',sync); setTimeout(sync,300);
+  window.addEventListener('resize',function(){ setTimeout(edges,200); });
 })();
 </script>
 </body>
