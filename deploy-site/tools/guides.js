@@ -8,7 +8,7 @@
  * Videos: /media/how/<slug>[-v].(mp4|webm) — 9:16 cut on portrait screens. */
 (function () {
   if (window.R4UGuide) return;
-  var V = 'v=1';
+  var V = 'v=2';
   var G = [
     { s: 'build-your-resume', t: 'Build your resume', d: '0:49', b: 'Add your details step by step and generate a polished resume.' },
     { s: 'ai-bullet-points', t: 'AI bullet points', d: '0:46', b: 'Let AI write strong, quantified bullet points for each role.' },
