@@ -11205,10 +11205,10 @@ window.__novaPortfolioHTML=function(d,sections){
       +'.tpl-atelier .cs-gallery img{border-radius:14px;transition:transform .5s cubic-bezier(.2,.7,.2,1)}.tpl-atelier .cs-gallery figure:hover img{transform:scale(1.05)}'
       +'.tpl-atelier .btn-p{background:var(--acc)!important;color:#fff!important;border-radius:99px;padding:13px 26px}'
       +'.tpl-atelier .btn-s{border-radius:99px;padding:13px 26px;border-color:var(--line)}',
-    onepage: ':root{--bg:#f6f6fb;--card:#ffffff;--ink:#111019;--mut:rgba(17,16,25,0.6);--mut2:rgba(17,16,25,0.42);--line:rgba(17,16,25,0.1);--acc:#5b4bfc;--acc-h:#4436d1;}'
+    onepage: ':root{--bg:#fbf8f3;--card:#ffffff;--ink:#111019;--mut:rgba(17,16,25,0.6);--mut2:rgba(17,16,25,0.42);--line:rgba(17,16,25,0.1);--acc:#e05a12;--acc-h:#b9450a;}'
       +'body{font-family:var(--font-body,"Inter",system-ui,-apple-system,sans-serif)}'
       +'.ophero{position:relative;overflow:hidden;padding:clamp(32px,7vh,88px) 0 clamp(40px,7vh,80px)}'
-      +'.ophero-blob{position:absolute;inset:0;pointer-events:none;background:radial-gradient(46% 55% at 82% -5%,rgba(91,75,252,0.20),transparent 70%),radial-gradient(40% 50% at 5% 15%,rgba(236,72,153,0.14),transparent 70%),radial-gradient(50% 60% at 100% 60%,rgba(16,185,129,0.10),transparent 70%)}'
+      +'.ophero-blob{position:absolute;inset:0;pointer-events:none;background:radial-gradient(46% 55% at 82% -5%,rgba(249,115,22,0.20),transparent 70%),radial-gradient(40% 50% at 5% 15%,rgba(236,72,153,0.14),transparent 70%),radial-gradient(50% 60% at 100% 60%,rgba(16,185,129,0.10),transparent 70%)}'
       +'.ophero-photo{width:104px;height:104px;border-radius:50%;overflow:hidden;margin-bottom:20px;box-shadow:0 12px 34px -12px rgba(0,0,0,0.28);position:relative}.ophero-photo img{width:100%;height:100%;object-fit:cover}'
       +'.ophero-in{max-width:1000px;margin:0 auto;padding:0 26px}'
       +'.ophero-eyebrow{font-size:0.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:14px;animation:opUp .7s cubic-bezier(.2,.7,.2,1) both}'
@@ -16414,6 +16414,15 @@ html body .hero-feat-grid .hero-feat-card:nth-child(4) .hero-feat-card-ico{backg
 html body .hero-av:nth-child(1){background:linear-gradient(135deg,#fb923c,#c2410c) !important;}
 /* The homepage video card stays below pop-ups (it covered the upload sheet on phones) */
 html body #r4tut:not(.big){z-index:3500 !important;}
+
+/* Portfolio builder: AI buttons and the portfolio AI chat (were purple) */
+html body #pfOverlay [id^="pfGen"][id$="Btn"], html body #pfOverlay button[style*="124,58,237"], html body #pfOverlay button[style*="7c3aed"], html body #pfOverlay button[style*="4f46e5"]{
+  background:linear-gradient(#fff,#fff) padding-box,linear-gradient(120deg,#fbbf24,#f97316,#ec4899,#f97316,#fbbf24) border-box !important;background-size:100% 100%,300% 100% !important;
+  border:1.6px solid transparent !important;color:#9a3412 !important;font-weight:800 !important;box-shadow:0 6px 14px -10px rgba(249,115,22,.6) !important;transition:background-position 1.2s ease,transform .18s cubic-bezier(.34,1.56,.64,1) !important;}
+@media (hover:hover){html body #pfOverlay [id^="pfGen"][id$="Btn"]:hover, html body #pfOverlay button[style*="124,58,237"]:hover, html body #pfOverlay button[style*="7c3aed"]:hover{background-position:0 0,100% 0 !important;transform:translateY(-1px);}}
+html body .pf-ai-chip:hover{border-color:#fdba74 !important;background:#fff7ed !important;color:#9a3412 !important;}
+html body .pf-ai-msg.u{background:linear-gradient(135deg,#fcd34d,#f59e0b) !important;color:#431407 !important;}
+html body #pfGuidePanel{background:linear-gradient(135deg,#fff7ed,#fffbf5) !important;border-color:#fed7aa !important;}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
