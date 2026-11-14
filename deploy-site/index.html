@@ -16895,6 +16895,8 @@ html body #pvTplBar .pvt-nav:active{transform:scale(.94);background:#fff7ed;}
 @keyframes pvtPulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.55)}100%{box-shadow:0 0 0 10px rgba(245,158,11,0)}}
 @media (prefers-reduced-motion:reduce){html body #pvTplBar #previewTplSelect{animation:none;}}
 
+#pvTplBar .pvt-hit{position:absolute;inset:0;width:100%;height:100%;border:0;margin:0;padding:0;background:transparent;cursor:pointer;border-radius:12px;-webkit-tap-highlight-color:transparent;z-index:2;}
+#pvTplBar .pvt-hit:focus-visible{outline:3px solid rgba(217,119,6,.5);outline-offset:2px;}
 /* Preview: custom template picker sheet (replaces the phone's plain native list) */
 #pvTplSheet{position:fixed;inset:0;z-index:10090;display:none;align-items:flex-end;justify-content:center;background:rgba(41,24,10,.45);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 #pvTplSheet.on{display:flex;}
@@ -17201,17 +17203,27 @@ html body #pvTplBar .pvt-nav:active{transform:scale(.94);background:#fff7ed;}
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&sheet.classList.contains('on')){ e.stopPropagation(); close(); } },true);
   }
   function open(){ if(!sheet) build(); var s=sel(); var c=s&&meta(s.value).cat; cat='all'; paint(); sheet.classList.add('on'); try{ sheet.querySelector('.pvs-x').focus({preventScroll:true}); }catch(e){} }
-  function close(){ if(sheet) sheet.classList.remove('on'); try{ var s=sel(); if(s) s.focus({preventScroll:true}); }catch(e){} }
+  function close(){ if(sheet) sheet.classList.remove('on'); try{ var h=document.querySelector('#pvTplBar .pvt-hit'); if(h) h.focus({preventScroll:true}); }catch(e){} }
   window._r4uOpenTplSheet=open;
+  /* iOS Safari opens its own picker for a <select> regardless of preventDefault, and
+     again on the next tap once the select has focus. So the select never receives
+     taps at all: a transparent button sits on top of it and opens our sheet. The
+     select stays (hidden from taps/keyboard) as the value holder. */
   function hook(){
-    var s=sel(); if(!s||s.__pvs) return !!s; s.__pvs=true;
-    var stop=function(e){ e.preventDefault(); e.stopPropagation(); };
-    s.addEventListener('mousedown',function(e){ stop(e); open(); });
-    s.addEventListener('touchend',function(e){ stop(e); open(); });
-    s.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'&&e.altKey){ stop(e); open(); } });
+    var s=sel(); if(!s) return false;
+    var host=s.parentNode; if(!host) return false;
+    if(host.querySelector(':scope > .pvt-hit')) return true;
+    if(getComputedStyle(host).position==='static') host.style.position='relative';
+    s.setAttribute('tabindex','-1'); s.style.pointerEvents='none';
+    var hit=document.createElement('button'); hit.type='button'; hit.className='pvt-hit';
+    hit.setAttribute('aria-haspopup','dialog');
+    var lbl=function(){ var o=s.options[s.selectedIndex]; hit.setAttribute('aria-label','Template: '+(o?o.textContent:'')+'. Choose another template'); };
+    lbl(); s.addEventListener('change',lbl);
+    hit.addEventListener('click',function(e){ e.preventDefault(); open(); });
+    host.appendChild(hit);
     return true;
   }
-  if(!hook()){ var n=0,t=setInterval(function(){ if(hook()||++n>60) clearInterval(t); },250); }
+  hook(); setInterval(hook,1000);   /* re-attach if the preview bar is ever rebuilt */
 })();
 </script>
 </body>
