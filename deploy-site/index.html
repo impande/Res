@@ -78,8 +78,11 @@
   (function(){
     var nf=window.fetch; if(!nf||window.__r4uGenBg) return; window.__r4uGenBg=1;
     var GEN=/\/\.netlify\/functions\/generate(\?|$)/;
+    /* Only requests whose ANSWER is the whole resume are long: writing a full resume
+       and whole-resume rewrites (modified JSON/HTML). Bullets, summaries, skills etc.
+       answer in seconds and stay on the direct route. */
     function isLong(b){ return b && typeof b.prompt==='string' && !b.action && !b.imageBase64 && !b.imageBase64Array &&
-      (b.prompt.length>=1200 || /Generate a complete,? interview-winning resume/i.test(b.prompt)); }
+      (/Generate a complete,? interview-winning resume/i.test(b.prompt) || /\bmodified (JSON|HTML)\b/i.test(b.prompt) || b.prompt.length>=12000); }
     function hex(n){ var a=new Uint8Array(n); (window.crypto||window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a,function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }
     function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
     function reply(status,obj){ return new Response(JSON.stringify(obj),{status:status,headers:{'Content-Type':'application/json'}}); }
@@ -90,7 +93,8 @@
         var r=await nf('/.netlify/functions/generate-background',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},b,{jobId:id}))});
         if(r.status===200){ var j0=await r.json().catch(function(){return null;});   // ran synchronously
           if(j0&&j0.status==='done') return reply(200,j0.result||{text:''});
-          if(j0&&j0.status==='error') return reply(j0.code||502,{text:'',error:j0.error}); }
+          if(j0&&j0.status==='error') return reply(j0.code||502,{text:'',error:j0.error});
+          return nf(input,init); }                                                  // unexpected reply → direct route
         if(r.status!==202&&r.status!==200) return nf(input,init);                   // no background support → old path
         started=true;
         var t0=Date.now();
