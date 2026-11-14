@@ -16045,7 +16045,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
    - appears 2.5 s after the page has fully loaded, plays muted (browsers only
      allow muted autoplay); tap to enlarge; × closes it
    - never on other steps or for signed-in users; hides if they leave landing
-   - shows on every page load (closing hides it for that page view only);
+   - pops up once per browser session (not again on reload or when coming back
+     from another page; a new tab/visit gets it once);
      "Watch how it works" under the landing cards replays it anytime
    - reduced-motion / data-saver: card shows paused (no auto download+play) */
 (function(){
@@ -16071,6 +16072,9 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
      users are recognised before the SDK has finished loading. */
   function signedIn(){ try{ if(localStorage.getItem('_r4uHadAccount')==='1') return true; }catch(e){} try{ return !!(window._fbUser || (window._fbAuth && window._fbAuth.currentUser) || (typeof _fbUser!=='undefined' && _fbUser)); }catch(e){ return false; } }
   function onLanding(){ return step()===0 && !document.body.classList.contains('r4u-in-step'); }
+  var SKEY='_r4uTutAutoShown';
+  function seenThisSession(){ try{ return sessionStorage.getItem(SKEY)==='1'; }catch(e){ return false; } }
+  function markSession(){ try{ sessionStorage.setItem(SKEY,'1'); }catch(e){} }
   function recent(){ var t=+ls(KEY)||0; return t && Date.now()-t < 7*864e5; }
   function quiet(){ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches || (navigator.connection && (navigator.connection.saveData || /2g/.test(navigator.connection.effectiveType||''))); }catch(e){ return false; } }
   var PLAY='<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
@@ -16128,7 +16132,8 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   window._r4uTutorial={ show:function(){ show(false); vid.currentTime=0; enlarge(); }, close:close };
   function schedule(){
     clearTimeout(timer);
-    timer=setTimeout(function(){ if(onLanding() && !signedIn()) show(true); }, DELAY);
+    if(seenThisSession()) return;          // once per browser session: not again on reload / coming back
+    timer=setTimeout(function(){ if(onLanding() && !signedIn() && !seenThisSession()){ markSession(); show(true); } }, DELAY);
   }
   // leaving the landing page (any step) or signing in hides it
   function watch(){
