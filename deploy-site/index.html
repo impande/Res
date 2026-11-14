@@ -16807,6 +16807,24 @@ html body #tplSection.tpl-can-fold .tpl-hide{display:inline-flex;}
   html body #tplSection .tpl-section-title small{display:none !important;}
   html body #tplSection .tpl-section-header{align-items:center !important;}
 }
+
+/* Generate step: the WhatsApp "versions" bar and the folded template bar share one look
+   (same width, height, white card, small icon chip, pill button). */
+html body #_r4uWaConnectRow{max-width:none !important;width:100% !important;box-sizing:border-box !important;margin:0 0 10px !important;padding:10px 12px !important;gap:12px !important;
+  border-radius:14px !important;background:#fff !important;border:1px solid #e3efe7 !important;box-shadow:0 1px 2px rgba(40,30,10,.04) !important;}
+html body #_r4uWaConnectRow > span:first-child{width:34px !important;height:34px !important;border-radius:10px !important;}
+html body #_r4uWaConnectRow > span:first-child svg{width:18px !important;height:18px !important;}
+html body #_r4uWaConnectRow > span:nth-child(2){font-size:.9rem !important;}
+html body #_r4uWaConnectRow button{border-radius:99px !important;padding:7px 16px !important;font-size:.8rem !important;font-weight:800 !important;background:#f0fdf4 !important;border:1px solid #9ee3b8 !important;color:#0f766e !important;}
+html body #_r4uWaConnectRow button:hover{background:#dcfce7 !important;}
+html body #tplSection.tpl-folded{padding:10px 12px !important;border-radius:14px !important;background:#fff !important;border:1px solid #efe4d3 !important;box-shadow:0 1px 2px rgba(40,30,10,.04) !important;margin-bottom:0 !important;}
+html body #tplSection.tpl-folded::before,html body #tplSection.tpl-folded::after{display:none !important;}
+html body #tplSum .ts-ico{width:34px !important;height:34px !important;flex-basis:34px !important;}
+html body #tplSum .ts-t{flex-direction:row !important;align-items:baseline;gap:6px;}
+html body #tplSum .ts-t small{font-size:.9rem !important;font-weight:500 !important;}
+html body #tplSum .ts-t small::after{content:":";}
+html body #tplSum .ts-t b{font-size:.9rem !important;}
+html body #tplSum .ts-go{padding:7px 16px !important;font-size:.8rem !important;}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
