@@ -13336,6 +13336,15 @@ window.__novaPortfolioHTML=function(d,sections){
     active=true;
     var item=queue.shift();
     try{ orig(item.msg, item.type); }catch(e){}
+    /* save / restore messages ("Saved to your account", "Version restored from cloud",
+       version saved…) stay 3 s instead of ~6 s */
+    try{
+      if(/saved|restored from cloud|version/i.test(String(item.msg||''))){
+        var c=document.getElementById(item.type==='success'?'toastContainerTop':'toastContainer');
+        var t=c&&c.lastElementChild;
+        if(t){ setTimeout(function(){ try{ t.style.transition='opacity .25s ease, transform .25s ease'; t.style.opacity='0'; t.style.transform='translateY(6px)'; setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },260); }catch(e){} }, 2750); }
+      }
+    }catch(e){}
     var tries=0, iv=setInterval(function(){
       if(!busy() || ++tries>45){ clearInterval(iv); active=false; setTimeout(pump, 160); }
     }, 180);
@@ -15658,7 +15667,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'<a class="r4u-tl" href="/linkedin-profile-optimizer/" target="_blank" rel="noopener">'+ic('li')+'<b>LinkedIn</b><small>Improve your profile</small></a>'
       +'<a class="r4u-tl" href="/interview-prep/" target="_blank" rel="noopener">'+ic('iv')+'<b>Interview</b><small>Practice questions</small></a>'
       +'<a class="r4u-tl" href="/resume-in-hindi/" target="_blank" rel="noopener">'+ic('hi')+'<b>In Hindi</b><small>Resume + 9 languages</small></a>'
-      +'</div>';
+      +'</div>'
+      /* Portfolio website now lives here (the banner that showed on every step was removed) */
+      +'<button type="button" class="nb-pf" onclick="if(typeof openPortfolioBuilder===\'function\')openPortfolioBuilder()">'
+      +'<span class="nb-pf-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg></span>'
+      +'<span class="nb-pf-tx"><b>Portfolio website</b><small>Turn this resume into your own site — free</small></span><span class="nb-pf-go" aria-hidden="true">→</span></button>';
     bar.addEventListener('click',function(e){
       var a=e.target.closest('a'); if(!a) return;
       stash();
@@ -16520,8 +16533,8 @@ html body #dlActions .r4d-s{display:none;}
   html body .resume-bar-left .r4g-chip{background:none !important;border:0 !important;padding:2px 0 !important;margin-top:6px !important;font-size:.74rem !important;box-shadow:none !important;}
   html body .resume-bar-left .r4g-chip i{width:18px;height:18px;}
 }
-@media (max-width:768px){
-  /* Share / QR stands out among the small buttons: teal tint, teal border + text, soft glow, light sweep */
+@media all{
+  /* Share / QR stands out among the small buttons on every screen: teal tint, teal border + text, soft glow, light sweep */
   html body #dlActions .btn-dl.btn-dl-qr{background:linear-gradient(135deg,#e6fbf6,#f4fffc) !important;border:1.5px solid #5eead4 !important;
     box-shadow:0 8px 16px -10px rgba(13,148,136,.75) !important;position:relative;overflow:hidden;}
   html body #dlActions .btn-dl.btn-dl-qr .dlt b{color:#0f766e !important;}
@@ -16956,6 +16969,125 @@ html body #pvTplBar .pvt-nav:active{transform:scale(.94);background:#fff7ed;}
 #pvTplSheet .pvs-ck{flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#f59e0b,#ea580c);font-size:13px;font-weight:900;visibility:hidden;}
 #pvTplSheet .pvs-row.cur .pvs-ck{visibility:visible;}
 @media (prefers-reduced-motion:reduce){#pvTplSheet .pvs-card{animation:none;}}
+
+/* "Build your portfolio website" moved into "Use this resume for" (no banner on every step) */
+html body #pf-sticky-cta{display:none !important;}
+html body #_r4uNextBar .nb-pf{display:flex;align-items:center;gap:12px;width:100%;margin-top:8px;padding:10px 12px;border:1px solid #e4dafb;border-radius:12px;background:linear-gradient(135deg,#f6f2ff,#fff 80%);font:inherit;text-align:left;cursor:pointer;color:var(--text,#1a1a1a);-webkit-tap-highlight-color:transparent;transition:border-color .15s,transform .15s;}
+html body #_r4uNextBar .nb-pf:hover{border-color:#c4b5fd;}
+html body #_r4uNextBar .nb-pf:active{transform:scale(.99);}
+html body #_r4uNextBar .nb-pf:focus-visible{outline:3px solid rgba(124,58,237,.35);outline-offset:2px;}
+html body #_r4uNextBar .nb-pf-ic{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(140deg,#a78bfa,#7c3aed);box-shadow:0 6px 14px -7px rgba(124,58,237,.7);}
+html body #_r4uNextBar .nb-pf-ic svg{width:18px;height:18px;}
+html body #_r4uNextBar .nb-pf-tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;}
+html body #_r4uNextBar .nb-pf-tx b{font-size:.86rem;font-weight:800;}
+html body #_r4uNextBar .nb-pf-tx small{font-size:.72rem;color:var(--muted,#6b7280);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;font-size:1.05rem;}
+
+/* ══ Generate step on laptops/desktops: tools grouped into cards ABOVE a full-size resume ══
+   [Your resume] [Improve]  /  [Use this resume for — full width, original look]  */
+#s8Grid{display:flex;flex-direction:column;gap:18px;margin-top:28px;}
+#s8Main{min-width:0;}
+#s8Side{order:-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto;column-gap:16px;row-gap:0;align-items:stretch;}
+#s8Side > *{margin:0 !important;box-sizing:border-box;}
+#s8Side .resume-bar{grid-column:1;grid-row:1 / span 2;}
+#s8Side #_r4uJdTailorBar{grid-column:2;grid-row:1;}
+#s8Side #_r4uRoastBar{grid-column:2;grid-row:2;}
+#s8Grid #s8Side > #_r4uNextBar{grid-column:1 / -1;grid-row:3;margin-top:16px !important;}
+#s8Grid.hub2 #s8Side{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto auto;row-gap:0;}
+/* card look */
+#s8Side .resume-bar{padding:18px !important;border:1px solid #ece4d8 !important;border-radius:18px !important;background:var(--card-bg,#fff) !important;box-shadow:0 1px 2px rgba(40,30,10,.04),0 12px 28px -24px rgba(120,60,10,.35) !important;}
+/* card 1 — Your resume: download & share */
+#s8Side .resume-bar{display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;gap:0 !important;}
+#s8Side .resume-bar-left h3{font-size:1.15rem !important;margin:0;}
+#s8Side .resume-bar-left p{margin:2px 0 0 !important;font-size:.8rem !important;}
+#s8Side .resume-bar-left .r4g-chip{margin-top:8px !important;font-size:.74rem !important;}
+#s8Side #dlActions:not([style*="none"]){display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:10px !important;margin-top:14px !important;width:100% !important;}
+#s8Side #dlActions .btn-dl{width:100% !important;min-width:0 !important;flex-direction:column !important;justify-content:center !important;gap:7px !important;padding:12px 6px 11px !important;border-radius:14px !important;}
+#s8Side #dlActions .btn-dl .dlt{align-items:center;}
+#s8Side #dlActions .btn-dl .dlt b{font-size:.8rem;text-align:center;white-space:nowrap;}
+#s8Side #dlActions .btn-dl .dlt small{display:none;}
+#s8Side #dlActions .dli{width:34px;height:34px;border-radius:10px;}
+#s8Side #dlActions .dli svg{width:16px;height:16px;}
+#s8Side #dlActions .btn-dl.btn-dl-pdf{grid-column:1 / -1;order:-1;flex-direction:row !important;justify-content:flex-start !important;gap:12px !important;padding:13px 16px 13px 12px !important;}
+#s8Side #dlActions .btn-dl-pdf .dli{width:40px;height:40px;}
+#s8Side #dlActions .btn-dl-pdf .dlt{align-items:flex-start;}
+#s8Side #dlActions .btn-dl-pdf .dlt b{font-size:1rem;}
+#s8Side #dlActions .btn-dl-pdf .dlt small{display:block;font-size:.74rem;}
+#s8Side #dlActions .btn-dl-pdf::after{content:"\2192";margin-left:auto;font-weight:800;opacity:.65;font-size:1.1rem;}
+#s8Side #dlActions .r4d-l{display:none;} #s8Side #dlActions .r4d-s{display:inline;}
+#s8Side #dlActions .btn-dl-qr .r4d-s{display:none;} #s8Side #dlActions .btn-dl-qr .r4d-l{display:inline;}
+/* card 2 — Improve: Match a job (top) + ATS score (bottom) form one card */
+#s8Side #_r4uJdTailorBar,#s8Side #_r4uRoastBar{display:flex !important;flex-wrap:wrap !important;align-content:center !important;align-items:center !important;gap:10px 12px !important;padding:16px 18px !important;background:#fff !important;border:1px solid #ece4d8 !important;box-shadow:none !important;transform:none;}
+#s8Side #_r4uJdTailorBar{border-radius:18px 18px 0 0 !important;border-bottom:0 !important;}
+#s8Side #_r4uRoastBar{border-radius:0 0 18px 18px !important;border-top:1px dashed #efe6d8 !important;}
+#s8Side #_r4uJdTailorBar::before,#s8Side #_r4uRoastBar::before{display:none !important;}
+#s8Side #_r4uRoastBar .rb-ico,#s8Side #_r4uJdTailorBar .jdt-ico{width:40px !important;height:40px !important;border-radius:11px !important;flex:0 0 40px;}
+#s8Side #_r4uRoastBar .rb-ico svg,#s8Side #_r4uJdTailorBar .jdt-ico svg{width:19px !important;height:19px !important;}
+#s8Side #_r4uRoastBar .rb-body,#s8Side #_r4uJdTailorBar .jdt-body{flex:1 1 calc(100% - 52px) !important;min-width:0 !important;}
+#s8Grid.hub2 #s8Side #_r4uRoastBar .rb-body,#s8Grid.hub2 #s8Side #_r4uJdTailorBar .jdt-body{flex:1 1 0 !important;}
+#s8Grid.hub2 #s8Side #_r4uRoastBar .rb-go,#s8Grid.hub2 #s8Side #_r4uJdTailorBar .jdt-go{margin-left:0 !important;}
+#s8Side #_r4uRoastBar .r4m-t,#s8Side #_r4uJdTailorBar .r4m-t,#s8Side #_r4uRoastBar .r4m-sub,#s8Side #_r4uJdTailorBar .r4m-sub{display:none !important;}
+#s8Side #_r4uRoastBar .rb-title,#s8Side #_r4uJdTailorBar .jdt-title{display:block !important;font-size:.95rem !important;font-weight:800 !important;}
+#s8Side #_r4uRoastBar .rb-sub,#s8Side #_r4uJdTailorBar .jdt-sub{display:block !important;font-size:.78rem !important;line-height:1.4 !important;margin-top:3px !important;}
+#s8Side #_r4uRoastBar .rb-go,#s8Side #_r4uJdTailorBar .jdt-go{display:inline-flex !important;flex:0 0 auto !important;margin:0 0 0 52px !important;padding:8px 14px 8px 16px !important;font-size:.8rem !important;gap:5px !important;}
+#s8Side #_r4uRoastBar .r4go-l,#s8Side #_r4uJdTailorBar .r4go-l{display:inline;}
+/* card 3 — Use this resume for */
+/* below the cards: slim toolbar (length + text size), tip, then the full-size resume */
+#s8Main #pageCountStrip,#s8Main #r4uFsRow{display:inline-flex !important;width:auto !important;border:1px solid #ece4d8 !important;border-radius:12px !important;background:#fff !important;margin:0 8px 10px 0 !important;padding:6px 10px !important;gap:10px !important;align-items:center !important;}
+#s8Main #editHint{margin-top:0 !important;}
+#s8Main #pageAdvisorPanel{margin:0 0 12px !important;}
+
+
+/* Generate step tool card: short descriptions under Share / QR, Cover letter, Word */
+#s8Side #dlActions .btn-dl:not(.btn-dl-pdf){flex-direction:column !important;justify-content:center !important;align-items:center !important;gap:6px !important;padding:12px 6px 11px !important;text-align:center;}
+#s8Side #dlActions .btn-dl:not(.btn-dl-pdf) .dlt{align-items:center !important;min-width:0;max-width:100%;}
+#s8Side #dlActions .btn-dl:not(.btn-dl-pdf) .dlt b{text-align:center !important;font-size:.82rem !important;}
+#s8Side #dlActions .btn-dl:not(.btn-dl-pdf) .dlt small{display:block !important;font-size:.68rem !important;line-height:1.25;opacity:.8;text-align:center;white-space:normal;}
+#s8Side #dlActions .btn-dl:not(.btn-dl-pdf) .dli{flex:0 0 auto;width:32px;height:32px;}
+/* phones: same short line, smaller */
+@media (max-width:768px){
+  html body #dlActions .btn-dl:not(.btn-dl-pdf){flex-direction:column !important;gap:4px !important;padding:9px 4px 8px !important;}
+  html body #dlActions .btn-dl:not(.btn-dl-pdf) .dlt{align-items:center !important;}
+  html body #dlActions .btn-dl:not(.btn-dl-pdf) .dlt small{display:block !important;font-size:.6rem !important;line-height:1.2;opacity:.8;text-align:center;}
+}
+/* Generating your resume: full-screen loader until the resume is ready */
+#r4uGenLoad{position:fixed;inset:0;z-index:10080;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(41,24,10,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
+#r4uGenLoad.on{display:flex;}
+#r4uGenLoad .gl-card{width:100%;max-width:400px;background:#fffdf9;border-radius:20px;padding:26px 24px 22px;text-align:center;box-shadow:0 30px 70px -20px rgba(41,24,10,.5);animation:glIn .25s ease-out;}
+@keyframes glIn{from{transform:translateY(12px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+#r4uGenLoad .gl-doc{position:relative;width:64px;height:80px;margin:0 auto 16px;border-radius:10px;background:#fff;border:1.5px solid #f3d9b5;box-shadow:0 10px 24px -14px rgba(234,88,12,.6);overflow:hidden;}
+#r4uGenLoad .gl-doc i{position:absolute;left:10px;height:5px;border-radius:3px;background:#fde3c2;animation:glLine 1.6s ease-in-out infinite;}
+#r4uGenLoad .gl-doc i:nth-child(1){top:12px;width:30px;background:#f59e0b;}
+#r4uGenLoad .gl-doc i:nth-child(2){top:24px;width:44px;animation-delay:.15s}
+#r4uGenLoad .gl-doc i:nth-child(3){top:34px;width:38px;animation-delay:.3s}
+#r4uGenLoad .gl-doc i:nth-child(4){top:44px;width:42px;animation-delay:.45s}
+#r4uGenLoad .gl-doc i:nth-child(5){top:54px;width:30px;animation-delay:.6s}
+#r4uGenLoad .gl-doc i:nth-child(6){top:64px;width:36px;animation-delay:.75s}
+#r4uGenLoad .gl-doc b{position:absolute;left:0;right:0;top:-30%;height:30%;background:linear-gradient(180deg,rgba(251,191,36,0),rgba(251,191,36,.35),rgba(251,191,36,0));animation:glScan 1.8s ease-in-out infinite;}
+@keyframes glLine{0%,100%{opacity:.45;transform:scaleX(.85);transform-origin:left}50%{opacity:1;transform:scaleX(1)}}
+@keyframes glScan{0%{top:-30%}100%{top:100%}}
+#r4uGenLoad h3{margin:0;font-size:1.12rem;font-weight:800;color:#1c1917;}
+#r4uGenLoad .gl-step{margin:6px 0 0;min-height:1.4em;font-size:.88rem;color:#9a3412;font-weight:600;transition:opacity .25s;}
+#r4uGenLoad .gl-bar{height:6px;border-radius:99px;background:#f3eee6;margin:16px 0 10px;overflow:hidden;}
+#r4uGenLoad .gl-bar i{display:block;height:100%;width:6%;border-radius:inherit;background:linear-gradient(90deg,#fcd34d,#f59e0b,#ea580c);transition:width .8s ease;}
+#r4uGenLoad .gl-note{margin:0;font-size:.76rem;color:#78716c;}
+@media (prefers-reduced-motion:reduce){#r4uGenLoad .gl-doc i,#r4uGenLoad .gl-doc b,#r4uGenLoad .gl-card{animation:none;}}
+
+/* Old "Turn your resume into a portfolio website" card at the bottom of the Generate step — removed
+   (portfolio lives in "Use this resume for" and on the homepage) */
+html body #portfolioBanner{display:none !important;}
+
+/* Download hint: while the user reads the resume (Download PDF scrolled out of view) */
+#r4uDlHint{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transition:opacity .25s ease,transform .25s ease,bottom .25s ease !important;z-index:3400;display:flex;align-items:center;gap:6px;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;}
+#r4uDlHint.on{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+#r4uDlHint .dh-go{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;font:inherit;font-size:.86rem;font-weight:800;color:#431407;padding:10px 16px 10px 12px;border-radius:99px;
+  background:linear-gradient(135deg,#fcd34d,#fbbf24 45%,#f59e0b);box-shadow:0 12px 26px -12px rgba(120,53,15,.65),0 0 0 1px rgba(217,119,6,.25);-webkit-tap-highlight-color:transparent;white-space:nowrap;}
+#r4uDlHint .dh-go svg{width:16px;height:16px;flex:0 0 16px;}
+#r4uDlHint .dh-x{width:26px;height:26px;border-radius:50%;border:0;background:rgba(41,24,10,.55);color:#fff;font-size:15px;line-height:1;cursor:pointer;}
+@keyframes r4DlPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.0)}40%{box-shadow:0 0 0 8px rgba(245,158,11,.45)}}
+html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:r4DlPulse .9s ease-out 2 !important;}
+@media (prefers-reduced-motion:reduce){#r4uDlHint{transition:none;} html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:none !important;}}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
@@ -17249,6 +17381,137 @@ html body #pvTplBar .pvt-nav:active{transform:scale(.94);background:#fff7ed;}
     return true;
   }
   hook(); setInterval(hook,1000);   /* re-attach if the preview bar is ever rebuilt */
+})();
+</script>
+<script id="_r4uS8Layout">
+/* Wide screens (Generate step ≥ 1000px wide): resume left, sticky toolbox right.
+   Moves the existing blocks (no copies), so every button keeps its behaviour; the
+   blocks' own placers (Tailor → ATS → "Use this resume for" follow .resume-bar) keep
+   working because .resume-bar moves with them. Narrow screens get the original order back. */
+(function(){
+  var ORDER=['_r4uWaConnectRow','tplSection','@nav','@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar','pageCountStrip','r4uFsRow','pageAdvisorPanel','editHint','@res','clSection'];
+  function step(){ return document.getElementById('step8'); }
+  function el(k,s){ s=s||step(); if(!s) return null;
+    if(k==='@nav') return s.querySelector('.nav-buttons');
+    if(k==='@bar') return s.querySelector('.resume-bar');
+    if(k==='@res'){ var ro=document.getElementById('resumeOutput'); return ro&&ro.parentElement&&ro.parentElement!==s&&!/^s8/.test(ro.parentElement.id||'')?ro.parentElement:ro; }
+    return document.getElementById(k); }
+  function wide(){ var s=step(); return !!(s&&s.classList.contains('active')&&s.clientWidth>=700&&document.querySelector('#resumeOutput .resume-a4-page')); }
+  function build(){
+    var s=step(), g=document.getElementById('s8Grid');
+    if(!g){
+      g=document.createElement('div'); g.id='s8Grid';
+      g.innerHTML='<div id="s8Main"></div><div id="s8Side" role="region" aria-label="Resume tools"></div>';
+      var bar=el('@bar'); s.insertBefore(g, bar);
+    }
+    /* WhatsApp "Connect" and "Template: X · Change" stay as they are on production
+       (full-width, stacked, original style) — only the tools and the resume move. */
+    var M=document.getElementById('s8Main'), S=document.getElementById('s8Side');
+    var oldT=document.getElementById('s8Top'); if(oldT){ ['_r4uWaConnectRow','tplSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode===oldT) s.insertBefore(e, oldT); }); oldT.remove(); }
+    ['@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==S) S.appendChild(e); });
+    ['pageCountStrip','r4uFsRow','pageAdvisorPanel','editHint','@res','clSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==M) M.appendChild(e); });
+    var gg=document.getElementById('s8Grid'); if(gg){ gg.classList.toggle('hub2', s.clientWidth<960); }
+  }
+  function unbuild(){
+    var s=step(), g=document.getElementById('s8Grid'), T=document.getElementById('s8Top'); if(!g&&!T) return;
+    var anchor=g||T;
+    ORDER.forEach(function(k){ var e=el(k); if(e) s.insertBefore(e, anchor); });
+    if(g) g.remove(); if(T) T.remove();
+  }
+  function sync(){ try{ var s=step(); if(!s) return; if(document.body.classList.contains('pdf-printing')||document.body.classList.contains('ios-print-mode')){ unbuild(); return; } if(wide()) build(); else unbuild(); }catch(e){} }
+  setInterval(sync,500); window.addEventListener('resize',function(){ setTimeout(sync,50); });
+  window._r4uS8Sync=sync;
+})();
+</script>
+<script id="_r4uGenLoader">
+/* Show a full-screen "Writing your resume…" loader from the moment Generate Resume is
+   tapped until the resume is on screen. The app already disables the button and sets
+   its label to "Generating…" for the whole run (including the background route), so
+   the loader simply follows that state; it also closes as soon as a new resume
+   renders, and after 3 minutes at most. */
+(function(){
+  var STEPS=['Reading your details…','Writing your professional summary…','Crafting achievement bullet points…','Making it ATS-friendly…','Applying your template…','Almost there…'];
+  var ov=null, t0=0, iv=null, si=0, stepEl, barEl, sawBusy=false, lastHtml='';
+  function build(){
+    ov=document.createElement('div'); ov.id='r4uGenLoad'; ov.setAttribute('role','alert'); ov.setAttribute('aria-live','polite');
+    ov.innerHTML='<div class="gl-card"><div class="gl-doc" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><b></b></div>'
+      +'<h3>Writing your resume with AI</h3><p class="gl-step"></p><div class="gl-bar"><i></i></div><p class="gl-note">This usually takes 20–40 seconds. Please keep this page open.</p></div>';
+    document.body.appendChild(ov); stepEl=ov.querySelector('.gl-step'); barEl=ov.querySelector('.gl-bar i');
+  }
+  function show(){
+    if(!ov) build(); if(ov.classList.contains('on')) return;
+    t0=Date.now(); si=0; stepEl.textContent=STEPS[0]; barEl.style.width='6%';
+    var ro=document.getElementById('resumeOutput'); lastHtml=ro?ro.innerHTML.length+':'+(ro.textContent||'').slice(0,200):'';
+    ov.classList.add('on');
+    clearInterval(iv); iv=setInterval(function(){
+      var sec=(Date.now()-t0)/1000;
+      barEl.style.width=Math.min(92, 6+86*(1-Math.exp(-sec/18)))+'%';      /* eases toward 92% */
+      var want=Math.min(STEPS.length-1, Math.floor(sec/5));
+      if(want!==si){ si=want; stepEl.style.opacity='0'; setTimeout(function(){ stepEl.textContent=STEPS[si]; stepEl.style.opacity='1'; },200); }
+      if(sec>180) hide();
+    },500);
+  }
+  function hide(){ if(!ov||!ov.classList.contains('on')) return; barEl.style.width='100%'; clearInterval(iv); setTimeout(function(){ ov.classList.remove('on'); },250); }
+  function busy(){ var b=document.getElementById('generateBtn'); return !!(b&&b.disabled&&/generat/i.test(b.textContent||'')); }
+  function tick(){
+    if(busy()){ sawBusy=true; show(); return; }
+    if(sawBusy){ sawBusy=false; hide(); }
+  }
+  /* close as soon as a NEW resume renders (don't wait for the button to reset) */
+  function watchOut(){
+    var ro=document.getElementById('resumeOutput'); if(!ro){ setTimeout(watchOut,400); return; }
+    try{ new MutationObserver(function(){ if(ov&&ov.classList.contains('on')&&ro.querySelector('.resume-a4-page')){ var now=ro.innerHTML.length+':'+(ro.textContent||'').slice(0,200); if(now!==lastHtml&&(Date.now()-t0)>800) hide(); } }).observe(ro,{childList:true}); }catch(e){}
+  }
+  /* react instantly on the tap, then follow the button state */
+  document.addEventListener('click',function(e){ if(e.target&&e.target.closest&&e.target.closest('#generateBtn')) setTimeout(tick,30); },true);
+  setInterval(tick,300); watchOut();
+})();
+</script>
+<script id="_r4uDlHint">
+/* While the user scrolls through their resume on the Generate step and the Download PDF
+   button is out of view, show a small pill: "Download PDF ↑ buttons are above". Tapping
+   it scrolls back to the download buttons and briefly highlights Download PDF.
+   Hidden while Quick Tips / pop-ups are open; × hides it for this visit. */
+(function(){
+  var el=null, off=false, t=null;
+  function build(){
+    el=document.createElement('div'); el.id='r4uDlHint'; el.setAttribute('role','status');
+    el.innerHTML='<button type="button" class="dh-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>Download PDF</button><button type="button" class="dh-x" aria-label="Hide this hint">×</button>';
+    document.body.appendChild(el);
+    el.querySelector('.dh-go').addEventListener('click',function(){
+      var b=document.querySelector('#dlActions .btn-dl-pdf'); if(!b) return;
+      try{ b.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){ b.scrollIntoView(); }
+      b.classList.remove('r4u-dl-flash'); void b.offsetWidth; b.classList.add('r4u-dl-flash'); setTimeout(function(){ b.classList.remove('r4u-dl-flash'); },2000);
+      el.classList.remove('on');
+    });
+    el.querySelector('.dh-x').addEventListener('click',function(){ off=true; el.classList.remove('on'); });
+  }
+  function shown(e){ if(!e) return false; var c=getComputedStyle(e); return c.display!=='none'&&c.visibility!=='hidden'&&+c.opacity>.05; }
+  function check(){
+    t=null;
+    var step=document.getElementById('step8'), ro=document.getElementById('resumeOutput'), pdf=document.querySelector('#dlActions .btn-dl-pdf');
+    var want=false;
+    if(!off && step && step.classList.contains('active') && ro && ro.querySelector('.resume-a4-page') && pdf && pdf.offsetParent){
+      var vh=innerHeight, pr=pdf.getBoundingClientRect(), rr=ro.getBoundingClientRect();
+      var pdfVisible = pr.bottom>0 && pr.top<vh;
+      var readingResume = rr.top<vh*0.6 && rr.bottom>vh*0.4;
+      var blocked = shown(document.getElementById('resumeTips')) || document.querySelector('#previewModalOverlay[style*="flex"],#pvTplSheet.on,#r4uGenLoad.on,.ai-panel-open,#pfOverlay[style*="flex"]');
+      want = !pdfVisible && readingResume && !blocked;
+    }
+    if(want&&!el) build();
+    if(el){
+      /* sit above any toast (e.g. "Version restored from cloud") instead of under it */
+      var lift=18; try{ var tc=document.getElementById('toastContainerTop'); if(tc){ [].forEach.call(tc.children,function(c){ var cs=getComputedStyle(c), r=c.getBoundingClientRect(); if(cs.display!=='none'&&cs.visibility!=='hidden'&&+cs.opacity>0.1&&r.height>4&&r.bottom>innerHeight-120&&r.top<innerHeight) lift=Math.max(lift, Math.round(innerHeight-r.top)+16); }); } }catch(e){}
+      el.style.bottom='calc('+lift+'px + env(safe-area-inset-bottom,0px))';
+      el.classList.toggle('on',want);
+    }
+  }
+  function soon(){ if(!t) t=setTimeout(check,120); }
+  window.addEventListener('scroll',soon,{passive:true,capture:true});
+  window.addEventListener('resize',soon);
+  setInterval(check,1500);
+  (function watchToasts(n){ var tc=document.getElementById('toastContainerTop'); if(!tc){ if(n<40) setTimeout(function(){ watchToasts(n+1); },500); return; }
+    try{ new MutationObserver(function(){ [30,300,700,1200].forEach(function(d){ setTimeout(check,d); }); }).observe(tc,{childList:true,subtree:true}); }catch(e){} })(0);
 })();
 </script>
 </body>
