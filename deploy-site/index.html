@@ -9382,11 +9382,26 @@ if ('serviceWorker' in navigator) {
        flush against the top edge and page 1 runs into the bottom edge. */
     + '.resume-a4-page{-webkit-box-decoration-break:clone !important;box-decoration-break:clone !important;}'
     + '</style>';
+  /* Header spacing = the on-screen card. An old print rule gives the header of 12
+     single-column templates (classic, minimal, creative, fresh, academic, simple,
+     coral, sage, lime, mono, retro, paper) 13mm/14mm padding — written when the PDF
+     page had no padding. The page now keeps its own margins, so the header was
+     indented twice: the name sat ~53px right of the body and the contact line
+     (LinkedIn) wrapped. Copy the live card's header padding/margin instead. */
+  var HEAD_TPLS = /\btpl-(classic|minimal|creative|fresh|academic|simple|coral|sage|lime|mono|retro|paper)\b/;
+  function headFixCss(){
+    try{
+      var hd = document.querySelector('#resumeOutput .resume-a4-page .r-head'); if(!hd) return '';
+      var w = hd.parentElement; var m = w && (w.className||'').match(HEAD_TPLS); if(!m) return '';
+      var cs = getComputedStyle(hd);
+      return '<style id="_r4uPdfHeadFix">.resume-a4-page .tpl-'+m[1]+'>.r-head,.resume-a4-page .tpl-'+m[1]+'.r4-rf>.r-head{padding:'+cs.paddingTop+' '+cs.paddingRight+' '+cs.paddingBottom+' '+cs.paddingLeft+' !important;margin:0 0 '+cs.marginBottom+' 0 !important;}</style>';
+    }catch(e){ return ''; }
+  }
   function injectPdfFix(html){
     try{
       var i = html.lastIndexOf('</head>');
       if(i === -1) return html;
-      return html.slice(0, i) + PDF_FIX_CSS + html.slice(i);
+      return html.slice(0, i) + PDF_FIX_CSS + headFixCss() + html.slice(i);
     }catch(e){ return html; }
   }
 
