@@ -16978,6 +16978,8 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
    (Download & share · Improve · Use this resume for) instead of a long full-width stack. */
 #s8Grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start;margin-top:4px;}
 #s8Grid.narrow{grid-template-columns:minmax(0,1fr) 300px;gap:18px;}
+#s8Grid.slim{grid-template-columns:minmax(0,1fr) 280px;gap:14px;}
+#s8Grid.slim #s8Main #pageCountStrip,#s8Grid.slim #s8Main #r4uFsRow{margin-right:6px !important;}
 #s8Main{min-width:0;}
 #s8Side{position:sticky;top:14px;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px 2px 8px;}
 #s8Side > *{margin:0 !important;}
@@ -17340,7 +17342,7 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
     if(k==='@bar') return s.querySelector('.resume-bar');
     if(k==='@res'){ var ro=document.getElementById('resumeOutput'); return ro&&ro.parentElement&&ro.parentElement!==s&&!/^s8/.test(ro.parentElement.id||'')?ro.parentElement:ro; }
     return document.getElementById(k); }
-  function wide(){ var s=step(); return !!(s&&s.classList.contains('active')&&s.clientWidth>=940&&document.querySelector('#resumeOutput .resume-a4-page')); }
+  function wide(){ var s=step(); return !!(s&&s.classList.contains('active')&&s.clientWidth>=800&&document.querySelector('#resumeOutput .resume-a4-page')); }
   function build(){
     var s=step(), g=document.getElementById('s8Grid');
     if(!g){
@@ -17356,7 +17358,7 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
     ['@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==S) S.appendChild(e); });
     ['pageCountStrip','r4uFsRow','editHint','@res','clSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==M) M.appendChild(e); });
     T.style.gridTemplateColumns = (T.children.length>1)?'1fr 1fr':'1fr';
-    var gg=document.getElementById('s8Grid'); if(gg) gg.classList.toggle('narrow', s.clientWidth<1040);
+    var gg=document.getElementById('s8Grid'); if(gg){ gg.classList.toggle('narrow', s.clientWidth<1040); gg.classList.toggle('slim', s.clientWidth<920); }
   }
   function unbuild(){
     var s=step(), g=document.getElementById('s8Grid'), T=document.getElementById('s8Top'); if(!g&&!T) return;
