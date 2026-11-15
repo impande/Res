@@ -17037,10 +17037,6 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
 /* below the cards: slim toolbar (length + text size), tip, then the full-size resume */
 #s8Main #pageCountStrip,#s8Main #r4uFsRow{display:inline-flex !important;width:auto !important;border:1px solid #ece4d8 !important;border-radius:12px !important;background:#fff !important;margin:0 8px 10px 0 !important;padding:6px 10px !important;gap:10px !important;align-items:center !important;}
 #s8Main #editHint{margin-top:0 !important;}
-#s8Top{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-#s8Top > *{margin:0 !important;}
-#step8 > #s8Top + .nav-buttons{margin:0 0 16px !important;padding-top:0 !important;border-top:0 !important;}
-#s8Top > *{margin:0 !important;}
 
 /* ══ Generate step cards: clean & professional (restrained) ══
    one accent (amber) only on Download PDF; everything else neutral: thin borders,
@@ -17104,10 +17100,6 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
 #s8Side #_r4uNextBar .nb-ok{display:none !important;}
 /* toolbar above the resume: same neutral look */
 #s8Main #pageCountStrip,#s8Main #r4uFsRow{border-color:#e7e5e4 !important;border-radius:8px !important;}
-#s8Top #tplSection.tpl-folded,#s8Top #_r4uWaConnectRow{border-color:#e7e5e4 !important;border-radius:12px !important;box-shadow:none !important;}
-#s8Top #tplSum .ts-ico{background:none !important;color:#57534e !important;width:20px !important;height:20px !important;flex-basis:20px !important;}
-#s8Top #tplSum .ts-go{background:#fff !important;color:#292524 !important;border:1px solid #d6d3d1 !important;box-shadow:none !important;font-weight:600 !important;border-radius:7px !important;padding:6px 14px !important;}
-#s8Top #_r4uWaConnectRow button{border-radius:7px !important;font-weight:600 !important;}
 #s8Main #editHint{background:#fafaf9 !important;border:1px solid #e7e5e4 !important;color:#57534e !important;}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
@@ -17421,18 +17413,16 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
   function build(){
     var s=step(), g=document.getElementById('s8Grid');
     if(!g){
-      var top=document.createElement('div'); top.id='s8Top';
       g=document.createElement('div'); g.id='s8Grid';
       g.innerHTML='<div id="s8Main"></div><div id="s8Side" role="region" aria-label="Resume tools"></div>';
-      var nav=el('@nav'); s.insertBefore(top, el('_r4uWaConnectRow')||el('tplSection')||nav); 
       var bar=el('@bar'); s.insertBefore(g, bar);
     }
-    var T=document.getElementById('s8Top'), M=document.getElementById('s8Main'), S=document.getElementById('s8Side');
-    ['_r4uWaConnectRow','tplSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==T) T.appendChild(e); });
-    var nav=el('@nav'); if(nav&&nav.previousElementSibling!==T&&T.parentNode===s) s.insertBefore(nav, T.nextSibling);
+    /* WhatsApp "Connect" and "Template: X · Change" stay as they are on production
+       (full-width, stacked, original style) — only the tools and the resume move. */
+    var M=document.getElementById('s8Main'), S=document.getElementById('s8Side');
+    var oldT=document.getElementById('s8Top'); if(oldT){ ['_r4uWaConnectRow','tplSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode===oldT) s.insertBefore(e, oldT); }); oldT.remove(); }
     ['@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==S) S.appendChild(e); });
     ['pageCountStrip','r4uFsRow','editHint','@res','clSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==M) M.appendChild(e); });
-    T.style.gridTemplateColumns = (T.children.length>1)?'1fr 1fr':'1fr';
     var gg=document.getElementById('s8Grid'); if(gg){ gg.classList.toggle('hub2', s.clientWidth<960); }
   }
   function unbuild(){
