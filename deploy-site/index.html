@@ -17066,9 +17066,6 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
 /* Old "Turn your resume into a portfolio website" card at the bottom of the Generate step — removed
    (portfolio lives in "Use this resume for" and on the homepage) */
 html body #portfolioBanner{display:none !important;}
-/* "Quick tips" link (tips no longer pop up by themselves after generating) */
-html body .r4u-tipslink{display:inline-flex;align-items:center;gap:5px;margin:8px 0 0 8px;padding:4px 10px;border:1px solid #fde3c2;border-radius:99px;background:#fff8ef;color:#9a4a0b;font:inherit;font-size:.74rem;font-weight:700;cursor:pointer;}
-html body .r4u-tipslink:hover{background:#ffefd9;}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
@@ -17432,30 +17429,7 @@ html body .r4u-tipslink:hover{background:#ffefd9;}
       if(sec>180) hide();
     },500);
   }
-  function hide(){ if(!ov||!ov.classList.contains('on')) return; barEl.style.width='100%'; clearInterval(iv); setTimeout(function(){ ov.classList.remove('on'); },250); land(); }
-  /* After generating: don't pop Quick Tips over the page and don't leave the user deep
-     in the resume card — bring the download / share tools into view instead. */
-  var landT=null, userMoved=false;
-  ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev,function(){ userMoved=true; },{passive:true,capture:true}); });
-  function target(){ return document.getElementById('s8Grid')||document.querySelector('#step8 .resume-bar'); }
-  function land(){
-    userMoved=false; clearInterval(landT); var n=0;
-    landT=setInterval(function(){
-      n++; if(n>30){ clearInterval(landT); return; }                     /* ~6 s */
-      try{ var tp=document.getElementById('resumeTips'); if(tp&&getComputedStyle(tp).display!=='none'){ if(typeof dismissTips==='function') dismissTips(); else tp.style.display='none'; var bd=document.getElementById('tipsBackdrop'); if(bd) bd.style.display='none'; } }catch(e){}
-      if(userMoved) return;
-      var t=target(); if(!t) return; var r=t.getBoundingClientRect();
-      var lo=40; try{ var hd2=document.getElementById('mobileHeader'); if(hd2&&getComputedStyle(hd2).display!=='none') lo=hd2.getBoundingClientRect().bottom; }catch(_){} if(r.top<lo||r.top>Math.max(lo+40,Math.min(260,innerHeight*.4))){ try{ t.scrollIntoView({block:'start',behavior:n<3?'smooth':'auto'}); var off=90; try{ var hd=document.getElementById('mobileHeader'); if(hd&&getComputedStyle(hd).display!=='none'){ var hb=hd.getBoundingClientRect().bottom; if(hb>0) off=hb+12; } }catch(_){} var m=document.getElementById('main'); if(m&&m.scrollHeight>m.clientHeight) m.scrollTop=Math.max(0,m.scrollTop-off); else window.scrollBy(0,-off); }catch(e){} }
-    },200);
-  }
-  /* keep Quick Tips one tap away */
-  function tipsLink(){
-    var left=document.querySelector('#step8 .resume-bar-left'); if(!left||left.querySelector('.r4u-tipslink')) return;
-    var bt=document.createElement('button'); bt.type='button'; bt.className='r4u-tipslink'; bt.innerHTML='💡 Quick tips';
-    bt.addEventListener('click',function(){ clearInterval(landT); var tp=document.getElementById('resumeTips'); if(!tp) return; tp.classList.remove('tips-hidden'); tp.style.display='flex'; });
-    left.appendChild(bt);
-  }
-  setInterval(tipsLink,1000);
+  function hide(){ if(!ov||!ov.classList.contains('on')) return; barEl.style.width='100%'; clearInterval(iv); setTimeout(function(){ ov.classList.remove('on'); },250); }
   function busy(){ var b=document.getElementById('generateBtn'); return !!(b&&b.disabled&&/generat/i.test(b.textContent||'')); }
   function tick(){
     if(busy()){ sawBusy=true; show(); return; }
