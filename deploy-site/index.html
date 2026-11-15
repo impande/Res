@@ -17068,17 +17068,15 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
 html body #portfolioBanner{display:none !important;}
 
 /* Download hint: while the user reads the resume (Download PDF scrolled out of view) */
-#r4uDlHint{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:3400;display:flex;align-items:center;gap:6px;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+#r4uDlHint{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transition:opacity .25s ease,transform .25s ease,bottom .25s ease !important;z-index:3400;display:flex;align-items:center;gap:6px;transform:translate(-50%,16px);opacity:0;pointer-events:none;
   transition:opacity .25s ease,transform .25s ease;}
 #r4uDlHint.on{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
 #r4uDlHint .dh-go{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;font:inherit;font-size:.86rem;font-weight:800;color:#431407;padding:10px 16px 10px 12px;border-radius:99px;
   background:linear-gradient(135deg,#fcd34d,#fbbf24 45%,#f59e0b);box-shadow:0 12px 26px -12px rgba(120,53,15,.65),0 0 0 1px rgba(217,119,6,.25);-webkit-tap-highlight-color:transparent;white-space:nowrap;}
 #r4uDlHint .dh-go svg{width:16px;height:16px;flex:0 0 16px;}
-#r4uDlHint .dh-go small{font-weight:600;color:#7c2d12;opacity:.85;font-size:.76rem;}
 #r4uDlHint .dh-x{width:26px;height:26px;border-radius:50%;border:0;background:rgba(41,24,10,.55);color:#fff;font-size:15px;line-height:1;cursor:pointer;}
 @keyframes r4DlPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.0)}40%{box-shadow:0 0 0 8px rgba(245,158,11,.45)}}
 html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:r4DlPulse .9s ease-out 2 !important;}
-@media (max-width:420px){#r4uDlHint .dh-go small{display:none;}}
 @media (prefers-reduced-motion:reduce){#r4uDlHint{transition:none;} html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:none !important;}}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
@@ -17468,7 +17466,7 @@ html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:r4DlPulse .9s ease-out 2
   var el=null, off=false, t=null;
   function build(){
     el=document.createElement('div'); el.id='r4uDlHint'; el.setAttribute('role','status');
-    el.innerHTML='<button type="button" class="dh-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>Download PDF <small>— buttons are above</small></button><button type="button" class="dh-x" aria-label="Hide this hint">×</button>';
+    el.innerHTML='<button type="button" class="dh-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>Download PDF</button><button type="button" class="dh-x" aria-label="Hide this hint">×</button>';
     document.body.appendChild(el);
     el.querySelector('.dh-go').addEventListener('click',function(){
       var b=document.querySelector('#dlActions .btn-dl-pdf'); if(!b) return;
@@ -17491,12 +17489,19 @@ html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:r4DlPulse .9s ease-out 2
       want = !pdfVisible && readingResume && !blocked;
     }
     if(want&&!el) build();
-    if(el) el.classList.toggle('on',want);
+    if(el){
+      /* sit above any toast (e.g. "Version restored from cloud") instead of under it */
+      var lift=18; try{ var tc=document.getElementById('toastContainerTop'); if(tc){ [].forEach.call(tc.children,function(c){ var cs=getComputedStyle(c), r=c.getBoundingClientRect(); if(cs.display!=='none'&&cs.visibility!=='hidden'&&+cs.opacity>0.1&&r.height>4&&r.bottom>innerHeight-120&&r.top<innerHeight) lift=Math.max(lift, Math.round(innerHeight-r.top)+16); }); } }catch(e){}
+      el.style.bottom='calc('+lift+'px + env(safe-area-inset-bottom,0px))';
+      el.classList.toggle('on',want);
+    }
   }
   function soon(){ if(!t) t=setTimeout(check,120); }
   window.addEventListener('scroll',soon,{passive:true,capture:true});
   window.addEventListener('resize',soon);
   setInterval(check,1500);
+  (function watchToasts(n){ var tc=document.getElementById('toastContainerTop'); if(!tc){ if(n<40) setTimeout(function(){ watchToasts(n+1); },500); return; }
+    try{ new MutationObserver(function(){ [30,300,700,1200].forEach(function(d){ setTimeout(check,d); }); }).observe(tc,{childList:true,subtree:true}); }catch(e){} })(0);
 })();
 </script>
 </body>
