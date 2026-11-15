@@ -17026,6 +17026,7 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
 /* below the cards: slim toolbar (length + text size), tip, then the full-size resume */
 #s8Main #pageCountStrip,#s8Main #r4uFsRow{display:inline-flex !important;width:auto !important;border:1px solid #ece4d8 !important;border-radius:12px !important;background:#fff !important;margin:0 8px 10px 0 !important;padding:6px 10px !important;gap:10px !important;align-items:center !important;}
 #s8Main #editHint{margin-top:0 !important;}
+#s8Main #pageAdvisorPanel{margin:0 0 12px !important;}
 
 
 /* Generate step tool card: short descriptions under Share / QR, Cover letter, Word */
@@ -17379,7 +17380,7 @@ html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:r4DlPulse .9s ease-out 2
    blocks' own placers (Tailor → ATS → "Use this resume for" follow .resume-bar) keep
    working because .resume-bar moves with them. Narrow screens get the original order back. */
 (function(){
-  var ORDER=['_r4uWaConnectRow','tplSection','@nav','@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar','pageCountStrip','r4uFsRow','editHint','@res','clSection'];
+  var ORDER=['_r4uWaConnectRow','tplSection','@nav','@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar','pageCountStrip','r4uFsRow','pageAdvisorPanel','editHint','@res','clSection'];
   function step(){ return document.getElementById('step8'); }
   function el(k,s){ s=s||step(); if(!s) return null;
     if(k==='@nav') return s.querySelector('.nav-buttons');
@@ -17399,7 +17400,7 @@ html body #dlActions .btn-dl-pdf.r4u-dl-flash{animation:r4DlPulse .9s ease-out 2
     var M=document.getElementById('s8Main'), S=document.getElementById('s8Side');
     var oldT=document.getElementById('s8Top'); if(oldT){ ['_r4uWaConnectRow','tplSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode===oldT) s.insertBefore(e, oldT); }); oldT.remove(); }
     ['@bar','_r4uJdTailorBar','_r4uRoastBar','_r4uNextBar'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==S) S.appendChild(e); });
-    ['pageCountStrip','r4uFsRow','editHint','@res','clSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==M) M.appendChild(e); });
+    ['pageCountStrip','r4uFsRow','pageAdvisorPanel','editHint','@res','clSection'].forEach(function(k){ var e=el(k); if(e&&e.parentNode!==M) M.appendChild(e); });
     var gg=document.getElementById('s8Grid'); if(gg){ gg.classList.toggle('hub2', s.clientWidth<960); }
   }
   function unbuild(){
