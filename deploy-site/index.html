@@ -16975,20 +16975,18 @@ html body #_r4uNextBar .nb-pf-tx small{font-size:.72rem;color:var(--muted,#6b728
 html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;font-size:1.05rem;}
 
 /* ══ Generate step on laptops/desktops: tools grouped into cards ABOVE a full-size resume ══
-   hub3 (≥960px content): [Your resume] [Improve] [Use this resume for]
-   hub2 (700-960px):      [Your resume] [Improve] / [Use this resume for — full width]  */
+   [Your resume] [Improve]  /  [Use this resume for — full width, original look]  */
 #s8Grid{display:flex;flex-direction:column;gap:18px;margin-top:4px;}
 #s8Main{min-width:0;}
-#s8Side{order:-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;column-gap:16px;row-gap:0;align-items:stretch;}
+#s8Side{order:-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto;column-gap:16px;row-gap:0;align-items:stretch;}
 #s8Side > *{margin:0 !important;box-sizing:border-box;}
 #s8Side .resume-bar{grid-column:1;grid-row:1 / span 2;}
 #s8Side #_r4uJdTailorBar{grid-column:2;grid-row:1;}
 #s8Side #_r4uRoastBar{grid-column:2;grid-row:2;}
-#s8Side #_r4uNextBar{grid-column:3;grid-row:1 / span 2;}
+#s8Grid #s8Side > #_r4uNextBar{grid-column:1 / -1;grid-row:3;margin-top:16px !important;}
 #s8Grid.hub2 #s8Side{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto auto;row-gap:0;}
-#s8Grid.hub2 #s8Side #_r4uNextBar{grid-column:1 / -1;grid-row:3;margin-top:16px !important;}
 /* card look */
-#s8Side .resume-bar,#s8Side #_r4uNextBar{padding:18px !important;border:1px solid #ece4d8 !important;border-radius:18px !important;background:var(--card-bg,#fff) !important;box-shadow:0 1px 2px rgba(40,30,10,.04),0 12px 28px -24px rgba(120,60,10,.35) !important;}
+#s8Side .resume-bar{padding:18px !important;border:1px solid #ece4d8 !important;border-radius:18px !important;background:var(--card-bg,#fff) !important;box-shadow:0 1px 2px rgba(40,30,10,.04),0 12px 28px -24px rgba(120,60,10,.35) !important;}
 /* card 1 — Your resume: download & share */
 #s8Side .resume-bar{display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;gap:0 !important;}
 #s8Side .resume-bar-left h3{font-size:1.15rem !important;margin:0;}
@@ -17025,82 +17023,10 @@ html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;fon
 #s8Side #_r4uRoastBar .rb-go,#s8Side #_r4uJdTailorBar .jdt-go{display:inline-flex !important;flex:0 0 auto !important;margin:0 0 0 52px !important;padding:8px 14px 8px 16px !important;font-size:.8rem !important;gap:5px !important;}
 #s8Side #_r4uRoastBar .r4go-l,#s8Side #_r4uJdTailorBar .r4go-l{display:inline;}
 /* card 3 — Use this resume for */
-#s8Side #_r4uNextBar .nb-h{margin:0 0 12px !important;font-size:1rem !important;}
-#s8Side #_r4uNextBar .nb-row{display:grid !important;grid-template-columns:1fr 1fr !important;gap:10px !important;}
-#s8Grid.hub2 #s8Side #_r4uNextBar .nb-row{grid-template-columns:repeat(4,minmax(0,1fr)) !important;}
-#s8Side #_r4uNextBar .r4u-tl{padding:12px 8px !important;gap:6px !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic{width:36px !important;height:36px !important;border-radius:10px !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic svg{width:18px !important;height:18px !important;}
-#s8Side #_r4uNextBar .r4u-tl b{font-size:.84rem !important;}
-#s8Side #_r4uNextBar .r4u-tl small{display:block !important;font-size:.7rem !important;}
-#s8Side #_r4uNextBar .nb-pf{margin-top:10px;padding:12px 14px;}
 /* below the cards: slim toolbar (length + text size), tip, then the full-size resume */
 #s8Main #pageCountStrip,#s8Main #r4uFsRow{display:inline-flex !important;width:auto !important;border:1px solid #ece4d8 !important;border-radius:12px !important;background:#fff !important;margin:0 8px 10px 0 !important;padding:6px 10px !important;gap:10px !important;align-items:center !important;}
 #s8Main #editHint{margin-top:0 !important;}
 
-/* ══ Generate step cards: clean & professional (restrained) ══
-   one accent (amber) only on Download PDF; everything else neutral: thin borders,
-   small grey line icons, compact type, no gradients / coloured tiles / shadows. */
-#s8Side{column-gap:14px !important;}
-#s8Side .resume-bar,#s8Side #_r4uNextBar,#s8Side #_r4uJdTailorBar,#s8Side #_r4uRoastBar{border:1px solid #e7e5e4 !important;background:#fff !important;box-shadow:none !important;}
-#s8Side .resume-bar,#s8Side #_r4uNextBar{padding:16px !important;border-radius:12px !important;}
-#s8Side #_r4uJdTailorBar{border-radius:12px 12px 0 0 !important;}
-#s8Side #_r4uRoastBar{border-radius:0 0 12px 12px !important;border-top:1px solid #f0efee !important;}
-/* card titles: small uppercase labels */
-#s8Side .resume-bar-left h3,#s8Side #_r4uNextBar .nb-h{font-size:.72rem !important;font-weight:700 !important;letter-spacing:.08em !important;text-transform:uppercase !important;color:#78716c !important;margin:0 0 10px !important;}
-#s8Side .resume-bar-left p{display:none !important;}
-#s8Side .resume-bar-left .r4g-chip{background:none !important;border:0 !important;padding:0 !important;margin:0 0 10px !important;font-size:.74rem !important;color:#78716c !important;box-shadow:none !important;}
-#s8Side .resume-bar-left .r4g-chip i{width:16px !important;height:16px !important;background:#a8a29e !important;}
-#s8Side .resume-bar-left .r4g-chip em{color:#a8a29e !important;}
-/* download & share */
-#s8Side #dlActions:not([style*="none"]){gap:8px !important;margin-top:0 !important;}
-#s8Side #dlActions .btn-dl{flex-direction:row !important;gap:7px !important;padding:8px 6px !important;border-radius:8px !important;background:#fff !important;border:1px solid #e7e5e4 !important;box-shadow:none !important;animation:none !important;transform:none !important;}
-#s8Side #dlActions .btn-dl:hover{background:#fafaf9 !important;border-color:#d6d3d1 !important;}
-#s8Side #dlActions .btn-dl::before{display:none !important;}
-#s8Side #dlActions .btn-dl .dlt b{font-size:.78rem !important;font-weight:600 !important;color:#292524 !important;}
-#s8Side #dlActions .dli{width:auto !important;height:auto !important;background:none !important;box-shadow:none !important;border-radius:0 !important;}
-#s8Side #dlActions .dli svg{width:15px !important;height:15px !important;stroke:#57534e !important;}
-#s8Side #dlActions .btn-dl.btn-dl-pdf{padding:10px 14px !important;gap:10px !important;border:0 !important;border-radius:9px !important;background:linear-gradient(135deg,#fbbf24,#f59e0b) !important;box-shadow:none !important;}
-#s8Side #dlActions .btn-dl.btn-dl-pdf:hover{background:#f59e0b !important;}
-#s8Side #dlActions .btn-dl-pdf .dli svg{stroke:#431407 !important;}
-#s8Side #dlActions .btn-dl-pdf .dlt b{font-size:.9rem !important;font-weight:700 !important;color:#431407 !important;}
-#s8Side #dlActions .btn-dl-pdf .dlt small{font-size:.7rem !important;color:#78350f !important;opacity:.85;}
-/* improve rows */
-#s8Side #_r4uJdTailorBar,#s8Side #_r4uRoastBar{padding:14px 16px !important;gap:6px 10px !important;}
-#s8Side #_r4uRoastBar .rb-ico,#s8Side #_r4uJdTailorBar .jdt-ico{width:20px !important;height:20px !important;flex:0 0 20px !important;background:none !important;box-shadow:none !important;border-radius:0 !important;}
-#s8Side #_r4uRoastBar .rb-ico svg,#s8Side #_r4uJdTailorBar .jdt-ico svg{width:18px !important;height:18px !important;}
-#s8Side #_r4uJdTailorBar .jdt-ico svg *{stroke:#57534e !important;} #s8Side #_r4uJdTailorBar .jdt-ico svg circle[fill]{fill:#57534e !important;}
-#s8Side #_r4uRoastBar .rb-ico svg,#s8Side #_r4uRoastBar .rb-ico svg *{fill:#57534e !important;}
-#s8Side #_r4uRoastBar .rb-body,#s8Side #_r4uJdTailorBar .jdt-body{flex:1 1 calc(100% - 30px) !important;}
-#s8Side #_r4uRoastBar .rb-title,#s8Side #_r4uJdTailorBar .jdt-title{font-size:.86rem !important;font-weight:600 !important;color:#1c1917 !important;}
-#s8Side #_r4uRoastBar .rb-sub,#s8Side #_r4uJdTailorBar .jdt-sub{font-size:.74rem !important;color:#78716c !important;}
-#s8Side #_r4uRoastBar .rb-go,#s8Side #_r4uJdTailorBar .jdt-go{margin-left:30px !important;padding:5px 12px !important;font-size:.74rem !important;font-weight:600 !important;background:#fff !important;color:#292524 !important;border:1px solid #d6d3d1 !important;border-radius:7px !important;box-shadow:none !important;}
-#s8Side #_r4uRoastBar .rb-go:hover,#s8Side #_r4uJdTailorBar .jdt-go:hover{background:#fafaf9 !important;}
-#s8Side .r4go-ar{animation:none !important;}
-#s8Grid.hub2 #s8Side #_r4uRoastBar .rb-go,#s8Grid.hub2 #s8Side #_r4uJdTailorBar .jdt-go{margin-left:0 !important;}
-/* use this resume for: plain list rows */
-#s8Side #_r4uNextBar .nb-row{grid-template-columns:1fr 1fr !important;gap:6px !important;}
-#s8Grid.hub2 #s8Side #_r4uNextBar .nb-row{grid-template-columns:repeat(4,minmax(0,1fr)) !important;}
-#s8Side #_r4uNextBar .r4u-tl{flex-direction:row !important;justify-content:flex-start !important;align-items:center !important;gap:8px !important;padding:8px 10px !important;border-radius:8px !important;background:#fff !important;border:1px solid #e7e5e4 !important;box-shadow:none !important;text-align:left;}
-#s8Side #_r4uNextBar .r4u-tl:hover{background:#fafaf9 !important;border-color:#d6d3d1 !important;transform:none !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic{width:18px !important;height:18px !important;flex:0 0 18px !important;background:none !important;box-shadow:none !important;border-radius:0 !important;color:#57534e !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic svg{width:16px !important;height:16px !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic svg,#s8Side #_r4uNextBar .r4u-tl .r4u-ic svg *{stroke:#57534e !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic svg [fill]:not([fill="none"]){fill:#57534e !important;}
-#s8Side #_r4uNextBar .r4u-tl .r4u-ic span{color:#57534e !important;font-size:14px !important;}
-#s8Side #_r4uNextBar .r4u-tl b{font-size:.8rem !important;font-weight:600 !important;color:#292524 !important;text-align:left !important;}
-#s8Side #_r4uNextBar .r4u-tl small{display:none !important;}
-#s8Side #_r4uNextBar .nb-pf{margin-top:6px;padding:8px 10px;gap:8px;border-radius:8px;background:#fff;border:1px solid #e7e5e4;}
-#s8Side #_r4uNextBar .nb-pf:hover{background:#fafaf9;border-color:#d6d3d1;}
-#s8Side #_r4uNextBar .nb-pf-ic{flex:0 0 18px;width:18px;height:18px;background:none;box-shadow:none;border-radius:0;}
-#s8Side #_r4uNextBar .nb-pf-ic svg{width:16px;height:16px;stroke:#57534e;}
-#s8Side #_r4uNextBar .nb-pf-tx b{font-size:.8rem;font-weight:600;color:#292524;}
-#s8Side #_r4uNextBar .nb-pf-tx small{display:none;}
-#s8Side #_r4uNextBar .nb-pf-go{font-size:.9rem;color:#a8a29e;}
-#s8Side #_r4uNextBar .nb-ok{display:none !important;}
-/* toolbar above the resume: same neutral look */
-#s8Main #pageCountStrip,#s8Main #r4uFsRow{border-color:#e7e5e4 !important;border-radius:8px !important;}
-#s8Main #editHint{background:#fafaf9 !important;border:1px solid #e7e5e4 !important;color:#57534e !important;}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
