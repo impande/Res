@@ -9392,8 +9392,18 @@ if ('serviceWorker' in navigator) {
   function headFixCss(){
     try{
       var hd = document.querySelector('#resumeOutput .resume-a4-page .r-head'); if(!hd) return '';
-      var w = hd.parentElement; var m = w && (w.className||'').match(HEAD_TPLS); if(!m) return '';
+      var w = hd.parentElement; var m = w && (w.className||'').match(HEAD_TPLS);
       var cs = getComputedStyle(hd);
+      if(!m){
+        /* Every other template: the print rule's margin:0 also dropped the gap under
+           the header (Professional Summary sat 6-20px higher than on screen). Restore
+           the screen's bottom gap — but only for headers that aren't full-bleed
+           (negative side/top margins stay at 0, as the print layout needs). */
+        var mb = parseFloat(cs.marginBottom)||0, neg = (parseFloat(cs.marginTop)<0)||(parseFloat(cs.marginLeft)<0)||(parseFloat(cs.marginRight)<0);
+        if(mb<=0 || neg) return '';
+        var tc = ((w && w.className)||'').match(/\btpl-[a-z0-9-]+/);
+        return tc ? '<style id="_r4uPdfHeadFix">.resume-a4-page .'+tc[0]+'>.r-head{margin-bottom:'+cs.marginBottom+' !important;}</style>' : '';
+      }
       return '<style id="_r4uPdfHeadFix">.resume-a4-page .tpl-'+m[1]+'>.r-head,.resume-a4-page .tpl-'+m[1]+'.r4-rf>.r-head{padding:'+cs.paddingTop+' '+cs.paddingRight+' '+cs.paddingBottom+' '+cs.paddingLeft+' !important;margin:0 0 '+cs.marginBottom+' 0 !important;}</style>';
     }catch(e){ return ''; }
   }
