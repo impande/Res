@@ -13336,6 +13336,15 @@ window.__novaPortfolioHTML=function(d,sections){
     active=true;
     var item=queue.shift();
     try{ orig(item.msg, item.type); }catch(e){}
+    /* save / restore messages ("Saved to your account", "Version restored from cloud",
+       version saved…) stay 3 s instead of ~6 s */
+    try{
+      if(/saved|restored from cloud|version/i.test(String(item.msg||''))){
+        var c=document.getElementById(item.type==='success'?'toastContainerTop':'toastContainer');
+        var t=c&&c.lastElementChild;
+        if(t){ setTimeout(function(){ try{ t.style.transition='opacity .25s ease, transform .25s ease'; t.style.opacity='0'; t.style.transform='translateY(6px)'; setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },260); }catch(e){} }, 2750); }
+      }
+    }catch(e){}
     var tries=0, iv=setInterval(function(){
       if(!busy() || ++tries>45){ clearInterval(iv); active=false; setTimeout(pump, 160); }
     }, 180);
