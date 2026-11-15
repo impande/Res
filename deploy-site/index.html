@@ -15658,7 +15658,11 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
       +'<a class="r4u-tl" href="/linkedin-profile-optimizer/" target="_blank" rel="noopener">'+ic('li')+'<b>LinkedIn</b><small>Improve your profile</small></a>'
       +'<a class="r4u-tl" href="/interview-prep/" target="_blank" rel="noopener">'+ic('iv')+'<b>Interview</b><small>Practice questions</small></a>'
       +'<a class="r4u-tl" href="/resume-in-hindi/" target="_blank" rel="noopener">'+ic('hi')+'<b>In Hindi</b><small>Resume + 9 languages</small></a>'
-      +'</div>';
+      +'</div>'
+      /* Portfolio website now lives here (the banner that showed on every step was removed) */
+      +'<button type="button" class="nb-pf" onclick="if(typeof openPortfolioBuilder===\'function\')openPortfolioBuilder()">'
+      +'<span class="nb-pf-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg></span>'
+      +'<span class="nb-pf-tx"><b>Portfolio website</b><small>Turn this resume into your own site — free</small></span><span class="nb-pf-go" aria-hidden="true">→</span></button>';
     bar.addEventListener('click',function(e){
       var a=e.target.closest('a'); if(!a) return;
       stash();
@@ -16956,6 +16960,19 @@ html body #pvTplBar .pvt-nav:active{transform:scale(.94);background:#fff7ed;}
 #pvTplSheet .pvs-ck{flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#f59e0b,#ea580c);font-size:13px;font-weight:900;visibility:hidden;}
 #pvTplSheet .pvs-row.cur .pvs-ck{visibility:visible;}
 @media (prefers-reduced-motion:reduce){#pvTplSheet .pvs-card{animation:none;}}
+
+/* "Build your portfolio website" moved into "Use this resume for" (no banner on every step) */
+html body #pf-sticky-cta{display:none !important;}
+html body #_r4uNextBar .nb-pf{display:flex;align-items:center;gap:12px;width:100%;margin-top:8px;padding:10px 12px;border:1px solid #e4dafb;border-radius:12px;background:linear-gradient(135deg,#f6f2ff,#fff 80%);font:inherit;text-align:left;cursor:pointer;color:var(--text,#1a1a1a);-webkit-tap-highlight-color:transparent;transition:border-color .15s,transform .15s;}
+html body #_r4uNextBar .nb-pf:hover{border-color:#c4b5fd;}
+html body #_r4uNextBar .nb-pf:active{transform:scale(.99);}
+html body #_r4uNextBar .nb-pf:focus-visible{outline:3px solid rgba(124,58,237,.35);outline-offset:2px;}
+html body #_r4uNextBar .nb-pf-ic{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(140deg,#a78bfa,#7c3aed);box-shadow:0 6px 14px -7px rgba(124,58,237,.7);}
+html body #_r4uNextBar .nb-pf-ic svg{width:18px;height:18px;}
+html body #_r4uNextBar .nb-pf-tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;}
+html body #_r4uNextBar .nb-pf-tx b{font-size:.86rem;font-weight:800;}
+html body #_r4uNextBar .nb-pf-tx small{font-size:.72rem;color:var(--muted,#6b7280);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+html body #_r4uNextBar .nb-pf-go{flex:0 0 auto;font-weight:800;color:#6d28d9;font-size:1.05rem;}
 /* tap ripple */
 .r4rip-clip{position:absolute !important;inset:0 !important;border-radius:inherit !important;overflow:hidden !important;pointer-events:none !important;padding:0 !important;margin:0 !important;background:none !important;border:0 !important;}
 .r4rip{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);opacity:.45;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);animation:r4Rip .55s ease-out forwards;}
