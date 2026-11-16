@@ -16638,57 +16638,27 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
   if(document.readyState==='complete') start(); else window.addEventListener('load',function(){setTimeout(start,0);});
 })();
 </script>
-<style id="_r4uHomeNavCss">
-/* Home button — a way back to the landing page from every step (signed in or not),
-   and the only way back inside the installed app, which has no browser buttons. */
-#r4uHomeM{display:none;align-items:center;gap:5px;flex:none;height:32px;padding:0 11px 0 9px;border-radius:99px;background:var(--r4-cream,#fff7ed);color:var(--r4-ink2,#9a3412);border:1.5px solid var(--r4-line2,#fcd9a8);box-shadow:0 1px 0 #fff inset,0 6px 14px -12px rgba(154,52,18,.6);font:inherit;font-size:.74rem;font-weight:700;white-space:nowrap;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
-#r4uHomeM:active{transform:scale(.96)}
-#r4uHomeM svg{width:14px;height:14px;flex:none}
-html.r4u-off-home #r4uHomeM{display:inline-flex}
-html.r4u-off-home #mobileHdr .mhdr-logo{display:none}
-@media (max-width:359px){#r4uHomeM span{display:none}#r4uHomeM{padding:0 9px}}
-#r4uHomeD{display:flex;align-items:center;gap:12px;margin:0 0 4px;padding:9px 13px;border:0;border-radius:12px;background:none;width:100%;font:inherit;font-size:.875rem;font-weight:600;color:var(--r4-ink2,#9a3412);cursor:pointer;text-align:left;transition:background-color .2s}
-#r4uHomeD:hover{background:var(--r4-cream,#fff7ed)}
-#r4uHomeD .hn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;flex:none;background:var(--r4-cream,#fff7ed);border:1.5px solid var(--r4-line2,#fcd9a8);color:var(--r4-ink2,#9a3412)}
-#r4uHomeD .hn svg{width:12px;height:12px}
-html:not(.r4u-off-home) #r4uHomeD{background:var(--r4-cream,#fff7ed)}
-html:not(.r4u-off-home) #r4uHomeD .hn{background:linear-gradient(135deg,#fcd34d,#f59e0b);border-color:rgba(217,119,6,.45);color:#431407}
-#r4uHomeM:focus-visible,#r4uHomeD:focus-visible{outline:2px solid #b45309;outline-offset:2px}
-</style>
 <script id="_r4uHomeNav">
+/* Tap the R4u logo (phone header or desktop sidebar) on any step, signed in or
+   not, to go back to the landing page. Also the way home inside the installed
+   app, which has no browser buttons. */
 (function(){
-  var ICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>';
-  function onLanding(){var s0=document.getElementById('step0');return !!(s0&&s0.classList.contains('active')&&!s0.classList.contains('flow-started'));}
   function goHome(){
     try{ if(typeof window.goToStep==='function') window.goToStep(0); }catch(e){}
     /* "flow-started" hides the landing page's lower half once a flow begins; clear
        it so the full landing page (and the "Resume For You" title) comes back. */
     var s0=document.getElementById('step0'); if(s0) s0.classList.remove('flow-started');
     try{ window.scrollTo({top:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
-    sync();
   }
   window.r4uGoHome=goHome;
-  function sync(){ document.documentElement.classList.toggle('r4u-off-home',!onLanding()); }
-  function mount(){
-    var row=document.querySelector('#mobileHdr .mhdr-row1'), logo=row&&row.querySelector('.mhdr-logo');
-    if(row&&logo&&!document.getElementById('r4uHomeM')){
-      var m=document.createElement('button'); m.type='button'; m.id='r4uHomeM'; m.title='Back to home'; m.innerHTML=ICO+'<span>Home</span>';
-      m.addEventListener('click',goHome); row.insertBefore(m,logo);
-      logo.onclick=goHome; logo.setAttribute('title','Home');
-    }
-    var list=document.querySelector('#sidebar .steps-list');
-    if(list&&!document.getElementById('r4uHomeD')){
-      var d=document.createElement('button'); d.type='button'; d.id='r4uHomeD';
-      d.innerHTML='<span class="hn">'+ICO+'</span><span>Home</span>';
-      d.addEventListener('click',goHome); list.parentNode.insertBefore(d,list);
-    }
-    var sl=document.querySelector('#sidebar .logo'); if(sl){ sl.onclick=goHome; sl.title='Home'; }
-    var s0=document.getElementById('step0');
-    if(s0) try{ new MutationObserver(sync).observe(s0,{attributes:true,attributeFilter:['class']}); }catch(e){}
-    sync();
+  function wire(){
+    var ml=document.querySelector('#mobileHdr .mhdr-logo');
+    if(ml){ ml.onclick=goHome; ml.setAttribute('title','Home'); ml.setAttribute('role','link'); ml.setAttribute('aria-label','Resume For You — home'); }
+    var sl=document.querySelector('#sidebar .logo');
+    if(sl){ sl.onclick=goHome; sl.setAttribute('title','Home'); }
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount); else mount();
-  window.addEventListener('load',function(){ mount(); setTimeout(sync,300); });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
+  window.addEventListener('load',function(){ wire(); setTimeout(wire,500); });
 })();
 </script>
 <script src="/tools/guides.js?v=4" defer></script>
