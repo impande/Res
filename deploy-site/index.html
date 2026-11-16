@@ -16525,25 +16525,36 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
       simple({top:true,arrow:'up right',line:'Tap '+g('share')+' in the address bar, then '+add,then:'Look under “View More” if you don’t see it. Then tap <b>Add</b>.'});
       return;
     }
+    /* Open the iOS Share sheet for the person, so they only tap "Add to Home
+       Screen" (then Add). If they close the sheet without picking anything —
+       e.g. Apple left that option out of a website's Share sheet — the card
+       switches to the manual steps (Safari's own Share button). */
+    if(navigator.share&&!isIPad){
+      var opened=false;
+      try{
+        navigator.share({title:'Resume For You',url:URL_HOME}).then(function(){ closeSheet(); },function(){ if(document.getElementById('r4uInstSheet')) manualIOS(true); });
+        opened=true;
+      }catch(e){}
+      if(opened){
+        simple({top:true,line:'Tap '+add+' in the list below',then:(s26?'It’s under “View More”. ':'Scroll down to find it. ')+'Then tap <b>Add</b>.'});
+        return;
+      }
+    }
+    manualIOS();
+  }
+  function manualIOS(again){
+    var s26=safariVer>=26, add='“<b>Add to Home Screen</b>”';
     /* Safari 26 on iPhone has 3 layouts: "Bottom" and "Top" keep a toolbar with
        Share in the middle at the bottom; "Compact" hides Share behind ⋯ at the
        bottom right. The toolbar layouts take far more screen height, so the
        tallest browser chrome seen since load (bars are fully shown on load)
        tells them apart. Older Safari always has Share at the bottom middle. */
-    /* EXPERIMENT (#sharetest): open the iOS Share sheet for the person, so they
-       only have to tap "Add to Home Screen". Apple may leave that option out of
-       sheets opened by a website — kept behind a flag until checked on a phone. */
-    if(/sharetest/.test(location.hash)&&navigator.share){
-      try{ navigator.share({title:'Resume For You',url:URL_HOME}).catch(function(){}); }catch(e){}
-      simple({top:true,line:'Find '+add+' in the list that opened',then:'Tap “View More” if you don’t see it. Then tap <b>Add</b>.'});
-      return;
-    }
     measure();
     var compact=!isIPad&&s26&&maxChrome>0&&maxChrome<COMPACT_MAX;
     var arrow=isIPad?'up right':(compact?'down right':'down mid');
     var line=compact?'Tap '+g('more')+' below, then '+g('share')+' and '+add
       :'Tap '+g('share')+(isIPad?' at the top':' below')+', then '+add;
-    simple({top:true,arrow:arrow,line:line,then:(s26?'It’s under “View More”. ':'Scroll down to find it. ')+'Then tap <b>Add</b>.'});
+    simple({top:true,arrow:arrow,line:line,then:(again?'Not in that list? Safari’s own Share button has it. ':'')+(s26?'It’s under “View More”. ':'Scroll down to find it. ')+'Then tap <b>Add</b>.'});
   }
   function guideAndroid(){
     if(inApp) return guideInApp();
