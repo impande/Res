@@ -16530,6 +16530,14 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
        bottom right. The toolbar layouts take far more screen height, so the
        tallest browser chrome seen since load (bars are fully shown on load)
        tells them apart. Older Safari always has Share at the bottom middle. */
+    /* EXPERIMENT (#sharetest): open the iOS Share sheet for the person, so they
+       only have to tap "Add to Home Screen". Apple may leave that option out of
+       sheets opened by a website — kept behind a flag until checked on a phone. */
+    if(/sharetest/.test(location.hash)&&navigator.share){
+      try{ navigator.share({title:'Resume For You',url:URL_HOME}).catch(function(){}); }catch(e){}
+      simple({top:true,line:'Find '+add+' in the list that opened',then:'Tap “View More” if you don’t see it. Then tap <b>Add</b>.'});
+      return;
+    }
     measure();
     var compact=!isIPad&&s26&&maxChrome>0&&maxChrome<COMPACT_MAX;
     var arrow=isIPad?'up right':(compact?'down right':'down mid');
@@ -16633,15 +16641,18 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
 <style id="_r4uHomeNavCss">
 /* Home button — a way back to the landing page from every step (signed in or not),
    and the only way back inside the installed app, which has no browser buttons. */
-#r4uHomeM{display:none;align-items:center;justify-content:center;width:34px;height:34px;flex:none;margin-right:-2px;border:1px solid #eadfce;border-radius:10px;background:#fff;color:#7c2d12;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#r4uHomeM svg{width:18px;height:18px}
+#r4uHomeM{display:none;align-items:center;gap:5px;flex:none;height:32px;padding:0 11px 0 9px;border-radius:99px;background:var(--r4-cream,#fff7ed);color:var(--r4-ink2,#9a3412);border:1.5px solid var(--r4-line2,#fcd9a8);box-shadow:0 1px 0 #fff inset,0 6px 14px -12px rgba(154,52,18,.6);font:inherit;font-size:.74rem;font-weight:700;white-space:nowrap;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+#r4uHomeM:active{transform:scale(.96)}
+#r4uHomeM svg{width:14px;height:14px;flex:none}
 html.r4u-off-home #r4uHomeM{display:inline-flex}
-#r4uHomeD{display:flex;align-items:center;gap:12px;margin:0 0 4px;padding:9px 13px;border:0;border-radius:12px;background:none;width:100%;font:inherit;font-size:.875rem;font-weight:500;color:#57534e;cursor:pointer;text-align:left}
-#r4uHomeD:hover{background:#faf5ee;color:#1c1917}
-#r4uHomeD .hn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid #d6d3d1;color:#78716c;flex:none}
-#r4uHomeD .hn svg{width:13px;height:13px}
-html:not(.r4u-off-home) #r4uHomeD{background:#fff7ed;color:#9a3412}
-html:not(.r4u-off-home) #r4uHomeD .hn{border-color:#c2410c;background:#c2410c;color:#fff}
+html.r4u-off-home #mobileHdr .mhdr-logo{display:none}
+@media (max-width:359px){#r4uHomeM span{display:none}#r4uHomeM{padding:0 9px}}
+#r4uHomeD{display:flex;align-items:center;gap:12px;margin:0 0 4px;padding:9px 13px;border:0;border-radius:12px;background:none;width:100%;font:inherit;font-size:.875rem;font-weight:600;color:var(--r4-ink2,#9a3412);cursor:pointer;text-align:left;transition:background-color .2s}
+#r4uHomeD:hover{background:var(--r4-cream,#fff7ed)}
+#r4uHomeD .hn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;flex:none;background:var(--r4-cream,#fff7ed);border:1.5px solid var(--r4-line2,#fcd9a8);color:var(--r4-ink2,#9a3412)}
+#r4uHomeD .hn svg{width:12px;height:12px}
+html:not(.r4u-off-home) #r4uHomeD{background:var(--r4-cream,#fff7ed)}
+html:not(.r4u-off-home) #r4uHomeD .hn{background:linear-gradient(135deg,#fcd34d,#f59e0b);border-color:rgba(217,119,6,.45);color:#431407}
 #r4uHomeM:focus-visible,#r4uHomeD:focus-visible{outline:2px solid #b45309;outline-offset:2px}
 </style>
 <script id="_r4uHomeNav">
@@ -16661,7 +16672,7 @@ html:not(.r4u-off-home) #r4uHomeD .hn{border-color:#c2410c;background:#c2410c;co
   function mount(){
     var row=document.querySelector('#mobileHdr .mhdr-row1'), logo=row&&row.querySelector('.mhdr-logo');
     if(row&&logo&&!document.getElementById('r4uHomeM')){
-      var m=document.createElement('button'); m.type='button'; m.id='r4uHomeM'; m.setAttribute('aria-label','Home'); m.title='Home'; m.innerHTML=ICO;
+      var m=document.createElement('button'); m.type='button'; m.id='r4uHomeM'; m.title='Back to home'; m.innerHTML=ICO+'<span>Home</span>';
       m.addEventListener('click',goHome); row.insertBefore(m,logo);
       logo.onclick=goHome; logo.setAttribute('title','Home');
     }
