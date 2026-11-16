@@ -16416,6 +16416,10 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
   var inApp=/FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|Twitter|Line\/|MicroMessenger|GSA\/|WhatsApp/i.test(ua)||(isAndroid&&/; wv\)/.test(ua));
   var iosOtherBrowser=isIOS&&/CriOS|EdgiOS|FxiOS|OPiOS/.test(ua);
   var isSamsung=/SamsungBrowser/i.test(ua);
+  /* tallest browser chrome (screen minus page height) seen in portrait */
+  var COMPACT_MAX=175, maxChrome=0, dbg=/instdbg/.test(location.hash);
+  function measure(){try{if(innerWidth<innerHeight){var c=screen.height-innerHeight;if(c>maxChrome)maxChrome=c;}}catch(e){}}
+  if(isIOS){measure();window.addEventListener('resize',measure);window.addEventListener('pageshow',measure);setTimeout(measure,600);}
   var safariVer=(function(){var m=ua.match(/Version\/(\d+)/);return m?+m[1]:0;})();
   function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
   function standalone(){try{return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: minimal-ui)').matches||navigator.standalone===true;}catch(e){return false;}}
@@ -16487,12 +16491,20 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
           +'<li><span class="n">3</span><div>Tap <b>Add</b></div></li></ol>'});
       return;
     }
-    var newUI=safariVer>=26;
-    var arrow=isIPad?'up right':(newUI?'down right':'down mid');
+    /* Safari 26 on iPhone has 3 layouts: "Bottom" and "Top" keep a toolbar with
+       Share in the middle at the bottom; "Compact" hides Share behind ⋯ at the
+       bottom right. The toolbar layouts take far more screen height, so the
+       tallest browser chrome seen since load (bars are fully shown on load)
+       tells them apart. Older Safari always has Share at the bottom middle. */
+    measure();
+    var compact=!isIPad&&safariVer>=26&&maxChrome>0&&maxChrome<COMPACT_MAX;
+    var arrow=isIPad?'up right':(compact?'down right':'down mid');
     sheet({title:'Add Resume For You to your Home Screen',sub:'3 quick taps · free · no App Store',arrow:arrow,top:!isIPad,
-      body:'<ol><li><span class="n">1</span><div>'+(newUI&&!isIPad
-            ?'Tap '+k('more','')+' at the bottom right, then '+k('share','Share')+'<small>Share button already at the bottom? Just tap it.</small>'
-            :'Tap '+k('share','Share')+(isIPad?' at the top right':' at the bottom of the screen'))+'</div></li>'
+      body:'<ol><li><span class="n">1</span><div>'+(compact
+            ?'Tap '+k('more','')+' at the bottom right, then '+k('share','Share')+'<small>See a Share button in the bottom bar? Just tap that.</small>'
+            :'Tap '+k('share','Share')+(isIPad?' at the top right':' in the middle of the bar at the bottom')
+              +(isIPad||safariVer<26?'':'<small>Only see '+k('more','')+' at the bottom right? Tap it, then Share.</small>'))
+          +(dbg?'<small>chrome '+maxChrome+' · Safari '+safariVer+'</small>':'')+'</div></li>'
         +'<li><span class="n">2</span><div>Scroll down and tap '+k('plus','Add to Home Screen')+'<small>Tap “View More” if it isn’t in the list.</small></div></li>'
         +'<li><span class="n">3</span><div>Tap <b>Add</b> at the top right<small>Keep “Open as Web App” switched on.</small></div></li></ol>'
         +'<div class="ic-ft">Then open <b>Resume4U</b> from your home screen. It opens full-screen, like an app, and always has the latest version.</div>'});
