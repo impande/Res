@@ -180,6 +180,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#f59e0b">
+  <script type="text/javascript">/* Keep Chrome/Edge's install prompt so our "Install the app" button can open it in one tap. Inline + typed so the build leaves it in <head>. */
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window._r4uBIP=e;try{window.dispatchEvent(new Event('r4u-bip'));}catch(_){}});</script>
 
   <!-- ── Schema.org JSON-LD ────────────────────────────────────────────── -->
   <script type="application/ld+json">
@@ -16344,6 +16346,256 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }
   function start(){ link(); watch(); schedule(); }
   if(document.readyState==='complete') start(); else window.addEventListener('load',start);
+})();
+</script>
+<style id="_r4uInstallCss">
+/* ══ "Install the app" — one-tap install on Android / desktop Chrome & Edge,
+   guided 3-tap sheet on iPhone / iPad (Apple lets no website install itself). ══ */
+#r4uInstBtn{display:inline-flex;align-items:center;gap:8px;margin:10px auto 0;padding:7px 14px 7px 8px;border:1.5px solid #f3c77a;border-radius:999px;background:linear-gradient(180deg,#fffaf0,#fff3dc);color:#7c2d12;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;box-shadow:0 2px 10px -4px rgba(180,83,9,.35);-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s}
+#r4uInstBtn:hover{transform:translateY(-1px);box-shadow:0 6px 16px -6px rgba(180,83,9,.45)}
+#r4uInstBtn:focus-visible{outline:2px solid #b45309;outline-offset:2px}
+#r4uInstBtn img{width:26px;height:26px;border-radius:7px;flex:none}
+#r4uInstBtn small{font-weight:600;color:#9a5b1e;font-size:.74rem}
+#r4uInstWrap{display:flex;justify-content:center}
+#r4uInstWrap[hidden]{display:none}
+
+#r4uInstSheet{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:flex-end;justify-content:center;background:rgba(28,25,23,.55);padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));animation:r4uInFade .18s ease-out}
+#r4uInstSheet.top{align-items:flex-start;padding-top:max(14px,env(safe-area-inset-top))}
+@media (min-width:700px){#r4uInstSheet,#r4uInstSheet.top{align-items:center}}
+#r4uInstSheet .ic-card{position:relative;width:100%;max-width:400px;background:#fff;border-radius:20px;padding:18px 18px 16px;box-shadow:0 24px 60px -12px rgba(0,0,0,.45);color:#1c1917;animation:r4uInUp .22s cubic-bezier(.2,.8,.3,1)}
+#r4uInstSheet .ic-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border:0;border-radius:50%;background:#f5f0e8;color:#57534e;font-size:18px;line-height:32px;cursor:pointer}
+#r4uInstSheet .ic-hd{display:flex;gap:12px;align-items:center;margin:0 34px 14px 0}
+#r4uInstSheet .ic-hd img{width:46px;height:46px;border-radius:12px;flex:none;box-shadow:0 4px 12px -4px rgba(180,83,9,.5)}
+#r4uInstSheet .ic-hd b{display:block;font-size:1.02rem;line-height:1.25}
+#r4uInstSheet .ic-hd span{display:block;color:#78716c;font-size:.8rem;margin-top:2px}
+#r4uInstSheet ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+#r4uInstSheet li{display:flex;gap:11px;align-items:flex-start;font-size:.9rem;line-height:1.4}
+#r4uInstSheet li .n{flex:none;width:24px;height:24px;border-radius:50%;background:#1c1917;color:#fff;font-size:.75rem;font-weight:700;display:grid;place-items:center;margin-top:1px}
+#r4uInstSheet li small{display:block;color:#78716c;font-size:.78rem;margin-top:2px}
+#r4uInstSheet .k{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:6px;background:#f5f0e8;border:1px solid #e7dfd2;font-weight:700;white-space:nowrap;vertical-align:baseline}
+#r4uInstSheet .k svg{width:14px;height:14px}
+#r4uInstSheet .ic-ft{margin-top:14px;padding-top:12px;border-top:1px solid #f0ebe3;color:#78716c;font-size:.78rem;line-height:1.45}
+#r4uInstSheet .ic-copy{display:flex;gap:8px;margin-top:12px}
+#r4uInstSheet .ic-copy input{flex:1;min-width:0;border:1px solid #e7dfd2;border-radius:10px;padding:9px 10px;font:inherit;font-size:.85rem;color:#44403c;background:#faf8f5}
+#r4uInstSheet .ic-copy button,#r4uInstSheet .ic-ok{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407}
+#r4uInstSheet .ic-ok{display:block;width:100%;margin-top:14px;background:#f5f0e8;color:#44403c}
+/* bouncing arrow pointing at the browser's own button */
+#r4uInstArrow{position:fixed;z-index:2147482001;width:54px;height:54px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(245,158,11,.3),0 10px 24px -6px rgba(0,0,0,.4);pointer-events:none}
+#r4uInstArrow svg{width:28px;height:28px}
+#r4uInstArrow.down{bottom:max(14px,env(safe-area-inset-bottom));animation:r4uInBobD 1.1s ease-in-out infinite}
+#r4uInstArrow.up{top:max(14px,env(safe-area-inset-top));animation:r4uInBobU 1.1s ease-in-out infinite}
+#r4uInstArrow.mid{left:calc(50% - 27px)}
+#r4uInstArrow.right{right:max(14px,env(safe-area-inset-right))}
+@keyframes r4uInBobD{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+@keyframes r4uInBobU{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes r4uInFade{from{opacity:0}to{opacity:1}}
+@keyframes r4uInUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+
+/* nudge after the first PDF download */
+#r4uInstNudge{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));z-index:2147481000;width:min(420px,calc(100% - 24px));transform:translateX(-50%);background:#fff;border:1px solid #f3dcb4;border-radius:18px;box-shadow:0 18px 40px -12px rgba(28,25,23,.45);padding:12px 12px 12px 14px;display:flex;gap:12px;align-items:center;color:#1c1917;animation:r4uInUpN .25s cubic-bezier(.2,.8,.3,1)}
+@keyframes r4uInUpN{from{transform:translate(-50%,20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+#r4uInstNudge img{width:42px;height:42px;border-radius:11px;flex:none}
+#r4uInstNudge .t{flex:1;min-width:0;font-size:.84rem;line-height:1.35}
+#r4uInstNudge .t b{display:block;font-size:.9rem}
+#r4uInstNudge .t span{color:#78716c}
+#r4uInstNudge .a{display:flex;flex-direction:column;gap:4px;flex:none}
+#r4uInstNudge .a button{border:0;border-radius:10px;padding:8px 14px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+#r4uInstNudge .a .go{background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407}
+#r4uInstNudge .a .no{background:none;color:#78716c;padding:4px 8px;font-weight:600}
+html.r4u-inst-open #r4uDlHint{display:none !important}
+@media (prefers-reduced-motion:reduce){#r4uInstArrow,#r4uInstSheet,#r4uInstSheet .ic-card,#r4uInstNudge{animation:none}}
+</style>
+<script id="_r4uInstall">
+(function(){
+  var ICON='/apple-touch-icon.png?v=4', URL_HOME=location.origin+'/';
+  var ua=navigator.userAgent||'';
+  var isIOS=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  var isIPad=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  var isAndroid=/Android/i.test(ua);
+  var isMobile=isIOS||isAndroid;
+  var inApp=/FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|Twitter|Line\/|MicroMessenger|GSA\/|WhatsApp/i.test(ua)||(isAndroid&&/; wv\)/.test(ua));
+  var iosOtherBrowser=isIOS&&/CriOS|EdgiOS|FxiOS|OPiOS/.test(ua);
+  var isSamsung=/SamsungBrowser/i.test(ua);
+  var safariVer=(function(){var m=ua.match(/Version\/(\d+)/);return m?+m[1]:0;})();
+  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
+  function standalone(){try{return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: minimal-ui)').matches||navigator.standalone===true;}catch(e){return false;}}
+  function recentlyInstalled(){var t=+ls('_r4uInstalled')||0;return t&&(Date.now()-t)<60*864e5;}
+  function bip(){return window._r4uBIP||null;}
+  /* Who gets the button: phones always (one-tap on Android, guide on iPhone);
+     computers only when Chrome/Edge says the site can be installed. */
+  function eligible(){
+    if(standalone()||recentlyInstalled()) return false;
+    if(isMobile) return true;
+    return !!bip();
+  }
+  function track(n){try{if(typeof window.gtag==='function')gtag('event',n);}catch(e){}}
+
+  /* ── icons ── */
+  var SV={
+    share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M8 11H6v10h12V11h-2"/></svg>',
+    more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+    kebab:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
+    down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15"/><path d="M6 13l6 6 6-6"/></svg>',
+    up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5"/><path d="M6 11l6-6 6 6"/></svg>'
+  };
+  function k(icon,label){return '<span class="k">'+(icon?SV[icon]:'')+label+'</span>';}
+
+  /* ── the guide sheet ── */
+  var lastFocus=null;
+  function closeSheet(){
+    var s=document.getElementById('r4uInstSheet'); if(s) s.remove();
+    var a=document.getElementById('r4uInstArrow'); if(a) a.remove();
+    document.removeEventListener('keydown',onKey);
+    document.documentElement.classList.remove('r4u-inst-open');
+    if(lastFocus&&lastFocus.focus) try{lastFocus.focus();}catch(e){}
+  }
+  function onKey(e){if(e.key==='Escape')closeSheet();}
+  function sheet(opts){
+    closeSheet(); lastFocus=document.activeElement;
+    var s=document.createElement('div'); s.id='r4uInstSheet'; if(opts.top) s.className='top';
+    s.setAttribute('role','dialog'); s.setAttribute('aria-modal','true'); s.setAttribute('aria-labelledby','r4uInstTitle');
+    s.innerHTML='<div class="ic-card"><button type="button" class="ic-x" aria-label="Close">×</button>'
+      +'<div class="ic-hd"><img src="'+ICON+'" alt=""><div><b id="r4uInstTitle">'+opts.title+'</b><span>'+opts.sub+'</span></div></div>'
+      +opts.body+'<button type="button" class="ic-ok">'+(opts.ok||'Got it')+'</button></div>';
+    s.addEventListener('click',function(e){if(e.target===s||e.target.closest('.ic-x')||e.target.closest('.ic-ok'))closeSheet();});
+    document.body.appendChild(s);
+    document.documentElement.classList.add('r4u-inst-open');
+    if(opts.arrow){var a=document.createElement('div');a.id='r4uInstArrow';a.className=opts.arrow;a.setAttribute('aria-hidden','true');a.innerHTML=/down/.test(opts.arrow)?SV.down:SV.up;document.body.appendChild(a);}
+    var cp=s.querySelector('.ic-copy button');
+    if(cp) cp.addEventListener('click',function(){
+      var inp=s.querySelector('.ic-copy input');
+      function done(){cp.textContent='Copied';}
+      try{navigator.clipboard.writeText(URL_HOME).then(done,function(){inp.select();try{document.execCommand('copy');done();}catch(e){}});}catch(e){inp.select();try{document.execCommand('copy');done();}catch(_){}}
+    });
+    document.addEventListener('keydown',onKey);
+    try{s.querySelector('.ic-x').focus({preventScroll:true});}catch(e){}
+  }
+  function guideInApp(){
+    sheet({title:'Open in your browser first',sub:'This app’s built-in browser can’t add apps to the home screen.',
+      body:'<ol><li><span class="n">1</span><div>Tap '+k('more','')+' or '+k('kebab','')+' in a corner of this screen</div></li>'
+        +'<li><span class="n">2</span><div>Choose <b>'+(isIOS?'Open in Safari':'Open in Chrome')+'</b> (or “Open in browser”)<small>No such option? Copy the link and paste it into '+(isIOS?'Safari':'Chrome')+'.</small></div></li>'
+        +'<li><span class="n">3</span><div>Tap <b>Install the app</b> again there</div></li></ol>'
+        +'<div class="ic-copy"><input id="r4uInstLink" readonly value="'+URL_HOME+'" aria-label="Website link"><button type="button">Copy link</button></div>'});
+  }
+  function guideIOS(){
+    if(inApp) return guideInApp();
+    if(iosOtherBrowser){
+      sheet({title:'Add Resume For You to your Home Screen',sub:'3 quick taps · free · no App Store',arrow:isIPad?'up right':'up right',top:false,
+        body:'<ol><li><span class="n">1</span><div>Tap '+k('share','Share')+' in the address bar<small>In Firefox, tap the menu first, then Share.</small></div></li>'
+          +'<li><span class="n">2</span><div>Tap '+k('plus','Add to Home Screen')+'<small>Scroll down, or tap “More”, if you don’t see it.</small></div></li>'
+          +'<li><span class="n">3</span><div>Tap <b>Add</b></div></li></ol>'});
+      return;
+    }
+    var newUI=safariVer>=26;
+    var arrow=isIPad?'up right':(newUI?'down right':'down mid');
+    sheet({title:'Add Resume For You to your Home Screen',sub:'3 quick taps · free · no App Store',arrow:arrow,top:!isIPad,
+      body:'<ol><li><span class="n">1</span><div>'+(newUI&&!isIPad
+            ?'Tap '+k('more','')+' at the bottom right, then '+k('share','Share')+'<small>Share button already at the bottom? Just tap it.</small>'
+            :'Tap '+k('share','Share')+(isIPad?' at the top right':' at the bottom of the screen'))+'</div></li>'
+        +'<li><span class="n">2</span><div>Scroll down and tap '+k('plus','Add to Home Screen')+'<small>Tap “View More” if it isn’t in the list.</small></div></li>'
+        +'<li><span class="n">3</span><div>Tap <b>Add</b> at the top right<small>Keep “Open as Web App” switched on.</small></div></li></ol>'
+        +'<div class="ic-ft">Then open <b>Resume4U</b> from your home screen. It opens full-screen, like an app, and always has the latest version.</div>'});
+  }
+  function guideAndroid(){
+    if(inApp) return guideInApp();
+    if(isSamsung){
+      sheet({title:'Add Resume For You to your Home screen',sub:'3 quick taps · free · no Play Store',arrow:'down right',
+        body:'<ol><li><span class="n">1</span><div>Tap the menu '+k('','≡')+' at the bottom right</div></li>'
+          +'<li><span class="n">2</span><div>Tap <b>Add page to</b>, then <b>Home screen</b></div></li>'
+          +'<li><span class="n">3</span><div>Tap <b>Add</b></div></li></ol>'});
+      return;
+    }
+    sheet({title:'Add Resume For You to your Home screen',sub:'3 quick taps · free · no Play Store',arrow:'up right',top:false,
+      body:'<ol><li><span class="n">1</span><div>Tap '+k('kebab','')+' at the top right of Chrome</div></li>'
+        +'<li><span class="n">2</span><div>Tap '+k('plus','Add to Home screen')+'<small>Some phones call it “Install app”.</small></div></li>'
+        +'<li><span class="n">3</span><div>Tap <b>Install</b></div></li></ol>'
+        +'<div class="ic-ft">Opened this from WhatsApp or another app? Tap '+k('kebab','')+' → <b>Open in Chrome</b> first.</div>'});
+  }
+
+  /* ── the one action every button calls ── */
+  function install(src){
+    track('pwa_install_click');
+    var p=bip();
+    if(p){
+      window._r4uBIP=null;
+      try{
+        p.prompt();
+        (p.userChoice||Promise.resolve({})).then(function(c){
+          track(c&&c.outcome==='accepted'?'pwa_install_accept':'pwa_install_dismiss');
+          if(c&&c.outcome==='accepted'){ls('_r4uInstalled',String(Date.now()));}
+          refresh();
+        }).catch(function(){});
+      }catch(e){ if(isAndroid) guideAndroid(); }
+      return;
+    }
+    if(isIOS) guideIOS(); else if(isAndroid) guideAndroid();
+  }
+  window._r4uInstall=install;
+
+  /* ── homepage button ── */
+  function mountButton(){
+    if(document.getElementById('r4uInstWrap')) return;
+    var anchor=document.getElementById('r4tutRow')||document.querySelector('#top-sticky-bar .hero-note');
+    if(!anchor) return;
+    var w=document.createElement('div'); w.id='r4uInstWrap'; w.hidden=true;
+    w.innerHTML='<button type="button" id="r4uInstBtn"><img src="'+ICON+'" alt="" width="26" height="26"><span>Install the app</span><small>Free · no app store</small></button>';
+    anchor.parentNode.insertBefore(w,anchor.nextSibling);
+    w.querySelector('button').addEventListener('click',function(){install('home');});
+  }
+  function refresh(){
+    var w=document.getElementById('r4uInstWrap'); if(w) w.hidden=!eligible();
+    if(!eligible()) hideNudge();
+  }
+
+  /* ── one gentle nudge after a PDF download (max 3 times, 3 weeks apart) ── */
+  var nudgeTimer=null;
+  function hideNudge(){var n=document.getElementById('r4uInstNudge');if(n)n.remove();if(!document.getElementById('r4uInstSheet'))document.documentElement.classList.remove('r4u-inst-open');}
+  function maybeNudge(){
+    if(!eligible()||document.getElementById('r4uInstNudge')) return;
+    var cnt=+ls('_r4uInstNudgeN')||0, last=+ls('_r4uInstNudgeT')||0;
+    if(cnt>=3||(Date.now()-last)<21*864e5) return;
+    clearTimeout(nudgeTimer);
+    nudgeTimer=setTimeout(function(){
+      if(!eligible()||document.getElementById('r4uInstSheet')) return;
+      ls('_r4uInstNudgeN',String(cnt+1)); ls('_r4uInstNudgeT',String(Date.now()));
+      var n=document.createElement('div'); n.id='r4uInstNudge'; n.setAttribute('role','dialog'); n.setAttribute('aria-label','Install the app');
+      n.innerHTML='<img src="'+ICON+'" alt=""><div class="t"><b>Keep your resume one tap away</b><span>Add it to your '+(isMobile?'home screen':'computer')+'. Free.</span></div>'
+        +'<div class="a"><button type="button" class="go">Install</button><button type="button" class="no">Not now</button></div>';
+      document.body.appendChild(n); document.documentElement.classList.add('r4u-inst-open'); track('pwa_nudge_shown');
+      n.querySelector('.go').addEventListener('click',function(){hideNudge();install('nudge');});
+      n.querySelector('.no').addEventListener('click',hideNudge);
+      setTimeout(hideNudge,20000);
+    },2500);
+  }
+  /* PDF success = the generate-pdf request came back OK (or iOS print finished). */
+  (function hookPdf(){
+    var f=window.fetch; if(typeof f!=='function'||f.__r4uInst) return;
+    var w=function(input,init){
+      var p=f.apply(this,arguments);
+      try{
+        var b=init&&init.body;
+        if(typeof b==='string'&&b.indexOf('generate-pdf')!==-1&&/"action"\s*:\s*"generate-pdf"/.test(b)){
+          p.then(function(r){if(r&&r.ok)maybeNudge();}).catch(function(){});
+        }
+      }catch(e){}
+      return p;
+    };
+    w.__r4uInst=1; try{for(var key in f)w[key]=f[key];}catch(e){}
+    window.fetch=w;
+  })();
+  window.addEventListener('afterprint',function(){if(isIOS)maybeNudge();});
+
+  /* ── browser events ── */
+  window.addEventListener('r4u-bip',refresh);
+  window.addEventListener('appinstalled',function(){
+    ls('_r4uInstalled',String(Date.now())); window._r4uBIP=null; closeSheet(); refresh(); track('pwa_installed');
+    try{if(typeof showToast==='function')showToast('✅ App installed. Find Resume4U on your '+(isMobile?'home screen':'computer')+'.','success');}catch(e){}
+  });
+  try{matchMedia('(display-mode: standalone)').addEventListener('change',refresh);}catch(e){}
+
+  function start(){mountButton();refresh();}
+  if(document.readyState==='complete') start(); else window.addEventListener('load',function(){setTimeout(start,0);});
 })();
 </script>
 <script src="/tools/guides.js?v=4" defer></script>
