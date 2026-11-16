@@ -16381,6 +16381,7 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4uInstSheet .ic-ok{display:block;width:100%;margin-top:14px;background:#f5f0e8;color:#44403c}
 /* slim top card (iPhone/iPad) — stays readable above the system Share sheet */
 #r4uInstSheet.mini,#r4uInstSheet.mini.top{align-items:flex-start;background:rgba(28,25,23,.38);padding-top:max(8px,env(safe-area-inset-top))}
+#r4uInstSheet.mini.btm{align-items:flex-end;padding-bottom:max(14px,env(safe-area-inset-bottom))}
 #r4uInstSheet.mini .ic-card{max-width:460px;padding:11px 12px 12px;border-radius:16px}
 #r4uInstSheet.mini .ic-x{top:7px;right:7px;width:28px;height:28px;line-height:28px;font-size:16px}
 #r4uInstSheet.mini .ic-hd{gap:9px;margin:0 32px 9px 0}
@@ -16394,22 +16395,14 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4uInstSheet.mini .k svg{width:13px;height:13px}
 #r4uInstSheet.mini .alt{font-style:normal;color:#78716c;font-size:.78rem;white-space:nowrap}
 #r4uInstSheet.mini .ic-ok{display:none}
-/* visual stepper */
-#r4uInstSheet .ic-steps{display:grid;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) 14px minmax(0,1fr);align-items:start;gap:2px;margin-top:4px}
-#r4uInstSheet .ic-step{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0}
-#r4uInstSheet .ic-tile{position:relative;width:50px;height:50px;margin-bottom:5px;border-radius:14px;background:#fff;border:1px solid #ece5da;box-shadow:0 6px 14px -8px rgba(28,25,23,.35);display:grid;place-items:center;color:#1c1917}
-#r4uInstSheet .ic-tile svg{width:24px;height:24px}
-#r4uInstSheet .ic-tile.ios{color:#007aff}
-#r4uInstSheet .ic-tile.and{color:#1a73e8}
-#r4uInstSheet .ic-tile.word{font-size:.92rem;font-weight:700;letter-spacing:-.01em}
-#r4uInstSheet .ic-tile.word.sm{font-size:.74rem}
-#r4uInstSheet .ic-num{position:absolute;top:-7px;left:-7px;width:19px;height:19px;border-radius:50%;background:#f59e0b;color:#fff;font:700 .66rem/19px system-ui,sans-serif;font-style:normal;text-align:center;box-shadow:0 0 0 2px #fff}
-#r4uInstSheet .ic-step b{font-size:.8rem;line-height:1.25;color:#1c1917}
-#r4uInstSheet .ic-step span{font-size:.7rem;line-height:1.3;color:#78716c}
-#r4uInstSheet .ic-sep{display:grid;place-items:center;height:50px;color:#d6c3a5}
-#r4uInstSheet .ic-sep svg{width:14px;height:14px}
-#r4uInstSheet.mini .ic-card{background:linear-gradient(180deg,#fffaf2,#fff 55%)}
-#r4uInstSheet.mini .ic-hd{margin-bottom:12px}
+/* simple one-line guide */
+#r4uInstSheet .ic-line{margin:2px 0 0;font-size:1.02rem;line-height:1.75;color:#1c1917}
+#r4uInstSheet .ic-then{margin:4px 0 0;font-size:.84rem;line-height:1.45;color:#78716c}
+#r4uInstSheet .ic-then b{color:#44403c}
+#r4uInstSheet .ic-g{display:inline-grid;place-items:center;width:32px;height:32px;margin:0 2px;border-radius:9px;background:#fff;border:1px solid #e7e0d5;box-shadow:0 2px 6px -3px rgba(28,25,23,.3);color:#007aff;vertical-align:middle;font-weight:700}
+#r4uInstSheet .ic-g.and{color:#1a73e8}
+#r4uInstSheet .ic-g svg{width:19px;height:19px}
+#r4uInstSheet.mini .ic-hd{margin-bottom:8px}
 #r4uInstSheet .dbg{margin-top:6px;color:#a8a29e;font-size:.7rem}
 /* bouncing arrow pointing at the browser's own button */
 #r4uInstArrow{position:fixed;z-index:2147482001;width:54px;height:54px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(245,158,11,.3),0 10px 24px -6px rgba(0,0,0,.4);pointer-events:none}
@@ -16490,7 +16483,7 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
   function onKey(e){if(e.key==='Escape')closeSheet();}
   function sheet(opts){
     closeSheet(); lastFocus=document.activeElement;
-    var s=document.createElement('div'); s.id='r4uInstSheet'; s.className=(opts.top?'top':'')+(opts.mini?' mini':'');
+    var s=document.createElement('div'); s.id='r4uInstSheet'; s.className=(opts.top?'top':'')+(opts.mini?' mini':'')+(opts.btm?' btm':'');
     s.setAttribute('role','dialog'); s.setAttribute('aria-modal','true'); s.setAttribute('aria-labelledby','r4uInstTitle');
     s.innerHTML='<div class="ic-card"><button type="button" class="ic-x" aria-label="Close">×</button>'
       +'<div class="ic-hd"><img src="'+ICON+'" alt=""><div><b id="r4uInstTitle">'+opts.title+'</b><span>'+opts.sub+'</span></div></div>'
@@ -16515,29 +16508,21 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
         +'<li><span class="n">3</span><div>Tap <b>Install the app</b> again there</div></li></ol>'
         +'<div class="ic-copy"><input id="r4uInstLink" readonly value="'+URL_HOME+'" aria-label="Website link"><button type="button">Copy link</button></div>'});
   }
-  /* Visual 3-step guide: each step is a tile that looks like the button to tap
-     (same icon / colour as the phone shows), with a short label under it. */
-  function stepper(list){
-    var h='<div class="ic-steps">';
-    list.forEach(function(s,i){
-      if(i) h+='<span class="ic-sep" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>';
-      h+='<div class="ic-step"><div class="ic-tile'+(s.cls?' '+s.cls:'')+'"><i class="ic-num">'+(i+1)+'</i>'+(s.icon?SV[s.icon]:'')+(s.text||'')+'</div>'
-        +'<b>'+s.title+'</b><span>'+s.sub+'</span></div>';
-    });
-    return h+'</div>';
+  /* Simple guide: one plain sentence with the real button's icon, plus the
+     bouncing arrow pointing at that button. */
+  function g(icon){return '<span class="ic-g'+(isAndroid?' and':'')+'">'+(SV[icon]||icon)+'</span>';}
+  function simple(o){
+    sheet({mini:true,top:!!o.top,btm:!o.top,title:'Add to Home Screen',sub:'Free · no app store',arrow:o.arrow,
+      body:'<p class="ic-line">'+o.line+'</p><p class="ic-then">'+o.then+'</p>'+(dbg?'<div class="dbg">chrome '+maxChrome+' · Safari '+safariVer+'</div>':'')});
   }
-  /* iPhone / iPad: the system Share sheet slides up over most of the screen, so
-     the guide is a slim card pinned to the TOP — all 3 steps stay readable
-     above the Share sheet while the person follows them. */
+  /* iPhone / iPad: the system Share sheet covers most of the screen, so the
+     guide is pinned to the TOP and stays readable while it is open. */
   function guideIOS(){
     if(inApp) return guideInApp();
     var s26=safariVer>=26;
-    var add={icon:'plus',cls:'ios',title:'Add to Home Screen',sub:s26?'under “View More”':'scroll down the list'};
-    var done={text:'Add',cls:'ios word',title:'Tap Add',sub:'top right'};
+    var add='“<b>Add to Home Screen</b>”';
     if(iosOtherBrowser){
-      sheet({mini:true,top:true,title:'Install Resume4U',sub:'3 taps · free · no App Store',arrow:'up right',
-        body:stepper([{icon:'share',cls:'ios',title:'Tap Share',sub:'in the address bar'},
-          {icon:'plus',cls:'ios',title:'Add to Home Screen',sub:'under “View More”'},done])});
+      simple({top:true,arrow:'up right',line:'Tap '+g('share')+' in the address bar, then '+add,then:'Look under “View More” if you don’t see it. Then tap <b>Add</b>.'});
       return;
     }
     /* Safari 26 on iPhone has 3 layouts: "Bottom" and "Top" keep a toolbar with
@@ -16548,25 +16533,17 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
     measure();
     var compact=!isIPad&&s26&&maxChrome>0&&maxChrome<COMPACT_MAX;
     var arrow=isIPad?'up right':(compact?'down right':'down mid');
-    var first=compact?{icon:'more',cls:'ios',title:'Tap ⋯, then Share',sub:'bottom right'}
-      :{icon:'share',cls:'ios',title:'Tap Share',sub:isIPad?'top right':'in the bottom bar'};
-    sheet({mini:true,top:true,title:'Install Resume4U',sub:'3 taps · free · no App Store',arrow:arrow,
-      body:stepper([first,add,done])+(dbg?'<div class="dbg">chrome '+maxChrome+' · Safari '+safariVer+'</div>':'')});
+    var line=compact?'Tap '+g('more')+' below, then '+g('share')+' and '+add
+      :'Tap '+g('share')+(isIPad?' at the top':' below')+', then '+add;
+    simple({top:true,arrow:arrow,line:line,then:(s26?'It’s under “View More”. ':'Scroll down to find it. ')+'Then tap <b>Add</b>.'});
   }
   function guideAndroid(){
     if(inApp) return guideInApp();
     if(isSamsung){
-      sheet({title:'Install Resume4U',sub:'3 taps · free · no Play Store',arrow:'down right',
-        body:stepper([{text:'≡',cls:'and word',title:'Tap the menu',sub:'bottom right'},
-          {icon:'plus',cls:'and',title:'Add page to',sub:'then Home screen'},
-          {text:'Add',cls:'and word',title:'Tap Add',sub:'to confirm'}])});
+      simple({top:true,arrow:'down right',line:'Tap '+g('≡')+' below, then “<b>Add page to</b>” → <b>Home screen</b>',then:'Then tap <b>Add</b>.'});
       return;
     }
-    sheet({title:'Install Resume4U',sub:'3 taps · free · no Play Store',arrow:'up right',top:false,
-      body:stepper([{icon:'kebab',cls:'and',title:'Tap the menu',sub:'top right of Chrome'},
-          {icon:'plus',cls:'and',title:'Add to Home screen',sub:'or “Install app”'},
-          {text:'Install',cls:'and word sm',title:'Tap Install',sub:'to confirm'}])
-        +'<div class="ic-ft">Opened this from WhatsApp or another app? Tap '+k('kebab','')+' → <b>Open in Chrome</b> first.</div>'});
+    simple({top:false,arrow:'up right',line:'Tap '+g('kebab')+' above, then “<b>Add to Home screen</b>”',then:'Some phones say “Install app”. Then tap <b>Install</b>.'});
   }
   /* ── the one action every button calls ── */
   function install(src){
@@ -16651,6 +16628,56 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
 
   function start(){mountButton();refresh();}
   if(document.readyState==='complete') start(); else window.addEventListener('load',function(){setTimeout(start,0);});
+})();
+</script>
+<style id="_r4uHomeNavCss">
+/* Home button — a way back to the landing page from every step (signed in or not),
+   and the only way back inside the installed app, which has no browser buttons. */
+#r4uHomeM{display:none;align-items:center;justify-content:center;width:34px;height:34px;flex:none;margin-right:-2px;border:1px solid #eadfce;border-radius:10px;background:#fff;color:#7c2d12;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#r4uHomeM svg{width:18px;height:18px}
+html.r4u-off-home #r4uHomeM{display:inline-flex}
+#r4uHomeD{display:flex;align-items:center;gap:12px;margin:0 0 4px;padding:9px 13px;border:0;border-radius:12px;background:none;width:100%;font:inherit;font-size:.875rem;font-weight:500;color:#57534e;cursor:pointer;text-align:left}
+#r4uHomeD:hover{background:#faf5ee;color:#1c1917}
+#r4uHomeD .hn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid #d6d3d1;color:#78716c;flex:none}
+#r4uHomeD .hn svg{width:13px;height:13px}
+html:not(.r4u-off-home) #r4uHomeD{background:#fff7ed;color:#9a3412}
+html:not(.r4u-off-home) #r4uHomeD .hn{border-color:#c2410c;background:#c2410c;color:#fff}
+#r4uHomeM:focus-visible,#r4uHomeD:focus-visible{outline:2px solid #b45309;outline-offset:2px}
+</style>
+<script id="_r4uHomeNav">
+(function(){
+  var ICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>';
+  function onLanding(){var s0=document.getElementById('step0');return !!(s0&&s0.classList.contains('active')&&!s0.classList.contains('flow-started'));}
+  function goHome(){
+    try{ if(typeof window.goToStep==='function') window.goToStep(0); }catch(e){}
+    /* "flow-started" hides the landing page's lower half once a flow begins; clear
+       it so the full landing page (and the "Resume For You" title) comes back. */
+    var s0=document.getElementById('step0'); if(s0) s0.classList.remove('flow-started');
+    try{ window.scrollTo({top:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
+    sync();
+  }
+  window.r4uGoHome=goHome;
+  function sync(){ document.documentElement.classList.toggle('r4u-off-home',!onLanding()); }
+  function mount(){
+    var row=document.querySelector('#mobileHdr .mhdr-row1'), logo=row&&row.querySelector('.mhdr-logo');
+    if(row&&logo&&!document.getElementById('r4uHomeM')){
+      var m=document.createElement('button'); m.type='button'; m.id='r4uHomeM'; m.setAttribute('aria-label','Home'); m.title='Home'; m.innerHTML=ICO;
+      m.addEventListener('click',goHome); row.insertBefore(m,logo);
+      logo.onclick=goHome; logo.setAttribute('title','Home');
+    }
+    var list=document.querySelector('#sidebar .steps-list');
+    if(list&&!document.getElementById('r4uHomeD')){
+      var d=document.createElement('button'); d.type='button'; d.id='r4uHomeD';
+      d.innerHTML='<span class="hn">'+ICO+'</span><span>Home</span>';
+      d.addEventListener('click',goHome); list.parentNode.insertBefore(d,list);
+    }
+    var sl=document.querySelector('#sidebar .logo'); if(sl){ sl.onclick=goHome; sl.title='Home'; }
+    var s0=document.getElementById('step0');
+    if(s0) try{ new MutationObserver(sync).observe(s0,{attributes:true,attributeFilter:['class']}); }catch(e){}
+    sync();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount); else mount();
+  window.addEventListener('load',function(){ mount(); setTimeout(sync,300); });
 })();
 </script>
 <script src="/tools/guides.js?v=4" defer></script>
