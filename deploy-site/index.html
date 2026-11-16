@@ -16379,6 +16379,22 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
 #r4uInstSheet .ic-copy input{flex:1;min-width:0;border:1px solid #e7dfd2;border-radius:10px;padding:9px 10px;font:inherit;font-size:.85rem;color:#44403c;background:#faf8f5}
 #r4uInstSheet .ic-copy button,#r4uInstSheet .ic-ok{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407}
 #r4uInstSheet .ic-ok{display:block;width:100%;margin-top:14px;background:#f5f0e8;color:#44403c}
+/* slim top card (iPhone/iPad) — stays readable above the system Share sheet */
+#r4uInstSheet.mini,#r4uInstSheet.mini.top{align-items:flex-start;background:rgba(28,25,23,.38);padding-top:max(8px,env(safe-area-inset-top))}
+#r4uInstSheet.mini .ic-card{max-width:460px;padding:11px 12px 12px;border-radius:16px}
+#r4uInstSheet.mini .ic-x{top:7px;right:7px;width:28px;height:28px;line-height:28px;font-size:16px}
+#r4uInstSheet.mini .ic-hd{gap:9px;margin:0 32px 9px 0}
+#r4uInstSheet.mini .ic-hd img{width:30px;height:30px;border-radius:8px;box-shadow:none}
+#r4uInstSheet.mini .ic-hd b{font-size:.93rem}
+#r4uInstSheet.mini .ic-hd span{font-size:.72rem;margin-top:0}
+#r4uInstSheet.mini ol{gap:7px}
+#r4uInstSheet.mini li{font-size:.86rem;line-height:1.5;align-items:center;gap:9px}
+#r4uInstSheet.mini li .n{width:21px;height:21px;font-size:.7rem;margin:0}
+#r4uInstSheet.mini .k{padding:0 6px;font-size:.84rem}
+#r4uInstSheet.mini .k svg{width:13px;height:13px}
+#r4uInstSheet.mini .alt{font-style:normal;color:#78716c;font-size:.78rem;white-space:nowrap}
+#r4uInstSheet.mini .ic-ok{display:none}
+#r4uInstSheet .dbg{margin-top:6px;color:#a8a29e;font-size:.7rem}
 /* bouncing arrow pointing at the browser's own button */
 #r4uInstArrow{position:fixed;z-index:2147482001;width:54px;height:54px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(245,158,11,.3),0 10px 24px -6px rgba(0,0,0,.4);pointer-events:none}
 #r4uInstArrow svg{width:28px;height:28px}
@@ -16439,6 +16455,7 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
     share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M8 11H6v10h12V11h-2"/></svg>',
     more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
     kebab:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
+    chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
     plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
     down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15"/><path d="M6 13l6 6 6-6"/></svg>',
     up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5"/><path d="M6 11l6-6 6 6"/></svg>'
@@ -16457,7 +16474,7 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
   function onKey(e){if(e.key==='Escape')closeSheet();}
   function sheet(opts){
     closeSheet(); lastFocus=document.activeElement;
-    var s=document.createElement('div'); s.id='r4uInstSheet'; if(opts.top) s.className='top';
+    var s=document.createElement('div'); s.id='r4uInstSheet'; s.className=(opts.top?'top':'')+(opts.mini?' mini':'');
     s.setAttribute('role','dialog'); s.setAttribute('aria-modal','true'); s.setAttribute('aria-labelledby','r4uInstTitle');
     s.innerHTML='<div class="ic-card"><button type="button" class="ic-x" aria-label="Close">×</button>'
       +'<div class="ic-hd"><img src="'+ICON+'" alt=""><div><b id="r4uInstTitle">'+opts.title+'</b><span>'+opts.sub+'</span></div></div>'
@@ -16482,13 +16499,20 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
         +'<li><span class="n">3</span><div>Tap <b>Install the app</b> again there</div></li></ol>'
         +'<div class="ic-copy"><input id="r4uInstLink" readonly value="'+URL_HOME+'" aria-label="Website link"><button type="button">Copy link</button></div>'});
   }
+  /* iPhone / iPad: the system Share sheet slides up over most of the screen, so
+     the guide is a slim card pinned to the TOP — all 3 steps stay readable
+     above the Share sheet while the person follows them. */
   function guideIOS(){
     if(inApp) return guideInApp();
+    var s26=safariVer>=26;
+    var step2=s26
+      ?'Tap '+k('chev','View More')+', then '+k('plus','Add to Home Screen')
+      :'Scroll down, tap '+k('plus','Add to Home Screen');
     if(iosOtherBrowser){
-      sheet({title:'Add Resume For You to your Home Screen',sub:'3 quick taps · free · no App Store',arrow:isIPad?'up right':'up right',top:false,
-        body:'<ol><li><span class="n">1</span><div>Tap '+k('share','Share')+' in the address bar<small>In Firefox, tap the menu first, then Share.</small></div></li>'
-          +'<li><span class="n">2</span><div>Tap '+k('plus','Add to Home Screen')+'<small>Scroll down, or tap “More”, if you don’t see it.</small></div></li>'
-          +'<li><span class="n">3</span><div>Tap <b>Add</b></div></li></ol>'});
+      sheet({mini:true,top:true,title:'Add to Home Screen · 3 taps',sub:'Free · no App Store',arrow:'up right',
+        body:'<ol><li><span class="n">1</span><div>Tap '+k('share','Share')+' in the address bar</div></li>'
+          +'<li><span class="n">2</span><div>Tap '+k('plus','Add to Home Screen')+' <i class="alt">(under View More)</i></div></li>'
+          +'<li><span class="n">3</span><div>Tap <b>Add</b> (top right)</div></li></ol>'});
       return;
     }
     /* Safari 26 on iPhone has 3 layouts: "Bottom" and "Top" keep a toolbar with
@@ -16497,17 +16521,16 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
        tallest browser chrome seen since load (bars are fully shown on load)
        tells them apart. Older Safari always has Share at the bottom middle. */
     measure();
-    var compact=!isIPad&&safariVer>=26&&maxChrome>0&&maxChrome<COMPACT_MAX;
+    var compact=!isIPad&&s26&&maxChrome>0&&maxChrome<COMPACT_MAX;
     var arrow=isIPad?'up right':(compact?'down right':'down mid');
-    sheet({title:'Add Resume For You to your Home Screen',sub:'3 quick taps · free · no App Store',arrow:arrow,top:!isIPad,
-      body:'<ol><li><span class="n">1</span><div>'+(compact
-            ?'Tap '+k('more','')+' at the bottom right, then '+k('share','Share')+'<small>See a Share button in the bottom bar? Just tap that.</small>'
-            :'Tap '+k('share','Share')+(isIPad?' at the top right':' in the middle of the bar at the bottom')
-              +(isIPad||safariVer<26?'':'<small>Only see '+k('more','')+' at the bottom right? Tap it, then Share.</small>'))
-          +(dbg?'<small>chrome '+maxChrome+' · Safari '+safariVer+'</small>':'')+'</div></li>'
-        +'<li><span class="n">2</span><div>Scroll down and tap '+k('plus','Add to Home Screen')+'<small>Tap “View More” if it isn’t in the list.</small></div></li>'
-        +'<li><span class="n">3</span><div>Tap <b>Add</b> at the top right<small>Keep “Open as Web App” switched on.</small></div></li></ol>'
-        +'<div class="ic-ft">Then open <b>Resume4U</b> from your home screen. It opens full-screen, like an app, and always has the latest version.</div>'});
+    var step1=compact
+      ?'Tap '+k('more','')+' (bottom right), then '+k('share','Share')
+      :'Tap '+k('share','Share')+(isIPad?' (top right)':' (bottom bar)')+(s26&&!isIPad?' <i class="alt">or '+k('more','')+' → Share</i>':'');
+    sheet({mini:true,top:true,title:'Add to Home Screen · 3 taps',sub:'Free · no App Store',arrow:arrow,
+      body:'<ol><li><span class="n">1</span><div>'+step1+'</div></li>'
+        +'<li><span class="n">2</span><div>'+step2+'</div></li>'
+        +'<li><span class="n">3</span><div>Tap <b>Add</b> (top right)</div></li></ol>'
+        +(dbg?'<div class="dbg">chrome '+maxChrome+' · Safari '+safariVer+'</div>':'')});
   }
   function guideAndroid(){
     if(inApp) return guideInApp();
