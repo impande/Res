@@ -6113,6 +6113,9 @@ if ('serviceWorker' in navigator) {
   /* Expose the JD keyword-match tool so a prominent Generate-page button can
      deep-link straight into it (see _r4uJdTailorJS). */
   try{ window._r4uJdMatch=_atsMatch; }catch(e){}
+  /* Expose the menu and a few tools so "Ask AI anything" can return to the menu
+     and offer the right built-in tool for layout requests. */
+  try{ window._r4uAiHome=_home; window._r4uAiFit=_fitFlow; window._r4uAiCustomise=_customiseFlow; window._r4uAiReorder=_reorderFlow; window._r4uAiTemplates=_templateVersions; }catch(e){}
 })();
 </script>
 <script>
@@ -16658,6 +16661,262 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
   window.addEventListener('load',function(){ wire(); setTimeout(wire,500); });
+})();
+</script>
+<style id="_r4uAskAICss">
+/* ══ Refine with AI → "Ask AI anything": type any change in plain words; AI edits
+   the resume and shows before → after with Apply / Undo. ══ */
+#aiChatPanel .r4u-ask{box-sizing:border-box;width:100%;min-width:0;contain:inline-size;overflow:hidden;background:#fff;border:1.5px solid #fed7aa;border-radius:16px;padding:12px;box-shadow:0 8px 22px -16px rgba(154,52,18,.55)}
+#aiChatPanel .r4u-ask-h{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:800;color:#7c2d12;margin:0 0 8px}
+#aiChatPanel .r4u-ask-h i{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:99px;background:linear-gradient(135deg,#fbbf24,#f97316);color:#431407}
+#aiChatPanel .r4u-ask-row{display:flex;gap:8px;align-items:flex-end}
+#aiChatPanel .r4u-ask textarea{flex:1;min-width:0;resize:none;min-height:42px;max-height:130px;border:1.5px solid #e7e0d5;border-radius:12px;padding:10px 12px;font:inherit;font-size:.88rem;line-height:1.4;color:#1c1917;background:#fffdf9;outline:none}
+#aiChatPanel .r4u-ask textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+#aiChatPanel .r4u-ask-go{flex:none;width:42px;height:42px;border:0;border-radius:12px;display:grid;place-items:center;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407;box-shadow:0 6px 14px -8px rgba(217,119,6,.8)}
+#aiChatPanel .r4u-ask-go:disabled{opacity:.5;cursor:default}
+#aiChatPanel .r4u-ask-go svg{width:18px;height:18px}
+#aiChatPanel .r4u-ask-ex{display:flex;flex-wrap:nowrap;gap:6px;margin:9px -12px 0 0;padding:0 12px 2px 0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#aiChatPanel .r4u-ask-ex::-webkit-scrollbar{display:none}
+@media (min-width:700px){#aiChatPanel .r4u-ask-ex{flex-wrap:wrap;overflow:visible;margin-right:0;padding-right:0}}
+#aiChatPanel .r4u-ask-ex button{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:99px;padding:5px 10px;font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;flex:none;white-space:nowrap}
+#aiChatPanel .r4u-ask-ex button:hover{background:#ffedd5}
+#aiChatPanel .r4u-ask-conv{display:flex;flex-direction:column;gap:10px}
+#aiChatPanel .r4u-you{align-self:flex-end;max-width:85%;background:#1c1917;color:#fff;border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:.84rem;line-height:1.45;white-space:pre-wrap}
+#aiChatPanel .r4u-ai{display:flex;gap:8px;align-items:flex-start}
+#aiChatPanel .r4u-ai .av{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#fbbf24,#f97316);font-size:.8rem}
+#aiChatPanel .r4u-ai .bd{flex:1;min-width:0;background:#fff;border:1px solid #efe6d8;border-radius:4px 14px 14px 14px;padding:9px 12px;font-size:.84rem;line-height:1.5;color:#1c1917}
+#aiChatPanel .r4u-think{color:#9a3412;font-weight:600}
+#aiChatPanel .r4u-think::after{content:'';display:inline-block;width:1.2em;text-align:left;animation:r4uDots 1.2s steps(4) infinite}
+@keyframes r4uDots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+#aiChatPanel .r4u-chg{margin-top:9px;border:1px solid #f0e6d6;border-radius:12px;overflow:hidden;background:#fffdf9}
+#aiChatPanel .r4u-chg-l{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#9a3412;padding:7px 10px 0}
+#aiChatPanel .r4u-chg-b,#aiChatPanel .r4u-chg-a{padding:6px 10px;font-size:.8rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+#aiChatPanel .r4u-chg-b{color:#a8a29e;text-decoration:line-through;text-decoration-color:rgba(168,162,158,.7)}
+#aiChatPanel .r4u-chg-a{color:#14532d;background:#f0fdf4;border-top:1px dashed #d9f99d}
+#aiChatPanel .r4u-chg-a b{color:#166534}
+#aiChatPanel .r4u-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#aiChatPanel .r4u-acts button{border-radius:10px;padding:8px 14px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;border:1.5px solid #fed7aa;background:#fff7ed;color:#9a3412}
+#aiChatPanel .r4u-acts .pri{border-color:rgba(217,119,6,.4);background:linear-gradient(135deg,#fcd34d,#fbbf24 45%,#f59e0b);color:#431407}
+#aiChatPanel .r4u-acts button:disabled{opacity:.55;cursor:default}
+#aiChatPanel .r4u-done{color:#166534;font-weight:700}
+#aiChatPanel .r4u-err{color:#b91c1c}
+#aiChatPanel .r4u-back{align-self:flex-start;border:1px solid #e7e0d5;background:#fff;color:#57534e;border-radius:9px;padding:6px 11px;font:inherit;font-size:.76rem;font-weight:600;cursor:pointer}
+@media (prefers-reduced-motion:reduce){#aiChatPanel .r4u-think::after{animation:none;content:'…'}}
+</style>
+<script id="_r4uAskAI">
+(function(){
+  var MAX_HIST=4, hist=[], lastBackup=null;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function data(){ try{ return (typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:null; }catch(e){ return null; } }
+  function msgs(){ return document.getElementById('aiChatMessages'); }
+  function hasResume(){ return !!document.querySelector('#resumeOutput .resume-a4-page'); }
+  var SEND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+  var EXAMPLES=['Make my summary stronger','Add numbers to my bullets','Make it sound more senior','Tailor it for a product manager job','सारी लाइनें छोटी और आसान करो'];
+
+  /* ── the ask box (on the Refine home and under every answer) ── */
+  function askBox(){
+    var w=document.createElement('div'); w.className='r4u-ask';
+    w.innerHTML='<div class="r4u-ask-h">✨ Ask AI to change anything <i>NEW</i></div>'
+      +'<div class="r4u-ask-row"><textarea rows="1" maxlength="600" placeholder="Type what to change…" aria-label="Tell AI what to change"></textarea>'
+      +'<button type="button" class="r4u-ask-go" aria-label="Send">'+SEND+'</button></div>'
+      +(hist.length?'':'<div class="r4u-ask-ex">'+EXAMPLES.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join('')+'</div>');
+    var ta=w.querySelector('textarea'), go=w.querySelector('.r4u-ask-go');
+    function grow(){ ta.style.height='auto'; ta.style.height=Math.min(130,ta.scrollHeight)+'px'; }
+    ta.addEventListener('input',grow);
+    ta.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(ta.value); } });
+    go.addEventListener('click',function(){ send(ta.value); });
+    Array.prototype.forEach.call(w.querySelectorAll('.r4u-ask-ex button'),function(b){ b.addEventListener('click',function(){ ta.value=b.textContent; grow(); ta.focus(); }); });
+    return w;
+  }
+  function mountHome(){
+    var m=msgs(); if(!m||!hasResume()) return;
+    var home=m.querySelector('.airx-home'); if(!home||home.querySelector('.r4u-ask')) return;
+    if(!home.querySelector('.airx-cards')) return;            /* only once the resume is read */
+    var holder=document.createElement('div'); holder.className='airx-cont'; holder.appendChild(askBox());
+    var first=home.querySelector('.airx-am');
+    if(first&&first.nextSibling) home.insertBefore(holder,first.nextSibling); else home.appendChild(holder);
+  }
+  function watch(){
+    var m=msgs(); if(!m){ setTimeout(watch,600); return; }
+    try{ new MutationObserver(function(){ mountHome(); }).observe(m,{childList:true}); }catch(e){}
+    mountHome();
+  }
+
+  /* ── what the AI sees: a compact, indexed copy of the resume ── */
+  function snapshot(d){
+    return {
+      jobTitle:d.jobTitle||'', summary:d.summary||'',
+      skills:(d.skills||[]).slice(0,40),
+      experience:(d.experience||[]).map(function(e,i){ return {index:i,title:e.title||'',company:e.co||e.company||'',dates:[e.start,e.end].filter(Boolean).join(' – ')||e.dates||'',bullets:(e.bullets||[]).slice(0,12)}; }),
+      education:(d.education||[]).map(function(e){ return {degree:e.deg||e.degree||'',school:e.sch||e.school||'',year:e.yr||e.year||''}; }),
+      keyAchievements:Array.isArray(d.keyAchievements)?d.keyAchievements.slice(0,6):undefined
+    };
+  }
+  function buildPrompt(d,request){
+    var lines=[
+      'You are the "Refine with AI" assistant inside Resume For You, an AI resume builder used mostly by job seekers in India.',
+      'The user is looking at their finished resume and asks for a change in plain words (English, Hindi or Hinglish).',
+      'Decide what to change and return ONLY a JSON object — no markdown, no code fences, no text outside the JSON:',
+      '{"reply":"1-2 short friendly sentences saying what you changed and why, or answering their question",',
+      ' "changes":[',
+      '   {"field":"summary","after":"<new summary>"},',
+      '   {"field":"jobTitle","after":"<new headline/title>"},',
+      '   {"field":"skills","after":["<the FULL new skills list>"]},',
+      '   {"field":"bullets","index":<experience index>,"after":["<the FULL new bullet list for that role>"]},',
+      '   {"field":"title","index":<experience index>,"after":"<new job title for that role>"}',
+      ' ],',
+      ' "tool":"none|fit|customise|reorder|ats|templates"}',
+      '',
+      'Rules:',
+      '- Only include fields you actually change. Never change company names, dates, education or contact details.',
+      '- Keep every fact true. NEVER invent employers, tools, certifications or numbers. Where a number would clearly help but is unknown, write a [X] placeholder (e.g. "cut report time by [X]%") — the user fills it in.',
+      '- Resume style: strong past-tense action verbs, no "I/my", no fluff or clichés, each bullet ideally under 25 words, ATS-friendly keywords for the target role.',
+      '- Summary: 2-3 sentences, max ~55 words, unless the user asks otherwise.',
+      '- If the user asks to tailor for a role or a pasted job post, rewrite summary, relevant bullets and skills towards it (still only true facts).',
+      '- Write resume text in English unless the user explicitly asks for another language. Write "reply" in the SAME language/style the user wrote in (Hindi → Hindi, Hinglish → Hinglish).',
+      '- If they only ask a question (e.g. "is my resume good for Amazon?"), answer in "reply" with specific advice and leave "changes" empty.',
+      '- Set "tool" when a built-in tool does it better: fit = make it one page / font size / spacing, customise = colours or fonts, reorder = move sections, ats = check against a job post, templates = change design. Otherwise "none".',
+      '- For things you cannot change here (name, phone, email, dates, education), say in "reply" that they can tap that text on the resume to edit it.',
+      '',
+      'Current resume (JSON):',
+      JSON.stringify(snapshot(d))
+    ];
+    if(hist.length){
+      lines.push('','Earlier in this chat (for context; the resume above already includes any applied changes):');
+      hist.forEach(function(h){ lines.push('User: '+h.u,'You: '+h.a); });
+    }
+    lines.push('','User request: '+request);
+    return lines.join('\n');
+  }
+  function callAI(prompt){
+    return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt,task:'rewrite'})})
+      .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ if(!r.ok) throw new Error(j.error||('status '+r.status)); return j; }); })
+      .then(function(j){ var raw=j.content; return String((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||j.text||'').trim(); });
+  }
+  function parse(text){
+    var t=String(text||'').replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
+    var a=t.indexOf('{'), b=t.lastIndexOf('}');
+    if(a<0||b<=a) return null;
+    try{ var o=JSON.parse(t.slice(a,b+1)); if(!o||typeof o!=='object') return null;
+      o.changes=Array.isArray(o.changes)?o.changes:[]; o.reply=String(o.reply||''); return o; }catch(e){ return null; }
+  }
+
+  /* ── turn the AI's change list into safe, checked edits ── */
+  function clean(s){ return String(s==null?'':s).replace(/^\s*[•\-–*]\s*/,'').replace(/\s+/g,' ').trim(); }
+  function plan(d,changes){
+    var out=[], exp=d.experience||[];
+    changes.forEach(function(c){
+      if(!c||!c.field) return;
+      var f=String(c.field);
+      if(f==='summary'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'summary',label:'Summary',before:d.summary||'',after:String(c.after).trim()});
+      else if(f==='jobTitle'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'jobTitle',label:'Headline',before:d.jobTitle||'',after:clean(c.after)});
+      else if(f==='skills'&&Array.isArray(c.after)){
+        var sk=c.after.map(clean).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).slice(0,40);
+        if(sk.length) out.push({kind:'skills',label:'Skills',before:(d.skills||[]).slice(),after:sk});
+      }
+      else if((f==='bullets'||f==='title')&&exp[c.index|0]&&c.index!==undefined){
+        var e=exp[c.index|0], nm=(e.title||'Role')+(e.co?(' · '+e.co):'');
+        if(f==='bullets'&&Array.isArray(c.after)){ var bl=c.after.map(clean).filter(Boolean).slice(0,12); if(bl.length) out.push({kind:'bullets',idx:c.index|0,label:nm,before:(e.bullets||[]).slice(),after:bl}); }
+        if(f==='title'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'title',idx:c.index|0,label:nm+' — job title',before:e.title||'',after:clean(c.after)});
+      }
+    });
+    return out.filter(function(p){ return JSON.stringify(p.before)!==JSON.stringify(p.after); });
+  }
+  function showList(before,after){
+    var b=before.filter(function(x){return after.indexOf(x)<0;}), a=after.map(function(x){ return before.indexOf(x)<0?'<b>'+esc(x)+'</b>':esc(x); });
+    return {b:b.length?b.map(esc).join('\n'):'', a:a.join(', ')};
+  }
+  function changeHTML(p){
+    var bt,at;
+    if(p.kind==='skills'){ var s=showList(p.before,p.after); bt=s.b; at=s.a; }
+    else if(p.kind==='bullets'){ bt=p.before.map(function(x){return '• '+esc(x);}).join('\n'); at=p.after.map(function(x){return '• '+esc(x);}).join('\n'); }
+    else { bt=esc(p.before); at=esc(p.after); }
+    return '<div class="r4u-chg"><div class="r4u-chg-l">'+esc(p.label)+'</div>'+(bt?'<div class="r4u-chg-b">'+bt+'</div>':'')+'<div class="r4u-chg-a">'+at+'</div></div>';
+  }
+  function rerender(d){
+    try{ manuallyEdited=true; }catch(e){} try{ window.manuallyEdited=true; }catch(e){}
+    var snap=null; try{ snap=window._snapResumeStyles?window._snapResumeStyles():null; }catch(e){}
+    try{ if(typeof renderOutput==='function') renderOutput(d); }catch(e){}
+    try{ if(window._applyResumeStyles) window._applyResumeStyles(snap); }catch(e){}
+    try{ if(typeof _updPageBadge==='function') _updPageBadge(); }catch(e){}
+    window._versionDirty=true;
+  }
+  function syncSkills(list){ try{ if(typeof skills!=='undefined'&&Array.isArray(skills)){ skills.length=0; list.forEach(function(s){ skills.push(s); }); } }catch(e){} }
+  function apply(d,steps){
+    var bk={summary:d.summary,jobTitle:d.jobTitle,skills:(d.skills||[]).slice(),exp:(d.experience||[]).map(function(e){return {title:e.title,bullets:(e.bullets||[]).slice(),desc:e.desc,rawDesc:e.rawDesc};})};
+    steps.forEach(function(p){
+      if(p.kind==='summary') d.summary=p.after;
+      else if(p.kind==='jobTitle') d.jobTitle=p.after;
+      else if(p.kind==='skills'){ d.skills=p.after.slice(); syncSkills(d.skills); }
+      else if(p.kind==='bullets'){ var e=d.experience[p.idx]; e.bullets=p.after.slice(); e.desc=e.bullets.join('\n'); if('rawDesc' in e) e.rawDesc=e.bullets.map(function(x){return '<div>• '+esc(x)+'</div>';}).join(''); }
+      else if(p.kind==='title'){ d.experience[p.idx].title=p.after; }
+    });
+    rerender(d);
+    return bk;
+  }
+  function undo(d,bk){
+    d.summary=bk.summary; d.jobTitle=bk.jobTitle; d.skills=bk.skills.slice(); syncSkills(d.skills);
+    bk.exp.forEach(function(x,i){ var e=d.experience[i]; if(!e) return; e.title=x.title; e.bullets=x.bullets; e.desc=x.desc; if(x.rawDesc!==undefined) e.rawDesc=x.rawDesc; });
+    rerender(d);
+  }
+  var TOOL={fit:['📄 Open Fit to page','_r4uAiFit'],customise:['🎨 Open Customise look','_r4uAiCustomise'],reorder:['↕️ Open Reorder sections','_r4uAiReorder'],ats:['🎯 Open ATS match to a job','_r4uJdMatch'],templates:['🪄 Open Template versions','_r4uAiTemplates']};
+
+  /* ── the conversation view ── */
+  var busy=false;
+  function send(text){
+    text=String(text||'').trim(); if(!text||busy) return;
+    var d=data(), m=msgs(); if(!m) return;
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    if(!d||!hasResume()){ return; }
+    var conv=m.querySelector('.r4u-ask-conv');
+    if(!conv){
+      m.innerHTML=''; conv=document.createElement('div'); conv.className='aig-wrap r4u-ask-conv'; m.appendChild(conv);
+      var back=document.createElement('button'); back.type='button'; back.className='r4u-back'; back.textContent='← Back to menu';
+      back.addEventListener('click',function(){ if(typeof window._r4uAiHome==='function') window._r4uAiHome(); });
+      conv.appendChild(back);
+    }
+    var old=conv.querySelector('.r4u-ask'); if(old) old.parentNode.removeChild(old);
+    var you=document.createElement('div'); you.className='r4u-you'; you.textContent=text; conv.appendChild(you);
+    var ai=document.createElement('div'); ai.className='r4u-ai'; ai.innerHTML='<div class="av">✨</div><div class="bd"><span class="r4u-think">Reading your resume</span></div>'; conv.appendChild(ai);
+    var bd=ai.querySelector('.bd');
+    m.scrollTop=m.scrollHeight; busy=true;
+    callAI(buildPrompt(d,text)).then(function(raw){
+      busy=false;
+      var o=parse(raw);
+      if(!o){ bd.innerHTML='<span class="r4u-err">I couldn’t work that out. Try saying it another way.</span>'; finish(conv); return; }
+      var steps=plan(d,o.changes);
+      hist.push({u:text.slice(0,300),a:(o.reply||'').slice(0,300)+(steps.length?' [proposed '+steps.length+' change(s)]':'')}); if(hist.length>MAX_HIST) hist.shift();
+      var h=esc(o.reply||(steps.length?'Here’s what I’d change:':'Done.'));
+      if(steps.length) h+=steps.map(changeHTML).join('');
+      var tl=TOOL[o.tool]; var toolFn=tl&&typeof window[tl[1]]==='function'?window[tl[1]]:null;
+      if(steps.length||toolFn) h+='<div class="r4u-acts">'+(steps.length?'<button type="button" class="pri" data-a="apply">✓ Apply to my resume</button><button type="button" data-a="skip">Not now</button>':'')+(toolFn?'<button type="button" data-a="tool">'+tl[0]+'</button>':'')+'</div>';
+      bd.innerHTML=h;
+      var acts=bd.querySelector('.r4u-acts');
+      if(acts) acts.addEventListener('click',function(e){
+        var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
+        if(a==='tool'&&toolFn){ toolFn(); return; }
+        if(a==='skip'){ acts.innerHTML='<span style="color:#78716c">Not applied.</span>'; hist.push({u:'(did not apply)',a:''}); return; }
+        if(a==='apply'){
+          var dd=data(); if(!dd) return;
+          var bk=apply(dd,steps); lastBackup=bk;
+          acts.innerHTML='<span class="r4u-done">✓ Applied to your resume.</span> <button type="button" data-a="undo">↺ Undo</button>';
+          try{ if(typeof showToast==='function') showToast('✨ Resume updated','success'); }catch(err){}
+          return;
+        }
+        if(a==='undo'){ var d3=data(); if(d3&&lastBackup){ undo(d3,lastBackup); lastBackup=null; } acts.innerHTML='<span style="color:#78716c">Undone — back to how it was.</span>'; }
+      });
+      finish(conv);
+    }).catch(function(){
+      busy=false; bd.innerHTML='<span class="r4u-err">Couldn’t reach AI. Check your connection and try again.</span>'; finish(conv);
+    });
+  }
+  function finish(conv){
+    var box=askBox(); conv.appendChild(box);
+    var m=msgs(); if(m) m.scrollTop=m.scrollHeight;
+    var ta=box.querySelector('textarea'); if(ta) ta.placeholder='Ask a follow-up…';
+  }
+  window._r4uAskAI=send;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watch); else watch();
 })();
 </script>
 <script src="/tools/guides.js?v=4" defer></script>
