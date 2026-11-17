@@ -16525,21 +16525,9 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
       simple({top:true,arrow:'up right',line:'Tap '+g('share')+' in the address bar, then '+add,then:'Look under “View More” if you don’t see it. Then tap <b>Add</b>.'});
       return;
     }
-    /* Open the iOS Share sheet for the person, so they only tap "Add to Home
-       Screen" (then Add). If they close the sheet without picking anything —
-       e.g. Apple left that option out of a website's Share sheet — the card
-       switches to the manual steps (Safari's own Share button). */
-    if(navigator.share&&!isIPad){
-      var opened=false;
-      try{
-        navigator.share({title:'Resume For You',url:URL_HOME}).then(function(){ closeSheet(); },function(){ if(document.getElementById('r4uInstSheet')) manualIOS(true); });
-        opened=true;
-      }catch(e){}
-      if(opened){
-        simple({top:true,line:'Tap '+add+' in the list below',then:(s26?'It’s under “View More”. ':'Scroll down to find it. ')+'Then tap <b>Add</b>.'});
-        return;
-      }
-    }
+    /* A website can't open "Add to Home Screen" itself, and Apple leaves it out
+       of the Share sheet a website opens (checked on iOS 26) — so point at
+       Safari's own Share button, where it lives. */
     manualIOS();
   }
   function manualIOS(again){
