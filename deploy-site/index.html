@@ -17014,6 +17014,104 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
 </script>
+<style id="_r4uFoldCss">
+/* ══ Generate page (phones / narrow): "Match a job + ATS score" and "Use this
+   resume for" fold into one summary row each — like "Template: X · Change". ══ */
+.r4f-sum,.r4f-hide{display:none}
+.r4f-sum{align-items:center;gap:12px;width:100%;cursor:pointer;color:var(--text,#1a1a1a);text-align:left;-webkit-tap-highlight-color:transparent}
+.r4f-ic{position:relative;flex:0 0 62px;width:62px;height:36px}
+.r4f-ic i{position:absolute;top:4px;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:#fff;font-style:normal;font-size:13px;font-weight:800}
+.r4f-ic i:nth-child(1){left:0;z-index:2}
+.r4f-ic i:nth-child(2){left:32px;z-index:1}
+.r4f-ic svg{width:15px;height:15px}
+.r4f-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.r4f-t small{font-size:.72rem;color:var(--muted,#6b7280);font-weight:600}
+.r4f-t b{font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r4f-go{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:800;color:#431407;background:linear-gradient(135deg,var(--r4-a1,#fcd34d),var(--r4-a2,#fbbf24) 45%,var(--r4-a3,#f59e0b));border-radius:99px;padding:8px 14px;box-shadow:0 6px 14px -8px rgba(234,88,12,.75)}
+.r4f-go svg,.r4f-hide svg{width:13px;height:13px}
+.r4f-hide{align-items:center;gap:3px;margin-left:auto;border:0;background:none;color:#9a3412;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:4px 2px}
+.r4f-t b{letter-spacing:-.01em}
+@media (max-width:360px){.r4f-sum{gap:9px}.r4f-go{padding:7px 10px}.r4f-ic{flex-basis:52px;width:52px}.r4f-ic i{width:24px;height:24px;border-radius:8px}.r4f-ic i:nth-child(2){left:28px}.r4f-t b{font-size:.88rem}}
+.r4f-sum:focus-visible,.r4f-hide:focus-visible{outline:2px solid #b45309;outline-offset:2px;border-radius:8px}
+
+/* folded */
+html body #_r4uJdTailorBar.r4f-folded > :not(.r4f-sum),
+html body #_r4uNextBar.r4f-folded > :not(.r4f-sum){display:none !important}
+html body #_r4uJdTailorBar.r4f-folded .r4f-sum,
+html body #_r4uNextBar.r4f-folded .r4f-sum{display:flex}
+html body #_r4uJdTailorBar.r4f-folded{border-radius:16px !important;border-bottom:var(--r4f-bb,1px solid #ece4d8) !important;padding-top:12px !important;padding-bottom:12px !important}
+html body #_r4uRoastBar.r4f-gone{display:none !important}
+html body #_r4uNextBar.r4f-folded{padding-top:12px !important;padding-bottom:12px !important}
+
+/* open: a small header with "Hide" */
+html body #_r4uJdTailorBar.r4f-open{flex-wrap:wrap !important}
+html body #_r4uJdTailorBar.r4f-open .r4f-sum{display:flex;flex:0 0 100%;order:-1;margin:-2px 0 2px;cursor:default}
+html body #_r4uJdTailorBar.r4f-open .r4f-sum .r4f-ic,
+html body #_r4uJdTailorBar.r4f-open .r4f-sum b,
+html body #_r4uJdTailorBar.r4f-open .r4f-sum .r4f-go{display:none}
+html body #_r4uJdTailorBar.r4f-open .r4f-sum .r4f-hide{display:inline-flex}
+html body #_r4uNextBar.r4f-open .nb-h{display:flex !important;align-items:center}
+html body #_r4uNextBar.r4f-open .nb-h .r4f-hide{display:inline-flex}
+</style>
+<script id="_r4uFold">
+(function(){
+  var KEY={tools:'_r4uFoldTools',next:'_r4uFoldNext'};
+  var UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+  var DOWN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  var TARGET='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg>';
+  var CHART='<svg viewBox="0 0 24 24" fill="#fff"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg>';
+  var BELL='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+  function $(id){ return document.getElementById(id); }
+  function hasResume(){ return !!document.querySelector('#resumeOutput .resume-a4-page'); }
+  function narrow(){ return !$('s8Grid'); }
+  function isFolded(k){ try{ var v=localStorage.getItem(KEY[k]); return v===null?true:v==='1'; }catch(e){ return true; } }
+  function setFold(k,v){ try{ localStorage.setItem(KEY[k],v?'1':'0'); }catch(e){} sync(); }
+  function sum(host,k,html){
+    var s=host.querySelector(':scope > .r4f-sum');
+    if(!s){ s=document.createElement('span'); s.className='r4f-sum'; s.setAttribute('data-fold',k); s.innerHTML=html; host.insertBefore(s,host.firstChild); }
+    return s;
+  }
+  function sync(){
+    var jd=$('_r4uJdTailorBar'), rb=$('_r4uRoastBar'), nb=$('_r4uNextBar');
+    var on=narrow()&&hasResume();
+    if(jd){
+      var s1=sum(jd,'tools','<span class="r4f-ic" aria-hidden="true"><i style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">'+TARGET+'</i><i style="background:linear-gradient(135deg,#14b8a6,#0f766e)">'+CHART+'</i></span>'
+        +'<span class="r4f-t"><small>Check your resume</small><b>Job match · ATS</b></span>'
+        +'<span class="r4f-go">Open '+DOWN+'</span><button type="button" class="r4f-hide" data-fold="tools" aria-label="Hide job match and ATS score">Hide '+UP+'</button>');
+      if(!jd.style.getPropertyValue('--r4f-bb')){ try{ var cs=getComputedStyle(jd); if(cs.borderTopStyle!=='none') jd.style.setProperty('--r4f-bb',cs.borderTopWidth+' '+cs.borderTopStyle+' '+cs.borderTopColor); }catch(e){} }
+      var f1=on&&isFolded('tools');
+      jd.classList.toggle('r4f-folded',f1); jd.classList.toggle('r4f-open',on&&!f1);
+      s1.setAttribute('role','button'); s1.setAttribute('tabindex',f1?'0':'-1'); s1.setAttribute('aria-expanded',f1?'false':'true');
+      if(rb) rb.classList.toggle('r4f-gone',f1);
+    } else if(rb) rb.classList.remove('r4f-gone');
+    if(nb){
+      var s2=sum(nb,'next','<span class="r4f-ic" aria-hidden="true"><i style="background:linear-gradient(145deg,#25d366,#128c7e)">'+BELL+'</i><i style="background:linear-gradient(145deg,#0a66c2,#004182)">in</i></span>'
+        +'<span class="r4f-t"><small>Use this resume for</small><b>Job alerts &amp; more</b></span>'
+        +'<span class="r4f-go">Open '+DOWN+'</span>');
+      var h=nb.querySelector('.nb-h');
+      if(h&&!h.querySelector('.r4f-hide')){ var hb=document.createElement('button'); hb.type='button'; hb.className='r4f-hide'; hb.setAttribute('data-fold','next'); hb.setAttribute('aria-label','Hide “Use this resume for”'); hb.innerHTML='Hide '+UP; h.appendChild(hb); }
+      var f2=on&&isFolded('next');
+      nb.classList.toggle('r4f-folded',f2); nb.classList.toggle('r4f-open',on&&!f2);
+      s2.setAttribute('role','button'); s2.setAttribute('tabindex',f2?'0':'-1'); s2.setAttribute('aria-expanded',f2?'false':'true');
+    }
+  }
+  /* Taps on a folded card (or on Open / Hide) only fold or unfold — they never
+     reach the card's own action (opening the job match, the ATS score, a tile). */
+  function handle(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var hide=t.closest('.r4f-hide');
+    if(hide){ e.preventDefault(); e.stopImmediatePropagation(); setFold(hide.getAttribute('data-fold'),true);
+      var host=$(hide.getAttribute('data-fold')==='tools'?'_r4uJdTailorBar':'_r4uNextBar'); if(host) try{ host.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(_){}
+      return; }
+    var card=t.closest('#_r4uJdTailorBar.r4f-folded,#_r4uNextBar.r4f-folded');
+    if(card){ e.preventDefault(); e.stopImmediatePropagation(); setFold(card.id==='_r4uJdTailorBar'?'tools':'next',false); }
+  }
+  document.addEventListener('click',handle,true);
+  document.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ handle(e); } },true);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',sync); else sync();
+  setInterval(sync,700); window.addEventListener('resize',function(){ setTimeout(sync,80); });
+})();
+</script>
 <script src="/tools/guides.js?v=4" defer></script>
 <script id="_r4uGuideChips">
 /* "How this works" chips next to each feature — open that feature's short video guide. */
