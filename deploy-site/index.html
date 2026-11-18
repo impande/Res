@@ -3208,8 +3208,9 @@ html body #r4uHero .rh-sep{position:absolute;width:1px;height:1px;overflow:hidde
         <h2 id="seoIntroH">Free AI resume builder &amp; CV maker for India</h2>
         <p>Resume For You is a free online resume maker that writes your resume with AI. Pick from 100+ ATS-friendly resume templates, let AI turn your experience into strong, quantified bullet points, check your ATS score and download a print-ready PDF or an editable Word file — on your phone or laptop, with no sign-up needed.</p>
         <p>It works for freshers and students making their first resume or CV, experienced professionals changing jobs, and government job applicants who need a biodata. Build it in English or Hindi (plus 9 Indian languages), turn it into a portfolio website, or simply answer a few questions on WhatsApp.</p>
-        <nav class="seo-links" aria-label="Popular resume guides"><span class="seo-links-h">Popular guides</span><a href="/resume-format-for-freshers/">Resume format for freshers</a><a href="/resume-format-for-experienced/">Resume format for experienced</a><a href="/cv-format-for-freshers/">CV format for freshers</a><a href="/resume-templates/">Resume templates</a><a href="/ats-resume-builder-india/">ATS resume builder</a><a href="/resume-in-hindi/">Resume in Hindi</a><a href="/biodata-format-for-job/">Biodata format for job</a><a href="/resume-for-internship/">Resume for internship</a><a href="/career-objective-for-freshers/">Career objective for freshers</a><a href="/skills-to-put-on-a-resume/">Skills to put on a resume</a><a href="/how-to-make-resume-for-first-job/">Resume for your first job</a></nav>
-        <nav class="seo-links seo-links-2" aria-label="Resume builder tools"><span class="seo-links-h">Tools &amp; resources</span><a href="/resume-builder-india/">Resume Builder India</a><a href="/free-resume-builder/">Free Resume Builder</a><a href="/ai-resume-builder/">AI Resume Builder</a><a href="/ats-resume-builder/">ATS Resume Checker</a><a href="/portfolio-website-builder/">Portfolio Website Builder</a><a href="/cover-letter-generator/">Cover Letter Generator</a><a href="/examples/software-engineer">Software Engineer Resume Example</a></nav>
+        <nav class="seo-links" aria-label="Popular resume guides"><span class="seo-links-h">Popular guides</span><a href="/resume-format-for-freshers/">Resume format for freshers</a><a href="/resume-format-for-experienced/">Resume format for experienced</a><a href="/cv-format-for-freshers/">CV format for freshers</a><a href="/resume-templates/">Resume templates</a><a href="/ats-resume-builder-india/">ATS resume builder</a><a href="/resume-in-hindi/">Resume in Hindi</a><a href="/biodata-format-for-job/">Biodata format for job</a><a href="/resume-for-internship/">Resume for internship</a><a href="/career-objective-for-freshers/">Career objective for freshers</a><a href="/skills-to-put-on-a-resume/">Skills to put on a resume</a><a href="/how-to-make-resume-for-first-job/">Resume for your first job</a><a href="/hobbies-in-resume/">Hobbies for resume</a><a href="/declaration-in-resume/">Declaration in resume</a></nav>
+        <nav class="seo-links seo-links-2" aria-label="Fresher resumes by job"><span class="seo-links-h">Fresher resumes by job</span><a href="/data-entry-resume-no-experience/">Data entry resume</a><a href="/customer-service-resume-no-experience/">Customer service resume</a><a href="/bpo-resume-for-freshers/">BPO / call center resume</a><a href="/sales-resume-no-experience/">Sales resume</a><a href="/teacher-resume-for-freshers/">Teacher resume</a><a href="/resume-kaise-banaye/">रिज्यूमे कैसे बनाएं</a><a href="/fresher-resume-hindi/">फ्रेशर रिज्यूमे (हिंदी)</a></nav>
+        <nav class="seo-links seo-links-2" aria-label="Resume builder tools"><span class="seo-links-h">Tools &amp; resources</span><a href="/resume-builder-india/">Resume Builder India</a><a href="/free-resume-builder/">Free Resume Builder</a><a href="/ai-resume-builder/">AI Resume Builder</a><a href="/ats-resume-builder/">ATS Resume Checker</a><a href="/portfolio-website-builder/">Portfolio Website Builder</a><a href="/cover-letter-generator/">Cover Letter Generator</a><a href="/examples/software-engineer/">Software Engineer Resume Example</a></nav>
       </section>
 
     </div>
@@ -6111,6 +6112,9 @@ if ('serviceWorker' in navigator) {
   /* Expose the JD keyword-match tool so a prominent Generate-page button can
      deep-link straight into it (see _r4uJdTailorJS). */
   try{ window._r4uJdMatch=_atsMatch; }catch(e){}
+  /* Expose the menu and a few tools so "Ask AI anything" can return to the menu
+     and offer the right built-in tool for layout requests. */
+  try{ window._r4uAiHome=_home; window._r4uAiFit=_fitFlow; window._r4uAiCustomise=_customiseFlow; window._r4uAiReorder=_reorderFlow; window._r4uAiTemplates=_templateVersions; }catch(e){}
 })();
 </script>
 <script>
@@ -16344,6 +16348,807 @@ try{window._r4uQRlib=qrcode;}catch(e){}})();</script>
   }
   function start(){ link(); watch(); schedule(); }
   if(document.readyState==='complete') start(); else window.addEventListener('load',start);
+})();
+</script>
+<style id="_r4uInstallCss">
+/* ══ "Install the app" — one-tap install on Android / desktop Chrome & Edge,
+   guided 3-tap sheet on iPhone / iPad (Apple lets no website install itself). ══ */
+#r4uInstBtn{display:inline-flex;align-items:center;gap:8px;margin:10px auto 0;padding:7px 14px 7px 8px;border:1.5px solid #f3c77a;border-radius:999px;background:linear-gradient(180deg,#fffaf0,#fff3dc);color:#7c2d12;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;box-shadow:0 2px 10px -4px rgba(180,83,9,.35);-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s}
+#r4uInstBtn:hover{transform:translateY(-1px);box-shadow:0 6px 16px -6px rgba(180,83,9,.45)}
+#r4uInstBtn:focus-visible{outline:2px solid #b45309;outline-offset:2px}
+#r4uInstBtn img{width:26px;height:26px;border-radius:7px;flex:none}
+#r4uInstBtn small{font-weight:600;color:#9a5b1e;font-size:.74rem}
+#r4uInstWrap{display:flex;justify-content:center}
+#r4uInstWrap[hidden]{display:none}
+
+#r4uInstSheet{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:flex-end;justify-content:center;background:rgba(28,25,23,.55);padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));animation:r4uInFade .18s ease-out}
+#r4uInstSheet.top{align-items:flex-start;padding-top:max(14px,env(safe-area-inset-top))}
+@media (min-width:700px){#r4uInstSheet,#r4uInstSheet.top{align-items:center}}
+#r4uInstSheet .ic-card{position:relative;width:100%;max-width:400px;background:#fff;border-radius:20px;padding:18px 18px 16px;box-shadow:0 24px 60px -12px rgba(0,0,0,.45);color:#1c1917;animation:r4uInUp .22s cubic-bezier(.2,.8,.3,1)}
+#r4uInstSheet .ic-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border:0;border-radius:50%;background:#f5f0e8;color:#57534e;font-size:18px;line-height:32px;cursor:pointer}
+#r4uInstSheet .ic-hd{display:flex;gap:12px;align-items:center;margin:0 34px 14px 0}
+#r4uInstSheet .ic-hd img{width:46px;height:46px;border-radius:12px;flex:none;box-shadow:0 4px 12px -4px rgba(180,83,9,.5)}
+#r4uInstSheet .ic-hd b{display:block;font-size:1.02rem;line-height:1.25}
+#r4uInstSheet .ic-hd span{display:block;color:#78716c;font-size:.8rem;margin-top:2px}
+#r4uInstSheet ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+#r4uInstSheet li{display:flex;gap:11px;align-items:flex-start;font-size:.9rem;line-height:1.4}
+#r4uInstSheet li .n{flex:none;width:24px;height:24px;border-radius:50%;background:#1c1917;color:#fff;font-size:.75rem;font-weight:700;display:grid;place-items:center;margin-top:1px}
+#r4uInstSheet li small{display:block;color:#78716c;font-size:.78rem;margin-top:2px}
+#r4uInstSheet .k{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:6px;background:#f5f0e8;border:1px solid #e7dfd2;font-weight:700;white-space:nowrap;vertical-align:baseline}
+#r4uInstSheet .k svg{width:14px;height:14px}
+#r4uInstSheet .ic-ft{margin-top:14px;padding-top:12px;border-top:1px solid #f0ebe3;color:#78716c;font-size:.78rem;line-height:1.45}
+#r4uInstSheet .ic-copy{display:flex;gap:8px;margin-top:12px}
+#r4uInstSheet .ic-copy input{flex:1;min-width:0;border:1px solid #e7dfd2;border-radius:10px;padding:9px 10px;font:inherit;font-size:.85rem;color:#44403c;background:#faf8f5}
+#r4uInstSheet .ic-copy button,#r4uInstSheet .ic-ok{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407}
+#r4uInstSheet .ic-ok{display:block;width:100%;margin-top:14px;background:#f5f0e8;color:#44403c}
+/* slim top card (iPhone/iPad) — stays readable above the system Share sheet */
+#r4uInstSheet.mini,#r4uInstSheet.mini.top{align-items:flex-start;background:rgba(28,25,23,.38);padding-top:max(8px,env(safe-area-inset-top))}
+#r4uInstSheet.mini.btm{align-items:flex-end;padding-bottom:max(14px,env(safe-area-inset-bottom))}
+#r4uInstSheet.mini .ic-card{max-width:460px;padding:11px 12px 12px;border-radius:16px}
+#r4uInstSheet.mini .ic-x{top:7px;right:7px;width:28px;height:28px;line-height:28px;font-size:16px}
+#r4uInstSheet.mini .ic-hd{gap:9px;margin:0 32px 9px 0}
+#r4uInstSheet.mini .ic-hd img{width:30px;height:30px;border-radius:8px;box-shadow:none}
+#r4uInstSheet.mini .ic-hd b{font-size:.93rem}
+#r4uInstSheet.mini .ic-hd span{font-size:.72rem;margin-top:0}
+#r4uInstSheet.mini ol{gap:7px}
+#r4uInstSheet.mini li{font-size:.86rem;line-height:1.5;align-items:center;gap:9px}
+#r4uInstSheet.mini li .n{width:21px;height:21px;font-size:.7rem;margin:0}
+#r4uInstSheet.mini .k{padding:0 6px;font-size:.84rem}
+#r4uInstSheet.mini .k svg{width:13px;height:13px}
+#r4uInstSheet.mini .alt{font-style:normal;color:#78716c;font-size:.78rem;white-space:nowrap}
+#r4uInstSheet.mini .ic-ok{display:none}
+/* simple one-line guide */
+#r4uInstSheet .ic-line{margin:2px 0 0;font-size:1.02rem;line-height:1.75;color:#1c1917}
+#r4uInstSheet .ic-then{margin:4px 0 0;font-size:.84rem;line-height:1.45;color:#78716c}
+#r4uInstSheet .ic-then b{color:#44403c}
+#r4uInstSheet .ic-g{display:inline-grid;place-items:center;width:32px;height:32px;margin:0 2px;border-radius:9px;background:#fff;border:1px solid #e7e0d5;box-shadow:0 2px 6px -3px rgba(28,25,23,.3);color:#007aff;vertical-align:middle;font-weight:700}
+#r4uInstSheet .ic-g.and{color:#1a73e8}
+#r4uInstSheet .ic-g svg{width:19px;height:19px}
+#r4uInstSheet.mini .ic-hd{margin-bottom:8px}
+#r4uInstSheet .dbg{margin-top:6px;color:#a8a29e;font-size:.7rem}
+/* bouncing arrow pointing at the browser's own button */
+#r4uInstArrow{position:fixed;z-index:2147482001;width:54px;height:54px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(245,158,11,.3),0 10px 24px -6px rgba(0,0,0,.4);pointer-events:none}
+#r4uInstArrow svg{width:28px;height:28px}
+#r4uInstArrow.down{bottom:max(14px,env(safe-area-inset-bottom));animation:r4uInBobD 1.1s ease-in-out infinite}
+#r4uInstArrow.up{top:max(14px,env(safe-area-inset-top));animation:r4uInBobU 1.1s ease-in-out infinite}
+#r4uInstArrow.mid{left:calc(50% - 27px)}
+#r4uInstArrow.right{right:max(14px,env(safe-area-inset-right))}
+@keyframes r4uInBobD{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+@keyframes r4uInBobU{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes r4uInFade{from{opacity:0}to{opacity:1}}
+@keyframes r4uInUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+
+/* nudge after the first PDF download */
+#r4uInstNudge{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));z-index:2147481000;width:min(420px,calc(100% - 24px));transform:translateX(-50%);background:#fff;border:1px solid #f3dcb4;border-radius:18px;box-shadow:0 18px 40px -12px rgba(28,25,23,.45);padding:12px 12px 12px 14px;display:flex;gap:12px;align-items:center;color:#1c1917;animation:r4uInUpN .25s cubic-bezier(.2,.8,.3,1)}
+@keyframes r4uInUpN{from{transform:translate(-50%,20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+#r4uInstNudge img{width:42px;height:42px;border-radius:11px;flex:none}
+#r4uInstNudge .t{flex:1;min-width:0;font-size:.84rem;line-height:1.35}
+#r4uInstNudge .t b{display:block;font-size:.9rem}
+#r4uInstNudge .t span{color:#78716c}
+#r4uInstNudge .a{display:flex;flex-direction:column;gap:4px;flex:none}
+#r4uInstNudge .a button{border:0;border-radius:10px;padding:8px 14px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+#r4uInstNudge .a .go{background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407}
+#r4uInstNudge .a .no{background:none;color:#78716c;padding:4px 8px;font-weight:600}
+html.r4u-inst-open #r4uDlHint{display:none !important}
+@media (prefers-reduced-motion:reduce){#r4uInstArrow,#r4uInstSheet,#r4uInstSheet .ic-card,#r4uInstNudge{animation:none}}
+</style>
+<script id="_r4uInstall">
+(function(){
+  /* Switched off for now (owner's call) — set INSTALL_ON=true and restore the
+     beforeinstallprompt catcher in <head> to bring the button back. */
+  var INSTALL_ON=false; if(!INSTALL_ON) return;
+  var ICON='/apple-touch-icon.png?v=4', URL_HOME=location.origin+'/';
+  var ua=navigator.userAgent||'';
+  var isIOS=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  var isIPad=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  var isAndroid=/Android/i.test(ua);
+  var isMobile=isIOS||isAndroid;
+  var inApp=/FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|Twitter|Line\/|MicroMessenger|GSA\/|WhatsApp/i.test(ua)||(isAndroid&&/; wv\)/.test(ua));
+  var iosOtherBrowser=isIOS&&/CriOS|EdgiOS|FxiOS|OPiOS/.test(ua);
+  var isSamsung=/SamsungBrowser/i.test(ua);
+  /* tallest browser chrome (screen minus page height) seen in portrait */
+  var COMPACT_MAX=175, maxChrome=0, dbg=/instdbg/.test(location.hash);
+  function measure(){try{if(innerWidth<innerHeight){var c=screen.height-innerHeight;if(c>maxChrome)maxChrome=c;}}catch(e){}}
+  if(isIOS){measure();window.addEventListener('resize',measure);window.addEventListener('pageshow',measure);setTimeout(measure,600);}
+  var safariVer=(function(){var m=ua.match(/Version\/(\d+)/);return m?+m[1]:0;})();
+  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
+  function standalone(){try{return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: minimal-ui)').matches||navigator.standalone===true;}catch(e){return false;}}
+  function recentlyInstalled(){var t=+ls('_r4uInstalled')||0;return t&&(Date.now()-t)<60*864e5;}
+  function bip(){return window._r4uBIP||null;}
+  /* Who gets the button: phones always (one-tap on Android, guide on iPhone);
+     computers only when Chrome/Edge says the site can be installed. */
+  function eligible(){
+    if(standalone()||recentlyInstalled()) return false;
+    if(isMobile) return true;
+    return !!bip();
+  }
+  function track(n){try{if(typeof window.gtag==='function')gtag('event',n);}catch(e){}}
+
+  /* ── icons ── */
+  var SV={
+    share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M8 11H6v10h12V11h-2"/></svg>',
+    more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+    kebab:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
+    chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
+    down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15"/><path d="M6 13l6 6 6-6"/></svg>',
+    up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5"/><path d="M6 11l6-6 6 6"/></svg>'
+  };
+  function k(icon,label){return '<span class="k">'+(icon?SV[icon]:'')+label+'</span>';}
+
+  /* ── the guide sheet ── */
+  var lastFocus=null;
+  function closeSheet(){
+    var s=document.getElementById('r4uInstSheet'); if(s) s.remove();
+    var a=document.getElementById('r4uInstArrow'); if(a) a.remove();
+    document.removeEventListener('keydown',onKey);
+    document.documentElement.classList.remove('r4u-inst-open');
+    if(lastFocus&&lastFocus.focus) try{lastFocus.focus();}catch(e){}
+  }
+  function onKey(e){if(e.key==='Escape')closeSheet();}
+  function sheet(opts){
+    closeSheet(); lastFocus=document.activeElement;
+    var s=document.createElement('div'); s.id='r4uInstSheet'; s.className=(opts.top?'top':'')+(opts.mini?' mini':'')+(opts.btm?' btm':'');
+    s.setAttribute('role','dialog'); s.setAttribute('aria-modal','true'); s.setAttribute('aria-labelledby','r4uInstTitle');
+    s.innerHTML='<div class="ic-card"><button type="button" class="ic-x" aria-label="Close">×</button>'
+      +'<div class="ic-hd"><img src="'+ICON+'" alt=""><div><b id="r4uInstTitle">'+opts.title+'</b><span>'+opts.sub+'</span></div></div>'
+      +opts.body+'<button type="button" class="ic-ok">'+(opts.ok||'Got it')+'</button></div>';
+    s.addEventListener('click',function(e){if(e.target===s||e.target.closest('.ic-x')||e.target.closest('.ic-ok'))closeSheet();});
+    document.body.appendChild(s);
+    document.documentElement.classList.add('r4u-inst-open');
+    if(opts.arrow){var a=document.createElement('div');a.id='r4uInstArrow';a.className=opts.arrow;a.setAttribute('aria-hidden','true');a.innerHTML=/down/.test(opts.arrow)?SV.down:SV.up;document.body.appendChild(a);}
+    var cp=s.querySelector('.ic-copy button');
+    if(cp) cp.addEventListener('click',function(){
+      var inp=s.querySelector('.ic-copy input');
+      function done(){cp.textContent='Copied';}
+      try{navigator.clipboard.writeText(URL_HOME).then(done,function(){inp.select();try{document.execCommand('copy');done();}catch(e){}});}catch(e){inp.select();try{document.execCommand('copy');done();}catch(_){}}
+    });
+    document.addEventListener('keydown',onKey);
+    try{s.querySelector('.ic-x').focus({preventScroll:true});}catch(e){}
+  }
+  function guideInApp(){
+    sheet({title:'Open in your browser first',sub:'This app’s built-in browser can’t add apps to the home screen.',
+      body:'<ol><li><span class="n">1</span><div>Tap '+k('more','')+' or '+k('kebab','')+' in a corner of this screen</div></li>'
+        +'<li><span class="n">2</span><div>Choose <b>'+(isIOS?'Open in Safari':'Open in Chrome')+'</b> (or “Open in browser”)<small>No such option? Copy the link and paste it into '+(isIOS?'Safari':'Chrome')+'.</small></div></li>'
+        +'<li><span class="n">3</span><div>Tap <b>Install the app</b> again there</div></li></ol>'
+        +'<div class="ic-copy"><input id="r4uInstLink" readonly value="'+URL_HOME+'" aria-label="Website link"><button type="button">Copy link</button></div>'});
+  }
+  /* Simple guide: one plain sentence with the real button's icon, plus the
+     bouncing arrow pointing at that button. */
+  function g(icon){return '<span class="ic-g'+(isAndroid?' and':'')+'">'+(SV[icon]||icon)+'</span>';}
+  function simple(o){
+    sheet({mini:true,top:!!o.top,btm:!o.top,title:'Add to Home Screen',sub:'Free · no app store',arrow:o.arrow,
+      body:'<p class="ic-line">'+o.line+'</p><p class="ic-then">'+o.then+'</p>'+(dbg?'<div class="dbg">chrome '+maxChrome+' · Safari '+safariVer+'</div>':'')});
+  }
+  /* iPhone / iPad: the system Share sheet covers most of the screen, so the
+     guide is pinned to the TOP and stays readable while it is open. */
+  function guideIOS(){
+    if(inApp) return guideInApp();
+    var s26=safariVer>=26;
+    var add='“<b>Add to Home Screen</b>”';
+    if(iosOtherBrowser){
+      simple({top:true,arrow:'up right',line:'Tap '+g('share')+' in the address bar, then '+add,then:'Look under “View More” if you don’t see it. Then tap <b>Add</b>.'});
+      return;
+    }
+    /* A website can't open "Add to Home Screen" itself, and Apple leaves it out
+       of the Share sheet a website opens (checked on iOS 26) — so point at
+       Safari's own Share button, where it lives. */
+    manualIOS();
+  }
+  function manualIOS(again){
+    var s26=safariVer>=26, add='“<b>Add to Home Screen</b>”';
+    /* Safari 26 on iPhone has 3 layouts: "Bottom" and "Top" keep a toolbar with
+       Share in the middle at the bottom; "Compact" hides Share behind ⋯ at the
+       bottom right. The toolbar layouts take far more screen height, so the
+       tallest browser chrome seen since load (bars are fully shown on load)
+       tells them apart. Older Safari always has Share at the bottom middle. */
+    measure();
+    var compact=!isIPad&&s26&&maxChrome>0&&maxChrome<COMPACT_MAX;
+    var arrow=isIPad?'up right':(compact?'down right':'down mid');
+    var line=compact?'Tap '+g('more')+' below, then '+g('share')+' and '+add
+      :'Tap '+g('share')+(isIPad?' at the top':' below')+', then '+add;
+    simple({top:true,arrow:arrow,line:line,then:(again?'Not in that list? Safari’s own Share button has it. ':'')+(s26?'It’s under “View More”. ':'Scroll down to find it. ')+'Then tap <b>Add</b>.'});
+  }
+  function guideAndroid(){
+    if(inApp) return guideInApp();
+    if(isSamsung){
+      simple({top:true,arrow:'down right',line:'Tap '+g('≡')+' below, then “<b>Add page to</b>” → <b>Home screen</b>',then:'Then tap <b>Add</b>.'});
+      return;
+    }
+    simple({top:false,arrow:'up right',line:'Tap '+g('kebab')+' above, then “<b>Add to Home screen</b>”',then:'Some phones say “Install app”. Then tap <b>Install</b>.'});
+  }
+  /* ── the one action every button calls ── */
+  function install(src){
+    track('pwa_install_click');
+    var p=bip();
+    if(p){
+      window._r4uBIP=null;
+      try{
+        p.prompt();
+        (p.userChoice||Promise.resolve({})).then(function(c){
+          track(c&&c.outcome==='accepted'?'pwa_install_accept':'pwa_install_dismiss');
+          if(c&&c.outcome==='accepted'){ls('_r4uInstalled',String(Date.now()));}
+          refresh();
+        }).catch(function(){});
+      }catch(e){ if(isAndroid) guideAndroid(); }
+      return;
+    }
+    if(isIOS) guideIOS(); else if(isAndroid) guideAndroid();
+  }
+  window._r4uInstall=install;
+
+  /* ── homepage button ── */
+  function mountButton(){
+    if(document.getElementById('r4uInstWrap')) return;
+    var anchor=document.getElementById('r4tutRow')||document.querySelector('#top-sticky-bar .hero-note');
+    if(!anchor) return;
+    var w=document.createElement('div'); w.id='r4uInstWrap'; w.hidden=true;
+    w.innerHTML='<button type="button" id="r4uInstBtn"><img src="'+ICON+'" alt="" width="26" height="26"><span>Install the app</span><small>Free · no app store</small></button>';
+    anchor.parentNode.insertBefore(w,anchor.nextSibling);
+    w.querySelector('button').addEventListener('click',function(){install('home');});
+  }
+  function refresh(){
+    var w=document.getElementById('r4uInstWrap'); if(w) w.hidden=!eligible();
+    if(!eligible()) hideNudge();
+  }
+
+  /* ── one gentle nudge after a PDF download (max 3 times, 3 weeks apart) ── */
+  var nudgeTimer=null;
+  function hideNudge(){var n=document.getElementById('r4uInstNudge');if(n)n.remove();if(!document.getElementById('r4uInstSheet'))document.documentElement.classList.remove('r4u-inst-open');}
+  function maybeNudge(){
+    if(!eligible()||document.getElementById('r4uInstNudge')) return;
+    var cnt=+ls('_r4uInstNudgeN')||0, last=+ls('_r4uInstNudgeT')||0;
+    if(cnt>=3||(Date.now()-last)<21*864e5) return;
+    clearTimeout(nudgeTimer);
+    nudgeTimer=setTimeout(function(){
+      if(!eligible()||document.getElementById('r4uInstSheet')) return;
+      ls('_r4uInstNudgeN',String(cnt+1)); ls('_r4uInstNudgeT',String(Date.now()));
+      var n=document.createElement('div'); n.id='r4uInstNudge'; n.setAttribute('role','dialog'); n.setAttribute('aria-label','Install the app');
+      n.innerHTML='<img src="'+ICON+'" alt=""><div class="t"><b>Keep your resume one tap away</b><span>Add it to your '+(isMobile?'home screen':'computer')+'. Free.</span></div>'
+        +'<div class="a"><button type="button" class="go">Install</button><button type="button" class="no">Not now</button></div>';
+      document.body.appendChild(n); document.documentElement.classList.add('r4u-inst-open'); track('pwa_nudge_shown');
+      n.querySelector('.go').addEventListener('click',function(){hideNudge();install('nudge');});
+      n.querySelector('.no').addEventListener('click',hideNudge);
+      setTimeout(hideNudge,20000);
+    },2500);
+  }
+  /* PDF success = the generate-pdf request came back OK (or iOS print finished). */
+  (function hookPdf(){
+    var f=window.fetch; if(typeof f!=='function'||f.__r4uInst) return;
+    var w=function(input,init){
+      var p=f.apply(this,arguments);
+      try{
+        var b=init&&init.body;
+        if(typeof b==='string'&&b.indexOf('generate-pdf')!==-1&&/"action"\s*:\s*"generate-pdf"/.test(b)){
+          p.then(function(r){if(r&&r.ok)maybeNudge();}).catch(function(){});
+        }
+      }catch(e){}
+      return p;
+    };
+    w.__r4uInst=1; try{for(var key in f)w[key]=f[key];}catch(e){}
+    window.fetch=w;
+  })();
+  window.addEventListener('afterprint',function(){if(isIOS)maybeNudge();});
+
+  /* ── browser events ── */
+  window.addEventListener('r4u-bip',refresh);
+  window.addEventListener('appinstalled',function(){
+    ls('_r4uInstalled',String(Date.now())); window._r4uBIP=null; closeSheet(); refresh(); track('pwa_installed');
+    try{if(typeof showToast==='function')showToast('✅ App installed. Find Resume4U on your '+(isMobile?'home screen':'computer')+'.','success');}catch(e){}
+  });
+  try{matchMedia('(display-mode: standalone)').addEventListener('change',refresh);}catch(e){}
+
+  function start(){mountButton();refresh();}
+  if(document.readyState==='complete') start(); else window.addEventListener('load',function(){setTimeout(start,0);});
+})();
+</script>
+<script id="_r4uHomeNav">
+/* Tap the R4u logo (phone header or desktop sidebar) on any step, signed in or
+   not, to go back to the landing page. Also the way home inside the installed
+   app, which has no browser buttons. */
+(function(){
+  function goHome(){
+    try{ if(typeof window.goToStep==='function') window.goToStep(0); }catch(e){}
+    /* "flow-started" hides the landing page's lower half once a flow begins; clear
+       it so the full landing page (and the "Resume For You" title) comes back. */
+    var s0=document.getElementById('step0'); if(s0) s0.classList.remove('flow-started');
+    try{ window.scrollTo({top:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
+  }
+  window.r4uGoHome=goHome;
+  function wire(){
+    var ml=document.querySelector('#mobileHdr .mhdr-logo');
+    if(ml){ ml.onclick=goHome; ml.setAttribute('title','Home'); ml.setAttribute('role','link'); ml.setAttribute('aria-label','Resume For You — home'); }
+    var sl=document.querySelector('#sidebar .logo');
+    if(sl){ sl.onclick=goHome; sl.setAttribute('title','Home'); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
+  window.addEventListener('load',function(){ wire(); setTimeout(wire,500); });
+})();
+</script>
+<style id="_r4uAskAICss">
+/* ══ "Ask AI to change anything" — a chat window (messaging-app style) where the
+   user types any change; AI edits the resume and shows before → after with
+   Apply / Undo. Opened from the Generate page card and from Refine with AI. ══ */
+
+/* entry 1: box at the top of Refine with AI (opens the chat) */
+#aiChatPanel .r4u-ask{box-sizing:border-box;width:100%;min-width:0;contain:inline-size;overflow:hidden;background:#fff;border:1.5px solid #fed7aa;border-radius:16px;padding:12px;box-shadow:0 8px 22px -16px rgba(154,52,18,.55)}
+#aiChatPanel .r4u-ask-h{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:800;color:#7c2d12;margin:0 0 8px}
+.r4u-new{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:99px;background:linear-gradient(135deg,#fbbf24,#f97316);color:#431407}
+#aiChatPanel .r4u-ask-row{display:flex;gap:8px;align-items:center}
+#aiChatPanel .r4u-ask-fake{flex:1;min-width:0;display:flex;align-items:center;height:42px;border:1.5px solid #e7e0d5;border-radius:12px;padding:0 12px;font-size:.88rem;color:#a8a29e;background:#fffdf9;cursor:text;text-align:left;font-family:inherit}
+#aiChatPanel .r4u-ask-go,#r4uAskBar .ab-go{flex:none;width:42px;height:42px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407;box-shadow:0 6px 14px -8px rgba(217,119,6,.8)}
+#aiChatPanel .r4u-ask-go svg,#r4uAskBar .ab-go svg{width:18px;height:18px}
+
+/* entry 2: chat card on the Generate page */
+#r4uAskBar{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin:16px 0 0;padding:12px 12px 12px 14px;border:1.5px solid #fed7aa;border-radius:18px;background:linear-gradient(180deg,#fffaf2,#fff);box-shadow:0 1px 2px rgba(40,30,10,.04),0 12px 28px -24px rgba(120,60,10,.45);cursor:pointer;text-align:left;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+#r4uAskBar:hover{box-shadow:0 1px 2px rgba(40,30,10,.04),0 16px 30px -20px rgba(120,60,10,.5)}
+#r4uAskBar:active{transform:scale(.99)}
+#r4uAskBar:focus-visible{outline:2px solid #b45309;outline-offset:2px}
+#r4uAskBar .ab-av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;background:linear-gradient(135deg,#fbbf24,#f97316);box-shadow:0 6px 14px -6px rgba(249,115,22,.7)}
+#r4uAskBar .ab-av::after{content:"";position:absolute;right:1px;bottom:1px;width:11px;height:11px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px #fff}
+#r4uAskBar .ab-tx{flex:1;min-width:0}
+#r4uAskBar .ab-tx b{display:flex;align-items:center;gap:7px;font-size:.95rem;color:#1c1917}
+#r4uAskBar .ab-tx span{display:block;margin-top:2px;font-size:.78rem;color:#78716c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#s8Grid #s8Side > #r4uAskBar{grid-column:1 / -1;grid-row:3;margin-top:16px !important}
+html body #s8Grid #s8Side > #_r4uNextBar{grid-row:4}
+
+/* ── the chat window ── */
+#r4uChat{position:fixed;inset:0;z-index:9800;display:none;background:rgba(28,25,23,.42)}
+#r4uChat.on{display:block}
+#r4uChat .rc-win{position:absolute;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column;background:#efe7da;overflow:hidden;color:#1c1917;font-family:inherit}
+@media (min-width:700px){
+  #r4uChat{background:rgba(28,25,23,.28)}
+  #r4uChat .rc-win{left:auto;top:auto;right:24px;bottom:24px;width:420px;height:min(680px,calc(100vh - 48px));border-radius:22px;box-shadow:0 30px 70px -20px rgba(28,25,23,.55),0 0 0 1px rgba(0,0,0,.04);animation:rcIn .22s cubic-bezier(.2,.8,.3,1)}
+}
+@keyframes rcIn{from{transform:translateY(18px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+html.r4u-chat-open,html.r4u-chat-open body{overflow:hidden}
+html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #toastContainer,html.r4u-chat-open #toastContainerTop{display:none !important}
+#r4uChat .rc-hd{flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:linear-gradient(135deg,#7c2d12,#9a3412 55%,#b45309);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+#r4uChat .rc-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer}
+#r4uChat .rc-x:hover{background:rgba(255,255,255,.12)}
+#r4uChat .rc-x svg{width:22px;height:22px}
+#r4uChat .rc-av{position:relative;flex:none;width:40px;height:40px;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+#r4uChat .rc-av img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+#r4uChat .rc-ti{flex:1;min-width:0;line-height:1.2}
+#r4uChat .rc-ti b{display:block;font-size:1rem;font-weight:700}
+#r4uChat .rc-st{display:block;font-size:.76rem;color:#fde7c8;margin-top:2px}
+#r4uChat .rc-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 10px 8px;display:flex;flex-direction:column;gap:6px;
+  background-color:#efe7da;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23b45309' stroke-opacity='.09' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 18h16v20H14z M18 24h8 M18 29h8 M18 34h5'/%3E%3Cpath d='M78 14l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L68 21l6-1z'/%3E%3Cpath d='M40 70a8 8 0 1 0 16 0a8 8 0 1 0-16 0 M48 66v4l3 2'/%3E%3Cpath d='M92 76h18v12H92z M96 76v-4h10v4'/%3E%3Cpath d='M16 98l5 5 9-10'/%3E%3Cpath d='M66 104c4-6 10-6 14 0'/%3E%3Ccircle cx='102' cy='44' r='2'/%3E%3Ccircle cx='34' cy='50' r='1.6'/%3E%3C/g%3E%3C/svg%3E")}
+#r4uChat .rc-day{align-self:center;margin:2px 0 6px;padding:4px 10px;border-radius:8px;background:rgba(255,253,248,.92);color:#78716c;font-size:.7rem;font-weight:600;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+#r4uChat .rc-m{position:relative;max-width:84%;padding:7px 10px 6px;border-radius:10px;font-size:.88rem;line-height:1.42;box-shadow:0 1px 1px rgba(0,0,0,.08);overflow-wrap:anywhere;animation:rcPop .16s ease-out}
+@keyframes rcPop{from{transform:translateY(4px);opacity:0}to{transform:none;opacity:1}}
+#r4uChat .rc-ai{align-self:flex-start;background:#fff;border-top-left-radius:2px}
+#r4uChat .rc-me{align-self:flex-end;background:#ffe9c6;border-top-right-radius:2px;white-space:pre-wrap}
+#r4uChat .rc-ai::before,#r4uChat .rc-me::before{content:"";position:absolute;top:0;width:8px;height:12px}
+#r4uChat .rc-ai::before{left:-7px;background:linear-gradient(225deg,#fff 50%,transparent 50%)}
+#r4uChat .rc-me::before{right:-7px;background:linear-gradient(135deg,#ffe9c6 50%,transparent 50%)}
+#r4uChat .rc-ai.wide{max-width:92%;width:92%}
+#r4uChat .rc-meta{float:right;margin:6px 0 -2px 10px;font-size:.66rem;color:#a8a29e;white-space:nowrap;line-height:1}
+#r4uChat .rc-me .rc-meta{color:#a16207}
+#r4uChat .rc-ai.wide .rc-meta{float:none;display:block;text-align:right;margin:6px 0 0}
+#r4uChat .rc-tick{display:inline-block;margin-left:3px;color:#a8a29e;letter-spacing:-3px}
+#r4uChat .rc-tick.read{color:#0ea5e9}
+#r4uChat .rc-typing{display:inline-flex;gap:4px;padding:4px 2px}
+#r4uChat .rc-typing i{width:7px;height:7px;border-radius:50%;background:#b8a99a;animation:rcDot 1.2s infinite}
+#r4uChat .rc-typing i:nth-child(2){animation-delay:.15s}#r4uChat .rc-typing i:nth-child(3){animation-delay:.3s}
+@keyframes rcDot{0%,60%,100%{transform:translateY(0);opacity:.55}30%{transform:translateY(-4px);opacity:1}}
+#r4uChat .rc-chg{margin-top:8px;border:1px solid #f0e6d6;border-radius:10px;overflow:hidden;background:#fffdf9}
+#r4uChat .rc-chg-l{font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#9a3412;padding:6px 9px 0}
+#r4uChat .rc-chg-b,#r4uChat .rc-chg-a{padding:5px 9px;font-size:.8rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+#r4uChat .rc-chg-b{color:#a8a29e;text-decoration:line-through;text-decoration-color:rgba(168,162,158,.7)}
+#r4uChat .rc-chg-a{color:#14532d;background:#f0fdf4;border-top:1px dashed #d9f99d}
+#r4uChat .rc-chg-a b{color:#166534}
+#r4uChat .rc-acts{display:flex;margin:8px -10px -6px;border-top:1px solid #f1ebe2}
+#r4uChat .rc-acts button{flex:1;padding:10px 6px;border:0;background:none;font:inherit;font-size:.84rem;font-weight:700;color:#b45309;cursor:pointer}
+#r4uChat .rc-acts button+button{border-left:1px solid #f1ebe2}
+#r4uChat .rc-acts button:hover{background:#fffaf2}
+#r4uChat .rc-acts .pri{color:#9a3412}
+#r4uChat .rc-acts .note{flex:1;padding:10px;text-align:center;font-size:.8rem;font-weight:600;color:#78716c}
+#r4uChat .rc-acts .note.ok{color:#166534}
+#r4uChat .rc-err{color:#b91c1c}
+#r4uChat .rc-chips{flex:none;display:grid;grid-auto-flow:column;grid-template-rows:auto auto;grid-auto-columns:max-content;gap:6px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;padding:8px 10px 0;background:#efe7da;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+#r4uChat .rc-chips.end{-webkit-mask-image:none;mask-image:none}
+#r4uChat .rc-chips::-webkit-scrollbar{display:none}
+#r4uChat .rc-chips:empty{display:none}
+#r4uChat .rc-chips button{flex:none;white-space:nowrap;border:1px solid #f3d3a5;background:#fffaf2;color:#9a3412;border-radius:99px;padding:7px 12px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+#r4uChat .rc-in{flex:none;display:flex;align-items:flex-end;gap:8px;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));background:#efe7da}
+#r4uChat .rc-in textarea{flex:1;min-width:0;resize:none;min-height:44px;max-height:120px;border:0;border-radius:22px;padding:12px 16px;font:inherit;font-size:16px;line-height:1.3;color:#1c1917;background:#fff;outline:none;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+#r4uChat .rc-in textarea::placeholder{color:#a8a29e}
+#r4uChat .rc-send{flex:none;width:46px;height:46px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407;box-shadow:0 4px 12px -6px rgba(217,119,6,.9)}
+#r4uChat .rc-send:disabled{opacity:.55;cursor:default}
+#r4uChat .rc-send svg{width:20px;height:20px}
+#r4uChat button:focus-visible{outline:2px solid #f59e0b;outline-offset:1px}
+#r4uChat .rc-in textarea:focus,#r4uChat .rc-in textarea:focus-visible{outline:none;box-shadow:0 1px 1px rgba(0,0,0,.08),0 0 0 2px rgba(245,158,11,.35)}
+@media (prefers-reduced-motion:reduce){#r4uChat .rc-m,#r4uChat .rc-win,#r4uChat .rc-typing i{animation:none}}
+</style>
+<script id="_r4uAskAI">
+(function(){
+  var MAX_HIST=4, hist=[], busy=false;
+  var EXAMPLES=['Make my summary stronger','Add numbers to my bullets','Use stronger action verbs','Make it sound more senior','Fix grammar and spelling','Make every bullet shorter','Add skills for my role','Make it more ATS-friendly','Write a better headline','Sound confident, not boastful','Is my resume good enough?','Make it fit on one page','Summary ko aur impressive banao','सारी लाइनें छोटी और आसान करो'];
+  var SEND='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87z"/></svg>';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function data(){ try{ return (typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:null; }catch(e){ return null; } }
+  function hasResume(){ return !!document.querySelector('#resumeOutput .resume-a4-page'); }
+  function now(){ try{ return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
+  function firstName(){ var d=data(); var n=d&&d.firstName?String(d.firstName).trim().split(/\s+/)[0]:''; return n?n.charAt(0).toUpperCase()+n.slice(1).toLowerCase():''; }
+
+  /* ── AI: prompt, call, parse ── */
+  function snapshot(d){
+    return {
+      jobTitle:d.jobTitle||'', summary:d.summary||'',
+      skills:(d.skills||[]).slice(0,40),
+      experience:(d.experience||[]).map(function(e,i){ return {index:i,title:e.title||'',company:e.co||e.company||'',dates:[e.start,e.end].filter(Boolean).join(' – ')||e.dates||'',bullets:(e.bullets||[]).slice(0,12)}; }),
+      education:(d.education||[]).map(function(e){ return {degree:e.deg||e.degree||'',school:e.sch||e.school||'',year:e.yr||e.year||''}; }),
+      keyAchievements:kaList().map(function(a,i){ return {index:i,title:a.title||'',desc:a.desc||''}; })
+    };
+  }
+  function kaList(){ var A=Array.isArray(window.__keyAchiev)?window.__keyAchiev:((data()||{}).keyAchievements||[]); return (A||[]).filter(function(a){ return a&&(a.title||a.desc); }).slice(0,8); }
+  function buildPrompt(d,request){
+    var lines=[
+      'You are "Resume AI", the chat assistant inside Resume For You, an AI resume builder used mostly by job seekers in India.',
+      'The user is chatting with you about their finished resume and asks for a change (or a question) in plain words — English, Hindi or Hinglish.',
+      'Return ONLY a JSON object — no markdown, no code fences, no text outside the JSON:',
+      '{"reply":"1-2 short, warm, chat-style sentences: what you changed and why, or the answer to their question",',
+      ' "changes":[',
+      '   {"field":"summary","after":"<new summary>"},',
+      '   {"field":"jobTitle","after":"<new headline/title>"},',
+      '   {"field":"skills","after":["<the FULL new skills list>"]},',
+      '   {"field":"bullets","index":<experience index>,"after":["<the FULL new bullet list for that role>"]},',
+      '   {"field":"title","index":<experience index>,"after":"<new job title for that role>"},',
+      '   {"field":"keyAchievements","after":[{"title":"<short title>","desc":"<one line with the result>"}]}  (the FULL new list)',
+      ' ],',
+      ' "tool":"none|fit|customise|reorder|ats|templates",',
+      ' "go":"none|basic|experience|awards|keyAchievements|education|skills|extras|template"}',
+      '',
+      'Rules:',
+      '- Only include fields you actually change. Never change company names, dates, education or contact details.',
+      '- Keep every fact true. NEVER invent employers, tools, certifications or numbers. Where a number would clearly help but is unknown, write a [X] placeholder (e.g. "cut report time by [X]%") — the user fills it in.',
+      '- Resume style: strong past-tense action verbs, no "I/my", no fluff or clichés, each bullet ideally under 25 words, ATS-friendly keywords for the target role.',
+      '- Summary: 2-3 sentences, max ~55 words, unless the user asks otherwise.',
+      '- If the user asks to tailor for a role or a pasted job post, rewrite summary, relevant bullets and skills towards it (still only true facts).',
+      '- LANGUAGE: write "reply" in English by default. Use Hindi or Hinglish ONLY if the user\'s latest message itself is written in Hindi or Hinglish. Never switch language because of the user\'s country, name or earlier messages. Resume text is always English unless they explicitly ask otherwise.',
+      '- If they only ask a question (e.g. "is my resume good for Amazon?") or just chat, answer in "reply" with specific advice and leave "changes" empty.',
+      '- Set "tool" when a built-in tool does it better: fit = make it one page / font size / spacing, customise = colours or fonts, reorder = move sections, ats = check against a job post, templates = change design. Otherwise "none".',
+      '- For things you cannot change here (name, phone, email, dates, education), say in "reply" that they can tap that text on the resume to edit it.',
+      '- Set "go" when the user wants to go somewhere or edit a section by hand ("take me to…", "where do I edit…"): the matching step below; template = the template picker. The app shows a button that takes them there. Otherwise "none".',
+      '- Keep replies short (max 2 sentences). Never describe buttons or places that are not in the site map below.',
+      '',
+      'Site map (the only places that exist): the resume is built in 8 steps — 1 Basic Info, 2 Experience, 3 Awards, 4 Key Achievements (add / edit / remove achievement cards), 5 Education, 6 Skills, 7 Extras, 8 Generate. Phones show "Step X of 8" at the top; computers show the steps in the left menu. Tapping the R4u logo opens the home page. Step 8 shows the finished resume: tap any text on it to edit it directly; buttons there: Download PDF, Share / QR, Cover letter, Word, "Template: … Change", Match a job, ATS score, Refine with AI (fit to page, colours and fonts, reorder sections).',
+      '',
+      'Current resume (JSON):',
+      JSON.stringify(snapshot(d))
+    ];
+    if(hist.length){
+      lines.push('','Earlier in this chat (the resume above already includes any changes the user applied):');
+      hist.forEach(function(h){ lines.push('User: '+h.u,'You: '+h.a); });
+    }
+    lines.push('','User message: '+request);
+    return lines.join('\n');
+  }
+  function callAI(prompt){
+    return fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt,task:'rewrite'})})
+      .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ if(!r.ok) throw new Error(j.error||('status '+r.status)); return j; }); })
+      .then(function(j){ var raw=j.content; return String((Array.isArray(raw)?(raw[0]&&raw[0].text||''):(raw||''))||j.text||'').trim(); });
+  }
+  function parse(text){
+    var t=String(text||'').replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
+    var a=t.indexOf('{'), b=t.lastIndexOf('}');
+    if(a<0||b<=a) return null;
+    try{ var o=JSON.parse(t.slice(a,b+1)); if(!o||typeof o!=='object') return null;
+      o.changes=Array.isArray(o.changes)?o.changes:[]; o.reply=String(o.reply||''); return o; }catch(e){ return null; }
+  }
+
+  /* ── turn the AI's change list into safe, checked edits ── */
+  function clean(s){ return String(s==null?'':s).replace(/^\s*[•\-–*]\s*/,'').replace(/\s+/g,' ').trim(); }
+  function plan(d,changes){
+    var out=[], exp=d.experience||[];
+    changes.forEach(function(c){
+      if(!c||!c.field) return;
+      var f=String(c.field);
+      if(f==='summary'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'summary',label:'Summary',before:d.summary||'',after:String(c.after).trim()});
+      else if(f==='jobTitle'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'jobTitle',label:'Headline',before:d.jobTitle||'',after:clean(c.after)});
+      else if(f==='skills'&&Array.isArray(c.after)){
+        var sk=c.after.map(clean).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).slice(0,40);
+        if(sk.length) out.push({kind:'skills',label:'Skills',before:(d.skills||[]).slice(),after:sk});
+      }
+      else if((f==='bullets'||f==='title')&&c.index!==undefined&&exp[c.index|0]){
+        var e=exp[c.index|0], nm=(e.title||'Role')+(e.co?(' · '+e.co):'');
+        if(f==='bullets'&&Array.isArray(c.after)){ var bl=c.after.map(clean).filter(Boolean).slice(0,12); if(bl.length) out.push({kind:'bullets',idx:c.index|0,label:nm,before:(e.bullets||[]).slice(),after:bl}); }
+        if(f==='title'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'title',idx:c.index|0,label:nm+' — job title',before:e.title||'',after:clean(c.after)});
+      }
+      else if(f==='keyAchievements'&&Array.isArray(c.after)){
+        var ka=c.after.map(function(a){ return a&&typeof a==='object'?{title:clean(a.title),desc:clean(a.desc)}:{title:clean(a),desc:''}; }).filter(function(a){ return a.title||a.desc; }).slice(0,8);
+        if(ka.length) out.push({kind:'ka',label:'Key Achievements',before:kaList().map(function(a){return {title:a.title||'',desc:a.desc||''};}),after:ka});
+      }
+    });
+    return out.filter(function(p){ return JSON.stringify(p.before)!==JSON.stringify(p.after); });
+  }
+  function changeHTML(p){
+    var bt,at;
+    if(p.kind==='skills'){
+      var gone=p.before.filter(function(x){return p.after.indexOf(x)<0;});
+      bt=gone.map(esc).join(', '); at=p.after.map(function(x){ return p.before.indexOf(x)<0?'<b>'+esc(x)+'</b>':esc(x); }).join(', ');
+    } else if(p.kind==='bullets'){ bt=p.before.map(function(x){return '• '+esc(x);}).join('\n'); at=p.after.map(function(x){return '• '+esc(x);}).join('\n'); }
+    else if(p.kind==='ka'){ var f=function(a){ return '• '+(a.title?'<b>'+esc(a.title)+'</b>'+(a.desc?' — ':''):'')+esc(a.desc); }; bt=p.before.map(f).join('\n'); at=p.after.map(f).join('\n'); }
+    else { bt=esc(p.before); at=esc(p.after); }
+    return '<div class="rc-chg"><div class="rc-chg-l">'+esc(p.label)+'</div>'+(bt?'<div class="rc-chg-b">'+bt+'</div>':'')+'<div class="rc-chg-a">'+at+'</div></div>';
+  }
+  function rerender(d){
+    try{ manuallyEdited=true; }catch(e){} try{ window.manuallyEdited=true; }catch(e){}
+    var snap=null; try{ snap=window._snapResumeStyles?window._snapResumeStyles():null; }catch(e){}
+    try{ if(typeof renderOutput==='function') renderOutput(d); }catch(e){}
+    try{ if(window._applyResumeStyles) window._applyResumeStyles(snap); }catch(e){}
+    try{ if(typeof _updPageBadge==='function') _updPageBadge(); }catch(e){}
+    window._versionDirty=true;
+  }
+  function syncSkills(list){ try{ if(typeof skills!=='undefined'&&Array.isArray(skills)){ skills.length=0; list.forEach(function(s){ skills.push(s); }); } }catch(e){} }
+  function apply(d,steps){
+    var bk={ka:JSON.parse(JSON.stringify(window.__keyAchiev||[])),summary:d.summary,jobTitle:d.jobTitle,skills:(d.skills||[]).slice(),exp:(d.experience||[]).map(function(e){return {title:e.title,bullets:(e.bullets||[]).slice(),desc:e.desc,rawDesc:e.rawDesc};})};
+    steps.forEach(function(p){
+      if(p.kind==='summary') d.summary=p.after;
+      else if(p.kind==='jobTitle') d.jobTitle=p.after;
+      else if(p.kind==='skills'){ d.skills=p.after.slice(); syncSkills(d.skills); }
+      else if(p.kind==='bullets'){ var e=d.experience[p.idx]; e.bullets=p.after.slice(); e.desc=e.bullets.join('\n'); if('rawDesc' in e) e.rawDesc=e.bullets.map(function(x){return '<div>• '+esc(x)+'</div>';}).join(''); }
+      else if(p.kind==='title'){ d.experience[p.idx].title=p.after; }
+      else if(p.kind==='ka'){ var old=kaList(); setKA(d,p.after.map(function(a,i){ return {icon:(old[i]&&old[i].icon)||'🏆',title:a.title,desc:a.desc,link:(old[i]&&old[i].link)||''}; })); }
+    });
+    rerender(d);
+    return bk;
+  }
+  /* Key Achievements live in their own store (window.__keyAchiev): save it the same way step 4 does */
+  function setKA(d,list){
+    window.__keyAchiev=list; d.keyAchievements=list.slice();
+    try{ localStorage.setItem('_keyAchiev',JSON.stringify(list)); }catch(e){}
+    try{ if(window.__kaCloudSave) window.__kaCloudSave(); }catch(e){}
+    try{ if(typeof window.pfRenderKa==='function') window.pfRenderKa(); }catch(e){}
+  }
+  function undo(d,bk){
+    if(bk.ka) setKA(d,bk.ka);
+    d.summary=bk.summary; d.jobTitle=bk.jobTitle; d.skills=bk.skills.slice(); syncSkills(d.skills);
+    bk.exp.forEach(function(x,i){ var e=d.experience[i]; if(!e) return; e.title=x.title; e.bullets=x.bullets; e.desc=x.desc; if(x.rawDesc!==undefined) e.rawDesc=x.rawDesc; });
+    rerender(d);
+  }
+  var GO={basic:[1,'Basic Info'],experience:[2,'Experience'],awards:[3,'Awards'],keyAchievements:[4,'Key Achievements'],education:[5,'Education'],skills:[6,'Skills'],extras:[7,'Extras'],template:[8,'Templates']};
+  function goTo(k){
+    var g=GO[k]; if(!g) return; closeChat();
+    try{ if(typeof goToStep==='function') goToStep(g[0]); }catch(e){}
+    setTimeout(function(){
+      if(k==='template'){ var ts=document.getElementById('tplSum'); var sec=document.getElementById('tplSection'); if(sec&&sec.classList.contains('tpl-folded')&&ts) ts.click(); if(sec) try{ sec.scrollIntoView({block:'start',behavior:'smooth'}); }catch(e){} }
+      else { try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); } }
+    },120);
+  }
+  var TOOL={fit:['📄 Fit to page','_r4uAiFit'],customise:['🎨 Customise look','_r4uAiCustomise'],reorder:['↕️ Reorder sections','_r4uAiReorder'],ats:['🎯 Match a job post','_r4uJdMatch'],templates:['🪄 Template versions','_r4uAiTemplates']};
+  function openTool(fnName){
+    closeChat();
+    var p=document.getElementById('aiChatPanel');
+    if(p&&!p.classList.contains('ai-panel-open')){ var cta=document.getElementById('aiChatCta'); if(cta) cta.click(); else p.classList.add('ai-panel-open'); }
+    setTimeout(function(){ try{ window[fnName](); }catch(e){} },260);
+  }
+
+  /* ── the chat window ── */
+  var root=null, body, input, sendBtn, chips, status, lastFocus=null;
+  function build(){
+    root=document.createElement('div'); root.id='r4uChat';
+    root.innerHTML='<div class="rc-win" role="dialog" aria-modal="true" aria-label="Chat with Resume AI">'
+      +'<div class="rc-hd"><button type="button" class="rc-x" aria-label="Close chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>'
+      +'<div class="rc-av" aria-hidden="true"><img src="/logo-mark.svg?v=4" alt="" width="40" height="40"></div><div class="rc-ti"><b>Resume AI</b><span class="rc-st">online</span></div></div>'
+      +'<div class="rc-body" role="log" aria-live="polite"></div>'
+      +'<div class="rc-chips"></div>'
+      +'<form class="rc-in"><textarea rows="1" maxlength="800" placeholder="Message" aria-label="Message Resume AI"></textarea><button type="submit" class="rc-send" aria-label="Send">'+SEND+'</button></form>'
+      +'</div>';
+    document.body.appendChild(root);
+    body=root.querySelector('.rc-body'); input=root.querySelector('textarea'); sendBtn=root.querySelector('.rc-send'); chips=root.querySelector('.rc-chips'); status=root.querySelector('.rc-st');
+    root.addEventListener('click',function(e){ if(e.target===root) closeChat(); });
+    root.querySelector('.rc-x').addEventListener('click',closeChat);
+    root.querySelector('form').addEventListener('submit',function(e){ e.preventDefault(); send(input.value); });
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&window.matchMedia('(hover:hover)').matches){ e.preventDefault(); send(input.value); } });
+    input.addEventListener('input',grow);
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&root.classList.contains('on')) closeChat(); });
+    chips.addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) send(b.textContent); });
+    /* fade at the right edge until the chips are scrolled to the end; mouse wheel scrolls them sideways */
+    chips.addEventListener('scroll',function(){ chips.classList.toggle('end',chips.scrollLeft+chips.clientWidth>=chips.scrollWidth-4); });
+    chips.addEventListener('wheel',function(e){ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&chips.scrollWidth>chips.clientWidth){ chips.scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
+    /* phones: keep the message bar above the on-screen keyboard */
+    if(window.visualViewport){ var vv=window.visualViewport; var fit=function(){ if(!root.classList.contains('on')||window.innerWidth>=700) { root.querySelector('.rc-win').style.height=''; root.querySelector('.rc-win').style.top=''; return; } var w=root.querySelector('.rc-win'); w.style.height=vv.height+'px'; w.style.top=vv.offsetTop+'px'; body.scrollTop=body.scrollHeight; }; vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); root._fit=fit; }
+    var day=document.createElement('div'); day.className='rc-day'; day.textContent='Today'; body.appendChild(day);
+    var nm=firstName();
+    aiText('Hi'+(nm?' '+nm:'')+' 👋 I’m your resume assistant. Tell me what to change — in English or Hindi — and I’ll show you the before → after. Nothing changes until you tap <b>Apply</b>.',true);
+    setChips();
+  }
+  function grow(){ input.style.height='auto'; input.style.height=Math.min(120,input.scrollHeight)+'px'; }
+  /* quick-reply chips stay under the chat at all times */
+  function setChips(){
+    var d=data(), role=d&&d.jobTitle?String(d.jobTitle).trim():'', list=EXAMPLES.slice();
+    if(role&&role.length<40) list.splice(4,0,'Tailor it for a senior '+role+' role');
+    chips.innerHTML=list.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join('');
+  }
+  function scrollEnd(){ body.scrollTop=body.scrollHeight; }
+  function bubble(cls,html){ var m=document.createElement('div'); m.className='rc-m '+cls; m.innerHTML=html; body.appendChild(m); scrollEnd(); return m; }
+  function aiText(html,isHtml){ return bubble('rc-ai',(isHtml?html:esc(html))+'<span class="rc-meta">'+now()+'</span>'); }
+  function openChat(text){
+    if(!hasResume()) return;
+    if(!root) build();
+    lastFocus=document.activeElement;
+    root.classList.add('on'); document.documentElement.classList.add('r4u-chat-open');
+    if(root._fit) root._fit();
+    scrollEnd();
+    if(text){ send(text); } else { setTimeout(function(){ try{ input.focus({preventScroll:true}); }catch(e){} },120); }
+  }
+  function closeChat(){
+    if(!root) return;
+    root.classList.remove('on'); document.documentElement.classList.remove('r4u-chat-open');
+    try{ input.blur(); }catch(e){}
+    if(lastFocus&&lastFocus.focus) try{ lastFocus.focus({preventScroll:true}); }catch(e){}
+  }
+  function send(text){
+    text=String(text||'').trim(); if(!text||busy) return;
+    var d=data(); if(!d||!hasResume()) return;
+    try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
+    input.value=''; grow();
+    var me=bubble('rc-me',esc(text)+'<span class="rc-meta">'+now()+'<span class="rc-tick">✓✓</span></span>');
+    var typing=bubble('rc-ai','<span class="rc-typing" aria-label="Resume AI is typing"><i></i><i></i><i></i></span>');
+    status.textContent='typing…'; busy=true; sendBtn.disabled=true;
+    callAI(buildPrompt(d,text)).then(function(raw){
+      done();
+      var o=parse(raw);
+      if(!o){ aiText('<span class="rc-err">Sorry, I couldn’t work that out. Could you say it another way?</span>',true); return; }
+      var steps=plan(d,o.changes);
+      hist.push({u:text.slice(0,300),a:(o.reply||'').slice(0,300)+(steps.length?' [proposed '+steps.length+' change(s)]':'')}); if(hist.length>MAX_HIST) hist.shift();
+      var tl=TOOL[o.tool]; var toolFn=tl&&typeof window[tl[1]]==='function'?tl[1]:null;
+      var go=GO[o.go]?o.go:null;
+      var h=esc(o.reply||(steps.length?'Here’s what I’d change:':'Done.'));
+      h+=steps.map(changeHTML).join('');
+      h+='<span class="rc-meta">'+now()+'</span>';
+      if(steps.length||toolFn||go) h+='<div class="rc-acts">'+(steps.length?'<button type="button" class="pri" data-a="apply">✓ Apply</button><button type="button" data-a="skip">Not now</button>':'')+(toolFn&&!steps.length?'<button type="button" data-a="tool">'+tl[0]+'</button>':'')+(go&&!steps.length?'<button type="button" class="pri" data-a="go">Go to '+GO[go][1]+' →</button>':'')+'</div>';
+      var m=bubble('rc-ai'+(steps.length?' wide':''),h);
+      var acts=m.querySelector('.rc-acts'), bk=null;
+      if(acts) acts.addEventListener('click',function(e){
+        var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
+        if(a==='tool'&&toolFn){ openTool(toolFn); return; }
+        if(a==='go'&&go){ goTo(go); return; }
+        if(a==='skip'){ acts.innerHTML='<span class="note">Not applied</span>'; return; }
+        if(a==='apply'){ var dd=data(); if(!dd) return; bk=apply(dd,steps); acts.innerHTML='<span class="note ok">✓ Applied to your resume</span><button type="button" data-a="undo">↺ Undo</button>'; return; }
+        if(a==='undo'){ var d3=data(); if(d3&&bk){ undo(d3,bk); bk=null; } acts.innerHTML='<span class="note">Undone — back to how it was</span>'; }
+      });
+    }).catch(function(){
+      done(); aiText('<span class="rc-err">I couldn’t reach the AI just now. Check your connection and send it again.</span>',true);
+    });
+    function done(){
+      busy=false; sendBtn.disabled=false; status.textContent='online';
+      if(typing.parentNode) typing.parentNode.removeChild(typing);
+      var tk=me.querySelector('.rc-tick'); if(tk) tk.classList.add('read');
+    }
+  }
+  window.r4uOpenAskChat=openChat;
+
+  /* ── entry 1: box inside Refine with AI ── */
+  function panelBox(){
+    var m=document.getElementById('aiChatMessages'); if(!m||!hasResume()) return;
+    var home=m.querySelector('.airx-home'); if(!home||home.querySelector('.r4u-ask')||!home.querySelector('.airx-cards')) return;
+    var w=document.createElement('div'); w.className='airx-cont';
+    w.innerHTML='<div class="r4u-ask"><div class="r4u-ask-h">✨ Ask AI to change anything <i class="r4u-new">NEW</i></div>'
+      +'<div class="r4u-ask-row"><button type="button" class="r4u-ask-fake">Type what to change…</button><button type="button" class="r4u-ask-go" aria-label="Open chat">'+SEND+'</button></div></div>';
+    Array.prototype.forEach.call(w.querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ openChat(); }); });
+    var first=home.querySelector('.airx-am');
+    if(first&&first.nextSibling) home.insertBefore(w,first.nextSibling); else home.appendChild(w);
+  }
+  function watchPanel(){
+    var m=document.getElementById('aiChatMessages'); if(!m){ setTimeout(watchPanel,700); return; }
+    try{ new MutationObserver(panelBox).observe(m,{childList:true}); }catch(e){} panelBox();
+  }
+  /* ── entry 2: chat card on the Generate page, next to "Use this resume for" ── */
+  function card(){
+    var bar=document.getElementById('r4uAskBar'), next=document.getElementById('_r4uNextBar');
+    var show=hasResume()&&next&&next.offsetParent!==null;
+    if(!show){ if(bar) bar.style.display='none'; return; }
+    if(!bar){
+      bar=document.createElement('button'); bar.type='button'; bar.id='r4uAskBar';
+      bar.innerHTML='<span class="ab-av" aria-hidden="true">✨</span><span class="ab-tx"><b>Chat with Resume AI <i class="r4u-new">NEW</i></b><span>Tell it what to change, in any words</span></span><span class="ab-go" aria-hidden="true">'+SEND+'</span>';
+      bar.setAttribute('aria-label','Chat with Resume AI — tell it what to change');
+      bar.addEventListener('click',function(){ openChat(); });
+    }
+    bar.style.display='';
+    /* sit right after "Use this resume for" (that box re-places itself after the ATS
+       card, so going after it never fights it); on the wide layout CSS grid rows
+       show this card above it */
+    if(next.nextElementSibling!==bar) next.parentNode.insertBefore(bar,next.nextSibling);
+  }
+  function start(){ watchPanel(); card(); setInterval(card,700); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
+<style id="_r4uFoldCss">
+/* ══ Generate page (phones / narrow): "Match a job + ATS score" and "Use this
+   resume for" fold into one summary row each — like "Template: X · Change". ══ */
+.r4f-sum,.r4f-hide{display:none}
+.r4f-sum{align-items:center;gap:12px;width:100%;cursor:pointer;color:var(--text,#1a1a1a);text-align:left;-webkit-tap-highlight-color:transparent}
+.r4f-ic{position:relative;flex:0 0 62px;width:62px;height:36px}
+.r4f-ic i{position:absolute;top:4px;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:#fff;font-style:normal;font-size:13px;font-weight:800}
+.r4f-ic i:nth-child(1){left:0;z-index:2}
+.r4f-ic i:nth-child(2){left:32px;z-index:1}
+.r4f-ic svg{width:15px;height:15px}
+.r4f-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.r4f-t small{font-size:.72rem;color:var(--muted,#6b7280);font-weight:600}
+.r4f-t b{font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r4f-go{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:800;color:#431407;background:linear-gradient(135deg,var(--r4-a1,#fcd34d),var(--r4-a2,#fbbf24) 45%,var(--r4-a3,#f59e0b));border-radius:99px;padding:8px 14px;box-shadow:0 6px 14px -8px rgba(234,88,12,.75)}
+.r4f-go svg,.r4f-hide svg{width:13px;height:13px}
+.r4f-hide{align-items:center;gap:3px;margin-left:auto;border:0;background:none;color:#9a3412;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:4px 2px}
+.r4f-t b{letter-spacing:-.01em}
+.r4f-lg{display:none}
+@media (min-width:700px){.r4f-sh{display:none}.r4f-lg{display:inline}}
+@media (max-width:360px){.r4f-sum{gap:9px}.r4f-go{padding:7px 10px}.r4f-ic{flex-basis:52px;width:52px}.r4f-ic i{width:24px;height:24px;border-radius:8px}.r4f-ic i:nth-child(2){left:28px}.r4f-t b{font-size:.88rem}}
+.r4f-sum:focus-visible,.r4f-hide:focus-visible{outline:2px solid #b45309;outline-offset:2px;border-radius:8px}
+
+/* folded */
+html body #_r4uJdTailorBar.r4f-folded > :not(.r4f-sum),
+html body #_r4uNextBar.r4f-folded > :not(.r4f-sum){display:none !important}
+html body #_r4uJdTailorBar.r4f-folded .r4f-sum,
+html body #_r4uNextBar.r4f-folded .r4f-sum{display:flex}
+html body #_r4uJdTailorBar.r4f-folded{border-radius:16px !important;border-bottom:var(--r4f-bb,1px solid #ece4d8) !important;padding-top:12px !important;padding-bottom:12px !important}
+html body #_r4uRoastBar.r4f-gone{display:none !important}
+html body #_r4uNextBar.r4f-folded{padding-top:12px !important;padding-bottom:12px !important}
+
+/* open: a small header with "Hide" */
+html body #_r4uJdTailorBar.r4f-open{flex-wrap:wrap !important}
+html body #_r4uJdTailorBar.r4f-open .r4f-sum{display:flex;flex:0 0 100%;order:-1;margin:-2px 0 2px;cursor:default}
+html body #_r4uJdTailorBar.r4f-open .r4f-sum .r4f-ic,
+html body #_r4uJdTailorBar.r4f-open .r4f-sum b,
+html body #_r4uJdTailorBar.r4f-open .r4f-sum .r4f-go{display:none}
+html body #_r4uJdTailorBar.r4f-open .r4f-sum .r4f-hide{display:inline-flex}
+html body #_r4uNextBar.r4f-open .nb-h{display:flex !important;align-items:center}
+html body #_r4uNextBar.r4f-open .nb-h .r4f-hide{display:inline-flex}
+</style>
+<script id="_r4uFold">
+(function(){
+  var KEY={tools:'_r4uFoldTools',next:'_r4uFoldNext'};
+  var UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+  var DOWN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  var TARGET='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg>';
+  var CHART='<svg viewBox="0 0 24 24" fill="#fff"><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="7" width="4" height="12" rx="1"/><rect x="16" y="10" width="4" height="9" rx="1"/></svg>';
+  var BELL='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+  function $(id){ return document.getElementById(id); }
+  function hasResume(){ return !!document.querySelector('#resumeOutput .resume-a4-page'); }
+  function narrow(){ return !$('s8Grid'); }
+  function isFolded(k){ try{ var v=localStorage.getItem(KEY[k]); return v===null?true:v==='1'; }catch(e){ return true; } }
+  function setFold(k,v){ try{ localStorage.setItem(KEY[k],v?'1':'0'); }catch(e){} sync(); }
+  function sum(host,k,html){
+    var s=host.querySelector(':scope > .r4f-sum');
+    if(!s){ s=document.createElement('span'); s.className='r4f-sum'; s.setAttribute('data-fold',k); s.innerHTML=html; host.insertBefore(s,host.firstChild); }
+    return s;
+  }
+  function sync(){
+    var jd=$('_r4uJdTailorBar'), rb=$('_r4uRoastBar'), nb=$('_r4uNextBar');
+    var on=narrow()&&hasResume();
+    /* "Match a job + ATS score" always stays open (owner's call) — clear any fold state */
+    if(jd){ jd.classList.remove('r4f-folded','r4f-open'); var o1=jd.querySelector(':scope > .r4f-sum'); if(o1) o1.remove(); }
+    if(rb) rb.classList.remove('r4f-gone');
+    if(nb){
+      var s2=sum(nb,'next','<span class="r4f-ic" aria-hidden="true"><i style="background:linear-gradient(145deg,#25d366,#128c7e)">'+BELL+'</i><i style="background:linear-gradient(145deg,#0a66c2,#004182)">in</i></span>'
+        +'<span class="r4f-t"><small>Use this resume for</small><b><span class="r4f-sh">Job alerts &amp; more</span><span class="r4f-lg">Job alerts · LinkedIn · Interview · Hindi · Portfolio</span></b></span>'
+        +'<span class="r4f-go">Open '+DOWN+'</span>');
+      var h=nb.querySelector('.nb-h');
+      if(h&&!h.querySelector('.r4f-hide')){ var hb=document.createElement('button'); hb.type='button'; hb.className='r4f-hide'; hb.setAttribute('data-fold','next'); hb.setAttribute('aria-label','Hide “Use this resume for”'); hb.innerHTML='Hide '+UP; h.appendChild(hb); }
+      /* folds on every screen size (phones, laptops, desktops) */
+      var on2=hasResume(), f2=on2&&isFolded('next');
+      nb.classList.toggle('r4f-folded',f2); nb.classList.toggle('r4f-open',on2&&!f2);
+      s2.setAttribute('role','button'); s2.setAttribute('tabindex',f2?'0':'-1'); s2.setAttribute('aria-expanded',f2?'false':'true');
+    }
+  }
+  /* Taps on a folded card (or on Open / Hide) only fold or unfold — they never
+     reach the card's own action (opening the job match, the ATS score, a tile). */
+  function handle(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var hide=t.closest('.r4f-hide');
+    if(hide){ e.preventDefault(); e.stopImmediatePropagation(); setFold(hide.getAttribute('data-fold'),true);
+      var host=$(hide.getAttribute('data-fold')==='tools'?'_r4uJdTailorBar':'_r4uNextBar'); if(host) try{ host.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(_){}
+      return; }
+    var card=t.closest('#_r4uJdTailorBar.r4f-folded,#_r4uNextBar.r4f-folded');
+    if(card){ e.preventDefault(); e.stopImmediatePropagation(); setFold(card.id==='_r4uJdTailorBar'?'tools':'next',false); }
+  }
+  document.addEventListener('click',handle,true);
+  document.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ handle(e); } },true);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',sync); else sync();
+  setInterval(sync,700); window.addEventListener('resize',function(){ setTimeout(sync,80); });
 })();
 </script>
 <script src="/tools/guides.js?v=4" defer></script>
