@@ -16920,7 +16920,8 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
     setChips();
   }
   function grow(){ input.style.height='auto'; input.style.height=Math.min(120,input.scrollHeight)+'px'; }
-  function setChips(){ chips.innerHTML=hist.length?'':EXAMPLES.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join(''); }
+  /* quick-reply chips stay under the chat at all times */
+  function setChips(){ chips.innerHTML=EXAMPLES.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join(''); }
   function scrollEnd(){ body.scrollTop=body.scrollHeight; }
   function bubble(cls,html){ var m=document.createElement('div'); m.className='rc-m '+cls; m.innerHTML=html; body.appendChild(m); scrollEnd(); return m; }
   function aiText(html,isHtml){ return bubble('rc-ai',(isHtml?html:esc(html))+'<span class="rc-meta">'+now()+'</span>'); }
@@ -16943,7 +16944,7 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
     text=String(text||'').trim(); if(!text||busy) return;
     var d=data(); if(!d||!hasResume()) return;
     try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
-    input.value=''; grow(); chips.innerHTML='';
+    input.value=''; grow();
     var me=bubble('rc-me',esc(text)+'<span class="rc-meta">'+now()+'<span class="rc-tick">✓✓</span></span>');
     var typing=bubble('rc-ai','<span class="rc-typing" aria-label="Resume AI is typing"><i></i><i></i><i></i></span>');
     status.textContent='typing…'; busy=true; sendBtn.disabled=true;
