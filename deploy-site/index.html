@@ -16701,7 +16701,7 @@ html body #s8Grid #s8Side > #_r4uNextBar{grid-row:4}
 }
 @keyframes rcIn{from{transform:translateY(18px) scale(.98);opacity:0}to{transform:none;opacity:1}}
 html.r4u-chat-open,html.r4u-chat-open body{overflow:hidden}
-html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !important}
+html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #toastContainer,html.r4u-chat-open #toastContainerTop{display:none !important}
 #r4uChat .rc-hd{flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:linear-gradient(135deg,#7c2d12,#9a3412 55%,#b45309);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
 #r4uChat .rc-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer}
 #r4uChat .rc-x:hover{background:rgba(255,255,255,.12)}
@@ -16744,7 +16744,8 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
 #r4uChat .rc-acts .note{flex:1;padding:10px;text-align:center;font-size:.8rem;font-weight:600;color:#78716c}
 #r4uChat .rc-acts .note.ok{color:#166534}
 #r4uChat .rc-err{color:#b91c1c}
-#r4uChat .rc-chips{flex:none;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 10px 0;background:#efe7da}
+#r4uChat .rc-chips{flex:none;display:grid;grid-auto-flow:column;grid-template-rows:auto auto;grid-auto-columns:max-content;gap:6px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;padding:8px 10px 0;background:#efe7da;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+#r4uChat .rc-chips.end{-webkit-mask-image:none;mask-image:none}
 #r4uChat .rc-chips::-webkit-scrollbar{display:none}
 #r4uChat .rc-chips:empty{display:none}
 #r4uChat .rc-chips button{flex:none;white-space:nowrap;border:1px solid #f3d3a5;background:#fffaf2;color:#9a3412;border-radius:99px;padding:7px 12px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.05)}
@@ -16761,7 +16762,7 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
 <script id="_r4uAskAI">
 (function(){
   var MAX_HIST=4, hist=[], busy=false;
-  var EXAMPLES=['Make my summary stronger','Add numbers to my bullets','Make it sound more senior','Tailor it for a product manager job','सारी लाइनें छोटी और आसान करो'];
+  var EXAMPLES=['Make my summary stronger','Add numbers to my bullets','Use stronger action verbs','Make it sound more senior','Fix grammar and spelling','Make every bullet shorter','Add skills for my role','Make it more ATS-friendly','Write a better headline','Sound confident, not boastful','Is my resume good enough?','Make it fit on one page','Summary ko aur impressive banao','सारी लाइनें छोटी और आसान करो'];
   var SEND='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87z"/></svg>';
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function data(){ try{ return (typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:null; }catch(e){ return null; } }
@@ -16912,6 +16913,9 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
     input.addEventListener('input',grow);
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&root.classList.contains('on')) closeChat(); });
     chips.addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) send(b.textContent); });
+    /* fade at the right edge until the chips are scrolled to the end; mouse wheel scrolls them sideways */
+    chips.addEventListener('scroll',function(){ chips.classList.toggle('end',chips.scrollLeft+chips.clientWidth>=chips.scrollWidth-4); });
+    chips.addEventListener('wheel',function(e){ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&chips.scrollWidth>chips.clientWidth){ chips.scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
     /* phones: keep the message bar above the on-screen keyboard */
     if(window.visualViewport){ var vv=window.visualViewport; var fit=function(){ if(!root.classList.contains('on')||window.innerWidth>=700) { root.querySelector('.rc-win').style.height=''; root.querySelector('.rc-win').style.top=''; return; } var w=root.querySelector('.rc-win'); w.style.height=vv.height+'px'; w.style.top=vv.offsetTop+'px'; body.scrollTop=body.scrollHeight; }; vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); root._fit=fit; }
     var day=document.createElement('div'); day.className='rc-day'; day.textContent='Today'; body.appendChild(day);
@@ -16921,7 +16925,11 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
   }
   function grow(){ input.style.height='auto'; input.style.height=Math.min(120,input.scrollHeight)+'px'; }
   /* quick-reply chips stay under the chat at all times */
-  function setChips(){ chips.innerHTML=EXAMPLES.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join(''); }
+  function setChips(){
+    var d=data(), role=d&&d.jobTitle?String(d.jobTitle).trim():'', list=EXAMPLES.slice();
+    if(role&&role.length<40) list.splice(4,0,'Tailor it for a senior '+role+' role');
+    chips.innerHTML=list.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join('');
+  }
   function scrollEnd(){ body.scrollTop=body.scrollHeight; }
   function bubble(cls,html){ var m=document.createElement('div'); m.className='rc-m '+cls; m.innerHTML=html; body.appendChild(m); scrollEnd(); return m; }
   function aiText(html,isHtml){ return bubble('rc-ai',(isHtml?html:esc(html))+'<span class="rc-meta">'+now()+'</span>'); }
@@ -16965,7 +16973,7 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !import
         var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
         if(a==='tool'&&toolFn){ openTool(toolFn); return; }
         if(a==='skip'){ acts.innerHTML='<span class="note">Not applied</span>'; return; }
-        if(a==='apply'){ var dd=data(); if(!dd) return; bk=apply(dd,steps); acts.innerHTML='<span class="note ok">✓ Applied to your resume</span><button type="button" data-a="undo">↺ Undo</button>'; try{ if(typeof showToast==='function') showToast('✨ Resume updated','success'); }catch(err){} return; }
+        if(a==='apply'){ var dd=data(); if(!dd) return; bk=apply(dd,steps); acts.innerHTML='<span class="note ok">✓ Applied to your resume</span><button type="button" data-a="undo">↺ Undo</button>'; return; }
         if(a==='undo'){ var d3=data(); if(d3&&bk){ undo(d3,bk); bk=null; } acts.innerHTML='<span class="note">Undone — back to how it was</span>'; }
       });
     }).catch(function(){
