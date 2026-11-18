@@ -16778,9 +16778,10 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
       skills:(d.skills||[]).slice(0,40),
       experience:(d.experience||[]).map(function(e,i){ return {index:i,title:e.title||'',company:e.co||e.company||'',dates:[e.start,e.end].filter(Boolean).join(' – ')||e.dates||'',bullets:(e.bullets||[]).slice(0,12)}; }),
       education:(d.education||[]).map(function(e){ return {degree:e.deg||e.degree||'',school:e.sch||e.school||'',year:e.yr||e.year||''}; }),
-      keyAchievements:Array.isArray(d.keyAchievements)?d.keyAchievements.slice(0,6):undefined
+      keyAchievements:kaList().map(function(a,i){ return {index:i,title:a.title||'',desc:a.desc||''}; })
     };
   }
+  function kaList(){ var A=Array.isArray(window.__keyAchiev)?window.__keyAchiev:((data()||{}).keyAchievements||[]); return (A||[]).filter(function(a){ return a&&(a.title||a.desc); }).slice(0,8); }
   function buildPrompt(d,request){
     var lines=[
       'You are "Resume AI", the chat assistant inside Resume For You, an AI resume builder used mostly by job seekers in India.',
@@ -16792,9 +16793,11 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
       '   {"field":"jobTitle","after":"<new headline/title>"},',
       '   {"field":"skills","after":["<the FULL new skills list>"]},',
       '   {"field":"bullets","index":<experience index>,"after":["<the FULL new bullet list for that role>"]},',
-      '   {"field":"title","index":<experience index>,"after":"<new job title for that role>"}',
+      '   {"field":"title","index":<experience index>,"after":"<new job title for that role>"},',
+      '   {"field":"keyAchievements","after":[{"title":"<short title>","desc":"<one line with the result>"}]}  (the FULL new list)',
       ' ],',
-      ' "tool":"none|fit|customise|reorder|ats|templates"}',
+      ' "tool":"none|fit|customise|reorder|ats|templates",',
+      ' "go":"none|basic|experience|awards|keyAchievements|education|skills|extras|template"}',
       '',
       'Rules:',
       '- Only include fields you actually change. Never change company names, dates, education or contact details.',
@@ -16802,10 +16805,14 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
       '- Resume style: strong past-tense action verbs, no "I/my", no fluff or clichés, each bullet ideally under 25 words, ATS-friendly keywords for the target role.',
       '- Summary: 2-3 sentences, max ~55 words, unless the user asks otherwise.',
       '- If the user asks to tailor for a role or a pasted job post, rewrite summary, relevant bullets and skills towards it (still only true facts).',
-      '- Write resume text in English unless the user explicitly asks for another language. Write "reply" in the SAME language/style the user wrote in (Hindi → Hindi, Hinglish → Hinglish).',
+      '- LANGUAGE: write "reply" in English by default. Use Hindi or Hinglish ONLY if the user\'s latest message itself is written in Hindi or Hinglish. Never switch language because of the user\'s country, name or earlier messages. Resume text is always English unless they explicitly ask otherwise.',
       '- If they only ask a question (e.g. "is my resume good for Amazon?") or just chat, answer in "reply" with specific advice and leave "changes" empty.',
       '- Set "tool" when a built-in tool does it better: fit = make it one page / font size / spacing, customise = colours or fonts, reorder = move sections, ats = check against a job post, templates = change design. Otherwise "none".',
       '- For things you cannot change here (name, phone, email, dates, education), say in "reply" that they can tap that text on the resume to edit it.',
+      '- Set "go" when the user wants to go somewhere or edit a section by hand ("take me to…", "where do I edit…"): the matching step below; template = the template picker. The app shows a button that takes them there. Otherwise "none".',
+      '- Keep replies short (max 2 sentences). Never describe buttons or places that are not in the site map below.',
+      '',
+      'Site map (the only places that exist): the resume is built in 8 steps — 1 Basic Info, 2 Experience, 3 Awards, 4 Key Achievements (add / edit / remove achievement cards), 5 Education, 6 Skills, 7 Extras, 8 Generate. Phones show "Step X of 8" at the top; computers show the steps in the left menu. Tapping the R4u logo opens the home page. Step 8 shows the finished resume: tap any text on it to edit it directly; buttons there: Download PDF, Share / QR, Cover letter, Word, "Template: … Change", Match a job, ATS score, Refine with AI (fit to page, colours and fonts, reorder sections).',
       '',
       'Current resume (JSON):',
       JSON.stringify(snapshot(d))
@@ -16848,6 +16855,10 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
         if(f==='bullets'&&Array.isArray(c.after)){ var bl=c.after.map(clean).filter(Boolean).slice(0,12); if(bl.length) out.push({kind:'bullets',idx:c.index|0,label:nm,before:(e.bullets||[]).slice(),after:bl}); }
         if(f==='title'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'title',idx:c.index|0,label:nm+' — job title',before:e.title||'',after:clean(c.after)});
       }
+      else if(f==='keyAchievements'&&Array.isArray(c.after)){
+        var ka=c.after.map(function(a){ return a&&typeof a==='object'?{title:clean(a.title),desc:clean(a.desc)}:{title:clean(a),desc:''}; }).filter(function(a){ return a.title||a.desc; }).slice(0,8);
+        if(ka.length) out.push({kind:'ka',label:'Key Achievements',before:kaList().map(function(a){return {title:a.title||'',desc:a.desc||''};}),after:ka});
+      }
     });
     return out.filter(function(p){ return JSON.stringify(p.before)!==JSON.stringify(p.after); });
   }
@@ -16857,6 +16868,7 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
       var gone=p.before.filter(function(x){return p.after.indexOf(x)<0;});
       bt=gone.map(esc).join(', '); at=p.after.map(function(x){ return p.before.indexOf(x)<0?'<b>'+esc(x)+'</b>':esc(x); }).join(', ');
     } else if(p.kind==='bullets'){ bt=p.before.map(function(x){return '• '+esc(x);}).join('\n'); at=p.after.map(function(x){return '• '+esc(x);}).join('\n'); }
+    else if(p.kind==='ka'){ var f=function(a){ return '• '+(a.title?'<b>'+esc(a.title)+'</b>'+(a.desc?' — ':''):'')+esc(a.desc); }; bt=p.before.map(f).join('\n'); at=p.after.map(f).join('\n'); }
     else { bt=esc(p.before); at=esc(p.after); }
     return '<div class="rc-chg"><div class="rc-chg-l">'+esc(p.label)+'</div>'+(bt?'<div class="rc-chg-b">'+bt+'</div>':'')+'<div class="rc-chg-a">'+at+'</div></div>';
   }
@@ -16870,21 +16882,39 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
   }
   function syncSkills(list){ try{ if(typeof skills!=='undefined'&&Array.isArray(skills)){ skills.length=0; list.forEach(function(s){ skills.push(s); }); } }catch(e){} }
   function apply(d,steps){
-    var bk={summary:d.summary,jobTitle:d.jobTitle,skills:(d.skills||[]).slice(),exp:(d.experience||[]).map(function(e){return {title:e.title,bullets:(e.bullets||[]).slice(),desc:e.desc,rawDesc:e.rawDesc};})};
+    var bk={ka:JSON.parse(JSON.stringify(window.__keyAchiev||[])),summary:d.summary,jobTitle:d.jobTitle,skills:(d.skills||[]).slice(),exp:(d.experience||[]).map(function(e){return {title:e.title,bullets:(e.bullets||[]).slice(),desc:e.desc,rawDesc:e.rawDesc};})};
     steps.forEach(function(p){
       if(p.kind==='summary') d.summary=p.after;
       else if(p.kind==='jobTitle') d.jobTitle=p.after;
       else if(p.kind==='skills'){ d.skills=p.after.slice(); syncSkills(d.skills); }
       else if(p.kind==='bullets'){ var e=d.experience[p.idx]; e.bullets=p.after.slice(); e.desc=e.bullets.join('\n'); if('rawDesc' in e) e.rawDesc=e.bullets.map(function(x){return '<div>• '+esc(x)+'</div>';}).join(''); }
       else if(p.kind==='title'){ d.experience[p.idx].title=p.after; }
+      else if(p.kind==='ka'){ var old=kaList(); setKA(d,p.after.map(function(a,i){ return {icon:(old[i]&&old[i].icon)||'🏆',title:a.title,desc:a.desc,link:(old[i]&&old[i].link)||''}; })); }
     });
     rerender(d);
     return bk;
   }
+  /* Key Achievements live in their own store (window.__keyAchiev): save it the same way step 4 does */
+  function setKA(d,list){
+    window.__keyAchiev=list; d.keyAchievements=list.slice();
+    try{ localStorage.setItem('_keyAchiev',JSON.stringify(list)); }catch(e){}
+    try{ if(window.__kaCloudSave) window.__kaCloudSave(); }catch(e){}
+    try{ if(typeof window.pfRenderKa==='function') window.pfRenderKa(); }catch(e){}
+  }
   function undo(d,bk){
+    if(bk.ka) setKA(d,bk.ka);
     d.summary=bk.summary; d.jobTitle=bk.jobTitle; d.skills=bk.skills.slice(); syncSkills(d.skills);
     bk.exp.forEach(function(x,i){ var e=d.experience[i]; if(!e) return; e.title=x.title; e.bullets=x.bullets; e.desc=x.desc; if(x.rawDesc!==undefined) e.rawDesc=x.rawDesc; });
     rerender(d);
+  }
+  var GO={basic:[1,'Basic Info'],experience:[2,'Experience'],awards:[3,'Awards'],keyAchievements:[4,'Key Achievements'],education:[5,'Education'],skills:[6,'Skills'],extras:[7,'Extras'],template:[8,'Templates']};
+  function goTo(k){
+    var g=GO[k]; if(!g) return; closeChat();
+    try{ if(typeof goToStep==='function') goToStep(g[0]); }catch(e){}
+    setTimeout(function(){
+      if(k==='template'){ var ts=document.getElementById('tplSum'); var sec=document.getElementById('tplSection'); if(sec&&sec.classList.contains('tpl-folded')&&ts) ts.click(); if(sec) try{ sec.scrollIntoView({block:'start',behavior:'smooth'}); }catch(e){} }
+      else { try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); } }
+    },120);
   }
   var TOOL={fit:['📄 Fit to page','_r4uAiFit'],customise:['🎨 Customise look','_r4uAiCustomise'],reorder:['↕️ Reorder sections','_r4uAiReorder'],ats:['🎯 Match a job post','_r4uJdMatch'],templates:['🪄 Template versions','_r4uAiTemplates']};
   function openTool(fnName){
@@ -16964,15 +16994,17 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
       var steps=plan(d,o.changes);
       hist.push({u:text.slice(0,300),a:(o.reply||'').slice(0,300)+(steps.length?' [proposed '+steps.length+' change(s)]':'')}); if(hist.length>MAX_HIST) hist.shift();
       var tl=TOOL[o.tool]; var toolFn=tl&&typeof window[tl[1]]==='function'?tl[1]:null;
+      var go=GO[o.go]?o.go:null;
       var h=esc(o.reply||(steps.length?'Here’s what I’d change:':'Done.'));
       h+=steps.map(changeHTML).join('');
       h+='<span class="rc-meta">'+now()+'</span>';
-      if(steps.length||toolFn) h+='<div class="rc-acts">'+(steps.length?'<button type="button" class="pri" data-a="apply">✓ Apply</button><button type="button" data-a="skip">Not now</button>':'')+(toolFn?'<button type="button" data-a="tool">'+tl[0]+'</button>':'')+'</div>';
+      if(steps.length||toolFn||go) h+='<div class="rc-acts">'+(steps.length?'<button type="button" class="pri" data-a="apply">✓ Apply</button><button type="button" data-a="skip">Not now</button>':'')+(toolFn&&!steps.length?'<button type="button" data-a="tool">'+tl[0]+'</button>':'')+(go&&!steps.length?'<button type="button" class="pri" data-a="go">Go to '+GO[go][1]+' →</button>':'')+'</div>';
       var m=bubble('rc-ai'+(steps.length?' wide':''),h);
       var acts=m.querySelector('.rc-acts'), bk=null;
       if(acts) acts.addEventListener('click',function(e){
         var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
         if(a==='tool'&&toolFn){ openTool(toolFn); return; }
+        if(a==='go'&&go){ goTo(go); return; }
         if(a==='skip'){ acts.innerHTML='<span class="note">Not applied</span>'; return; }
         if(a==='apply'){ var dd=data(); if(!dd) return; bk=apply(dd,steps); acts.innerHTML='<span class="note ok">✓ Applied to your resume</span><button type="button" data-a="undo">↺ Undo</button>'; return; }
         if(a==='undo'){ var d3=data(); if(d3&&bk){ undo(d3,bk); bk=null; } acts.innerHTML='<span class="note">Undone — back to how it was</span>'; }
