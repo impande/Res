@@ -17040,6 +17040,8 @@ html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta,html.r4u-chat-open #
 .r4f-go svg,.r4f-hide svg{width:13px;height:13px}
 .r4f-hide{align-items:center;gap:3px;margin-left:auto;border:0;background:none;color:#9a3412;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:4px 2px}
 .r4f-t b{letter-spacing:-.01em}
+.r4f-lg{display:none}
+@media (min-width:700px){.r4f-sh{display:none}.r4f-lg{display:inline}}
 @media (max-width:360px){.r4f-sum{gap:9px}.r4f-go{padding:7px 10px}.r4f-ic{flex-basis:52px;width:52px}.r4f-ic i{width:24px;height:24px;border-radius:8px}.r4f-ic i:nth-child(2){left:28px}.r4f-t b{font-size:.88rem}}
 .r4f-sum:focus-visible,.r4f-hide:focus-visible{outline:2px solid #b45309;outline-offset:2px;border-radius:8px}
 
@@ -17088,12 +17090,13 @@ html body #_r4uNextBar.r4f-open .nb-h .r4f-hide{display:inline-flex}
     if(rb) rb.classList.remove('r4f-gone');
     if(nb){
       var s2=sum(nb,'next','<span class="r4f-ic" aria-hidden="true"><i style="background:linear-gradient(145deg,#25d366,#128c7e)">'+BELL+'</i><i style="background:linear-gradient(145deg,#0a66c2,#004182)">in</i></span>'
-        +'<span class="r4f-t"><small>Use this resume for</small><b>Job alerts &amp; more</b></span>'
+        +'<span class="r4f-t"><small>Use this resume for</small><b><span class="r4f-sh">Job alerts &amp; more</span><span class="r4f-lg">Job alerts · LinkedIn · Interview · Hindi · Portfolio</span></b></span>'
         +'<span class="r4f-go">Open '+DOWN+'</span>');
       var h=nb.querySelector('.nb-h');
       if(h&&!h.querySelector('.r4f-hide')){ var hb=document.createElement('button'); hb.type='button'; hb.className='r4f-hide'; hb.setAttribute('data-fold','next'); hb.setAttribute('aria-label','Hide “Use this resume for”'); hb.innerHTML='Hide '+UP; h.appendChild(hb); }
-      var f2=on&&isFolded('next');
-      nb.classList.toggle('r4f-folded',f2); nb.classList.toggle('r4f-open',on&&!f2);
+      /* folds on every screen size (phones, laptops, desktops) */
+      var on2=hasResume(), f2=on2&&isFolded('next');
+      nb.classList.toggle('r4f-folded',f2); nb.classList.toggle('r4f-open',on2&&!f2);
       s2.setAttribute('role','button'); s2.setAttribute('tabindex',f2?'0':'-1'); s2.setAttribute('aria-expanded',f2?'false':'true');
     }
   }
