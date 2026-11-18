@@ -34,7 +34,7 @@ def page(role):
     # related links: 3 other examples + 2 core landing pages
     others = [(s,t) for s,t in ALL_SLUGS if s != slug][:5]
     related = ''.join(
-        f'<a class="rel-link" href="/examples/{s}">{esc(t)} Resume Example</a>' for s,t in others[:4]
+        f'<a class="rel-link" href="/examples/{s}/">{esc(t)} Resume Example</a>' for s,t in others[:4]
     )
     related += '<a class="rel-link" href="/ats-resume-builder-india/">ATS Resume Builder</a>'
     related += '<a class="rel-link" href="/resume-templates/">Resume Templates</a>'
@@ -66,7 +66,7 @@ def page(role):
         "@context":"https://schema.org",
         "@graph":[
             {"@type":"WebPage","name":f"{title} Resume Example",
-             "url":f"https://resume4u.help/examples/{slug}",
+             "url":f"https://resume4u.help/examples/{slug}/",
              "description":role['meta'],
              "isPartOf":{"@type":"WebSite","name":"Resume For You","url":"https://resume4u.help"}},
             {"@type":"FAQPage","mainEntity":faq_ld},
@@ -82,9 +82,9 @@ def page(role):
   <title>{esc(title)} Resume Example (2026) | Free AI Builder – resume4u.help</title>
   <meta name="description" content="{esc(role['meta'])}">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://resume4u.help/examples/{slug}">
+  <link rel="canonical" href="https://resume4u.help/examples/{slug}/">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://resume4u.help/examples/{slug}">
+  <meta property="og:url" content="https://resume4u.help/examples/{slug}/">
   <meta property="og:title" content="{esc(title)} Resume Example – Free AI Builder">
   <meta property="og:description" content="{esc(role['og'])}">
   <meta property="og:image" content="https://resume4u.help/og-image.png">
