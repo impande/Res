@@ -17083,16 +17083,9 @@ html body #_r4uNextBar.r4f-open .nb-h .r4f-hide{display:inline-flex}
   function sync(){
     var jd=$('_r4uJdTailorBar'), rb=$('_r4uRoastBar'), nb=$('_r4uNextBar');
     var on=narrow()&&hasResume();
-    if(jd){
-      var s1=sum(jd,'tools','<span class="r4f-ic" aria-hidden="true"><i style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">'+TARGET+'</i><i style="background:linear-gradient(135deg,#14b8a6,#0f766e)">'+CHART+'</i></span>'
-        +'<span class="r4f-t"><small>Check your resume</small><b>Job match · ATS</b></span>'
-        +'<span class="r4f-go">Open '+DOWN+'</span><button type="button" class="r4f-hide" data-fold="tools" aria-label="Hide job match and ATS score">Hide '+UP+'</button>');
-      if(!jd.style.getPropertyValue('--r4f-bb')){ try{ var cs=getComputedStyle(jd); if(cs.borderTopStyle!=='none') jd.style.setProperty('--r4f-bb',cs.borderTopWidth+' '+cs.borderTopStyle+' '+cs.borderTopColor); }catch(e){} }
-      var f1=on&&isFolded('tools');
-      jd.classList.toggle('r4f-folded',f1); jd.classList.toggle('r4f-open',on&&!f1);
-      s1.setAttribute('role','button'); s1.setAttribute('tabindex',f1?'0':'-1'); s1.setAttribute('aria-expanded',f1?'false':'true');
-      if(rb) rb.classList.toggle('r4f-gone',f1);
-    } else if(rb) rb.classList.remove('r4f-gone');
+    /* "Match a job + ATS score" always stays open (owner's call) — clear any fold state */
+    if(jd){ jd.classList.remove('r4f-folded','r4f-open'); var o1=jd.querySelector(':scope > .r4f-sum'); if(o1) o1.remove(); }
+    if(rb) rb.classList.remove('r4f-gone');
     if(nb){
       var s2=sum(nb,'next','<span class="r4f-ic" aria-hidden="true"><i style="background:linear-gradient(145deg,#25d366,#128c7e)">'+BELL+'</i><i style="background:linear-gradient(145deg,#0a66c2,#004182)">in</i></span>'
         +'<span class="r4f-t"><small>Use this resume for</small><b>Job alerts &amp; more</b></span>'
