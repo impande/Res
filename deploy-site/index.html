@@ -180,8 +180,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#f59e0b">
-  <script type="text/javascript">/* Keep Chrome/Edge's install prompt so our "Install the app" button can open it in one tap. Inline + typed so the build leaves it in <head>. */
-  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window._r4uBIP=e;try{window.dispatchEvent(new Event('r4u-bip'));}catch(_){}});</script>
 
   <!-- ── Schema.org JSON-LD ────────────────────────────────────────────── -->
   <script type="application/ld+json">
@@ -16435,6 +16433,9 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
 </style>
 <script id="_r4uInstall">
 (function(){
+  /* Switched off for now (owner's call) — set INSTALL_ON=true and restore the
+     beforeinstallprompt catcher in <head> to bring the button back. */
+  var INSTALL_ON=false; if(!INSTALL_ON) return;
   var ICON='/apple-touch-icon.png?v=4', URL_HOME=location.origin+'/';
   var ua=navigator.userAgent||'';
   var isIOS=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
@@ -16664,85 +16665,111 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
 })();
 </script>
 <style id="_r4uAskAICss">
-/* ══ Refine with AI → "Ask AI anything": type any change in plain words; AI edits
-   the resume and shows before → after with Apply / Undo. ══ */
+/* ══ "Ask AI to change anything" — a chat window (messaging-app style) where the
+   user types any change; AI edits the resume and shows before → after with
+   Apply / Undo. Opened from the Generate page card and from Refine with AI. ══ */
+
+/* entry 1: box at the top of Refine with AI (opens the chat) */
 #aiChatPanel .r4u-ask{box-sizing:border-box;width:100%;min-width:0;contain:inline-size;overflow:hidden;background:#fff;border:1.5px solid #fed7aa;border-radius:16px;padding:12px;box-shadow:0 8px 22px -16px rgba(154,52,18,.55)}
 #aiChatPanel .r4u-ask-h{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:800;color:#7c2d12;margin:0 0 8px}
-#aiChatPanel .r4u-ask-h i{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:99px;background:linear-gradient(135deg,#fbbf24,#f97316);color:#431407}
-#aiChatPanel .r4u-ask-row{display:flex;gap:8px;align-items:flex-end}
-#aiChatPanel .r4u-ask textarea{flex:1;min-width:0;resize:none;min-height:42px;max-height:130px;border:1.5px solid #e7e0d5;border-radius:12px;padding:10px 12px;font:inherit;font-size:.88rem;line-height:1.4;color:#1c1917;background:#fffdf9;outline:none}
-#aiChatPanel .r4u-ask textarea:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
-#aiChatPanel .r4u-ask-go{flex:none;width:42px;height:42px;border:0;border-radius:12px;display:grid;place-items:center;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407;box-shadow:0 6px 14px -8px rgba(217,119,6,.8)}
-#aiChatPanel .r4u-ask-go:disabled{opacity:.5;cursor:default}
-#aiChatPanel .r4u-ask-go svg{width:18px;height:18px}
-#aiChatPanel .r4u-ask-ex{display:flex;flex-wrap:nowrap;gap:6px;margin:9px -12px 0 0;padding:0 12px 2px 0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-#aiChatPanel .r4u-ask-ex::-webkit-scrollbar{display:none}
-@media (min-width:700px){#aiChatPanel .r4u-ask-ex{flex-wrap:wrap;overflow:visible;margin-right:0;padding-right:0}}
-#aiChatPanel .r4u-ask-ex button{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:99px;padding:5px 10px;font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;flex:none;white-space:nowrap}
-#aiChatPanel .r4u-ask-ex button:hover{background:#ffedd5}
-#aiChatPanel .r4u-ask-conv{display:flex;flex-direction:column;gap:10px}
-#aiChatPanel .r4u-you{align-self:flex-end;max-width:85%;background:#1c1917;color:#fff;border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:.84rem;line-height:1.45;white-space:pre-wrap}
-#aiChatPanel .r4u-ai{display:flex;gap:8px;align-items:flex-start}
-#aiChatPanel .r4u-ai .av{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#fbbf24,#f97316);font-size:.8rem}
-#aiChatPanel .r4u-ai .bd{flex:1;min-width:0;background:#fff;border:1px solid #efe6d8;border-radius:4px 14px 14px 14px;padding:9px 12px;font-size:.84rem;line-height:1.5;color:#1c1917}
-#aiChatPanel .r4u-think{color:#9a3412;font-weight:600}
-#aiChatPanel .r4u-think::after{content:'';display:inline-block;width:1.2em;text-align:left;animation:r4uDots 1.2s steps(4) infinite}
-@keyframes r4uDots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
-#aiChatPanel .r4u-chg{margin-top:9px;border:1px solid #f0e6d6;border-radius:12px;overflow:hidden;background:#fffdf9}
-#aiChatPanel .r4u-chg-l{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#9a3412;padding:7px 10px 0}
-#aiChatPanel .r4u-chg-b,#aiChatPanel .r4u-chg-a{padding:6px 10px;font-size:.8rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
-#aiChatPanel .r4u-chg-b{color:#a8a29e;text-decoration:line-through;text-decoration-color:rgba(168,162,158,.7)}
-#aiChatPanel .r4u-chg-a{color:#14532d;background:#f0fdf4;border-top:1px dashed #d9f99d}
-#aiChatPanel .r4u-chg-a b{color:#166534}
-#aiChatPanel .r4u-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-#aiChatPanel .r4u-acts button{border-radius:10px;padding:8px 14px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;border:1.5px solid #fed7aa;background:#fff7ed;color:#9a3412}
-#aiChatPanel .r4u-acts .pri{border-color:rgba(217,119,6,.4);background:linear-gradient(135deg,#fcd34d,#fbbf24 45%,#f59e0b);color:#431407}
-#aiChatPanel .r4u-acts button:disabled{opacity:.55;cursor:default}
-#aiChatPanel .r4u-done{color:#166534;font-weight:700}
-#aiChatPanel .r4u-err{color:#b91c1c}
-#aiChatPanel .r4u-back{align-self:flex-start;border:1px solid #e7e0d5;background:#fff;color:#57534e;border-radius:9px;padding:6px 11px;font:inherit;font-size:.76rem;font-weight:600;cursor:pointer}
-@media (prefers-reduced-motion:reduce){#aiChatPanel .r4u-think::after{animation:none;content:'…'}}
+.r4u-new{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:99px;background:linear-gradient(135deg,#fbbf24,#f97316);color:#431407}
+#aiChatPanel .r4u-ask-row{display:flex;gap:8px;align-items:center}
+#aiChatPanel .r4u-ask-fake{flex:1;min-width:0;display:flex;align-items:center;height:42px;border:1.5px solid #e7e0d5;border-radius:12px;padding:0 12px;font-size:.88rem;color:#a8a29e;background:#fffdf9;cursor:text;text-align:left;font-family:inherit}
+#aiChatPanel .r4u-ask-go,#r4uAskBar .ab-go{flex:none;width:42px;height:42px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407;box-shadow:0 6px 14px -8px rgba(217,119,6,.8)}
+#aiChatPanel .r4u-ask-go svg,#r4uAskBar .ab-go svg{width:18px;height:18px}
+
+/* entry 2: chat card on the Generate page */
+#r4uAskBar{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin:16px 0 0;padding:12px 12px 12px 14px;border:1.5px solid #fed7aa;border-radius:18px;background:linear-gradient(180deg,#fffaf2,#fff);box-shadow:0 1px 2px rgba(40,30,10,.04),0 12px 28px -24px rgba(120,60,10,.45);cursor:pointer;text-align:left;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+#r4uAskBar:hover{box-shadow:0 1px 2px rgba(40,30,10,.04),0 16px 30px -20px rgba(120,60,10,.5)}
+#r4uAskBar:active{transform:scale(.99)}
+#r4uAskBar:focus-visible{outline:2px solid #b45309;outline-offset:2px}
+#r4uAskBar .ab-av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;background:linear-gradient(135deg,#fbbf24,#f97316);box-shadow:0 6px 14px -6px rgba(249,115,22,.7)}
+#r4uAskBar .ab-av::after{content:"";position:absolute;right:1px;bottom:1px;width:11px;height:11px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px #fff}
+#r4uAskBar .ab-tx{flex:1;min-width:0}
+#r4uAskBar .ab-tx b{display:flex;align-items:center;gap:7px;font-size:.95rem;color:#1c1917}
+#r4uAskBar .ab-tx span{display:block;margin-top:2px;font-size:.78rem;color:#78716c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#s8Grid #s8Side > #r4uAskBar{grid-column:1 / -1;grid-row:3;margin-top:16px !important}
+html body #s8Grid #s8Side > #_r4uNextBar{grid-row:4}
+
+/* ── the chat window ── */
+#r4uChat{position:fixed;inset:0;z-index:9800;display:none;background:rgba(28,25,23,.42)}
+#r4uChat.on{display:block}
+#r4uChat .rc-win{position:absolute;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column;background:#efe7da;overflow:hidden;color:#1c1917;font-family:inherit}
+@media (min-width:700px){
+  #r4uChat{background:rgba(28,25,23,.28)}
+  #r4uChat .rc-win{left:auto;top:auto;right:24px;bottom:24px;width:420px;height:min(680px,calc(100vh - 48px));border-radius:22px;box-shadow:0 30px 70px -20px rgba(28,25,23,.55),0 0 0 1px rgba(0,0,0,.04);animation:rcIn .22s cubic-bezier(.2,.8,.3,1)}
+}
+@keyframes rcIn{from{transform:translateY(18px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+html.r4u-chat-open,html.r4u-chat-open body{overflow:hidden}
+html.r4u-chat-open #r4uDlHint,html.r4u-chat-open #aiChatCta{display:none !important}
+#r4uChat .rc-hd{flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:linear-gradient(135deg,#7c2d12,#9a3412 55%,#b45309);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+#r4uChat .rc-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer}
+#r4uChat .rc-x:hover{background:rgba(255,255,255,.12)}
+#r4uChat .rc-x svg{width:22px;height:22px}
+#r4uChat .rc-av{position:relative;flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:1.1rem;background:linear-gradient(135deg,#fde68a,#fbbf24 50%,#f97316)}
+#r4uChat .rc-ti{flex:1;min-width:0;line-height:1.2}
+#r4uChat .rc-ti b{display:block;font-size:1rem;font-weight:700}
+#r4uChat .rc-st{display:block;font-size:.76rem;color:#fde7c8;margin-top:2px}
+#r4uChat .rc-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 10px 8px;display:flex;flex-direction:column;gap:6px;
+  background-color:#efe7da;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23b45309' stroke-opacity='.09' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 18h16v20H14z M18 24h8 M18 29h8 M18 34h5'/%3E%3Cpath d='M78 14l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L68 21l6-1z'/%3E%3Cpath d='M40 70a8 8 0 1 0 16 0a8 8 0 1 0-16 0 M48 66v4l3 2'/%3E%3Cpath d='M92 76h18v12H92z M96 76v-4h10v4'/%3E%3Cpath d='M16 98l5 5 9-10'/%3E%3Cpath d='M66 104c4-6 10-6 14 0'/%3E%3Ccircle cx='102' cy='44' r='2'/%3E%3Ccircle cx='34' cy='50' r='1.6'/%3E%3C/g%3E%3C/svg%3E")}
+#r4uChat .rc-day{align-self:center;margin:2px 0 6px;padding:4px 10px;border-radius:8px;background:rgba(255,253,248,.92);color:#78716c;font-size:.7rem;font-weight:600;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+#r4uChat .rc-m{position:relative;max-width:84%;padding:7px 10px 6px;border-radius:10px;font-size:.88rem;line-height:1.42;box-shadow:0 1px 1px rgba(0,0,0,.08);overflow-wrap:anywhere;animation:rcPop .16s ease-out}
+@keyframes rcPop{from{transform:translateY(4px);opacity:0}to{transform:none;opacity:1}}
+#r4uChat .rc-ai{align-self:flex-start;background:#fff;border-top-left-radius:2px}
+#r4uChat .rc-me{align-self:flex-end;background:#ffe9c6;border-top-right-radius:2px;white-space:pre-wrap}
+#r4uChat .rc-ai::before,#r4uChat .rc-me::before{content:"";position:absolute;top:0;width:8px;height:12px}
+#r4uChat .rc-ai::before{left:-7px;background:linear-gradient(225deg,#fff 50%,transparent 50%)}
+#r4uChat .rc-me::before{right:-7px;background:linear-gradient(135deg,#ffe9c6 50%,transparent 50%)}
+#r4uChat .rc-ai.wide{max-width:92%;width:92%}
+#r4uChat .rc-meta{float:right;margin:6px 0 -2px 10px;font-size:.66rem;color:#a8a29e;white-space:nowrap;line-height:1}
+#r4uChat .rc-me .rc-meta{color:#a16207}
+#r4uChat .rc-ai.wide .rc-meta{float:none;display:block;text-align:right;margin:6px 0 0}
+#r4uChat .rc-tick{display:inline-block;margin-left:3px;color:#a8a29e;letter-spacing:-3px}
+#r4uChat .rc-tick.read{color:#0ea5e9}
+#r4uChat .rc-typing{display:inline-flex;gap:4px;padding:4px 2px}
+#r4uChat .rc-typing i{width:7px;height:7px;border-radius:50%;background:#b8a99a;animation:rcDot 1.2s infinite}
+#r4uChat .rc-typing i:nth-child(2){animation-delay:.15s}#r4uChat .rc-typing i:nth-child(3){animation-delay:.3s}
+@keyframes rcDot{0%,60%,100%{transform:translateY(0);opacity:.55}30%{transform:translateY(-4px);opacity:1}}
+#r4uChat .rc-chg{margin-top:8px;border:1px solid #f0e6d6;border-radius:10px;overflow:hidden;background:#fffdf9}
+#r4uChat .rc-chg-l{font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#9a3412;padding:6px 9px 0}
+#r4uChat .rc-chg-b,#r4uChat .rc-chg-a{padding:5px 9px;font-size:.8rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+#r4uChat .rc-chg-b{color:#a8a29e;text-decoration:line-through;text-decoration-color:rgba(168,162,158,.7)}
+#r4uChat .rc-chg-a{color:#14532d;background:#f0fdf4;border-top:1px dashed #d9f99d}
+#r4uChat .rc-chg-a b{color:#166534}
+#r4uChat .rc-acts{display:flex;margin:8px -10px -6px;border-top:1px solid #f1ebe2}
+#r4uChat .rc-acts button{flex:1;padding:10px 6px;border:0;background:none;font:inherit;font-size:.84rem;font-weight:700;color:#b45309;cursor:pointer}
+#r4uChat .rc-acts button+button{border-left:1px solid #f1ebe2}
+#r4uChat .rc-acts button:hover{background:#fffaf2}
+#r4uChat .rc-acts .pri{color:#9a3412}
+#r4uChat .rc-acts .note{flex:1;padding:10px;text-align:center;font-size:.8rem;font-weight:600;color:#78716c}
+#r4uChat .rc-acts .note.ok{color:#166534}
+#r4uChat .rc-err{color:#b91c1c}
+#r4uChat .rc-chips{flex:none;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 10px 0;background:#efe7da}
+#r4uChat .rc-chips::-webkit-scrollbar{display:none}
+#r4uChat .rc-chips:empty{display:none}
+#r4uChat .rc-chips button{flex:none;white-space:nowrap;border:1px solid #f3d3a5;background:#fffaf2;color:#9a3412;border-radius:99px;padding:7px 12px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+#r4uChat .rc-in{flex:none;display:flex;align-items:flex-end;gap:8px;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));background:#efe7da}
+#r4uChat .rc-in textarea{flex:1;min-width:0;resize:none;min-height:44px;max-height:120px;border:0;border-radius:22px;padding:12px 16px;font:inherit;font-size:16px;line-height:1.3;color:#1c1917;background:#fff;outline:none;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+#r4uChat .rc-in textarea::placeholder{color:#a8a29e}
+#r4uChat .rc-send{flex:none;width:46px;height:46px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#431407;box-shadow:0 4px 12px -6px rgba(217,119,6,.9)}
+#r4uChat .rc-send:disabled{opacity:.55;cursor:default}
+#r4uChat .rc-send svg{width:20px;height:20px}
+#r4uChat button:focus-visible{outline:2px solid #f59e0b;outline-offset:1px}
+#r4uChat .rc-in textarea:focus,#r4uChat .rc-in textarea:focus-visible{outline:none;box-shadow:0 1px 1px rgba(0,0,0,.08),0 0 0 2px rgba(245,158,11,.35)}
+@media (prefers-reduced-motion:reduce){#r4uChat .rc-m,#r4uChat .rc-win,#r4uChat .rc-typing i{animation:none}}
 </style>
 <script id="_r4uAskAI">
 (function(){
-  var MAX_HIST=4, hist=[], lastBackup=null;
+  var MAX_HIST=4, hist=[], busy=false;
+  var EXAMPLES=['Make my summary stronger','Add numbers to my bullets','Make it sound more senior','Tailor it for a product manager job','सारी लाइनें छोटी और आसान करो'];
+  var SEND='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87z"/></svg>';
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function data(){ try{ return (typeof lastResumeData!=='undefined'&&lastResumeData)?lastResumeData:null; }catch(e){ return null; } }
-  function msgs(){ return document.getElementById('aiChatMessages'); }
   function hasResume(){ return !!document.querySelector('#resumeOutput .resume-a4-page'); }
-  var SEND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
-  var EXAMPLES=['Make my summary stronger','Add numbers to my bullets','Make it sound more senior','Tailor it for a product manager job','सारी लाइनें छोटी और आसान करो'];
+  function now(){ try{ return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
+  function firstName(){ var d=data(); var n=d&&d.firstName?String(d.firstName).trim().split(/\s+/)[0]:''; return n?n.charAt(0).toUpperCase()+n.slice(1).toLowerCase():''; }
 
-  /* ── the ask box (on the Refine home and under every answer) ── */
-  function askBox(){
-    var w=document.createElement('div'); w.className='r4u-ask';
-    w.innerHTML='<div class="r4u-ask-h">✨ Ask AI to change anything <i>NEW</i></div>'
-      +'<div class="r4u-ask-row"><textarea rows="1" maxlength="600" placeholder="Type what to change…" aria-label="Tell AI what to change"></textarea>'
-      +'<button type="button" class="r4u-ask-go" aria-label="Send">'+SEND+'</button></div>'
-      +(hist.length?'':'<div class="r4u-ask-ex">'+EXAMPLES.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join('')+'</div>');
-    var ta=w.querySelector('textarea'), go=w.querySelector('.r4u-ask-go');
-    function grow(){ ta.style.height='auto'; ta.style.height=Math.min(130,ta.scrollHeight)+'px'; }
-    ta.addEventListener('input',grow);
-    ta.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(ta.value); } });
-    go.addEventListener('click',function(){ send(ta.value); });
-    Array.prototype.forEach.call(w.querySelectorAll('.r4u-ask-ex button'),function(b){ b.addEventListener('click',function(){ ta.value=b.textContent; grow(); ta.focus(); }); });
-    return w;
-  }
-  function mountHome(){
-    var m=msgs(); if(!m||!hasResume()) return;
-    var home=m.querySelector('.airx-home'); if(!home||home.querySelector('.r4u-ask')) return;
-    if(!home.querySelector('.airx-cards')) return;            /* only once the resume is read */
-    var holder=document.createElement('div'); holder.className='airx-cont'; holder.appendChild(askBox());
-    var first=home.querySelector('.airx-am');
-    if(first&&first.nextSibling) home.insertBefore(holder,first.nextSibling); else home.appendChild(holder);
-  }
-  function watch(){
-    var m=msgs(); if(!m){ setTimeout(watch,600); return; }
-    try{ new MutationObserver(function(){ mountHome(); }).observe(m,{childList:true}); }catch(e){}
-    mountHome();
-  }
-
-  /* ── what the AI sees: a compact, indexed copy of the resume ── */
+  /* ── AI: prompt, call, parse ── */
   function snapshot(d){
     return {
       jobTitle:d.jobTitle||'', summary:d.summary||'',
@@ -16754,10 +16781,10 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
   }
   function buildPrompt(d,request){
     var lines=[
-      'You are the "Refine with AI" assistant inside Resume For You, an AI resume builder used mostly by job seekers in India.',
-      'The user is looking at their finished resume and asks for a change in plain words (English, Hindi or Hinglish).',
-      'Decide what to change and return ONLY a JSON object — no markdown, no code fences, no text outside the JSON:',
-      '{"reply":"1-2 short friendly sentences saying what you changed and why, or answering their question",',
+      'You are "Resume AI", the chat assistant inside Resume For You, an AI resume builder used mostly by job seekers in India.',
+      'The user is chatting with you about their finished resume and asks for a change (or a question) in plain words — English, Hindi or Hinglish.',
+      'Return ONLY a JSON object — no markdown, no code fences, no text outside the JSON:',
+      '{"reply":"1-2 short, warm, chat-style sentences: what you changed and why, or the answer to their question",',
       ' "changes":[',
       '   {"field":"summary","after":"<new summary>"},',
       '   {"field":"jobTitle","after":"<new headline/title>"},',
@@ -16774,7 +16801,7 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
       '- Summary: 2-3 sentences, max ~55 words, unless the user asks otherwise.',
       '- If the user asks to tailor for a role or a pasted job post, rewrite summary, relevant bullets and skills towards it (still only true facts).',
       '- Write resume text in English unless the user explicitly asks for another language. Write "reply" in the SAME language/style the user wrote in (Hindi → Hindi, Hinglish → Hinglish).',
-      '- If they only ask a question (e.g. "is my resume good for Amazon?"), answer in "reply" with specific advice and leave "changes" empty.',
+      '- If they only ask a question (e.g. "is my resume good for Amazon?") or just chat, answer in "reply" with specific advice and leave "changes" empty.',
       '- Set "tool" when a built-in tool does it better: fit = make it one page / font size / spacing, customise = colours or fonts, reorder = move sections, ats = check against a job post, templates = change design. Otherwise "none".',
       '- For things you cannot change here (name, phone, email, dates, education), say in "reply" that they can tap that text on the resume to edit it.',
       '',
@@ -16782,10 +16809,10 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
       JSON.stringify(snapshot(d))
     ];
     if(hist.length){
-      lines.push('','Earlier in this chat (for context; the resume above already includes any applied changes):');
+      lines.push('','Earlier in this chat (the resume above already includes any changes the user applied):');
       hist.forEach(function(h){ lines.push('User: '+h.u,'You: '+h.a); });
     }
-    lines.push('','User request: '+request);
+    lines.push('','User message: '+request);
     return lines.join('\n');
   }
   function callAI(prompt){
@@ -16814,7 +16841,7 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
         var sk=c.after.map(clean).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).slice(0,40);
         if(sk.length) out.push({kind:'skills',label:'Skills',before:(d.skills||[]).slice(),after:sk});
       }
-      else if((f==='bullets'||f==='title')&&exp[c.index|0]&&c.index!==undefined){
+      else if((f==='bullets'||f==='title')&&c.index!==undefined&&exp[c.index|0]){
         var e=exp[c.index|0], nm=(e.title||'Role')+(e.co?(' · '+e.co):'');
         if(f==='bullets'&&Array.isArray(c.after)){ var bl=c.after.map(clean).filter(Boolean).slice(0,12); if(bl.length) out.push({kind:'bullets',idx:c.index|0,label:nm,before:(e.bullets||[]).slice(),after:bl}); }
         if(f==='title'&&typeof c.after==='string'&&clean(c.after)) out.push({kind:'title',idx:c.index|0,label:nm+' — job title',before:e.title||'',after:clean(c.after)});
@@ -16822,16 +16849,14 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
     });
     return out.filter(function(p){ return JSON.stringify(p.before)!==JSON.stringify(p.after); });
   }
-  function showList(before,after){
-    var b=before.filter(function(x){return after.indexOf(x)<0;}), a=after.map(function(x){ return before.indexOf(x)<0?'<b>'+esc(x)+'</b>':esc(x); });
-    return {b:b.length?b.map(esc).join('\n'):'', a:a.join(', ')};
-  }
   function changeHTML(p){
     var bt,at;
-    if(p.kind==='skills'){ var s=showList(p.before,p.after); bt=s.b; at=s.a; }
-    else if(p.kind==='bullets'){ bt=p.before.map(function(x){return '• '+esc(x);}).join('\n'); at=p.after.map(function(x){return '• '+esc(x);}).join('\n'); }
+    if(p.kind==='skills'){
+      var gone=p.before.filter(function(x){return p.after.indexOf(x)<0;});
+      bt=gone.map(esc).join(', '); at=p.after.map(function(x){ return p.before.indexOf(x)<0?'<b>'+esc(x)+'</b>':esc(x); }).join(', ');
+    } else if(p.kind==='bullets'){ bt=p.before.map(function(x){return '• '+esc(x);}).join('\n'); at=p.after.map(function(x){return '• '+esc(x);}).join('\n'); }
     else { bt=esc(p.before); at=esc(p.after); }
-    return '<div class="r4u-chg"><div class="r4u-chg-l">'+esc(p.label)+'</div>'+(bt?'<div class="r4u-chg-b">'+bt+'</div>':'')+'<div class="r4u-chg-a">'+at+'</div></div>';
+    return '<div class="rc-chg"><div class="rc-chg-l">'+esc(p.label)+'</div>'+(bt?'<div class="rc-chg-b">'+bt+'</div>':'')+'<div class="rc-chg-a">'+at+'</div></div>';
   }
   function rerender(d){
     try{ manuallyEdited=true; }catch(e){} try{ window.manuallyEdited=true; }catch(e){}
@@ -16859,64 +16884,134 @@ html.r4u-inst-open #r4uDlHint{display:none !important}
     bk.exp.forEach(function(x,i){ var e=d.experience[i]; if(!e) return; e.title=x.title; e.bullets=x.bullets; e.desc=x.desc; if(x.rawDesc!==undefined) e.rawDesc=x.rawDesc; });
     rerender(d);
   }
-  var TOOL={fit:['📄 Open Fit to page','_r4uAiFit'],customise:['🎨 Open Customise look','_r4uAiCustomise'],reorder:['↕️ Open Reorder sections','_r4uAiReorder'],ats:['🎯 Open ATS match to a job','_r4uJdMatch'],templates:['🪄 Open Template versions','_r4uAiTemplates']};
+  var TOOL={fit:['📄 Fit to page','_r4uAiFit'],customise:['🎨 Customise look','_r4uAiCustomise'],reorder:['↕️ Reorder sections','_r4uAiReorder'],ats:['🎯 Match a job post','_r4uJdMatch'],templates:['🪄 Template versions','_r4uAiTemplates']};
+  function openTool(fnName){
+    closeChat();
+    var p=document.getElementById('aiChatPanel');
+    if(p&&!p.classList.contains('ai-panel-open')){ var cta=document.getElementById('aiChatCta'); if(cta) cta.click(); else p.classList.add('ai-panel-open'); }
+    setTimeout(function(){ try{ window[fnName](); }catch(e){} },260);
+  }
 
-  /* ── the conversation view ── */
-  var busy=false;
+  /* ── the chat window ── */
+  var root=null, body, input, sendBtn, chips, status, lastFocus=null;
+  function build(){
+    root=document.createElement('div'); root.id='r4uChat';
+    root.innerHTML='<div class="rc-win" role="dialog" aria-modal="true" aria-label="Chat with Resume AI">'
+      +'<div class="rc-hd"><button type="button" class="rc-x" aria-label="Close chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>'
+      +'<div class="rc-av" aria-hidden="true">✨</div><div class="rc-ti"><b>Resume AI</b><span class="rc-st">online</span></div></div>'
+      +'<div class="rc-body" role="log" aria-live="polite"></div>'
+      +'<div class="rc-chips"></div>'
+      +'<form class="rc-in"><textarea rows="1" maxlength="800" placeholder="Message" aria-label="Message Resume AI"></textarea><button type="submit" class="rc-send" aria-label="Send">'+SEND+'</button></form>'
+      +'</div>';
+    document.body.appendChild(root);
+    body=root.querySelector('.rc-body'); input=root.querySelector('textarea'); sendBtn=root.querySelector('.rc-send'); chips=root.querySelector('.rc-chips'); status=root.querySelector('.rc-st');
+    root.addEventListener('click',function(e){ if(e.target===root) closeChat(); });
+    root.querySelector('.rc-x').addEventListener('click',closeChat);
+    root.querySelector('form').addEventListener('submit',function(e){ e.preventDefault(); send(input.value); });
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&window.matchMedia('(hover:hover)').matches){ e.preventDefault(); send(input.value); } });
+    input.addEventListener('input',grow);
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&root.classList.contains('on')) closeChat(); });
+    chips.addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) send(b.textContent); });
+    /* phones: keep the message bar above the on-screen keyboard */
+    if(window.visualViewport){ var vv=window.visualViewport; var fit=function(){ if(!root.classList.contains('on')||window.innerWidth>=700) { root.querySelector('.rc-win').style.height=''; root.querySelector('.rc-win').style.top=''; return; } var w=root.querySelector('.rc-win'); w.style.height=vv.height+'px'; w.style.top=vv.offsetTop+'px'; body.scrollTop=body.scrollHeight; }; vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); root._fit=fit; }
+    var day=document.createElement('div'); day.className='rc-day'; day.textContent='Today'; body.appendChild(day);
+    var nm=firstName();
+    aiText('Hi'+(nm?' '+nm:'')+' 👋 I’m your resume assistant. Tell me what to change — in English or Hindi — and I’ll show you the before → after. Nothing changes until you tap <b>Apply</b>.',true);
+    setChips();
+  }
+  function grow(){ input.style.height='auto'; input.style.height=Math.min(120,input.scrollHeight)+'px'; }
+  function setChips(){ chips.innerHTML=hist.length?'':EXAMPLES.map(function(x){return '<button type="button">'+esc(x)+'</button>';}).join(''); }
+  function scrollEnd(){ body.scrollTop=body.scrollHeight; }
+  function bubble(cls,html){ var m=document.createElement('div'); m.className='rc-m '+cls; m.innerHTML=html; body.appendChild(m); scrollEnd(); return m; }
+  function aiText(html,isHtml){ return bubble('rc-ai',(isHtml?html:esc(html))+'<span class="rc-meta">'+now()+'</span>'); }
+  function openChat(text){
+    if(!hasResume()) return;
+    if(!root) build();
+    lastFocus=document.activeElement;
+    root.classList.add('on'); document.documentElement.classList.add('r4u-chat-open');
+    if(root._fit) root._fit();
+    scrollEnd();
+    if(text){ send(text); } else { setTimeout(function(){ try{ input.focus({preventScroll:true}); }catch(e){} },120); }
+  }
+  function closeChat(){
+    if(!root) return;
+    root.classList.remove('on'); document.documentElement.classList.remove('r4u-chat-open');
+    try{ input.blur(); }catch(e){}
+    if(lastFocus&&lastFocus.focus) try{ lastFocus.focus({preventScroll:true}); }catch(e){}
+  }
   function send(text){
     text=String(text||'').trim(); if(!text||busy) return;
-    var d=data(), m=msgs(); if(!m) return;
+    var d=data(); if(!d||!hasResume()) return;
     try{ if(typeof _captureResumeOutputEdits==='function') _captureResumeOutputEdits(); }catch(e){}
-    if(!d||!hasResume()){ return; }
-    var conv=m.querySelector('.r4u-ask-conv');
-    if(!conv){
-      m.innerHTML=''; conv=document.createElement('div'); conv.className='aig-wrap r4u-ask-conv'; m.appendChild(conv);
-      var back=document.createElement('button'); back.type='button'; back.className='r4u-back'; back.textContent='← Back to menu';
-      back.addEventListener('click',function(){ if(typeof window._r4uAiHome==='function') window._r4uAiHome(); });
-      conv.appendChild(back);
-    }
-    var old=conv.querySelector('.r4u-ask'); if(old) old.parentNode.removeChild(old);
-    var you=document.createElement('div'); you.className='r4u-you'; you.textContent=text; conv.appendChild(you);
-    var ai=document.createElement('div'); ai.className='r4u-ai'; ai.innerHTML='<div class="av">✨</div><div class="bd"><span class="r4u-think">Reading your resume</span></div>'; conv.appendChild(ai);
-    var bd=ai.querySelector('.bd');
-    m.scrollTop=m.scrollHeight; busy=true;
+    input.value=''; grow(); chips.innerHTML='';
+    var me=bubble('rc-me',esc(text)+'<span class="rc-meta">'+now()+'<span class="rc-tick">✓✓</span></span>');
+    var typing=bubble('rc-ai','<span class="rc-typing" aria-label="Resume AI is typing"><i></i><i></i><i></i></span>');
+    status.textContent='typing…'; busy=true; sendBtn.disabled=true;
     callAI(buildPrompt(d,text)).then(function(raw){
-      busy=false;
+      done();
       var o=parse(raw);
-      if(!o){ bd.innerHTML='<span class="r4u-err">I couldn’t work that out. Try saying it another way.</span>'; finish(conv); return; }
+      if(!o){ aiText('<span class="rc-err">Sorry, I couldn’t work that out. Could you say it another way?</span>',true); return; }
       var steps=plan(d,o.changes);
       hist.push({u:text.slice(0,300),a:(o.reply||'').slice(0,300)+(steps.length?' [proposed '+steps.length+' change(s)]':'')}); if(hist.length>MAX_HIST) hist.shift();
+      var tl=TOOL[o.tool]; var toolFn=tl&&typeof window[tl[1]]==='function'?tl[1]:null;
       var h=esc(o.reply||(steps.length?'Here’s what I’d change:':'Done.'));
-      if(steps.length) h+=steps.map(changeHTML).join('');
-      var tl=TOOL[o.tool]; var toolFn=tl&&typeof window[tl[1]]==='function'?window[tl[1]]:null;
-      if(steps.length||toolFn) h+='<div class="r4u-acts">'+(steps.length?'<button type="button" class="pri" data-a="apply">✓ Apply to my resume</button><button type="button" data-a="skip">Not now</button>':'')+(toolFn?'<button type="button" data-a="tool">'+tl[0]+'</button>':'')+'</div>';
-      bd.innerHTML=h;
-      var acts=bd.querySelector('.r4u-acts');
+      h+=steps.map(changeHTML).join('');
+      h+='<span class="rc-meta">'+now()+'</span>';
+      if(steps.length||toolFn) h+='<div class="rc-acts">'+(steps.length?'<button type="button" class="pri" data-a="apply">✓ Apply</button><button type="button" data-a="skip">Not now</button>':'')+(toolFn?'<button type="button" data-a="tool">'+tl[0]+'</button>':'')+'</div>';
+      var m=bubble('rc-ai'+(steps.length?' wide':''),h);
+      var acts=m.querySelector('.rc-acts'), bk=null;
       if(acts) acts.addEventListener('click',function(e){
         var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
-        if(a==='tool'&&toolFn){ toolFn(); return; }
-        if(a==='skip'){ acts.innerHTML='<span style="color:#78716c">Not applied.</span>'; hist.push({u:'(did not apply)',a:''}); return; }
-        if(a==='apply'){
-          var dd=data(); if(!dd) return;
-          var bk=apply(dd,steps); lastBackup=bk;
-          acts.innerHTML='<span class="r4u-done">✓ Applied to your resume.</span> <button type="button" data-a="undo">↺ Undo</button>';
-          try{ if(typeof showToast==='function') showToast('✨ Resume updated','success'); }catch(err){}
-          return;
-        }
-        if(a==='undo'){ var d3=data(); if(d3&&lastBackup){ undo(d3,lastBackup); lastBackup=null; } acts.innerHTML='<span style="color:#78716c">Undone — back to how it was.</span>'; }
+        if(a==='tool'&&toolFn){ openTool(toolFn); return; }
+        if(a==='skip'){ acts.innerHTML='<span class="note">Not applied</span>'; return; }
+        if(a==='apply'){ var dd=data(); if(!dd) return; bk=apply(dd,steps); acts.innerHTML='<span class="note ok">✓ Applied to your resume</span><button type="button" data-a="undo">↺ Undo</button>'; try{ if(typeof showToast==='function') showToast('✨ Resume updated','success'); }catch(err){} return; }
+        if(a==='undo'){ var d3=data(); if(d3&&bk){ undo(d3,bk); bk=null; } acts.innerHTML='<span class="note">Undone — back to how it was</span>'; }
       });
-      finish(conv);
     }).catch(function(){
-      busy=false; bd.innerHTML='<span class="r4u-err">Couldn’t reach AI. Check your connection and try again.</span>'; finish(conv);
+      done(); aiText('<span class="rc-err">I couldn’t reach the AI just now. Check your connection and send it again.</span>',true);
     });
+    function done(){
+      busy=false; sendBtn.disabled=false; status.textContent='online';
+      if(typing.parentNode) typing.parentNode.removeChild(typing);
+      var tk=me.querySelector('.rc-tick'); if(tk) tk.classList.add('read');
+    }
   }
-  function finish(conv){
-    var box=askBox(); conv.appendChild(box);
-    var m=msgs(); if(m) m.scrollTop=m.scrollHeight;
-    var ta=box.querySelector('textarea'); if(ta) ta.placeholder='Ask a follow-up…';
+  window.r4uOpenAskChat=openChat;
+
+  /* ── entry 1: box inside Refine with AI ── */
+  function panelBox(){
+    var m=document.getElementById('aiChatMessages'); if(!m||!hasResume()) return;
+    var home=m.querySelector('.airx-home'); if(!home||home.querySelector('.r4u-ask')||!home.querySelector('.airx-cards')) return;
+    var w=document.createElement('div'); w.className='airx-cont';
+    w.innerHTML='<div class="r4u-ask"><div class="r4u-ask-h">✨ Ask AI to change anything <i class="r4u-new">NEW</i></div>'
+      +'<div class="r4u-ask-row"><button type="button" class="r4u-ask-fake">Type what to change…</button><button type="button" class="r4u-ask-go" aria-label="Open chat">'+SEND+'</button></div></div>';
+    Array.prototype.forEach.call(w.querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ openChat(); }); });
+    var first=home.querySelector('.airx-am');
+    if(first&&first.nextSibling) home.insertBefore(w,first.nextSibling); else home.appendChild(w);
   }
-  window._r4uAskAI=send;
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watch); else watch();
+  function watchPanel(){
+    var m=document.getElementById('aiChatMessages'); if(!m){ setTimeout(watchPanel,700); return; }
+    try{ new MutationObserver(panelBox).observe(m,{childList:true}); }catch(e){} panelBox();
+  }
+  /* ── entry 2: chat card on the Generate page, next to "Use this resume for" ── */
+  function card(){
+    var bar=document.getElementById('r4uAskBar'), next=document.getElementById('_r4uNextBar');
+    var show=hasResume()&&next&&next.offsetParent!==null;
+    if(!show){ if(bar) bar.style.display='none'; return; }
+    if(!bar){
+      bar=document.createElement('button'); bar.type='button'; bar.id='r4uAskBar';
+      bar.innerHTML='<span class="ab-av" aria-hidden="true">✨</span><span class="ab-tx"><b>Chat with Resume AI <i class="r4u-new">NEW</i></b><span>Tell it what to change, in any words</span></span><span class="ab-go" aria-hidden="true">'+SEND+'</span>';
+      bar.setAttribute('aria-label','Chat with Resume AI — tell it what to change');
+      bar.addEventListener('click',function(){ openChat(); });
+    }
+    bar.style.display='';
+    /* sit right after "Use this resume for" (that box re-places itself after the ATS
+       card, so going after it never fights it); on the wide layout CSS grid rows
+       show this card above it */
+    if(next.nextElementSibling!==bar) next.parentNode.insertBefore(bar,next.nextSibling);
+  }
+  function start(){ watchPanel(); card(); setInterval(card,700); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
 </script>
 <script src="/tools/guides.js?v=4" defer></script>
