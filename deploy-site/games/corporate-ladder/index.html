@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Corporate Ladder: Free Office Merge Game, Intern to CEO</title>
+<meta name="description" content="Swipe to merge job-title badges from Intern to CEO. A free office puzzle game with coffee, appraisal and layoff power tiles. Play on your phone.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/corporate-ladder/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/corporate-ladder/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/corporate-ladder/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Corporate Ladder: Free Office Merge Game, Intern to CEO">
+<meta property="og:description" content="Swipe to merge job-title badges from Intern to CEO. A free office puzzle game with coffee, appraisal and layoff power tiles. Play on your phone.">
+<meta property="og:url" content="https://resume4u.help/games/corporate-ladder/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Corporate Ladder: Free Office Merge Game, Intern to CEO">
+<meta name="twitter:description" content="Swipe to merge job-title badges from Intern to CEO. A free office puzzle game with coffee, appraisal and layoff power tiles. Play on your phone.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Corporate Ladder",
+   "url": "https://resume4u.help/games/corporate-ladder/",
+   "description": "Swipe to merge job-title badges from Intern to CEO. A free office puzzle game with coffee, appraisal and layoff power tiles. Play on your phone.",
+   "genre": "Puzzle",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Corporate Ladder",
+     "item": "https://resume4u.help/games/corporate-ladder/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: single dark "office tower at night" world (deliberately one theme): score strip, the 4×4 floor plan of ID-badge tiles, the ladder legend below. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --cell:#222d4f; --line:#2e3b63;
+  --ink:#eef2ff; --muted:#9aa6c8; --gold:#fbbf24; --gold-ink:#3b2506;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);
+  background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%),
+    linear-gradient(180deg,transparent 70%,rgba(251,191,36,.06));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 36px}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+h1{margin:0;font:800 1.6rem/1 var(--display);letter-spacing:-.01em}
+h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px}
+.sub a{color:inherit}
+.scores{display:flex;gap:6px}
+.sc{background:var(--floor);border:1px solid var(--line);border-radius:11px;padding:5px 10px;text-align:center;min-width:66px}
+.sc small{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sc b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:.85rem}
+.bar b{color:var(--gold)}
+.btn{border:0;border-radius:11px;padding:9px 14px;font:800 .9rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink)}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,.board:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+/* board */
+.board{position:relative;width:100%;aspect-ratio:1;max-width:100%;background:var(--floor);border:1px solid var(--line);border-radius:18px;padding:var(--g);--g:9px;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 24px 50px -24px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.03)}
+.grid{position:absolute;inset:var(--g);display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:var(--g)}
+.grid i{background:var(--cell);border-radius:12px;box-shadow:inset 0 2px 0 rgba(255,255,255,.02)}
+.tiles{position:absolute;inset:var(--g)}
+.t{position:absolute;width:calc((100% - 3*var(--g))/4);height:calc((100% - 3*var(--g))/4);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  transition:transform .12s ease-out;color:#0d1324;font-weight:800;text-align:center;line-height:1.05;overflow:hidden;padding:4px}
+.t .e{font-size:clamp(1.15rem,6.2vw,1.75rem);line-height:1}
+.t .n{font:800 clamp(.56rem,2.6vw,.78rem)/1.05 var(--body);letter-spacing:-.01em}
+.t::before{content:"";position:absolute;top:5px;left:50%;width:22%;height:3px;border-radius:3px;background:rgba(13,19,36,.25);transform:translateX(-50%)}
+.t.new{animation:appear .16s ease-out}
+.t.pop{animation:pop .2s ease-out}
+@keyframes appear{from{opacity:0;scale:.5}to{opacity:1;scale:1}}
+@keyframes pop{0%{scale:1}50%{scale:1.14}100%{scale:1}}
+.t.sp{background:#0d1324!important;color:var(--ink);border:2px dashed var(--gold)}
+.t.sp::before{display:none}
+.t.lv12{box-shadow:0 0 22px rgba(251,191,36,.7)}
+
+.legend{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.lg{border-radius:9px;padding:5px 2px;text-align:center;color:#0d1324;font:700 .56rem/1.1 var(--body);opacity:.35}
+.lg .e{display:block;font-size:1rem}
+.lg.got{opacity:1}
+.specials{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;font-size:.74rem;color:var(--muted)}
+.specials div{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:7px 8px}
+.specials b{color:var(--ink);display:block;font-size:.8rem}
+.help{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
+
+.over{position:absolute;inset:0;border-radius:18px;background:rgba(13,19,36,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:18px;z-index:5;animation:appear .25s ease-out}
+.over .e{font-size:3rem;line-height:1}
+.over h2{margin:0;font:800 1.5rem/1.15 var(--display)}
+.over p{margin:0;color:var(--muted);font-size:.9rem}
+.over .acts{display:grid;gap:8px;width:100%;max-width:260px;margin-top:6px}
+.over a.btn{text-decoration:none;display:block}
+.toast{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--gold);color:var(--gold-ink);font:800 .95rem var(--display);padding:8px 16px;border-radius:99px;box-shadow:0 10px 24px -8px rgba(0,0,0,.6);z-index:20;animation:appear .2s ease-out;white-space:nowrap}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+@media (prefers-reduced-motion:reduce){.t{transition:none}.t.new,.t.pop,.over,.toast{animation:none}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Corporate <span>Ladder</span></h1><div class="sub">Merge your way from Intern to CEO · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+    <div class="scores"><div class="sc"><small>Score</small><b id="score">0</b></div><div class="sc"><small>Best</small><b id="best">0</b></div></div>
+  </div>
+  <div class="bar"><span>Highest title: <b id="hi">Intern 🧑‍🎓</b></span><button class="btn ghost" id="restart">New game</button></div>
+  <div class="board" id="board" tabindex="0" aria-label="Game board. Use arrow keys or swipe to move.">
+    <div class="grid" aria-hidden="true"></div>
+    <div class="tiles" id="tiles"></div>
+  </div>
+  <p class="help">Swipe (or use arrow keys). Two of the same title merge into the next one up.</p>
+  <div class="legend" id="legend" aria-label="Career ladder"></div>
+  <div class="specials">
+    <div><b>☕ Coffee</b>Joins any badge and promotes it once</div>
+    <div><b>🎁 Appraisal</b>Joins any badge and promotes it twice</div>
+    <div><b>📉 Layoff</b>Removes the badge it hits. Use it to clear space</div>
+  </div>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Climbing the real ladder? Build your resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Corporate Ladder</h2><ol><li>Swipe (or use arrow keys) to slide every badge on the board.</li><li>Two matching titles merge into the next one up: Intern → Trainee → Associate … → CEO.</li><li>☕ Coffee promotes a badge once, 🎁 Appraisal twice, 📉 Layoff clears a badge to make space.</li><li>The game ends when no moves are left. Try to reach CEO 👑.</li></ol><p>Climbing the real ladder needs a resume that shows impact. <a href="/how-to-make-resume-for-first-job/">See how to write one</a> or <a href="/">build yours free</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var L=[null,
+    ['Intern','🧑‍🎓','#a7f3d0'],['Trainee','🙋','#86efac'],['Associate','🧑‍💻','#5eead4'],['Analyst','📊','#67e8f9'],
+    ['Sr Analyst','📈','#93c5fd'],['Team Lead','🧭','#a5b4fc'],['Manager','🗂️','#c4b5fd'],['Sr Manager','💼','#f0abfc'],
+    ['Director','🎯','#fda4af'],['VP','🏆','#fdba74'],['CXO','🚀','#fde047'],['CEO','👑','linear-gradient(135deg,#fef08a,#fbbf24,#f59e0b)']];
+  var MAX=12, SP={coffee:['Coffee','☕'],appraisal:['Appraisal','🎁'],layoff:['Layoff','📉']};
+  var N=4, grid, score, best=0, top, uid=0, moving=false, over=false, moves=0;
+  var tilesEl=document.getElementById('tiles'), board=document.getElementById('board');
+  try{ best=+localStorage.getItem('cl_best')||0; }catch(e){}
+  document.querySelector('.grid').innerHTML=new Array(17).join('<i></i>');
+  document.getElementById('legend').innerHTML=L.slice(1).map(function(x,i){return '<div class="lg" data-l="'+(i+1)+'" style="background:'+x[2]+'"><span class="e">'+x[1]+'</span>'+x[0]+'</div>';}).join('');
+
+  function newGame(){
+    grid=[];for(var r=0;r<N;r++){grid.push([null,null,null,null]);}
+    score=0; top=1; over=false; moves=0; tilesEl.innerHTML='';
+    var o=board.querySelector('.over'); if(o) o.remove();
+    spawn(true); spawn(true); paint();
+  }
+  function empties(){ var e=[]; for(var r=0;r<N;r++)for(var c=0;c<N;c++) if(!grid[r][c]) e.push([r,c]); return e; }
+  function count(){ return N*N-empties().length; }
+  function spawn(plain){
+    var e=empties(); if(!e.length) return;
+    var p=e[Math.floor(Math.random()*e.length)], x=Math.random(), t={id:++uid,lv:1,isNew:true};
+    if(!plain){
+      if(x<0.025) t={id:uid,sp:'coffee',isNew:true};
+      else if(x<0.04&&count()>=7) t={id:uid,sp:'layoff',isNew:true};
+      else if(x<0.047&&moves>40) t={id:uid,sp:'appraisal',isNew:true};
+      else if(x<0.15) t.lv=2;
+    }
+    grid[p[0]][p[1]]=t;
+  }
+  function pos(el,r,c){ el.style.transform='translate(calc('+c+' * (100% + var(--g))),calc('+r+' * (100% + var(--g))))'; }
+  function look(el,t){
+    el.className='t'+(t.sp?' sp':' lv'+t.lv); var d=t.sp?SP[t.sp]:L[t.lv];
+    el.style.background=t.sp?'':d[2]; el.innerHTML='<span class="e">'+d[1]+'</span><span class="n">'+d[0]+'</span>';
+    el.setAttribute('aria-label',d[0]);
+  }
+  function paint(){
+    var seen={};
+    for(var r=0;r<N;r++)for(var c=0;c<N;c++){ var t=grid[r][c]; if(!t) continue; seen[t.id]=1;
+      var el=tilesEl.querySelector('[data-id="'+t.id+'"]');
+      if(!el){ el=document.createElement('div'); el.dataset.id=t.id; tilesEl.appendChild(el); pos(el,r,c); look(el,t); el.classList.add('new'); }
+      else { pos(el,r,c); if(t.changed){ look(el,t); el.classList.add('pop'); } }
+      t.isNew=false; t.changed=false;
+    }
+    Array.prototype.forEach.call(tilesEl.children,function(el){ if(!seen[el.dataset.id]) el.remove(); });
+    document.getElementById('score').textContent=score.toLocaleString('en-IN');
+    if(score>best){ best=score; try{localStorage.setItem('cl_best',best);}catch(e){} }
+    document.getElementById('best').textContent=best.toLocaleString('en-IN');
+    document.getElementById('hi').textContent=L[top][0]+' '+L[top][1];
+    document.querySelectorAll('.lg').forEach(function(x){ x.classList.toggle('got',+x.dataset.l<=top); });
+  }
+  /* merge rule between the tile already placed (a) and the incoming one (b) */
+  function combine(a,b){
+    if(a.merged) return null;
+    if(!a.sp&&!b.sp&&a.lv===b.lv&&a.lv<MAX) return {lv:a.lv+1};
+    var n=a.sp?b:a, s=a.sp?a:b;
+    if(n.sp||!s.sp) return null;
+    if(s.sp==='coffee') return n.lv<MAX?{lv:n.lv+1,msg:'☕ Coffee-powered promotion!'}:null;
+    if(s.sp==='appraisal') return n.lv<MAX?{lv:Math.min(MAX,n.lv+2),msg:'🎁 Great appraisal: double promotion!'}:null;
+    if(s.sp==='layoff') return {gone:true,msg:'📉 Layoff! Space cleared.'};
+    return null;
+  }
+  function move(dir){ // 0 up,1 right,2 down,3 left
+    if(moving||over) return;
+    var changed=false, msg=null, slid=[];
+    for(var i=0;i<N;i++){
+      var cells=[]; for(var j=0;j<N;j++){ var r,c;
+        if(dir===0){r=j;c=i;} else if(dir===2){r=N-1-j;c=i;} else if(dir===3){r=i;c=j;} else {r=i;c=N-1-j;}
+        cells.push([r,c]); }
+      var line=cells.map(function(p){return grid[p[0]][p[1]];}).filter(Boolean), out=[];
+      var idx=function(){ return out.filter(function(x){return !x.hole;}).length-1; };
+      line.forEach(function(t){
+        var a=out[out.length-1], res=a?combine(a,t):null;
+        if(res){
+          if(res.gone){ slid.push({t:t,to:idx(),line:i,cells:cells,die:true}); slid.push({t:a,die:true,stay:true}); out.pop(); out.push({hole:true,merged:true}); }
+          else { var keep=a.sp?t:a; slid.push({t:t,to:idx(),cells:cells,die:t!==keep}); if(t===keep){ slid.push({t:a,die:true,stay:true}); }
+            keep.lv=res.lv; keep.merged=true; keep.changed=true; out[out.length-1]=keep; score+=Math.pow(2,res.lv); if(res.lv>top){ top=res.lv; if(res.lv>=6) msg='🎉 Promoted to '+L[res.lv][0]+'!'; } }
+          if(res.msg&&!msg) msg=res.msg; changed=true;
+        } else { out.push(t); }
+      });
+      out=out.filter(function(t){return !t.hole;});
+      for(var j=0;j<N;j++){ var p=cells[j], nt=out[j]||null; if(grid[p[0]][p[1]]!==nt){ changed=true; } grid[p[0]][p[1]]=nt; }
+      slid.forEach(function(s){ if(s.cells===cells&&s.to!==undefined){ s.r=cells[Math.max(0,s.to)][0]; s.c=cells[Math.max(0,s.to)][1]; } });
+    }
+    if(!changed) return;
+    moves++; moving=true;
+    // animate tiles that merge away into their target before removal
+    slid.forEach(function(s){ var el=tilesEl.querySelector('[data-id="'+s.t.id+'"]'); if(el&&s.die&&s.r!==undefined) pos(el,s.r,s.c); });
+    for(var r=0;r<N;r++)for(var c=0;c<N;c++){ var t=grid[r][c]; if(t){ t.merged=false; var el=tilesEl.querySelector('[data-id="'+t.id+'"]'); if(el) pos(el,r,c); } }
+    setTimeout(function(){ spawn(false); paint(); moving=false; if(msg) toast(msg); if(top===MAX&&!won){ won=true; end(true); } else if(!canMove()) end(false); },125);
+  }
+  var won=false;
+  function canMove(){
+    if(empties().length) return true;
+    for(var r=0;r<N;r++)for(var c=0;c<N;c++){ var a=grid[r][c];
+      var nb=[[r+1,c],[r,c+1]]; for(var k=0;k<2;k++){ var x=nb[k][0],y=nb[k][1]; if(x<N&&y<N){ var b=grid[x][y]; a.merged=false;b.merged=false; if(combine(a,b)||combine(b,a)) return true; } } }
+    return false;
+  }
+  function end(isWin){
+    over=!isWin; var d=L[top];
+    var share='I climbed the Corporate Ladder to '+d[0]+' '+d[1]+' with '+score.toLocaleString('en-IN')+' points 🏢 Can you reach CEO? Play free: https://resume4u.help/games/corporate-ladder/';
+    var o=document.createElement('div'); o.className='over'; o.setAttribute('role','dialog'); o.setAttribute('aria-label',isWin?'You became CEO':'Game over');
+    o.innerHTML='<div class="e">'+(isWin?'👑':d[1])+'</div><h2>'+(isWin?'You made it to CEO!':'Career peak: '+d[0])+'</h2><p>'+(isWin?'From intern to the corner office. Legendary.':'Score '+score.toLocaleString('en-IN')+' · No more moves left')+'</p>'
+      +'<div class="acts"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a>'
+      +(isWin?'<button class="btn ghost" id="keep">Keep playing</button>':'')+'<button class="btn ghost" id="again">Play again</button></div>';
+    board.appendChild(o);
+    o.querySelector('#again').onclick=function(){ won=false; newGame(); };
+    var k=o.querySelector('#keep'); if(k) k.onclick=function(){ o.remove(); };
+  }
+  var tt; function toast(m){ var o=document.querySelector('.toast'); if(o) o.remove(); var d=document.createElement('div'); d.className='toast'; d.setAttribute('role','status'); d.textContent=m; document.body.appendChild(d); clearTimeout(tt); tt=setTimeout(function(){d.remove();},1600); }
+
+  /* controls */
+  document.addEventListener('keydown',function(e){
+    var k={ArrowUp:0,ArrowRight:1,ArrowDown:2,ArrowLeft:3,w:0,d:1,s:2,a:3,W:0,D:1,S:2,A:3}[e.key];
+    if(k===undefined||e.target.tagName==='INPUT') return; e.preventDefault(); move(k);
+  });
+  var sx=0,sy=0,touching=false;
+  board.addEventListener('pointerdown',function(e){ if(e.target.closest('.over')) return; touching=true; sx=e.clientX; sy=e.clientY; });
+  board.addEventListener('pointerup',function(e){ if(!touching) return; touching=false; var dx=e.clientX-sx, dy=e.clientY-sy;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<24) return; if(Math.abs(dx)>Math.abs(dy)) move(dx>0?1:3); else move(dy>0?2:0); });
+  board.addEventListener('pointercancel',function(){touching=false;});
+  document.getElementById('restart').onclick=function(){ won=false; newGame(); };
+  newGame();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Who Stole My Tiffin? Free Office Detective Mystery Game</title>
+<meta name="description" content="Someone ate your lunch from the office fridge. Question colleagues, flip clue cards and catch the tiffin thief. A free detective game, new case every time.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/who-stole-my-tiffin/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/who-stole-my-tiffin/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/who-stole-my-tiffin/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Who Stole My Tiffin? Free Office Detective Mystery Game">
+<meta property="og:description" content="Someone ate your lunch from the office fridge. Question colleagues, flip clue cards and catch the tiffin thief. A free detective game, new case every time.">
+<meta property="og:url" content="https://resume4u.help/games/who-stole-my-tiffin/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Who Stole My Tiffin? Free Office Detective Mystery Game">
+<meta name="twitter:description" content="Someone ate your lunch from the office fridge. Question colleagues, flip clue cards and catch the tiffin thief. A free detective game, new case every time.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Who Stole My Tiffin?",
+   "url": "https://resume4u.help/games/who-stole-my-tiffin/",
+   "description": "Someone ate your lunch from the office fridge. Question colleagues, flip clue cards and catch the tiffin thief. A free detective game, new case every time.",
+   "genre": "Mystery",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Who Stole My Tiffin?",
+     "item": "https://resume4u.help/games/who-stole-my-tiffin/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap">
+<style>
+/* Layout: one dark "night office" detective notebook: header + stats, case file folder with Mummy's sticky note, suspect dossier rows, clue deck, accuse bar. Sheets slide up from the bottom. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --cell:#222d4f; --line:#2e3b63;
+  --ink:#eef2ff; --muted:#9aa6c8; --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  --hand:"Caveat","Segoe Print","Comic Sans MS",cursive;
+  --paper:#f5ead0; --paper-ink:#2b2113; --string:#e11d48;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px;overflow-x:hidden}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* header + stats */
+.stats{display:flex;gap:6px;align-items:stretch}
+.sc{flex:1;background:var(--night2);border:1px solid var(--line);border-radius:11px;padding:5px 8px;text-align:center;min-width:0}
+.sc small{display:block;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sc b{font:800 1.1rem/1.2 var(--display);font-variant-numeric:tabular-nums}
+.stats .btn{flex:1.2;white-space:nowrap;padding:6px 8px;font-size:.88rem;border-radius:11px}
+
+/* case file */
+.case{position:relative;background:linear-gradient(180deg,#22305a,#1b2542 60%);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:16px 14px 14px;box-shadow:0 22px 44px -26px rgba(0,0,0,.9);margin-top:12px}
+.case::before{content:"";position:absolute;left:-1px;top:-13px;width:120px;height:14px;background:#22305a;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0}
+.stamp{position:absolute;right:12px;top:10px;transform:rotate(8deg);border:2.5px solid var(--red);color:var(--red);font:800 .78rem/1 var(--display);letter-spacing:.14em;padding:5px 8px 3px;border-radius:6px;opacity:.85}
+.case .no{padding-right:100px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.case h2{margin:2px 0 6px;font:800 1.35rem/1.1 var(--display);color:var(--gold);padding-right:84px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.76rem;color:var(--muted)}
+.meta span{background:var(--night2);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+.note{position:relative;margin:14px 4px 2px;background:#fde68a;color:#3b2a06;padding:12px 14px 10px 54px;border-radius:3px;transform:rotate(-1.2deg);box-shadow:0 10px 18px -10px rgba(0,0,0,.8);font:700 1.18rem/1.2 var(--hand)}
+.note .dish{position:absolute;left:10px;top:12px;font-size:1.9rem;line-height:1}
+.note .pin{position:absolute;top:-9px;left:50%;font-size:1rem;transform:translateX(-50%)}
+.note small{display:block;font-size:1rem;margin-top:4px;opacity:.8}
+.tip{font-size:.76rem;color:var(--muted);background:var(--night2);border:1px dashed var(--line);border-radius:12px;padding:8px 10px;margin:0}
+.tip b{color:var(--ink)}
+
+/* section heads */
+.sh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:4px}
+.sh h3{margin:0;font:800 1.08rem var(--display);letter-spacing:.02em}
+.sh h3::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--string);margin-right:7px;vertical-align:2px;box-shadow:0 0 0 3px rgba(225,29,72,.25)}
+.sh span{font-size:.74rem;color:var(--muted)}
+.sh b{color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* suspects */
+.sus-list{display:flex;flex-direction:column;gap:8px;position:relative}
+.sus{position:relative;display:flex;align-items:stretch;background:var(--floor);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 26px -20px rgba(0,0,0,.9);overflow:hidden;transition:opacity .2s}
+.sus .open{flex:1;min-width:0;display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;padding:9px 6px 9px 10px;cursor:pointer;border-radius:14px 0 0 14px}
+.av{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;background:radial-gradient(circle at 35% 30%,#3a4a7f,#222d4f);border:2px solid var(--line)}
+.who{min-width:0;display:block}
+.who b{display:block;font:800 1rem/1.15 var(--display)}
+.who small{display:block;font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;background:var(--night2);border:1px solid var(--line);border-radius:99px;padding:1px 7px 1px 5px;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;border:1px solid rgba(255,255,255,.35)}
+.dot.clean{background:transparent;border:1.5px dashed var(--muted)}
+.dot.grease{background:radial-gradient(circle at 35% 35%,#fff 0,#fde68a 35%,#d4a52a 100%)}
+.ab{font-size:.68rem;font-weight:700;border-radius:99px;padding:1px 7px}
+.ab.ok{background:rgba(74,222,128,.14);color:var(--green);border:1px solid rgba(74,222,128,.35)}
+.ab.bust{background:rgba(248,113,113,.14);color:var(--red);border:1px solid rgba(248,113,113,.4)}
+.ab.q{background:rgba(251,191,36,.12);color:var(--gold);border:1px solid rgba(251,191,36,.3)}
+.clr{flex:none;width:56px;border:0;border-left:1px dashed var(--line);background:var(--night2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.58rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.clr i{font-style:normal;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;font-size:.9rem;color:transparent}
+.clr[aria-pressed="true"] i{background:var(--green);border-color:var(--green);color:#052e16}
+.clr[aria-pressed="true"]{color:var(--green)}
+.sus.cleared{opacity:.55}
+.sus.cleared .who b{text-decoration:line-through;text-decoration-color:var(--green);text-decoration-thickness:2px}
+.sus .st{position:absolute;right:66px;top:50%;transform:translateY(-50%) rotate(-10deg);font:800 .7rem/1 var(--display);letter-spacing:.12em;padding:4px 6px 2px;border-radius:5px;pointer-events:none;background:rgba(13,19,36,.7)}
+.sus .st.c{color:var(--green);border:2px solid var(--green)}
+.sus .st.w{color:var(--red);border:2px solid var(--red)}
+.sus.culprit{border-color:var(--gold);box-shadow:0 0 0 2px rgba(251,191,36,.45)}
+
+/* clues */
+.clues{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.clue{position:relative;min-height:86px;border-radius:12px;border:1.5px dashed rgba(251,191,36,.55);background:repeating-linear-gradient(45deg,#18223f 0 10px,#1b2647 10px 20px);cursor:pointer;padding:10px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:4px;transition:transform .15s}
+.clue:hover:not(.open){transform:translateY(-2px)}
+.clue .ci{font-size:1.4rem;line-height:1}
+.clue .ct{font:800 .92rem/1.1 var(--display)}
+.clue .lk{font-size:.68rem;color:var(--gold);font-weight:700;letter-spacing:.04em}
+.clue.open{grid-column:1/-1;cursor:default;background:var(--paper);color:var(--paper-ink);border:0;min-height:0;padding:12px 14px 12px 14px;box-shadow:0 12px 22px -14px rgba(0,0,0,.9);animation:flip .35s ease-out}
+.clue.open::before{content:"";position:absolute;top:-7px;left:22px;width:54px;height:16px;background:rgba(253,230,138,.75);transform:rotate(-4deg);border-radius:2px}
+.clue.open .ct{color:#7c2d12;display:flex;gap:6px;align-items:center}
+.clue.open .ct em{margin-left:auto;font:700 .66rem var(--body);font-style:normal;color:#78716c;letter-spacing:.06em}
+.clue.open p{margin:2px 0 0;font-size:.86rem;line-height:1.45}
+.clue.open p b{background:rgba(250,204,21,.4);padding:0 3px;border-radius:3px}
+.clue.open p .lie{display:block;margin-top:6px;color:#9f1239;font-weight:600}
+.clue.open p .lie::before{content:"❌ "}
+@keyframes flip{from{transform:rotateX(70deg);opacity:.2}to{transform:none;opacity:1}}
+
+.status{min-height:1.4em;font-size:.84rem;text-align:center;color:var(--gold);font-weight:600;margin:0}
+.acts{display:grid;grid-template-columns:2fr 1fr;gap:8px;position:sticky;bottom:10px;z-index:4}
+.acts .btn{box-shadow:0 14px 30px -12px rgba(0,0,0,.9)}
+#accuse{font-size:1.15rem;padding:14px}
+#newcase2{white-space:nowrap;padding-inline:8px}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem;margin-top:4px}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(5,8,18,.72);z-index:30;display:flex;align-items:flex-end;justify-content:center;padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+.scrim[hidden]{display:none}
+.sheet{width:100%;max-width:480px;max-height:88vh;overflow:auto;background:var(--night2);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 50px -10px rgba(0,0,0,.7);animation:up .22s ease-out}
+.sheet .grab{width:44px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 10px}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{margin:0;font:800 1.3rem/1.1 var(--display)}
+.shd{display:flex;gap:12px;align-items:center}
+.shd .av{width:60px;height:60px;font-size:2.1rem}
+.shd .x{margin-left:auto;align-self:flex-start;background:var(--floor);border:1px solid var(--line);border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:1rem}
+.muted{color:var(--muted);font-size:.8rem}
+.trait{margin:10px 0 0;font-size:.86rem;color:var(--muted);font-style:italic}
+.quote{margin:12px 0 0;background:var(--paper);color:var(--paper-ink);border-radius:4px 14px 14px 14px;padding:12px 14px;font:700 1.22rem/1.25 var(--hand);position:relative}
+.quote::before{content:"“";position:absolute;left:-4px;top:-18px;font:800 2.6rem var(--display);color:var(--gold)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.facts div{background:var(--floor);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:.8rem;font-weight:600;display:flex;flex-direction:column;gap:2px}
+.facts small{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.facts span{display:flex;align-items:center;gap:5px}
+.anote{margin-top:10px;font-size:.82rem;border-radius:10px;padding:8px 10px}
+.anote.ok{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3)}
+.anote.bust{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35)}
+.sheet .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.btn.on{background:var(--green);color:#052e16}
+.pick{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.pick button{display:flex;align-items:center;gap:10px;background:var(--floor);border:1.5px solid var(--line);border-radius:12px;padding:7px 10px;cursor:pointer;text-align:left}
+.pick button .av{width:38px;height:38px;font-size:1.3rem}
+.pick button[aria-pressed="true"]{border-color:var(--red);background:rgba(248,113,113,.12);box-shadow:0 0 0 2px rgba(248,113,113,.3)}
+.pick button:disabled{opacity:.35;cursor:not-allowed}
+.pick button small{display:block;color:var(--muted);font-size:.72rem}
+.pick button b{font:800 .98rem/1.1 var(--display)}
+.pick .cl{margin-left:auto;font-size:.66rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.btn.red{background:linear-gradient(135deg,#fca5a5,#ef4444);color:#3b0a0a}
+.oops{text-align:center}
+.oops .big{font-size:3rem;line-height:1;margin:6px 0}
+.oops p{color:var(--muted);margin:8px 0 0}
+
+/* result */
+.res{position:fixed;inset:0;z-index:40;background:rgba(5,8,18,.9);overflow:auto;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.res[hidden]{display:none}
+.rc{max-width:460px;margin:0 auto;background:var(--floor);border:1px solid var(--line);border-radius:18px;padding:18px 16px;text-align:center;animation:up .3s ease-out;position:relative;overflow:hidden}
+.rc .e{font-size:3.4rem;line-height:1}
+.rc h2{margin:6px 0 2px;font:800 1.5rem/1.15 var(--display)}
+.rank{display:inline-block;margin-top:6px;background:var(--gold);color:var(--gold-ink);font:800 1rem var(--display);padding:4px 14px;border-radius:99px}
+.rank.lose{background:var(--red);color:#3b0a0a}
+.rc>p{margin:8px 0 0;color:var(--muted);font-size:.88rem}
+.expl{text-align:left;margin-top:14px;background:var(--paper);color:var(--paper-ink);border-radius:6px;padding:12px 14px;font-size:.85rem;line-height:1.5}
+.expl h4{margin:0 0 4px;font:800 1rem var(--display);color:#7c2d12}
+.expl p{margin:0 0 8px}
+.expl ul{margin:0;padding-left:18px}
+.expl li{margin-bottom:5px}
+.expl .wl{color:#78716c;font-style:italic}
+.ra{display:grid;gap:8px;margin-top:14px}
+.mini{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.mini .sc{flex:0 1 92px}
+
+.toast{position:fixed;left:50%;top:max(14px,env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--gold);color:var(--gold-ink);font:800 .9rem var(--display);padding:7px 14px;border-radius:99px;z-index:50;box-shadow:0 10px 24px -8px rgba(0,0,0,.6);max-width:calc(100vw - 32px);text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.clue,.sheet,.rc,.clue.open,.sus{animation:none!important;transition:none!important}}
+@media (max-width:370px){.tag{font-size:.64rem}.clr{width:50px}.sus .st{right:58px}.case h2{font-size:1.22rem}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <header>
+    <h1>Who Stole My <span>Tiffin?</span></h1>
+    <div class="sub">Office whodunit: find who ate Mummy's lunch · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div>
+  </header>
+  <div class="stats">
+    <div class="sc"><small>Streak</small><b id="streak">0</b></div>
+    <div class="sc"><small>Best</small><b id="best">0</b></div>
+    <div class="sc"><small>Solved</small><b id="solved">0</b></div>
+    <button class="btn ghost" id="newcase" type="button">New case</button>
+  </div>
+
+  <section class="case" aria-labelledby="ctitle">
+    <div class="stamp" aria-hidden="true">CASE FILE</div>
+    <div class="no" id="cno">Case #00</div>
+    <h2 id="ctitle">The Missing Tiffin</h2>
+    <div class="meta"><span>🕛 12:00 – 1:00 PM</span><span>📍 Pantry fridge</span><span id="tries">⚖️ 2 accusations</span></div>
+    <div class="note"><span class="pin" aria-hidden="true">📌</span><span class="dish" id="dishE" aria-hidden="true">🍱</span><span id="noteT"></span><small id="noteS"></small></div>
+  </section>
+
+  <p class="tip">🕵️ <b>How to solve:</b> the thief matches <b>every</b> clue. A confirmed alibi clears someone. A busted alibi is suspicious, but not proof. Tick suspects off as you go. Fewer clues = better rank.</p>
+
+  <div class="sh"><h3>Suspects</h3><span>Tap to question · ✓ to clear</span></div>
+  <div class="sus-list" id="sus"></div>
+
+  <div class="sh"><h3>Evidence</h3><span>Clues used: <b id="used">0/6</b></span></div>
+  <div class="clues" id="clues"></div>
+
+  <p class="status" id="status" aria-live="polite" role="status"></p>
+  <div class="acts">
+    <button class="btn" id="accuse" type="button">☝️ Accuse someone</button>
+    <button class="btn ghost" id="newcase2" type="button">New case</button>
+  </div>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Sharp detective skills belong on a CV. Build your resume free →</a>
+</div>
+
+<div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT" tabindex="-1"></div></div>
+<div class="res" id="res" hidden><div class="rc" id="rc" role="dialog" aria-modal="true" aria-labelledby="resT" tabindex="-1"></div></div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Who Stole My Tiffin?</h2><ol><li>Read the case file: whose lunch, which dish, and the time window.</li><li>Tap a suspect to question them and read their alibi.</li><li>Flip clue cards (CCTV, swipe log, stains, alibi records) to rule people out.</li><li>Accuse the thief. Fewer clues used = higher detective rank.</li></ol><p>Good detectives notice details, and so do recruiters. <a href="/ats-score-checker/">Check your resume's ATS score</a> for free.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  'use strict';
+  /* ---------- content ---------- */
+  var TOPS={blue:['Blue','#3b82f6'],white:['White','#f1f5f9'],black:['Black','#1f2937'],maroon:['Maroon','#9f1239'],green:['Green','#16a34a'],pink:['Pink','#f472b6']};
+  var FLOORS=[3,4,5];
+  var STAINS={yellow:['Yellow stain','#facc15'],brown:['Brown stain','#8b4513'],orange:['Orange stain','#f97316'],red:['Red stain','#dc2626'],
+    grease:['Ghee grease','grease'],green:['Green chutney','#22c55e'],ink:['Blue ink','#60a5fa'],clean:['Clean sleeve','clean']};
+  var DISHES=[
+    {n:'Rajma-Chawal',e:'🍛',st:'brown',sd:'thick brown rajma gravy',note:'Mummy soaked the rajma OVERNIGHT for this. Now the dabba is empty and licked clean.'},
+    {n:'Aloo Paratha',e:'🫓',st:'grease',sd:'shiny ghee and makkhan',note:'Three parathas, extra makkhan, achaar on the side. Packed at 7 AM with love. Gone by 1.'},
+    {n:'Biryani',e:'🍚',st:'orange',sd:'orange biryani masala',note:'Sunday\'s leftover biryani. The legendary next-day biryani. Only one elaichi survived.'},
+    {n:'Chole-Chawal',e:'🥘',st:'brown',sd:'dark brown chole masala',note:'The chole that relatives ask the recipe for at every wedding. Vanished without a trace.'},
+    {n:'Idli-Sambar',e:'🥥',st:'orange',sd:'orange sambar',note:'Soft idlis, sambar in the separate dabba, coconut chutney. Someone took ALL THREE compartments.'},
+    {n:'Poha',e:'🥣',st:'yellow',sd:'bright yellow haldi',note:'Poha with peanuts, sev and nimbu. Mummy added extra peanuts because "you look weak". 😢'},
+    {n:'Kadhi-Chawal',e:'🍲',st:'yellow',sd:'yellow kadhi',note:'Kadhi with pakodas, the good kind. Mummy\'s handwriting on the lid said "FOR MY BETA ONLY".'},
+    {n:'Pav Bhaji',e:'🍅',st:'red',sd:'buttery red bhaji',note:'Bhaji with a cube of butter melting on top and four pavs. All gone. Even the onion-lemon.'},
+    {n:'Lemon Rice',e:'🍋',st:'yellow',sd:'yellow lemon-rice tadka',note:'Lemon rice with curry leaves and peanuts. The whole floor smelled it at 11 AM. Big mistake.'},
+    {n:'Dal Makhani',e:'🫕',st:'brown',sd:'creamy brown dal makhani',note:'Slow-cooked dal makhani and two rotis wrapped in foil. Mummy\'s Sunday special. Tuesday tragedy.'}
+  ];
+  var CHARS=[
+    {e:'🧑‍🎓',n:'Sid',r:'Intern',t:'Always hungry. Ate three farewell cakes this week for people he has never met.',
+      l:'I didn\'t even know there was {dish} in the fridge. …Was there? Is there any left?',w:'Sid\'s eyes well up. Now the whole floor thinks YOU bully interns.'},
+    {e:'💪',n:'Rocky',r:'Sales Executive',t:'Gym-bro. "Only eats protein." Brings a shaker bottle to client meetings.',
+      l:'Bro. {dish}? Carbs? Me? I\'m on a cut, bro.',w:'Rocky is so offended he flexes at you for ten straight minutes. Everyone watches.'},
+    {e:'👩‍💼',n:'Pinky Didi',r:'HR Manager',t:'Knows everyone\'s business, including what\'s in their dabba.',
+      l:'Beta, I don\'t steal food. I only keep a list of who brings what. For culture purposes.',w:'Pinky Didi has booked a "quick 1:1 about workplace trust" with you. It\'s two hours long.'},
+    {e:'🦉',n:'Nikhil',r:'Night-shift Developer',t:'Awake at noon purely by accident. Runs on Maggi and cold coffee.',
+      l:'Bhai, at 12 PM my body thinks it\'s 3 AM. I can barely open the fridge, forget a tiffin.',w:'Nikhil sighs, pushes a hotfix and logs off. Production breaks. Somehow it\'s your fault.'},
+    {e:'🧔',n:'Arjun Sir',r:'New Manager',t:'Joined two weeks ago. Says "let\'s take this offline" about everything.',
+      l:'Let\'s not jump to conclusions. Let\'s take this offline. After lunch. My lunch.',w:'Arjun Sir has added "Feedback 🙂" to your calendar. The smiley is the scariest part.'},
+    {e:'👴',n:'Ramu Kaka',r:'Pantry In-charge',t:'Knows every tiffin in this office by smell. Holds the only master key.',
+      l:'Thirty years I\'ve guarded that fridge, beta. Thirty. I\'m hurt you even asked.',w:'Ramu Kaka is so hurt he has stopped making your chai. Indefinitely.'},
+    {e:'📊',n:'Meera',r:'Finance Analyst',t:'Splits every bill to the paisa. Once asked the vending machine for a GST invoice.',
+      l:'I can tell you what that {dish} cost per gram. I would never eat anything without a receipt.',w:'Meera has calculated your emotional damages. You owe her ₹4,380.50.'},
+    {e:'🎨',n:'Zoya',r:'UI Designer',t:'Hates the office font. Labels her oat milk with a nicer one.',
+      l:'Please. Steel tiffins are not my aesthetic. And that lid has terrible kerning.',w:'Zoya has made a 40-slide deck titled "Why You Were Wrong". It has animations.'},
+    {e:'🎧',n:'Kabir',r:'Support Lead',t:'Headphones on 24×7. Answers "hello, can you hear me?" to every question.',
+      l:'Hello? Sorry, you were on mute. Tiffin? What tiffin? Hello?',w:'Kabir puts you on hold. You are still on hold. Your call is important to him.'},
+    {e:'📱',n:'Tanya',r:'Social Media Exec',t:'Photographs every meal before eating. Even other people\'s.',
+      l:'If I ate that {dish}, it would be on my story. Check my story. Okay, there\'s a samosa. That\'s it.',w:'Tanya posts a story about "toxic coworkers". 47 views and counting.'},
+    {e:'👓',n:'Iyer Sir',r:'Senior Accountant',t:'22 years in this office. Remembers when the fridge was new.',
+      l:'In my time we brought curd rice and ate it at our desks. Silently. Like gentlemen.',w:'Iyer Sir writes a formal complaint. By hand. In triplicate.'},
+    {e:'🧘',n:'Priya',r:'Wellness Champion',t:'On a "sugar detox" for the fourth time this month. Runs chair yoga.',
+      l:'I\'m on a detox, yaar. I only eat things that are green and sad.',w:'Priya calmly asks you to breathe in for 4 counts and out for 8. It feels like a threat.'}
+  ];
+  var VENUES={
+    meet:{c:'in the sprint review in Conference Room 3B',s:'sprint review',i:'📅',t:'Meeting log',
+      y:'Teams log for the 12:00 sprint review in Conf Room 3B. Present till 12:58: {n}. (Nobody remembers what was decided.)',
+      no:'{x} says they were in it too, but the log shows {x} left at 12:{m}.'},
+    canteen:{c:'in the canteen, eating the ₹60 thali',s:'canteen thali',i:'🧾',t:'Canteen register',
+      y:'Cashier\'s register: thalis billed at 12:08, table occupied till 12:55 by {n}. Extra papad noted.',
+      no:'No bill for {x} all afternoon. Not even a papad.'},
+    gym:{c:'in the basement gym. Chest day',s:'gym',i:'🏋️',t:'Gym register',
+      y:'Gym door log: checked in at 12:03, out at 12:57: {n}. Sweaty and smug.',
+      no:'{x}\'s badge never touched the gym door.'},
+    chai:{c:'at the chai tapri outside the gate',s:'chai tapri',i:'☕',t:'Chaiwala\'s UPI',
+      y:'Chaiwala\'s UPI history: cutting chai paid at 12:06, 12:31 and 12:52 by {n}. Loyal customers.',
+      no:'Not a single ₹12 payment from {x}.'},
+    call:{c:'on a client call at my desk, camera on',s:'client call',i:'🎧',t:'Call recordings',
+      y:'Client call recording, 12:00–12:59, camera on, nodding seriously: {n}.',
+      no:'{x}\'s call actually ended at 12:{m}. Camera was off anyway.'},
+    dhaba:{c:'out at the dhaba with the lunch gang',s:'dhaba lunch',i:'📱',t:'WhatsApp group',
+      y:'"Lunch Gang 🍽️" WhatsApp group: dhaba selfies at 12:15 and 12:48 featuring {n}. Butter naan clearly visible.',
+      no:'{x} claims to be with the gang but is in zero photos.'},
+    printer:{c:'helping IT fix the 2nd-floor printer',s:'printer duty',i:'🖨️',t:'IT helpdesk ticket',
+      y:'Ticket #4471: facilities confirm these heroes fought the 2nd-floor printer from 12:05 to 12:55: {n}.',
+      no:'{x} left at 12:{m} "to find a screwdriver" and never came back.'}
+  };
+  var VK=Object.keys(VENUES);
+  var WHERE=['was secretly giving a job interview on Zoom in the parking lot 🤫','was napping in the first-aid room','was hiding in the stairwell to dodge a "quick call"',
+    'was in the pani-puri queue outside','was getting a haircut. During office hours. Bold.','was on the terrace practising a resignation speech'];
+  var TITLES=['The Missing {d}','The Great {d} Robbery','The {d} Heist','Operation {d}','The Curious Case of the {d}'];
+
+  /* ---------- helpers ---------- */
+  function rnd(n){return Math.floor(Math.random()*n);}
+  function pick(a){return a[rnd(a.length)];}
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function others(list,v){return list.filter(function(x){return x!==v;});}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function joinNames(a){a=a.map(function(x){return '<b>'+esc(x)+'</b>';});return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' &amp; '+a[a.length-1];}
+  function hhmm(m){return '12:'+(m<10?'0':'')+m;}
+  function dotHtml(c){return c==='clean'||c==='grease'?'<i class="dot '+c+'"></i>':'<i class="dot" style="background:'+c+'"></i>';}
+  function bits(n){var c=0;while(n){c+=n&1;n>>=1;}return c;}
+
+  /* ---------- case generator ---------- */
+  function tryCase(){
+    var dish=pick(DISHES), people=shuffle(CHARS).slice(0,5), cul=rnd(5), C={};
+    var sus=people.map(function(p,i){return {p:p,i:i};});
+    C=sus[cul];
+    C.top=pick(Object.keys(TOPS)); C.floor=pick(FLOORS); C.stain=dish.st; C.venue=pick(VK); C.truth=false;
+    sus.forEach(function(s){
+      if(s===C) return;
+      s.top=Math.random()<.4?C.top:pick(others(Object.keys(TOPS),C.top));
+      s.floor=Math.random()<.45?C.floor:pick(others(FLOORS,C.floor));
+      s.stain=Math.random()<.35?C.stain:pick(others(Object.keys(STAINS),C.stain));
+      s.venue=Math.random()<.3?C.venue:pick(VK);
+      s.truth=Math.random()<.8;
+      if(!s.truth) s.where=pick(WHERE);
+    });
+    function truthful(v){return sus.filter(function(s){return s.venue===v&&s.truth;});}
+    if(!truthful(C.venue).length) return null;
+    var extra=shuffle(VK.filter(function(v){return v!==C.venue&&truthful(v).length;}));
+    if(extra.length<2) return null;
+    var t=20+rnd(31);
+    var clues=[
+      {k:'top',i:'📹',t:'Pantry CCTV',x:'Grainy footage, '+hhmm(t)+' PM: someone in a <b>'+TOPS[C.top][0].toLowerCase()+' top</b> opens the fridge, looks left, looks right, and walks off hugging a steel tiffin.',
+        ok:function(s){return s.top===C.top;}},
+      {k:'floor',i:'🪪',t:'Swipe-card log',x:'The pantry door is badge-only. At '+hhmm(t-3)+' it was opened by a <b>Floor '+C.floor+' badge</b>. Nobody else swiped in till 1:05.',
+        ok:function(s){return s.floor===C.floor;}},
+      {k:'stain',i:'🧪',t:'Tiffin forensics',x:'The dabba is licked almost clean, but there\'s '+dish.sd+' on the lid and the fridge handle. The thief\'s sleeve will show the same: <b>'+STAINS[C.stain][0].toLowerCase()+'</b>.',
+        ok:function(s){return s.stain===C.stain;}}
+    ];
+    [C.venue,extra[0],extra[1]].forEach(function(v){
+      var V=VENUES[v], yes=truthful(v), no=sus.filter(function(s){return s.venue===v&&!s.truth;});
+      var txt=V.y.replace('{n}',joinNames(yes.map(function(s){return s.p.n;})));
+      no.forEach(function(s){ var m=12+rnd(20); s.lie=V.no.split('{x}').join(s.p.n).replace('{m}',m<10?'0'+m:m);
+        txt+='<span class="lie">'+esc(s.lie)+'</span>'; });
+      clues.push({k:'alibi',v:v,i:V.i,t:V.t,x:txt,yes:yes.map(function(s){return s.i;}),no:no.map(function(s){return s.i;}),
+        ok:function(s){return yes.indexOf(s)<0;}});
+    });
+    // elimination masks over suspects
+    var all=0; sus.forEach(function(s){ if(s!==C) all|=1<<s.i; });
+    var masks=clues.map(function(c){ var m=0; sus.forEach(function(s){ if(!c.ok(s)) m|=1<<s.i; }); return m; });
+    if(masks.some(function(m){return m&(1<<C.i);})) return null;
+    var cover=masks.reduce(function(a,m){return a|m;},0);
+    if(cover!==all) return null;
+    if(masks.some(function(m){return bits(m)<1||bits(m)>3;})) return null;
+    var min=99;
+    for(var sub=1;sub<64;sub++){ var cv=0; for(var j=0;j<6;j++) if(sub&(1<<j)) cv|=masks[j]; if(cv===all) min=Math.min(min,bits(sub)); }
+    if(min<3) return null;
+    clues.forEach(function(c,j){ c.mask=masks[j]; });
+    return {dish:dish,sus:sus,cul:cul,clues:shuffle(clues),min:min,t:t,no:11+rnd(88),
+      title:pick(TITLES).replace('{d}',dish.n)};
+  }
+  function genCase(){ var c=null; while(!c) c=tryCase(); return c; }
+
+  /* ---------- state + storage ---------- */
+  var S, store={streak:0,best:0,solved:0};
+  try{ ['streak','best','solved'].forEach(function(k){ store[k]=+localStorage.getItem('tiffin_'+k)||0; }); }catch(e){}
+  function save(){ try{ ['streak','best','solved'].forEach(function(k){ localStorage.setItem('tiffin_'+k,store[k]); }); }catch(e){} }
+
+  var $=function(id){return document.getElementById(id);};
+  var susEl=$('sus'), cluesEl=$('clues'), scrim=$('scrim'), sheet=$('sheet'), res=$('res'), rc=$('rc'), statusEl=$('status');
+  var lastFocus=null;
+
+  function newCase(){
+    S={c:genCase(),open:[],cleared:[0,0,0,0,0],wrong:[0,0,0,0,0],asked:[0,0,0,0,0],acc:0,over:false,sel:-1};
+    var c=S.c;
+    $('cno').textContent='Case #'+c.no+' · Filed by: you';
+    $('ctitle').textContent=c.title;
+    $('dishE').textContent=c.dish.e;
+    $('noteT').textContent=c.dish.note;
+    $('noteS').textContent='— Mummy\'s '+c.dish.n+', RIP 💔';
+    closeAll(); $('accuse').textContent='☝️ Accuse someone';
+    renderStats(); renderSus(); renderClues(); renderTries();
+    say('New case opened. Pick a clue or question a suspect.');
+  }
+  function renderStats(){ $('streak').textContent=store.streak; $('best').textContent=store.best; $('solved').textContent=store.solved; }
+  function renderTries(){ var left=2-S.acc; $('tries').textContent='⚖️ '+left+' accusation'+(left===1?'':'s')+' left'; }
+
+  function alibiState(i){
+    var r=null;
+    S.open.forEach(function(j){ var cl=S.c.clues[j]; if(cl.k!=='alibi') return;
+      if(cl.yes.indexOf(i)>=0) r={ok:true,cl:cl}; if(cl.no.indexOf(i)>=0) r={ok:false,cl:cl}; });
+    return r;
+  }
+  function tagsHtml(s){
+    return '<span class="tag">'+dotHtml(TOPS[s.top][1])+TOPS[s.top][0]+' top</span>'
+      +'<span class="tag">🏢 Floor '+s.floor+'</span>'
+      +'<span class="tag">'+dotHtml(STAINS[s.stain][1])+STAINS[s.stain][0]+'</span>';
+  }
+  function renderSus(){
+    susEl.innerHTML=S.c.sus.map(function(s){
+      var i=s.i, a=alibiState(i), cl=S.cleared[i], w=S.wrong[i];
+      var badge=a?(a.ok?'<span class="ab ok">✅ Alibi OK</span>':'<span class="ab bust">❌ Alibi busted</span>'):(S.asked[i]?'<span class="ab q">💬 Questioned</span>':'');
+      return '<div class="sus'+(cl||w?' cleared':'')+(S.over&&i===S.c.cul?' culprit':'')+'">'
+        +'<button class="open" type="button" data-i="'+i+'" aria-label="Question '+esc(s.p.n)+', '+esc(s.p.r)+'">'
+        +'<span class="av" aria-hidden="true">'+s.p.e+'</span><span class="who"><b>'+esc(s.p.n)+'</b><small>'+esc(s.p.r)+'</small>'
+        +'<span class="tags">'+tagsHtml(s)+badge+'</span></span></button>'
+        +(w?'<span class="st w" aria-hidden="true">NOT GUILTY</span>':cl?'<span class="st c" aria-hidden="true">CLEARED</span>':'')
+        +'<button class="clr" type="button" data-c="'+i+'" aria-pressed="'+(cl||w?'true':'false')+'"'+(w||S.over?' disabled':'')+' aria-label="Mark '+esc(s.p.n)+' as cleared"><i>✓</i>Clear</button></div>';
+    }).join('');
+  }
+  function renderClues(){
+    $('used').textContent=S.open.length+'/6';
+    cluesEl.innerHTML=S.c.clues.map(function(cl,j){
+      var n=S.open.indexOf(j);
+      if(n<0) return '<button class="clue" type="button" data-j="'+j+'"'+(S.over?' disabled':'')+'><span class="ci" aria-hidden="true">'+cl.i+'</span><span class="ct">'+esc(cl.t)+'</span><span class="lk">🔒 TAP TO OPEN</span></button>';
+      return '<div class="clue open"><span class="ct"><span aria-hidden="true">'+cl.i+'</span>'+esc(cl.t)+'<em>CLUE '+(n+1)+'</em></span><p>'+cl.x+'</p></div>';
+    }).join('');
+  }
+
+  function openClue(j){
+    if(S.over||S.open.indexOf(j)>=0) return;
+    S.open.push(j); renderClues(); renderSus();
+    var cl=S.c.clues[j];
+    var lie=cl.k==='alibi'&&cl.no.length;
+    say('Clue '+S.open.length+' of 6: '+cl.t+(lie?'. Someone\'s alibi just fell apart!':'.'));
+    if(lie) toast('❌ An alibi just got busted!');
+  }
+
+  /* ---------- sheets ---------- */
+  function showSheet(html,label){
+    lastFocus=document.activeElement;
+    sheet.innerHTML='<div class="grab" aria-hidden="true"></div>'+html;
+    sheet.setAttribute('aria-label',label);
+    scrim.hidden=false;
+    var f=sheet.querySelector('[data-focus]')||sheet.querySelector('button');
+    (f||sheet).focus();
+  }
+  function closeSheet(){ if(scrim.hidden) return; scrim.hidden=true; sheet.innerHTML=''; if(lastFocus&&document.contains(lastFocus)) lastFocus.focus(); }
+  function closeAll(){ scrim.hidden=true; sheet.innerHTML=''; res.hidden=true; rc.innerHTML=''; }
+
+  function openSuspect(i){
+    var s=S.c.sus[i], a=alibiState(i), cl=S.cleared[i]||S.wrong[i];
+    var st=s.p.l.replace('{dish}',S.c.dish.n);
+    var h='<div class="shd"><span class="av" aria-hidden="true">'+s.p.e+'</span><div><h3 id="sheetT">'+esc(s.p.n)+'</h3><div class="muted">'+esc(s.p.r)+'</div></div>'
+      +'<button class="x" type="button" data-close aria-label="Close">✕</button></div>'
+      +'<p class="trait">'+esc(s.p.t)+'</p>';
+    if(S.asked[i]) h+='<div class="quote">From 12 to 1, I was '+esc(VENUES[s.venue].c)+'. '+esc(st)+'</div>';
+    else h+='<div class="row" style="grid-template-columns:1fr"><button class="btn" type="button" data-ask="'+i+'" data-focus>🗣️ Question '+esc(s.p.n)+'</button></div>';
+    h+='<div class="facts"><div><small>Wearing</small><span>'+dotHtml(TOPS[s.top][1])+TOPS[s.top][0]+' top</span></div>'
+      +'<div><small>Desk</small><span>🏢 Floor '+s.floor+'</span></div>'
+      +'<div><small>Sleeve</small><span>'+dotHtml(STAINS[s.stain][1])+STAINS[s.stain][0]+'</span></div></div>';
+    if(a) h+='<div class="anote '+(a.ok?'ok':'bust')+'">'+(a.ok?'✅ Alibi confirmed by '+a.cl.i+' <b>'+esc(a.cl.t)+'</b>.':'❌ Contradicted by '+a.cl.i+' <b>'+esc(a.cl.t)+'</b>: '+esc(s.lie)+' Suspicious… but lying isn\'t proof of theft.')+'</div>';
+    if(S.wrong[i]) h+='<div class="anote ok">You already accused '+esc(s.p.n)+'. Not guilty.</div>';
+    h+='<div class="row"><button class="btn ghost'+(cl?' on':'')+'" type="button" data-tog="'+i+'" aria-pressed="'+(cl?'true':'false')+'"'+(S.wrong[i]||S.over?' disabled':'')+'>'+(cl?'✓ Cleared':'Mark cleared')+'</button>'
+      +'<button class="btn ghost" type="button" data-close>Back to case</button></div>';
+    showSheet(h,s.p.n);
+  }
+  function toggleClear(i){
+    if(S.wrong[i]||S.over) return;
+    S.cleared[i]=S.cleared[i]?0:1; renderSus();
+    say(S.c.sus[i].p.n+(S.cleared[i]?' marked as cleared.':' is back on the suspect list.'));
+  }
+
+  function openAccuse(){
+    if(S.over) return;
+    S.sel=-1;
+    var h='<div class="shd"><div><h3 id="sheetT">Who ate the '+esc(S.c.dish.n)+'?</h3><div class="muted">'+(2-S.acc)+' accusation'+(S.acc===1?'':'s')+' left. Choose wisely. HR is watching.</div></div>'
+      +'<button class="x" type="button" data-close aria-label="Close">✕</button></div><div class="pick">'
+      +S.c.sus.map(function(s){ var w=S.wrong[s.i];
+        return '<button type="button" data-pick="'+s.i+'" aria-pressed="false"'+(w?' disabled':'')+'><span class="av" aria-hidden="true">'+s.p.e+'</span><span><b>'+esc(s.p.n)+'</b><small>'+esc(s.p.r)+'</small></span>'
+          +(w?'<span class="cl" style="color:var(--red)">Not guilty</span>':S.cleared[s.i]?'<span class="cl">Cleared</span>':'')+'</button>'; }).join('')
+      +'</div><div class="row"><button class="btn ghost" type="button" data-close>Not yet</button><button class="btn red" type="button" id="confirm" disabled>Confirm</button></div>';
+    showSheet(h,'Accuse a suspect');
+  }
+  function choose(i){
+    S.sel=i;
+    sheet.querySelectorAll('[data-pick]').forEach(function(b){ b.setAttribute('aria-pressed',+b.dataset.pick===i?'true':'false'); });
+    var c=sheet.querySelector('#confirm'); c.disabled=false; c.textContent='Accuse '+S.c.sus[i].p.n;
+  }
+  function consistent(){
+    return S.c.sus.filter(function(s){ return !S.wrong[s.i]&&S.open.every(function(j){ return S.c.clues[j].ok(s); }); }).map(function(s){return s.i;});
+  }
+  function confirmAccuse(){
+    var i=S.sel; if(i<0||S.over) return;
+    var determined=consistent().length===1, used=S.open.length;
+    S.acc++;
+    if(i===S.c.cul){ finish(true,determined,used); return; }
+    S.wrong[i]=1; S.cleared[i]=0;
+    if(S.acc>=2){ finish(false,false,used); return; }
+    renderSus(); renderTries();
+    var s=S.c.sus[i];
+    showSheet('<div class="oops"><div class="big" aria-hidden="true">🙅</div><h3 id="sheetT">'+esc(s.p.n)+' didn\'t do it!</h3><p>'+esc(s.p.w)+'</p>'
+      +'<p><b style="color:var(--gold)">One accusation left.</b> Maybe open another clue first?</p></div>'
+      +'<div class="row" style="grid-template-columns:1fr"><button class="btn" type="button" data-close data-focus>Back to the case</button></div>',s.p.n+' is not guilty');
+    say('Wrong! '+s.p.n+' is innocent. One accusation left.');
+  }
+
+  /* ---------- ending ---------- */
+  function reasonFor(cl,s){
+    if(cl.k==='top') return TOPS[s.top][0].toLowerCase()+' top (CCTV saw '+TOPS[S.c.sus[S.c.cul].top][0].toLowerCase()+')';
+    if(cl.k==='floor') return 'Floor '+s.floor+' badge (pantry opened by Floor '+S.c.sus[S.c.cul].floor+')';
+    if(cl.k==='stain') return STAINS[s.stain][0].toLowerCase()+' (the thief has '+STAINS[S.c.sus[S.c.cul].stain][0].toLowerCase()+')';
+    return 'alibi confirmed by '+cl.t;
+  }
+  function finish(win,determined,used){
+    S.over=true; scrim.hidden=true; sheet.innerHTML=''; var ot=document.querySelector('.toast'); if(ot) ot.remove();
+    var c=S.c, C=c.sus[c.cul], rank, emo;
+    if(win){
+      if(!determined){ rank='😅 Lucky Guess'; emo='😅'; }
+      else if(S.acc===1&&used<=c.min){ rank='🕵️ Master Detective'; emo='🕵️'; }
+      else if(S.acc===1&&used<=c.min+1){ rank='🔍 Sharp Eye'; emo='🔍'; }
+      else { rank='🙂 Got There'; emo='🙂'; }
+      store.streak++; store.solved++; if(store.streak>store.best) store.best=store.streak;
+    } else { rank='🥲 Case Gone Cold'; emo='🥲'; store.streak=0; }
+    save(); renderStats(); renderSus(); renderClues(); renderTries(); $('accuse').textContent='📋 See the verdict';
+    var V=VENUES[C.venue], cv=c.clues.filter(function(x){return x.k==='alibi'&&x.v===C.venue;})[0];
+    var why='<p><b>It was '+esc(C.p.n)+' the '+esc(C.p.r.toLowerCase())+'.</b> CCTV caught a '+TOPS[C.top][0].toLowerCase()+' top at the fridge at '+hhmm(c.t)
+      +', a Floor '+C.floor+' badge opened the pantry at '+hhmm(c.t-3)+', the '+STAINS[C.stain][0].toLowerCase()+' on '+esc(C.p.n)+'\'s sleeve matches the '+esc(c.dish.sd)
+      +', and the "'+esc(V.s)+'" alibi was false: '+esc(C.lie)+'</p>';
+    var cleared='<ul>'+c.sus.filter(function(s){return s!==C;}).map(function(s){
+      var rs=c.clues.filter(function(cl){return !cl.ok(s);}).map(function(cl){return cl.i+' '+esc(reasonFor(cl,s));});
+      return '<li><b>'+esc(s.p.n)+'</b>: '+rs.join('; ')+'.'+(s.truth?'':' <span class="wl">Also lied about the '+esc(VENUES[s.venue].s)+'. Actually '+esc(s.where)+'. Not a crime, just embarrassing.</span>')+'</li>';
+    }).join('')+'</ul>';
+    var sum=win?(determined?'You opened '+used+' of 6 clues. The minimum needed was '+c.min+'.':'Right answer… but the clues you opened didn\'t prove it yet. Pure gut feeling.')
+      :'Two wrong accusations. '+esc(C.p.n)+' is quietly finishing your '+esc(c.dish.n)+' at their desk right now.';
+    var share=win?'🕵️ I cracked Case #'+c.no+': '+C.p.n+' the '+C.p.r.toLowerCase()+' stole Mummy\'s '+c.dish.n+'! Rank: '+rank.replace(/^\S+\s/,'')+' using '+used+' clues. Can you catch your office tiffin thief? Play free: https://resume4u.help/games/who-stole-my-tiffin/'
+      :'😭 '+C.p.n+' the '+C.p.r.toLowerCase()+' stole my '+c.dish.n+' and I accused the wrong people TWICE. Think you\'re a better detective? Play free: https://resume4u.help/games/who-stole-my-tiffin/';
+    rc.innerHTML='<div class="e" aria-hidden="true">'+emo+'</div><h2 id="resT">'+(win?'Case closed!':'The thief got away…')+'</h2>'
+      +'<div class="rank'+(win?'':' lose')+'">'+rank+'</div><p>'+sum+'</p>'
+      +'<div class="mini"><div class="sc"><small>Streak</small><b>'+store.streak+'</b></div><div class="sc"><small>Best</small><b>'+store.best+'</b></div><div class="sc"><small>Clues</small><b>'+used+'/6</b></div></div>'
+      +'<div class="expl"><h4>🧵 How it went down</h4>'+why+'<h4>How the others were cleared</h4>'+cleared+'</div>'
+      +'<div class="ra"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a>'
+      +'<button class="btn ghost" type="button" id="again">🔎 New case (play again)</button>'
+      +'<button class="btn ghost" type="button" id="review">View the case board</button></div>'
+      +'<a class="cta" style="margin-top:12px" href="https://resume4u.help/" target="_blank" rel="noopener">Put "attention to detail" on your CV, for real. Build your resume free →</a>';
+    res.hidden=false; res.scrollTop=0; rc.focus();
+    say(win?'Case closed! It was '+C.p.n+'. Rank: '+rank.replace(/^\S+\s/,'')+'.':'Out of accusations. It was '+C.p.n+'.');
+  }
+
+  /* ---------- misc ---------- */
+  function say(m){ statusEl.textContent=m; }
+  var tt; function toast(m){ var o=document.querySelector('.toast'); if(o) o.remove(); var d=document.createElement('div'); d.className='toast'; d.setAttribute('aria-hidden','true'); d.textContent=m; document.body.appendChild(d); clearTimeout(tt); tt=setTimeout(function(){ d.remove(); },1700); }
+
+  /* ---------- events ---------- */
+  susEl.addEventListener('click',function(e){
+    var o=e.target.closest('[data-i]'), c=e.target.closest('[data-c]');
+    if(c){ toggleClear(+c.dataset.c); return; }
+    if(o){ openSuspect(+o.dataset.i); }
+  });
+  cluesEl.addEventListener('click',function(e){ var b=e.target.closest('[data-j]'); if(b) openClue(+b.dataset.j); });
+  sheet.addEventListener('click',function(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.hasAttribute('data-close')){ closeSheet(); return; }
+    if(t.dataset.ask){ var i=+t.dataset.ask; S.asked[i]=1; renderSus(); openSuspect(i); lastFocus=susEl.querySelector('[data-i="'+i+'"]'); say(S.c.sus[i].p.n+' gave a statement.'); return; }
+    if(t.dataset.tog){ var k=+t.dataset.tog; toggleClear(k); var f=lastFocus; openSuspect(k); lastFocus=f; return; }
+    if(t.dataset.pick){ choose(+t.dataset.pick); return; }
+    if(t.id==='confirm') confirmAccuse();
+  });
+  scrim.addEventListener('click',function(e){ if(e.target===scrim) closeSheet(); });
+  rc.addEventListener('click',function(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.id==='again') newCase();
+    else if(t.id==='review'){ res.hidden=true; $('ctitle').scrollIntoView({block:'start'}); say('Case board unlocked. The thief is highlighted in gold.'); }
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ if(!scrim.hidden) closeSheet(); else if(!res.hidden&&S.over){ res.hidden=true; } }
+  });
+  $('accuse').onclick=function(){ if(S.over){ res.hidden=false; rc.focus(); } else openAccuse(); };
+  $('newcase').onclick=newCase; $('newcase2').onclick=newCase;
+  newCase();
+})();
+</script>
+</body>
+</html>

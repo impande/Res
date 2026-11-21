@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Naukri Life: Free Indian Career Life Simulator Game</title>
+<meta name="description" content="Live a whole Indian career from 21 to 40 in five minutes. Placements, appraisals, layoffs, onsite, UPSC, startups and shaadi pressure. See where you end up.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/naukri-life/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/naukri-life/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/naukri-life/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Naukri Life: Free Indian Career Life Simulator Game">
+<meta property="og:description" content="Live a whole Indian career from 21 to 40 in five minutes. Placements, appraisals, layoffs, onsite, UPSC, startups and shaadi pressure. See where you end up.">
+<meta property="og:url" content="https://resume4u.help/games/naukri-life/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Naukri Life: Free Indian Career Life Simulator Game">
+<meta name="twitter:description" content="Live a whole Indian career from 21 to 40 in five minutes. Placements, appraisals, layoffs, onsite, UPSC, startups and shaadi pressure. See where you end up.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Naukri Life",
+   "url": "https://resume4u.help/games/naukri-life/",
+   "description": "Live a whole Indian career from 21 to 40 in five minutes. Placements, appraisals, layoffs, onsite, UPSC, startups and shaadi pressure. See where you end up.",
+   "genre": "Life story",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Naukri Life",
+     "item": "https://resume4u.help/games/naukri-life/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column — a status strip (age, job, salary, three meters) above a single "year" card on ruled answer-sheet paper; the card flips between event, outcome and ending. */
+:root{
+  --paper:#fbf7ec; --rule:#dfe7f2; --margin:#e9a2a2; --ink:#1f1a14; --muted:#6d6358;
+  --card:#fffdf7; --edge:#e8dcc4; --saffron:#f59e0b; --saffron-ink:#7c2d12; --teal:#0f766e;
+  --good:#15803d; --bad:#b91c1c; --chip:#fff3d6;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1d2a24; --rule:#25352d; --margin:#7a3b3b; --ink:#eef2ea; --muted:#a8b5ab;
+  --card:#24332b; --edge:#3a4d42; --saffron:#fbbf24; --saffron-ink:#fde68a; --teal:#5eead4;
+  --good:#86efac; --bad:#fca5a5; --chip:#33463b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1d2a24; --rule:#25352d; --margin:#7a3b3b; --ink:#eef2ea; --muted:#a8b5ab;
+  --card:#24332b; --edge:#3a4d42; --saffron:#fbbf24; --saffron-ink:#fde68a; --teal:#5eead4;
+  --good:#86efac; --bad:#fca5a5; --chip:#33463b; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);
+  background-color:var(--paper);
+  background-image:linear-gradient(90deg,transparent 46px,var(--margin) 46px,var(--margin) 48px,transparent 48px),
+    repeating-linear-gradient(180deg,transparent 0 29px,var(--rule) 29px 30px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.logo{font:800 1.55rem/1 var(--display);letter-spacing:-.01em;margin:0}
+.logo span{color:var(--saffron)}
+.by{font-size:.72rem;color:var(--muted);text-align:right}
+.by a{color:inherit}
+
+/* status strip */
+.status{background:var(--card);border:1.5px solid var(--edge);border-radius:16px;padding:12px 14px;display:grid;gap:10px;box-shadow:0 10px 24px -20px rgba(60,40,10,.5)}
+.st-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.age{font:800 1.9rem/1 var(--display);font-variant-numeric:tabular-nums}
+.age small{font:600 .7rem var(--body);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-left:4px}
+.job{min-width:0;text-align:right}
+.job b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sal{font:800 1.05rem var(--display);color:var(--saffron-ink)}
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.m label{display:flex;justify-content:space-between;font-size:.7rem;font-weight:600;color:var(--muted)}
+.m label b{color:var(--ink);font-variant-numeric:tabular-nums}
+.bar{height:7px;border-radius:9px;background:var(--rule);overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;border-radius:9px;background:var(--saffron);transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.m.sk .bar i{background:var(--teal)} .m.fa .bar i{background:#e879a6}
+
+/* card */
+.card{position:relative;background:var(--card);border:1.5px solid var(--edge);border-radius:18px;padding:20px 18px 18px;box-shadow:0 18px 40px -26px rgba(60,40,10,.55);animation:pop .28s cubic-bezier(.2,.8,.3,1)}
+@keyframes pop{from{transform:translateY(10px) rotate(-.4deg);opacity:0}to{transform:none;opacity:1}}
+.tag{position:absolute;top:-11px;left:16px;background:var(--saffron);color:#3b1d06;font:700 .68rem var(--body);letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.emo{font-size:2.6rem;line-height:1}
+.card h2{font:800 1.45rem/1.15 var(--display);margin:8px 0 6px;text-wrap:balance}
+.card p{margin:0 0 14px;color:var(--ink)}
+.choices{display:grid;gap:9px}
+.choice{display:flex;gap:10px;align-items:center;text-align:left;width:100%;border:1.5px solid var(--edge);background:var(--paper);color:var(--ink);border-radius:13px;padding:12px 13px;font:600 .95rem/1.3 var(--body);cursor:pointer;transition:transform .12s,border-color .12s,background .12s}
+.choice:hover{border-color:var(--saffron);transform:translateY(-1px)}
+.choice:active{transform:scale(.99)}
+.choice:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
+.choice .k{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--chip);color:var(--saffron-ink);font:800 .85rem var(--display)}
+.outcome{font-size:1rem;margin:2px 0 12px}
+.deltas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.d{font:700 .78rem var(--body);padding:4px 9px;border-radius:99px;background:var(--chip)}
+.d.up{color:var(--good)} .d.dn{color:var(--bad)}
+a.btn{text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:13px;padding:13px 18px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#3b1d06;box-shadow:0 8px 18px -10px rgba(217,119,6,.9);width:100%}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1.5px solid var(--edge);box-shadow:none}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+/* start */
+.field{display:grid;gap:5px;margin-bottom:12px}
+.field label{font-size:.78rem;font-weight:600;color:var(--muted)}
+input[type=text]{border:1.5px solid var(--edge);background:var(--paper);color:var(--ink);border-radius:12px;padding:12px 13px;font:600 1rem var(--body)}
+.streams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.stream{border:1.5px solid var(--edge);background:var(--paper);color:var(--ink);border-radius:13px;padding:12px 6px;text-align:center;cursor:pointer;font:700 .82rem var(--body)}
+.stream span{display:block;font-size:1.7rem;margin-bottom:2px}
+.stream[aria-pressed="true"]{border-color:var(--saffron);background:var(--chip)}
+
+/* ending */
+.end-emo{font-size:3.6rem;line-height:1;text-align:center}
+.end h2{text-align:center;font-size:1.7rem}
+.end .line{text-align:center;color:var(--muted);margin-bottom:14px}
+.final{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:14px}
+.final div{background:var(--paper);border:1px solid var(--edge);border-radius:11px;padding:8px 4px;text-align:center}
+.final b{display:block;font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.final small{font-size:.66rem;color:var(--muted)}
+.story{border-left:2px solid var(--margin);padding-left:12px;margin:0 0 14px;display:grid;gap:5px;max-height:230px;overflow:auto}
+.story div{font-size:.84rem}
+.story b{font-variant-numeric:tabular-nums;color:var(--saffron-ink)}
+.lesson{background:var(--chip);border-radius:12px;padding:10px 12px;font-size:.88rem;margin-bottom:14px}
+.cta{display:block;text-align:center;margin-top:10px;font-weight:700;color:var(--teal);text-decoration:none}
+.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:10px;font-size:.85rem;font-weight:600}
+.foot{font-size:.72rem;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:reduce){.card{animation:none}.bar i{transition:none}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <header class="brand">
+    <h1 class="logo">Naukri <span>Life</span></h1>
+    <div class="by">A career in 5 minutes<br>by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div>
+  </header>
+  <section class="status" id="status" hidden aria-live="polite">
+    <div class="st-top">
+      <div class="age" id="age">21<small>years</small></div>
+      <div class="job"><b id="title">Fresher</b><span class="sal" id="sal">₹0 LPA</span></div>
+    </div>
+    <div class="meters">
+      <div class="m"><label>😊 Happiness <b id="vh">60</b></label><div class="bar"><i id="bh"></i></div></div>
+      <div class="m sk"><label>🧠 Skills <b id="vs">20</b></label><div class="bar"><i id="bs"></i></div></div>
+      <div class="m fa"><label>🏠 Family <b id="vf">60</b></label><div class="bar"><i id="bf"></i></div></div>
+    </div>
+  </section>
+  <main id="stage"></main>
+  <p class="foot">A demo by Resume For You · every playthrough is different</p>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Naukri Life</h2><ol><li>Enter your name and pick Engineering, Commerce or Arts.</li><li>Make one choice for each stage of life, from placements to promotions.</li><li>Your salary, happiness, skills and family meter change with every choice.</li><li>At 40, see your ending and the real-life lesson behind it.</li></ol><p>Start your real career story with a strong first resume. <a href="/">Build it free</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var stage=$('stage');
+  var AGES=[21,22,23,24,26,27,28,30,31,33,35,37,39];
+  var S;
+  function rnd(p){return Math.random()<p;}
+  function clamp(v){return Math.max(0,Math.min(100,Math.round(v)));}
+  function fmt(m){return m<=0?'₹0 LPA':'₹'+(m<10?(Math.round(m*10)/10):Math.round(m))+' LPA';}
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  /* fx helpers return the outcome text; they change S */
+  function ch(o){ // o: {h,s,f,m (multiplier) ,set (salary)}
+    if(o.h) S.h=clamp(S.h+o.h); if(o.s) S.s=clamp(S.s+o.s); if(o.f) S.f=clamp(S.f+o.f);
+    if(o.mul) S.m=S.m*o.mul; if(o.set!==undefined) S.m=o.set; if(o.add) S.m=Math.max(0,S.m+o.add);
+    if(o.title) S.title=o.title;
+  }
+
+  /* ───────── scenes ───────── */
+  var SC={
+   ENG:{emo:'🎓',tag:'Campus placement',t:'Placement day!',p:'Three options. Your phone is already full of "Congrats beta!" messages.',c:[
+     ['Mass recruiter — ₹4.5 LPA, very stable',function(){ch({set:4.5,f:15,title:'Software Engineer · IT services'});S.co='service';return 'Mummy distributes laddoos. You get 3 months of training and a lanyard.';}],
+     ['Startup — ₹10 LPA + ESOPs',function(){ch({set:10,h:10,f:-10,title:'SDE-1 · Startup'});S.co='startup';S.fl.esop=1;return 'Relatives ask "startup matlab?". You get a hoodie and unlimited Maggi.';}],
+     ['Skip it. Crack GATE / go for MS',function(){ch({set:0,s:15,f:-5,title:'Aspirant'});S.q.push('STUDY');return 'Library card, 3 test series and one very tired chai-wala.';}]]},
+   COM:{emo:'📊',tag:'Final year',t:'B.Com done. Now what?',p:'Your CA uncle has opinions. So does everyone else.',c:[
+     ['Big 4 audit firm — ₹6 LPA',function(){ch({set:6,f:10,h:-5,title:'Audit Associate · Big 4'});S.co='big4';return 'Busy season begins. You learn that "quick call" means 2 hours.';}],
+     ['Start CA articleship',function(){ch({set:1.5,s:20,title:'CA Articled Assistant'});S.q.push('CA');return 'Stipend is small, dreams are big. Excel becomes your best friend.';}],
+     ['Join Papa\'s business',function(){ch({set:5,f:20,h:5,title:'Family Business'});S.track='biz';return 'You get a desk, a ledger and 40 years of "humare zamane mein".';}]]},
+   ART:{emo:'🎨',tag:'Graduation',t:'BA done. The world awaits.',p:'Everyone wants to know your "plan". You have a vibe.',c:[
+     ['Content writer — ₹3.5 LPA',function(){ch({set:3.5,s:5,title:'Content Writer'});S.co='agency';return 'You write "10 Ways to Boost Productivity" for the 10th time.';}],
+     ['UPSC prep in Delhi',function(){ch({set:0,f:12,s:10,title:'UPSC Aspirant'});S.track='govt';S.q.push('UPSC');return 'Rajinder Nagar. One room, two roommates, three newspapers.';}],
+     ['Become a creator',function(){ch({set:1,h:15,f:-15,title:'Creator · 2k followers'});S.track='creator';S.q.push('VIRAL');return 'Ring light bought. Family WhatsApp group is "concerned".';}]]},
+   STUDY:{emo:'📬',tag:'Results',t:'Results are out',p:'Months of mock tests come down to one PDF.',c:[
+     ['Open the mail…',function(){ if(rnd(.65)){ S.q.unshift('ABROAD_OR_PSU'); ch({s:10,h:15}); return 'You made it! Two good doors just opened.'; } ch({h:-15,s:5}); S.q.unshift('JOBHUNT'); return 'Missed the cut by 3 marks. Pain. Time to job hunt.';}]]},
+   ABROAD_OR_PSU:{emo:'🛫',tag:'Big choice',t:'MS in Germany or a PSU job?',p:'Scholarship in Munich, or a government engineering job with a 5:30 pm exit.',c:[
+     ['Germany 🇩🇪',function(){ch({set:42,h:10,f:-15,s:15,title:'Engineer · Berlin'});S.fl.abroad=1;S.co='product';return 'Two years later: an engineering job in Berlin. Mummy learns video calls.';}],
+     ['PSU job',function(){ch({set:12,f:20,h:10,title:'PSU Engineer'});S.track='govt';S.fl.psu=1;return 'Govt quarters, canteen thali, peace of mind.';}]]},
+   CA:{emo:'📜',tag:'CA Final',t:'CA Final results',p:'The website crashes. Of course it does.',c:[
+     ['Refresh… refresh…',function(){ if(rnd(.55)){ ch({set:9,s:15,h:15,f:15,title:'Chartered Accountant'}); S.co='big4'; return 'You\'re a CA! Your name gets a "CA" in front. Forever.'; } ch({h:-15,s:5}); S.q.unshift('CA2'); return 'Not this attempt. Deep breath.';}]]},
+   CA2:{emo:'🔁',tag:'Second chance',t:'Try again or switch?',p:'Your friends are already earning. You are revising Indirect Tax.',c:[
+     ['One more attempt',function(){ if(rnd(.6)){ch({set:9,s:15,h:20,f:10,title:'Chartered Accountant'});S.co='big4';return 'Cleared! Second attempts hit different.';} ch({h:-10,set:5,title:'Finance Analyst'});S.co='product';return 'Didn\'t clear, but a finance analyst job comes through.';}],
+     ['Become a finance analyst',function(){ch({set:5.5,h:5,title:'Finance Analyst'});S.co='product';return 'Excel shortcuts make you a legend in the office.';}]]},
+   UPSC:{emo:'📚',tag:'UPSC',t:'Prelims, Mains, Interview',p:'The interview board asks: "Why should we select you?"',c:[
+     ['Honest, simple answer',function(){ return upsc(.5);}],
+     ['A rehearsed speech',function(){ return upsc(.35);}],
+     ['A small joke to break the ice',function(){ return upsc(.4);}]]},
+   UPSC2:{emo:'🧭',tag:'Next step',t:'Missed the final list',p:'So close. You know more about the Constitution than most lawyers.',c:[
+     ['One last attempt',function(){ if(rnd(.35)){S.fl.ias=1;ch({set:14,f:25,h:20,s:15,title:'IAS Officer'});return 'Rank 212. Your town puts up a banner with your photo.';} ch({h:-15,set:6,title:'State PSC Officer'});return 'Not this time, but you clear the State PSC. Still a sarkari job!';}],
+     ['Take a State PSC job',function(){ch({set:6,f:20,h:5,title:'State PSC Officer'});return 'Stable job, respect in the mohalla.';}],
+     ['Teach UPSC on YouTube',function(){ch({set:4,h:10,title:'UPSC Teacher · YouTube'});S.track='creator';S.q.push('VIRAL');return 'Your Polity explanations are surprisingly good.';}]]},
+   VIRAL:{emo:'🚀',tag:'Going viral',t:'A reel hits 2M views',p:'Brands are in your DMs. Your phone is hot. Literally.',c:[
+     ['Go all in: brand deals',function(){ch({set:14,h:10,f:5,title:'Creator · 500k followers'});S.fl.viral=1;return 'You buy Mummy a washing machine. Family group goes quiet.';}],
+     ['Take a social media manager job',function(){S.track='job';ch({set:7,f:15,title:'Social Media Manager'});S.co='agency';return 'Steady salary. Your reels are now for a detergent brand.';}]]},
+   /* general */
+   CREDIT:{emo:'😤',tag:'Office drama',t:'Your manager took credit',p:'Your project. Their slide. Their name.',c:[
+     ['Raise it calmly in a 1:1',function(){ if(rnd(.55)){ch({s:5,mul:1.15,h:5});return 'Respect earned. A bigger project lands on your desk.';} ch({h:-10});return 'Awkward. Very awkward. But you said it.';}],
+     ['Ignore it',function(){ch({h:-12});return 'You let it go. Your heart doesn\'t.';}],
+     ['Quietly update your resume',function(){ch({s:5});S.q.unshift('SWITCH');return 'Fresh resume, new profile photo, "Open to work" in stealth mode.';}]]},
+   APPRAISAL:{emo:'🙃',tag:'Appraisal',t:'3% hike. Thank you for your "contribution".',p:'Inflation laughs at you.',c:[
+     ['Accept it',function(){ch({mul:1.03,h:-8});return 'Happy to be here. (You are not.)';}],
+     ['Negotiate with data',function(){ if(rnd(.45)){ch({mul:1.15,s:3,h:5});return 'You showed numbers. HR found "budget". +15%!';} ch({mul:1.03,h:-5});return 'HR: "We\'ll revisit next cycle." Sure.';}],
+     ['Start looking outside',function(){S.q.unshift('SWITCH');return 'LinkedIn notifications: ON.';}]]},
+   SWITCH:{emo:'📈',tag:'New offer',t:'An offer: +45% hike',p:'Better title, better pay, new team.',c:[
+     ['Take it!',function(){ch({mul:1.45,s:5,h:5});S.title=upTitle(S.title);if(S.co==='service')S.co='product';return 'New laptop, new badge, same Excel.';}],
+     ['Use it for a counter-offer',function(){ch({mul:1.22,h:-3});return 'You stayed with +22%. Your manager now replies within minutes.';}],
+     ['Stay loyal',function(){ch({h:5,f:3});return 'Loyalty points: 100. Salary points: same.';}]]},
+   LAYOFF:{emo:'😱',tag:'Bad news',t:'Layoffs announced',p:'Calendar invite: "Quick sync" at 9 am. With HR.',c:[
+     ['Open the invite',function(){ var risk=S.co==='startup'?.6:.35; if(rnd(risk)){ch({h:-15,mul:.0001});S.q.unshift('JOBHUNT');return 'You\'re affected. Laptop to be returned by Friday.';} ch({h:-5,s:5});return 'You survived. Survivor\'s guilt and double the work.';}]]},
+   JOBHUNT:{emo:'🔍',tag:'Job hunt',t:'Job hunting season',p:'How do you go about it?',c:[
+     ['Rebuild your resume properly first',function(){ var base=Math.max(S.mPrev||S.m,6); if(rnd(.75)){ch({set:base*1.15,s:5,h:12});S.title=upTitle(S.title||'Analyst');return 'A sharp resume gets 4 callbacks in a week. New job, +15%!';} ch({set:base,h:5});return 'Took a while, but you\'re back at the same pay.';}],
+     ['Spray the same resume to 200 jobs',function(){ var base=Math.max(S.mPrev||S.m,6); if(rnd(.3)){ch({set:base,h:5});return 'Lucky break after 6 weeks.';} ch({set:base*.85,h:-10});return 'Few replies. You take a lower offer.';}],
+     ['Take 3 months to upskill',function(){ var base=Math.max(S.mPrev||S.m,6); ch({s:18,set:base*1.1,h:5});return 'New skills, new job, slightly better pay.';}]]},
+   ONSITE:{emo:'✈️',tag:'Opportunity',t:'Onsite offer: Germany',p:'2 years abroad. Mummy has already started crying.',c:[
+     ['Go!',function(){ch({mul:2.4,h:10,f:-15,s:8});S.fl.abroad=1;S.title=S.title.replace(/·.*$/,'')+'· Germany';return 'Bread is hard, salary is soft. You learn "Danke".';}],
+     ['Stay home',function(){ch({f:12});return 'Sunday lunches with family > Euros.';}]]},
+   COUSIN:{emo:'📞',tag:'Family',t:'Cousin got 30 LPA',p:'Mummy is on the phone. Comparison mode: ON.',c:[
+     ['Do an AI course on weekends',function(){ch({s:15,h:-5});return 'Weekend gone, skills up. Mummy is now comparing your certificates.';}],
+     ['Ignore. You\'re doing fine',function(){ch({h:6,f:-10});return 'Peace of mind. Family WhatsApp group: tension.';}],
+     ['"Mine is also 30" 😅',function(){ch({f:12,h:-6});S.fl.lie=1;return 'It works… until Diwali, when someone asks for a treat.';}]]},
+   SHAADI:{emo:'💍',tag:'Shaadi season',t:'Marriage pressure begins',p:'Biodata requests are arriving faster than job offers.',c:[
+     ['Arranged — trust the family',function(){ch({f:20,h:5});S.fl.married=1;return 'Biodata made, families met, 600 guests fed.';}],
+     ['Love marriage',function(){ch({h:15,f:-5});S.fl.married=1;return 'Some drama, then everyone agrees. Good food at the wedding.';}],
+     ['"After my promotion"',function(){ch({f:-15,h:5});return 'Buys you 2 years. Maybe.';}]]},
+   IDEA:{emo:'💡',tag:'2 AM thought',t:'A startup idea at 2 AM',p:'It\'s brilliant. Or it\'s the coffee.',c:[
+     ['Quit and build it',function(){S.track='startup';S.mPrev=S.m;ch({set:0.0001,h:10,f:-15,title:'Founder & CEO'});S.q.unshift('FUNDING');return 'You print visiting cards that say "Founder". Mummy hides them.';}],
+     ['Build on weekends',function(){ch({s:10,h:-5});return 'Side project grows slowly. Your sleep doesn\'t.';}],
+     ['Go back to sleep',function(){ch({h:5});return 'The idea is gone by morning. Probably for the best.';}]]},
+   FUNDING:{emo:'🦈',tag:'Investor meeting',t:'The pitch',p:'An investor leans in: "What\'s your moat?"',c:[
+     ['Raise ₹5 Cr',function(){ if(rnd(.6)){ch({set:20,h:10,s:10});S.q.unshift('GROWTH');return 'Funded! You hire 12 people and a plant.';} ch({h:-15,set:0.0001});S.q.unshift('GROWTH');return 'Ghosted by 30 investors. You keep going anyway.';}],
+     ['Bootstrap it',function(){ch({set:6,h:5,s:8});S.q.unshift('GROWTH');return 'Slow, profitable, no board meetings.';}]]},
+   GROWTH:{emo:'📈',tag:'Startup',t:'Make or break year',p:'Burn rate, growth chart and your blood pressure are all going up.',c:[
+     ['Blitzscale!',function(){ if(rnd(.3)){S.fl.unicorn=1;ch({set:80,h:15,f:15});return 'Valuation crosses $1 billion. 🦄 Business news calls you "young founder".';} S.fl.failed=1;ch({set:0.0001,h:-20,f:-5});return 'Money ran out. You shut down and write a long LinkedIn post.';}],
+     ['Stay small & profitable',function(){ch({set:30,h:12});return 'No headlines, but salaries always on time.';}],
+     ['Sell to a big company',function(){S.fl.acquired=1;ch({set:55,h:10,f:10,title:'VP · after acquisition'});S.track='job';return 'Acquired! You get a big cheque and a 2-year lock-in.';}]]},
+   MBA:{emo:'🎯',tag:'CAT result',t:'99.2 percentile!',p:'A top B-school calls. Two years, big loan, bigger dreams.',c:[
+     ['Go for the MBA',function(){S.mPrev=S.m;ch({set:Math.max(S.m*2,28),s:12,f:10,title:'Product Manager'});S.co='product';return 'Case studies, placements, and finally: Product Manager.';}],
+     ['Skip it',function(){ch({h:5});return 'You keep your job and your sanity.';}]]},
+   BURNOUT:{emo:'🫠',tag:'Uh oh',t:'Burnout hits',p:'You stare at Slack. Slack stares back.',c:[
+     ['Take a 3-month sabbatical',function(){ch({h:25,mul:.95});return 'Mountains, sleep, no notifications. You come back human.';}],
+     ['Push through',function(){ch({h:-15,mul:1.1});return 'Bonus received. Sleep not received.';}],
+     ['Quit and travel',function(){S.mPrev=S.m;ch({h:30,mul:.0001});S.q.unshift('JOBHUNT');return 'Ladakh, Spiti, Gokarna. Then reality: rent.';}]]},
+   AI:{emo:'🤖',tag:'The future',t:'AI can now do half your job',p:'Your boss forwards an article titled "Is your job safe?"',c:[
+     ['Learn AI tools seriously',function(){ch({s:20,mul:1.2});return 'You become the person who makes AI actually useful. +20%.';}],
+     ['Ignore it',function(){ if(rnd(.4)){S.mPrev=S.m;ch({h:-15,mul:.0001});S.q.unshift('JOBHUNT');return 'Your role gets "restructured".';} ch({h:-3});return 'Nothing changes. For now.';}],
+     ['Become the "AI person" of the team',function(){ch({s:10,mul:1.3,h:-5});return 'Promotion! Also, 14 new meetings a week.';}]]},
+   PROMO:{emo:'🧑‍💼',tag:'Promotion',t:'Manager role offered',p:'More pay, more meetings, fewer weekends.',c:[
+     ['Accept',function(){ch({mul:1.3,h:-6});S.title=mgrTitle(S.title);S.fl.mgr=1;return 'You now say "let\'s circle back" unironically.';}],
+     ['Stay an expert (IC)',function(){ch({s:10,h:6,mul:1.1});return 'Deep work, fewer meetings, still a raise.';}]]},
+   RTO:{emo:'🏢',tag:'New policy',t:'Back to office, 5 days a week',p:'2 hours of traffic. Each way.',c:[
+     ['Comply',function(){ch({h:-10});return 'You discover 4 new podcasts and lose 4 kg of patience.';}],
+     ['Find a remote job',function(){ if(rnd(.6)){ch({h:12});return 'Remote offer! Pyjama bottoms forever.';} ch({h:-5});return 'Remote jobs are rarer than you thought.';}],
+     ['Move to hometown, negotiate hybrid',function(){ch({f:15,h:5,mul:.95});return 'Mummy\'s food, cheaper rent, okay internet.';}]]},
+   HEALTH:{emo:'🩺',tag:'Health check',t:'"Your vitamin D is almost zero"',p:'The doctor sighs. You sit at a desk 11 hours a day.',c:[
+     ['Gym + morning walks',function(){ch({h:12});return 'Two months later you are the person who talks about protein.';}],
+     ['Buy an expensive smartwatch',function(){ch({h:2,mul:.99});return 'It reminds you to stand. You don\'t.';}],
+     ['Ignore it',function(){ch({h:-10});return 'Your back has started making noises.';}]]},
+   ESOP:{emo:'💎',tag:'ESOPs',t:'Your ESOPs just vested',p:'The startup is doing a buyback.',c:[
+     ['Sell them',function(){ if(rnd(.35)){S.fl.rich=1;ch({h:15,f:10});return '₹1.8 Cr in your account. You read the SMS 11 times.';} ch({h:-3});return 'Worth about one nice dinner.';}]]},
+   PARENTS:{emo:'🏡',tag:'Family',t:'Parents want you back home',p:'"Beta, how long will you live alone in that city?"',c:[
+     ['Move back home',function(){ch({f:20,h:5,mul:.85});return 'Ghar ka khana. Lower salary, lower rent.';}],
+     ['Bring them to your city',function(){ch({f:15,mul:.95});return 'Papa now gives directions to your Uber drivers.';}],
+     ['Visit more often',function(){ch({f:6});return 'Every long weekend: train tickets booked.';}]]},
+   GOVT_T:{emo:'🚌',tag:'Sarkari life',t:'Transfer to a remote district',p:'New posting, 400 km away.',c:[
+     ['Accept and do good work',function(){ch({s:12,h:5});S.fl.good=1;return 'You fix the district\'s water problem. People remember your name.';}],
+     ['Use "source" to stop it',function(){ch({f:5,h:-5});return 'Transfer cancelled. Your conscience files a complaint.';}]]},
+   BIZ_T:{emo:'🛒',tag:'Family business',t:'Take the business online?',p:'Papa still uses a red ledger. You have ideas.',c:[
+     ['Go online, quick delivery & all',function(){ if(rnd(.5)){S.fl.biz=1;ch({mul:2.5,s:12,f:10});return 'Orders explode. You open 3 new branches.';} ch({h:-8,s:8});return 'Slow start. Papa says "told you".';}],
+     ['Keep it traditional',function(){ch({f:12,h:3});return 'Same loyal customers since 1987.';}]]},
+   CREATOR_T:{emo:'💸',tag:'Brand deal',t:'A shady app wants you to promote it',p:'₹5 lakh for one reel. The app looks… questionable.',c:[
+     ['Take the money',function(){ if(rnd(.4)){ch({h:-20,f:-5,mul:.8});return 'Followers call it out. 40k unfollows in a day.';} ch({mul:1.4,h:-5});return 'Money in. Your comments section is spicy.';}],
+     ['Say no',function(){ch({h:10,s:5});S.fl.trust=1;return 'Your audience trusts you more. A bigger brand calls next month.';}]]}
+  };
+  function upsc(p){ if(rnd(p)){S.fl.ias=1;ch({set:14,f:25,h:20,s:15,title:'IAS Officer'});return 'Selected! Rank 187. Your town puts up a banner with your photo.';} ch({h:-12});S.q.unshift('UPSC2');return 'You cleared Prelims and Mains, but missed the final list.';}
+  function upTitle(t){ return t.replace('SDE-1','SDE-2').replace('Software Engineer','Senior Software Engineer').replace('Content Writer','Content Lead').replace('Audit Associate','Audit Senior').replace('Finance Analyst','Senior Finance Analyst').replace('Aspirant','Engineer'); }
+  function mgrTitle(t){ var c=(t.split('·')[1]||'').trim(); return 'Manager'+(c?' · '+c:''); }
+
+  /* which general scenes can appear */
+  var POOL=[
+    ['CREDIT',3,function(){return S.track==='job'&&S.m>0.01;}],['APPRAISAL',3,function(){return S.track==='job'&&S.m>0.01;}],
+    ['LAYOFF',2,function(){return S.track==='job'&&S.m>0.01&&S.age>=23;}],['ONSITE',2,function(){return S.track==='job'&&!S.fl.abroad&&S.age<34&&S.m>0.01;}],
+    ['COUSIN',2,function(){return S.age<32;}],['SHAADI',2,function(){return !S.fl.married&&S.age>=25&&S.age<34;}],
+    ['IDEA',2,function(){return S.track==='job'&&S.age>=24&&S.age<36;}],['MBA',1,function(){return S.track==='job'&&S.age<29&&S.fl.mgr!==1;}],
+    ['BURNOUT',3,function(){return S.h<45&&S.track!=='govt';}],['AI',2,function(){return S.age>=26&&(S.track==='job'||S.track==='creator');}],
+    ['PROMO',2,function(){return S.track==='job'&&S.s>=45&&!S.fl.mgr&&S.m>0.01;}],['RTO',1,function(){return S.track==='job'&&S.age>=27;}],
+    ['HEALTH',1,function(){return S.age>=28;}],['ESOP',3,function(){return S.fl.esop&&S.co==='startup'&&S.age>=25&&!S.fl.esopDone;}],
+    ['PARENTS',1,function(){return S.age>=30;}],['GOVT_T',3,function(){return S.track==='govt';}],
+    ['BIZ_T',3,function(){return S.track==='biz';}],['CREATOR_T',3,function(){return S.track==='creator';}]
+  ];
+  function pick(){
+    if(S.q.length) return S.q.shift();
+    var ok=POOL.filter(function(x){return S.used.indexOf(x[0])<0&&x[2]();});
+    if(!ok.length) ok=POOL.filter(function(x){return x[2]();});
+    if(!ok.length) return 'HEALTH';
+    var tot=ok.reduce(function(a,x){return a+x[1];},0), r=Math.random()*tot;
+    for(var i=0;i<ok.length;i++){ r-=ok[i][1]; if(r<=0) return ok[i][0]; }
+    return ok[0][0];
+  }
+
+  /* ───────── screens ───────── */
+  function renderStatus(){
+    $('status').hidden=false;
+    $('age').innerHTML=S.age+'<small>years</small>';
+    $('title').textContent=S.title; $('sal').textContent=fmt(S.m);
+    [['h','h'],['s','s'],['f','f']].forEach(function(k){ $('v'+k[0]).textContent=S[k[1]]; $('b'+k[0]).style.width=S[k[1]]+'%'; });
+  }
+  function start(){
+    var name=''; try{ name=localStorage.getItem('nl_name')||''; }catch(e){}
+    stage.innerHTML='<section class="card"><span class="tag">Age 21</span><div class="emo">🎒</div><h2>Live a whole career in 5 minutes</h2>'
+      +'<p>Every choice changes your salary, happiness, skills and how proud your family is. See where you end up at 40.</p>'
+      +'<div class="field"><label for="nm">Your name</label><input type="text" id="nm" maxlength="20" placeholder="e.g. Rohan" value="'+esc(name)+'"></div>'
+      +'<div class="field"><label>Pick your stream</label></div><div class="streams" role="group" aria-label="Stream">'
+      +'<button class="stream" data-s="ENG" aria-pressed="true"><span>💻</span>Engineering</button>'
+      +'<button class="stream" data-s="COM" aria-pressed="false"><span>📊</span>Commerce</button>'
+      +'<button class="stream" data-s="ART" aria-pressed="false"><span>🎨</span>Arts</button></div>'
+      +'<button class="btn" id="go">Start my life →</button></section>';
+    var sel='ENG';
+    stage.querySelectorAll('.stream').forEach(function(b){ b.onclick=function(){ sel=b.dataset.s; stage.querySelectorAll('.stream').forEach(function(x){x.setAttribute('aria-pressed',x===b);}); }; });
+    $('go').onclick=function(){
+      var n=($('nm').value||'').trim()||'You'; try{ localStorage.setItem('nl_name',n==='You'?'':n); }catch(e){}
+      S={name:n,stream:sel,age:21,turn:0,m:0,h:60,s:20,f:60,title:'Fresher',track:'job',co:'',fl:{},q:[sel],used:[],log:[]};
+      next();
+    };
+    $('status').hidden=true;
+  }
+  function next(){
+    if(S.turn>=AGES.length) return ending();
+    S.age=AGES[S.turn];
+    var id=pick(); S.used.push(id); if(id==='ESOP') S.fl.esopDone=1;
+    var sc=SC[id]; S.cur=id; renderStatus();
+    stage.innerHTML='<section class="card"><span class="tag">Age '+S.age+' · '+esc(sc.tag)+'</span><div class="emo" aria-hidden="true">'+sc.emo+'</div><h2>'+esc(sc.t)+'</h2><p>'+esc(sc.p)+'</p><div class="choices">'
+      +sc.c.map(function(c,i){return '<button class="choice" data-i="'+i+'"><span class="k">'+'ABC'[i]+'</span><span>'+esc(c[0])+'</span></button>';}).join('')+'</div></section>';
+    stage.querySelectorAll('.choice').forEach(function(b){ b.onclick=function(){ choose(sc,+b.dataset.i); }; });
+    var first=stage.querySelector('.choice'); if(first&&S.turn>0) first.focus({preventScroll:true});
+  }
+  function choose(sc,i){
+    var before={m:S.m,h:S.h,s:S.s,f:S.f};
+    if(S.m>0.01) S.mPrev=S.m;
+    var out=sc.c[i][1]();
+    S.log.push({age:S.age,emo:sc.emo,txt:sc.c[i][0]});
+    S.turn++;
+    var d=[], dm=S.m-before.m;
+    if(Math.abs(dm)>=0.1) d.push('<span class="d '+(dm>0?'up':'dn')+'">💰 '+(dm>0?'+':'−')+'₹'+(Math.abs(dm)<10?(Math.round(Math.abs(dm)*10)/10):Math.round(Math.abs(dm)))+' LPA</span>');
+    [['h','😊'],['s','🧠'],['f','🏠']].forEach(function(k){ var v=S[k[0]]-before[k[0]]; if(v) d.push('<span class="d '+(v>0?'up':'dn')+'">'+k[1]+' '+(v>0?'+':'')+v+'</span>'); });
+    renderStatus();
+    var last=S.turn>=AGES.length;
+    stage.innerHTML='<section class="card"><span class="tag">Age '+S.age+' · what happened</span><div class="emo" aria-hidden="true">'+sc.emo+'</div><p class="outcome">'+esc(out)+'</p>'
+      +(d.length?'<div class="deltas">'+d.join('')+'</div>':'')+'<button class="btn" id="nx">'+(last?'See where you end up at 40 →':'Next year →')+'</button></section>';
+    $('nx').onclick=next; $('nx').focus({preventScroll:true});
+  }
+  function ending(){
+    S.age=40; renderStatus();
+    var E=fate();
+    var story=S.log.map(function(l){return '<div><b>'+l.age+'</b> '+l.emo+' '+esc(l.txt)+'</div>';}).join('');
+    var share=(S.name!=='You'?S.name+' played':'I played')+' Naukri Life 🎲 and ended up: '+E.emo+' '+E.t+' at 40 — '+fmt(S.m)+', Happiness '+S.h+'%. What\'s your story? https://resume4u.help/games/naukri-life/';
+    stage.innerHTML='<section class="card end"><span class="tag">Age 40 · your ending</span><div class="end-emo" aria-hidden="true">'+E.emo+'</div><h2>'+esc(E.t)+'</h2><p class="line">'+esc(E.l)+'</p>'
+      +'<div class="final"><div><b>'+fmt(S.m).replace(' LPA','')+'</b><small>LPA</small></div><div><b>'+S.h+'</b><small>😊 Happy</small></div><div><b>'+S.s+'</b><small>🧠 Skills</small></div><div><b>'+S.f+'</b><small>🏠 Family</small></div></div>'
+      +'<div class="lesson">💡 <b>Real-life lesson:</b> '+esc(E.k)+'</div>'
+      +'<h3 style="font:800 1rem var(--display);margin:0 0 6px">Your story</h3><div class="story">'+story+'</div>'
+      +'<div class="row"><a class="btn" id="wa" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Share on WhatsApp</a><button class="btn ghost" id="cp">Copy result</button></div>'
+      +'<div style="height:9px"></div><button class="btn ghost" id="again">Live another life ↻</button>'
+      +'<a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Start your real career → build your resume free</a></section>';
+    $('cp').onclick=function(){ var t=share; try{ navigator.clipboard.writeText(t).then(function(){toast('Copied! Paste it anywhere.');},function(){toast('Select and copy: '+t);}); }catch(e){ toast('Select and copy: '+t); } };
+    $('again').onclick=start;
+  }
+  function fate(){
+    var f=S.fl;
+    if(f.ias) return {emo:'🏛️',t:'IAS Officer',l:'Red-beacon dreams came true. Your town still talks about your banner.',k:'Long preparation pays off when you also keep a backup plan ready.'};
+    if(f.unicorn) return {emo:'🦄',t:'Unicorn Founder',l:'From a 2 AM idea to a $1B company. Mummy finally understands "startup".',k:'Big risks can pay off, but most founders fail first. Build skills that survive failure.'};
+    if(f.acquired) return {emo:'🤝',t:'Founder, Acquired',l:'You built something a big company wanted to buy. Then you took a long nap.',k:'A good exit is a real win. Not every startup has to become a unicorn.'};
+    if(S.track==='startup'&&(f.failed||S.m<1)) return {emo:'☕',t:'Café Owner in Goa',l:'Two startups later, you serve the best cold coffee in Anjuna. No regrets.',k:'Failure teaches fast. Keep your resume ready for the next chapter.'};
+    if(S.track==='startup') return {emo:'🧡',t:'Profitable Founder',l:'No unicorn, but 40 people get salaries on time because of you.',k:'Steady, profitable businesses are underrated.'};
+    if(S.track==='creator'&&f.viral) return {emo:'📱',t:'Famous Creator',l:'Half a million followers and a podcast. Your family now forwards your reels.',k:'Creators who keep their audience\'s trust last the longest.'};
+    if(S.track==='creator') return {emo:'🎤',t:'Part-time Creator',l:'A loyal small audience and a steady day job. Best of both.',k:'A side hustle grows best with a stable base.'};
+    if(S.track==='biz'&&f.biz) return {emo:'🏬',t:'Business Tycoon',l:'Papa\'s shop is now 4 branches and an app. He still uses the red ledger.',k:'Mixing tradition with new ideas is a superpower.'};
+    if(S.track==='biz') return {emo:'🧾',t:'Family Business Owner',l:'Same shop, loyal customers, lunch at home every day.',k:'A good life doesn\'t always need a big title.'};
+    if(S.track==='govt') return {emo:'🏢',t:'Sarkari Officer',l:'Home by 5:30 pm, respected in the colony, pension secured.',k:'Stability is a real career choice. Choose it with pride.'};
+    if(f.abroad) return {emo:'🌍',t:'NRI Engineer',l:'Great salary, video calls with Mummy every Sunday, and a deep love for Maggi.',k:'Global careers open fast when your resume shows real impact.'};
+    if(S.h<30) return {emo:'🏔️',t:'Burnt Out at 40',l:'Big salary, no sleep. You finally take a year off in the mountains.',k:'Salary grows fast; health and happiness don\'t come back as easily.'};
+    if(S.m>=42&&S.s>=60) return {emo:'👑',t:'CXO at 40',l:'Corner office, big team, and LinkedIn posts that start with "Humbled to share".',k:'Skills + smart job switches + a strong resume compound over time.'};
+    if(S.m>=20) return {emo:'💼',t:'Senior Manager',l:'Solid salary, good team, and you finally bought that 2BHK.',k:'Consistent growth beats lucky jumps.'};
+    if(S.h>=70) return {emo:'🌼',t:'Happy & Balanced',l:'Not the richest, but home by 7, weekends free and a full heart.',k:'Success is what you decide it is.'};
+    return {emo:'🧭',t:'Still Figuring It Out',l:'And that\'s okay. Many people find their path after 40.',k:'It\'s never too late to learn a new skill and update your resume.'};
+  }
+  var tt; function toast(m){ var o=document.querySelector('.toast'); if(o) o.remove(); var d=document.createElement('div'); d.className='toast'; d.setAttribute('role','status'); d.textContent=m; document.body.appendChild(d); clearTimeout(tt); tt=setTimeout(function(){d.remove();},2600); }
+  start();
+})();
+</script>
+</body>
+</html>
