@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Typing Race: Free Typing Speed Test Game (WPM + Certificate)</title>
+<meta name="description" content="Test your typing speed in a race against office colleagues. Get your words per minute (WPM), accuracy and a typing certificate. Free, no sign-up.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/typing-race/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/typing-race/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/typing-race/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Typing Race: Free Typing Speed Test Game (WPM + Certificate)">
+<meta property="og:description" content="Test your typing speed in a race against office colleagues. Get your words per minute (WPM), accuracy and a typing certificate. Free, no sign-up.">
+<meta property="og:url" content="https://resume4u.help/games/typing-race/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Typing Race: Free Typing Speed Test Game (WPM + Certificate)">
+<meta name="twitter:description" content="Test your typing speed in a race against office colleagues. Get your words per minute (WPM), accuracy and a typing certificate. Free, no sign-up.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Typing Race",
+   "url": "https://resume4u.help/games/typing-race/",
+   "description": "Test your typing speed in a race against office colleagues. Get your words per minute (WPM), accuracy and a typing certificate. Free, no sign-up.",
+   "genre": "Typing test",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Typing Race",
+     "item": "https://resume4u.help/games/typing-race/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: same night-office world as the other Office Arcade games (deliberately one dark theme) — 4-lane race track, the passage to type, the input, then a certificate card. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --line:#2e3b63; --ink:#eef2ff; --muted:#9aa6c8;
+  --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.live{display:flex;gap:6px}
+.live div{background:var(--night2);border:1px solid var(--line);border-radius:11px;padding:5px 10px;text-align:center;min-width:64px}
+.live small{display:block;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.live b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.track{background:var(--floor);border:1px solid var(--line);border-radius:16px;padding:8px 10px;display:grid;gap:6px}
+.lane{position:relative;height:34px;border-bottom:1px dashed var(--line)}
+.lane:last-child{border-bottom:0}
+.lane .nm{position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:.66rem;color:var(--muted);font-weight:700;width:74px;line-height:1.1}
+.lane .rn{position:absolute;top:50%;left:74px;transform:translate(0,-50%);font-size:1.4rem;transition:left .2s linear}
+.lane.me .nm{color:var(--gold)}
+.lane .fin{position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:1.1rem}
+.passage{background:#f8fafc;color:#0f172a;border-radius:16px;padding:14px 16px;font:500 1.02rem/1.75 var(--mono);box-shadow:0 20px 40px -24px rgba(0,0,0,.8);min-height:120px;word-wrap:break-word}
+.passage .w{border-radius:4px;padding:0 1px}
+.passage .done{color:#16a34a}
+.passage .cur{background:#fef3c7;outline:2px solid #fbbf24}
+.passage .cur .ok{color:#16a34a}
+.passage .cur .bad{color:#fff;background:#ef4444;border-radius:2px}
+.passage .cur.err{background:#fee2e2;outline-color:#ef4444}
+input#ty{width:100%;border:2px solid var(--line);background:var(--night2);color:var(--ink);border-radius:14px;padding:14px;font:600 1.1rem var(--mono)}
+input#ty:focus{outline:none;border-color:var(--gold)}
+input#ty:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--floor);color:var(--ink);border-radius:99px;padding:6px 11px;font:700 .8rem var(--body);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block;width:100%}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,.chip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.count{position:fixed;inset:0;display:grid;place-items:center;background:rgba(13,19,36,.6);font:800 6rem var(--display);color:var(--gold);z-index:5;pointer-events:none}
+.cert{background:linear-gradient(160deg,#fffbeb,#fff 60%);color:#1f2937;border-radius:18px;padding:20px 18px;border:3px double #d97706;text-align:center;box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+.cert small{letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#b45309;font-size:.68rem}
+.cert h2{font:800 1.5rem/1.1 var(--display);margin:6px 0 2px;color:#1f2937}
+.cert .who{font:700 1.1rem var(--display);color:#7c2d12}
+.cert .big{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.cert .big div{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:8px 4px}
+.cert .big b{display:block;font:800 1.6rem/1 var(--display);color:#7c2d12;font-variant-numeric:tabular-nums}
+.cert .big span{font-size:.7rem;color:#78716c;font-weight:600}
+.cert .lvl{font:800 1.05rem var(--display);color:#15803d}
+.cert p{font-size:.84rem;color:#57534e;margin:6px 0 0}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.help{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Typing <span>Race</span></h1><div class="sub">Race your office colleagues · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+    <div class="live"><div><small>WPM</small><b id="wpm">0</b></div><div><small>Accuracy</small><b id="acc">100%</b></div></div>
+  </div>
+  <div class="track" id="track" aria-label="Race track"></div>
+  <div class="passage" id="passage" aria-live="off"></div>
+  <input id="ty" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Tap Start, then type here…" aria-label="Type the highlighted word, then press space" disabled>
+  <div class="row" role="group" aria-label="Passage type">
+    <button class="chip" data-m="office" aria-pressed="true">Office life</button>
+    <button class="chip" data-m="jobs" aria-pressed="false">Job hunting</button>
+    <button class="chip" data-m="exam" aria-pressed="false">Govt exam style</button>
+  </div>
+  <button class="btn" id="start">Start race</button>
+  <div id="result"></div>
+  <p class="help">Type the highlighted word and press space. Fix mistakes before moving on, just like a real typing test.</p>
+  <a class="cta" href="https://resume4u.help/data-entry-resume-no-experience/" target="_blank" rel="noopener">Fast typist? Make a data-entry resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Typing Race</h2><ol><li>Pick a passage type: office life, job hunting or government-exam style.</li><li>Tap Start race and type the highlighted word, then press space.</li><li>Fix mistakes before moving on, just like a real typing test.</li><li>Finish to get your WPM, accuracy and a shareable certificate.</li></ol><p>Many data-entry and government typing tests ask for about 35 WPM in English. Fast typist? <a href="/data-entry-resume-no-experience/">Make a data-entry resume</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var P={
+   office:['Every morning the team meets for a quick standup. Everyone shares what they finished yesterday and what they plan to do today. The manager notes the blockers and promises to fix them before lunch. Then the coffee machine breaks again.',
+           'The client sent fourteen changes at six in the evening and called them small tweaks. The designer sighed, opened the file and ordered two cups of chai. By midnight the deck looked better than ever, and the client said it was perfect.',
+           'Please find attached the updated report for this quarter. Sales grew by twelve percent in the west region, while costs stayed flat. Kindly review the numbers and share your feedback before the review meeting on Friday morning.'],
+   jobs:['A good resume is short, clear and honest. Start every bullet with a strong action verb and add a number wherever you can. Recruiters spend only a few seconds on the first look, so put your best work at the top of the page.',
+         'Before an interview, read the job description twice and match your stories to it. Prepare examples of problems you solved, results you delivered and lessons you learned. Arrive early, listen carefully and always ask one thoughtful question at the end.',
+         'Freshers can win interviews with strong projects, internships and certifications. Explain what you built, which tools you used and what changed because of your work. Keep the resume to one page and check every line for spelling mistakes.'],
+   exam:['The Constitution of India came into force on the twenty sixth of January in the year nineteen fifty. It lays down the framework of the government, defines its powers and duties, and guarantees fundamental rights to every citizen of the country.',
+         'Digital payments have grown rapidly across the country in recent years. Small shopkeepers, vegetable vendors and large stores now accept payments through mobile phones, which has made everyday transactions faster, safer and more transparent for millions of people.',
+         'Regular exercise improves both physical and mental health. Experts suggest at least thirty minutes of walking, cycling or yoga on most days of the week, along with a balanced diet, enough sleep and plenty of water throughout the day.']
+  };
+  var BOTS=[['Sid (Intern)','🐢',22],['Meera (HR)','🚶‍♀️',34],['Ravi (Accounts)','🏃',46]];
+  var mode='office', S=null, tm=null, best=0;
+  try{ best=+localStorage.getItem('tr_best')||0; }catch(e){}
+  var $=function(id){return document.getElementById(id);}, inp=$('ty');
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function track(){
+    var lanes=[['You','🛵',0,1]].concat(BOTS.map(function(b){return [b[0],b[1],b[2],0];}));
+    $('track').innerHTML=lanes.map(function(l,i){return '<div class="lane'+(l[3]?' me':'')+'"><span class="nm">'+l[0]+'</span><span class="rn" id="r'+i+'">'+l[1]+'</span><span class="fin">🏁</span></div>';}).join('');
+  }
+  function setRunner(i,f){ var el=$('r'+i); if(el) el.style.left='calc(74px + (100% - 74px - 52px) * '+Math.min(1,f)+')'; }
+  function prep(){
+    var list=P[mode]; var text=list[Math.floor(Math.random()*list.length)];
+    S={words:text.split(' '),i:0,text:text,typed:0,errors:0,keys:0,t0:0,done:false,bots:BOTS.map(function(b){return {wpm:b[2]*(0.9+Math.random()*.2),f:0,fin:0};}),place:0};
+    track(); render(''); $('wpm').textContent='0'; $('acc').textContent='100%'; $('result').innerHTML='';
+    inp.value=''; inp.disabled=true; inp.placeholder='Tap Start, then type here…';
+  }
+  function render(cur){
+    $('passage').innerHTML=S.words.map(function(w,i){
+      if(i<S.i) return '<span class="w done">'+esc(w)+'</span>';
+      if(i===S.i){ var ok=true, h=''; for(var k=0;k<w.length;k++){ var c=cur[k]; if(c===undefined){ h+=esc(w[k]); } else if(c===w[k]&&ok){ h+='<span class="ok">'+esc(w[k])+'</span>'; } else { ok=false; h+='<span class="bad">'+esc(w[k])+'</span>'; } }
+        var err=cur.length>w.length||!ok; return '<span class="w cur'+(err?' err':'')+'">'+h+'</span>'; }
+      return '<span class="w">'+esc(w)+'</span>';
+    }).join(' ');
+  }
+  function stats(){
+    var mins=Math.max(1/60,(performance.now()-S.t0)/60000);
+    var wpm=Math.round((S.typed/5)/mins), acc=S.keys?Math.max(0,Math.round(100*(S.keys-S.errors)/S.keys)):100;
+    return {wpm:wpm,acc:acc,secs:Math.round(mins*60)};
+  }
+  function tick(){
+    if(!S||S.done) return;
+    var st=stats(); $('wpm').textContent=st.wpm; $('acc').textContent=st.acc+'%';
+    var total=S.text.length, el=(performance.now()-S.t0)/60000;
+    S.bots.forEach(function(b,i){ if(b.fin) return; b.f=(b.wpm*5*el)/total; setRunner(i+1,b.f); if(b.f>=1){ b.fin=1; S.place++; } });
+  }
+  function start(){
+    prep(); var n=3, c=document.createElement('div'); c.className='count'; c.textContent=n; document.body.appendChild(c);
+    var iv=setInterval(function(){ n--; if(n>0){ c.textContent=n; } else { clearInterval(iv); c.remove(); go(); } },650);
+    $('start').disabled=true;
+  }
+  function go(){
+    inp.disabled=false; inp.placeholder='Type the highlighted word…'; inp.focus();
+    S.t0=performance.now(); clearInterval(tm); tm=setInterval(tick,200);
+  }
+  inp.addEventListener('input',function(){
+    if(!S||S.done||inp.disabled) return;
+    var v=inp.value, w=S.words[S.i], last=S.i===S.words.length-1;
+    var typedChar=v.length>(S.prevLen||0); S.prevLen=v.length;
+    if(typedChar){ S.keys++; var ch=v[v.length-1], exp=(w+' ')[v.length-1]; if(ch!==exp) S.errors++; }
+    if(v.endsWith(' ')){
+      if(v.trim()===w){ S.typed+=w.length+1; S.i++; inp.value=''; S.prevLen=0; render(''); setRunner(0,S.typed/S.text.length); }
+      else render(v.trimEnd());
+      return;
+    }
+    if(last&&v===w){ S.typed+=w.length; S.i++; setRunner(0,1); finish(); return; }
+    render(v);
+  });
+  function finish(){
+    S.done=true; clearInterval(tm); inp.disabled=true; render(''); var st=stats(); $('wpm').textContent=st.wpm; $('acc').textContent=st.acc+'%';
+    var pos=S.place+1, medal=['🥇','🥈','🥉','4th'][pos-1];
+    if(st.wpm>best){ best=st.wpm; try{localStorage.setItem('tr_best',best);}catch(e){} }
+    var lvl=st.wpm>=50?['Lightning fingers ⚡','Faster than most office pros.']:st.wpm>=35?['Data-entry & exam ready ✅','Many government typing tests ask for about 35 WPM in English.']:st.wpm>=25?['Good, keep practising 💪','A few minutes a day will get you past 35 WPM.']:['Beginner 🌱','Practise daily with all ten fingers. Speed comes fast.'];
+    var share='I typed '+st.wpm+' WPM with '+st.acc+'% accuracy and finished '+(pos===1?'1st 🥇':pos===2?'2nd 🥈':pos===3?'3rd 🥉':'4th')+' in Typing Race ⌨️ Can you beat me? https://resume4u.help/games/typing-race/';
+    $('result').innerHTML='<div class="cert" role="region" aria-label="Typing certificate"><small>Certificate of typing speed</small><h2>'+medal+' '+(pos===1?'You won the race!':'Finished '+(pos===2?'2nd':pos===3?'3rd':'4th'))+'</h2>'
+      +'<div class="big"><div><b>'+st.wpm+'</b><span>Words / min</span></div><div><b>'+st.acc+'%</b><span>Accuracy</span></div><div><b>'+st.secs+'s</b><span>Time</span></div></div>'
+      +'<div class="lvl">'+lvl[0]+'</div><p>'+lvl[1]+' Personal best: '+best+' WPM.</p></div>'
+      +'<div style="height:10px"></div><div class="acts"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Share on WhatsApp</a><button class="btn ghost" id="again">Race again</button></div>';
+    $('again').onclick=start; $('start').disabled=false;
+  }
+  document.querySelectorAll('.chip').forEach(function(b){ b.onclick=function(){ mode=b.dataset.m; document.querySelectorAll('.chip').forEach(function(x){x.setAttribute('aria-pressed',x===b);}); clearInterval(tm); prep(); $('start').disabled=false; }; });
+  $('start').onclick=start;
+  prep();
+})();
+</script>
+</body>
+</html>

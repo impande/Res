@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>IT Helpdesk Hero: Free Office Game, Fix Wi-Fi and Printers</title>
+<meta name="description" content="Be the office IT person from 9 AM to 6 PM. Tap fast to fix Wi-Fi, printers, laptops and a server crash before colleagues complain. Free fast tapping game.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/it-helpdesk-hero/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/it-helpdesk-hero/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/it-helpdesk-hero/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="IT Helpdesk Hero: Free Office Game, Fix Wi-Fi and Printers">
+<meta property="og:description" content="Be the office IT person from 9 AM to 6 PM. Tap fast to fix Wi-Fi, printers, laptops and a server crash before colleagues complain. Free fast tapping game.">
+<meta property="og:url" content="https://resume4u.help/games/it-helpdesk-hero/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="IT Helpdesk Hero: Free Office Game, Fix Wi-Fi and Printers">
+<meta name="twitter:description" content="Be the office IT person from 9 AM to 6 PM. Tap fast to fix Wi-Fi, printers, laptops and a server crash before colleagues complain. Free fast tapping game.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "IT Helpdesk Hero",
+   "url": "https://resume4u.help/games/it-helpdesk-hero/",
+   "description": "Be the office IT person from 9 AM to 6 PM. Tap fast to fix Wi-Fi, printers, laptops and a server crash before colleagues complain. Free fast tapping game.",
+   "genre": "Arcade",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "IT Helpdesk Hero",
+     "item": "https://resume4u.help/games/it-helpdesk-hero/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same night-office world as the other Office Arcade games (deliberately one dark theme) — shift clock and score strip, a 3×3 floor of desks you tap to fix, status line. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --cell:#222d4f; --line:#2e3b63; --ink:#eef2ff; --muted:#9aa6c8;
+  --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.hud div{background:var(--night2);border:1px solid var(--line);border-radius:11px;padding:6px 4px;text-align:center}
+.hud small{display:block;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hud b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.shift{height:8px;background:var(--floor);border-radius:9px;overflow:hidden}
+.shift i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5eead4,#fbbf24,#f87171);border-radius:9px}
+.office{position:relative;background:var(--floor);border:1px solid var(--line);border-radius:18px;padding:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;box-shadow:0 24px 50px -24px rgba(0,0,0,.8);user-select:none;-webkit-user-select:none}
+.desk{position:relative;aspect-ratio:1;border-radius:16px;background:var(--cell);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--ink);font:inherit;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.desk:active{transform:scale(.96)}
+.desk .p{font-size:1.9rem;line-height:1}
+.desk .tbl{font-size:.9rem;line-height:1;opacity:.7}
+.desk .nm{font-size:.62rem;color:var(--muted);font-weight:600}
+.desk .iss{position:absolute;top:-8px;right:-8px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.35rem;
+  background:conic-gradient(var(--c,#f87171) calc(var(--p,1)*360deg),rgba(255,255,255,.08) 0);box-shadow:0 6px 14px -6px rgba(0,0,0,.8)}
+.desk .iss::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#0d1324}
+.desk .iss span{position:relative}
+.desk .taps{position:absolute;bottom:6px;font:800 .7rem var(--display);color:var(--gold)}
+.desk.has{border-color:rgba(248,113,113,.6);animation:wob .5s infinite alternate}
+@keyframes wob{to{box-shadow:0 0 0 3px rgba(248,113,113,.25)}}
+.desk.fixed{background:#163a2e;border-color:#4ade80}
+.desk.angry{background:#3b1d22}
+.pop{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font:800 1.1rem var(--display);color:var(--green);pointer-events:none;animation:up .7s ease-out forwards}
+@keyframes up{to{transform:translate(-50%,-160%);opacity:0}}
+.status{min-height:46px;background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:600;font-size:.9rem}
+.server{display:none;align-items:center;justify-content:center;gap:10px;border:2px solid var(--red);background:#2a1420;color:var(--ink);border-radius:14px;padding:12px;font:800 1.05rem var(--display);cursor:pointer;width:100%;animation:wob .3s infinite alternate}
+.server.on{display:flex}
+.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,.desk:focus-visible,.server:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.over{position:absolute;inset:0;background:rgba(13,19,36,.94);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;text-align:center;z-index:5}
+.over .e{font-size:2.8rem;line-height:1}
+.over h2{margin:0;font:800 1.4rem/1.15 var(--display)}
+.over p{margin:0;color:var(--muted);font-size:.9rem}
+.over .acts{display:grid;gap:8px;width:100%;max-width:260px;margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:.74rem;color:var(--muted)}
+.legend span{background:var(--night2);border:1px solid var(--line);border-radius:99px;padding:4px 9px}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+@media (prefers-reduced-motion:reduce){.desk.has,.server{animation:none}.pop{animation:none;opacity:0}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div><h1>IT Helpdesk <span>Hero</span></h1><div class="sub">Keep the office running till 6 PM · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+  <div class="hud"><div><small>Time</small><b id="tm">9:00</b></div><div><small>Fixed</small><b id="fx">0</b></div><div><small>Combo</small><b id="cb">×1</b></div><div><small>Complaints</small><b id="cp">0/5</b></div></div>
+  <div class="shift" aria-hidden="true"><i id="shift"></i></div>
+  <button class="server" id="server">🔥 SERVER DOWN! Tap fast to reboot <b id="srv">10</b></button>
+  <div class="office" id="office" aria-label="Office floor"></div>
+  <div class="status" id="status" role="status" aria-live="polite">Tap Start. Fix problems before people lose patience. Some fixes need more than one tap.</div>
+  <button class="btn" id="start">Start shift</button>
+  <div class="legend"><span>📶 Wi-Fi ×1</span><span>💻 Laptop ×2</span><span>🖨️ Printer jam ×3</span><span>🔐 Password ×1</span><span>📽️ Projector ×2</span><span>☕ Coffee machine ×2</span></div>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">IT support is a great first job. Build your resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play IT Helpdesk Hero</h2><ol><li>Tap Start shift. Problems pop up on colleagues&#x27; desks.</li><li>Tap a desk to fix it. Printer jams need 3 taps, laptops 2.</li><li>Fix fast for combos. The Boss has the least patience.</li><li>Reboot the server when it crashes. 5 complaints ends your shift.</li></ol><p>IT support is a great first job. <a href="/how-to-make-resume-for-first-job/">Write your first resume</a> in minutes.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var PEOPLE=[['👩‍💼','Priya'],['👨‍💻','Arjun'],['👩‍🎨','Neha'],['🧔','Boss'],['👨‍🔬','Ravi'],['👩‍🏫','Meera'],['🧑‍💼','Sid'],['👵','Kamla ji'],['👨‍🦱','Mohit']];
+  var ISS=[['📶','Wi-Fi down',1,'#60a5fa'],['💻','Laptop frozen',2,'#a78bfa'],['🖨️','Printer jam',3,'#f472b6'],['🔐','Password reset',1,'#34d399'],['📽️','Projector not working',2,'#fbbf24'],['☕','Coffee machine broke',2,'#fb923c']];
+  var MOODS=['"Is it fixed yet?" 😤','"I have a client call in 2 mins!"','"Have you tried restarting it?" — them, to you','"My cousin fixes these in 1 second"'];
+  var office=document.getElementById('office'), S, raf, last=0, best=0;
+  try{ best=+localStorage.getItem('ih_best')||0; }catch(e){}
+  office.innerHTML=PEOPLE.map(function(p,i){return '<button class="desk" data-i="'+i+'" aria-label="'+p[1]+'\'s desk"><span class="p">'+p[0]+'</span><span class="tbl">🖥️</span><span class="nm">'+p[1]+'</span></button>';}).join('');
+  var desks=[].slice.call(office.querySelectorAll('.desk'));
+  function status(t){ document.getElementById('status').textContent=t; }
+  function reset(){
+    S={t:0,len:100,fixed:0,combo:1,lastFix:0,cp:0,over:false,run:false,spawn:1.2,iss:new Array(9).fill(null),server:null,serverT:38+Math.random()*20,lunch:false};
+    desks.forEach(function(d){ d.className='desk'; var x=d.querySelector('.iss'); if(x) x.remove(); var tp=d.querySelector('.taps'); if(tp) tp.remove(); });
+    document.getElementById('server').classList.remove('on'); hud();
+  }
+  function clockOf(t){ var m=9*60+Math.floor(t/S.len*540), h=Math.floor(m/60), mm=m%60; return (h>12?h-12:h)+':'+(mm<10?'0':'')+mm; }
+  function hud(){ document.getElementById('tm').textContent=clockOf(S.t); document.getElementById('fx').textContent=S.fixed; document.getElementById('cb').textContent='×'+S.combo; document.getElementById('cp').textContent=S.cp+'/5'; document.getElementById('shift').style.width=(S.t/S.len*100)+'%'; }
+  function spawn(){
+    var free=[]; S.iss.forEach(function(x,i){ if(!x) free.push(i); }); if(!free.length) return;
+    var i=free[Math.floor(Math.random()*free.length)], k=ISS[Math.floor(Math.random()*ISS.length)];
+    var pat=Math.max(3.4,6.8-S.t*.035)*(PEOPLE[i][1]==='Boss'?.75:1);
+    S.iss[i]={k:k,need:k[2],life:pat,max:pat};
+    var d=desks[i]; d.classList.add('has'); d.classList.remove('fixed','angry');
+    var b=document.createElement('span'); b.className='iss'; b.innerHTML='<span>'+k[0]+'</span>'; b.style.setProperty('--c',k[3]); d.appendChild(b);
+    var tp=document.createElement('span'); tp.className='taps'; tp.textContent=k[2]>1?'tap ×'+k[2]:''; d.appendChild(tp);
+    d.setAttribute('aria-label',PEOPLE[i][1]+': '+k[1]+(k[2]>1?', tap '+k[2]+' times':''));
+  }
+  function clear(i,cls){ var d=desks[i]; S.iss[i]=null; d.classList.remove('has'); var b=d.querySelector('.iss'); if(b) b.remove(); var tp=d.querySelector('.taps'); if(tp) tp.remove(); d.setAttribute('aria-label',PEOPLE[i][1]+'\'s desk');
+    if(cls){ d.classList.add(cls); setTimeout(function(){ d.classList.remove(cls); },500); } }
+  function tap(i){
+    if(!S.run||S.over||S.server) return; var x=S.iss[i]; if(!x) return;
+    x.need--; var d=desks[i];
+    if(x.need>0){ d.querySelector('.taps').textContent='tap ×'+x.need; navigator.vibrate&&navigator.vibrate(10); return; }
+    var now=S.t; S.combo=(now-S.lastFix<1.4)?Math.min(5,S.combo+1):1; S.lastFix=now;
+    S.fixed+=1; clear(i,'fixed');
+    var p=document.createElement('span'); p.className='pop'; p.textContent=S.combo>1?'Fixed! ×'+S.combo:'Fixed!'; d.appendChild(p); setTimeout(function(){p.remove();},700);
+    if(S.combo>=3) status('🔥 Combo ×'+S.combo+'! You\'re on fire.'); else status('✅ '+x.k[1]+' fixed for '+PEOPLE[i][1]+'.');
+    hud();
+  }
+  function complain(i){
+    var x=S.iss[i]; S.cp++; S.combo=1; clear(i,'angry'); navigator.vibrate&&navigator.vibrate(80);
+    status('😡 '+PEOPLE[i][1]+' escalated the '+x.k[1].toLowerCase()+' to the boss. '+MOODS[Math.floor(Math.random()*MOODS.length)]);
+    hud(); if(S.cp>=5) end(false);
+  }
+  function serverDown(){
+    S.server={need:10,life:6}; var b=document.getElementById('server'); b.classList.add('on'); document.getElementById('srv').textContent=10; status('🔥 Whole office offline! Reboot the server before everyone panics.');
+  }
+  document.getElementById('server').addEventListener('click',function(){
+    if(!S.server) return; S.server.need--; document.getElementById('srv').textContent=S.server.need;
+    if(S.server.need<=0){ S.server=null; this.classList.remove('on'); S.fixed+=3; status('🚀 Server back up! Everyone cheers (for 5 seconds).'); hud(); }
+  });
+  function loop(t){
+    if(!S.run) return; var dt=Math.min(.05,(t-last)/1000||0); last=t;
+    if(!S.over){
+      S.t+=dt;
+      var lunch=S.t>S.len*.44&&S.t<S.len*.5; if(lunch!==S.lunch){ S.lunch=lunch; status(lunch?'🍛 Lunch hour! Fewer problems… enjoy it.':'Back from lunch. Here we go again.'); }
+      if(S.server){ S.server.life-=dt; if(S.server.life<=0){ S.server=null; document.getElementById('server').classList.remove('on'); S.cp+=2; status('💥 Server stayed down too long. 2 complaints!'); hud(); if(S.cp>=5) end(false); } }
+      else {
+        S.spawn-=dt*(lunch?.35:1); if(S.spawn<=0){ spawn(); if(S.t>60&&Math.random()<.18) spawn(); S.spawn=Math.max(.72,1.6-S.t*.009); }
+        if(S.t>S.serverT){ S.serverT=9999; serverDown(); }
+        for(var i=0;i<9;i++){ var x=S.iss[i]; if(!x) continue; x.life-=dt; var b=desks[i].querySelector('.iss'); if(b) b.style.setProperty('--p',Math.max(0,x.life/x.max)); if(x.life<=0) complain(i); }
+      }
+      if(S.t>=S.len&&!S.over) end(true);
+      hud();
+    }
+    raf=requestAnimationFrame(loop);
+  }
+  function end(survived){
+    S.over=true; S.run=false; if(S.fixed>best){ best=S.fixed; try{localStorage.setItem('ih_best',best);}catch(e){} }
+    var rank=S.fixed>=70?['🦸','IT Legend']:S.fixed>=50?['🧑‍🔧','Office Hero']:S.fixed>=30?['🙂','Reliable Fixer']:['😵','Overwhelmed Newbie'];
+    var share=(survived?'I survived a full shift':'I lasted till '+clockOf(S.t))+' in IT Helpdesk Hero 🛠️ Fixed '+S.fixed+' problems. Rank: '+rank[1]+' '+rank[0]+'. Beat me! https://resume4u.help/games/it-helpdesk-hero/';
+    var o=document.createElement('div'); o.className='over'; o.setAttribute('role','dialog'); o.setAttribute('aria-label','Shift over');
+    o.innerHTML='<div class="e">'+(survived?'🏁':'😩')+'</div><h2>'+(survived?'Shift complete! 6 PM':'Too many complaints at '+clockOf(S.t))+'</h2><p>Fixed <b>'+S.fixed+'</b> problems · '+S.cp+' complaint'+(S.cp===1?'':'s')+'<br>Rank: '+rank[0]+' '+rank[1]+' · Best: '+best+'</p><div class="acts"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a><button class="btn ghost" id="again">New shift</button></div>';
+    office.appendChild(o); o.querySelector('#again').onclick=function(e){ e.stopPropagation(); o.remove(); begin(); };
+    document.getElementById('start').hidden=false;
+  }
+  function begin(){ reset(); S.run=true; document.getElementById('start').hidden=true; status('Shift started. Fix everything!'); last=performance.now(); raf=requestAnimationFrame(loop); }
+  office.addEventListener('pointerdown',function(e){ var d=e.target.closest('.desk'); if(d){ e.preventDefault(); tap(+d.dataset.i); } });
+  office.addEventListener('keydown',function(e){ var d=e.target.closest('.desk'); if(d&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); tap(+d.dataset.i); } });
+  document.addEventListener('keydown',function(e){ var n=+e.key; if(n>=1&&n<=9&&S&&S.run){ tap(n-1); } });
+  document.getElementById('start').onclick=begin;
+  reset();
+})();
+</script>
+</body>
+</html>

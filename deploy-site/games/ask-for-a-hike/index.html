@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ask for a Hike: Free Salary Negotiation Game for Appraisals</title>
+<meta name="description" content="Push your boss for a bigger hike in three appraisal meetings, and take the deal before they say no. A free salary negotiation game with real tips.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/ask-for-a-hike/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/ask-for-a-hike/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/ask-for-a-hike/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ask for a Hike: Free Salary Negotiation Game for Appraisals">
+<meta property="og:description" content="Push your boss for a bigger hike in three appraisal meetings, and take the deal before they say no. A free salary negotiation game with real tips.">
+<meta property="og:url" content="https://resume4u.help/games/ask-for-a-hike/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ask for a Hike: Free Salary Negotiation Game for Appraisals">
+<meta name="twitter:description" content="Push your boss for a bigger hike in three appraisal meetings, and take the deal before they say no. A free salary negotiation game with real tips.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Ask for a Hike",
+   "url": "https://resume4u.help/games/ask-for-a-hike/",
+   "description": "Push your boss for a bigger hike in three appraisal meetings, and take the deal before they say no. A free salary negotiation game with real tips.",
+   "genre": "Push your luck",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Ask for a Hike",
+     "item": "https://resume4u.help/games/ask-for-a-hike/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same night-office world as the other Office Arcade games (deliberately one dark theme) — salary/year strip, the appraisal-room card (boss, speech bubble, giant hike %, mood meter), three action buttons. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --line:#2e3b63; --ink:#eef2ff; --muted:#9aa6c8;
+  --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.hud div{background:var(--night2);border:1px solid var(--line);border-radius:11px;padding:6px 6px;text-align:center}
+.hud small{display:block;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hud b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.room{position:relative;background:var(--floor);border:1px solid var(--line);border-radius:20px;padding:18px 16px 16px;box-shadow:0 24px 50px -24px rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;gap:10px;overflow:hidden}
+.room::before{content:"APPRAISAL MEETING · CABIN 2";position:absolute;top:10px;left:14px;font:700 .6rem var(--body);letter-spacing:.14em;color:var(--muted)}
+.boss{font-size:4.2rem;line-height:1;margin-top:16px;transition:transform .2s}
+.boss.shake{animation:sh .35s}
+@keyframes sh{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.bubble{position:relative;background:#f8fafc;color:#0f172a;border-radius:14px;padding:10px 14px;font-weight:600;font-size:.92rem;text-align:center;max-width:320px;min-height:44px}
+.bubble::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top:0;border-bottom-color:#f8fafc}
+.pct{font:800 4.4rem/1 var(--display);color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:-.02em;transition:transform .15s}
+.pct.bump{transform:scale(1.12)}
+.pct small{font-size:1.4rem;color:var(--muted)}
+.newsal{font-size:.86rem;color:var(--muted);margin-top:-6px}
+.newsal b{color:var(--ink)}
+.mood{width:100%}
+.mood label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);font-weight:700}
+.mtrack{height:12px;border-radius:9px;background:#0d1324;overflow:hidden;border:1px solid var(--line);margin-top:4px}
+.mtrack i{display:block;height:100%;width:8%;background:linear-gradient(90deg,#4ade80,#fbbf24 55%,#ef4444);border-radius:9px;transition:width .35s}
+.acts{display:grid;gap:8px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:0;border-radius:14px;padding:13px 12px;font:800 1rem/1.2 var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block;width:100%}
+.btn small{display:block;font:600 .7rem var(--body);opacity:.8}
+.btn.push{background:var(--floor);color:var(--ink);border:1.5px solid #4ade80}
+.btn.bluff{background:var(--floor);color:var(--ink);border:1.5px solid #f87171}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.log{background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.84rem;color:var(--muted);display:grid;gap:3px}
+.log b{color:var(--ink)}
+.over{position:absolute;inset:0;background:rgba(13,19,36,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;text-align:center;z-index:3}
+.over .e{font-size:2.8rem;line-height:1}
+.over h2{margin:0;font:800 1.45rem/1.15 var(--display)}
+.over p{margin:0;color:var(--muted);font-size:.9rem}
+.over .acts{width:100%;max-width:270px;margin-top:6px}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+@media (prefers-reduced-motion:reduce){.boss.shake{animation:none}.pct{transition:none}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div><h1>Ask for a <span>Hike</span></h1><div class="sub">Push your luck in 3 appraisals · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+  <div class="hud"><div><small>Year</small><b id="yr">1 / 3</b></div><div><small>Salary now</small><b id="sal">₹6 LPA</b></div><div><small>Best ever</small><b id="best">—</b></div></div>
+  <section class="room" id="room" aria-live="polite">
+    <div class="boss" id="boss" aria-hidden="true">🙂</div>
+    <div class="bubble" id="say">"So… let's talk about your performance this year."</div>
+    <div class="pct" id="pct">3<small>%</small></div>
+    <div class="newsal" id="ns">New salary: <b>₹6.18 LPA</b></div>
+    <div class="mood"><label><span>Boss's patience used</span><span id="mtxt">calm</span></label><div class="mtrack"><i id="mood"></i></div></div>
+  </section>
+  <div class="acts">
+    <div class="row2">
+      <button class="btn push" id="push">💪 Push<small>+3 to 6% · some risk</small></button>
+      <button class="btn bluff" id="bluff">🃏 "I have an offer"<small>+10 to 15% · big risk</small></button>
+    </div>
+    <button class="btn" id="take">🤝 I'll take it</button>
+  </div>
+  <div class="log" id="log"><span>Your salary starts at <b>₹6 LPA</b>. Three appraisals. Push for more, but stop before the boss says <b>"No hike this year"</b>.</span></div>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Real tip: the biggest hikes come from switching jobs. Build your resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Ask for a Hike</h2><ol><li>You start on ₹6 LPA. Each year is one appraisal meeting.</li><li>Push for a few percent more, or bluff with an outside offer for a big jump.</li><li>Watch the boss&#x27;s mood. Push too far and you get a 0% hike.</li><li>Tap &quot;I&#x27;ll take it&quot; to lock in the hike before it&#x27;s too late.</li></ol><p>In real life, the biggest hikes usually come from switching jobs. <a href="/">Build a resume</a> that gets you offers.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var PUSH=['"I fixed the production bug at 2 AM."','"The client praised me by name."','"I trained all three new interns."','"I automated the weekly report."','"I handled the biggest account this year."','"I never took a sick leave."','"I learned Python on weekends."'];
+  var BOSS_OK=['"Hmm… that\'s fair."','"Okay, okay. Noted."','"Let me see what I can do."','"You do work hard, I know."'];
+  var BOSS_TENSE=['"Don\'t push it…"','"Budget is tight this year."','"Others also worked hard, you know."','"Let\'s be realistic here."'];
+  var NO=['"No hike this year. Market is tough." 😤','"Actually… let\'s revisit this next year." 🙃','"You\'re lucky you still have a job." 😠','"HR says the budget is frozen." 🧊'];
+  var S, best=0;
+  try{ best=+localStorage.getItem('afh_best')||0; }catch(e){}
+  var $=function(id){return document.getElementById(id);};
+  function lpa(v){ return '₹'+(Math.round(v*100)/100)+' LPA'; }
+  function rand(a){return a[Math.floor(Math.random()*a.length)];}
+  function newGame(){ S={year:1,sal:6,hike:3,risk:0,hist:[],busy:false}; $('log').innerHTML='<span>Your salary starts at <b>₹6 LPA</b>. Three appraisals. Push for more, but stop before the boss says <b>"No hike this year"</b>.</span>'; var o=document.querySelector('.over'); if(o) o.remove(); round(); }
+  function round(){ S.hike=3; S.risk=0; S.limit=16+Math.random()*40; draw('"So… let\'s talk about your performance this year."'); enable(true); }
+  function draw(line){
+    $('yr').textContent=S.year+' / 3'; $('sal').textContent=lpa(S.sal); $('best').textContent=best?lpa(best):'—';
+    $('pct').innerHTML=S.hike+'<small>%</small>'; $('ns').innerHTML='New salary: <b>'+lpa(S.sal*(1+S.hike/100))+'</b>';
+    var m=Math.min(100,S.risk); $('mood').style.width=Math.max(6,m)+'%';
+    $('mtxt').textContent=m<30?'calm':m<55?'getting annoyed':m<80?'irritated':'about to explode';
+    $('boss').textContent=m<30?'🙂':m<55?'😐':m<80?'😠':'🤬';
+    if(line) $('say').textContent=line;
+  }
+  function enable(on){ ['push','bluff','take'].forEach(function(id){ $(id).disabled=!on; }); }
+  function ask(big){
+    if(S.busy) return; S.busy=true; enable(false);
+    var add=big?10+Math.floor(Math.random()*6):3+Math.floor(Math.random()*4);
+    $('say').textContent=big?'"Actually, I have an offer from another company…" 🃏':rand(PUSH);
+    setTimeout(function(){
+      S.hike+=add; S.risk+=big?(22+Math.random()*24):(8+Math.random()*13);
+      // the boss's real limit is hidden; the mood bar is only a rough hint
+      var over=S.hike>S.limit, chance=over?(big?.9:.7):Math.max(0,(S.risk-40)/90);
+      var p=$('pct'); p.classList.add('bump'); setTimeout(function(){p.classList.remove('bump');},160);
+      if(Math.random()<chance){ bust(big); return; }
+      draw(S.risk>45?rand(BOSS_TENSE):rand(BOSS_OK)); S.busy=false; enable(true);
+    },650);
+  }
+  function bust(big){
+    var b=$('boss'); b.textContent='🤬'; b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); navigator.vibrate&&navigator.vibrate([70,40,70]);
+    $('say').textContent=big?'"Then go join them!" … "Just kidding. But no hike." 😤':rand(NO);
+    S.hist.push({y:S.year,h:0,lost:S.hike}); logRow(S.year,0,S.hike);
+    S.hike=0; draw(); setTimeout(next,1500);
+  }
+  function take(){
+    if(S.busy) return; S.busy=true; enable(false);
+    S.sal=S.sal*(1+S.hike/100); S.hist.push({y:S.year,h:S.hike}); logRow(S.year,S.hike);
+    $('say').textContent=S.hike>=30?'"Fine. But I expect miracles next year." 😅':'"Done. Congratulations!" 🤝'; draw(); setTimeout(next,1300);
+  }
+  function logRow(y,h,lost){
+    var l=$('log'); if(S.hist.length===1) l.innerHTML='';
+    var s=document.createElement('span'); s.innerHTML='Year '+y+': '+(h?'<b style="color:#4ade80">+'+h+'% hike</b>':'<b style="color:#f87171">0% hike</b> (pushed to '+lost+'% and lost it)'); l.appendChild(s);
+  }
+  function next(){ S.busy=false; if(S.year>=3) return end(); S.year++; round(); }
+  function end(){
+    var grow=Math.round((S.sal/6-1)*100); if(S.sal>best){ best=S.sal; try{localStorage.setItem('afh_best',best);}catch(e){} }
+    var rank=grow>=80?['🦈','Negotiation Shark']:grow>=45?['😎','Smooth Talker']:grow>=20?['🙂','Safe Player']:['😅','Too Greedy (or too shy)'];
+    var share='I asked for hikes 3 years in a row 💸 ₹6 LPA → '+lpa(S.sal)+' (+'+grow+'%). Rank: '+rank[1]+' '+rank[0]+'. Can you negotiate better? https://resume4u.help/games/ask-for-a-hike/';
+    var o=document.createElement('div'); o.className='over'; o.setAttribute('role','dialog'); o.setAttribute('aria-label','Result');
+    o.innerHTML='<div class="e">'+rank[0]+'</div><h2>'+rank[1]+'</h2><p>₹6 LPA → <b style="color:#fbbf24">'+lpa(S.sal)+'</b> in 3 years (+'+grow+'%)<br>'+S.hist.map(function(h){return 'Y'+h.y+': '+(h.h?'+'+h.h+'%':'0%');}).join(' · ')+'</p><div class="acts" style="display:grid;gap:8px"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a><button class="btn ghost" id="again">Play again</button></div>';
+    $('room').appendChild(o); $('again').onclick=newGame; draw();
+  }
+  $('push').onclick=function(){ask(false);}; $('bluff').onclick=function(){ask(true);}; $('take').onclick=take;
+  newGame();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Commute Dash: Free Indian Traffic Game, Reach Office by 9:30</title>
+<meta name="description" content="Ride your scooter through Bengaluru, Mumbai, Delhi or Gurugram traffic. Dodge autos, cows and potholes and reach office on time. Free, no download.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/commute-dash/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/commute-dash/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/commute-dash/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Commute Dash: Free Indian Traffic Game, Reach Office by 9:30">
+<meta property="og:description" content="Ride your scooter through Bengaluru, Mumbai, Delhi or Gurugram traffic. Dodge autos, cows and potholes and reach office on time. Free, no download.">
+<meta property="og:url" content="https://resume4u.help/games/commute-dash/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Commute Dash: Free Indian Traffic Game, Reach Office by 9:30">
+<meta name="twitter:description" content="Ride your scooter through Bengaluru, Mumbai, Delhi or Gurugram traffic. Dodge autos, cows and potholes and reach office on time. Free, no download.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Commute Dash",
+   "url": "https://resume4u.help/games/commute-dash/",
+   "description": "Ride your scooter through Bengaluru, Mumbai, Delhi or Gurugram traffic. Dodge autos, cows and potholes and reach office on time. Free, no download.",
+   "genre": "Arcade",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Commute Dash",
+     "item": "https://resume4u.help/games/commute-dash/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same night-office world as Corporate Ladder (deliberately one dark theme) — HUD strip, a tall canvas road, city chips and controls below. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --line:#2e3b63; --ink:#eef2ff; --muted:#9aa6c8;
+  --gold:#fbbf24; --gold-ink:#3b2506; --red:#f87171; --teal:#5eead4;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.sc{background:var(--floor);border:1px solid var(--line);border-radius:11px;padding:5px 10px;text-align:center;min-width:70px}
+.sc small{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sc b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hud div{background:var(--night2);border:1px solid var(--line);border-radius:11px;padding:6px 8px;text-align:center}
+.hud small{display:block;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hud b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.stage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 24px 50px -24px rgba(0,0,0,.8);touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:auto}
+.prog{height:8px;background:var(--floor);border-radius:9px;overflow:hidden;position:relative}
+.prog i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#5eead4,#fbbf24);border-radius:9px}
+.progl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:-6px}
+.cities{display:flex;gap:6px;flex-wrap:wrap}
+.city{border:1px solid var(--line);background:var(--floor);color:var(--ink);border-radius:99px;padding:6px 11px;font:700 .8rem var(--body);cursor:pointer}
+.city[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,.city:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.over{position:absolute;inset:0;background:rgba(13,19,36,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center}
+.over .e{font-size:3rem;line-height:1}
+.over h2{margin:0;font:800 1.5rem/1.15 var(--display)}
+.over p{margin:0;color:var(--muted);font-size:.92rem}
+.over .acts{display:grid;gap:8px;width:100%;max-width:260px;margin-top:6px}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--gold);color:var(--gold-ink);font:800 .9rem var(--display);padding:7px 14px;border-radius:99px;white-space:nowrap;box-shadow:0 10px 20px -8px rgba(0,0,0,.6);pointer-events:none}
+.help{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Commute <span>Dash</span></h1><div class="sub">Reach office on time. Every. Single. Day. · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+    <div class="sc"><small>Best</small><b id="best">0</b></div>
+  </div>
+  <div class="hud"><div><small>Day</small><b id="day">1</b></div><div><small>Clock</small><b id="clock">8:45</b></div><div><small>Excuses left</small><b id="lives">🙏🙏🙏</b></div></div>
+  <div class="prog" aria-hidden="true"><i id="bar"></i></div>
+  <div class="progl"><span>🏠 Home</span><span>🏢 Office (9:30 sharp)</span></div>
+  <div class="stage" id="stage"><canvas id="cv" width="440" height="560" aria-label="Road. Swipe or tap left and right to change lanes."></canvas></div>
+  <p class="help">Swipe or tap left/right (or ← →) to change lanes. ☕ Chai = 3 seconds of invincibility.</p>
+  <div class="cities" role="group" aria-label="City">
+    <button class="city" data-c="Bengaluru" aria-pressed="true">Bengaluru</button><button class="city" data-c="Mumbai" aria-pressed="false">Mumbai 🌧️</button><button class="city" data-c="Delhi" aria-pressed="false">Delhi 🌫️</button><button class="city" data-c="Gurugram" aria-pressed="false">Gurugram</button>
+  </div>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Want a job worth the commute? Build your resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Commute Dash</h2><ol><li>Swipe or tap left and right (or ← →) to change lanes.</li><li>Dodge autos, taxis, buses, cows, potholes and barricades.</li><li>Grab ☕ chai for 3 seconds of invincibility.</li><li>Each crash uses one of your 3 excuses. Survive as many office days as you can.</li></ol><p>Tired of the commute? Many companies now hire remote. <a href="/">Build a resume</a> that gets you interviews.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), stage=document.getElementById('stage');
+  var W=440,H=560,LANES=3,LW=W/LANES, DPR=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*DPR; cv.height=H*DPR; ctx.scale(DPR,DPR);
+  var OB={Bengaluru:['🛺','🚕','🕳️','🐄','🚌','🚧'],Mumbai:['🛺','🚕','💧','🐄','🚌','🚧'],Delhi:['🛺','🚗','🕳️','🐄','🚌','🌫️'],Gurugram:['🚗','🚙','🕳️','🐄','🚌','🚧']};
+  var LATE=['"Ola driver went to the wrong pin" 🙃','"There was a baraat on the road" 💃','"Metro was stuck between stations" 🚇','"Cow sitting in the middle of the road" 🐄','"Water-logging till my knees" 🌊','"Google Maps showed green, it was red" 🗺️'];
+  var DAYMSG=['Boss didn\'t notice ✅','Punched in at 9:29 😮‍💨','Early! Free breakfast 🥪','Made it. Shirt is wet. 💦','Reached before the boss 😎'];
+  var city='Bengaluru', S, raf, last=0, best=0;
+  try{ best=+localStorage.getItem('cd_best')||0; }catch(e){}
+  document.getElementById('best').textContent=best;
+
+  function reset(){
+    S={lane:1,px:1,day:1,dist:0,dayLen:1600,speed:240,obs:[],spawnY:0,lives:3,shield:0,hitT:0,over:false,score:0,dash:0,msg:'',msgT:0,started:false};
+    hud(); draw(); showStart();
+  }
+  function hud(){
+    document.getElementById('day').textContent=S.day;
+    var frac=Math.min(1,S.dist/S.dayLen), mins=45*frac, m=45+Math.floor(mins); var h=8+Math.floor(m/60); m=m%60;
+    document.getElementById('clock').textContent=h+':'+(m<10?'0':'')+m;
+    document.getElementById('bar').style.width=(frac*100)+'%';
+    document.getElementById('lives').textContent=S.lives>0?new Array(S.lives+1).join('🙏'):'—';
+  }
+  function spawnRow(){
+    var free=Math.floor(Math.random()*LANES), set=OB[city];
+    for(var l=0;l<LANES;l++){
+      if(l===free) { if(Math.random()<.14) S.obs.push({lane:l,y:-60,e:'☕',chai:1,h:36}); continue; }
+      if(Math.random()<.55){ var e=set[Math.floor(Math.random()*set.length)]; S.obs.push({lane:l,y:-60-Math.random()*40,e:e,h:e==='🚌'?70:44}); }
+    }
+  }
+  function step(dt){
+    S.speed+=dt*4; var v=S.speed*(S.shield>0?1.25:1);
+    S.dist+=v*dt*0.6; S.dash=(S.dash+v*dt)%60;
+    S.px+= (S.lane-S.px)*Math.min(1,dt*14);
+    S.spawnY+=v*dt; var gap=Math.max(150,260-S.day*12);
+    if(S.spawnY>gap){ S.spawnY=0; spawnRow(); }
+    var py=H-90;
+    S.obs.forEach(function(o){ o.y+=v*dt;
+      if(o.dead) return;
+      var near=Math.abs(o.lane-S.px)<0.45, hit=near&&o.y+o.h/2>py-22&&o.y-o.h/2<py+22;
+      if(hit){
+        if(o.chai){ o.dead=1; S.shield=3; say('☕ Chai power!'); }
+        else if(S.shield<=0&&S.hitT<=0){ o.dead=1; S.lives--; S.hitT=1.2; navigator.vibrate&&navigator.vibrate(80); say(S.lives>0?'Bumped! Used an excuse 🙏':'');
+          if(S.lives<=0){ end(); } }
+      }
+    });
+    S.obs=S.obs.filter(function(o){return o.y<H+80&&!(o.dead&&o.chai);});
+    if(S.shield>0) S.shield-=dt; if(S.hitT>0) S.hitT-=dt; if(S.msgT>0) S.msgT-=dt;
+    if(S.dist>=S.dayLen){ S.day++; S.score++; S.dist=0; S.dayLen+=150; S.obs=[]; S.speed*=1.04; say('Day '+(S.day-1)+': '+DAYMSG[Math.floor(Math.random()*DAYMSG.length)]); }
+    hud();
+  }
+  function draw(){
+    // road
+    ctx.fillStyle='#2a3150'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#232a46'; ctx.fillRect(0,0,14,H); ctx.fillRect(W-14,0,14,H);
+    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=4; ctx.setLineDash([30,30]); ctx.lineDashOffset=-S.dash;
+    for(var l=1;l<LANES;l++){ ctx.beginPath(); ctx.moveTo(l*LW,0); ctx.lineTo(l*LW,H); ctx.stroke(); }
+    ctx.setLineDash([]);
+    if(city==='Mumbai'){ ctx.fillStyle='rgba(147,197,253,.06)'; for(var i=0;i<30;i++){ ctx.fillRect((i*67+S.dash*3)%W,(i*91+S.dash*9)%H,2,12); } }
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    S.obs.forEach(function(o){ if(o.dead&&!o.chai) { ctx.globalAlpha=.25; }
+      ctx.font=(o.e==='🚌'?62:o.chai?34:46)+'px serif'; ctx.fillText(o.e,o.lane*LW+LW/2,o.y); ctx.globalAlpha=1; });
+    // player
+    var px=S.px*LW+LW/2, py=H-90;
+    if(S.shield>0){ ctx.beginPath(); ctx.arc(px,py,34,0,Math.PI*2); ctx.fillStyle='rgba(251,191,36,.22)'; ctx.fill(); ctx.strokeStyle='#fbbf24'; ctx.lineWidth=3; ctx.stroke(); }
+    if(!(S.hitT>0&&Math.floor(S.hitT*10)%2)){ ctx.font='48px serif'; ctx.fillText('🛵',px,py); }
+    if(city==='Delhi'){ var g=ctx.createLinearGradient(0,0,0,H*.55); g.addColorStop(0,'rgba(180,180,170,.55)'); g.addColorStop(1,'rgba(180,180,170,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H*.55); }
+  }
+  function loop(t){
+    if(S.over) return;
+    var dt=Math.min(.05,(t-last)/1000||0); last=t; step(dt); draw(); raf=requestAnimationFrame(loop);
+  }
+  var tst; function say(m){ if(!m) return; var o=stage.querySelector('.toast'); if(o) o.remove(); var d=document.createElement('div'); d.className='toast'; d.setAttribute('role','status'); d.textContent=m; stage.appendChild(d); clearTimeout(tst); tst=setTimeout(function(){d.remove();},1500); }
+  function overlay(html){ var o=stage.querySelector('.over'); if(o) o.remove(); o=document.createElement('div'); o.className='over'; o.innerHTML=html; stage.appendChild(o); return o; }
+  function showStart(){
+    var o=overlay('<div class="e">🛵</div><h2>Reach office by 9:30</h2><p>'+city+' traffic is waiting. Dodge everything, grab chai, survive as many days as you can.</p><div class="acts"><button class="btn" id="go">Start my commute</button></div>');
+    o.querySelector('#go').onclick=function(){ o.remove(); S.started=true; last=performance.now(); raf=requestAnimationFrame(loop); };
+  }
+  function end(){
+    S.over=true; cancelAnimationFrame(raf); draw();
+    var days=S.day-1; if(days>best){ best=days; try{localStorage.setItem('cd_best',best);}catch(e){} document.getElementById('best').textContent=best; }
+    var ex=LATE[Math.floor(Math.random()*LATE.length)];
+    var share='I survived '+days+' day'+(days===1?'':'s')+' of '+city+' traffic in Commute Dash 🛵 Can you beat me? Play free: https://resume4u.help/games/commute-dash/';
+    var o=overlay('<div class="e">😬</div><h2>Late on Day '+S.day+'!</h2><p>You survived <b>'+days+' day'+(days===1?'':'s')+'</b>.<br>Excuse to the boss: '+ex+'</p><div class="acts"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a><button class="btn ghost" id="again">Try again</button></div>');
+    o.querySelector('#again').onclick=function(){ cancelAnimationFrame(raf); reset(); };
+  }
+  function moveLane(d){ if(!S.started||S.over) return; S.lane=Math.max(0,Math.min(LANES-1,S.lane+d)); }
+  document.addEventListener('keydown',function(e){ if(e.key==='ArrowLeft'||e.key==='a'){e.preventDefault();moveLane(-1);} if(e.key==='ArrowRight'||e.key==='d'){e.preventDefault();moveLane(1);} });
+  var sx=null;
+  stage.addEventListener('pointerdown',function(e){ if(e.target.closest('.over')) return; sx=e.clientX; });
+  stage.addEventListener('pointerup',function(e){ if(sx===null) return; var dx=e.clientX-sx; sx=null;
+    if(Math.abs(dx)>24) moveLane(dx>0?1:-1); else { var r=stage.getBoundingClientRect(); moveLane(e.clientX<r.left+r.width/2?-1:1); } });
+  document.querySelectorAll('.city').forEach(function(b){ b.onclick=function(){ city=b.dataset.c; document.querySelectorAll('.city').forEach(function(x){x.setAttribute('aria-pressed',x===b);}); cancelAnimationFrame(raf); reset(); }; });
+  reset();
+})();
+</script>
+</body>
+</html>

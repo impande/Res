@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sneak Out at 6: Free Office Game, Leave Without Getting Caught</title>
+<meta name="description" content="Hold to sneak to the office exit at 6 PM and freeze whenever the boss, a colleague or HR turns around. Escape all five weekdays in this free office game.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/sneak-out-at-6/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/sneak-out-at-6/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/sneak-out-at-6/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sneak Out at 6: Free Office Game, Leave Without Getting Caught">
+<meta property="og:description" content="Hold to sneak to the office exit at 6 PM and freeze whenever the boss, a colleague or HR turns around. Escape all five weekdays in this free office game.">
+<meta property="og:url" content="https://resume4u.help/games/sneak-out-at-6/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sneak Out at 6: Free Office Game, Leave Without Getting Caught">
+<meta name="twitter:description" content="Hold to sneak to the office exit at 6 PM and freeze whenever the boss, a colleague or HR turns around. Escape all five weekdays in this free office game.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Sneak Out at 6",
+   "url": "https://resume4u.help/games/sneak-out-at-6/",
+   "description": "Hold to sneak to the office exit at 6 PM and freeze whenever the boss, a colleague or HR turns around. Escape all five weekdays in this free office game.",
+   "genre": "Stealth",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Sneak Out at 6",
+     "item": "https://resume4u.help/games/sneak-out-at-6/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same night-office world as the other Office Arcade games (deliberately one dark theme) — clock/day strip, side-view corridor canvas, status line, big hold-to-sneak button. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --line:#2e3b63; --ink:#eef2ff; --muted:#9aa6c8;
+  --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171; --amber:#fb923c;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.hud div{background:var(--night2);border:1px solid var(--line);border-radius:11px;padding:6px 8px;text-align:center}
+.hud small{display:block;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hud b{font:800 1.1rem var(--display);font-variant-numeric:tabular-nums}
+.stage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 24px 50px -24px rgba(0,0,0,.8);user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:auto}
+.light{display:flex;align-items:center;gap:10px;background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:700;min-height:48px}
+.dot{flex:none;width:16px;height:16px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+.light.warn .dot{background:var(--amber);box-shadow:0 0 12px var(--amber)}
+.light.stop .dot{background:var(--red);box-shadow:0 0 14px var(--red)}
+.hold{border:0;border-radius:18px;padding:20px 16px;font:800 1.3rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);box-shadow:0 12px 24px -12px rgba(251,191,36,.9);width:100%;touch-action:none;-webkit-touch-callout:none}
+.hold.on{background:linear-gradient(135deg,#bbf7d0,#4ade80);transform:scale(.985)}
+.hold:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.btn.red{background:#ef4444;color:#fff}
+.over{position:absolute;inset:0;background:rgba(13,19,36,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;text-align:center}
+.over .e{font-size:2.8rem;line-height:1}
+.over h2{margin:0;font:800 1.4rem/1.15 var(--display)}
+.over p{margin:0;color:var(--muted);font-size:.9rem}
+.over .acts{display:grid;gap:8px;width:100%;max-width:260px;margin-top:6px}
+.invite{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(86%,300px);background:#f8fafc;color:#0f172a;border-radius:14px;padding:14px;box-shadow:0 24px 40px -10px rgba(0,0,0,.7);text-align:left}
+.invite b{display:block;font-size:.95rem}
+.invite small{color:#64748b}
+.invite .bar{height:4px;background:#e2e8f0;border-radius:9px;margin:10px 0;overflow:hidden}
+.invite .bar i{display:block;height:100%;background:#ef4444;width:100%;transition:width linear}
+.invite .r{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.help{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div><h1>Sneak Out <span>at 6</span></h1><div class="sub">Leave on time without the boss noticing · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+  <div class="hud"><div><small>Day</small><b id="day">Mon</b></div><div><small>Clock</small><b id="clock">6:00 PM</b></div><div><small>Caught</small><b id="caught">0 / 3</b></div></div>
+  <div class="stage" id="stage"><canvas id="cv" width="480" height="270" aria-label="Office corridor. Hold the button to sneak towards the exit when nobody is looking."></canvas></div>
+  <div class="light" id="light" role="status" aria-live="polite"><span class="dot"></span><span id="lt">Boss is busy with emails. Move!</span></div>
+  <button class="hold" id="hold">Hold to sneak 🤫</button>
+  <p class="help">Hold the button (or Space) to walk. Let go the moment someone turns around. 👀 = they can see you.</p>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Looking for a job with better hours? Build your resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Sneak Out at 6</h2><ol><li>Hold the button (or Space) to walk towards the exit.</li><li>Let go the moment someone turns around. 👀 means they can see you.</li><li>Decline surprise meeting invites fast.</li><li>Get caught 3 times and you&#x27;re stuck with &quot;one small task&quot;. Escape Monday to Friday.</li></ol><p>Want a job with better work-life balance? <a href="/">Build your resume free</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/wfh-mute-master/">🎧 WFH Mute Master</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), stage=document.getElementById('stage');
+  var W=480,H=270,DPR=Math.min(2,window.devicePixelRatio||1); cv.width=W*DPR; cv.height=H*DPR; ctx.scale(DPR,DPR);
+  var DAYS=['Mon','Tue','Wed','Thu','Fri'], START_X=46, EXIT_X=440, FLOOR=210;
+  var CAUGHT=['"Before you go… one small task" 😩','"Can you join this call for 5 mins?" 📞','"Leaving already? Must be nice" 😒','"Just update this Excel, quick hai" 📊'];
+  var S, raf, last=0, holding=false, best=null;
+  try{ best=localStorage.getItem('so_best'); }catch(e){}
+  function watcher(x,emo,name,lvl){ return {x:x,emo:emo,name:name,st:'away',t:1.5+Math.random()*1.5,lvl:lvl}; }
+  function setupDay(){
+    var d=S.day, ws=[watcher(250,'🧔','Boss',d)];
+    if(d>=1) ws.push(watcher(150,'🙋‍♀️','Colleague',d));
+    if(d>=3) ws.push(watcher(360,'🧑‍💼','HR',d));
+    S.ws=ws; S.x=START_X; S.inv=null; S.mins=0; S.invT=d>=1?6+Math.random()*6:999; S.msgT=0;
+  }
+  function newGame(){ S={day:0,mins:0,caught:0,over:false,x:START_X,walk:0}; setupDay(); hud(); light(); var o=stage.querySelector('.over,.invite'); if(o) o.remove(); cancelAnimationFrame(raf); last=performance.now(); raf=requestAnimationFrame(loop); }
+  function clock(m){ var h=6+Math.floor(m/60), mm=Math.floor(m%60); var hh=h>12?h-12:h; return hh+':'+(mm<10?'0':'')+mm+' PM'; }
+  function hud(){ document.getElementById('day').textContent=DAYS[S.day]; document.getElementById('clock').textContent=clock(S.mins); document.getElementById('caught').textContent=S.caught+' / 3'; }
+  function danger(){ var lvl=0; S.ws.forEach(function(w){ if(w.st==='look') lvl=2; else if(w.st==='turn'&&lvl<1) lvl=1; }); return lvl; }
+  function light(){ var l=document.getElementById('light'), d=danger(); l.className='light'+(d===2?' stop':d===1?' warn':'');
+    document.getElementById('lt').textContent=S.inv?'📅 A meeting invite! Decline it fast.':d===2?'👀 Someone is looking. FREEZE!':d===1?'⚠️ Someone is turning around…':'All clear. Move!'; }
+  function stepW(w,dt){
+    w.t-=dt; if(w.t>0) return;
+    var hard=Math.min(1,w.lvl*.18);
+    if(w.st==='away'){ w.st='turn'; w.t=.55-hard*.2; w.feint=Math.random()<.15+hard*.2; }
+    else if(w.st==='turn'){ if(w.feint){ w.st='away'; w.t=.6+Math.random()*1.2; } else { w.st='look'; w.t=.8+Math.random()*.9; } }
+    else { w.st='away'; w.t=(1.6+Math.random()*2.2)*(1-hard*.4); }
+  }
+  function loop(t){
+    var dt=Math.min(.05,(t-last)/1000||0); last=t;
+    if(!S.over){
+      S.mins+=dt*0.35;
+      if(!S.inv){ S.ws.forEach(function(w){stepW(w,dt);}); S.invT-=dt; if(S.invT<=0) invite(); }
+      var moving=holding&&!S.inv;
+      if(moving){ S.x+=dt*92; S.walk+=dt*10; if(danger()===2) caught(); }
+      if(S.x>=EXIT_X) escaped();
+      hud(); light();
+    }
+    draw(); raf=requestAnimationFrame(loop);
+  }
+  function caught(){
+    var who=S.ws.filter(function(w){return w.st==='look';})[0];
+    S.caught++; S.mins+=20; S.total=(S.total||0)+20; S.x=START_X; holding=false; document.getElementById('hold').classList.remove('on');
+    navigator.vibrate&&navigator.vibrate([80,50,80]);
+    if(S.caught>=3) return gameOver(who);
+    S.msg=(who?who.name:'Boss')+': '+CAUGHT[Math.floor(Math.random()*CAUGHT.length)]+'  (+20 min)'; S.msgT=2.4;
+    S.ws.forEach(function(w){ w.st='away'; w.t=1.2+Math.random(); });
+  }
+  function invite(){
+    holding=false; document.getElementById('hold').classList.remove('on');
+    var names=['Quick sync (15 min)','Alignment call','Catch-up on the catch-up','Brainstorm: Q3 ideas','"Small" client call'];
+    var el=document.createElement('div'); el.className='invite'; el.setAttribute('role','alertdialog');
+    el.innerHTML='<small>📅 New meeting invite · starts now</small><b>'+names[Math.floor(Math.random()*names.length)]+'</b><div class="bar"><i></i></div><div class="r"><button class="btn red" data-a="no">Decline</button><button class="btn ghost" data-a="yes">Accept</button></div>';
+    stage.appendChild(el); S.inv=el; var lim=Math.max(1.3,2.2-S.day*.2);
+    requestAnimationFrame(function(){ var b=el.querySelector('.bar i'); b.style.transitionDuration=lim+'s'; b.style.width='0%'; });
+    var to=setTimeout(function(){ done('yes'); },lim*1000);
+    function done(a){ clearTimeout(to); if(!S.inv) return; el.remove(); S.inv=null; S.invT=7+Math.random()*7;
+      if(a==='yes'){ S.mins+=15; S.msg='Meeting accepted. That was 45 minutes 🙃 (+15 min)'; } else { S.msg='Declined! Your calendar thanks you 🗓️'; } S.msgT=2; }
+    el.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ done(b.dataset.a); }; });
+  }
+  function escaped(){
+    var t=clock(S.mins), d=DAYS[S.day];
+    S.times=(S.times||[]); S.times.push(d+' '+t);
+    if(S.day<4){ S.msg='🎉 '+d+': escaped at '+t+'!'; S.msgT=2.4; S.day++; setupDay(); return; }
+    S.over=true; holding=false;
+    if(!best||S.mins<+best){ best=S.mins; try{localStorage.setItem('so_best',best);}catch(e){} }
+    var share='I sneaked out of office every day this week 🏃‍♂️💨 Last escape: '+t+' on Friday, caught only '+S.caught+' time'+(S.caught===1?'':'s')+'. Can you? Play Sneak Out at 6: https://resume4u.help/games/sneak-out-at-6/';
+    overlay('🎉','Weekend unlocked!','You escaped all 5 days.<br>'+S.times.join(' · ')+'<br>Caught '+S.caught+' time'+(S.caught===1?'':'s')+'.',share);
+  }
+  function gameOver(who){
+    S.over=true; holding=false; var t=clock(S.mins+60);
+    var share='The boss caught me 3 times on '+DAYS[S.day]+' 😩 Stuck in office till '+t+' in Sneak Out at 6. Can you escape? https://resume4u.help/games/sneak-out-at-6/';
+    overlay('😩','Stuck till '+t,'Caught 3 times on '+DAYS[S.day]+'. '+(who?who.name:'The boss')+' gave you "one small task".',share);
+  }
+  function overlay(e,h,p,share){
+    var o=document.createElement('div'); o.className='over'; o.setAttribute('role','dialog'); o.setAttribute('aria-label',h);
+    o.innerHTML='<div class="e">'+e+'</div><h2>'+h+'</h2><p>'+p+'</p><div class="acts"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a><button class="btn ghost" id="again">Play again</button></div>';
+    stage.appendChild(o); o.querySelector('#again').onclick=newGame;
+  }
+  function draw(){
+    var g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a2342'); g.addColorStop(1,'#141c33'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    // windows with sunset
+    for(var i=0;i<5;i++){ var wx=20+i*96; var sg=ctx.createLinearGradient(0,26,0,90); sg.addColorStop(0,'#fb923c'); sg.addColorStop(1,'#7c3aed'); ctx.fillStyle=sg; ctx.globalAlpha=.35; ctx.fillRect(wx,26,70,60); ctx.globalAlpha=1; ctx.strokeStyle='#2e3b63'; ctx.lineWidth=3; ctx.strokeRect(wx,26,70,60); }
+    ctx.fillStyle='#232d52'; ctx.fillRect(0,FLOOR,W,H-FLOOR); ctx.fillStyle='#2e3b63'; ctx.fillRect(0,FLOOR,W,3);
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.font='30px serif'; ctx.fillText('🖥️',30,FLOOR-24); ctx.fillText('🪴',205,FLOOR); ctx.fillText('🚰',310,FLOOR); ctx.font='44px serif'; ctx.fillText('🚪',EXIT_X+14,FLOOR+2);
+    ctx.font='700 10px Inter,sans-serif'; ctx.fillStyle='#4ade80'; ctx.fillText('EXIT',EXIT_X+14,FLOOR-48);
+    // watchers
+    S.ws.forEach(function(w){
+      ctx.save(); ctx.translate(w.x,FLOOR); var facing=w.st==='look';
+      if(!facing){ ctx.scale(-1,1); } ctx.font='40px serif'; ctx.fillText(w.emo,0,0); ctx.restore();
+      ctx.font='22px serif'; ctx.fillText(w.st==='look'?'👀':w.st==='turn'?'❗':(w.name==='Boss'?'📧':w.name==='HR'?'📋':'📱'),w.x,FLOOR-46);
+      if(w.st==='look'){ ctx.fillStyle='rgba(248,113,113,.12)'; ctx.beginPath(); ctx.moveTo(w.x-10,FLOOR-24); ctx.lineTo(0,FLOOR-80); ctx.lineTo(0,FLOOR+8); ctx.closePath(); ctx.fill(); }
+      ctx.font='600 9px Inter,sans-serif'; ctx.fillStyle='#9aa6c8'; ctx.textBaseline='top'; ctx.fillText(w.name,w.x,FLOOR+6); ctx.textBaseline='bottom';
+    });
+    // player
+    var bob=holding&&!S.inv?Math.abs(Math.sin(S.walk))*4:0;
+    ctx.font='40px serif'; ctx.fillText('🧑‍💻',S.x,FLOOR-bob); ctx.font='16px serif'; ctx.fillText('🎒',S.x+14,FLOOR-14-bob);
+    if(S.msgT>0&&!S.over){ S.msgT-=1/60; ctx.fillStyle='rgba(13,19,36,.85)'; ctx.fillRect(0,H-34,W,34); ctx.fillStyle='#fbbf24'; ctx.font='700 12px Inter,sans-serif'; ctx.textBaseline='middle'; ctx.fillText(S.msg,W/2,H-17); ctx.textBaseline='bottom'; }
+  }
+  var hb=document.getElementById('hold');
+  function down(e){ if(S.over||S.inv) return; e&&e.preventDefault&&e.preventDefault(); holding=true; hb.classList.add('on'); }
+  function up(){ holding=false; hb.classList.remove('on'); }
+  hb.addEventListener('pointerdown',down); hb.addEventListener('pointerup',up); hb.addEventListener('pointerleave',up); hb.addEventListener('pointercancel',up);
+  hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+  document.addEventListener('keydown',function(e){ if(e.code==='Space'&&!e.repeat){ e.preventDefault(); down(); } });
+  document.addEventListener('keyup',function(e){ if(e.code==='Space'){ e.preventDefault(); up(); } });
+  newGame();
+})();
+</script>
+</body>
+</html>

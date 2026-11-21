@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>WFH Mute Master: Free Work From Home Video Call Game</title>
+<meta name="description" content="Keep a client video call alive: mute colleagues before the pressure cooker whistle, barking dog or sabzi-wala is heard. A free, funny work from home game.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/wfh-mute-master/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/wfh-mute-master/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/wfh-mute-master/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="WFH Mute Master: Free Work From Home Video Call Game">
+<meta property="og:description" content="Keep a client video call alive: mute colleagues before the pressure cooker whistle, barking dog or sabzi-wala is heard. A free, funny work from home game.">
+<meta property="og:url" content="https://resume4u.help/games/wfh-mute-master/">
+<meta property="og:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WFH Mute Master: Free Work From Home Video Call Game">
+<meta name="twitter:description" content="Keep a client video call alive: mute colleagues before the pressure cooker whistle, barking dog or sabzi-wala is heard. A free, funny work from home game.">
+<meta name="twitter:image" content="https://resume4u.help/og-image.png?v=3">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "WFH Mute Master",
+   "url": "https://resume4u.help/games/wfh-mute-master/",
+   "description": "Keep a client video call alive: mute colleagues before the pressure cooker whistle, barking dog or sabzi-wala is heard. A free, funny work from home game.",
+   "genre": "Arcade",
+   "inLanguage": "en-IN",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/"
+   },
+   "dateModified": "2026-11-21"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "WFH Mute Master",
+     "item": "https://resume4u.help/games/wfh-mute-master/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same night-office world as the other Office Arcade games (deliberately one dark theme) — call timer and client-mood strip, a 2×3 grid of video tiles you tap to mute/unmute, a status line. */
+:root{
+  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --cell:#222d4f; --line:#2e3b63; --ink:#eef2ff; --muted:#9aa6c8;
+  --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171; --blue:#60a5fa;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
+.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
+.bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.rec{display:flex;align-items:center;gap:6px;font:800 .95rem var(--display);font-variant-numeric:tabular-nums}
+.rec i{width:9px;height:9px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444}
+.cm label{display:flex;justify-content:space-between;font-size:.66rem;color:var(--muted);font-weight:700;letter-spacing:.04em}
+.cm .t{height:9px;background:#0d1324;border-radius:9px;overflow:hidden;border:1px solid var(--line);margin-top:3px}
+.cm .t i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ef4444,#fbbf24 45%,#4ade80);transition:width .3s}
+.sc{font:800 .95rem var(--display);text-align:right}
+.call{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:#05080f;border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:0 24px 50px -24px rgba(0,0,0,.8);user-select:none;-webkit-user-select:none}
+.tile{position:relative;aspect-ratio:4/3;border-radius:12px;background:var(--cell);border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font:inherit;padding:0;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.tile .face{font-size:2.4rem;line-height:1}
+.tile .nm{position:absolute;left:6px;bottom:5px;font-size:.66rem;font-weight:700;background:rgba(0,0,0,.45);padding:1px 6px;border-radius:6px;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .mic{position:absolute;right:6px;bottom:5px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;background:rgba(0,0,0,.45)}
+.tile.muted .mic{background:#ef4444}
+.tile.client{background:linear-gradient(160deg,#27355f,#1b2542);border-color:#60a5fa}
+.tile.client .nm{background:#2563eb}
+.tile.talk{border-color:#4ade80;box-shadow:0 0 0 2px rgba(74,222,128,.25) inset}
+.tile .noise,.tile .ask{position:absolute;top:6px;left:6px;right:6px;display:flex;align-items:center;gap:6px;border-radius:9px;padding:4px 7px;font-size:.7rem;font-weight:700;line-height:1.2}
+.tile .noise{background:rgba(239,68,68,.92);color:#fff;animation:pulse .6s infinite alternate}
+.tile .ask{background:rgba(74,222,128,.92);color:#052e16}
+.tile .noise b,.tile .ask b{font-size:1rem}
+.tile .tm{position:absolute;left:0;bottom:0;height:3px;background:#fbbf24}
+@keyframes pulse{to{filter:brightness(1.25)}}
+.tile:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.status{min-height:46px;background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:600;font-size:.88rem}
+.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block;width:100%}
+.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+.over{position:absolute;inset:0;background:rgba(5,8,15,.95);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;text-align:center;z-index:4}
+.over .e{font-size:2.8rem;line-height:1}
+.over h2{margin:0;font:800 1.4rem/1.15 var(--display)}
+.over p{margin:0;color:var(--muted);font-size:.9rem}
+.over .acts{display:grid;gap:8px;width:100%;max-width:260px;margin-top:6px}
+.rules{display:grid;gap:4px;font-size:.78rem;color:var(--muted)}
+.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
+@media (prefers-reduced-motion:reduce){.tile .noise{animation:none}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="wrap">
+  <div><h1>WFH <span>Mute Master</span></h1><div class="sub">Save the client call from home chaos · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
+  <div class="bar">
+    <div class="rec"><i></i><span id="time">00:00</span></div>
+    <div class="cm"><label><span>CLIENT MOOD</span><span id="cmt">😊</span></label><div class="t"><i id="cmood"></i></div></div>
+    <div class="sc" id="score">0 saves</div>
+  </div>
+  <div class="call" id="call" aria-label="Video call"></div>
+  <div class="status" id="status" role="status" aria-live="polite">Tap Join call. Mute anyone making noise 🔇, unmute anyone who wants to speak 🙋. Never mute the client!</div>
+  <button class="btn" id="start">Join call</button>
+  <div class="rules"><span>🔴 Noise on a tile → tap to <b>mute</b> before the client hears it.</span><span>🟢 "Wants to speak" on a muted tile → tap to <b>unmute</b>.</span><span>🔵 The client's tile: don't touch it.</span></div>
+  <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Looking for a remote job? Build your resume free →</a>
+</div>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play WFH Mute Master</h2><ol><li>Join the call. Home chaos pops up on colleagues&#x27; video tiles.</li><li>Tap a noisy tile to mute it before the client hears.</li><li>Muted colleagues sometimes want to answer: tap to unmute them.</li><li>Never touch the client&#x27;s tile. Keep the client happy till the call ends.</li></ol><p>Looking for a remote job? <a href="/">Build a resume free</a> and get <a href="/whatsapp-job-alerts/">daily job alerts on WhatsApp</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+  var P=[['🧑‍💼','Mr. Kapoor (Client)',1],['🧑‍💻','You (host)',0],['👩‍💼','Priya',0],['👨‍💻','Arjun',0],['🧔','Ravi',0],['👩','Neha',0]];
+  var NOISE=[['🔔','Pressure cooker whistle!'],['🐕','Dog barking at the delivery guy'],['👩‍🦳','"Beta, khana kha lo!"'],['📢','"Sabzi le lo, sabziii!"'],['🔨','Drilling next door'],['👶','Baby crying'],['🌀','Mixer grinder at full speed'],['📺','TV: "It\'s a SIX!"'],['🛵','Pressure horn outside'],['🦜','Neighbour\'s parrot screaming']];
+  var call=document.getElementById('call'), S, raf, last=0, best=0;
+  try{ best=+localStorage.getItem('wfh_best')||0; }catch(e){}
+  call.innerHTML=P.map(function(p,i){return '<button class="tile'+(p[2]?' client':'')+'" data-i="'+i+'" aria-label="'+p[1]+'"><span class="face">'+p[0]+'</span><span class="nm">'+p[1]+'</span><span class="mic">🎤</span></button>';}).join('');
+  var tiles=[].slice.call(call.querySelectorAll('.tile'));
+  function $(id){return document.getElementById(id);}
+  function status(t){ $('status').textContent=t; }
+  function reset(){
+    S={t:0,len:75,mood:100,saves:0,run:false,over:false,next:1.4,muted:[0,0,0,0,0,0],ev:[null,null,null,null,null,null]};
+    tiles.forEach(function(el,i){ el.classList.remove('muted','talk'); clearEv(i); }); hud();
+  }
+  function hud(){ var s=Math.floor(S.t), mm=Math.floor(s/60), ss=s%60; $('time').textContent=(mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss;
+    $('cmood').style.width=Math.max(0,S.mood)+'%'; $('cmt').textContent=S.mood>70?'😊':S.mood>45?'😐':S.mood>20?'😠':'🤬'; $('score').textContent=S.saves+' save'+(S.saves===1?'':'s'); }
+  function clearEv(i){ S&&(S.ev[i]=null); var el=tiles[i]; ['.noise','.ask','.tm'].forEach(function(s){ var x=el.querySelector(s); if(x) x.remove(); }); el.classList.remove('talk'); }
+  function spawn(){
+    var cand=[]; for(var i=1;i<P.length;i++) if(!S.ev[i]) cand.push(i); if(!cand.length) return;
+    var i=cand[Math.floor(Math.random()*cand.length)], el=tiles[i];
+    var wantSpeak=S.muted[i]&&Math.random()<.45;
+    var life=Math.max(1.5,3.0-S.t*.022);
+    if(wantSpeak){ S.ev[i]={type:'ask',life:life+.6,max:life+.6}; var a=document.createElement('span'); a.className='ask'; a.innerHTML='<b>🙋</b>Wants to answer the client'; el.appendChild(a); el.classList.add('talk'); }
+    else if(!S.muted[i]){ var n=NOISE[Math.floor(Math.random()*NOISE.length)]; S.ev[i]={type:'noise',life:life,max:life}; var b=document.createElement('span'); b.className='noise'; b.innerHTML='<b>'+n[0]+'</b>'+n[1]; el.appendChild(b); }
+    else return;
+    var tm=document.createElement('span'); tm.className='tm'; el.appendChild(tm);
+  }
+  function setMute(i,m){ S.muted[i]=m; tiles[i].classList.toggle('muted',!!m); tiles[i].querySelector('.mic').textContent=m?'🔇':'🎤'; }
+  function tap(i){
+    if(!S.run||S.over) return;
+    if(P[i][2]){ S.mood-=22; status('😱 You muted the CLIENT! Mr. Kapoor: "Hello? Hello?? Can you hear me?"'); navigator.vibrate&&navigator.vibrate([80,40,80]); hud(); if(S.mood<=0) end(); return; }
+    var ev=S.ev[i];
+    if(ev&&ev.type==='noise'){ setMute(i,1); clearEv(i); S.saves++; status('🔇 Saved! '+P[i][1]+' muted just in time.'); }
+    else if(ev&&ev.type==='ask'){ setMute(i,0); clearEv(i); S.saves++; status('🎤 '+P[i][1]+' unmuted and answers the client. Smooth!'); }
+    else { setMute(i,S.muted[i]?0:1); status(S.muted[i]?P[i][1]+' muted.':P[i][1]+' unmuted. Careful, homes are noisy!'); }
+    hud();
+  }
+  function loop(t){
+    if(!S.run) return; var dt=Math.min(.05,(t-last)/1000||0); last=t;
+    if(!S.over){
+      S.t+=dt; S.next-=dt; if(S.next<=0){ spawn(); if(S.t>20&&Math.random()<.4) spawn(); if(S.t>50&&Math.random()<.3) spawn(); S.next=Math.max(.55,1.3-S.t*.012); }
+      for(var i=1;i<P.length;i++){ var ev=S.ev[i]; if(!ev) continue; ev.life-=dt; var tm=tiles[i].querySelector('.tm'); if(tm) tm.style.width=Math.max(0,ev.life/ev.max*100)+'%';
+        if(ev.life<=0){ if(ev.type==='noise'){ S.mood-=16; status('😬 The client heard it: '+tiles[i].querySelector('.noise').textContent.trim()); } else { S.mood-=12; status('🤦 '+P[i][1]+' was talking on mute for 2 minutes.'); } clearEv(i); navigator.vibrate&&navigator.vibrate(60); } }
+      if(S.mood<=0) end(); else if(S.t>=S.len) end(true);
+      hud();
+    }
+    raf=requestAnimationFrame(loop);
+  }
+  function end(ok){
+    S.over=true; S.run=false; if(ok&&S.saves>best){ best=S.saves; try{localStorage.setItem('wfh_best',best);}catch(e){} }
+    var rank=S.saves>=45?['🎧','Mute Master']:S.saves>=30?['🧘','Calm Host']:S.saves>=15?['😅','Survived, barely']:['🙈','Chaos Coordinator'];
+    var share=ok?'I saved a client call from '+S.saves+' WFH disasters 🎧🔇 (pressure cooker included). Rank: '+rank[1]+'. Can you? https://resume4u.help/games/wfh-mute-master/':'The client LEFT my call after '+Math.floor(S.t)+' seconds of WFH chaos 😂 Can you handle it better? https://resume4u.help/games/wfh-mute-master/';
+    var o=document.createElement('div'); o.className='over'; o.setAttribute('role','dialog'); o.setAttribute('aria-label','Call ended');
+    o.innerHTML='<div class="e">'+(ok?'✅':'📵')+'</div><h2>'+(ok?'Deal signed! Call ended well':'Client left the call')+'</h2><p>'+(ok?'You handled '+S.saves+' moments of home chaos.<br>Rank: '+rank[0]+' '+rank[1]:'Mr. Kapoor: "Let\'s reconnect… never." 🙃<br>You lasted '+Math.floor(S.t)+' seconds with '+S.saves+' saves.')+'</p><div class="acts"><a class="btn" href="https://wa.me/?text='+encodeURIComponent(share)+'" target="_blank" rel="noopener">Challenge friends on WhatsApp</a><button class="btn ghost" id="again">Join another call</button></div>';
+    call.appendChild(o); o.querySelector('#again').onclick=function(e){ e.stopPropagation(); o.remove(); begin(); };
+    $('start').hidden=false;
+  }
+  function begin(){ reset(); S.run=true; $('start').hidden=true; setMute(3,1); status('Call started. Mr. Kapoor is presenting. Keep it quiet!'); last=performance.now(); raf=requestAnimationFrame(loop); }
+  call.addEventListener('pointerdown',function(e){ var t=e.target.closest('.tile'); if(t&&!e.target.closest('.over')){ e.preventDefault(); tap(+t.dataset.i); } });
+  call.addEventListener('keydown',function(e){ var t=e.target.closest('.tile'); if(t&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); tap(+t.dataset.i); } });
+  $('start').onclick=begin;
+  reset();
+})();
+</script>
+</body>
+</html>
