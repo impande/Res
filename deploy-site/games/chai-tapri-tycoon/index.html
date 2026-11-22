@@ -78,133 +78,220 @@
  ]
 }
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/games/kit.css?v=529d41bb"><script src="/games/kit.js?v=60dcd1e8"></script>
 <style>
-/* Layout: one dark "IT park at night" theme. Galla (cash) HUD, the tapri stage with the big kettle, then tabs for businesses / upgrades / trophies, then share + reset. */
-:root{
-  --night:#0d1324; --night2:#141c33; --floor:#1b2542; --cell:#222d4f; --line:#2e3b63;
-  --ink:#eef2ff; --muted:#9aa6c8; --gold:#fbbf24; --gold-ink:#3b2506; --green:#4ade80; --red:#f87171;
-  --display:"Baloo 2","Segoe UI",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
-  color-scheme:dark;
-}
+:root{--night:#0d1324;--night2:#141c33;--floor:#1b2542;--cell:#222d4f;--line:#2e3b63;--ink:#eef2ff;--muted:#9aa6c8;--gold:#fbbf24;--gold-ink:#3b2506;--green:#4ade80;--red:#f87171;--chai:#d08a45;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif;--body:"Inter",system-ui,-apple-system,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{min-height:100%}
 body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background:var(--night);background-image:radial-gradient(ellipse at 50% -10%,#24305a 0,transparent 60%);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px;overflow-x:hidden}
-.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-h1{margin:0;font:800 1.6rem/1 var(--display)} h1 span{color:var(--gold)}
-.sub{font-size:.74rem;color:var(--muted);margin-top:4px} .sub a{color:inherit}
-.btn{border:0;border-radius:12px;padding:12px 14px;font:800 1rem var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);text-decoration:none;text-align:center;display:block}
-.btn.ghost{background:var(--floor);color:var(--ink);border:1px solid var(--line)}
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:14px;padding-bottom:28px;overflow-x:hidden}
 button{font-family:inherit;color:inherit}
-:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.top .btn{padding:7px 11px;font-size:.82rem;border-radius:10px;white-space:nowrap;flex:none}
-
-/* HUD */
-.hud{background:var(--floor);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 18px 40px -24px rgba(0,0,0,.8)}
-.lbl{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.cash{font:800 2.25rem/1.05 var(--display);color:var(--gold);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
-.chip{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:5px 8px;min-width:0}
-.chip b{display:block;font:800 1rem/1.2 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank{display:flex;align-items:center;gap:10px;margin-top:10px}
-.rank .re{font-size:1.6rem;line-height:1}
-.rank .rt{flex:1;min-width:0}
-.rank .rn{font:800 1rem/1.1 var(--display)} .rank .rn span{color:var(--muted);font:600 .72rem var(--body)}
-.bar{height:7px;border-radius:9px;background:var(--night2);border:1px solid var(--line);overflow:hidden;margin-top:4px}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#fde68a);border-radius:9px;transition:width .3s}
-
-/* Stage */
-.stage{position:relative;height:320px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,#1c2650 0,#141c39 70%,#10172d);box-shadow:0 24px 50px -24px rgba(0,0,0,.8);user-select:none;-webkit-user-select:none}
-.awning{position:absolute;top:0;left:0;right:0;height:26px;background:repeating-linear-gradient(90deg,#d9503b 0 22px,#fbecc9 22px 44px);z-index:2}
-.awning::after{content:"";position:absolute;left:0;right:0;top:100%;height:11px;
-  background:radial-gradient(circle at 11px 0,#d9503b 10.5px,transparent 11px) 0 0/44px 11px repeat-x,radial-gradient(circle at 11px 0,#fbecc9 10.5px,transparent 11px) 22px 0/44px 11px repeat-x}
-.sign{position:absolute;top:44px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#7c4a1e,#5c3613);border:2px solid #a8692f;color:#fde68a;font:800 .78rem/1 var(--display);letter-spacing:.06em;padding:6px 12px 5px;border-radius:8px;white-space:nowrap;z-index:2;text-transform:uppercase;box-shadow:0 6px 14px -6px rgba(0,0,0,.7)}
-.sky{position:absolute;left:0;right:0;bottom:46px;width:100%;height:120px;opacity:.55}
-.counter{position:absolute;left:0;right:0;bottom:0;height:52px;background:linear-gradient(180deg,#9a5c26 0,#7a4519 10%,#5a3212);border-top:3px solid #b9773a;z-index:1}
-.shelf{position:absolute;left:8px;right:8px;bottom:6px;display:flex;justify-content:center;align-items:flex-start;flex-wrap:nowrap;gap:4px;z-index:3;overflow:hidden;height:40px;padding-top:2px}
-.shelf span{font-size:1.15rem;line-height:1;background:rgba(0,0,0,.22);border-radius:8px;padding:4px 5px;position:relative}
-.shelf span small{position:absolute;right:-3px;bottom:-6px;font:800 .55rem/1 var(--body);background:var(--gold);color:var(--gold-ink);border-radius:6px;padding:1px 3px}
-.kettle{position:absolute;left:50%;top:98px;width:156px;height:156px;margin-left:-78px;border:0;border-radius:50%;cursor:pointer;z-index:4;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  background:radial-gradient(circle at 50% 55%,rgba(251,191,36,.38),rgba(251,191,36,.08) 55%,transparent 70%);display:flex;align-items:center;justify-content:center}
-.kettle .k{font-size:88px;line-height:1;filter:drop-shadow(0 10px 12px rgba(0,0,0,.55));pointer-events:none;display:block}
-.kettle .tag{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font:800 .7rem/1 var(--display);background:var(--gold);color:var(--gold-ink);border-radius:99px;padding:4px 8px 3px;white-space:nowrap;pointer-events:none}
-.steam{position:absolute;left:50%;top:84px;width:60px;height:60px;margin-left:-6px;pointer-events:none;z-index:3}
-.steam i{position:absolute;bottom:0;width:12px;height:34px;border-radius:50%;background:rgba(255,255,255,.4);filter:blur(5px);opacity:0;animation:rise 2.6s ease-out infinite}
-.steam i:nth-child(1){left:6px}.steam i:nth-child(2){left:22px;animation-delay:.9s}.steam i:nth-child(3){left:36px;animation-delay:1.7s}
-@keyframes rise{0%{transform:translateY(10px) scaleX(.7);opacity:0}30%{opacity:.8}100%{transform:translateY(-46px) scaleX(1.5);opacity:0}}
-.puff{position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.55);filter:blur(6px);pointer-events:none;z-index:5;animation:puff .8s ease-out forwards}
-@keyframes puff{from{transform:translate(-50%,0) scale(.6);opacity:.9}to{transform:translate(-50%,-60px) scale(2.2);opacity:0}}
-.pop{position:absolute;font:800 1.35rem/1 var(--display);color:#fde68a;text-shadow:0 2px 0 #7c4a1e,0 4px 12px rgba(0,0,0,.6);pointer-events:none;z-index:6;white-space:nowrap;transform:translate(-50%,-50%);animation:floatUp .9s ease-out forwards}
-.pop.hot{color:#fb923c}
-@keyframes floatUp{0%{transform:translate(-50%,-30%) scale(.7);opacity:0}15%{transform:translate(-50%,-60%) scale(1.15);opacity:1}100%{transform:translate(-50%,-260%) scale(1);opacity:0}}
-.boosts{position:absolute;left:8px;top:84px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;z-index:5;max-width:32%}
-.boosts span,.stars{background:rgba(13,19,36,.85);border:1px solid #f59e0b;color:#fde68a;border-radius:99px;font:700 .68rem/1 var(--body);padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ev{position:absolute;z-index:7;max-width:38%;border:2px solid #fff7d6;border-radius:16px;padding:7px 10px;font:800 .8rem/1.1 var(--display);cursor:pointer;color:var(--gold-ink);background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);box-shadow:0 0 0 0 rgba(251,191,36,.7),0 10px 22px -8px rgba(0,0,0,.8);animation:bob 1.2s ease-in-out infinite,ring 1.4s ease-out infinite;text-align:left}
-.ev small{display:block;font:600 .62rem/1.2 var(--body);opacity:.8;margin-top:2px}
-@keyframes bob{50%{transform:translateY(-6px)}}
-@keyframes ring{0%{box-shadow:0 0 0 0 rgba(251,191,36,.65),0 10px 22px -8px rgba(0,0,0,.8)}100%{box-shadow:0 0 0 16px rgba(251,191,36,0),0 10px 22px -8px rgba(0,0,0,.8)}}
-.status{margin:-4px 0 0;min-height:1.4em;font-size:.82rem;color:var(--muted);text-align:center}
-.status b{color:var(--ink)}
-
-/* Tabs + lists */
-.tabs{display:flex;gap:6px;align-items:center}
-.tab{position:relative;flex:1;min-width:0;border:1px solid var(--line);background:var(--night2);border-radius:10px;padding:8px 4px;font:800 .82rem/1 var(--display);cursor:pointer;color:var(--muted);white-space:nowrap}
-.tab[aria-selected="true"]{background:var(--floor);color:var(--ink);border-color:#f59e0b}
-.tab .dot{position:absolute;top:-6px;right:-4px;min-width:17px;height:17px;border-radius:99px;background:var(--red);color:#fff;font:800 .62rem/17px var(--body);padding:0 4px}
-.qty{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
-.qty button{border:0;background:var(--night2);color:var(--muted);font:800 .8rem/1 var(--display);padding:8px 9px;cursor:pointer}
-.qty button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink)}
-.panel{display:flex;flex-direction:column;gap:8px}
-.row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--floor);border:1px solid var(--line);border-radius:14px;padding:9px 10px;box-shadow:0 12px 26px -20px rgba(0,0,0,.9)}
-.row .ic{width:42px;height:42px;border-radius:11px;background:var(--cell);display:flex;align-items:center;justify-content:center;font-size:1.45rem;position:relative}
-.row .ic small{position:absolute;right:-5px;bottom:-5px;min-width:20px;height:18px;border-radius:9px;background:var(--gold);color:var(--gold-ink);font:800 .66rem/18px var(--body);text-align:center;padding:0 4px}
-.row .nm{font:800 .95rem/1.15 var(--display)}
-.row .fl{font-size:.72rem;line-height:1.35;color:var(--muted);margin-top:2px}
-.row .rt{font-size:.72rem;color:var(--green);font-weight:600;margin-top:3px}
-.buy{border:0;border-radius:10px;padding:8px 9px;min-width:86px;font:800 .82rem/1.1 var(--display);cursor:pointer;background:linear-gradient(135deg,#fde68a,#fbbf24 45%,#f59e0b);color:var(--gold-ink);font-variant-numeric:tabular-nums}
-.buy small{display:block;font:700 .58rem/1.2 var(--body);opacity:.75;text-transform:uppercase;letter-spacing:.05em}
-.buy:disabled{background:var(--night2);color:var(--muted);border:1px solid var(--line);cursor:not-allowed}
-.row.lock{opacity:.55;border-style:dashed;box-shadow:none}
-.row.lock .ic{filter:grayscale(1)}
-.row.done{opacity:.7}
-.row.done .buy{background:transparent;border:1px solid var(--green);color:var(--green)}
-.hint{font-size:.74rem;color:var(--muted);text-align:center;margin:0}
-.troph{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-.tr{background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:8px 9px;font-size:.74rem;color:var(--muted);min-width:0}
-.tr b{display:block;color:var(--ink);font:800 .85rem/1.2 var(--display)}
-.tr.got{background:var(--floor);border-color:#a16207}
-.tr.got b{color:#fde68a}
-.foot{display:grid;gap:10px;margin-top:4px}
-.cta{display:block;text-align:center;color:var(--gold);font-weight:700;text-decoration:none;font-size:.88rem}
-.cta:hover{text-decoration:underline}
-.reset{justify-self:center;background:none;border:0;color:var(--muted);font-size:.76rem;text-decoration:underline;cursor:pointer;padding:6px}
-
-/* Modal + toast */
-.modal{position:fixed;inset:0;z-index:30;background:rgba(5,8,18,.78);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .2s ease-out}
-.card{width:100%;max-width:360px;background:var(--floor);border:1px solid var(--line);border-radius:18px;padding:22px 18px 18px;text-align:center;box-shadow:0 30px 60px -20px rgba(0,0,0,.9)}
-.card .e{font-size:3rem;line-height:1}
-.card h2{margin:8px 0 4px;font:800 1.4rem/1.15 var(--display)}
-.card p{margin:0 0 4px;color:var(--muted);font-size:.9rem}
-.card p b{color:var(--gold)}
-.card .acts{display:grid;gap:8px;margin-top:14px}
-.card .btn:disabled{opacity:.45;cursor:not-allowed}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-.toast{position:fixed;left:50%;top:max(14px,env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--gold);color:var(--gold-ink);font:800 .92rem/1.25 var(--display);padding:8px 16px;border-radius:99px;box-shadow:0 10px 24px -8px rgba(0,0,0,.6);z-index:40;animation:drop .25s ease-out;text-align:center}
-@keyframes drop{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
+.ct :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.ct{max-width:520px;margin:0 auto;position:relative}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (max-width:370px){.cash{font-size:1.95rem}.row .fl{display:none}.buy{min-width:78px}}
-@media (prefers-reduced-motion:reduce){
-  .steam,.puff{display:none}
-  .pop{animation:none;opacity:1;transform:translate(-50%,-120%)}
-  .ev{animation:none}
-  .modal,.toast{animation:none}
-  .bar i{transition:none}
-}
+
+/* top bar */
+.ct-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:42px}
+.ct-back{flex:none;border:1px solid var(--line);background:var(--floor);border-radius:12px;padding:8px 12px;font:800 .86rem/1 var(--display);cursor:pointer;box-shadow:0 3px 0 #0a0f1e}
+.ct-back:active{transform:translateY(2px);box-shadow:0 1px 0 #0a0f1e}
+.ct-bt{flex:1;min-width:0;font:800 1.05rem/1.1 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-bt small{display:block;font:600 .7rem/1.2 var(--body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ct-scr{animation:ct-in .32s cubic-bezier(.2,.9,.3,1) both}
+@keyframes ct-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* logo */
+.ct-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin:2px 0 12px}
+.ct-logo svg{width:74px;height:74px;flex:none;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45));animation:ct-bob 3s ease-in-out infinite}
+.ct-logo h1{margin:0;display:flex;flex-direction:column;line-height:.86}
+.ct-logo h1 span{font:800 1.45rem/1 var(--display);color:#fff1dc;letter-spacing:.02em;text-shadow:0 2px 0 #1b2036}
+.ct-logo h1 b{font:800 3.1rem/.9 var(--display);color:var(--gold);letter-spacing:.03em;-webkit-text-stroke:2px #1b2036;paint-order:stroke fill;text-shadow:0 5px 0 #7c2d12,0 12px 22px rgba(0,0,0,.45)}
+@keyframes ct-bob{50%{transform:translateY(-5px) rotate(-3deg)}}
+
+/* stage */
+.ct-stage{position:relative;border-radius:20px;overflow:hidden;background:#141c39;border:2px solid #0a0f1e;box-shadow:0 0 0 1px var(--line),0 24px 50px -24px rgba(0,0,0,.85);user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ct-stage canvas{display:block;width:100%;aspect-ratio:6/5;height:auto}
+.ct-cap{margin:0;position:relative;z-index:3;background:linear-gradient(180deg,#121a33,#0e1529);border-top:2px solid #0a0f1e;padding:8px 12px;font-size:.82rem;line-height:1.35;color:var(--muted);text-align:center;min-height:2.2em}
+.ct-cap b{color:var(--ink)}
+.ct-brew{position:absolute;left:0;top:0;width:100%;aspect-ratio:6/5;border:0;background:transparent;cursor:pointer;z-index:2;touch-action:manipulation;padding:0}
+.ct-brew:focus-visible{outline:3px solid var(--gold);outline-offset:-4px;border-radius:18px}
+.ct-hint{position:absolute;left:50%;top:36%;transform:translateX(-50%);z-index:3;pointer-events:none;background:var(--gold);color:var(--gold-ink);font:800 .9rem/1 var(--display);padding:8px 14px 7px;border-radius:99px;border:2px solid #1b2036;box-shadow:0 4px 0 #1b2036;white-space:nowrap;animation:ct-hint 1.1s ease-in-out infinite}
+@keyframes ct-hint{50%{transform:translate(-50%,-6px)}}
+.ct-boosts{position:absolute;left:8px;top:8px;z-index:3;display:flex;flex-direction:column;align-items:flex-start;gap:4px;pointer-events:none;max-width:56%}
+.ct-boosts span{background:rgba(13,19,36,.86);border:1px solid #f59e0b;color:#fde68a;border-radius:99px;font:700 .68rem/1 var(--body);padding:5px 8px;white-space:nowrap}
+.ct-boosts span.cool{border-color:#60a5fa;color:#bfdbfe}
+.ct-ev{position:absolute;z-index:4;right:10px;top:12%;display:flex;align-items:center;gap:8px;max-width:62%;border:2px solid #1b2036;border-radius:16px;padding:6px 10px 6px 6px;cursor:pointer;color:var(--gold-ink);text-align:left;
+  background:linear-gradient(180deg,#fde68a,#fbbf24 55%,#f59e0b);box-shadow:0 4px 0 #1b2036,0 0 0 0 rgba(251,191,36,.6);animation:ct-evbob 1.2s ease-in-out infinite,ct-ring 1.4s ease-out infinite;font:800 .84rem/1.1 var(--display)}
+.ct-ev svg{width:34px;height:34px;flex:none}
+.ct-ev small{display:block;font:600 .66rem/1.2 var(--body);opacity:.85}
+.ct-ev i{position:absolute;left:8px;right:8px;bottom:3px;height:3px;border-radius:3px;background:rgba(59,37,6,.35);transform-origin:left;animation:ct-drain linear forwards}
+@keyframes ct-evbob{50%{transform:translateY(-5px)}}
+@keyframes ct-ring{0%{box-shadow:0 4px 0 #1b2036,0 0 0 0 rgba(251,191,36,.6)}100%{box-shadow:0 4px 0 #1b2036,0 0 0 16px rgba(251,191,36,0)}}
+@keyframes ct-drain{to{transform:scaleX(0)}}
+.ct-count{position:absolute;inset:0;bottom:auto;aspect-ratio:6/5;z-index:5;display:grid;place-items:center;pointer-events:none;font:800 5rem/1 var(--display);color:#fff;-webkit-text-stroke:3px #1b2036;paint-order:stroke fill;text-shadow:0 6px 0 #1b2036}
+.ct-count.go{color:var(--gold)}
+.ct-count span{animation:ct-cd .7s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes ct-cd{0%{transform:scale(2.2);opacity:0}100%{transform:none;opacity:1}}
+
+/* cards + hud */
+.ct-card{background:var(--floor);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 18px 40px -26px rgba(0,0,0,.9)}
+.lbl{display:block;font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ct-hud{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;margin-bottom:10px}
+.ct-cash{font:800 2.1rem/1 var(--display);color:var(--gold);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;text-shadow:0 2px 0 #7c2d12}
+.ct-cash.long{font-size:1.55rem;line-height:1.15}
+.ct-cash.bump{animation:ct-bump .18s ease-out}
+@keyframes ct-bump{50%{transform:scale(1.05)}}
+.ct-chips{display:flex;gap:6px}
+.ct-chip{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:5px 8px;min-width:0;text-align:right}
+.ct-chip b{display:block;font:800 .98rem/1.15 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ct-fame{color:#c4b5fd}
+
+/* goals */
+.ct-goals{margin-top:10px}
+.ct-gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ct-gh b{font:800 1rem var(--display)}
+.ct-g{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 0}
+.ct-g+.ct-g{border-top:1px dashed rgba(154,166,200,.18)}
+.ct-gs{width:26px;height:26px;display:grid;place-items:center}
+.ct-gs svg{width:24px;height:24px}
+.ct-gt{font:700 .86rem/1.2 var(--body);min-width:0}
+.ct-gt i{display:block;height:6px;border-radius:9px;background:var(--night2);border:1px solid var(--line);margin-top:4px;overflow:hidden}
+.ct-gt i b{display:block;height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#fde68a);border-radius:9px;transition:width .3s}
+.ct-g.done .ct-gt{color:#fde68a}
+.ct-g.done .ct-gt i b{background:var(--green)}
+.ct-gv{font:700 .74rem var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ct-next{margin-top:8px}
+
+/* expand */
+.ct-exp{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center;margin-top:10px;background:linear-gradient(135deg,#24305c,#1b2542);border-color:#3d4f86}
+.ct-exp canvas{width:96px;height:72px;border-radius:12px;background:#2a3768;border:2px solid #0a0f1e;display:block}
+.ct-exp h3{margin:0;font:800 1.02rem/1.15 var(--display)}
+.ct-exp p{margin:2px 0 8px;font-size:.76rem;color:var(--muted);line-height:1.35}
+.ct-exp .oa-btn{padding:9px 12px;font-size:.92rem}
+
+/* tabs + items */
+.ct-tabs{display:flex;gap:6px;align-items:center;margin:14px 0 8px}
+.ct-tab{position:relative;flex:1;min-width:0;border:1px solid var(--line);background:var(--night2);border-radius:11px;padding:9px 4px;font:800 .86rem/1 var(--display);cursor:pointer;color:var(--muted);white-space:nowrap}
+.ct-tab[aria-selected="true"]{background:var(--floor);color:var(--ink);border-color:#f59e0b;box-shadow:inset 0 -3px 0 #f59e0b}
+.ct-tab .dot{position:absolute;top:-6px;right:-3px;min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font:800 .62rem/18px var(--body);padding:0 4px;border:2px solid var(--night)}
+.ct-qty{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;flex:none}
+.ct-qty button{border:0;background:var(--night2);color:var(--muted);font:800 .8rem/1 var(--display);padding:9px 9px;cursor:pointer}
+.ct-qty button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink)}
+.ct-list{display:flex;flex-direction:column;gap:8px}
+.ct-item{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--floor);border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.ct-ic{width:46px;height:46px;border-radius:12px;background:radial-gradient(circle at 50% 35%,#34437a,#222d4f);border:1px solid #33427a;display:grid;place-items:center;position:relative;overflow:hidden}
+.ct-ic svg{width:40px;height:40px;display:block}
+.ct-ic small{position:absolute;right:2px;bottom:2px;min-width:18px;height:16px;border-radius:8px;background:var(--gold);color:var(--gold-ink);font:800 .62rem/16px var(--body);text-align:center;padding:0 3px}
+.ct-it{min-width:0}
+.ct-it b{display:block;font:800 .95rem/1.15 var(--display)}
+.ct-it span{display:block;font-size:.72rem;line-height:1.35;color:var(--muted);margin-top:1px}
+.ct-it em{display:block;font-style:normal;font-size:.72rem;color:var(--green);font-weight:600;margin-top:2px}
+.ct-buy{border:0;border-radius:11px;padding:8px 9px;min-width:86px;font:800 .84rem/1.1 var(--display);cursor:pointer;background:linear-gradient(180deg,#fde68a,#fbbf24 55%,#f59e0b);color:var(--gold-ink);box-shadow:0 3px 0 #b45309;font-variant-numeric:tabular-nums}
+.ct-buy:active{transform:translateY(2px);box-shadow:0 1px 0 #b45309}
+.ct-buy small{display:block;font:700 .58rem/1.2 var(--body);opacity:.75;text-transform:uppercase;letter-spacing:.05em}
+.ct-buy:disabled{background:var(--night2);color:var(--muted);box-shadow:none;border:1px solid var(--line);cursor:not-allowed;transform:none}
+.ct-item.lock{opacity:.6;border-style:dashed}
+.ct-item.lock .ct-ic{filter:grayscale(1) brightness(.8)}
+.ct-item.got{opacity:.72}
+.ct-item.got .ct-buy{background:transparent;border:1px solid var(--green);color:var(--green);box-shadow:none}
+.ct-lk{font:700 .7rem/1.25 var(--body);color:var(--muted);text-align:right;max-width:96px}
+.ct-note{font-size:.76rem;color:var(--muted);text-align:center;margin:4px 0 0}
+
+/* title menu */
+.ct-menu{display:grid;gap:10px;margin-top:14px}
+.ct-menu>.oa-btn{font-size:1.2rem;padding:16px}
+.ct-mode{display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;width:100%;cursor:pointer;background:linear-gradient(135deg,#243060,#1b2542);border:1px solid #3b4c85;border-radius:16px;padding:10px 12px;box-shadow:0 4px 0 #0a0f1e;transition:transform .08s}
+.ct-mode:active{transform:translateY(3px);box-shadow:0 1px 0 #0a0f1e}
+.ct-mode svg{width:50px;height:50px}
+.ct-mode b{display:block;font:800 1.08rem/1.15 var(--display);color:var(--ink)}
+.ct-mode span{display:block;font-size:.76rem;color:var(--muted);line-height:1.3}
+.ct-mode i{font-style:normal;font:800 .8rem/1 var(--display);background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.4);color:#fde68a;border-radius:99px;padding:5px 9px;white-space:nowrap}
+.ct-mode i.ok{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.45);color:#bbf7d0}
+.ct-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ct-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.ct-stats div{background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:7px 8px;text-align:center;min-width:0}
+.ct-stats b{display:block;font:800 1.02rem/1.1 var(--display);color:#fde68a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-chal{margin-top:12px}
+
+/* cities + collection grids */
+.ct-intro{font-size:.84rem;color:var(--muted);margin:0 0 10px}
+.ct-intro b{color:#c4b5fd}
+.ct-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ct-tile{position:relative;border:1px solid var(--line);background:var(--floor);border-radius:14px;padding:5px 5px 7px;cursor:pointer;text-align:center;min-width:0;box-shadow:0 3px 0 #0a0f1e}
+.ct-tile:active{transform:translateY(2px);box-shadow:0 1px 0 #0a0f1e}
+.ct-tile canvas{display:block;width:100%;aspect-ratio:5/3;border-radius:10px;background:#2a3768}
+.ct-tile b{display:block;font:800 .8rem/1.1 var(--display);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-tile .n{position:absolute;left:9px;top:9px;background:#0d1324d9;border:1px solid var(--line);border-radius:8px;font:800 .7rem/1 var(--display);padding:3px 6px 2px;color:#fde68a}
+.ct-tile .st{display:block;font-size:.82rem;letter-spacing:1px;color:#334166;line-height:1.1;margin-top:2px}
+.ct-tile .st .on{color:var(--gold)}
+.ct-tile.cur{border-color:#f59e0b;box-shadow:0 3px 0 #b45309}
+.ct-tile.lock{cursor:not-allowed;opacity:.55}
+.ct-tile.lock canvas{filter:grayscale(1) brightness(.55)}
+.ct-tile .lk{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);width:30px;height:30px}
+.ct-coll h2{font:800 1.15rem/1.2 var(--display);margin:14px 0 8px}
+.ct-sw{position:relative;border:1px solid var(--line);background:var(--floor);border-radius:14px;padding:6px 6px 8px;cursor:pointer;text-align:center;min-width:0;box-shadow:0 3px 0 #0a0f1e}
+.ct-sw canvas{display:block;width:100%;aspect-ratio:6/5;border-radius:10px;background:#3a4a7a}
+.ct-sw .cupic{display:grid;place-items:center;aspect-ratio:6/5;border-radius:10px;background:radial-gradient(circle at 50% 40%,#3a4a7a,#222d4f)}
+.ct-sw .cupic svg{width:62%;height:auto}
+.ct-sw b{display:block;font:800 .8rem/1.15 var(--display);margin-top:5px}
+.ct-sw span{display:block;font-size:.68rem;color:var(--muted)}
+.ct-sw.sel{border-color:var(--green);box-shadow:0 0 0 2px rgba(74,222,128,.35),0 3px 0 #0a0f1e}
+.ct-sw.sel span{color:var(--green);font-weight:700}
+.ct-sw.lock{cursor:not-allowed}
+.ct-sw.lock canvas,.ct-sw.lock .cupic{filter:grayscale(1) brightness(.5)}
+.ct-rivals{margin-top:14px}
+.ct-rivals li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(154,166,200,.2);font-size:.84rem}
+.ct-rivals ul{list-style:none;margin:0;padding:0}
+
+/* rush */
+.ct-rhud{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;margin-bottom:10px}
+.ct-timer{position:relative;width:54px;height:54px}
+.ct-timer svg{width:54px;height:54px;transform:rotate(-90deg)}
+.ct-timer b{position:absolute;inset:0;display:grid;place-items:center;font:800 .92rem/1 var(--display);font-variant-numeric:tabular-nums}
+.ct-timer.low b{color:var(--red)}
+.ct-rc{min-width:0}
+.ct-rc .ct-cash{font-size:1.8rem}
+.ct-combo{font:800 .8rem/1 var(--display);color:#fde68a;margin-top:3px;min-height:1em}
+.ct-strikes{display:flex;gap:3px}
+.ct-strikes svg{width:22px;height:22px}
+.ct-strikes svg.off{opacity:.25;filter:grayscale(1)}
+.ct-line{font:700 .7rem var(--body);color:var(--muted);text-align:right;margin-top:3px;white-space:nowrap}
+.ct-stations{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px;touch-action:manipulation}
+.ct-st{position:relative;border:2px solid #0a0f1e;border-radius:16px;background:linear-gradient(180deg,#2a3a6e,#1d2850);padding:6px 3px 7px;cursor:pointer;text-align:center;box-shadow:0 4px 0 #0a0f1e,inset 0 1px 0 rgba(255,255,255,.1);min-width:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .06s}
+.ct-st:active,.ct-st.hit{transform:translateY(3px);box-shadow:0 1px 0 #0a0f1e}
+.ct-st svg{width:44px;height:44px;display:block;margin:0 auto}
+.ct-st b{display:block;font:800 .86rem/1.05 var(--display);margin-top:2px;white-space:nowrap}
+.ct-st span{display:block;font:700 .64rem/1.2 var(--body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-st kbd{position:absolute;right:5px;top:4px;font:700 .6rem/1 var(--body);color:var(--muted);background:var(--night);border:1px solid var(--line);border-radius:4px;padding:2px 4px}
+.ct-st.wait{filter:saturate(.4) brightness(.8)}
+.ct-st.ready{background:linear-gradient(180deg,#facc15,#f59e0b);color:var(--gold-ink);animation:ct-glow .8s ease-in-out infinite}
+.ct-st.ready span{color:#5b3a0a}
+.ct-st.burnt{background:linear-gradient(180deg,#57534e,#292524)}
+.ct-st .bar{position:absolute;left:8px;right:8px;bottom:3px;height:4px;border-radius:4px;background:rgba(0,0,0,.35);overflow:hidden}
+.ct-st .bar i{display:block;height:100%;width:0;background:var(--green)}
+@keyframes ct-glow{50%{box-shadow:0 4px 0 #0a0f1e,0 0 18px 2px rgba(251,191,36,.7)}}
+.ct-keys{font-size:.72rem;color:var(--muted);text-align:center;margin:8px 0 0}
+/* modals */
+.ct-cthumb{display:block;width:100%;aspect-ratio:320/150;border-radius:14px;border:2px solid #0a0f1e;margin:-4px 0 10px;background:#2a3768}
+.ct-new{text-align:left;background:rgba(196,181,253,.1);border:1px solid rgba(196,181,253,.35);border-radius:12px;padding:8px 11px;margin:8px 0}
+.ct-new b{display:block;font:800 .95rem var(--display);color:#ddd6fe}
+.ct-new span{display:block;font-size:.82rem;color:var(--muted);line-height:1.4}
+.ct-cg{list-style:none;margin:6px 0 4px;padding:0;text-align:left}
+.ct-cg li{display:flex;gap:8px;align-items:center;padding:4px 0;font-size:.86rem}
+.ct-cg li svg{width:22px;height:22px;flex:none}
+.ct-cg li.done{color:#fde68a}
+.ct-mart{display:flex;justify-content:center}
+.ct-mart svg{width:84px;height:84px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.4))}
+.ct-offv{font:800 2rem/1.2 var(--display);color:var(--gold);margin:4px 0 6px;text-shadow:0 2px 0 #7c2d12}
+.ct-how{list-style:none;margin:8px 0;padding:0;text-align:left}
+.ct-how li{display:flex;gap:10px;align-items:center;padding:4px 0;font-size:.84rem;color:var(--muted)}
+.ct-how li b{color:var(--ink)}
+.ct-how li svg{width:34px;height:34px;flex:none}
+@media (max-width:370px){.ct-cash{font-size:1.8rem}.ct-it span{display:none}.ct-buy{min-width:78px}.ct-logo h1 b{font-size:2.6rem}.ct-st b{font-size:.78rem}}
+@media (hover:none){.ct-st kbd,.ct-keys{display:none}}
+@media (prefers-reduced-motion:reduce){.ct-scr,.ct-logo svg,.ct-hint,.ct-ev,.ct-count span,.ct-st.ready,.ct-cash.long{font-size:1.55rem;line-height:1.15}
+.ct-cash.bump{animation:none!important}.ct-gt i b{transition:none}}
 </style>
 <style id="g-page">
 .g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
@@ -225,67 +312,84 @@ button{font-family:inherit;color:inherit}
 </head>
 <body>
 <nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
-<div class="wrap">
-  <div class="top">
-    <div><h1>Chai Tapri <span>Tycoon</span></h1><div class="sub">From one kettle to a chai empire · by <a href="https://resume4u.help/" target="_blank" rel="noopener">Resume For You</a></div></div>
-    <a class="btn" id="shareTop" href="https://wa.me/" target="_blank" rel="noopener" aria-label="Share your chai empire on WhatsApp">📤 Share</a>
-  </div>
+<div class="ct" id="ct">
+  <header class="ct-bar">
+    <button class="ct-back" id="back" type="button" hidden>‹ Menu</button>
+    <div class="ct-bt" id="barT"></div>
+    <div id="ctl"></div>
+  </header>
 
-  <section class="hud" aria-label="Your earnings">
-    <span class="lbl">Cash in the galla</span>
-    <div class="cash" id="cash">₹0</div>
-    <div class="chips">
-      <div class="chip"><span class="lbl">Per second</span><b id="rate">₹0</b></div>
-      <div class="chip"><span class="lbl">Per tap</span><b id="tapv">₹10</b></div>
-      <div class="chip"><span class="lbl">Cups by hand</span><b id="cups">0</b></div>
+  <section class="ct-scr" id="sTitle" aria-label="Title screen">
+    <div class="ct-logo" id="logo"></div>
+    <div data-slot="title"></div>
+    <div class="ct-chal" id="chal" hidden></div>
+    <div class="ct-menu">
+      <button class="oa-btn" type="button" id="bPlay">Play</button>
+      <button class="ct-mode" type="button" id="bRush"></button>
+      <button class="ct-mode" type="button" id="bDaily"></button>
+      <div class="ct-row2"><button class="oa-btn ghost" type="button" id="bCities">Cities</button><button class="oa-btn ghost" type="button" id="bColl">Collection</button></div>
     </div>
-    <div class="rank">
-      <div class="re" id="rankE" aria-hidden="true">🛖</div>
-      <div class="rt">
-        <div class="rn" id="rankN">Tapri <span></span></div>
-        <div class="bar" aria-hidden="true"><i id="rankBar"></i></div>
-      </div>
-    </div>
+    <div class="ct-stats" id="tStats"></div>
   </section>
 
-  <div class="stage" id="stage">
-    <div class="awning" aria-hidden="true"></div>
-    <div class="sign" id="sign" aria-hidden="true">☕ Tapri · Cutting ₹10</div>
-    <svg class="sky" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <g fill="#2a3768">
-        <rect x="0" y="40" width="58" height="80"/><rect x="64" y="12" width="46" height="108"/><rect x="116" y="55" width="40" height="65"/>
-        <rect x="246" y="30" width="54" height="90"/><rect x="306" y="6" width="40" height="114"/><rect x="352" y="48" width="48" height="72"/>
-      </g>
-      <g fill="#fbbf24" opacity=".55">
-        <rect x="8" y="50" width="6" height="5"/><rect x="24" y="64" width="6" height="5"/><rect x="40" y="50" width="6" height="5"/><rect x="72" y="22" width="6" height="5"/><rect x="92" y="36" width="6" height="5"/><rect x="72" y="62" width="6" height="5"/><rect x="124" y="66" width="6" height="5"/><rect x="140" y="80" width="6" height="5"/>
-        <rect x="256" y="40" width="6" height="5"/><rect x="280" y="54" width="6" height="5"/><rect x="256" y="72" width="6" height="5"/><rect x="314" y="16" width="6" height="5"/><rect x="330" y="44" width="6" height="5"/><rect x="314" y="70" width="6" height="5"/><rect x="362" y="58" width="6" height="5"/><rect x="382" y="74" width="6" height="5"/>
-      </g>
-    </svg>
-    <div class="counter" aria-hidden="true"></div>
-    <div class="shelf" id="shelf" aria-hidden="true"></div>
-    <div class="boosts" id="boosts" aria-hidden="true"></div>
-    <div class="steam" aria-hidden="true"><i></i><i></i><i></i></div>
-    <button class="kettle" id="kettle" aria-label="Brew and sell a cup of chai"><span class="k" aria-hidden="true">🫖</span><span class="tag" aria-hidden="true">TAP TO BREW</span></button>
-  </div>
-  <p class="status" id="status" aria-live="polite">Tap the kettle to brew a cutting chai. The IT park is thirsty.</p>
+  <section class="ct-scr" id="sPlay" aria-label="Your chai stall" hidden>
+    <div class="ct-hud">
+      <div><span class="lbl">Cash in the galla</span><div class="ct-cash" id="cash">₹0</div></div>
+      <div class="ct-chips">
+        <div class="ct-chip"><span class="lbl">Per sec</span><b id="rate">₹0</b></div>
+        <div class="ct-chip"><span class="lbl">Per tap</span><b id="tapv">₹10</b></div>
+      </div>
+    </div>
+    <div data-slot="play"></div>
+    <div class="ct-card ct-goals" id="goals"></div>
+    <div class="ct-card ct-exp" id="exp"></div>
+    <div class="ct-tabs" role="tablist" aria-label="Shop">
+      <button class="ct-tab" role="tab" type="button" id="t-staff" aria-controls="p-staff">Staff<span class="dot" hidden></span></button>
+      <button class="ct-tab" role="tab" type="button" id="t-menu" aria-controls="p-menu">Menu<span class="dot" hidden></span></button>
+      <button class="ct-tab" role="tab" type="button" id="t-ups" aria-controls="p-ups">Upgrades<span class="dot" hidden></span></button>
+      <div class="ct-qty" role="group" aria-label="Hire quantity"><button type="button" id="q1" aria-pressed="true">×1</button><button type="button" id="q10" aria-pressed="false">×10</button></div>
+    </div>
+    <div class="ct-list" id="p-staff" role="tabpanel" aria-labelledby="t-staff"></div>
+    <div class="ct-list" id="p-menu" role="tabpanel" aria-labelledby="t-menu" hidden></div>
+    <div class="ct-list" id="p-ups" role="tabpanel" aria-labelledby="t-ups" hidden></div>
+  </section>
 
-  <div class="tabs" role="tablist" aria-label="Shop">
-    <button class="tab" role="tab" id="t-biz" aria-selected="true" aria-controls="p-biz">🏪 Business</button>
-    <button class="tab" role="tab" id="t-up" aria-selected="false" aria-controls="p-up">⬆️ Upgrades<span class="dot" id="upDot" hidden></span></button>
-    <button class="tab" role="tab" id="t-tr" aria-selected="false" aria-controls="p-tr">🏆 <span id="trCount">0</span></button>
-    <div class="qty" role="group" aria-label="Buy quantity"><button id="q1" aria-pressed="true">×1</button><button id="q10" aria-pressed="false">×10</button></div>
-  </div>
-  <div class="panel" id="p-biz" role="tabpanel" aria-labelledby="t-biz"></div>
-  <div class="panel" id="p-up" role="tabpanel" aria-labelledby="t-up" hidden></div>
-  <div class="panel" id="p-tr" role="tabpanel" aria-labelledby="t-tr" hidden></div>
+  <section class="ct-scr" id="sRush" aria-label="Rush Hour" hidden>
+    <div class="ct-rhud">
+      <div class="ct-timer" id="timer"><svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" fill="#141c33" stroke="#2e3b63" stroke-width="6"/><circle id="tRing" cx="27" cy="27" r="23" fill="none" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="0"/></svg><b id="tTxt">3:00</b></div>
+      <div class="ct-rc"><span class="lbl">Rush galla</span><div class="ct-cash" id="rCash">₹0</div><div class="ct-combo" id="rCombo"></div></div>
+      <div><div class="ct-strikes" id="strikes" aria-label="Walkouts left"></div><div class="ct-line" id="rLine"></div></div>
+    </div>
+    <div data-slot="rush"></div>
+    <div class="ct-stations" id="stations"></div>
+    <p class="ct-keys">Keys: 1 Chai · 2 Samosa · 3 Bun maska · 4 Maggi</p>
+    <ul class="sr" id="rOrders" aria-label="Customers at the counter"></ul>
+  </section>
 
-  <div class="foot">
-    <a class="btn" id="shareBtn" href="https://wa.me/" target="_blank" rel="noopener">Brag on WhatsApp ☕</a>
-    <a class="cta" href="https://resume4u.help/" target="_blank" rel="noopener">Real career next? Build your resume free →</a>
-    <button class="reset" id="resetBtn">Reset empire</button>
+  <section class="ct-scr" id="sCities" aria-label="Cities" hidden>
+    <p class="ct-intro" id="cIntro"></p>
+    <div class="ct-grid" id="cGrid"></div>
+  </section>
+
+  <section class="ct-scr ct-coll" id="sColl" aria-label="Collection" hidden>
+    <p class="ct-intro" id="kIntro"></p>
+    <h2>Stall themes</h2>
+    <div class="ct-grid" id="kThemes"></div>
+    <h2>Cup styles</h2>
+    <div class="ct-grid" id="kCups"></div>
+    <div class="ct-card ct-rivals" id="kRivals" hidden></div>
+  </section>
+
+  <div class="ct-stage" id="stage">
+    <canvas id="cv" aria-hidden="true"></canvas>
+    <button class="ct-brew" id="brew" type="button" aria-label="Brew and sell a cup of chai"></button>
+    <div class="ct-hint" id="hint" hidden>Tap to brew!</div>
+    <div class="ct-boosts" id="boosts" aria-hidden="true"></div>
+    <div class="ct-count" id="count" hidden></div>
+    <p class="ct-cap" id="status" aria-live="polite"></p>
   </div>
 </div>
-<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Chai Tapri Tycoon</h2><ol><li>Tap the kettle to brew and sell chai.</li><li>Buy upgrades and businesses that earn money every second.</li><li>Collect events like rain or the IT park fest for bonus sales.</li><li>Come back later: your stalls keep earning while you&#x27;re away.</li></ol><p>Running a business teaches real skills. Put them on your resume with our <a href="/skills-to-put-on-a-resume/">skills guide</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/">🎮 All games</a></div></section>
+<section class="g-about" aria-labelledby="howto"><h2 id="howto">How to play Chai Tapri Tycoon</h2><ol><li>Tap the Chai button to brew and sell. Spend your cash on upgrades, staff and snacks like samosa, bun maska and Maggi that earn money every second.</li><li>Catch timed events (rain rush, cricket match crowd, IT park fest) for bonus sales. Your stalls keep earning while you&#x27;re away.</li><li>Grow from a cart to a café, a chain and a factory across 15 cities. Each city has 3 goals for 3 stars, and every star adds fame everywhere.</li><li>Play Rush Hour: 3 minutes at the counter serving orders before customers walk out. It&#x27;s also the Daily Rush and the mode your friends&#x27; challenges use. Stars unlock stall themes and cup styles.</li></ol><p>Running a business teaches real skills. Put them on your resume with our <a href="/skills-to-put-on-a-resume/">skills guide</a>.</p><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/">🎮 All games</a></div></section>
 <div class="g-foot"><style>
 .r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
 .r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
@@ -306,384 +410,1078 @@ button{font-family:inherit;color:inherit}
 </footer></div>
 <script>
 (function(){
-  'use strict';
-  var $=function(id){ return document.getElementById(id); };
-  var KEY='chaiTapriTycoon_v1', OFFLINE_CAP=8*3600, OFFLINE_RATE=0.5;
-  var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+OA.init({slug:'chai-tapri-tycoon', name:'Chai Tapri Tycoon'});
+var $=function(id){ return document.getElementById(id); };
+var RM=OA.reducedMotion, INK=OA.art.ink;
+var VW=360, VH=300;
 
-  var BIZ=[
-    {id:'kettle',e:'🫖',n:'Extra kettle',f:'One more on the stove. Double the boil, double the office gossip.',c:150,r:1.5},
-    {id:'chhotu',e:'🧑‍🍳',n:'Helper "Chhotu"',f:'He is 22, "Chhotu" is just a nickname. Auto-brews and remembers who takes kam cheeni.',c:1000,r:9},
-    {id:'samosa',e:'🥟',n:'Samosa counter',f:'Chai without samosa is a stand-up without a punchline.',c:6000,r:50},
-    {id:'noodle',e:'🍜',n:'Masala noodle point',f:'"Two-minute" noodles, eleven-minute wait. Night-shift coders never complain.',c:35000,r:250},
-    {id:'bun',e:'🍞',n:'Bun-maska corner',f:'Soft bun, extra butter, zero regrets. Old Irani café energy.',c:1.8e5,r:1100},
-    {id:'metro',e:'🚇',n:'Second stall near the metro',f:'Catch the 9:12 crowd before they catch the 9:14 train.',c:1e6,r:5200},
-    {id:'cloud',e:'☁️',n:'Cloud kitchen',f:'No tables, no chairs, just 40 orders and one very tired kettle.',c:5.5e6,r:25000},
-    {id:'app',e:'🛵',n:'App delivery',f:'Chai in 10 minutes, still hot. The rider gets a cup too.',c:3e7,r:1.15e5},
-    {id:'fran',e:'🏙️',n:'Franchise: Bengaluru · Pune · Hyderabad',f:'Same masala, three cities, three different opinions about traffic.',c:1.8e8,r:6e5},
-    {id:'startup',e:'🦄',n:'"Chai Startup" with VC funding',f:'Deck says "Chai-as-a-Service". The VCs said yes before slide 3.',c:1.2e9,r:3.3e6},
-    {id:'ipo',e:'🔔',n:'IPO',f:'Ring the bell. Your first dented kettle is framed in the lobby.',c:9e9,r:2.1e7},
-    {id:'global',e:'🌍',n:'Chai on every continent',f:'From Toronto to Tokyo, someone is ordering "one cutting, less sugar".',c:8e10,r:1.5e8},
-    {id:'moon',e:'🌕',n:'Tapri on the Moon',f:'Low gravity, high demand. Best view from any counter, ever.',c:8e11,r:1.2e9}
-  ];
-  var UPS=[
-    {id:'masala',e:'🌿',n:'Masala recipe',f:'Elaichi, adrak and a secret pinch. Doubles the value of every tap.',c:200,tap:2},
-    {id:'kulhad',e:'🏺',n:'Kulhad cups',f:'Clay cups make everything taste like a hill station. Taps +50%.',c:2000,tap:1.5},
-    {id:'biscuit',e:'🍪',n:'Biscuit jar on the counter',f:'Dunk-friendly. Kettles and Chhotu earn 2×.',c:6000,biz:['kettle','chhotu'],x:2},
-    {id:'adrak',e:'🫚',n:'Extra-adrak winter blend',f:'Clears the sinuses and the backlog. Taps 2×.',c:25000,tap:2},
-    {id:'upi',e:'📱',n:'QR code payments',f:'No more "bhaiya, change nahi hai". All businesses +25%.',c:60000,all:1.25},
-    {id:'cutting',e:'✂️',n:'Cutting-chai speed pour',f:'Half glass, double speed. Each tap also earns 2% of your ₹/sec.',c:1.5e5,pct:0.02},
-    {id:'combo',e:'🍽️',n:'Chai + samosa combo board',f:'"Combo le lo, sir." Samosa and noodle point earn 2×.',c:5e5,biz:['samosa','noodle'],x:2},
-    {id:'stove',e:'🔥',n:'Double-burner stove',f:'Two flames, one mission. Taps 3×.',c:1.2e6,tap:3},
-    {id:'led',e:'✨',n:'LED signboard',f:'Visible from the 14th floor stand-up meeting. All businesses 1.5×.',c:4e6,all:1.5},
-    {id:'bunx',e:'🧈',n:'Fresh white-butter supply',f:'Bun-maska and metro stall earn 2×.',c:1.5e7,biz:['bun','metro'],x:2},
-    {id:'recipe',e:'📜',n:'Dadi\'s secret recipe',f:'Never written down until now. Each tap also earns 5% of your ₹/sec.',c:3e7,pct:0.05},
-    {id:'tieup',e:'🤝',n:'Office tie-ups',f:'Every IT company cafeteria wants you. Cloud kitchen and app delivery 2×.',c:2e8,biz:['cloud','app'],x:2},
-    {id:'jingle',e:'📻',n:'Radio jingle',f:'"Ek cutting, full setting!" Stuck in every head. All businesses 2×.',c:1.5e9,all:2},
-    {id:'golden',e:'🏆',n:'Golden kulhad',f:'For display only. Mostly. Taps 5×.',c:5e9,tap:5},
-    {id:'seriesb',e:'📈',n:'Series B round',f:'Franchise and startup earn 2×. The founders finally buy chairs.',c:3e10,biz:['fran','startup'],x:2},
-    {id:'somm',e:'🎓',n:'Chai sommelier course',f:'You can now describe chai as "robust, with notes of monsoon". All 2×.',c:5e11,all:2}
-  ];
-  var TITLES=[[0,'Tapri','🛖'],[1e4,'Stall','🏪'],[5e5,'Café','☕'],[1e7,'Chain','🏬'],[1e9,'Chai Empire','👑']];
-  var ACH=[
-    {id:'c1',n:'First cutting',d:'Sold your very first cup',t:function(){return S.cups>=1;}},
-    {id:'c100',n:'100 cups',d:'The regulars know your name',t:function(){return S.cups>=100;}},
-    {id:'c1k',n:'1,000 cups',d:'Your thumb has a six-pack',t:function(){return S.cups>=1000;}},
-    {id:'c5k',n:'5,000 cups',d:'Tap-tap legend of the IT park',t:function(){return S.cups>=5000;}},
-    {id:'m1k',n:'First ₹1,000',d:'Galla is officially not empty',t:function(){return S.life>=1000;}},
-    {id:'chhotu',n:'Hired Chhotu',d:'Delegation: the first management skill',t:function(){return own('chhotu')>=1;}},
-    {id:'k10',n:'10 kettles boiling',d:'The kitchen is now a sauna',t:function(){return own('kettle')>=10;}},
-    {id:'m1l',n:'First ₹1 lakh!',d:'Six figures, one tapri',t:function(){return S.life>=1e5;}},
-    {id:'r1k',n:'₹1,000 per second',d:'Earning while you blink',t:function(){return baseRate()>=1000;}},
-    {id:'metro',n:'Metro mogul',d:'Opened the second stall',t:function(){return own('metro')>=1;}},
-    {id:'m10l',n:'₹10 lakh club',d:'Relatives now call you "beta, business kaisa hai?"',t:function(){return S.life>=1e6;}},
-    {id:'crore',n:'Chai Crorepati',d:'₹1 crore earned from chai',t:function(){return S.life>=1e7;}},
-    {id:'fran',n:'Three-city chai',d:'First franchise opened',t:function(){return own('fran')>=1;}},
-    {id:'m100c',n:'₹100 crore',d:'Unicorn energy, kulhad budget',t:function(){return S.life>=1e9;}},
-    {id:'ipo',n:'Ding ding!',d:'Rang the IPO bell',t:function(){return own('ipo')>=1;}},
-    {id:'mk',n:'₹1k crore',d:'A Chai Empire, for real',t:function(){return S.life>=1e10;}},
-    {id:'ev1',n:'Lucky break',d:'Caught your first event',t:function(){return S.events>=1;}},
-    {id:'ev10',n:'Event planner',d:'Caught 10 events',t:function(){return S.events>=10;}},
-    {id:'star3',n:'Hygiene ⭐⭐⭐',d:'Three stars from the inspector',t:function(){return S.stars>=3;}},
-    {id:'all',n:'One of everything',d:'Own every business on the list',t:function(){ for(var i=0;i<BIZ.length;i++){ if(!own(BIZ[i].id)) return false; } return true; }}
-  ];
-  var EVENTS=[
-    {id:'fest',e:'🎉',t:'IT park fest!',s:'2× sales',w:24},
-    {id:'rain',e:'🌧️',t:'Rain! Chai weather',s:'3× sales',w:20},
-    {id:'match',e:'🏏',t:'Last over on canteen TV',s:'taps 7×',w:14},
-    {id:'reel',e:'📸',t:'Influencer reel',s:'instant ₹',w:24},
-    {id:'insp',e:'📋',t:'Food inspector!',s:'tap to meet him',w:18}
-  ];
+/* ---------- numbers ---------- */
+function grp(n){ var s=String(Math.floor(n)); if(s.length<=3) return s; return s.slice(0,-3).replace(/\B(?=(\d{2})+(?!\d))/g,',')+','+s.slice(-3); }
+function trim(x){ var d=x<10?2:x<100?1:0, p=Math.pow(10,d), v=Math.floor(x*p+1e-7)/p; return d?String(+v.toFixed(d)):grp(v); }
+function money(n,dec){
+  if(!(n>0)) return '₹0'; if(!isFinite(n)) return '₹∞';
+  if(n<1e5) return '₹'+(dec&&n<100&&n%1?String(Math.floor(n*10)/10):grp(n));
+  if(n<1e7) return '₹'+trim(n/1e5)+' lakh';
+  if(n<1e10) return '₹'+trim(n/1e7)+' crore';
+  if(n<1e12) return '₹'+trim(n/1e10)+'k crore';
+  if(n<1e17) return '₹'+trim(n/1e12)+' lakh crore';
+  return '₹'+(n/1e7).toExponential(2).replace('e+',' × 10^')+' crore';
+}
+function cnt(n){ n=Math.floor(n); if(n<1e5) return grp(n); if(n<1e7) return trim(n/1e5)+' lakh'; return trim(n/1e7)+' crore'; }
+function dur(s){ s=Math.floor(s); var h=Math.floor(s/3600), m=Math.floor(s%3600/60); return h?h+'h '+m+'m':m?m+'m '+(s%60)+'s':s+'s'; }
+function mmss(s){ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
+function lerp(a,b,t){ return a+(b-a)*t; }
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+function hexc(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function mix(a,b,t){ var x=hexc(a),y=hexc(b); return 'rgb('+Math.round(lerp(x[0],y[0],t))+','+Math.round(lerp(x[1],y[1],t))+','+Math.round(lerp(x[2],y[2],t))+')'; }
+function esc(s){ return OA.esc(s); }
+var VR=OA.rng(OA.newSeed()); /* cosmetic-only randomness (walkers, steam) */
 
-  /* ---------- state ---------- */
-  var S, boosts=[], nextEv, liveEv=null, evEl=null, modalOpen=false;
-  function fresh(){ return {cash:0,life:0,cups:0,owned:{},ups:{},ach:{},stars:0,events:0,saved:Date.now(),qty:1,tab:'biz'}; }
-  function num(x){ x=+x; return isFinite(x)&&x>=0?x:0; }
-  function load(){
-    var d=null; try{ d=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ d=null; }
-    S=fresh();
-    if(d&&typeof d==='object'){
-      ['cash','life','cups','stars','events','saved'].forEach(function(k){ S[k]=num(d[k]); });
-      if(!S.saved) S.saved=Date.now();
-      S.qty=d.qty===10?10:1; S.tab=(d.tab==='up'||d.tab==='tr')?d.tab:'biz';
-      BIZ.forEach(function(b){ if(d.owned&&d.owned[b.id]) S.owned[b.id]=Math.floor(num(d.owned[b.id])); });
-      UPS.forEach(function(u){ if(d.ups&&d.ups[u.id]) S.ups[u.id]=true; });
-      ACH.forEach(function(a){ if(d.ach&&d.ach[a.id]) S.ach[a.id]=true; });
-      S.stars=Math.min(10,Math.floor(S.stars));
-      return true;
+/* ---------- sound ---------- */
+var lastSnd={}, THR={pour:70,coin:45,plop:40,sizzle:120,step:80};
+var SND={
+  pour:function(){ OA.sfx.noise({dur:.22,vol:.22,type:'bandpass',f:420,f2:1500,q:4}); OA.sfx.tone({f:300,f2:540,type:'sine',dur:.07,vol:.16,at:.03}); OA.sfx.tone({f:360,f2:660,type:'sine',dur:.07,vol:.12,at:.11}); },
+  coin:function(i){ var b=1480+(i||0)*110; OA.sfx.tone({f:b,type:'square',dur:.04,vol:.06}); OA.sfx.tone({f:b*1.5,type:'sine',dur:.15,vol:.13,at:.035}); },
+  kaching:function(){ OA.sfx.noise({dur:.07,vol:.3,type:'highpass',f:2800}); OA.sfx.tone({f:180,f2:90,type:'triangle',dur:.08,vol:.32}); OA.sfx.tone({f:1568,type:'triangle',dur:.12,vol:.22,at:.06}); OA.sfx.tone({f:2349,type:'triangle',dur:.42,vol:.22,at:.13}); OA.sfx.tone({f:3136,type:'sine',dur:.5,vol:.1,at:.13}); },
+  sizzle:function(){ OA.sfx.noise({dur:.4,vol:.12,type:'highpass',f:3600}); },
+  plop:function(){ OA.sfx.tone({f:520,f2:200,type:'sine',dur:.08,vol:.3}); },
+  bell:function(){ OA.sfx.tone({f:1760,type:'sine',dur:.6,vol:.18}); OA.sfx.tone({f:2637,type:'sine',dur:.5,vol:.08,at:.01}); },
+  thunder:function(){ OA.sfx.noise({dur:1.2,vol:.35,type:'lowpass',f:500,f2:80}); }
+};
+function snd(n,a){ var now=performance.now(); if(THR[n]&&lastSnd[n]&&now-lastSnd[n]<THR[n]) return; lastSnd[n]=now; if(SND[n]) SND[n](a); else OA.sfx(n,a); }
+
+/* ---------- cosmetics ---------- */
+var THEMES=[
+  {id:'t-classic',type:'theme',name:'Classic Tapri',need:0,c:{a:'#d9503b',b:'#fbecc9',wood:'#b06b2c',woodL:'#c98a47',woodD:'#6b3b16',sign:'#7c2d12',signInk:'#fde68a',wall:'#efdcbc',trim:'#fbbf24'}},
+  {id:'t-monsoon',type:'theme',name:'Monsoon Blue',need:3,c:{a:'#2563eb',b:'#dbeafe',wood:'#64748b',woodL:'#94a3b8',woodD:'#334155',sign:'#1e3a8a',signInk:'#bfdbfe',wall:'#e2e8f0',trim:'#60a5fa'}},
+  {id:'t-mango',type:'theme',name:'Mango Lassi',need:8,c:{a:'#f59e0b',b:'#fff7d6',wood:'#a16207',woodL:'#ca8a04',woodD:'#713f12',sign:'#9a3412',signInk:'#fef3c7',wall:'#fef3c7',trim:'#fde047'}},
+  {id:'t-pista',type:'theme',name:'Pista Green',need:14,c:{a:'#16a34a',b:'#ecfccb',wood:'#7c5a2a',woodL:'#a37a3d',woodD:'#4a3313',sign:'#14532d',signInk:'#d9f99d',wall:'#ecfdf5',trim:'#a3e635'}},
+  {id:'t-royal',type:'theme',name:'Royal Purple',need:22,c:{a:'#7c3aed',b:'#f3e8ff',wood:'#5b3a8a',woodL:'#7e5bb5',woodD:'#3b1f63',sign:'#4c1d95',signInk:'#fde68a',wall:'#f5f3ff',trim:'#fbbf24'}},
+  {id:'t-neon',type:'theme',name:'Neon Night',need:32,c:{a:'#ec4899',b:'#1e1b4b',wood:'#1f2937',woodL:'#374151',woodD:'#111827',sign:'#0f172a',signInk:'#22d3ee',wall:'#312e81',trim:'#22d3ee'}}
+];
+var CUPS=[
+  {id:'c-glass',type:'cup',name:'Cutting glass',need:0},
+  {id:'c-kulhad',type:'cup',name:'Clay kulhad',need:2},
+  {id:'c-steel',type:'cup',name:'Steel tumbler',need:6},
+  {id:'c-paper',type:'cup',name:'Office paper cup',need:11},
+  {id:'c-china',type:'cup',name:'Bone china',need:18},
+  {id:'c-gold',type:'cup',name:'Golden kulhad',need:28}
+];
+function rushStars(){ return OA.load('rushStars',0)||0; }
+OA.unlocks.define(THEMES.concat(CUPS), function(){ return OA.levels.total()+rushStars(); });
+function theme(){ var id=OA.unlocks.selected(); for(var i=0;i<THEMES.length;i++) if(THEMES[i].id===id) return THEMES[i]; return THEMES[0]; }
+function cupId(){ var id=OA.load('cup','c-glass'), a=OA.unlocks.all(); for(var i=0;i<a.length;i++) if(a[i].id===id&&a[i].unlocked) return id; return 'c-glass'; }
+
+/* ---------- cities, staff, menu, upgrades ---------- */
+var CITIES=[
+  {n:'IT Park Gate',lm:'itpark',b:'Coders on a break, managers on a call. Everyone needs a cutting.',m:'Tap to brew',md:'Tap the stall to pour a cutting chai. Buy the masala recipe, then build a proper stall with a bench.',g:[['earn',3000],['served',150],['stage',1]]},
+  {n:'College Gate',lm:'college',b:'Exams tomorrow, chai today. Students pay in coins and gossip.',m:'Hire staff',md:'Chhotu and Kettle Didi brew while you relax. Staff earn every second, even while you are away.',g:[['earn',25000],['staff',15],['served',800]]},
+  {n:'Railway Station',lm:'station',b:'The 9:40 express is late. Again. Perfect for business.',m:'Snacks: samosa',md:'Put samosa on the menu: every order gets bigger. Then Samosa Bhaiya can fry nonstop. The café expansion opens here too.',g:[['earn',1e5],['menu','samosa'],['served',1500]]},
+  {n:'Bus Depot',lm:'depot',b:'Conductors, commuters and one very sleepy driver.',m:'Timed events',md:'Rain rush, cricket match crowd, IT park fest. Tap the gold bubble when it pops up for a big boost.',g:[['earn',3e5],['events',3],['staff',50]]},
+  {n:'Office Tower',lm:'tower',b:'Forty floors of meetings that could have been a chai break.',m:'Chai café',md:'Grow the stall into a café. Delivery riders and a café manager join the team.',g:[['earn',1.5e6],['stage',2],['rate',5000]]},
+  {n:'Old City Bazaar',lm:'bazaar',b:'Every shopkeeper here has an opinion on your elaichi.',m:'Bun maska + outlets',md:'Soft bun, extra butter. Open a chain of outlets across the city.',g:[['earn',2e7],['menu','bun'],['stage',3]]},
+  {n:'Night-shift Lane',lm:'night',night:true,b:'Support desks that never sleep. Neither does your kettle.',m:'Maggi at midnight',md:'It is always night here. Night-shift coders want Maggi with their chai.',g:[['earn',5e8],['menu','maggi'],['served',2e4]]},
+  {n:'Cricket Ground',lm:'stadium',b:'Last over, full stands, nobody leaves their seat. Except for chai.',m:'Food inspector',md:'The inspector visits with a clipboard. Pass his check for a hygiene star: +10% on everything here.',evW:{insp:4,match:3},g:[['earn',5e9],['hyg',2],['events',5]]},
+  {n:'Hill Station',lm:'hills',b:'Cold air, foggy view, and tourists who want "something hot".',m:'Chai factory',md:'Build a factory. Packaged masala chai, shipped down the hills.',g:[['earn',1e11],['stage',4],['staff',300]]},
+  {n:'Beach Promenade',lm:'beach',b:'Sunset, sea breeze and corn sellers who are your new best friends.',m:'Sunset rush',md:'Every event lasts twice as long here. Catch them all.',mod:{evDur:2},g:[['earn',1e12],['events',6],['served',1e5]]},
+  {n:'Airport Terminal',lm:'airport',b:'Flight delayed by two hours. Business up by two hundred percent.',m:'Premium lounge',md:'Taps earn 3×, but staff want airport salaries: hiring costs 2×.',mod:{tap:3,staffCost:2},g:[['earn',5e12],['rate',2e9],['hyg',3]]},
+  {n:'Tech Summit',lm:'summit',b:'Ten thousand lanyards. Ten thousand "quick chai?" requests.',m:'Fest season',md:'Every event here is an IT park fest. Badges, banners and endless chai.',mod:{fest:true},g:[['earn',2e13],['events',8],['staff',500]]},
+  {n:'Film City',lm:'film',b:'Lights, camera, cutting! The hero takes his chai with two sugars.',m:'Shooting days',md:'Crowds appear out of nowhere: events pop up twice as often.',mod:{evFreq:2},g:[['earn',8e13],['events',12],['served',3e5]]},
+  {n:'Metro Junction',lm:'metro',b:'Four lines, one platform, and a commuter rush every few minutes.',m:'Peak hours',md:'Daytime commuters pay 2×. At night the station goes quiet: 0.5×. Watch the sky.',mod:{peak:true},g:[['earn',2.5e14],['rate',2e11],['hyg',4]]},
+  {n:'Chai Empire HQ',lm:'hq',b:'Your own glass tower, with a giant kulhad on the roof.',m:'The final city',md:'Everything you have learnt, one city. Build the biggest chai empire in the country.',g:[['earn',1e15],['served',1e6],['staff',800]]}
+];
+var STAFF=[
+  {id:'chhotu',n:'Chhotu',role:'intern',f:'He is 22. "Chhotu" is just a nickname. Remembers who takes kam cheeni.',c:50,r:1,cups:.25,city:2},
+  {id:'didi',n:'Kettle Didi',role:'aunty',f:'Runs the second stove. Her chai has never boiled over. Not once.',c:500,r:6,cups:.35,city:2},
+  {id:'bhaiya',n:'Samosa Bhaiya',role:'peon',f:'Folds a samosa in four seconds flat.',c:5000,r:40,cups:.5,city:3,menu:'samosa'},
+  {id:'cashier',n:'Cashier Uncle',role:'boss',f:'Has exact change for a ₹2,000 note. Nobody knows how.',c:5e4,r:250,cups:.6,city:4},
+  {id:'rider',n:'Delivery Rider',role:'sales',x:{cap:'#dc2626'},f:'Chai to the 14th floor in six minutes, still hot.',c:5e5,r:1500,cups:.8,city:5,stage:2},
+  {id:'manager',n:'Café Manager',role:'hr',f:'Runs a spreadsheet called "Chai KPIs". It is beautiful.',c:6e6,r:9000,cups:1,city:5,stage:2},
+  {id:'partner',n:'Outlet Partner',role:'manager',f:'Opens a new outlet every week. Same masala, new pin code.',c:8e7,r:6e4,cups:1.5,city:6,stage:3},
+  {id:'line',n:'Plant Head',role:'ceo',f:'Runs the factory line. Thinks in tonnes of tea leaves.',c:1.2e9,r:4.5e5,cups:3,city:9,stage:4}
+];
+var MENU=[
+  {id:'masala',n:'Masala chai',ic:'leaf',f:'Elaichi, adrak and a secret pinch. Taps earn 2×.',c:100,tap:2,city:1},
+  {id:'adrak',n:'Adrak-elaichi blend',ic:'ginger',f:'Clears the sinuses and the sprint backlog. Taps 2×.',c:1500,tap:2,city:1},
+  {id:'cutting',n:'Speed-pour cutting',ic:'glass',f:'Half glass, double speed. Each tap also earns 3% of your ₹/sec.',c:2e4,pct:.03,city:2},
+  {id:'samosa',n:'Samosa',ic:'samosa',f:'Chai without samosa is a stand-up without a punchline. Everything 1.5×.',c:2500,all:1.5,city:3},
+  {id:'bun',n:'Bun maska',ic:'bun',f:'Soft bun, extra butter, zero regrets. Everything 1.6×.',c:4e5,all:1.6,city:6},
+  {id:'maggi',n:'Masala Maggi',ic:'maggi',f:'"Two-minute" noodles, eleven-minute wait. Everything 1.8×.',c:2e7,all:1.8,city:7},
+  {id:'dadi',n:'Dadi\'s secret recipe',ic:'scroll',f:'Never written down until now. Everything 2×.',c:5e10,all:2,city:9}
+];
+var UPS=[
+  {id:'biscuit',n:'Biscuit jar',ic:'jar',f:'Dunk-friendly. Chhotu and Kettle Didi earn 2×.',c:400,biz:['chhotu','didi'],x:2,city:2},
+  {id:'qr',n:'QR code payments',ic:'qr',f:'No more "bhaiya, change nahi hai". Everything 1.25×.',c:8000,all:1.25,city:2},
+  {id:'kulhad',n:'Kulhad cups',ic:'kulhad',f:'Clay cups make everything taste like a hill station. Taps 3×.',c:3e4,tap:3,city:2},
+  {id:'led',n:'LED signboard',ic:'led',f:'Visible from the 14th-floor stand-up. Everything 1.5×.',c:3e5,all:1.5,city:3},
+  {id:'combo',n:'Combo board',ic:'combo',f:'"Combo le lo, sir." Samosa Bhaiya and Cashier Uncle 2×.',c:2e6,biz:['bhaiya','cashier'],x:2,city:4},
+  {id:'jingle',n:'Radio jingle',ic:'radio',f:'"Ek cutting, full setting!" Stuck in every head. Everything 2×.',c:3e7,all:2,city:5},
+  {id:'tieup',n:'Office tie-ups',ic:'scooter',f:'Every cafeteria wants you. Riders and managers 2×.',c:2e8,biz:['rider','manager'],x:2,city:6},
+  {id:'golden',n:'Golden kulhad',ic:'goldcup',f:'For display only. Mostly. Everything 2×, taps 5×.',c:3e9,all:2,tap:5,city:9},
+  {id:'seriesb',n:'Series B round',ic:'chart',f:'The founders finally buy chairs. Partners and Plant Head 2×.',c:4e10,biz:['partner','line'],x:2,city:10},
+  {id:'somm',n:'Chai sommelier course',ic:'cap',f:'"Robust, with notes of monsoon." Everything 2×.',c:5e11,all:2,city:11}
+];
+var STAGES=[
+  {n:'Tapri cart',m:1,d:'One kettle, one stove, big dreams.'},
+  {n:'Stall with bench',c:1000,m:1.5,city:1,d:'A tin roof, a long bench and room for staff. Everything 1.5×.'},
+  {n:'Chai café',c:1e5,m:2,city:3,d:'Tables, a glowing window and a menu board. Everything 2×.'},
+  {n:'Chain of outlets',c:1e7,m:3,city:6,d:'Outlet No. 2, No. 3, No. 25… Everything 3×.'},
+  {n:'Chai factory',c:1e9,m:4,city:9,d:'Packaged chai, shipped everywhere. Everything 4×.'}
+];
+var STAGE_RANK=['Tapri Owner','Stall Seth','Café Boss','Chain Chairperson','Factory Founder'];
+var EVENTS={
+  rain:{n:'Rain rush!',s:'Sales 3× for 20s',ic:'cloud',all:3,d:20},
+  match:{n:'Cricket match crowd',s:'Taps 7× for 15s',ic:'bat',tap:7,d:15},
+  fest:{n:'IT park fest',s:'Sales 2× for 30s',ic:'bunting',all:2,d:30},
+  reel:{n:'Viral chai reel',s:'Instant cash',ic:'phone'},
+  insp:{n:'Food inspector!',s:'Tap to meet him',ic:'clip'}
+};
+
+/* ---------- icons (SVG) ---------- */
+function svg(vb,body){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" aria-hidden="true">'+body+'</svg>'; }
+var SK=' stroke="'+INK+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"';
+function cupBody(id){
+  if(id==='c-kulhad'||id==='c-gold'){ var f=id==='c-gold'?'url(#gk)':'#c2643a';
+    return (id==='c-gold'?'<defs><linearGradient id="gk" x1="0" x2="1"><stop offset="0" stop-color="#fde68a"/><stop offset=".55" stop-color="#f59e0b"/><stop offset="1" stop-color="#b45309"/></linearGradient></defs>':'')+
+      '<path d="M8 12 L32 12 L28.5 33 Q20 36 11.5 33 Z" fill="'+f+'"'+SK+'/><ellipse cx="20" cy="12" rx="12" ry="3.6" fill="#7a3d16"'+SK+'/><ellipse cx="20" cy="12.4" rx="9" ry="2.2" fill="#b26a2e"/><path d="M12 20 Q20 22 28 20" stroke="'+(id==='c-gold'?'#fff7d6':'#e08a5a')+'" stroke-width="1.6" fill="none"/>'+(id==='c-gold'?'<path d="M31 5 l1 3 3 1 -3 1 -1 3 -1 -3 -3 -1 3 -1z" fill="#fff"/>':''); }
+  if(id==='c-steel') return '<path d="M9 9 h22 l-2.5 25 h-17 z" fill="#cbd5e1"'+SK+'/><ellipse cx="20" cy="10" rx="10.4" ry="2.6" fill="#a5622c"'+SK+'/><path d="M13 14 v17" stroke="#fff" stroke-width="2.2" opacity=".8"/><path d="M26 15 v16" stroke="#64748b" stroke-width="1.6" opacity=".6"/>';
+  if(id==='c-paper') return '<path d="M9 9 h22 l-3 25 h-16 z" fill="#fff"'+SK+'/><path d="M10.4 18 h19.2 l-.9 8 h-17.4 z" fill="#fbbf24"/><ellipse cx="20" cy="10" rx="10.5" ry="2.6" fill="#a5622c"'+SK+'/><path d="M14 20.5 h12" stroke="#7c2d12" stroke-width="1.4"/>';
+  if(id==='c-china') return '<ellipse cx="20" cy="34" rx="15" ry="3.4" fill="#f8fafc"'+SK+'/><path d="M29 16 q7 0 6 6 q-1 5 -7 5" fill="none" stroke="'+INK+'" stroke-width="5"/><path d="M29 16 q7 0 6 6 q-1 5 -7 5" fill="none" stroke="#f8fafc" stroke-width="2"/><path d="M8 12 h22 q0 17 -11 20 q-11 -3 -11 -20z" fill="#f8fafc"'+SK+'/><ellipse cx="19" cy="12" rx="11" ry="2.6" fill="#a5622c"'+SK+'/><path d="M11 19 q4 3 8 0 q4 -3 8 0" stroke="#3b82f6" stroke-width="1.6" fill="none"/>';
+  return '<path d="M9 8 h22 l-3 26 h-16 z" fill="#dbeafe" fill-opacity=".55"'+SK+'/><path d="M10.6 14 h18.8 l-2.4 20 h-14 z" fill="#b8692c"/><path d="M10.6 14 h18.8" stroke="#f0c48f" stroke-width="2.4"/><path d="M9 8 h22 l-3 26 h-16 z" fill="none"'+SK+'/><path d="M14 16 l1.4 15 M20 16 v15 M26 16 l-1.4 15" stroke="#fff" stroke-width="1" opacity=".45"/>';
+}
+function cupSVG(id){ return svg('0 0 40 40',cupBody(id)); }
+var IC={
+  samosa:'<path d="M20 5 L36 33 Q20 38 4 33 Z" fill="#e0a24a"'+SK+'/><path d="M20 5 L16 34 M20 5 L28 33" stroke="#b7742a" stroke-width="1.6" fill="none"/><circle cx="12" cy="28" r="1.2" fill="#8a4b1a"/><circle cx="26" cy="25" r="1.2" fill="#8a4b1a"/><circle cx="19" cy="20" r="1.2" fill="#8a4b1a"/>',
+  bun:'<path d="M5 25 Q5 9 20 9 Q35 9 35 25 Z" fill="#e7a85a"'+SK+'/><rect x="5" y="24" width="30" height="8" rx="3" fill="#f3c98b"'+SK+'/><rect x="13" y="20" width="12" height="6" rx="1.5" fill="#fde68a"'+SK+'/><path d="M12 14 q2 -2 4 0 M22 13 q2 -2 4 0" stroke="#fff3d6" stroke-width="1.6" fill="none"/>',
+  maggi:'<path d="M5 19 h30 q-2 15 -15 15 q-13 0 -15 -15z" fill="#ef4444"'+SK+'/><path d="M8 18 q3 -5 6 0 q3 -5 6 0 q3 -5 6 0 q3 -5 6 0" stroke="#facc15" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M11 25 h18" stroke="#fff" stroke-width="2" opacity=".7"/><path d="M28 4 L22 17" stroke="#94a3b8" stroke-width="2.6" stroke-linecap="round"/><path d="M8 7 q2 -3 0 -5 M14 8 q2 -3 0 -5" stroke="#cbd5e1" stroke-width="1.6" fill="none"/>',
+  leaf:'<path d="M8 32 Q6 10 32 6 Q34 30 8 32 Z" fill="#22c55e"'+SK+'/><path d="M8 32 Q18 20 28 10" stroke="#14532d" stroke-width="1.8" fill="none"/><circle cx="29" cy="29" r="4" fill="#a16207"'+SK+'/>',
+  ginger:'<path d="M6 26 q2 -10 10 -8 q2 -8 8 -6 q6 -6 10 2 q4 8 -4 10 q-2 8 -10 6 q-8 6 -14 -4z" fill="#e8b96a"'+SK+'/><path d="M14 22 q4 2 8 -2 M24 15 q2 2 5 1" stroke="#a16207" stroke-width="1.5" fill="none"/>',
+  glass:cupBody('c-glass')+'<path d="M33 14 h5 M34 20 h4 M33 26 h5" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>',
+  scroll:'<rect x="9" y="7" width="22" height="26" rx="2" fill="#fde7b0"'+SK+'/><path d="M13 14 h14 M13 19 h14 M13 24 h10" stroke="#a16207" stroke-width="1.8"/><circle cx="28" cy="30" r="5" fill="#dc2626"'+SK+'/>',
+  jar:'<rect x="9" y="11" width="22" height="24" rx="5" fill="#dbeafe" fill-opacity=".6"'+SK+'/><rect x="11" y="6" width="18" height="6" rx="2" fill="#dc2626"'+SK+'/><circle cx="16" cy="24" r="4" fill="#d9a05b"'+SK+'/><circle cx="24" cy="28" r="4" fill="#c58a4a"'+SK+'/><circle cx="23" cy="19" r="3.4" fill="#e7b46f"'+SK+'/>',
+  qr:'<rect x="6" y="6" width="28" height="28" rx="4" fill="#fff"'+SK+'/><rect x="10" y="10" width="8" height="8" fill="'+INK+'"/><rect x="22" y="10" width="8" height="8" fill="'+INK+'"/><rect x="10" y="22" width="8" height="8" fill="'+INK+'"/><rect x="23" y="23" width="3" height="3" fill="'+INK+'"/><rect x="27" y="27" width="3" height="3" fill="'+INK+'"/><rect x="23" y="27" width="2" height="2" fill="'+INK+'"/>',
+  kulhad:cupBody('c-kulhad'),
+  goldcup:cupBody('c-gold'),
+  led:'<rect x="4" y="10" width="32" height="18" rx="4" fill="#1e1b4b"'+SK+'/><text x="20" y="23.5" text-anchor="middle" font-family="Baloo 2,system-ui" font-weight="800" font-size="10" fill="#22d3ee">CHAI</text><path d="M12 28 v6 M28 28 v6" stroke="'+INK+'" stroke-width="2.4"/><circle cx="7" cy="7" r="2" fill="#fde047"/><circle cx="33" cy="7" r="2" fill="#fde047"/>',
+  combo:'<rect x="5" y="6" width="30" height="28" rx="3" fill="#1f2a24"'+SK+'/><path d="M10 13 h12 M10 18 h18 M10 23 h9" stroke="#e2e8f0" stroke-width="1.8"/><path d="M27 21 L33 31 L21 31 Z" fill="#e0a24a"'+SK+'/>',
+  radio:'<rect x="5" y="13" width="30" height="20" rx="4" fill="#f97316"'+SK+'/><circle cx="14" cy="23" r="5" fill="#1b2036"/><circle cx="14" cy="23" r="2" fill="#94a3b8"/><rect x="22" y="18" width="9" height="4" rx="1" fill="#fde68a"/><path d="M10 13 L28 4" stroke="'+INK+'" stroke-width="2.2"/><path d="M24 27 h6" stroke="'+INK+'" stroke-width="2"/>',
+  scooter:'<circle cx="10" cy="29" r="5" fill="#1b2036"'+SK+'/><circle cx="31" cy="29" r="5" fill="#1b2036"'+SK+'/><path d="M8 25 h14 q2 -8 8 -8 l2 8 q-4 2 -6 4 h-16 z" fill="#ef4444"'+SK+'/><path d="M28 17 l-2 -8 h5" stroke="'+INK+'" stroke-width="2.4" fill="none"/><rect x="9" y="13" width="10" height="9" rx="1.5" fill="#fbbf24"'+SK+'/>',
+  chart:'<rect x="5" y="5" width="30" height="30" rx="4" fill="#0f172a"'+SK+'/><path d="M10 28 L17 20 L22 24 L30 12" stroke="#4ade80" stroke-width="3" fill="none"/><path d="M25 12 h5 v5" stroke="#4ade80" stroke-width="3" fill="none"/>',
+  cap:'<path d="M3 16 L20 9 L37 16 L20 23 Z" fill="#1e293b"'+SK+'/><path d="M10 19 v8 q10 6 20 0 v-8" fill="#334155"'+SK+'/><path d="M33 17 v10" stroke="#fbbf24" stroke-width="2"/><circle cx="33" cy="28" r="2" fill="#fbbf24"/>',
+  cloud:'<path d="M9 22 q-6 0 -5 -6 q1 -5 7 -4 q2 -7 9 -6 q7 1 7 8 q6 0 6 5 q0 5 -6 5 h-18z" fill="#e2e8f0"'+SK+'/><path d="M12 28 l-2 6 M20 28 l-2 6 M28 28 l-2 6" stroke="#3b82f6" stroke-width="2.4" stroke-linecap="round"/>',
+  bat:'<path d="M27 5 l6 6 -16 20 -5 -5z" fill="#e7c08a"'+SK+'/><path d="M12 26 l-5 5" stroke="'+INK+'" stroke-width="4" stroke-linecap="round"/><circle cx="30" cy="30" r="5" fill="#ef4444"'+SK+'/>',
+  bunting:'<path d="M2 8 Q20 18 38 8" stroke="'+INK+'" stroke-width="2" fill="none"/><path d="M6 10 l4 12 4 -10z" fill="#ef4444"'+SK+'/><path d="M16 13 l4 12 4 -12z" fill="#fbbf24"'+SK+'/><path d="M26 12 l4 12 4 -13z" fill="#22c55e"'+SK+'/><circle cx="12" cy="32" r="2" fill="#f472b6"/><circle cx="28" cy="33" r="2" fill="#60a5fa"/>',
+  phone:'<rect x="11" y="4" width="18" height="32" rx="4" fill="#1b2036"'+SK+'/><rect x="13.5" y="8" width="13" height="22" rx="1.5" fill="#f472b6"/><path d="M18 15 l6 4 -6 4z" fill="#fff"/><path d="M33 8 l3 -3 M34 14 h4" stroke="#fde68a" stroke-width="2.2" stroke-linecap="round"/>',
+  clip:'<rect x="8" y="7" width="24" height="30" rx="3" fill="#a16207"'+SK+'/><rect x="11" y="11" width="18" height="23" rx="1" fill="#fff"/><rect x="14" y="4" width="12" height="7" rx="2" fill="#94a3b8"'+SK+'/><path d="M14 18 l2 2 4 -4 M14 26 l2 2 4 -4" stroke="#16a34a" stroke-width="2" fill="none"/><path d="M23 19 h4 M23 27 h4" stroke="#64748b" stroke-width="1.8"/>',
+  star:'<path d="M20 3 l5.2 10.6 11.7 1.7 -8.5 8.2 2 11.6 -10.4 -5.5 -10.4 5.5 2 -11.6 -8.5 -8.2 11.7 -1.7z" fill="#fbbf24"'+SK+'/>',
+  staroff:'<path d="M20 3 l5.2 10.6 11.7 1.7 -8.5 8.2 2 11.6 -10.4 -5.5 -10.4 5.5 2 -11.6 -8.5 -8.2 11.7 -1.7z" fill="#2e3b63" stroke="#46578c" stroke-width="2" stroke-linejoin="round"/>',
+  lock:'<rect x="9" y="17" width="22" height="17" rx="3" fill="#94a3b8"'+SK+'/><path d="M13 17 v-5 q0 -7 7 -7 q7 0 7 7 v5" fill="none" stroke="'+INK+'" stroke-width="3"/><circle cx="20" cy="25" r="2.4" fill="'+INK+'"/>',
+  kettle:'<path d="M9 33 q-3 -15 11 -17 q14 2 11 17z" fill="#cbd5e1"'+SK+'/><path d="M10 20 L2 12 l2 -2 9 7" fill="#94a3b8"'+SK+'/><path d="M13 16 q7 -12 14 0" fill="none" stroke="'+INK+'" stroke-width="3"/><ellipse cx="20" cy="16" rx="6" ry="2" fill="#94a3b8"'+SK+'/><path d="M14 26 q6 2 12 0" stroke="#fff" stroke-width="1.6" fill="none" opacity=".8"/>',
+  rush:'<circle cx="20" cy="21" r="15" fill="#fde68a"'+SK+'/><path d="M20 11 v10 l7 4" stroke="'+INK+'" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M5 6 l5 4 M35 6 l-5 4" stroke="'+INK+'" stroke-width="3" stroke-linecap="round"/>',
+  daily:'<rect x="5" y="8" width="30" height="27" rx="4" fill="#fff"'+SK+'/><path d="M5 15 h30" stroke="'+INK+'" stroke-width="2.2"/><rect x="5" y="8" width="30" height="7" rx="3" fill="#ef4444"'+SK+'/><path d="M12 5 v6 M28 5 v6" stroke="'+INK+'" stroke-width="2.6" stroke-linecap="round"/><path d="M20 19 l2.3 4.6 5 .7 -3.6 3.5 .9 5 -4.6 -2.4 -4.6 2.4 .9 -5 -3.6 -3.5 5 -.7z" fill="#fbbf24" stroke="'+INK+'" stroke-width="1.4" stroke-linejoin="round"/>',
+  strike:'<path d="M8 10 h20 l-2.5 22 h-15 z" fill="#c2643a"'+SK+'/><ellipse cx="18" cy="10" rx="10" ry="3" fill="#7a3d16"'+SK+'/><path d="M28 14 q6 1 5 6 q-1 4 -6 4" fill="none" stroke="'+INK+'" stroke-width="2.2"/>'
+};
+function icon(k){ return svg('0 0 40 40',IC[k]||''); }
+function portrait(role,x){ return OA.art.who(role,Object.assign({mood:'happy'},x||{})).replace('viewBox="0 0 100 140" width="100" height="140"','viewBox="16 0 68 68"'); }
+function logoSVG(){ var I=' stroke="'+INK+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"'; return svg('0 0 84 80','<defs><linearGradient id="lk" x1="0" x2="1"><stop offset="0" stop-color="#f1f5f9"/><stop offset=".55" stop-color="#cbd5e1"/><stop offset="1" stop-color="#8391a7"/></linearGradient></defs><ellipse cx="44" cy="75" rx="27" ry="4" fill="#000" opacity=".28"/><path d="M24 56 Q12 54 8 36 L15 34 Q18 47 27 49 Z" fill="#94a3b8"'+I+'/><path d="M30 34 Q44 12 58 34" fill="none" stroke="'+INK+'" stroke-width="6" stroke-linecap="round"/><path d="M30 34 Q44 12 58 34" fill="none" stroke="#475569" stroke-width="2.4" stroke-linecap="round"/><path d="M19 72 Q12 40 44 36 Q76 40 69 72 Z" fill="url(#lk)"'+I+'/><ellipse cx="44" cy="37" rx="14" ry="4.4" fill="#94a3b8"'+I+'/><circle cx="44" cy="31" r="4" fill="#fbbf24"'+I+'/><rect x="25" y="51" width="38" height="12" rx="4" fill="#d9503b"'+I+'/><text x="44" y="60.6" text-anchor="middle" font-family="Baloo 2,system-ui" font-weight="800" font-size="10" fill="#fde68a">CHAI</text><path d="M26 44 Q36 40 46 42" stroke="#fff" stroke-width="2.6" fill="none" opacity=".8" stroke-linecap="round"/><path d="M8 28 q-4 -5 0 -9 q4 -4 0 -9 M15 25 q-4 -5 0 -9 q4 -4 0 -9" stroke="#e2e8f0" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".85"/>'); }
+
+/* ---------- sprites: SVG rasterised once into canvases ---------- */
+var SPR={}, SF=2.8;
+function sprite(key,svgStr,w,h){
+  if(SPR[key]) return SPR[key];
+  var s={cv:document.createElement('canvas'),ok:false,w:w,h:h}; s.cv.width=Math.ceil(w*SF); s.cv.height=Math.ceil(h*SF);
+  var im=OA.art.img(svgStr);
+  function draw(){ try{ s.cv.getContext('2d').drawImage(im,0,0,s.cv.width,s.cv.height); s.ok=true; }catch(e){} }
+  if(im.complete&&im.naturalWidth) draw(); else im.addEventListener('load',draw);
+  SPR[key]=s; return s;
+}
+function personSpr(role,mood,pose,x){ var k='p|'+role+'|'+mood+'|'+pose+'|'+(x&&x.cap||''); return sprite(k,OA.art.who(role,Object.assign({mood:mood,pose:pose},x||{})),70,98); }
+function cupSpr(id){ return sprite('cup|'+id,cupSVG(id),20,20); }
+function iconSpr(k){ return sprite('ic|'+k,icon(k),20,20); }
+function dspr(c,s,x,y,w,h){ if(s&&s.ok) c.drawImage(s.cv,x,y,w,h); }
+function vsprite(key,w,h,fn){ if(SPR[key]) return SPR[key]; var cv=document.createElement('canvas'); cv.width=Math.ceil(w*SF); cv.height=Math.ceil(h*SF); var c=cv.getContext('2d'); c.scale(SF,SF); fn(c); SPR[key]={cv:cv,ok:true,w:w,h:h}; return SPR[key]; }
+
+/* ---------- canvas drawing helpers (virtual 360×300 space) ---------- */
+function rr(c,x,y,w,h,r){ r=Math.min(r,w/2,h/2); c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function fs(c,f,lw){ c.fillStyle=f; c.fill(); if(lw!==0){ c.lineWidth=lw||2; c.strokeStyle=INK; c.lineJoin='round'; c.stroke(); } }
+function box(c,x,y,w,h,r,f,lw){ rr(c,x,y,w,h,r); fs(c,f,lw); }
+function poly(c,p,f,lw){ c.beginPath(); c.moveTo(p[0],p[1]); for(var i=2;i<p.length;i+=2) c.lineTo(p[i],p[i+1]); c.closePath(); fs(c,f,lw); }
+function circ(c,x,y,r,f,lw){ c.beginPath(); c.arc(x,y,r,0,Math.PI*2); fs(c,f,lw); }
+function line(c,x0,y0,x1,y1,col,w){ c.beginPath(); c.moveTo(x0,y0); c.lineTo(x1,y1); c.strokeStyle=col; c.lineWidth=w||2; c.lineCap='round'; c.stroke(); }
+function txt(c,s,x,y,size,col,al,wt){ c.font=(wt||800)+' '+size+'px "Baloo 2","Segoe UI",system-ui,sans-serif'; c.textAlign=al||'center'; c.textBaseline='middle'; c.fillStyle=col; c.fillText(s,x,y); }
+function nc(n,d,k){ return n?k:d; }
+
+/* ---------- sky ---------- */
+var SKY=[[0,'#070b1d','#17214c'],[.21,'#070b1d','#17214c'],[.27,'#2d2f6d','#e7897b'],[.33,'#4d86c6','#f3d3a6'],[.42,'#4a86c8','#b4d6ea'],[.62,'#4a86c8','#bcd9e8'],[.71,'#3b4b95','#f2a35f'],[.78,'#1f2257','#b0577a'],[.85,'#070b1d','#17214c'],[1,'#070b1d','#17214c']];
+function skyAt(t){ for(var i=0;i<SKY.length-1;i++){ var a=SKY[i],b=SKY[i+1]; if(t>=a[0]&&t<=b[0]){ var k=(t-a[0])/(b[0]-a[0]||1); return [mix(a[1],b[1],k),mix(a[2],b[2],k)]; } } return [SKY[0][1],SKY[0][2]]; }
+function nightAt(t){ if(t<.22||t>.84) return 1; if(t<.32) return 1-(t-.22)/.1; if(t<.70) return 0; return (t-.70)/.14; }
+var STARS=[]; (function(){ var r=OA.rng(7); for(var i=0;i<46;i++) STARS.push([r()*360,r()*150,r()*1.3+.4,r()*6.28]); })();
+function drawSky(c,tod,now){
+  var s=skyAt(tod), n=nightAt(tod), g=c.createLinearGradient(0,0,0,205); g.addColorStop(0,s[0]); g.addColorStop(1,s[1]);
+  c.fillStyle=g; c.fillRect(0,0,VW,206);
+  if(n>0.05){ c.fillStyle='#fff'; for(var i=0;i<STARS.length;i++){ var st=STARS[i]; c.globalAlpha=n*(.45+.45*Math.sin(now*1.6+st[3])); c.fillRect(st[0],st[1],st[2],st[2]); } c.globalAlpha=1; }
+  var p=(tod-.24)/.54; if(p>0&&p<1){ var x=lerp(-10,370,p), y=150-Math.sin(Math.PI*p)*118; c.fillStyle='rgba(255,236,170,.25)'; c.beginPath(); c.arc(x,y,22,0,7); c.fill(); circ(c,x,y,13,'#fde68a',0); }
+  var q=((tod+.5)%1-.26)/.48; if(q>0&&q<1){ var mx=lerp(370,-10,q), my=140-Math.sin(Math.PI*q)*110; c.globalAlpha=n; circ(c,mx,my,11,'#f1f5f9',0); c.fillStyle=s[0]; c.beginPath(); c.arc(mx+6,my-4,9.5,0,7); c.fill(); c.globalAlpha=1; }
+  c.fillStyle=n>.5?'rgba(40,50,95,.55)':'rgba(255,255,255,.55)';
+  for(var j=0;j<3;j++){ var cx=((now*(4+j*2)+j*140)%460)-50, cy=30+j*26; c.beginPath(); c.ellipse(cx,cy,26,8,0,0,7); c.ellipse(cx+16,cy-5,16,8,0,0,7); c.ellipse(cx-14,cy-2,14,6,0,0,7); c.fill(); }
+}
+
+/* ---------- skyline + landmarks ---------- */
+function tower(c,x,y,w,h,n,col){ box(c,x,y,w,h,2,col,1.6); c.fillStyle=n?'rgba(251,191,36,.75)':'rgba(255,255,255,.35)'; for(var yy=y+6;yy<y+h-6;yy+=9) for(var xx=x+4;xx<x+w-5;xx+=7){ if(((xx*7+yy*13)|0)%5<(n?3:4)) c.fillRect(xx,yy,3.5,4.5); } }
+function tree(c,x,y,r,n){ box(c,x-2,y,4,r*1.1,1,'#6b4423',1.4); circ(c,x,y-2,r,nc(n,'#4f9a5a','#1f4a3a'),1.6); circ(c,x-r*.5,y+2,r*.7,nc(n,'#5fae68','#24553f'),1.6); }
+function palm(c,x,y,n){ c.beginPath(); c.moveTo(x,200); c.quadraticCurveTo(x+6,y+30,x+10,y); c.strokeStyle='#8a5a2b'; c.lineWidth=4; c.stroke(); var f=nc(n,'#3f9a4a','#1f4a3a'); for(var a=0;a<5;a++){ var an=-2.6+a*.55; poly(c,[x+10,y,x+10+Math.cos(an)*24,y+Math.sin(an)*12+6,x+10+Math.cos(an+.25)*18,y+Math.sin(an+.25)*10+8],f,1.2); } }
+var LM={
+  itpark:function(c,n){ tower(c,14,96,54,104,n,nc(n,'#5fa3c4','#1c3a5c')); tower(c,290,66,56,134,n,nc(n,'#6aa9c9','#1e3d62')); box(c,298,52,40,14,3,nc(n,'#e2e8f0','#0f172a'),1.6); txt(c,'TECH PARK',318,59.5,8,nc(n,'#1e3a8a','#22d3ee')); circ(c,41,90,7,nc(n,'#f1f5f9','#22d3ee'),1.4); },
+  college:function(c,n){ var p=nc(n,'#c9a27a','#4a3a5e'); box(c,14,116,14,84,2,p,1.6); box(c,96,116,14,84,2,p,1.6); box(c,8,104,108,18,3,nc(n,'#a0522d','#3b2a4e'),1.6); txt(c,'COLLEGE',62,113.5,10,nc(n,'#fde68a','#fde68a')); tree(c,300,170,20,n); tree(c,334,160,24,n); tree(c,272,182,14,n); },
+  station:function(c,n){ box(c,24,70,26,130,2,nc(n,'#b45f3c','#3e2a48'),1.6); circ(c,37,92,9,'#f8fafc',1.6); line(c,37,92,37,86,INK,1.6); line(c,37,92,41,94,INK,1.6); poly(c,[20,70,37,56,54,70],nc(n,'#7c2d12','#2a1d3a'),1.6);
+    box(c,214,150,150,6,1,nc(n,'#64748b','#1e293b'),1.4); for(var x=222;x<360;x+=40) box(c,x,156,4,44,1,'#475569',1.2);
+    for(var k=0;k<3;k++){ box(c,214+k*54,166,52,32,4,nc(n,'#b91c1c','#5b1a2a'),1.6); for(var w=0;w<4;w++) box(c,220+k*54+w*11,172,7,8,1,n?'#fde68a':'#e0f2fe',1); box(c,214+k*54,188,52,4,0,'#fde7b0',0); } },
+  depot:function(c,n){ c.beginPath(); c.moveTo(6,200); c.lineTo(6,140); c.quadraticCurveTo(66,104,126,140); c.lineTo(126,200); fs(c,nc(n,'#94a3b8','#2a3558'),1.6); for(var x=20;x<120;x+=18) line(c,x,140,x,200,nc(n,'#64748b','#1b2442'),1.4); txt(c,'BUS DEPOT',66,134,9,nc(n,'#1e293b','#fde68a'));
+    box(c,232,152,124,46,8,nc(n,'#dc2626','#6b1d2a'),1.8); for(var w=0;w<6;w++) box(c,240+w*19,160,14,14,2,n?'#fde68a':'#bfdbfe',1.2); box(c,232,182,124,5,0,'#fde68a',0); circ(c,256,199,7,'#1b2036',1.4); circ(c,330,199,7,'#1b2036',1.4); },
+  tower:function(c,n){ tower(c,246,14,70,186,n,nc(n,'#5a8fc0','#1a3156')); line(c,281,14,281,-4,INK,2); circ(c,281,-2,2.4,'#ef4444',0); tower(c,8,110,44,90,n,nc(n,'#7aa2c8','#223a60')); tower(c,318,90,36,110,n,nc(n,'#6b93bc','#1e355a')); },
+  bazaar:function(c,n){ var cols=['#ef4444','#22c55e','#f59e0b','#3b82f6','#a855f7']; for(var i=0;i<5;i++){ var x=i<3?i*44:220+(i-3)*70, w=i<3?42:66; box(c,x,138,w,62,2,nc(n,'#e8d5b5','#3a3350'),1.4); box(c,x+4,124,w-8,16,2,cols[i],1.4); txt(c,['KIRANA','SAREES','SWEETS','TAILOR','BANGLES'][i],x+w/2,132.5,8,'#fff');
+      for(var s=0;s<w-4;s+=8) poly(c,[x+2+s,142,x+10+s,142,x+6+s,150],i%2?'#fbecc9':cols[i],0); }
+    c.beginPath(); c.moveTo(0,100); c.quadraticCurveTo(180,130,360,100); c.strokeStyle=INK; c.lineWidth=1; c.stroke(); for(var f=0;f<18;f++){ var fx=10+f*20, fy=100+Math.sin(fx/360*Math.PI)*15; poly(c,[fx-5,fy,fx+5,fy,fx,fy+9],cols[f%5],0); } },
+  night:function(c,n){ tower(c,0,80,60,120,1,'#1a2552'); tower(c,64,110,50,90,1,'#1d2a5a'); tower(c,262,60,64,140,1,'#18224d'); tower(c,326,100,40,100,1,'#1d2a5a'); box(c,270,44,48,16,3,'#0f172a',1.6); txt(c,'24×7',294,52.5,11,'#22d3ee'); },
+  stadium:function(c,n){ c.beginPath(); c.moveTo(186,200); c.lineTo(196,160); c.quadraticCurveTo(275,140,354,160); c.lineTo(364,200); fs(c,nc(n,'#94a3b8','#2a3558'),1.6); for(var x=200;x<352;x+=8) line(c,x,166,x,196,nc(n,'#cbd5e1','#3a4a78'),1.2);
+    [[206,60],[340,60],[30,80]].forEach(function(p){ line(c,p[0],p[1]+14,p[0],200,'#475569',3); box(c,p[0]-12,p[1],24,14,2,'#334155',1.4); c.fillStyle=n?'#fffbe6':'#e2e8f0'; for(var k=0;k<3;k++) c.fillRect(p[0]-9+k*7,p[1]+3,5,8); }); },
+  hills:function(c,n){ poly(c,[-20,200,70,90,150,200],nc(n,'#6e8fb8','#1d2a52'),1.4); poly(c,[90,200,210,70,330,200],nc(n,'#7d9cc4','#223062'),1.4); poly(c,[250,200,330,110,400,200],nc(n,'#6e8fb8','#1d2a52'),1.4); poly(c,[196,86,210,70,224,86,216,82,210,88,204,82],'#f8fafc',1);
+    for(var i=0;i<7;i++){ var x=10+i*52, y=184-(i%2)*8; poly(c,[x,y+16,x+8,y-6,x+16,y+16],nc(n,'#2f6b46','#163a32'),1.2); } line(c,0,60,360,110,INK,1); box(c,150,72,18,13,2,'#ef4444',1.4); },
+  beach:function(c,n){ c.fillStyle=nc(n,'#3f8fc7','#14284e'); c.fillRect(0,170,360,30); c.strokeStyle=n?'rgba(255,255,255,.25)':'rgba(255,255,255,.6)'; c.lineWidth=1.4; for(var y=176;y<200;y+=7){ c.beginPath(); for(var x=0;x<360;x+=12){ c.moveTo(x,y); c.quadraticCurveTo(x+3,y-2,x+6,y); } c.stroke(); }
+    box(c,318,92,20,80,3,'#f8fafc',1.6); box(c,318,108,20,10,0,'#ef4444',0); box(c,318,132,20,10,0,'#ef4444',0); box(c,314,82,28,12,3,nc(n,'#fde68a','#fde68a'),1.6); palm(c,20,120,n); palm(c,92,134,n); },
+  airport:function(c,n){ box(c,0,170,200,30,3,nc(n,'#cbd5e1','#2a3558'),1.6); for(var x=8;x<196;x+=16) box(c,x,176,10,14,1,n?'#fde68a':'#93c5fd',1); box(c,296,70,16,130,2,nc(n,'#e2e8f0','#2a3558'),1.6); box(c,284,52,40,22,6,nc(n,'#60a5fa','#1e3a8a'),1.6);
+    c.save(); c.translate(120,70); c.rotate(-.12); box(c,-40,-5,80,10,5,'#f8fafc',1.4); poly(c,[-6,0,14,0,-14,-22,-22,-22],'#cbd5e1',1.2); poly(c,[-36,-2,-28,-2,-38,-14,-42,-14],'#ef4444',1.2); c.restore(); },
+  summit:function(c,n){ c.beginPath(); c.moveTo(150,200); c.lineTo(150,140); c.quadraticCurveTo(255,92,360,140); c.lineTo(360,200); fs(c,nc(n,'#e2e8f0','#26325e'),1.6); for(var x=160;x<356;x+=14) line(c,x,140,x,200,nc(n,'#94a3b8','#3a4a7a'),1.2);
+    for(var i=0;i<4;i++){ line(c,14+i*30,110,14+i*30,200,'#475569',2); box(c,16+i*30,112,20,34,1,['#7c3aed','#0ea5e9','#f97316','#22c55e'][i],1.2); } txt(c,'SUMMIT',255,128,12,nc(n,'#1e3a8a','#fbbf24')); },
+  film:function(c,n){ c.fillStyle=n?'rgba(253,230,138,.18)':'rgba(255,255,255,.25)'; c.beginPath(); c.moveTo(30,200); c.lineTo(-10,0); c.lineTo(40,0); c.closePath(); c.fill(); c.beginPath(); c.moveTo(330,200); c.lineTo(300,0); c.lineTo(370,0); c.closePath(); c.fill();
+    box(c,206,110,14,90,2,nc(n,'#a16207','#3e2a48'),1.6); box(c,330,110,14,90,2,nc(n,'#a16207','#3e2a48'),1.6); c.beginPath(); c.moveTo(200,116); c.quadraticCurveTo(275,70,350,116); c.lineTo(350,128); c.quadraticCurveTo(275,84,200,128); c.closePath(); fs(c,'#fbbf24',1.6); txt(c,'FILM CITY',275,104,11,'#7c2d12'); box(c,40,150,40,30,2,'#1b2036',1.4); poly(c,[40,150,80,150,84,140,44,140],'#f8fafc',1.2); },
+  metro:function(c,n){ for(var x=20;x<360;x+=80) box(c,x,140,12,60,2,nc(n,'#94a3b8','#2a3558'),1.4); box(c,-4,128,368,14,2,nc(n,'#cbd5e1','#33407a'),1.6); for(var k=0;k<3;k++){ box(c,150+k*60,102,58,26,6,nc(n,'#f8fafc','#3b4a82'),1.6); box(c,150+k*60,112,58,5,0,'#ec4899',0); for(var w=0;w<3;w++) box(c,156+k*60+w*17,105,12,6,1,n?'#fde68a':'#bae6fd',1); } },
+  hq:function(c,n){ tower(c,232,40,84,160,n,nc(n,'#6aa3cc','#1b3360')); poly(c,[244,40,304,40,298,16,250,16],'#c2643a',1.8); c.beginPath(); c.ellipse(274,16,24,5,0,0,7); fs(c,'#7a3d16',1.6); box(c,244,46,60,16,3,'#0f172a',1.4); txt(c,'CHAI HQ',274,54.5,10,'#fbbf24'); tower(c,10,120,50,80,n,nc(n,'#7aa2c8','#223a60')); }
+};
+function drawSkyline(c,ci,n){
+  var r=OA.rng(1000+ci*77), far=n?'#141c42':'#a9bfe0', mid=n?'#1d2858':'#86a0cc';
+  for(var x=-10;x<370;){ var w=18+r()*26, h=36+r()*70; c.fillStyle=far; c.fillRect(x,200-h,w,h); x+=w+2+r()*6; }
+  for(x=-6;x<370;){ var w2=24+r()*30, h2=26+r()*48; c.fillStyle=mid; c.fillRect(x,200-h2,w2,h2); for(var yy=206-h2;yy<194;yy+=9) for(var xx=x+4;xx<x+w2-5;xx+=7){ var on=r(); if(on<(n?.42:.3)){ c.fillStyle=n?'rgba(251,191,36,.7)':'rgba(255,255,255,.4)'; c.fillRect(xx,yy,3.5,4.5); } } x+=w2+4+r()*10; }
+  LM[CITIES[ci].lm](c,n);
+  var g=c.createLinearGradient(0,150,0,200); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,n?'rgba(10,14,35,.5)':'rgba(255,255,255,.25)'); c.fillStyle=g; c.fillRect(0,150,VW,52);
+}
+function drawGround(c,lamp){
+  c.fillStyle='#3a405a'; c.fillRect(0,196,VW,30); c.fillStyle='#2c3148'; c.fillRect(0,196,VW,3);
+  c.fillStyle='#e5e7eb'; for(var x=0;x<VW;x+=34) c.fillRect(x+6,210,16,2.5);
+  c.fillStyle='#9aa3b8'; c.fillRect(0,224,VW,7); line(c,0,224,VW,224,INK,1.6); line(c,0,231,VW,231,INK,1.6);
+  var g=c.createLinearGradient(0,231,0,300); g.addColorStop(0,'#c7ae8a'); g.addColorStop(1,'#a88e6c'); c.fillStyle=g; c.fillRect(0,231,VW,70);
+  c.strokeStyle='rgba(90,64,40,.35)'; c.lineWidth=1; for(var y=244,k=0;y<300;y+=16,k++){ c.beginPath(); c.moveTo(0,y); c.lineTo(VW,y); c.stroke(); for(x=(k%2)*20;x<VW;x+=40){ c.beginPath(); c.moveTo(x,y-16); c.lineTo(x,y); c.stroke(); } }
+  if(lamp){ box(c,8,120,5,112,2,'#475569',1.6); c.beginPath(); c.moveTo(10,122); c.quadraticCurveTo(14,108,30,110); c.strokeStyle=INK; c.lineWidth=5; c.stroke(); c.strokeStyle='#475569'; c.lineWidth=2.4; c.stroke(); box(c,24,108,16,7,3,'#334155',1.4); }
+}
+
+/* ---------- the stall, by stage ---------- */
+function awning(c,x0,x1,y0,y1,th){
+  var n=Math.max(4,Math.round((x1-x0)/18)), w=(x1-x0)/n, i;
+  for(i=0;i<n;i++){ var x=x0+i*w; c.fillStyle=i%2?th.b:th.a; c.beginPath(); c.moveTo(x,y0); c.lineTo(x+w,y0); c.lineTo(x+w,y1); c.arc(x+w/2,y1,w/2,0,Math.PI,false); c.closePath(); c.fill(); }
+  c.beginPath(); c.moveTo(x0,y0); c.lineTo(x1,y0); c.lineTo(x1,y1); for(i=n-1;i>=0;i--) c.arc(x0+i*w+w/2,y1,w/2,0,Math.PI,false); c.closePath(); c.lineWidth=2.2; c.strokeStyle=INK; c.stroke();
+  c.fillStyle='rgba(0,0,0,.16)'; c.fillRect(x0+1,y0+1,x1-x0-2,4);
+}
+function sign(c,x,y,w,h,s,th,sz){ box(c,x,y,w,h,5,th.sign,2.2); rr(c,x+3,y+3,w-6,h-6,3); c.strokeStyle=th.trim; c.lineWidth=1.2; c.stroke(); txt(c,s,x+w/2,y+h/2+1,sz,th.signInk); }
+function jars(c,x,y){ var cl=['#d9a05b','#f472b6','#c58a4a','#fde047']; for(var i=0;i<4;i++){ box(c,x+i*15,y-14,12,14,3,'rgba(219,234,254,.55)',1.4); c.fillStyle=cl[i]; c.fillRect(x+i*15+2,y-8,8,6); box(c,x+i*15+1,y-17,10,4,1,'#dc2626',1.2); } }
+function planks(c,x,y,w,h,col){ c.strokeStyle=col; c.lineWidth=1.2; for(var xx=x+16;xx<x+w-4;xx+=16){ c.beginPath(); c.moveTo(xx,y+3); c.lineTo(xx,y+h-3); c.stroke(); } }
+var GEO=[{ct:186,kx:214,cupx:188,gx:262,staff:[176,262]},{ct:184,kx:216,cupx:188,gx:272,staff:[170,262,288]}];
+function geo(st){ return GEO[st?1:0]; }
+function drawStallBack(c,st,th,menuTxt,n){
+  if(st>=4){ box(c,0,92,128,108,2,nc(n,'#94a3b8','#2c3760'),1.8); c.beginPath(); c.moveTo(0,92); for(var x=0;x<128;x+=32){ c.lineTo(x+22,72); c.lineTo(x+32,92); } fs(c,nc(n,'#cbd5e1','#3a4778'),1.6); box(c,22,26,16,66,2,'#7c2d12',1.8); box(c,20,22,20,7,2,'#57534e',1.4); box(c,6,104,116,14,3,th.sign,1.4); txt(c,'CHAI WORKS',64,111.5,9,th.signInk); for(var w=0;w<5;w++) box(c,10+w*23,128,16,12,1,n?'#fde68a':'#e0f2fe',1.2); }
+  if(st>=3){ box(c,0,124,86,108,2,th.wall,1.8); awning(c,-4,90,140,154,th); sign(c,6,124,74,16,'OUTLET No.2',th,8.5); box(c,8,166,34,40,2,n?'#fcd9a0':'#fde7b0',1.6); box(c,50,166,28,66,2,'#3b2a20',1.6);
+    line(c,212,8,212,48,'#475569',3); line(c,292,8,292,48,'#475569',3); box(c,196,6,112,30,4,'#f8fafc',2); box(c,199,9,106,24,2,th.a,0); txt(c,'25 OUTLETS · ONE TASTE',252,21.5,8.6,th.b); }
+  if(st>=2){ box(c,124,48,234,188,3,th.wall,2.2); box(c,120,42,242,10,2,th.woodD,1.8); sign(c,150,56,150,30,'CHAI CAFÉ',th,17); box(c,312,124,38,112,2,'#3b2a20',2); box(c,318,131,26,58,2,n?'#fcd9a0':'#fde7b0',1.6); circ(c,341,186,2,'#fbbf24',1);
+    box(c,312,94,38,24,2,n?'#fcd9a0':'#bfdbfe',1.6); line(c,331,94,331,118,INK,1.4); box(c,112,212,20,24,3,'#b45309',1.6); circ(c,122,202,11,'#22c55e',1.6); circ(c,116,196,7,'#16a34a',1.4); }
+  if(st>=1){
+    box(c,144,112,154,74,2,'#5b3a1e',2); line(c,148,140,294,140,'#3b2410',2.4); jars(c,152,140); box(c,236,118,54,40,3,'#1f2a24',1.8); txt(c,'MENU',263,126,9,'#e2e8f0'); c.fillStyle='#cbd5e1'; c.fillRect(242,134,30,2); c.fillRect(242,140,40,2); c.fillRect(242,146,24,2);
+    box(c,138,92,7,94,1,th.woodD,1.6); box(c,297,92,7,94,1,th.woodD,1.6);
+    if(st<2){ poly(c,[128,86,312,86,318,100,122,100],'#9aa6b8',2); for(var x2=134;x2<312;x2+=8) line(c,x2,88,x2,99,'#6b7488',1.2); line(c,190,86,190,60,th.woodD,3); line(c,250,86,250,60,th.woodD,3); sign(c,166,50,108,28,'CHAI TAPRI',th,15); }
+    awning(c,130,312,100,118,th);
+  } else {
+    box(c,154,104,6,84,1,th.woodD,1.6); box(c,280,104,6,84,1,th.woodD,1.6); box(c,158,150,124,5,1,th.woodD,1.4); jars(c,164,150);
+    line(c,196,98,196,84,th.woodD,3); line(c,244,98,244,84,th.woodD,3); sign(c,176,68,88,26,'CHAI',th,17); awning(c,144,296,98,116,th);
+  }
+}
+function drawStallFront(c,st,th,menuTxt){
+  var G=geo(st);
+  if(st){ box(c,134,G.ct-2,174,9,2,th.woodL,2); box(c,140,G.ct+7,162,46,3,th.wood,2); planks(c,140,G.ct+7,162,46,th.woodD); box(c,154,G.ct+13,134,26,4,th.a,2); txt(c,menuTxt,221,G.ct+27,10.5,th.b); }
+  else { box(c,146,G.ct-2,148,8,2,th.woodL,2); box(c,150,G.ct+6,140,40,3,th.wood,2); planks(c,150,G.ct+6,140,40,th.woodD); box(c,164,G.ct+12,112,22,4,th.a,2); txt(c,'CUTTING CHAI',220,G.ct+24,10,th.b);
+    line(c,150,G.ct+14,124,G.ct+28,INK,5); line(c,150,G.ct+14,124,G.ct+28,th.woodD,2.6); wheel(c,174,G.ct+50); wheel(c,266,G.ct+50); }
+}
+function wheel(c,x,y){ circ(c,x,y,13,'#2a2a35',2.2); circ(c,x,y,8,'#94a3b8',1.6); for(var a=0;a<6;a++) line(c,x,y,x+Math.cos(a)*8,y+Math.sin(a)*8,INK,1.2); circ(c,x,y,2.4,'#fbbf24',1.2); }
+function bench(c,x,y,th){ box(c,x+4,y-2,4,14,1,th.woodD,1.4); box(c,x+48,y-2,4,14,1,th.woodD,1.4); box(c,x,y-12,56,8,2,th.woodL,1.8); box(c,x+2,y-5,52,6,1,th.wood,1.4); }
+function galla(c,x,y,b){ var s=1+b*.25; c.save(); c.translate(x,y); c.scale(s,1/s); box(c,-9,-12,18,12,2,'#d4a017',1.8); line(c,-4,-9,4,-9,INK,2); c.restore(); }
+function drawKettle(c,x,y,tilt,now){
+  box(c,x-20,y-8,40,8,2,'#334155',1.8); circ(c,x-14,y-4,1.8,'#fbbf24',0); circ(c,x+14,y-4,1.8,'#fbbf24',0);
+  var fl=.8+.2*Math.sin(now*30); c.fillStyle='#60a5fa'; for(var i=-1;i<=1;i++){ c.beginPath(); c.moveTo(x+i*7-3,y-8); c.quadraticCurveTo(x+i*7,y-8-6*fl,x+i*7+3,y-8); c.fill(); }
+  c.save(); c.translate(x+8,y-9); c.rotate(-tilt*.62); c.translate(-x-8,-y+9);
+  c.beginPath(); c.moveTo(x-12,y-18); c.lineTo(x-25,y-29); c.lineTo(x-22,y-31); c.lineTo(x-9,y-23); fs(c,'#94a3b8',1.8);
+  var g=c.createLinearGradient(x-14,0,x+14,0); g.addColorStop(0,'#e2e8f0'); g.addColorStop(.6,'#b7c2d2'); g.addColorStop(1,'#8391a7');
+  c.beginPath(); c.moveTo(x-14,y-9); c.quadraticCurveTo(x-17,y-30,x,y-31); c.quadraticCurveTo(x+17,y-30,x+14,y-9); c.closePath(); fs(c,g,2);
+  c.beginPath(); c.moveTo(x-8,y-30); c.quadraticCurveTo(x,y-45,x+8,y-30); c.strokeStyle=INK; c.lineWidth=2.6; c.stroke();
+  c.beginPath(); c.ellipse(x,y-30,7,2.2,0,0,7); fs(c,'#94a3b8',1.6); circ(c,x,y-33,2.2,'#fbbf24',1.4);
+  line(c,x-8,y-17,x-6,y-12,'#fff',1.4);
+  c.restore();
+}
+function spoutTip(x,y,tilt){ var a=-tilt*.62, px=x-24, py=y-30, ox=x+8, oy=y-9, dx=px-ox, dy=py-oy; return [ox+dx*Math.cos(a)-dy*Math.sin(a), oy+dx*Math.sin(a)+dy*Math.cos(a)]; }
+
+/* ---------- vehicles ---------- */
+function autoSpr(){ return vsprite('auto',56,40,function(c){ c.translate(2,2); box(c,6,6,40,10,4,'#facc15',1.8); poly(c,[2,30,4,14,12,10,48,10,50,30],'#22c55e',1.8); box(c,14,14,16,10,2,'#bae6fd',1.4); box(c,34,14,10,10,2,'#bae6fd',1.4); box(c,2,26,48,6,2,'#1b2036',1.2); circ(c,10,32,5,'#2a2a35',1.6); circ(c,42,32,5,'#2a2a35',1.6); circ(c,26,32,4,'#2a2a35',1.4); }); }
+function busSpr(){ return vsprite('bus',124,52,function(c){ c.translate(2,2); box(c,0,4,118,38,7,'#2563eb',2); for(var w=0;w<6;w++) box(c,8+w*18,10,14,13,2,'#bae6fd',1.2); box(c,0,28,118,5,0,'#fde68a',0); box(c,104,10,10,24,2,'#bae6fd',1.2); circ(c,22,42,6.5,'#2a2a35',1.6); circ(c,94,42,6.5,'#2a2a35',1.6); }); }
+function scootSpr(){ return vsprite('scoot',44,36,function(c){ c.translate(2,2); circ(c,8,28,5,'#2a2a35',1.6); circ(c,34,28,5,'#2a2a35',1.6); c.beginPath(); c.moveTo(6,24); c.lineTo(24,24); c.quadraticCurveTo(28,14,34,14); c.lineTo(36,24); c.lineTo(30,28); c.lineTo(8,28); fs(c,'#f97316',1.6); line(c,34,14,30,2,INK,2.4); box(c,4,14,12,9,2,'#fbbf24',1.4); }); }
+function vanSpr(th){ return vsprite('van|'+th.a,96,52,function(c){ c.translate(2,2); box(c,0,6,66,36,4,th.wall,2); box(c,64,16,26,26,5,th.a,2); box(c,70,20,14,10,2,'#bae6fd',1.2); box(c,6,14,52,18,3,th.a,1.6); txt(c,'CHAI TAPRI',32,23.5,9,th.b); circ(c,18,42,6.5,'#2a2a35',1.6); circ(c,72,42,6.5,'#2a2a35',1.6); }); }
+
+/* ---------- canvas + layers ---------- */
+var cv=$('cv'), ctx=cv.getContext('2d'), K=1, DPR=1, L={key:''};
+function fit(){ var r=cv.getBoundingClientRect(); if(!r.width) return; var d=Math.min(2,window.devicePixelRatio||1), w=Math.round(r.width*d), h=Math.round(r.width*VH/VW*d); if(cv.width!==w||cv.height!==h){ cv.width=w; cv.height=h; } K=r.width/VW; DPR=d; L.key=''; }
+function mkLayer(fn){ var l=document.createElement('canvas'); l.width=cv.width; l.height=cv.height; var c=l.getContext('2d'); c.setTransform(cv.width/VW,0,0,cv.height/VH,0,0); fn(c); return l; }
+var fontsOk=false; try{ document.fonts.ready.then(function(){ fontsOk=true; L.key=''; }); }catch(e){}
+function ensureLayers(ci,st,th,mt){
+  var key=[ci,st,th.a,th.wood,mt,cv.width,fontsOk].join('|'); if(L.key===key) return; L.key=key;
+  L.skyD=mkLayer(function(c){ drawSkyline(c,ci,0); }); L.skyN=mkLayer(function(c){ drawSkyline(c,ci,1); });
+  L.ground=mkLayer(function(c){ drawGround(c,st<3); });
+  L.back=st<0?null:mkLayer(function(c){ drawStallBack(c,st,th,mt,0); });
+  L.front=st<0?null:mkLayer(function(c){ drawStallFront(c,st,th,mt); });
+}
+function menuTxt(run){ var m=['CHAI']; if(run.menu.samosa) m.push('SAMOSA'); if(run.menu.bun) m.push('BUN MASKA'); if(run.menu.maggi) m.push('MAGGI'); return m.length===1?(run.menu.masala?'MASALA CHAI':'CUTTING CHAI'):m.slice(0,3).join(' · '); }
+
+/* ---------- scene actors ---------- */
+var ROLES=['dev','intern','analyst','sales','manager','hr','aunty','peon','boss'];
+var QX=[124,98,72,48,24], QY=[279,274,269,265,261];
+var SC={heat:0,cust:[],queue:[],parts:[],veh:[],vehT:2,spawnT:.5,staffT:2,pourT:9,gallaB:0,steamT:0,rain:[]};
+function sipSpots(st){ return st?[{x:312,y:256,sit:1},{x:340,y:256,sit:1},{x:300,y:290}]:[{x:310,y:284},{x:340,y:280}]; }
+function spawnCust(capCol){
+  if(SC.queue.length>=5) return;
+  var i=SC.queue.length, cu={role:VR.pick(ROLES),x:-30-VR()*20,y:QY[i],tx:QX[i],ty:QY[i],st:'walk',t:0,ph:VR()*6,cap:capCol||null};
+  if(VR()<.05) cu.role='ceo';
+  SC.cust.push(cu); SC.queue.push(cu);
+}
+function relineQueue(){ for(var i=0;i<SC.queue.length;i++){ SC.queue[i].tx=QX[i]; SC.queue[i].ty=QY[i]; } }
+function coinBurst(x0,y0,n,st){ var G=geo(st); for(var i=0;i<n;i++) SC.parts.push({k:'c',x0:x0+VR.range(-6,6),y0:y0,x1:G.gx,y1:G.ct-10,t:-i*.06,dur:.42+VR()*.12,h:30+VR()*20,i:i}); }
+function popText(x,y,s,col,big){ if(SC.parts.length>140) return; var nt=0; for(var i=0;i<SC.parts.length;i++) if(SC.parts[i].k==='t') nt++; if(nt>=6&&!big) return; SC.parts.push({k:'t',x:x,y:y,s:s,col:col||'#fde68a',t:0,dur:.9,big:big}); }
+function serveFront(fx,fy,st,label){
+  var cu=SC.queue[0], G=geo(st);
+  if(cu&&(cu.st==='wait'||(cu.st==='walk'&&Math.abs(cu.x-cu.tx)<14))){
+    SC.queue.shift(); relineQueue(); cu.st='get';
+    SC.parts.push({k:'f',x0:fx,y0:fy,x1:cu.x+9,y1:cu.y-38,t:0,dur:.3,cu:cu});
+    return cu;
+  }
+  coinBurst(fx,fy-6,1,st); return null;
+}
+function landCup(cu,st){
+  cu.hold=true; coinBurst(cu.x,cu.y-46,3,st);
+  var spots=sipSpots(st), free=null;
+  for(var i=0;i<spots.length;i++){ var taken=false; for(var j=0;j<SC.cust.length;j++) if(SC.cust[j].spot===i&&(SC.cust[j].st==='tosip'||SC.cust[j].st==='sip')) taken=true; if(!taken){ free=i; break; } }
+  if(free==null){ cu.st='leave'; cu.tx=420; }
+  else { cu.st='tosip'; cu.spot=free; cu.tx=spots[free].x; cu.ty=spots[free].y; cu.sit=spots[free].sit; }
+}
+function addSteam(x,y,big){ if(RM||SC.parts.length>150) return; SC.parts.push({k:'s',x:x+VR.range(-2,2),y:y,vx:VR.range(-3,3),vy:-VR.range(10,18),life:0,max:1.4+VR(),r:big?4:2.4}); }
+function sparks(x,y,n,col){ if(RM) n=Math.min(n,4); for(var i=0;i<n;i++){ var a=VR()*6.28,s=VR.range(30,90); SC.parts.push({k:'p',x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-40,life:0,max:.6+VR()*.4,col:col||VR.pick(['#fde68a','#fbbf24','#f472b6','#4ade80'])}); } }
+
+function sceneStep(dt,st,o){
+  /* o: {spawnEvery, staffEvery, capCol} */
+  var G=geo(st);
+  SC.pourT+=dt; SC.gallaB=Math.max(0,SC.gallaB-dt*4);
+  SC.heat=Math.max(0,SC.heat-dt*.8); SC.spawnT-=dt*(1+Math.min(3,SC.heat))*(SC.queue.length<2?1.6:1); if(SC.spawnT<=0){ SC.spawnT=o.spawnEvery*VR.range(.7,1.3); spawnCust(o.capCol); }
+  if(o.staffEvery){ SC.staffT-=dt; if(SC.staffT<=0){ SC.staffT=o.staffEvery; var sx=G.staff[VR.int(G.staff.length)]; var cu=serveFront(sx,G.ct-14,st); if(cu&&o.onStaff) o.onStaff(); } }
+  SC.steamT-=dt; if(SC.steamT<=0){ SC.steamT=.16; addSteam(G.kx-2,G.ct-36); }
+  for(var i=SC.cust.length-1;i>=0;i--){
+    var c=SC.cust[i]; c.t+=dt;
+    if(c.st==='walk'||c.st==='tosip'||c.st==='leave'||c.st==='wait'){
+      var dx=c.tx-c.x, dy=c.ty-c.y, d=Math.sqrt(dx*dx+dy*dy), sp=46*dt;
+      if(d>sp){ c.x+=dx/d*sp; c.y+=dy/d*sp; c.moving=true; } else { c.x=c.tx; c.y=c.ty; c.moving=false; if(c.st==='walk') c.st='wait'; else if(c.st==='tosip'){ c.st='sip'; c.sipT=2.2+VR()*2.4; } }
+      if(c.st==='leave'&&c.x>400){ SC.cust.splice(i,1); continue; }
     }
-    return false;
+    if(c.st==='sip'){ c.sipT-=dt; if(VR()<dt*2.2) addSteam(c.x+9,c.y-(c.sit?52:40)); if(c.sipT<=0){ c.st='leave'; c.tx=420; c.ty=c.y+(c.sit?26:0); c.sit=0; c.spot=null; } }
   }
-  function save(){ S.saved=Date.now(); try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+  partsStep(dt,o.onLand||function(cu){ landCup(cu,st); },st);
+  vehStep(dt,st);
+}
+function partsStep(dt,onLand,st){
+  for(var i=SC.parts.length-1;i>=0;i--){
+    var p=SC.parts[i];
+    if(p.k==='s'||p.k==='p'){ p.life+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; if(p.k==='p') p.vy+=160*dt; if(p.life>=p.max) SC.parts.splice(i,1); }
+    else { p.t+=dt; if(p.t>=p.dur){ SC.parts.splice(i,1); if(p.k==='c'){ SC.gallaB=1; snd('coin',p.i%4); } else if(p.k==='f'&&p.cu) onLand(p.cu); } }
+  }
+}
+function vehStep(dt,st){
+  SC.vehT-=dt; if(SC.vehT<=0){ SC.vehT=4+VR()*6; var dir=VR()<.5?1:-1, kinds=['auto','auto','bus','scoot']; if(st>=3) kinds.push('van'); SC.veh.push({k:VR.pick(kinds),dir:dir,x:dir>0?-130:490,v:(50+VR()*40)*dir}); }
+  for(var i=SC.veh.length-1;i>=0;i--){ var v=SC.veh[i]; v.x+=v.v*dt; if(v.x>500||v.x<-140) SC.veh.splice(i,1); }
+}
+function drawVehicles(c,th){
+  for(var i=0;i<SC.veh.length;i++){ var v=SC.veh[i], s=v.k==='auto'?autoSpr():v.k==='bus'?busSpr():v.k==='van'?vanSpr(th):scootSpr(), base=v.dir>0?225:215, sc=v.dir>0?.82:.72;
+    c.save(); c.translate(v.x,base-s.h*sc); if(v.dir<0){ c.scale(-1,1); c.translate(-s.w*sc,0); } c.drawImage(s.cv,0,0,s.w*sc,s.h*sc); c.restore(); }
+}
+var PW=40, PH=56;
+function drawCust(c,cu,now,cup){
+  var bob=cu.moving&&!RM?Math.abs(Math.sin(now*9+cu.ph))*2.2:Math.sin(now*2+cu.ph)*.6, sc=cu.sit?.92:1-(cu.y<270?(279-cu.y)*.006:0);
+  var w=PW*sc, h=PH*sc, x=cu.x-w/2, y=cu.sit?cu.y-6-h*.74:cu.y-h-bob;
+  var spr=cu.hold?personSpr(cu.role,'happy','coffee',cu.cap?{cap:cu.cap}:null):personSpr(cu.role,cu.mood||'neutral','stand',cu.cap?{cap:cu.cap}:null);
+  c.fillStyle='rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(cu.x,cu.sit?cu.y+12:cu.y,w*.34,3,0,0,7); c.fill();
+  if(cu.moving&&!RM){ c.save(); c.translate(cu.x,y+h); c.rotate(Math.sin(now*9+cu.ph)*.035); c.translate(-cu.x,-y-h); dspr(c,spr,x,y,w,h); c.restore(); } else dspr(c,spr,x,y,w,h);
+  if(cu.hold) dspr(c,cupSpr(cup),x+w*.6,y+h*.53,w*.22,w*.22);
+}
+function drawParts(c,cup){
+  for(var i=0;i<SC.parts.length;i++){ var p=SC.parts[i], k;
+    if(p.k==='s'){ k=p.life/p.max; c.fillStyle=p.dark?'rgba(40,30,25,'+(.55*(1-k))+')':'rgba(255,255,255,'+(.42*(1-k))+')'; c.beginPath(); c.arc(p.x,p.y,p.r*(1+k*1.6),0,7); c.fill(); }
+    else if(p.k==='p'){ k=p.life/p.max; c.globalAlpha=1-k; c.fillStyle=p.col; c.fillRect(p.x-2,p.y-2,4,4); c.globalAlpha=1; }
+    else if(p.k==='c'||p.k==='f'){ if(p.t<0) continue; k=p.t/p.dur; var e=k*(2-k), x=lerp(p.x0,p.x1,e), y=lerp(p.y0,p.y1,e)-Math.sin(Math.PI*k)*(p.h||26);
+      if(p.k==='c'){ var sq=Math.abs(Math.cos(p.t*18)); c.beginPath(); c.ellipse(x,y,4.2*Math.max(.3,sq),4.2,0,0,7); fs(c,'#fbbf24',1.4); c.fillStyle='#fde68a'; c.fillRect(x-1,y-2,1.6,3); }
+      else dspr(c,p.spr||cupSpr(cup),x-7,y-7,14,14); }
+    else if(p.k==='t'){ k=p.t/p.dur; c.globalAlpha=k<.7?1:1-(k-.7)/.3; var sz=p.big?16:12; c.font='800 '+sz+'px "Baloo 2",system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.lineWidth=3.4; c.strokeStyle=INK; var yy=p.y-k*34; c.strokeText(p.s,p.x,yy); c.fillStyle=p.col; c.fillText(p.s,p.x,yy); c.globalAlpha=1; }
+  }
+}
+function glow(c,x,y,r,col,a){ var g=c.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); c.globalAlpha=a; c.fillStyle=g; c.fillRect(x-r,y-r,r*2,r*2); c.globalAlpha=1; }
+function nightLights(c,st,n,now){
+  if(n<.05) return; c.globalCompositeOperation='lighter';
+  var x0=st?130:144, x1=st?312:296, yb=st?124:121;
+  for(var x=x0+8;x<x1;x+=16){ var tw=.75+.25*Math.sin(now*3+x); glow(c,x,yb,9,'rgba(253,224,130,.9)',n*tw); }
+  if(st<3) glow(c,32,118,60,'rgba(253,230,160,.55)',n);
+  if(st>=2){ glow(c,331,160,46,'rgba(253,200,120,.6)',n); glow(c,225,72,70,'rgba(251,191,36,.35)',n); }
+  if(st>=3) glow(c,25,186,40,'rgba(253,200,120,.5)',n);
+  glow(c,225,160,70,'rgba(255,190,110,.35)',n);
+  c.globalCompositeOperation='source-over';
+  if(st<3){ c.globalAlpha=n; c.fillStyle='rgba(255,240,190,.12)'; c.beginPath(); c.moveTo(26,114); c.lineTo(38,114); c.lineTo(66,232); c.lineTo(-4,232); c.closePath(); c.fill(); c.globalAlpha=1; }
+}
+function drawRain(c,dt,on){
+  if(on&&SC.rain.length<(RM?20:70)) for(var i=0;i<6;i++) SC.rain.push({x:VR()*380,y:-VR()*300,v:220+VR()*80});
+  if(!on&&!SC.rain.length) return;
+  c.strokeStyle='rgba(190,215,255,.55)'; c.lineWidth=1.2; c.beginPath();
+  for(i=SC.rain.length-1;i>=0;i--){ var d=SC.rain[i]; d.y+=d.v*dt; d.x-=d.v*dt*.15; if(d.y>300){ if(on){ d.y=-10; d.x=VR()*380; } else { SC.rain.splice(i,1); continue; } } c.moveTo(d.x,d.y); c.lineTo(d.x+2,d.y-9); }
+  c.stroke(); if(on){ c.fillStyle='rgba(40,60,120,.12)'; c.fillRect(0,0,VW,VH); }
+}
+function drawBunting(c,now){ var cols=['#ef4444','#fbbf24','#22c55e','#3b82f6','#f472b6']; c.beginPath(); c.moveTo(0,30); c.quadraticCurveTo(180,58,360,30); c.strokeStyle=INK; c.lineWidth=1.2; c.stroke(); for(var i=0;i<19;i++){ var x=8+i*19, y=30+Math.sin(x/360*Math.PI)*14, sw=Math.sin(now*3+i)*1.5; poly(c,[x-6,y,x+6,y,x+sw,y+12],cols[i%5],1); } }
 
-  /* ---------- numbers ---------- */
-  function grp(n){ var s=String(Math.floor(n)); if(s.length<=3) return s; return s.slice(0,-3).replace(/\B(?=(\d{2})+(?!\d))/g,',')+','+s.slice(-3); }
-  function trim(x){ var d=x<10?2:x<100?1:0, p=Math.pow(10,d), v=Math.floor(x*p+1e-7)/p; return d?String(+v.toFixed(d)):grp(v); }
-  function money(n,dec){
-    if(!(n>0)) return '₹0'; if(!isFinite(n)) return '₹∞';
-    if(n<1e5) return '₹'+(dec&&n<100&&n%1?String(Math.floor(n*10)/10):grp(n));
-    if(n<1e7) return '₹'+trim(n/1e5)+' lakh';
-    if(n<1e10) return '₹'+trim(n/1e7)+' crore';
-    if(n<1e12) return '₹'+trim(n/1e10)+'k crore';
-    if(n<1e17) return '₹'+trim(n/1e12)+' lakh crore';
-    return '₹'+(n/1e7).toExponential(2).replace('e+',' × 10^')+' crore';
-  }
-  function dur(s){ s=Math.floor(s); var h=Math.floor(s/3600), m=Math.floor(s%3600/60); return h?h+'h '+m+'m':m?m+'m '+(s%60)+'s':s+'s'; }
+function renderIdle(c,now,dt,run,ev){
+  var ci=run.c-1, th=theme().c, st=run.stage, tod=todNow(run), n=nightAt(tod), G=geo(st), cup=cupId(), mt=menuTxt(run);
+  ensureLayers(ci,st,th,mt);
+  c.setTransform(cv.width/VW,0,0,cv.height/VH,0,0);
+  drawSky(c,tod,now);
+  c.drawImage(L.skyD,0,0,VW,VH); if(n>0){ c.globalAlpha=n; c.drawImage(L.skyN,0,0,VW,VH); c.globalAlpha=1; }
+  c.drawImage(L.ground,0,0,VW,VH); drawVehicles(c,th);
+  if(st>=4&&!RM&&VR()<dt*6) SC.parts.push({k:'s',x:30+VR.range(-3,3),y:22,vx:VR.range(2,8),vy:-VR.range(8,14),life:0,max:2.4,r:5});
+  c.drawImage(L.back,0,0,VW,VH);
+  /* staff + you behind the counter */
+  var crew=[]; for(var i=0;i<STAFF.length&&crew.length<G.staff.length;i++) if(run.staff[STAFF[i].id]) crew.push(STAFF[i]);
+  for(i=0;i<crew.length;i++){ var sx=G.staff[i]; dspr(c,personSpr(crew[i].role,'happy','stand',crew[i].x),sx-17,G.ct-44+Math.sin(now*2+i)*.8,34,48); }
+  dspr(c,personSpr('you','happy',SC.pourT<.3?'coffee':'stand'),G.kx+4,G.ct-50+(SC.pourT<.15?2:0),36,50);
+  c.drawImage(L.front,0,0,VW,VH);
+  galla(c,G.gx,G.ct,SC.gallaB);
+  var pt=SC.pourT, tilt=pt<.07?pt/.07:pt<.24?1:pt<.36?1-(pt-.24)/.12:0;
+  var KS=.8;
+  if(pt<.36){ var tip=spoutTip(G.kx,G.ct,tilt); tip=[G.kx+(tip[0]-G.kx)*KS,G.ct+(tip[1]-G.ct)*KS]; dspr(c,cupSpr(cup),G.cupx-6,G.ct-13,12,12); if(tilt>.5){ c.beginPath(); c.moveTo(tip[0],tip[1]); c.quadraticCurveTo(tip[0]-4,tip[1]+5,G.cupx,G.ct-10); c.strokeStyle='#a4602a'; c.lineWidth=2.4; c.stroke(); } }
+  c.save(); c.translate(G.kx,G.ct); c.scale(KS,KS); c.translate(-G.kx,-G.ct); drawKettle(c,G.kx,G.ct,tilt,now); c.restore();
+  /* people sorted by depth, bench among them */
+  var list=SC.cust.slice().sort(function(a,b){ return a.y-b.y; }), benchDone=!st;
+  for(i=0;i<list.length;i++){ if(!benchDone&&list[i].y>262&&!list[i].sit){ bench(c,298,262,th); benchDone=true; } drawCust(c,list[i],now,cup); }
+  if(!benchDone) bench(c,298,262,th);
+  drawParts(c,cup);
+  if(n>0){ c.fillStyle='rgba(8,12,34,'+(n*.34)+')'; c.fillRect(0,0,VW,VH); nightLights(c,st,n,now); }
+  drawRain(c,dt,ev&&ev.rain);
+  if(ev&&ev.fest) drawBunting(c,now);
+}
 
-  /* ---------- economy ---------- */
-  function own(id){ return S.owned[id]||0; }
-  function bizMult(b){
-    var m=1, n=own(b.id);
-    UPS.forEach(function(u){ if(S.ups[u.id]&&u.biz&&u.biz.indexOf(b.id)>=0) m*=u.x; });
-    [25,50,100,200,300,400,500].forEach(function(t){ if(n>=t) m*=2; });
-    return m;
-  }
-  function starMult(){ return 1+0.1*S.stars; }
-  function allMult(){ var m=1; UPS.forEach(function(u){ if(S.ups[u.id]&&u.all) m*=u.all; }); return m*starMult(); }
-  function bizRate(b){ return b.r*bizMult(b)*allMult(); }
-  function baseRate(){ var t=0; BIZ.forEach(function(b){ t+=own(b.id)*bizRate(b); }); return t; }
-  function evMult(){ var m=1; boosts.forEach(function(x){ if(x.all) m*=x.all; }); return m; }
-  function tapBoost(){ var m=1; boosts.forEach(function(x){ if(x.tap) m*=x.tap; }); return m; }
-  function tapBase(){
-    var v=10, pct=0;
-    UPS.forEach(function(u){ if(S.ups[u.id]){ if(u.tap) v*=u.tap; if(u.pct) pct+=u.pct; } });
-    return (v+pct*baseRate())*starMult();
-  }
-  function tapValue(){ return tapBase()*evMult()*tapBoost(); }
-  function liveRate(){ return baseRate()*evMult(); }
-  function costN(b,n){ return Math.ceil(b.c*Math.pow(1.15,own(b.id))*(Math.pow(1.15,n)-1)/0.15-1e-6); }
-  function titleIdx(){ var i=0; TITLES.forEach(function(t,k){ if(S.life>=t[0]) i=k; }); return i; }
-  function earn(x){ if(!(x>0)||!isFinite(x)) return; S.cash+=x; S.life+=x; }
-  function bizRevealed(b,i){ return i<2||own(b.id)>0||S.life>=b.c*0.35; }
-  function upRevealed(u){ return S.life>=u.c*0.35; }
+/* ---------- save data + economy ---------- */
+var D=OA.load('state',null);
+function newRun(ci){ return {c:ci,cash:0,life:0,served:0,staff:{},menu:{},ups:{},stage:0,ev:0,hyg:0,done:[0,0,0],play:0,saved:Date.now(),seed:OA.newSeed(),evN:0}; }
+function okRun(r,ci){ var n=newRun(ci); if(!r||typeof r!=='object') return n; ['cash','life','served','stage','ev','hyg','play','saved','seed','evN'].forEach(function(k){ var v=+r[k]; if(isFinite(v)&&v>=0) n[k]=v; }); n.stage=Math.min(4,Math.floor(n.stage)); ['staff','menu','ups'].forEach(function(k){ if(r[k]&&typeof r[k]==='object') for(var j in r[k]){ var v=+r[k][j]; if(isFinite(v)&&v>0) n[k][j]=k==='staff'?Math.floor(v):1; } }); if(Array.isArray(r.done)) n.done=[r.done[0]?1:0,r.done[1]?1:0,r.done[2]?1:0]; return n; }
+(function(){ var d=D&&typeof D==='object'?D:{}; var out={cur:clamp(Math.floor(+d.cur)||1,1,CITIES.length),runs:{},seen:d.seen&&typeof d.seen==='object'?d.seen:{},rushSeen:!!d.rushSeen,tab:d.tab||'staff',qty:d.qty===10?10:1};
+  if(d.runs) for(var k in d.runs){ var ci=+k; if(ci>=1&&ci<=CITIES.length) out.runs[ci]=okRun(d.runs[k],ci); }
+  if(!out.runs[out.cur]) out.runs[out.cur]=newRun(out.cur); D=out; })();
+var R=D.runs[D.cur], boosts=[];
+function saveAll(){ R.saved=Date.now(); OA.save('state',D); }
+function city(){ return CITIES[R.c-1]; }
+function mod(k,d){ var m=city().mod; return m&&m[k]!=null?m[k]:d; }
+function todNow(run){ if(CITIES[run.c-1].night) return .93; return (.36+performance.now()/420000)%1; }
+function own(id){ return R.staff[id]||0; }
+function staffCount(){ var t=0; for(var k in R.staff) t+=R.staff[k]; return t; }
+function hasU(id){ return !!(R.menu[id]||R.ups[id]); }
+function fame(){ return 1+.1*OA.levels.total(); }
+function stageM(){ var m=1; for(var i=1;i<=R.stage;i++) m*=STAGES[i].m; return m; }
+var ALLUP=MENU.concat(UPS);
+function allM(){ var m=fame()*stageM()*(1+.1*R.hyg); for(var i=0;i<ALLUP.length;i++){ var u=ALLUP[i]; if(u.all&&hasU(u.id)) m*=u.all; } return m; }
+function staffM(s){ var m=1, n=own(s.id); for(var i=0;i<UPS.length;i++){ var u=UPS[i]; if(u.biz&&R.ups[u.id]&&u.biz.indexOf(s.id)>=0) m*=u.x; } [25,50,100,200].forEach(function(t){ if(n>=t) m*=1.5; }); return m; }
+function staffRate(s){ return s.r*staffM(s)*allM(); }
+function baseRate(){ var t=0; for(var i=0;i<STAFF.length;i++){ var s=STAFF[i]; if(own(s.id)) t+=own(s.id)*staffRate(s); } return t; }
+function peakM(){ if(!mod('peak')) return 1; return nightAt(todNow(R))>.5?.5:2; }
+function bAll(){ var m=1; boosts.forEach(function(b){ if(b.all) m*=b.all; }); return m; }
+function bTap(){ var m=1; boosts.forEach(function(b){ if(b.tap) m*=b.tap; }); return m; }
+function liveRate(){ return baseRate()*bAll()*peakM(); }
+function tapBase(){ var v=10*mod('tap',1), p=0; for(var i=0;i<ALLUP.length;i++){ var u=ALLUP[i]; if(hasU(u.id)){ if(u.tap) v*=u.tap; if(u.pct) p+=u.pct; } } return v*fame()*stageM()*(1+.1*R.hyg)+p*baseRate(); }
+function tapValue(){ return tapBase()*bAll()*bTap()*peakM(); }
+function cupsRate(){ var t=0; STAFF.forEach(function(s){ t+=own(s.id)*s.cups; }); return t; }
+function staffCost(s,n){ var b=s.c*mod('staffCost',1); return Math.ceil(b*Math.pow(1.15,own(s.id))*(Math.pow(1.15,n)-1)/.15-1e-6); }
+function earn(x){ if(!(x>0)||!isFinite(x)) return; R.cash+=x; R.life+=x; }
+function staffAvail(s){ if(R.c<s.city) return 'hidden'; if(s.menu&&!R.menu[s.menu]) return 'Needs samosa on the menu'; if(s.stage&&R.stage<s.stage) return 'Needs the '+STAGES[s.stage].n.toLowerCase(); return ''; }
 
-  /* ---------- UI build ---------- */
-  var rows={}, urows={}, trows={}, lockRow;
-  function mkRow(o,isUp){
-    var r=document.createElement('div'); r.className='row';
-    r.innerHTML='<div class="ic" aria-hidden="true">'+o.e+'<small></small></div><div><div class="nm"></div><div class="fl"></div><div class="rt"></div></div><button class="buy"></button>';
-    r.querySelector('.nm').textContent=o.n; r.querySelector('.fl').textContent=o.f;
-    var ref={el:r,cnt:r.querySelector('small'),rt:r.querySelector('.rt'),btn:r.querySelector('.buy'),c:{}};
-    ref.btn.addEventListener('click',function(){ isUp?buyUp(o):buyBiz(o); });
-    return ref;
-  }
-  function build(){
-    var pb=$('p-biz'), pu=$('p-up'), pt=$('p-tr');
-    BIZ.forEach(function(b){ var r=mkRow(b,false); rows[b.id]=r; pb.appendChild(r.el); });
-    lockRow=document.createElement('div'); lockRow.className='row lock';
-    lockRow.innerHTML='<div class="ic" aria-hidden="true">🔒</div><div><div class="nm">Something bigger is brewing…</div><div class="fl" id="lockTxt"></div></div><span></span>';
-    pb.appendChild(lockRow);
-    UPS.forEach(function(u){ var r=mkRow(u,true); r.cnt.remove(); urows[u.id]=r; pu.appendChild(r.el); });
-    var h=document.createElement('p'); h.className='hint'; h.id='upHint'; pu.appendChild(h);
-    var g=document.createElement('div'); g.className='troph'; pt.appendChild(g);
-    ACH.forEach(function(a){ var d=document.createElement('div'); d.className='tr'; d.innerHTML='<b></b><span></span>'; g.appendChild(d); trows[a.id]=d; });
-    var tp=document.createElement('p'); tp.className='hint'; tp.textContent='Trophies pop up as toasts. Hunt them all — some need luck with events.'; pt.appendChild(tp);
-  }
-  function setT(ref,key,el,txt){ if(ref.c[key]!==txt){ ref.c[key]=txt; el.textContent=txt; } }
-  function setH(el,html){ if(el._h!==html){ el._h=html; el.innerHTML=html; } }
+/* goals */
+var STAGE_GOAL=['','Build the stall with bench','Open the chai café','Open a chain of outlets','Build the chai factory'];
+var MENU_NAME={samosa:'samosa',bun:'bun maska',maggi:'Maggi'};
+function goalText(g){ switch(g[0]){ case 'earn': return 'Earn '+money(g[1])+' here'; case 'served': return 'Serve '+cnt(g[1])+' customers'; case 'stage': return STAGE_GOAL[g[1]]; case 'staff': return 'Hire '+cnt(g[1])+' staff'; case 'menu': return 'Add '+MENU_NAME[g[1]]+' to the menu'; case 'events': return 'Catch '+g[1]+' events'; case 'rate': return 'Reach '+money(g[1])+'/sec'; case 'hyg': return 'Earn '+g[1]+' hygiene stars'; } return ''; }
+function goalVal(g,run){ var r0=R; R=run||R; var v; switch(g[0]){ case 'earn': v=R.life; break; case 'served': v=R.served; break; case 'stage': v=R.stage; break; case 'staff': v=staffCount(); break; case 'menu': v=R.menu[g[1]]?1:0; break; case 'events': v=R.ev; break; case 'rate': v=baseRate(); break; case 'hyg': v=R.hyg; break; } R=r0; return v; }
+function goalNeed(g){ return g[0]==='menu'?1:g[1]; }
+function goalShow(g,v){ var need=goalNeed(g); if(g[0]==='menu'||g[0]==='stage') return v>=need?'Done':'Not yet'; if(g[0]==='earn'||g[0]==='rate') return money(Math.min(v,need))+' / '+money(need); return cnt(Math.min(v,need))+' / '+cnt(need); }
 
-  function render(){
-    var rate=liveRate(), ti=titleIdx(), T=TITLES[ti], nx=TITLES[ti+1];
-    $('cash').textContent=money(S.cash);
-    $('rate').textContent=money(rate,true);
-    $('tapv').textContent=money(tapValue());
-    $('cups').textContent=grp(S.cups);
-    $('rankE').textContent=T[2];
-    setH($('rankN'),T[1]+' <span>'+(nx?'· next: '+nx[1]+' at '+money(nx[0])+' earned':'· top title reached!')+'</span>');
-    $('rankBar').style.width=(nx?Math.min(100,(S.life-T[0])/(nx[0]-T[0])*100):100).toFixed(1)+'%';
-    $('sign').textContent='☕ '+T[1]+' · Cutting ₹10';
-    /* businesses */
-    var hidden=null;
-    BIZ.forEach(function(b,i){
-      var r=rows[b.id], show=bizRevealed(b,i);
-      if(!show&&!hidden) hidden=b;
-      r.el.hidden=!show; if(!show) return;
-      var n=own(b.id), cost=costN(b,S.qty), next=[25,50,100,200,300,400,500].filter(function(t){return t>n;})[0];
-      setT(r,'cnt',r.cnt,n?grp(n):''); r.cnt.style.display=n?'':'none';
-      setT(r,'rt',r.rt,'+'+money(bizRate(b),true)+'/s each'+(n?' · '+money(n*bizRate(b),true)+'/s total':'')+(next&&n?' · 2× at '+next:''));
-      setH(r.btn,'<small>Buy ×'+S.qty+'</small>'+money(cost));
-      r.btn.disabled=S.cash<cost;
-      r.btn.setAttribute('aria-label','Buy '+S.qty+' '+b.n+' for '+money(cost));
-    });
-    lockRow.hidden=!hidden;
-    if(hidden) $('lockTxt').textContent='Unlocks after '+money(hidden.c*0.35)+' total earnings.';
-    /* upgrades */
-    var avail=0, shown=0, ownedN=0;
-    UPS.forEach(function(u){
-      var r=urows[u.id], got=!!S.ups[u.id], show=got||upRevealed(u);
-      r.el.hidden=!show; if(!show) return;
-      shown++; if(got) ownedN++;
-      r.el.classList.toggle('done',got);
-      setT(r,'rt',r.rt,got?'Owned':'');
-      r.rt.style.display=got?'':'none';
-      if(got){ setH(r.btn,'✓ Done'); r.btn.disabled=true; r.btn.setAttribute('aria-label',u.n+' owned'); }
-      else { setH(r.btn,'<small>Upgrade</small>'+money(u.c)); r.btn.disabled=S.cash<u.c; r.btn.setAttribute('aria-label','Buy '+u.n+' for '+money(u.c)); if(S.cash>=u.c) avail++; }
-    });
-    /* keep owned upgrades at the bottom */
-    var pu=$('p-up'), hint=$('upHint');
-    UPS.forEach(function(u){ if(S.ups[u.id]&&urows[u.id].el.nextSibling!==hint&&!urows[u.id].moved){ urows[u.id].moved=true; pu.insertBefore(urows[u.id].el,hint); } });
-    hint.textContent=shown<UPS.length?'More upgrades appear as your empire grows.':'Every upgrade unlocked. Wah!';
-    var dot=$('upDot'); dot.hidden=!avail||S.tab==='up'; dot.textContent=avail;
-    /* trophies */
-    var got=0;
-    ACH.forEach(function(a){ var d=trows[a.id], g=!!S.ach[a.id]; if(g) got++;
-      if(d._g!==g){ d._g=g; d.classList.toggle('got',g); d.querySelector('b').textContent=(g?'🏆 ':'🔒 ')+a.n; d.querySelector('span').textContent=g?a.d:'???'; } });
-    $('trCount').textContent=got+'/'+ACH.length;
-    /* shelf */
-    var sh=''; BIZ.forEach(function(b){ var n=own(b.id); if(n) sh+='<span>'+b.e+'<small>'+(n>999?'999+':n)+'</small></span>'; });
-    setH($('shelf'),sh);
-    /* boosts */
-    setH($('boosts'),boosts.map(function(x){ return '<span>'+x.e+' '+x.lbl+' · '+Math.ceil(x.t)+'s</span>'; }).join('')+(S.stars?'<span class="stars">⭐ ×'+S.stars+' hygiene</span>':''));
-    var href='https://wa.me/?text='+encodeURIComponent(shareText());
-    if($('shareBtn').getAttribute('href')!==href){ $('shareBtn').setAttribute('href',href); $('shareTop').setAttribute('href',href); }
-  }
-  function shareText(){ return 'My chai empire earns '+money(baseRate(),true)+' per second ☕ Title: '+TITLES[titleIdx()][1]+' — https://resume4u.help/games/chai-tapri-tycoon/'; }
+/* ---------- UI helpers ---------- */
+var mode='title', stageEl=$('stage'), statusEl=$('status');
+function say(h){ if(statusEl._h!==h){ statusEl._h=h; statusEl.innerHTML=h; } }
+function setT(el,t){ if(el._t!==t){ el._t=t; el.textContent=t; } }
+function setH(el,h){ if(el._h!==h){ el._h=h; el.innerHTML=h; } }
+function starRow(n){ var h=''; for(var i=0;i<3;i++) h+='<span class="'+(i<n?'on':'')+'">★</span>'; return h; }
+function unlockToasts(list){ var f=list||OA.unlocks.fresh(); if(!f.length) return;
+  if(f.length>2){ OA.toast(f.length+' new themes and cups unlocked! See Collection.','gold'); return; }
+  f.forEach(function(u){ OA.toast((u.type==='cup'?'New cup style: ':'New stall theme: ')+esc(u.name)+' unlocked!','gold'); }); }
+function unlockLine(f){ return f.length?'<br><b style="color:#c4b5fd">Unlocked: '+f.map(function(u){ return esc(u.name)+(u.type==='cup'?(/cup$/i.test(u.name)?'':' cup'):' theme'); }).join(', ')+'</b>':''; }
 
-  /* ---------- messages ---------- */
-  var tq=[], tBusy=false;
-  function toast(m){ tq.push(m); if(!tBusy) nextToast(); }
-  function nextToast(){
-    var m=tq.shift(); if(!m){ tBusy=false; return; } tBusy=true;
-    var o=document.querySelector('.toast'); if(o) o.remove();
-    var d=document.createElement('div'); d.className='toast'; d.setAttribute('role','status'); d.textContent=m; document.body.appendChild(d);
-    setTimeout(function(){ d.remove(); nextToast(); },2100);
-  }
-  function say(html){ $('status').innerHTML=html; }
-
-  /* ---------- actions ---------- */
-  var stage=$('stage'), kettle=$('kettle'), pops=0;
-  function tap(x,y){
-    var v=tapValue(); earn(v); S.cups++;
-    if(x!==undefined){
-      if(pops<24){
-        pops++; var p=document.createElement('div'); p.className='pop'+(evMult()*tapBoost()>1?' hot':''); p.textContent='+'+money(v)+(evMult()*tapBoost()>1?' 🔥':'');
-        p.style.left=x+'px'; p.style.top=y+'px'; stage.appendChild(p);
-        setTimeout(function(){ p.remove(); pops--; },reduced?500:900);
-      }
-      if(!reduced){
-        var f=document.createElement('div'); f.className='puff'; f.style.left=(stage.clientWidth/2+18)+'px'; f.style.top='106px'; stage.appendChild(f);
-        setTimeout(function(){ f.remove(); },800);
-        kettle.firstChild.animate([{transform:'rotate(0) scale(1)'},{transform:'rotate(-12deg) scale(1.08)'},{transform:'rotate(0) scale(1)'}],{duration:180,easing:'ease-out'});
-      }
-    }
-    checkAch(); render();
-  }
-  function buyBiz(b){
-    var n=S.qty, cost=costN(b,n); if(S.cash<cost) return;
-    var before=own(b.id); S.cash-=cost; S.owned[b.id]=before+n;
-    [25,50,100,200,300,400,500].forEach(function(t){ if(before<t&&before+n>=t) toast(b.e+' '+t+' owned: '+b.n+' earns 2×!'); });
-    if(!before) say('<b>'+b.e+' '+b.n+'</b> is open for business. '+(b.id==='chhotu'?'Chhotu says "ho jayega bhaiya".':'Kya baat hai!'));
-    checkAch(); render(); save();
-  }
-  function buyUp(u){
-    if(S.ups[u.id]||S.cash<u.c) return;
-    S.cash-=u.c; S.ups[u.id]=true; say('<b>'+u.e+' '+u.n+'</b> unlocked. '+u.f);
-    checkAch(); render(); save();
-  }
-  var lastTitle=-1;
-  function checkAch(){
-    ACH.forEach(function(a){ if(!S.ach[a.id]&&a.t()){ S.ach[a.id]=true; toast('🏆 '+a.n+(a.id==='crore'?' 🎉':'')); } });
-    var ti=titleIdx();
-    if(lastTitle>=0&&ti>lastTitle){ toast(TITLES[ti][2]+' Promoted! You are now a '+TITLES[ti][1]); say('Your tapri grew into a <b>'+TITLES[ti][1]+'</b>. The sign painter is thrilled.'); }
-    lastTitle=ti;
-  }
-
-  /* ---------- events ---------- */
-  function schedule(first){ nextEv=first?35+Math.random()*20:45+Math.random()*45; }
-  function pickEvent(){
-    var list=EVENTS.filter(function(e){ return !(e.id==='insp'&&S.stars>=10); }), tot=0;
-    list.forEach(function(e){ tot+=e.w; }); var r=Math.random()*tot;
-    for(var i=0;i<list.length;i++){ r-=list[i].w; if(r<=0) return list[i]; } return list[0];
-  }
-  function spawnEvent(){
-    var ev=pickEvent(); liveEv={ev:ev,t:12};
-    evEl=document.createElement('button'); evEl.className='ev';
-    evEl.innerHTML=ev.e+' '+ev.t+'<small>Tap! · '+ev.s+'</small>';
-    evEl.setAttribute('aria-label',ev.t+': '+ev.s+'. Tap to collect.');
-    var spots=[[null,86],[null,172],[8,184]], s=spots[Math.floor(Math.random()*spots.length)];
-    evEl.style.top=s[1]+'px'; if(s[0]===null) evEl.style.right='8px'; else evEl.style.left=s[0]+'px';
-    evEl.addEventListener('click',function(e){ e.stopPropagation(); collect(); });
-    stage.appendChild(evEl);
-    say(ev.e+' <b>'+ev.t+'</b> Tap the gold bubble before it fades!');
-  }
-  function clearEvent(){ if(evEl) evEl.remove(); evEl=null; liveEv=null; schedule(false); }
-  function addBoost(id,e,lbl,o,t){
-    boosts=boosts.filter(function(x){ return x.id!==id; });
-    boosts.push({id:id,e:e,lbl:lbl,all:o.all,tap:o.tap,t:t});
-  }
-  function collect(){
-    if(!liveEv) return; var ev=liveEv.ev; clearEvent(); S.events++;
-    if(ev.id==='fest'){ addBoost('fest','🎉','Fest 2×',{all:2},30); say('🎉 <b>IT park fest!</b> Freshers\' day crowd: 2× sales for 30s.'); }
-    else if(ev.id==='rain'){ addBoost('rain','🌧️','Rain 3×',{all:3},20); say('🌧️ <b>Baarish!</b> Everyone wants chai: 3× sales for 20s.'); }
-    else if(ev.id==='match'){ addBoost('match','🏏','Taps 7×',{tap:7},15); say('🏏 <b>Last over on the canteen TV!</b> Nobody leaves the counter: taps 7× for 15s. Tap tap tap!'); }
-    else if(ev.id==='reel'){ var g=Math.max(500,baseRate()*90+tapBase()*25); earn(g); toast('📸 Reel went viral: +'+money(g)); say('📸 A food blogger called your chai <b>"a whole vibe"</b>. Crowd incoming: +'+money(g)+'.'); }
-    else if(ev.id==='insp'){ inspector(); }
-    checkAch(); render(); save();
-  }
-  function inspector(){
-    var cost=Math.max(150,Math.round(baseRate()*45+tapBase()*10)), fine=Math.round(cost/2);
-    openModal('📋','Food inspector visit',
-      '<p>Clipboard out, eyebrows up. He is checking the milk, the kulhads and that one dustbin.</p><p>Deep-clean now for <b>'+money(cost)+'</b> and earn a <b>hygiene star</b> (+10% on everything, forever). Or wing it: 50/50 between a free star and a <b>'+money(fine)+'</b> fine.</p>',
-      [{t:'🧽 Deep-clean ('+money(cost)+')',dis:S.cash<cost,fn:function(){ S.cash-=cost; star('Spotless! He even asked for a second cup.'); }},
-       {t:'🤞 Wing it',ghost:true,fn:function(){
-          if(Math.random()<0.5) star('He found nothing. Lucky — and slightly suspicious.');
-          else { var f=Math.min(S.cash,fine); S.cash-=f; say('📋 Uncovered sugar jar spotted. Fine paid: <b>'+money(f)+'</b>. Lid ordered.'); toast('📋 Fine: '+money(f)); }
-       }}]);
-  }
-  function star(msg){ S.stars=Math.min(10,S.stars+1); toast('⭐ Hygiene star! +10% forever'); say('⭐ '+msg+' Hygiene stars: <b>'+S.stars+'</b>.'); checkAch(); render(); save(); }
-
-  /* ---------- modal ---------- */
-  var lastFocus=null;
-  function openModal(e,h,body,acts){
-    closeModal(); lastFocus=document.activeElement; modalOpen=true;
-    var m=document.createElement('div'); m.className='modal'; m.id='modal';
-    m.innerHTML='<div class="card" role="dialog" aria-modal="true" aria-labelledby="mh"><div class="e" aria-hidden="true">'+e+'</div><h2 id="mh">'+h+'</h2>'+body+'<div class="acts"></div></div>';
-    var box=m.querySelector('.acts');
-    acts.forEach(function(a){ var b=document.createElement('button'); b.className='btn'+(a.ghost?' ghost':''); b.textContent=a.t; b.disabled=!!a.dis;
-      b.addEventListener('click',function(){ closeModal(); if(a.fn) a.fn(); render(); }); box.appendChild(b); });
-    document.body.appendChild(m);
-    var f=box.querySelector('button:not([disabled])'); if(f) f.focus();
-  }
-  function closeModal(){ var m=$('modal'); if(m){ m.remove(); modalOpen=false; if(lastFocus&&lastFocus.focus) lastFocus.focus(); } }
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modalOpen){ closeModal(); } });
-
-  /* ---------- loop ---------- */
-  function step(dt){
-    earn(liveRate()*dt);
-    boosts.forEach(function(x){ x.t-=dt; });
-    var had=boosts.length; boosts=boosts.filter(function(x){ return x.t>0; });
-    if(had&&!boosts.length) say('Rush over. Back to regular chai-time traffic.');
-    if(liveEv){ liveEv.t-=dt; if(liveEv.t<=0){ var n=liveEv.ev.t; clearEvent(); say('The '+n.replace(/!$/,'')+' moment passed. Another one will come.'); } }
-    else if(!modalOpen){ nextEv-=dt; if(nextEv<=0) spawnEvent(); }
-  }
-  function offline(sec,show){
-    var s=Math.min(sec,OFFLINE_CAP), g=baseRate()*s*OFFLINE_RATE;
-    boosts=[]; if(liveEv) clearEvent();
-    if(g>0){ earn(g); if(show) openModal('🌙','Welcome back!','<p>While you were away ('+dur(sec)+(sec>OFFLINE_CAP?', capped at 8h':'')+') your stalls earned</p><p style="font:800 1.8rem/1.2 var(--display);color:var(--gold);margin:6px 0">'+money(g)+'</p><p>Chhotu ran things at half speed. He also finished the biscuits.</p>',[{t:'Back to the tapri ☕'}]); }
-  }
-  var last=Date.now(), acc=0;
-  setInterval(function(){
-    var now=Date.now(), dt=(now-last)/1000; last=now;
-    if(dt<0) return;
-    if(dt>15){ offline(dt,dt>60); }
-    else step(dt);
-    acc+=dt; checkAch(); render();
-    if(acc>=4){ acc=0; save(); }
-  },100);
-  document.addEventListener('visibilitychange',function(){ if(document.hidden) save(); });
-  window.addEventListener('pagehide',save);
-
-  /* ---------- inputs ---------- */
-  kettle.addEventListener('pointerdown',function(e){
-    if(e.button>0) return;
-    var r=stage.getBoundingClientRect(); tap(e.clientX-r.left,e.clientY-r.top-20);
+/* ---------- idle: HUD, goals, expand, shop ---------- */
+function goalsHTML(run){
+  var C=CITIES[run.c-1], h='<div class="ct-gh"><b>City goals</b><span class="lbl ct-fame">Fame ×'+fame().toFixed(1)+'</span></div>';
+  C.g.forEach(function(g,i){ var v=goalVal(g,run), d=run.done[i]||v>=goalNeed(g), p=g[0]==='menu'||g[0]==='stage'?(d?1:0):Math.min(1,v/goalNeed(g));
+    h+='<div class="ct-g'+(d?' done':'')+'"><span class="ct-gs">'+icon(d?'star':'staroff')+'</span><div class="ct-gt">'+(i===0?'<span class="sr">Main goal: </span>':'')+esc(goalText(g))+'<i><b style="width:'+(p*100).toFixed(1)+'%"></b></i></div><span class="ct-gv">'+goalShow(g,v)+'</span></div>'; });
+  return h;
+}
+function renderGoals(){
+  var h=goalsHTML(R);
+  if(R.done[0]) h+='<button class="oa-btn ct-next" type="button" id="bNext">'+(R.c<CITIES.length?'Open next city: '+esc(CITIES[R.c].n)+' →':'Every city conquered! See all cities')+'</button>';
+  else h+='<p class="ct-note">Finish the first goal to bank your stars and unlock the next city.</p>';
+  var el=$('goals'); if(el._h!==h){ el._h=h; el.innerHTML=h; var b=$('bNext'); if(b) b.onclick=function(){ OA.sfx('tap'); if(R.c<CITIES.length) cityCard(R.c+1); else showScreen('cities'); }; }
+}
+var expTh='';
+function renderExp(){
+  var ns=STAGES[R.stage+1], el=$('exp'), key;
+  if(!ns){ key='max'; if(el._k!==key){ el._k=key; el.innerHTML='<canvas width="96" height="72" aria-hidden="true"></canvas><div><h3>Chai factory running</h3><p>Your empire is fully built here. Now chase every star and open the next city.</p></div>'; drawThumb(el.querySelector('canvas'),{ci:R.c-1,st:4,x0:0,y0:20,w:360,h:270}); } return; }
+  var lock=R.c<ns.city, can=R.cash>=ns.c;
+  key=R.stage+'|'+lock+'|'+theme().id;
+  if(el._k!==key){ el._k=key; el.innerHTML='<canvas width="96" height="72" aria-hidden="true"></canvas><div><span class="lbl">Next expansion</span><h3>'+esc(ns.n)+'</h3><p>'+esc(ns.d)+'</p>'+(lock?'<p><b>Opens in City '+ns.city+': '+esc(CITIES[ns.city-1].n)+'</b></p>':'<button class="oa-btn" type="button" id="bExp"></button>')+'</div>';
+    drawThumb(el.querySelector('canvas'),{ci:R.c-1,st:R.stage+1,x0:R.stage+1>=3?0:100,y0:R.stage+1>=3?0:40,w:R.stage+1>=3?360:240,h:R.stage+1>=3?270:180});
+    var b=$('bExp'); if(b) b.onclick=expand; }
+  var b2=$('bExp'); if(b2){ setT(b2,'Expand for '+money(ns.c)); b2.disabled=!can; }
+}
+var ROWS=[];
+function mkRow(kind,o,list){
+  var el=document.createElement('div'); el.className='ct-item';
+  el.innerHTML='<div class="ct-ic">'+(kind==='staff'?portrait(o.role,o.x)+'<small hidden></small>':icon(o.ic))+'</div><div class="ct-it"><b>'+esc(o.n)+'</b><span>'+esc(o.f)+'</span><em></em></div><button class="ct-buy" type="button"></button><div class="ct-lk" hidden></div>';
+  var r={kind:kind,o:o,el:el,btn:el.querySelector('.ct-buy'),em:el.querySelector('em'),lk:el.querySelector('.ct-lk'),cn:el.querySelector('small')};
+  r.btn.addEventListener('click',function(){ if(kind==='staff') hire(o); else buyUp(kind,o,r); });
+  list.appendChild(el); ROWS.push(r); return r;
+}
+function buildShop(){
+  ROWS=[]; ['p-staff','p-menu','p-ups'].forEach(function(id){ $(id).innerHTML=''; });
+  STAFF.forEach(function(s){ mkRow('staff',s,$('p-staff')); });
+  MENU.forEach(function(m){ mkRow('menu',m,$('p-menu')); });
+  UPS.forEach(function(u){ mkRow('ups',u,$('p-ups')); });
+  ['p-staff','p-menu','p-ups'].forEach(function(id){ var p=document.createElement('p'); p.className='ct-note'; p.id=id+'-n'; $(id).appendChild(p); });
+}
+function renderShop(){
+  var q=D.qty, avail={staff:0,menu:0,ups:0}, hid={staff:0,menu:0,ups:0};
+  ROWS.forEach(function(r){
+    var o=r.o, show=true, lockTxt='', cost=0, got=false;
+    if(r.kind==='staff'){ var a=staffAvail(o); if(a==='hidden'){ if(o.city===R.c+1) a='Opens in City '+o.city+': '+CITIES[o.city-1].n; else show=false; } if(show&&a) lockTxt=a; if(a==='hidden') show=false; else if(a) lockTxt=a; else cost=staffCost(o,q);
+      var n=own(o.id); r.cn.hidden=!n; setT(r.cn,n>999?'999+':String(n));
+      if(show&&!lockTxt){ var nx=[25,50,100,200].filter(function(t){ return t>n; })[0]; setT(r.em,'+'+money(staffRate(o),true)+'/s each'+(n?' · '+money(n*staffRate(o),true)+'/s total':'')+(nx&&n?' · 1.5× at '+nx:'')); } else setT(r.em,'');
+    } else { if(R.c<o.city){ if(o.city===R.c+1) lockTxt='Opens in City '+o.city+': '+CITIES[o.city-1].n; else show=false; } got=hasU(o.id); cost=o.c; setT(r.em,got?'On the menu':''); if(r.kind==='ups') setT(r.em,got?'Installed':''); }
+    r.el.hidden=!show; if(!show){ hid[r.kind]++; return; }
+    r.el.classList.toggle('lock',!!lockTxt); r.el.classList.toggle('got',got);
+    r.lk.hidden=!lockTxt; r.btn.hidden=!!lockTxt; if(lockTxt){ setT(r.lk,lockTxt); return; }
+    if(got){ setH(r.btn,'✓ Owned'); r.btn.disabled=true; r.btn.setAttribute('aria-label',o.n+' owned'); return; }
+    setH(r.btn,'<small>'+(r.kind==='staff'?'Hire ×'+q:r.kind==='menu'?'Add':'Buy')+'</small>'+money(cost));
+    r.btn.disabled=R.cash<cost; if(R.cash>=cost) avail[r.kind]++;
+    r.btn.setAttribute('aria-label',(r.kind==='staff'?'Hire '+q+' '+o.n:'Buy '+o.n)+' for '+money(cost));
   });
-  kettle.addEventListener('click',function(e){ if(e.detail===0){ tap(stage.clientWidth/2,124); } });
-  kettle.addEventListener('contextmenu',function(e){ e.preventDefault(); });
-  function setTab(t){
-    S.tab=t; ['biz','up','tr'].forEach(function(k){ $('t-'+k).setAttribute('aria-selected',String(k===t)); $('p-'+k).hidden=k!==t; });
-    render();
-  }
-  $('t-biz').onclick=function(){ setTab('biz'); }; $('t-up').onclick=function(){ setTab('up'); }; $('t-tr').onclick=function(){ setTab('tr'); };
-  function setQty(q){ S.qty=q; $('q1').setAttribute('aria-pressed',String(q===1)); $('q10').setAttribute('aria-pressed',String(q===10)); render(); }
-  $('q1').onclick=function(){ setQty(1); }; $('q10').onclick=function(){ setQty(10); };
-  $('resetBtn').onclick=function(){
-    openModal('🧯','Reset your empire?','<p>Every kettle, stall, franchise and trophy goes back to zero. Chhotu will be confused.</p>',
-      [{t:'Keep brewing ☕'},{t:'Yes, start a new tapri',ghost:true,fn:function(){
-        S=fresh(); boosts=[]; if(liveEv){ if(evEl) evEl.remove(); evEl=null; liveEv=null; } schedule(true); lastTitle=0;
-        UPS.forEach(function(u){ urows[u.id].moved=false; $('p-up').insertBefore(urows[u.id].el,$('upHint')); });
-        save(); setQty(1); setTab('biz'); say('Fresh start. One kettle, one dream.'); toast('🛖 New tapri opened');
-      }}]);
-  };
+  [['staff','More staff join in later cities.'],['menu','New recipes unlock in later cities.'],['ups','Bigger upgrades unlock in later cities.']].forEach(function(k){
+    setT($('p-'+(k[0])+'-n'),hid[k[0]]?k[1]:'Everything here is unlocked. Wah!');
+    var d=$('t-'+k[0]).querySelector('.dot'); d.hidden=!avail[k[0]]||D.tab===k[0]; setT(d,String(avail[k[0]])); });
+}
+function setTab(t){ D.tab=t; ['staff','menu','ups'].forEach(function(k){ $('t-'+k).setAttribute('aria-selected',String(k===t)); $('p-'+k).hidden=k!==t; }); renderShop(); }
+function setQty(q){ D.qty=q; $('q1').setAttribute('aria-pressed',String(q===1)); $('q10').setAttribute('aria-pressed',String(q===10)); renderShop(); }
+['staff','menu','ups'].forEach(function(k){ $('t-'+k).onclick=function(){ OA.sfx('click'); setTab(k); }; });
+$('q1').onclick=function(){ OA.sfx('click'); setQty(1); }; $('q10').onclick=function(){ OA.sfx('click'); setQty(10); };
+function renderHud(){
+  var cs=money(R.cash); setT($('cash'),cs); $('cash').classList.toggle('long',cs.length>10); setT($('rate'),money(liveRate(),true)); setT($('tapv'),money(tapValue()));
+  var b=boosts.map(function(x){ return '<span>'+esc(x.lbl)+' · '+Math.ceil(x.t)+'s</span>'; });
+  if(mod('peak')) b.push('<span class="cool">'+(peakM()>1?'Peak hour ×2':'Quiet night ×0.5')+'</span>');
+  if(R.hyg) b.push('<span>Hygiene ★'+R.hyg+'</span>');
+  setH($('boosts'),b.join(''));
+}
+function celebrateBuy(big){
+  snd('kaching'); OA.buzz(big?[20,30,40]:14); var G=geo(R.stage);
+  sparks(G.kx,G.ct-40,big?30:12);
+  if(big){ snd('levelup'); OA.shake(stageEl,'big'); var r=stageEl.getBoundingClientRect(); OA.confetti({x:r.left+r.width/2,y:r.top+r.height*.4,count:90}); }
+}
+function hire(s){
+  if(staffAvail(s)) return; var q=D.qty, cost=staffCost(s,q); if(R.cash<cost){ OA.sfx('error'); return; }
+  var before=own(s.id); R.cash-=cost; R.staff[s.id]=before+q; celebrateBuy(false);
+  [25,50,100,200].forEach(function(t){ if(before<t&&before+q>=t){ OA.toast(esc(s.n)+' ×'+t+': they now earn 1.5×!','gold'); } });
+  if(!before) say('<b>'+esc(s.n)+'</b> joined the team. '+(s.id==='chhotu'?'"Ho jayega, bhaiya."':s.id==='didi'?'"Kettle mera, tension tumhara nahi."':'Kya baat hai!'));
+  afterChange();
+}
+function buyUp(kind,u,r){
+  if(hasU(u.id)||R.cash<u.c||R.c<u.city) return;
+  R.cash-=u.c; (kind==='menu'?R.menu:R.ups)[u.id]=1; celebrateBuy(false);
+  say('<b>'+esc(u.n)+'</b> '+(kind==='menu'?'added to the menu. ':'installed. ')+esc(u.f));
+  if(kind==='menu') L.key='';
+  afterChange();
+}
+function expand(){
+  var ns=STAGES[R.stage+1]; if(!ns||R.c<ns.city||R.cash<ns.c) return;
+  R.cash-=ns.c; R.stage++; L.key=''; celebrateBuy(true);
+  OA.toast('Your tapri is now a '+esc(ns.n)+'!','gold'); say('Expansion done: <b>'+esc(ns.n)+'</b>. The sign painter is thrilled.');
+  $('exp')._k=''; afterChange();
+}
+function afterChange(){ checkGoals(); renderShop(); renderExp(); renderGoals(); renderHud(); saveAll(); }
 
-  /* ---------- start ---------- */
-  build();
-  var had=load();
-  schedule(true);
-  setQty(S.qty); setTab(S.tab);
-  lastTitle=titleIdx(); ACH.forEach(function(a){ if(!S.ach[a.id]&&a.t()) S.ach[a.id]=true; });
-  if(had){ var gap=(Date.now()-S.saved)/1000; if(gap>30) offline(gap,true); else if(S.life>0) say('Welcome back to the tapri. Kettle is still warm.'); }
-  render(); save();
+/* ---------- brewing ---------- */
+var hintN=0;
+function brew(){
+  if(mode!=='play') return;
+  var v=tapValue(), G=geo(R.stage); earn(v); R.served++; SC.pourT=0; SC.heat+=.35; snd('pour'); OA.buzz(6);
+  var cu=serveFront(G.cupx,G.ct-12,R.stage); var last=SC.parts[SC.parts.length-1]; if(last) last.t=-.16;
+  popText(G.kx+(VR()-.5)*70,G.ct-48-VR()*22,'+'+money(v),bAll()*bTap()>1?'#fb923c':'#fde68a',bAll()*bTap()>1);
+  var c=$('cash'); c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
+  if(++hintN>=4) $('hint').hidden=true;
+  checkGoalsSoon();
+}
+var brewBtn=$('brew');
+brewBtn.addEventListener('pointerdown',function(e){ if(e.button>0) return; e.preventDefault(); brew(); });
+brewBtn.addEventListener('click',function(e){ if(e.detail===0) brew(); });
+brewBtn.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+
+/* ---------- goals + city results ---------- */
+var gSoon=0;
+function checkGoalsSoon(){ gSoon=1; }
+function checkGoals(){
+  var g=city().g, newly=[], i;
+  for(i=0;i<3;i++) if(!R.done[i]&&goalVal(g[i])>=goalNeed(g[i])){ R.done[i]=1; newly.push(i); }
+  if(!newly.length) return;
+  var stars=R.done[0]?R.done[0]+R.done[1]+R.done[2]:0;
+  if(R.done[0]) OA.levels.complete(R.c,stars,Math.floor(R.life));
+  saveAll(); renderGoals();
+  if(newly.indexOf(0)>=0){ setTimeout(function(){ cityResult(stars===3?'all':'main'); },650); }
+  else if(R.done[0]){ OA.toast('★ Star '+stars+' earned at '+esc(city().n)+'!','gold'); OA.sfx('star',stars-1); if(stars===3) setTimeout(function(){ cityResult('all'); },650); }
+  else { OA.toast('Goal done! Finish "'+esc(goalText(g[0]))+'" to bank it.','good'); OA.sfx('ding'); }
+  if(!R.done[0]||newly.indexOf(0)<0&&stars<3) unlockToasts();
+}
+function cityResult(kind){
+  if(mode!=='play') return;
+  var C=city(), stars=R.done[0]+R.done[1]+R.done[2], ci=R.c;
+  var sub=C.g.map(function(g,i){ return (R.done[i]?'✓ ':'○ ')+esc(goalText(g)); }).join('<br>')+unlockLine(OA.unlocks.fresh());
+  OA.result({emoji:stars===3?'🏆':'☕',title:kind==='all'?'Three stars at '+C.n+'!':C.n+' conquered!',sub:sub,stars:stars,win:true,
+    score:Math.floor(R.life),scoreLabel:'earned in '+C.n,fmt:function(n){ return money(n); },rank:STAGE_RANK[R.stage],
+    stats:[['Customers',cnt(R.served)]].concat(staffCount()?[['Staff',cnt(staffCount())]]:[]).concat([['Stall',STAGES[R.stage].n],['Time here',dur(R.play)]]),
+    share:{text:'I turned a chai cart into a '+STAGES[R.stage].n.toLowerCase()+' at '+C.n+' in Chai Tapri Tycoon ☕ '+'⭐'.repeat(stars)+' Open your own tapri?'},
+    next:ci<CITIES.length?{label:'Open next city →',fn:function(){ cityCard(ci+1); }}:null,
+    again:{label:stars<3?'Chase the last stars':'Keep brewing',fn:function(){}},
+    menu:{label:'Cities',fn:function(){ showScreen('cities'); }},
+    tip:'From a tapri to a chain, it starts with one good first step. Same with jobs: <a href="/">build your resume free →</a>'});
+}
+
+/* ---------- idle events ---------- */
+var EV={live:null,next:30,el:null};
+function evOn(){ return R.c>=4; }
+function evSchedule(first){ var r=OA.rng(R.seed+R.evN*7919+11); EV.next=(first?16+r()*10:40+r()*40)/mod('evFreq',1); }
+function pickEv(){
+  if(mod('fest')) return 'fest';
+  var r=OA.rng(R.seed+R.evN*104729+3), w={rain:20,match:14,fest:18,reel:22,insp:R.c>=8&&R.hyg<5?16:0}, cw=city().evW, k, tot=0;
+  if(cw) for(k in cw) w[k]*=cw[k]; for(k in w) tot+=w[k]; var x=r()*tot; for(k in w){ x-=w[k]; if(x<=0) return k; } return 'reel';
+}
+function spawnEv(){
+  var id=pickEv(), E=EVENTS[id]; R.evN++; EV.live={id:id,t:12};
+  var b=document.createElement('button'); b.type='button'; b.className='ct-ev'; b.setAttribute('aria-label',E.n+' '+E.s+'. Tap to catch it.');
+  b.innerHTML=icon(E.ic)+'<span>'+esc(E.n)+'<small>Tap! · '+esc(E.s)+'</small></span><i style="animation-duration:12s"></i>';
+  b.addEventListener('click',function(e){ e.stopPropagation(); collectEv(); });
+  b.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
+  stageEl.appendChild(b); EV.el=b; snd('bell'); OA.buzz(20);
+  say('<b>'+esc(E.n)+'</b> Tap the gold bubble before it fades!');
+}
+function clearEv(){ if(EV.el) EV.el.remove(); EV.el=null; EV.live=null; evSchedule(false); }
+function addBoost(id,lbl,o,t){ boosts=boosts.filter(function(x){ return x.id!==id; }); boosts.push({id:id,lbl:lbl,all:o.all,tap:o.tap,t:t}); }
+function collectEv(){
+  if(!EV.live) return; var id=EV.live.id, E=EVENTS[id], dm=mod('evDur',1); clearEv(); R.ev++; OA.sfx('power'); OA.buzz([15,30,15]);
+  var G=geo(R.stage); sparks(G.kx,G.ct-60,24);
+  if(id==='rain'){ addBoost('rain','Rain ×3',{all:3},20*dm); snd('thunder'); say('<b>Baarish!</b> Everyone wants chai: sales 3× for '+20*dm+'s.'); }
+  else if(id==='match'){ addBoost('match','Match crowd · taps ×7',{tap:7},15*dm); OA.sfx('cheer'); say('<b>Last over on the canteen TV!</b> Nobody leaves the counter: taps 7×. Tap tap tap!'); }
+  else if(id==='fest'){ addBoost('fest','Fest ×2',{all:2},30*dm); OA.sfx('cheer'); say('<b>IT park fest!</b> Freshers, lanyards and DJs: sales 2× for '+30*dm+'s.'); }
+  else if(id==='reel'){ var g=Math.max(500,baseRate()*90+tapBase()*25); earn(g); OA.toast('Your chai reel went viral: +'+money(g),'gold'); say('A food blogger called your chai <b>"a whole vibe"</b>. Crowd incoming: +'+money(g)+'.'); coinBurst(30,120,8,R.stage); }
+  else if(id==='insp') inspector();
+  afterChange();
+}
+function inspector(){
+  var cost=Math.max(150,Math.round(baseRate()*45+tapBase()*10)), fine=Math.round(cost/2);
+  var m=OA.modal('<div class="ct-mart">'+icon('clip')+'</div><h2>Food inspector visit</h2><p class="oa-m-sub">Clipboard out, eyebrows up. He is checking the milk, the kulhads and that one dustbin.</p><p class="oa-m-sub">Deep-clean for <b>'+money(cost)+'</b> and earn a <b>hygiene star</b> (+10% on everything here). Or wing it: 50/50 between a free star and a '+money(fine)+' fine.</p><div class="oa-actions"><button class="oa-btn" type="button" data-a="clean" autofocus'+(R.cash<cost?' disabled':'')+'>Deep-clean ('+money(cost)+')</button><button class="oa-btn ghost" type="button" data-a="wing">Wing it</button></div>',{label:'Food inspector'});
+  m.querySelector('[data-a="clean"]').onclick=function(){ if(R.cash<cost) return; R.cash-=cost; OA.closeModal(); hygStar('Spotless! He even asked for a second cup.'); };
+  m.querySelector('[data-a="wing"]').onclick=function(){ OA.closeModal(); if(OA.rng(R.seed+R.evN*31)()<.5) hygStar('He found nothing. Lucky, and slightly suspicious.'); else { var f=Math.min(R.cash,fine); R.cash-=f; OA.sfx('error'); say('Uncovered sugar jar spotted. Fine paid: <b>'+money(f)+'</b>. Lid ordered.'); OA.toast('Inspector fine: '+money(f),'bad'); afterChange(); } };
+}
+function hygStar(msg){ R.hyg=Math.min(5,R.hyg+1); OA.sfx('star',2); OA.toast('Hygiene star! +10% here','gold'); say(msg+' Hygiene stars: <b>'+R.hyg+'</b>.'); afterChange(); }
+
+/* ---------- offline earnings ---------- */
+function offline(gap){
+  if(!(gap>0)) return; var r=baseRate(); if(!(r>0)) return;
+  if(gap<60){ earn(r*gap); R.served+=cupsRate()*gap; return; }
+  var s=Math.min(gap,8*3600), g=r*s*.5; earn(g); R.served+=cupsRate()*s*.5;
+  var m=OA.modal('<div class="ct-mart">'+portrait('intern',{mood:'sleepy'})+'</div><h2>Welcome back!</h2><p class="oa-m-sub">While you were away ('+dur(gap)+(gap>s?', capped at 8h':'')+'), your staff at '+esc(city().n)+' earned</p><div class="ct-offv">'+money(g)+'</div><p class="oa-m-sub">Chhotu ran things at half speed. He also finished the biscuits.</p><div class="oa-actions"><button class="oa-btn" type="button" data-ok autofocus>Collect and brew on</button></div>',{label:'Offline earnings'});
+  m.querySelector('[data-ok]').onclick=function(){ OA.closeModal(); snd('kaching'); afterChange(); };
+  saveAll();
+}
+
+/* ---------- cities ---------- */
+function drawThumb(el,o){
+  if(!el) return; var d=Math.min(2,window.devicePixelRatio||1), W=el.clientWidth||+el.getAttribute('width'), H=el.clientHeight||+el.getAttribute('height');
+  el.width=Math.round(W*d); el.height=Math.round(H*d); var c=el.getContext('2d'), s=el.width/o.w; c.setTransform(s,0,0,s,-o.x0*s,-o.y0*s);
+  var th=(o.th||theme()).c||o.th, tod=o.tod==null?.45:o.tod, n=nightAt(tod);
+  drawSky(c,tod,0); drawSkyline(c,o.ci,n>.5?1:0); drawGround(c,o.st<3&&o.st>=0);
+  if(o.st>=0){ drawStallBack(c,o.st,th,'MASALA CHAI',0); drawStallFront(c,o.st,th,'MASALA CHAI'); var G=geo(o.st); galla(c,G.gx,G.ct,0); drawKettle(c,G.kx,G.ct,0,0); if(o.st) bench(c,298,262,th); }
+  if(n>.5){ c.fillStyle='rgba(8,12,34,.3)'; c.fillRect(0,0,VW,VH); }
+}
+function cityCard(ci){
+  var C=CITIES[ci-1], run=D.runs[ci], unl=OA.levels.isUnlocked(ci), st=OA.levels.stars(ci);
+  var gl=C.g.map(function(g,i){ var d=run&&run.done[i]; return '<li class="'+(d?'done':'')+'">'+icon(d?'star':'staroff')+'<span>'+(i===0?'<b>Main:</b> ':'')+esc(goalText(g))+'</span></li>'; }).join('');
+  var m=OA.modal('<canvas class="ct-cthumb" width="320" height="150" aria-hidden="true"></canvas><p class="lbl">City '+ci+' of '+CITIES.length+'</p><h2>'+esc(C.n)+'</h2><p class="oa-m-sub">'+esc(C.b)+'</p><div class="ct-new"><b>New here: '+esc(C.m)+'</b><span>'+esc(C.md)+'</span></div><ul class="ct-cg">'+gl+'</ul>'+
+    (unl?'<div class="oa-actions"><button class="oa-btn" type="button" data-go autofocus>'+(run&&(run.life>0)?'Continue at '+esc(C.n)+' →':'Open a tapri here →')+'</button><button class="oa-btn ghost" type="button" data-x>Back</button></div>':'<p class="oa-m-sub"><b>Locked.</b> Finish the main goal in '+esc(CITIES[ci-2].n)+' to open this city.</p><div class="oa-actions"><button class="oa-btn ghost" type="button" data-x autofocus>Back</button></div>'),{label:C.n,dismiss:true});
+  drawThumb(m.querySelector('canvas'),{ci:ci-1,st:run?run.stage:0,x0:0,y0:40,w:360,h:169,tod:C.night?.93:.45});
+  var go=m.querySelector('[data-go]'); if(go) go.onclick=function(){ OA.sfx('tap'); OA.closeModal(); enterCity(ci); };
+  m.querySelector('[data-x]').onclick=function(){ OA.sfx('tap'); OA.closeModal(); };
+}
+function enterCity(ci){
+  if(R) saveAll();
+  D.cur=ci; if(!D.runs[ci]) D.runs[ci]=newRun(ci); R=D.runs[ci]; D.seen[ci]=1;
+  boosts=[]; if(EV.el) EV.el.remove(); EV.el=null; EV.live=null; evSchedule(true);
+  SC.cust=[]; SC.queue=[]; SC.parts=[]; L.key=''; $('exp')._k=''; $('goals')._h='';
+  buildShop(); setTab(R.c===1&&R.life<500?'menu':D.tab); setQty(D.qty); saveAll();
+  showScreen('play');
+}
+function renderCities(){
+  var tot=OA.levels.total();
+  $('cIntro').innerHTML='Each city is a fresh tapri with three goals. Every star you earn adds <b>+10% fame</b> to every city. You have <b>'+tot+' of '+CITIES.length*3+'</b> stars (fame ×'+fame().toFixed(1)+').';
+  var g=$('cGrid'); g.innerHTML='';
+  CITIES.forEach(function(C,i){ var ci=i+1, unl=OA.levels.isUnlocked(ci), b=document.createElement('button'); b.type='button'; b.className='ct-tile'+(unl?'':' lock')+(ci===D.cur?' cur':'');
+    b.setAttribute('aria-label','City '+ci+': '+C.n+(unl?', '+OA.levels.stars(ci)+' of 3 stars':', locked'));
+    b.innerHTML='<canvas aria-hidden="true"></canvas><span class="n">'+ci+'</span>'+(unl?'':'<span class="lk">'+icon('lock')+'</span>')+'<b>'+esc(C.n)+'</b><span class="st">'+starRow(OA.levels.stars(ci))+'</span>';
+    b.onclick=function(){ OA.sfx(unl?'tap':'error'); cityCard(ci); }; g.appendChild(b);
+    var r=D.runs[ci]; requestAnimationFrame(function(){ drawThumb(b.querySelector('canvas'),{ci:i,st:r?r.stage:(unl?0:-1),x0:0,y0:20,w:360,h:216,tod:C.night?.93:.45}); });
+  });
+}
+
+/* ---------- Rush Hour (seeded 3-minute mode) ---------- */
+var ITEMS=[{id:'chai',n:'Chai',price:10},{id:'samosa',n:'Samosa',price:15},{id:'bun',n:'Bun maska',price:20},{id:'maggi',n:'Maggi',price:30}];
+var IDX={chai:0,samosa:1,bun:2,maggi:3}, SX=[48,136,224,312], RT=180, MEDALS=[1500,3000,5000];
+var RROLE={dev:'developer',intern:'intern',analyst:'analyst',sales:'sales lead',manager:'manager',hr:'HR',aunty:'aunty',peon:'office peon',boss:'boss',ceo:'CEO'};
+var REV={rain:{n:'Rain rush!',s:'Everyone runs for cover. And chai.'},match:{n:'Match crowd!',s:'Last over on TV. Chai, chai, chai!'},fest:{n:'IT park fest!',s:'All payments 2× for 20 seconds'}};
+function genRush(seed){
+  var r=OA.rng(seed), L=[], t=1.2, id=0, ci=r.int(CITIES.length);
+  var ev=[{k:'rain',t:r.range(36,50),d:16},{k:'match',t:r.range(80,96),d:16},{k:'fest',t:r.range(124,140),d:20}];
+  var roles=['dev','intern','analyst','sales','manager','hr','aunty','peon'], W={chai:5,samosa:3,bun:2.4,maggi:1.6};
+  while(t<172){
+    var ph=t/RT, e=null; ev.forEach(function(x){ if(t>=x.t&&t<x.t+x.d) e=x.k; });
+    var av=['chai']; if(t>12) av.push('samosa'); if(t>34) av.push('bun'); if(t>58) av.push('maggi');
+    var vip=t>55&&r()<.08, n=1+(r()<.22+ph*.5?1:0)+(r()<ph*.35?1:0); if(vip) n=Math.min(4,n+1);
+    var ord={}, types=0;
+    for(var k=0;k<n;k++){ var it;
+      if(e==='match'&&r()<.75) it='chai'; else { var tot=0; av.forEach(function(a){ tot+=W[a]; }); var x=r()*tot; it=av[0]; for(var j=0;j<av.length;j++){ x-=W[av[j]]; if(x<=0){ it=av[j]; break; } } }
+      if(!ord[it]&&types>=3) it=Object.keys(ord)[0]; if(!ord[it]) types++; ord[it]=(ord[it]||0)+1; }
+    var pat=(17-ph*6)+n*2.2; if(vip) pat*=.8;
+    L.push({id:id++,t:t,role:vip?r.pick(['boss','ceo']):r.pick(roles),ord:ord,pat:pat,vip:vip,cap:e==='match'?'#2563eb':null});
+    var gap=(4.1-ph*2.3)*r.range(.75,1.25); if(e==='rain') gap*=.55; if(e==='match') gap*=.65; if(e==='fest') gap*=.8; t+=gap;
+  }
+  return {ci:ci,ev:ev,list:L};
+}
+var RS=null;
+function rushStart(seed,kind,chal){
+  OA.closeModal();
+  var sch=genRush(seed>>>0);
+  RS={seed:seed>>>0,kind:kind,chal:!!chal,sch:sch,ci:sch.ci,t:-3.4,cash:0,combo:0,best:0,strikes:0,served:0,wrong:0,missed:0,items:0,next:0,line:[],slots:[null,null,null,null],kettle:6,boil:0,simmer:0,sam:5,samT:0,mg:{s:'idle',t:0},ev:null,evShown:{},over:false,banner:0,cd:4};
+  SC.cust=[]; SC.queue=[]; SC.parts=[]; SC.rain=[]; L.key='';
+  showScreen('rush'); OA.music.play('bazaar'); buildStations();
+  say(kind==='daily'?'<b>Daily Rush.</b> Same customers for everyone today.':chal?'<b>Challenge round.</b> Same customers your friend got.':'<b>Rush Hour!</b> Serve every order before patience runs out.');
+}
+function rushEv(t){ var e=null; RS.sch.ev.forEach(function(x){ if(t>=x.t&&t<x.t+x.d) e=x; }); return e; }
+function freeSlot(){ var order=[1,2,0,3]; for(var i=0;i<4;i++) if(!RS.slots[order[i]]) return order[i]; return -1; }
+function rushStep(dt){
+  if(!RS||RS.over) return;
+  RS.t+=dt; var t=RS.t;
+  var cd=Math.ceil(-t); if(t<0&&cd!==RS.cd){ RS.cd=cd; showCount(cd>3?'':String(cd)); if(cd<=3) OA.sfx('tick'); }
+  if(t>=0&&RS.cd>0){ RS.cd=0; showCount('Chalo!'); OA.sfx('whistle'); setTimeout(function(){ showCount(''); },650); }
+  vehStep(dt); partsStep(dt,rushLand,null);
+  if(t<0) return;
+  var e=rushEv(t); RS.ev=e;
+  if(e&&!RS.evShown[e.k]){ RS.evShown[e.k]=1; RS.banner=3; if(e.k==='rain') snd('thunder'); else OA.sfx('cheer'); say('<b>'+REV[e.k].n+'</b> '+REV[e.k].s); OA.buzz([20,40,20]); }
+  RS.banner=Math.max(0,RS.banner-dt);
+  var L=RS.sch.list; while(RS.next<L.length&&L[RS.next].t<=t){ RS.line.push(L[RS.next]); RS.next++; }
+  while(RS.line.length>4){ RS.line.shift(); RS.missed++; say('Someone gave up on the long line. Serve faster!'); }
+  var fsl; while(RS.line.length&&(fsl=freeSlot())>=0){ var d=RS.line.shift(), fromL=d.id%2===0;
+    var cu={d:d,need:d.ord,got:{},pat:d.pat,max:d.pat,x:fromL?-40:400,tx:SX[fsl],y:262,slot:fsl,st:'in',ph:VR()*6,mood:'neutral'}; RS.slots[fsl]=cu; SC.cust.push(cu); }
+  for(var i=SC.cust.length-1;i>=0;i--){ var c=SC.cust[i], dx=c.tx-c.x, sp=170*dt;
+    if(Math.abs(dx)>sp){ c.x+=dx>0?sp:-sp; c.moving=true; } else { c.x=c.tx; c.moving=false; if(c.st==='in') c.st='wait'; }
+    if(c.st==='wait'){ c.pat-=dt; c.mood=c.pat/c.max<.3?'angry':'neutral';
+      if(c.pat<=0){ c.st='out'; c.mood='angry'; RS.slots[c.slot]=null; c.tx=c.x<180?-60:420; RS.strikes++; RS.combo=0; OA.sfx('error'); OA.buzz(80); OA.shake(stageEl);
+        popText(clamp(c.x,50,310),150,'Walked out!','#f87171',true); say('A customer walked out. '+(5-RS.strikes)+' walkouts left before the crowd goes next door.');
+        if(RS.strikes>=5){ rushEnd(true); return; } } }
+    if((c.st==='out'||c.st==='done')&&!c.moving){ SC.cust.splice(i,1); }
+  }
+  if(RS.kettle===0){ RS.boil+=dt; if(RS.boil>=2.2){ RS.kettle=6; RS.boil=0; snd('plop'); } } else if(RS.kettle<6){ RS.simmer+=dt; if(RS.simmer>=3){ RS.simmer=0; RS.kettle++; } }
+  if(RS.sam<5){ RS.samT+=dt; if(RS.samT>=2){ RS.samT=0; RS.sam++; } }
+  var mg=RS.mg; if(mg.s==='cook'){ mg.t+=dt; if(mg.t>=3){ mg.s='ready'; mg.t=0; OA.sfx('ding'); } } else if(mg.s==='ready'){ mg.t+=dt; if(mg.t>=7){ mg.s='burnt'; mg.t=0; OA.sfx('error'); say('The Maggi burnt! Tap the pan to clean it.'); } }
+  if(!RM&&mg.s==='cook'&&VR()<dt*8) addSteam(SX[3]+4,222,true);
+  if(!RM&&mg.s==='burnt'&&VR()<dt*6) SC.parts.push({k:'s',x:SX[3]+VR.range(-8,8),y:222,vx:VR.range(-4,4),vy:-16,life:0,max:1.6,r:5,dark:1});
+  if(t>=RT) rushEnd(false);
+}
+function rushTarget(item){ var b=null; for(var i=0;i<4;i++){ var c=RS.slots[i]; if(c&&(c.st==='wait'||c.st==='in')&&(c.need[item]||0)>(c.got[item]||0)&&(!b||c.pat<b.pat)) b=c; } return b; }
+function rushServe(item){
+  if(!RS||RS.over||RS.t<0) return;
+  var btn=stBtns[IDX[item]]; if(btn){ btn.classList.remove('hit'); void btn.offsetWidth; btn.classList.add('hit'); setTimeout(function(){ btn.classList.remove('hit'); },90); }
+  var mg=RS.mg;
+  if(item==='maggi'){
+    if(mg.s==='idle'){ mg.s='cook'; mg.t=0; snd('sizzle'); say('Maggi on the stove. Ready in 3 seconds.'); return; }
+    if(mg.s==='cook'){ OA.sfx('tick'); say('Patience. Even "two-minute" Maggi needs 3 seconds here.'); return; }
+    if(mg.s==='burnt'){ mg.s='idle'; OA.sfx('whoosh'); say('Pan cleaned. Cook a fresh one.'); return; }
+  }
+  if(item==='chai'&&RS.kettle===0){ OA.sfx('tick'); say('Kettle is boiling. Two seconds!'); return; }
+  if(item==='samosa'&&RS.sam===0){ OA.sfx('tick'); say('Samosas are still frying. Hold on!'); return; }
+  var c=rushTarget(item);
+  if(!c){
+    if(item==='maggi'){ OA.sfx('tick'); say('Nobody has ordered Maggi yet. Keep it warm, but not too long!'); return; }
+    if(item==='chai') RS.kettle--; if(item==='samosa') RS.sam--;
+    RS.cash=Math.max(0,RS.cash-5); RS.combo=0; RS.wrong++; OA.sfx('error'); OA.buzz(40); if(RS.t-(RS.wt||-9)>.6){ RS.wt=RS.t; popText(clamp(SX[IDX[item]],70,290),214,'Nobody ordered that! −₹5','#f87171'); } say('Wrong item: nobody ordered '+ITEMS[IDX[item]].n.toLowerCase()+'. −₹5'); return;
+  }
+  if(item==='chai'){ RS.kettle--; snd('pour'); } else if(item==='samosa'){ RS.sam--; snd('plop'); } else if(item==='maggi'){ mg.s='idle'; snd('plop'); } else snd('plop');
+  OA.buzz(8); RS.items++; c.got[item]=(c.got[item]||0)+1;
+  SC.parts.push({k:'f',x0:SX[IDX[item]],y0:232,x1:c.x,y1:128,t:0,dur:.26,h:30,cu:c,spr:item==='chai'?cupSpr(cupId()):iconSpr(item)});
+  var done=true; for(var k in c.need) if((c.got[k]||0)<c.need[k]) done=false;
+  if(done){ c.st='paying'; }
+}
+function rushLand(cu){
+  if(cu.st!=='paying'||!RS) return;
+  var pay=0; for(var k in cu.need) pay+=ITEMS[IDX[k]].price*cu.need[k];
+  var tip=.5*Math.max(0,cu.pat)/cu.max, mult=(1+Math.min(RS.combo,10)*.1)*(RS.ev&&RS.ev.k==='fest'?2:1)*(cu.d.vip?2:1), tot=Math.round(pay*(1+tip)*mult);
+  RS.cash+=tot; RS.combo++; RS.best=Math.max(RS.best,RS.combo); RS.served++;
+  cu.st='done'; cu.mood='happy'; cu.hold=true; RS.slots[cu.slot]=null; cu.tx=cu.x<180?-60:420;
+  for(var i=0;i<4;i++) SC.parts.push({k:'c',x0:cu.x+VR.range(-8,8),y0:140,x1:320,y1:-6,t:-i*.06,dur:.5,h:24,i:i});
+  popText(clamp(cu.x,40,320),106,'+'+money(tot),cu.d.vip?'#fbbf24':'#fde68a',true);
+  if(RS.combo>=3) popText(clamp(cu.x,50,310),88,'Combo ×'+(1+Math.min(RS.combo,10)*.1).toFixed(1),'#4ade80');
+  if(RS.combo===5||RS.combo===10){ OA.sfx('levelup'); sparks(cu.x,150,20); }
+  if(cu.d.vip){ snd('kaching'); say('<b>VIP served!</b> Double payment. The boss nods approvingly.'); }
+}
+function rushEnd(fail){
+  if(RS.over) return; RS.over=true; var R0=RS; showCount('');
+  OA.sfx(fail?'crash':'whistle'); if(fail) OA.shake(stageEl,'big');
+  setTimeout(function(){ if(RS===R0) rushResult(); },fail?900:700);
+}
+function rushRank(s){ return s>=8000?'Chai Samrat':s>=5000?'Rush Hour Legend':s>=3000?'Galla Guardian':s>=1500?'Samosa Sensei':s>=500?'Cutting Cadet':'Kettle Trainee'; }
+function rushResult(){
+  var r=RS, score=Math.round(r.cash), medals=score>=MEDALS[2]?3:score>=MEDALS[1]?2:score>=MEDALS[0]?1:0, fail=r.strikes>=5;
+  var fresh=[]; if(medals>rushStars()){ OA.save('rushStars',medals); fresh=OA.unlocks.fresh(); }
+  var best, cityN=CITIES[r.ci].n;
+  if(r.kind==='daily'&&r.seed===OA.daily.seed()){ var dr=OA.daily.record(score); best={isBest:dr.isBest,best:dr.best}; }
+  else best=OA.submitBest(score,'rush');
+  var acc=r.items+r.wrong?Math.round(r.items/(r.items+r.wrong)*100):100;
+  var date=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  var text=r.kind==='daily'?'Daily Rush ('+date+'): '+money(score)+' from '+r.served+' customers at '+cityN+' ☕ Can you beat my galla?':'Made '+money(score)+' serving '+r.served+' customers in a 3-minute Rush Hour at '+cityN+' ☕ Beat my galla?';
+  OA.result({emoji:fail?'😵':medals===3?'🏆':'☕',title:fail?'The crowd went next door!':medals?'Rush Hour done!':'Rush Hour over',
+    sub:(fail?'Five walkouts. The tapri across the road says thank you.':'Medals at '+MEDALS.map(function(m){ return money(m); }).join(' · ')+(r.kind==='daily'?' · Daily streak: '+OA.daily.streak()+' 🔥':''))+unlockLine(fresh),
+    win:!fail,stars:medals,score:score,scoreLabel:'rupees in 3 minutes',fmt:function(n){ return '₹'+OA.fmt(n); },rank:rushRank(score),
+    stats:[['Served',r.served],['Best combo','×'+r.best],['Walkouts',r.strikes+'/5'],['Accuracy',acc+'%']],best:best,
+    share:{text:text,score:score,seed:r.seed,mode:r.kind,label:'rupees'},
+    again:{label:r.kind==='daily'?'Retry daily':r.chal?'Rematch':'Play again',fn:function(){ rushStart(r.kind==='rush'&&!r.chal?OA.newSeed():r.seed,r.kind,r.chal); }},
+    menu:{label:'Menu',fn:function(){ RS=null; showScreen('title'); }},
+    tip:'Handling rush hour is a real skill. Put it on your CV: <a href="/">build your resume free →</a>'});
+}
+var stBtns=[];
+function buildStations(){
+  var w=$('stations'); if(stBtns.length){ stBtns[0].querySelector('.sic').innerHTML=cupSVG(cupId()); return; }
+  ITEMS.forEach(function(it,i){ var b=document.createElement('button'); b.type='button'; b.className='ct-st';
+    b.innerHTML='<kbd>'+(i+1)+'</kbd><span class="sic">'+(it.id==='chai'?cupSVG(cupId()):icon(it.id))+'</span><b>'+it.n+'</b><span class="sub"></span><span class="bar"><i></i></span>';
+    b.addEventListener('pointerdown',function(e){ if(e.button>0) return; e.preventDefault(); rushServe(it.id); });
+    b.addEventListener('click',function(e){ if(e.detail===0) rushServe(it.id); });
+    w.appendChild(b); stBtns.push(b); });
+}
+function rushHud(){
+  if(!RS) return; var t=Math.max(0,RS.t), left=RT-t;
+  setT($('tTxt'),mmss(RS.t<0?RT:left)); $('tRing').setAttribute('stroke-dashoffset',String((144.5*Math.min(1,t/RT)).toFixed(1))); $('timer').classList.toggle('low',left<=20);
+  setT($('rCash'),'₹'+OA.fmt(RS.cash)); setT($('rCombo'),RS.combo>=2?'Combo ×'+(1+Math.min(RS.combo,10)*.1).toFixed(1)+' · '+RS.combo+' in a row':'');
+  var sk=''; for(var i=0;i<5;i++) sk+=icon('strike').replace('<svg','<svg class="'+(i<5-RS.strikes?'':'off')+'"'); setH($('strikes'),sk);
+  $('strikes').setAttribute('aria-label',(5-RS.strikes)+' walkouts left');
+  setT($('rLine'),RS.line.length?'+'+RS.line.length+' waiting':'');
+  var mg=RS.mg, st=[
+    [RS.kettle?RS.kettle+'/6 cups':'Boiling…',RS.kettle?'':'wait',RS.kettle?RS.kettle/6:RS.boil/2.2],
+    [RS.sam?RS.sam+'/5 ready':'Frying…',RS.sam?'':'wait',RS.sam<5?RS.samT/2:1],
+    ['Always ready','',1],
+    [mg.s==='idle'?'Tap to cook':mg.s==='cook'?'Cooking…':mg.s==='ready'?'Serve now!':'Burnt! Clean',mg.s==='ready'?'ready':mg.s==='burnt'?'burnt':mg.s==='cook'?'wait':'',mg.s==='cook'?mg.t/3:mg.s==='ready'?1-mg.t/7:0]];
+  stBtns.forEach(function(b,i){ setT(b.querySelector('.sub'),st[i][0]); var cl='ct-st'+(st[i][1]?' '+st[i][1]:''); if(b.classList.contains('hit')) cl+=' hit'; if(b.className!==cl) b.className=cl; b.querySelector('.bar i').style.width=(clamp(st[i][2],0,1)*100).toFixed(0)+'%'; b.setAttribute('aria-label',ITEMS[i].n+': '+st[i][0]); });
+  var o=''; for(i=0;i<4;i++){ var c=RS.slots[i]; if(c){ var parts=[]; for(var k in c.need){ var lf=c.need[k]-(c.got[k]||0); if(lf>0) parts.push(lf+' '+ITEMS[IDX[k]].n.toLowerCase()); } if(!parts.length) parts.push('nothing more, paying now'); o+='<li>Seat '+(i+1)+': '+(c.d.vip?'VIP ':'')+RROLE[c.d.role]+' wants '+parts.join(', ')+'</li>'; } }
+  setH($('rOrders'),o);
+}
+function showCount(s){ var el=$('count'); if(!s){ el.hidden=true; return; } el.hidden=false; el.className='ct-count'+(s==='Chalo!'?' go':''); el.innerHTML='<span>'+esc(s)+'</span>'; }
+
+/* draw */
+function drawBubble(c,cu,now){
+  var keys=Object.keys(cu.need), rows=Math.ceil(keys.length/2), w=keys.length===1?50:80, h=rows*24+10, x=cu.x-w/2, y=150-h-(cu.st==='in'?0:Math.sin(now*3+cu.ph)*1.2);
+  x=clamp(x,4,VW-w-4);
+  rr(c,x,y,w,h,9); fs(c,cu.d.vip?'#fff7d6':'#ffffff',2); c.beginPath(); c.moveTo(cu.x-6,y+h-1); c.lineTo(cu.x,y+h+8); c.lineTo(cu.x+6,y+h-1); c.fillStyle=cu.d.vip?'#fff7d6':'#fff'; c.fill(); c.strokeStyle=INK; c.lineWidth=2; c.beginPath(); c.moveTo(cu.x-6,y+h); c.lineTo(cu.x,y+h+8); c.lineTo(cu.x+6,y+h); c.stroke();
+  if(cu.d.vip){ box(c,x+w-22,y-8,24,12,4,'#fbbf24',1.6); txt(c,'VIP',x+w-10,y-1.6,8.5,'#3b2506'); }
+  keys.forEach(function(k,i){ var cx=x+5+(i%2)*38+(keys.length===1?3:0), cy=y+5+Math.floor(i/2)*24, done=(cu.got[k]||0)>=cu.need[k];
+    c.globalAlpha=done?.35:1; dspr(c,k==='chai'?cupSpr(cupId()):iconSpr(k),cx,cy,22,22); c.globalAlpha=1;
+    if(done){ c.beginPath(); c.moveTo(cx+5,cy+12); c.lineTo(cx+10,cy+18); c.lineTo(cx+19,cy+5); c.strokeStyle='#16a34a'; c.lineWidth=3.4; c.lineCap='round'; c.stroke(); }
+    else { var left=cu.need[k]-(cu.got[k]||0); txt(c,'×'+left,cx+31,cy+13,11,INK); } });
+  var p=clamp(cu.pat/cu.max,0,1); box(c,cu.x-26,y-10,52,6,3,'#1b2036',0); c.fillStyle=p>.5?'#4ade80':p>.3?'#facc15':'#f87171'; rr(c,cu.x-25,y-9,50*p,4,2); c.fill();
+}
+function drawCounter(c,th,now){
+  var g=c.createLinearGradient(0,256,0,300); g.addColorStop(0,th.wood); g.addColorStop(1,th.woodD); c.fillStyle=g; c.fillRect(0,256,VW,44);
+  planks(c,0,256,VW,44,'rgba(0,0,0,.25)'); box(c,-4,247,368,11,3,th.woodL,2.2);
+  /* kettle station */
+  var k=RS.kettle; c.save(); c.translate(SX[0],252); c.scale(1.05,1.05); c.translate(-SX[0],-252); drawKettle(c,SX[0],252,0,now); c.restore();
+  if(k===0&&!RM&&VR()<.3) addSteam(SX[0]-2,206,true);
+  for(var i=0;i<6;i++){ c.globalAlpha=i<k?1:.25; dspr(c,cupSpr(cupId()),SX[0]-39+i*13,266,13,13); } c.globalAlpha=1;
+  /* samosa tray */
+  c.beginPath(); c.ellipse(SX[1],250,36,10,0,0,7); fs(c,'#cbd5e1',2); c.beginPath(); c.ellipse(SX[1],249,29,6.5,0,0,7); c.fillStyle='#94a3b8'; c.fill();
+  for(i=0;i<RS.sam;i++) dspr(c,iconSpr('samosa'),SX[1]-34+i*12,228+(i%2)*5,22,22);
+  for(i=0;i<5;i++){ circ(c,SX[1]-24+i*12,272,3.6,i<RS.sam?'#fbbf24':'#3b2a1e',1.4); }
+  /* bun jar */
+  box(c,SX[2]-26,220,52,32,9,'rgba(219,234,254,.55)',2); box(c,SX[2]-21,213,42,9,3,'#dc2626',1.8); for(i=0;i<4;i++) dspr(c,iconSpr('bun'),SX[2]-23+i*11,228+(i%2)*4,18,18);
+  /* maggi pan */
+  var mg=RS.mg; box(c,SX[3]-24,244,48,8,2,'#334155',1.8); if(mg.s==='cook'){ c.fillStyle='#60a5fa'; for(i=-1;i<=1;i++){ c.beginPath(); c.moveTo(SX[3]+i*10-4,244); c.quadraticCurveTo(SX[3]+i*10,236-Math.sin(now*30+i)*2,SX[3]+i*10+4,244); c.fill(); } }
+  c.beginPath(); c.moveTo(SX[3]-30,226); c.lineTo(SX[3]+30,226); c.lineTo(SX[3]+24,244); c.lineTo(SX[3]-24,244); c.closePath(); fs(c,'#475569',2); line(c,SX[3]+29,230,SX[3]+46,224,INK,5); line(c,SX[3]+29,230,SX[3]+46,224,'#1f2937',2.4);
+  if(mg.s!=='idle'){ c.fillStyle=mg.s==='burnt'?'#3f2a1a':mg.s==='ready'?'#facc15':'#fde68a'; c.beginPath(); c.ellipse(SX[3],227,25,4.5,0,0,7); c.fill(); c.strokeStyle=mg.s==='burnt'?'#1c1410':'#f59e0b'; c.lineWidth=1.8; c.beginPath(); for(i=-21;i<21;i+=6){ c.moveTo(SX[3]+i,227); c.quadraticCurveTo(SX[3]+i+3,222,SX[3]+i+6,227); } c.stroke(); }
+  if(mg.s==='cook'){ var pr=mg.t/3; box(c,SX[3]-20,270,40,6,3,'#1b2036',0); c.fillStyle='#4ade80'; rr(c,SX[3]-19,271,38*pr,4,2); c.fill(); }
+  if(mg.s==='ready'){ c.globalCompositeOperation='lighter'; glow(c,SX[3],226,34,'rgba(253,224,71,.8)',.5+.3*Math.sin(now*8)); c.globalCompositeOperation='source-over'; }
+}
+function renderRush(c,now,dt){
+  var th=theme().c, tod=lerp(.64,.86,clamp(RS.t/RT,0,1)), n=nightAt(tod);
+  ensureLayers(RS.ci,-1,th,'');
+  c.setTransform(cv.width/VW,0,0,cv.height/VH,0,0);
+  drawSky(c,tod,now); c.drawImage(L.skyD,0,0,VW,VH); if(n>0){ c.globalAlpha=n; c.drawImage(L.skyN,0,0,VW,VH); c.globalAlpha=1; }
+  c.drawImage(L.ground,0,0,VW,VH); drawVehicles(c,th);
+  var list=SC.cust.slice().sort(function(a,b){ return (a.st==='wait'?1:0)-(b.st==='wait'?1:0); });
+  for(var i=0;i<list.length;i++){ var cu=list[i], w=84, h=118, bob=cu.moving&&!RM?Math.abs(Math.sin(now*11+cu.ph))*3:Math.sin(now*2+cu.ph)*.8, x=cu.x-w/2, y=158-bob;
+    var spr=cu.hold?personSpr(cu.d.role,'happy','coffee',cu.d.cap?{cap:cu.d.cap}:null):personSpr(cu.d.role,cu.mood,cu.mood==='angry'?'stand':(cu.d.vip?'phone':'stand'),cu.d.cap?{cap:cu.d.cap}:null);
+    if(cu.st==='wait'&&cu.pat/cu.max<.3&&!RM) x+=Math.sin(now*40)*1.2;
+    dspr(c,spr,x,y,w,h); if(cu.hold) dspr(c,cupSpr(cupId()),x+w*.6,y+h*.53,w*.22,w*.22); }
+  if(n>0){ c.fillStyle='rgba(8,12,34,'+(n*.28)+')'; c.fillRect(0,0,VW,VH); }
+  for(i=0;i<list.length;i++) if(list[i].st==='wait'||list[i].st==='in'||list[i].st==='paying') drawBubble(c,list[i],now);
+  drawCounter(c,th,now);
+  line(c,128,18,124,40,INK,1.6); line(c,232,18,236,40,INK,1.6); box(c,104,38,152,30,6,'#1f2a24',2.2); rr(c,107,41,146,24,4); c.strokeStyle='#a16207'; c.lineWidth=1.4; c.stroke();
+  txt(c,'CHAI 10 · SAMOSA 15',180,48,9.5,'#f8fafc'); txt(c,'BUN MASKA 20 · MAGGI 30',180,59,9.5,'#fde68a');
+  awning(c,-6,366,0,16,th); if(n>.1){ c.globalCompositeOperation='lighter'; for(var x2=10;x2<360;x2+=20) glow(c,x2,24,8,'rgba(253,224,130,.9)',n); c.globalCompositeOperation='source-over'; }
+  drawParts(c,cupId());
+  drawRain(c,dt,RS.ev&&RS.ev.k==='rain'); if(RS.ev&&RS.ev.k==='fest') drawBunting(c,now);
+  if(RS.banner>0&&RS.ev){ var a=Math.min(1,RS.banner*2,(3-RS.banner)*4); c.globalAlpha=a; box(c,50,74,260,32,10,'#fbbf24',2.4); txt(c,REV[RS.ev.k].n.toUpperCase(),180,91,18,'#3b2506'); c.globalAlpha=1; }
+}
+
+/* ---------- title + collection ---------- */
+$('logo').innerHTML=logoSVG()+'<h1><span>Chai Tapri</span><b>Tycoon</b></h1>';
+$('ctl').appendChild(OA.controls());
+function totalStars(){ return OA.levels.total()+rushStars(); }
+function maxStars(){ return CITIES.length*3+3; }
+function renderTitle(){
+  var inc=OA.challenge.incoming(), C=city();
+  $('chal').hidden=!inc; if(inc) $('chal').innerHTML=OA.challengeBanner();
+  $('bPlay').innerHTML=inc?'⚔️ Accept challenge':(R.life>0?'Play · '+esc(C.n):'Open your first tapri');
+  $('bPlay').setAttribute('aria-label',inc?'Accept challenge':(R.life>0?'Continue at '+C.n:'Open your first tapri'));
+  var rb=OA.best('rush');
+  $('bRush').innerHTML=icon('rush')+'<span><b>Rush Hour</b><span>3 minutes, one kettle, a crowd that never stops. Medals at ₹1,500 · ₹3,000 · ₹5,000.</span></span><i>'+(rb?'Best ₹'+OA.fmt(rb):'New')+'</i>';
+  var db=OA.daily.best(), sk=OA.daily.streak();
+  $('bDaily').innerHTML=icon('daily')+'<span><b>Daily Rush</b><span>Same customers for everyone today · resets in '+OA.daily.resetsIn()+'</span></span><i class="'+(db!=null?'ok':'')+'">'+(db!=null?'✓ ₹'+OA.fmt(db):sk?'🔥 '+sk+' days':'Play')+'</i>';
+  $('bCities').innerHTML='Cities ★ '+OA.levels.total()+'/'+CITIES.length*3;
+  var un=OA.unlocks.all().filter(function(u){ return u.unlocked; }).length;
+  $('bColl').innerHTML='Collection '+un+'/'+(THEMES.length+CUPS.length);
+  $('tStats').innerHTML='<div><span class="lbl">Stars</span><b>★ '+totalStars()+'/'+maxStars()+'</b></div><div><span class="lbl">Best rush</span><b>'+(rb?'₹'+OA.fmt(rb):'—')+'</b></div><div><span class="lbl">Daily streak</span><b>'+(sk?sk+' 🔥':'0')+'</b></div>';
+}
+$('bPlay').onclick=function(){ OA.sfx('tap'); var inc=OA.challenge.incoming();
+  if(inc){ var s=inc.s>>>0; rushStart(s,inc.m==='daily'&&s===OA.daily.seed()?'daily':'rush',true); return; }
+  if(!D.seen[D.cur]) cityCard(D.cur); else enterCity(D.cur); };
+function rushIntro(fn){
+  if(D.rushSeen){ fn(); return; }
+  var m=OA.modal('<div class="ct-mart">'+icon('rush')+'</div><h2>How Rush Hour works</h2><p class="oa-m-sub">Customers walk up with an order bubble. Tap the matching station to serve the most impatient one first.</p><ul class="ct-how"><li>'+cupSVG(cupId())+'<span><b>Chai</b> pours from a 6-cup kettle. Empty? It boils for 2s.</span></li><li>'+icon('samosa')+'<span><b>Samosa</b> tray holds 5 and refills itself.</span></li><li>'+icon('bun')+'<span><b>Bun maska</b> is always ready.</span></li><li>'+icon('maggi')+'<span><b>Maggi</b>: tap to cook, wait 3s, tap to serve. Too slow and it burns.</span></li></ul><p class="oa-m-sub">Wrong item costs ₹5. Five walkouts and the crowd goes next door. Fast full orders build a combo.</p><div class="oa-actions"><button class="oa-btn" type="button" data-go autofocus>Start the rush</button></div>',{label:'How Rush Hour works'});
+  m.querySelector('[data-go]').onclick=function(){ D.rushSeen=true; saveAll(); OA.closeModal(); fn(); };
+}
+$('bRush').onclick=function(){ OA.sfx('tap'); rushIntro(function(){ rushStart(OA.newSeed(),'rush',false); }); };
+$('bDaily').onclick=function(){ OA.sfx('tap'); rushIntro(function(){ rushStart(OA.daily.seed(),'daily',false); }); };
+$('bCities').onclick=function(){ OA.sfx('tap'); showScreen('cities'); };
+$('bColl').onclick=function(){ OA.sfx('tap'); showScreen('coll'); };
+$('back').onclick=function(){ OA.sfx('tap'); if(mode==='rush'&&RS&&!RS.over){ RS=null; } if(mode==='play'||mode==='rush') saveAll(); showScreen('title'); };
+function renderColl(){
+  var m=totalStars(), all=OA.unlocks.all(), sel=theme().id, cs=cupId();
+  $('kIntro').innerHTML='Earn stars in cities and Rush Hour medals to unlock stall themes and cup styles. You have <b>★ '+m+'</b>. Your picks show up in every city and every rush.';
+  var kt=$('kThemes'), kc=$('kCups'); kt.innerHTML=''; kc.innerHTML='';
+  all.forEach(function(u){ var b=document.createElement('button'); b.type='button'; var isSel=u.type==='theme'?u.id===sel:u.id===cs;
+    b.className='ct-sw'+(u.unlocked?'':' lock')+(isSel?' sel':''); b.setAttribute('aria-pressed',String(isSel));
+    b.setAttribute('aria-label',u.name+(u.unlocked?(isSel?', selected':', tap to use'):', needs '+u.need+' stars'));
+    b.innerHTML=(u.type==='theme'?'<canvas aria-hidden="true"></canvas>':'<span class="cupic">'+cupSVG(u.id)+'</span>')+'<b>'+esc(u.name)+'</b><span>'+(u.unlocked?(isSel?'In use':'Tap to use'):'★ '+u.need+' needed')+'</span>';
+    b.onclick=function(){ if(!u.unlocked){ OA.sfx('error'); OA.toast('Earn '+(u.need-m)+' more stars to unlock '+esc(u.name)); return; } snd('kaching'); if(u.type==='theme'){ OA.unlocks.select(u.id); L.key=''; } else OA.save('cup',u.id); renderColl(); };
+    (u.type==='theme'?kt:kc).appendChild(b);
+    if(u.type==='theme'){ var th=THEMES.filter(function(t){ return t.id===u.id; })[0]; requestAnimationFrame(function(){ drawThumb(b.querySelector('canvas'),{ci:0,st:1,th:th,x0:116,y0:44,w:248,h:206.7}); }); } });
+  var rv=OA.challenge.rivals(), kr=$('kRivals'); kr.hidden=!rv.length;
+  if(rv.length) kr.innerHTML='<h2 style="margin-top:0">Rivals</h2><ul>'+rv.slice(0,8).map(function(x){ return '<li><span>'+(x.won?'🏆 ':'')+esc(x.n)+'</span><span>You ₹'+OA.fmt(x.mine)+' · '+esc(x.n)+' ₹'+OA.fmt(x.theirs)+'</span></li>'; }).join('')+'</ul>';
+}
+
+/* ---------- screens ---------- */
+var SCR={title:'sTitle',play:'sPlay',rush:'sRush',cities:'sCities',coll:'sColl'};
+function showScreen(s){
+  if(mode==='play'&&s!=='play'&&EV.el){ EV.el.remove(); EV.el=null; EV.live=null; evSchedule(false); }
+  mode=s; OA.closeModal();
+  for(var k in SCR) $(SCR[k]).hidden=k!==s;
+  var slot=document.querySelector('[data-slot="'+s+'"]');
+  if(slot){ slot.appendChild(stageEl); stageEl.hidden=false; } else stageEl.hidden=true;
+  $('brew').hidden=s!=='play'; $('boosts').hidden=s!=='play'; $('hint').hidden=!(s==='play'&&R.served<5); $('count').hidden=true;
+  $('back').hidden=s==='title';
+  stageEl.style.touchAction=s==='rush'?'none':'';
+  var bt=$('barT');
+  if(s==='title') bt.innerHTML='';
+  else if(s==='play') bt.innerHTML='<small>City '+R.c+' of '+CITIES.length+'</small>'+esc(city().n);
+  else if(s==='rush') bt.innerHTML='<small>'+(RS&&RS.kind==='daily'?'Daily Rush':RS&&RS.chal?'Challenge':'Rush Hour')+'</small>'+esc(RS?CITIES[RS.ci].n:'');
+  else if(s==='cities') bt.innerHTML='<small>Career</small>Cities';
+  else bt.innerHTML='<small>Unlockables</small>Collection';
+  if(s==='title'){ renderTitle(); say(R.life>0?'Now brewing at <b>'+esc(city().n)+'</b> · '+esc(STAGES[R.stage].n):'A kettle, a stove and a thirsty IT park. Your chai empire starts here.'); }
+  if(s==='play'){ OA.music.play('bazaar'); renderHud(); renderGoals(); renderExp(); renderShop(); say(R.served<5?'Tap the stall to pour a cutting chai. The '+esc(city().n)+' crowd is thirsty.':'Welcome back to <b>'+esc(city().n)+'</b>. Kettle is still warm.'); }
+  if(s==='cities') renderCities();
+  if(s==='coll') renderColl();
+  requestAnimationFrame(fit);
+  var top=$('ct').getBoundingClientRect().top; if(top<-10) window.scrollBy(0,top-8);
+}
+
+/* ---------- main loop ---------- */
+var lastT=performance.now(), saveT=0, uiT=0;
+function idleTick(dt){
+  if(mode==='play') R.play+=dt;
+  earn(liveRate()*dt); R.served+=cupsRate()*dt;
+  for(var i=boosts.length-1;i>=0;i--){ boosts[i].t-=dt; if(boosts[i].t<=0){ boosts.splice(i,1); if(!boosts.length&&mode==='play') say('Rush over. Back to regular chai-time traffic.'); } }
+  if(mode==='play'&&evOn()){
+    if(EV.live){ EV.live.t-=dt; if(EV.live.t<=0){ var n=EVENTS[EV.live.id].n; clearEv(); say('The '+esc(n.replace(/!$/,''))+' moment passed. Another one will come.'); } }
+    else if(!document.querySelector('.oa-modal-bg')){ EV.next-=dt; if(EV.next<=0) spawnEv(); }
+  }
+}
+function frame(now){
+  var dt=Math.min(.1,Math.max(0,(now-lastT)/1000)); lastT=now; var tn=now/1000;
+  if(!document.hidden){
+    idleTick(dt);
+    if(!stageEl.hidden&&cv.width){
+      if(mode==='play'||mode==='title'){
+        var lr=liveRate(), demo=mode==='title', match=boosts.some(function(b){ return b.id==='match'; });
+        sceneStep(dt,R.stage,{spawnEvery:demo?2.2:clamp(4-Math.log(1+lr)/Math.LN10*.55,.8,4)*(boosts.length?.6:1),staffEvery:demo?1.7:(staffCount()?clamp(3.2/(1+Math.log(1+cupsRate()*4)/Math.LN2),.45,3.2):0),capCol:match?'#2563eb':null});
+        renderIdle(ctx,tn,dt,R,{rain:boosts.some(function(b){ return b.id==='rain'; }),fest:boosts.some(function(b){ return b.id==='fest'; })});
+      } else if(mode==='rush'&&RS){ rushStep(dt); if(RS){ renderRush(ctx,tn,dt); rushHud(); } }
+    }
+    if(mode==='play'){ renderHud(); uiT+=dt; if(uiT>.25){ uiT=0; checkGoals(); renderShop(); renderExp(); renderGoals(); } }
+    saveT+=dt; if(saveT>5){ saveT=0; saveAll(); }
+  }
+  requestAnimationFrame(frame);
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){ saveAll(); return; }
+  lastT=performance.now(); var gap=(Date.now()-R.saved)/1000; if(gap>2) offline(gap);
+});
+window.addEventListener('pagehide',saveAll);
+window.addEventListener('resize',function(){ fit(); });
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(mode==='rush'&&RS&&!document.querySelector('.oa-modal-bg')){ var m={'1':'chai','2':'samosa','3':'bun','4':'maggi',c:'chai',s:'samosa',b:'bun',m:'maggi'}[e.key.toLowerCase()]; if(m){ e.preventDefault(); rushServe(m); } }
+});
+
+/* ---------- boot ---------- */
+var gap0=(Date.now()-R.saved)/1000;
+buildShop(); setTab(D.tab); setQty(D.qty);
+showScreen('title');
+if(gap0>2) offline(gap0);
+unlockToasts();
+requestAnimationFrame(function(t){ lastT=t; fit(); requestAnimationFrame(frame); });
 })();
 </script>
 </body>
