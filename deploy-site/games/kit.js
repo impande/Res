@@ -346,7 +346,10 @@
     if (r.menu) h += '<button class="oa-btn ghost" type="button" data-menu>' + esc(r.menu.label || 'Menu') + '</button>';
     h += '</div></div>';
     if (r.share) h += '<button class="oa-link" type="button" data-name>' + (OA.playerName() ? 'Sending as ' + esc(OA.playerName()) + ' · change' : 'Add your name to the challenge') + '</button>';
-    if (r.tip) h += '<p class="oa-tip">' + r.tip + '</p>';
+    /* Resume For You promo card: always shown on results (the games exist to introduce the resume builder) */
+    h += '<div class="oa-promo"><img src="/logo-mark.svg?v=4" alt="" width="40" height="40"><div class="oa-promo-t"><b>Resume For You</b>' +
+      '<span>' + (r.tip || 'Free AI resume builder for India. ATS-friendly resume in minutes.') + '</span></div>' +
+      '<a class="oa-promo-b" href="/" data-promo>Build my resume free →</a></div>';
     var m = OA.modal(h, { cls: 'oa-result', label: r.title || 'Result' });
     var n = m.querySelector('.oa-score-n'); if (n) OA.countUp(n, r.score, 800, fmt);
     var a = m.querySelector('[data-share]');
