@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Naukri Life: Free Indian Life Simulator Game</title>
+<meta name="description" content="A free life simulator game: live a whole Indian career from 21 to 40. Placements, appraisals, shaadi, startups and 20 endings to collect.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://resume4u.help/games/naukri-life/">
+<link rel="alternate" hreflang="en-IN" href="https://resume4u.help/games/naukri-life/">
+<link rel="alternate" hreflang="x-default" href="https://resume4u.help/games/naukri-life/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Naukri Life: Free Indian Life Simulator Game">
+<meta property="og:description" content="A free life simulator game: live a whole Indian career from 21 to 40. Placements, appraisals, shaadi, startups and 20 endings to collect.">
+<meta property="og:url" content="https://resume4u.help/games/naukri-life/">
+<meta property="og:image" content="https://resume4u.help/games/naukri-life/og.jpg?v=d8c6b6cb">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Naukri Life: Free Indian Life Simulator Game">
+<meta name="twitter:description" content="A free life simulator game: live a whole Indian career from 21 to 40. Placements, appraisals, shaadi, startups and 20 endings to collect.">
+<meta name="twitter:image" content="https://resume4u.help/games/naukri-life/og.jpg?v=d8c6b6cb">
+<meta name="theme-color" content="#0d1324">
+<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "VideoGame",
+   "name": "Naukri Life",
+   "url": "https://resume4u.help/games/naukri-life/",
+   "description": "A free life simulator game: live a whole Indian career from 21 to 40. Placements, appraisals, shaadi, startups and 20 endings to collect.",
+   "genre": "Life story",
+   "inLanguage": "en-IN",
+   "image": "https://resume4u.help/games/naukri-life/og.jpg?v=d8c6b6cb",
+   "gamePlatform": [
+    "Web browser",
+    "Mobile browser"
+   ],
+   "applicationCategory": "Game",
+   "operatingSystem": "Any",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Resume For You",
+    "url": "https://resume4u.help/",
+    "logo": "https://resume4u.help/logo-mark.svg"
+   },
+   "dateModified": "2026-11-24"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://resume4u.help/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Free Office Games",
+     "item": "https://resume4u.help/games/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Naukri Life",
+     "item": "https://resume4u.help/games/naukri-life/"
+    }
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "Is Naukri Life like other life simulator games?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It is a short, choice-based life simulator focused on Indian careers and family life, from college to age 40."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How long does one life take?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "About 5 minutes for a full life, so you can try different streams and endings."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is it free?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. It is free to play in your browser on phone or laptop."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/games/kit.css?v=6c91439e"><script src="/games/kit.js?v=7e7ac7f4"></script>
+<style>
+/* Naukri Life v2: an illustrated career life story on answer-sheet paper (light) or a blackboard (dark). */
+:root{
+  --paper:#fbf7ec;--rule:#e3e9f2;--margin:#eab0a8;--ink:#1f1a14;--muted:#6d6358;--card:#fffdf7;--sheet:#fffaf0;--edge:#e6d8bd;
+  --saffron:#f59e0b;--saffron-ink:#9a3412;--teal:#0f766e;--good:#15803d;--bad:#b91c1c;--chip:#fff1cf;--shade:rgba(80,55,20,.45);
+  --c-m:#f59e0b;--c-h:#ec4899;--c-s:#0d9488;--c-f:#6366f1;
+  --display:"Baloo 2","Segoe UI",system-ui,sans-serif;--body:"Inter",system-ui,-apple-system,sans-serif;
+  --oa-ink:var(--ink);--oa-muted:var(--muted);--oa-line:var(--edge);--oa-floor:var(--sheet);--oa-night:var(--sheet);
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1d2a24;--rule:#26372e;--margin:#7a3b3b;--ink:#eef2ea;--muted:#a8b5ab;--card:#24332b;--sheet:#2a3b32;--edge:#3d5145;
+  --saffron:#fbbf24;--saffron-ink:#fde68a;--teal:#5eead4;--good:#86efac;--bad:#fca5a5;--chip:#33463b;--shade:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1d2a24;--rule:#26372e;--margin:#7a3b3b;--ink:#eef2ea;--muted:#a8b5ab;--card:#24332b;--sheet:#2a3b32;--edge:#3d5145;
+  --saffron:#fbbf24;--saffron-ink:#fde68a;--teal:#5eead4;--good:#86efac;--bad:#fca5a5;--chip:#33463b;--shade:rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 var(--body);color:var(--ink);background-color:var(--paper);
+  background-image:linear-gradient(90deg,transparent 30px,var(--margin) 30px,var(--margin) 32px,transparent 32px),repeating-linear-gradient(180deg,transparent 0 29px,var(--rule) 29px 30px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:14px;padding-bottom:28px}
+.nl{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
+.nl-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.logo{margin:0;font:800 1.75rem/1 var(--display);letter-spacing:-.01em;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.logo svg{width:34px;height:34px;flex:none}
+.logo .lb{color:var(--saffron)}
+.oa-ctl{background:var(--card);border-color:var(--edge)}
+.oa-ctl-b:hover{background:var(--chip)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button{font-family:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
+
+/* HUD */
+.hud{background:var(--card);border:1.5px solid var(--edge);border-radius:18px;padding:10px 12px 8px;display:grid;gap:8px;box-shadow:0 12px 26px -22px var(--shade)}
+.hud[hidden]{display:none}
+.hud-top{display:flex;align-items:center;gap:10px}
+.age{font:800 2.1rem/.9 var(--display);font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
+.age small{display:block;font:700 .56rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.who{flex:1;min-width:0}
+.who b{display:block;font:700 .88rem/1.25 var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{font:800 1.05rem var(--display);color:var(--saffron-ink)}
+.mini{appearance:none;border:1.5px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:10px;padding:7px 11px;font:700 .8rem var(--body);cursor:pointer;flex:none}
+.meters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mt{display:grid;gap:3px;min-width:0}
+.mt .lab{display:flex;justify-content:space-between;align-items:center;gap:2px;font:700 .64rem var(--body);color:var(--muted);white-space:nowrap}
+.mt .lab b{color:var(--ink);font:800 .8rem var(--display);font-variant-numeric:tabular-nums}
+.bar{height:9px;border-radius:9px;background:var(--rule);overflow:hidden;border:1px solid var(--edge)}
+.bar i{display:block;height:100%;width:50%;border-radius:9px;background:var(--c);transition:width .7s cubic-bezier(.2,.8,.3,1)}
+.mt.up .bar{animation:pulG .7s}.mt.dn .bar{animation:pulR .7s}
+@keyframes pulG{40%{box-shadow:0 0 0 3px rgba(34,197,94,.45)}}
+@keyframes pulR{40%{box-shadow:0 0 0 3px rgba(239,68,68,.45)}}
+.tl{position:relative;padding-top:4px}
+.tl-seg{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.tl-seg span{height:7px;border-radius:4px;background:var(--rule);border:1px solid var(--edge);position:relative;overflow:hidden}
+.tl-seg span i{position:absolute;inset:0;background:var(--saffron);transform-origin:left;transform:scaleX(0);transition:transform .6s}
+.tl-lab{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;font:700 .55rem/1.6 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center}
+.tl-lab span.on{color:var(--saffron-ink)}
+.tl-pin{position:absolute;top:0;width:15px;height:15px;border-radius:50%;background:var(--saffron);border:2.5px solid #1b2036;transform:translateX(-50%);transition:left .7s cubic-bezier(.2,.8,.3,1);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+
+/* pages */
+.stage{min-height:420px;perspective:1200px}
+.page{background:var(--card);border:1.5px solid var(--edge);border-radius:20px;padding:12px 12px 14px;box-shadow:0 18px 40px -26px var(--shade);position:relative}
+.page::after{content:"";position:absolute;top:0;right:0;width:20px;height:20px;border-radius:0 18px 0 10px;background:linear-gradient(225deg,var(--paper) 50%,var(--edge) 50%);opacity:.9}
+.page.in{animation:pgIn .42s cubic-bezier(.2,.8,.3,1) both;transform-origin:left center}
+.page.out{animation:pgOut .22s ease-in both;transform-origin:left center}
+@keyframes pgIn{from{transform:rotateY(48deg) translateX(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pgOut{to{transform:rotateY(-62deg);opacity:0}}
+.scene{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:2.5px solid #1b2036;background:#cbd5e1;isolation:isolate}
+.scene>svg.bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.actor{position:absolute;bottom:-3%;height:84%;aspect-ratio:100/140}
+.actor svg{width:100%;height:100%;display:block;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
+.actor.l{left:6%}.actor.r{right:6%}.actor.r svg{animation-delay:-1.5s}
+.actor.c{left:50%;transform:translateX(-50%)}
+.actor.react svg{animation:hop .6s cubic-bezier(.2,1.6,.4,1),breathe 3.2s .6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:none}50%{transform:translateY(-1.5%) scale(1.012,.99)}}
+@keyframes hop{0%{transform:scale(1.12,.84)}40%{transform:translateY(-10%) scale(.94,1.08)}70%{transform:scale(1.04,.97)}100%{transform:none}}
+.sc-tag{position:absolute;left:8px;top:8px;z-index:2;background:rgba(255,253,247,.94);color:#1f1a14;border:2px solid #1b2036;border-radius:99px;font:800 .72rem/1.3 var(--display);padding:2px 10px;letter-spacing:.02em}
+.sc-badge{position:absolute;right:8px;top:8px;z-index:2;background:#fbbf24;color:#3b2506;border:2px solid #1b2036;border-radius:99px;font:800 .72rem/1.3 var(--display);padding:2px 10px}
+.an-blink{animation:blink 1.8s steps(2) infinite}
+.an-blink2{animation:blink 1.3s steps(2) infinite .6s}
+.an-steam{animation:steam 2.6s ease-in-out infinite}
+.an-sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 3.4s ease-in-out infinite}
+.an-spin{transform-box:fill-box;transform-origin:center;animation:spin 1.1s linear infinite}
+.an-fly{animation:fly 11s linear infinite}
+.an-flame{transform-box:fill-box;transform-origin:50% 100%;animation:flame .45s ease-in-out infinite alternate}
+.an-bob{animation:bob 2.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+@keyframes steam{0%{transform:translateY(4px);opacity:0}40%{opacity:.9}100%{transform:translateY(-10px);opacity:0}}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fly{0%{transform:translate(-120px,30px)}100%{transform:translate(420px,-30px)}}
+@keyframes flame{to{transform:scale(.86,1.12)}}
+@keyframes bob{50%{transform:translateY(-3px)}}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 2px 0}
+.chip{font:700 .66rem/1.5 var(--body);letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:99px;background:var(--chip);color:var(--saffron-ink)}
+.ev-h{font:800 1.42rem/1.15 var(--display);margin:6px 2px 4px;text-wrap:balance}
+.ev-p{margin:0 2px 12px;color:var(--muted);font-size:.94rem}
+.mem{display:flex;gap:8px;align-items:flex-start;background:#fef08a;color:#3f3a12;border-radius:4px 12px 12px 12px;padding:8px 10px;font:600 .82rem/1.35 var(--body);transform:rotate(-.6deg);box-shadow:0 6px 12px -8px rgba(0,0,0,.45);margin:0 2px 12px}
+.mem b{font-weight:800}
+.choices{display:grid;gap:9px}
+.choice{display:flex;gap:10px;align-items:center;text-align:left;width:100%;border:2px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:14px;padding:10px 11px;font:600 .94rem/1.3 var(--body);cursor:pointer;box-shadow:0 3px 0 var(--edge);transition:transform .1s,border-color .12s,box-shadow .1s}
+.choice:hover{border-color:var(--saffron)}
+.choice:active{transform:translateY(2px);box-shadow:0 1px 0 var(--edge)}
+.choice .k{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--ink);font:800 .82rem var(--display);color:var(--ink);transition:background .15s,color .15s}
+.choice.sel{border-color:var(--saffron)}
+.choice.sel .k{background:var(--ink);color:var(--card)}
+.choice .tx{flex:1;min-width:0}
+.odds{flex:none;font:700 .62rem/1.4 var(--body);padding:2px 7px;border-radius:99px;background:var(--chip);color:var(--saffron-ink);white-space:nowrap;letter-spacing:.03em}
+.odds.lo{color:var(--bad)}.odds.hi{color:var(--good)}
+.choices.done .choice:not(.sel){opacity:.4}
+.out-t{font-size:1.02rem;margin:12px 2px 10px}
+.roll{display:inline-flex;align-items:center;gap:6px;font:800 .8rem var(--display);padding:3px 10px;border-radius:99px;margin:12px 2px 0}
+.roll.ok{background:rgba(34,197,94,.15);color:var(--good)}.roll.no{background:rgba(239,68,68,.13);color:var(--bad)}
+.deltas{display:flex;flex-wrap:wrap;gap:6px;margin:0 2px 14px}
+.d{font:700 .78rem var(--body);padding:4px 10px;border-radius:99px;background:var(--chip);animation:dIn .4s cubic-bezier(.2,1.6,.4,1) both}
+.d.up{color:var(--good)}.d.dn{color:var(--bad)}
+@keyframes dIn{from{transform:scale(.4);opacity:0}}
+.btns{display:grid;gap:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+
+/* kit buttons on paper */
+.oa-btn.ghost{background:var(--sheet);color:var(--ink);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
+.oa-btn.ghost:active{box-shadow:0 1px 0 var(--edge)}
+.oa-btn small{font:600 .72rem var(--body);opacity:.8}
+
+/* title */
+.hero{position:relative;aspect-ratio:16/10;border-radius:16px;overflow:hidden;border:2.5px solid #1b2036;isolation:isolate}
+.hero>svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.hero .actor{height:40%;bottom:auto}
+.hero .ag{position:absolute;z-index:2;font:800 .7rem/1 var(--display);background:#fffdf7;color:#1f1a14;border:2px solid #1b2036;border-radius:99px;padding:2px 7px;transform:translateX(-50%)}
+.hero-cap{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;z-index:3;font:800 .9rem/1.2 var(--display);color:#fffdf7;background:rgba(27,32,54,.82);border-radius:99px;padding:4px 12px}
+.t-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.t-stats div{background:var(--sheet);border:1.5px solid var(--edge);border-radius:12px;padding:6px 4px;text-align:center}
+.t-stats b{display:block;font:800 1.15rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.t-stats small{font:700 .6rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile{appearance:none;display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:14px;padding:9px 4px 8px;cursor:pointer;box-shadow:0 3px 0 var(--edge);font:800 .86rem/1.1 var(--display);min-width:0}
+.tile:active{transform:translateY(2px);box-shadow:0 1px 0 var(--edge)}
+.tile .ic{font-size:1.25rem;line-height:1}
+.tile small{font:600 .66rem var(--body);color:var(--muted)}
+.daily-b{display:flex;align-items:center;gap:10px;text-align:left;border:2px dashed var(--saffron);background:var(--chip);color:var(--ink);border-radius:14px;padding:10px 12px;cursor:pointer;width:100%}
+.daily-b .cal{flex:none;width:42px;height:46px;border:2px solid #1b2036;border-radius:8px;background:#fffdf7;color:#1f1a14;display:grid;grid-template-rows:14px 1fr;overflow:hidden;text-align:center}
+.daily-b .cal i{background:#dc2626;color:#fff;font:800 .6rem/14px var(--body);font-style:normal;text-transform:uppercase}
+.daily-b .cal b{font:800 1.2rem/28px var(--display)}
+.daily-b div{flex:1;min-width:0}
+.daily-b strong{display:block;font:800 1rem/1.2 var(--display)}
+.daily-b span{font-size:.78rem;color:var(--muted)}
+.cont{font-size:.8rem;color:var(--muted);text-align:center;margin:8px 0 0}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 10px}
+.sec-h h2{font:800 1.35rem/1.1 var(--display);margin:0}
+.sec-h p{margin:0;font-size:.8rem;color:var(--muted)}
+
+/* stream pick */
+.streams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 12px}
+.st{appearance:none;border:2px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:14px;padding:6px 4px 8px;cursor:pointer;text-align:center;min-width:0;box-shadow:0 3px 0 var(--edge)}
+.st svg{width:100%;height:92px;display:block}
+.st b{display:block;font:800 .92rem/1.1 var(--display)}
+.st small{display:block;font-size:.66rem;color:var(--muted);line-height:1.25}
+.st[aria-pressed="true"]{border-color:var(--saffron);background:var(--chip);box-shadow:0 3px 0 var(--saffron)}
+.field{display:grid;gap:4px;margin-bottom:6px}
+.field label{font:700 .76rem var(--body);color:var(--muted)}
+.field input{border:2px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:12px;padding:11px 12px;font:600 1rem var(--body);min-width:0}
+
+/* level select */
+.lvs{display:grid;gap:10px}
+.lv-row{display:grid;grid-template-columns:78px 1fr 1fr;gap:8px;align-items:stretch}
+.lv-ch{border-radius:12px;overflow:hidden;border:2px solid #1b2036;position:relative;min-height:70px}
+.lv-ch svg{position:absolute;inset:0;width:100%;height:100%}
+.lv-ch b{position:absolute;left:0;right:0;bottom:0;background:rgba(27,32,54,.82);color:#fff;font:800 .68rem/1.5 var(--display);text-align:center}
+.lv{appearance:none;border:2px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:12px;padding:7px 9px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0;box-shadow:0 3px 0 var(--edge)}
+.lv .n{font:800 .7rem var(--body);color:var(--muted);letter-spacing:.06em}
+.lv b{font:800 .9rem/1.15 var(--display)}
+.lv .s{font-size:.95rem;letter-spacing:1px;color:var(--edge)}
+.lv .s .on{color:var(--saffron)}
+.lv.lock{opacity:.55;cursor:not-allowed}
+.lv.next{border-color:var(--saffron);box-shadow:0 3px 0 var(--saffron)}
+
+/* album / looks / achievements */
+.alb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.en{appearance:none;border:2px solid var(--edge);border-radius:14px;background:var(--sheet);color:var(--ink);padding:5px 5px 7px;cursor:pointer;text-align:center;min-width:0}
+.en .scene{border-width:2px;border-radius:10px}
+.en b{font:800 .76rem/1.15 var(--display);display:block;margin-top:5px}
+.en small{display:block;font-size:.62rem;color:var(--muted);line-height:1.2}
+.en.lock .scene>svg.bg{filter:grayscale(1) brightness(.4)}
+.en.lock .actor svg{filter:brightness(0);opacity:.75;animation:none}
+.en .q{position:absolute;inset:0;display:grid;place-items:center;font:800 1.8rem var(--display);color:#fff;z-index:3;text-shadow:0 2px 0 #1b2036}
+.achs{display:grid;gap:7px}
+.ach{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1.5px solid var(--edge);border-radius:12px;background:var(--sheet)}
+.ach .md{flex:none;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fef3c7,#f59e0b 70%);border:2.5px solid #1b2036;display:grid;place-items:center;font-size:1.05rem}
+.ach.lock .md{background:radial-gradient(circle at 35% 30%,#e5e7eb,#9ca3af 70%);filter:grayscale(1)}
+.ach.lock{opacity:.62}
+.ach b{display:block;font:800 .92rem/1.2 var(--display)}
+.ach span{font-size:.78rem;color:var(--muted)}
+.looks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.look{appearance:none;border:2px solid var(--edge);background:var(--sheet);color:var(--ink);border-radius:12px;padding:4px 2px 6px;cursor:pointer;min-width:0;text-align:center}
+.look svg{width:100%;height:84px;display:block}
+.look b{display:block;font:800 .72rem/1.1 var(--display)}
+.look small{font-size:.6rem;color:var(--muted)}
+.look[aria-pressed="true"]{border-color:var(--saffron);background:var(--chip)}
+.look.lock svg{filter:brightness(0);opacity:.3}
+.look.lock{cursor:not-allowed}
+
+/* chapter card + ending */
+.goal{background:var(--sheet);border:1.5px dashed var(--edge);border-radius:12px;padding:9px 11px;margin:0 2px 12px;font-size:.85rem}
+.goal b{font-family:var(--display);font-size:.95rem}
+.goal ul{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:2px}
+.goal li{color:var(--muted)}
+.goal li span{color:var(--saffron);letter-spacing:1px}
+.newlook{font:700 .74rem var(--body);color:var(--teal);margin:0 2px 10px}
+.intro{display:flex;gap:10px;background:var(--chip);border-radius:12px;padding:9px 11px;margin:0 2px 12px;font-size:.86rem}
+.intro b{display:block;font:800 .95rem var(--display)}
+.stamp{display:inline-block;border:3px solid var(--bad);color:var(--bad);font:800 .9rem/1.3 var(--display);padding:1px 10px;border-radius:8px;transform:rotate(-4deg);text-transform:uppercase;letter-spacing:.08em;margin:12px 2px 0}
+.stamp.new{border-color:var(--good);color:var(--good)}
+.end-h{font:800 1.7rem/1.1 var(--display);margin:6px 2px 4px}
+.lesson{background:var(--chip);border-radius:12px;padding:9px 11px;font-size:.86rem;margin:0 2px 12px}
+.finals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 2px 12px}
+.finals div{background:var(--sheet);border:1.5px solid var(--edge);border-radius:11px;padding:6px 2px;text-align:center}
+.finals b{display:block;font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.finals small{font-size:.62rem;color:var(--muted)}
+.story{border-left:2px solid var(--margin);padding-left:12px;margin:0 2px 14px;display:grid;gap:4px}
+.story h3{font:800 .82rem var(--display);margin:6px 0 0;color:var(--saffron-ink);text-transform:uppercase;letter-spacing:.06em}
+.story div{font-size:.84rem}
+.story div b{font-variant-numeric:tabular-nums;color:var(--muted);margin-right:4px}
+.dice{width:54px;height:54px;flex:none}
+.luck-h{display:flex;align-items:center;gap:10px;margin:10px 2px 6px}
+.luck-h .ev-h{margin:0}
+.dice.roll{animation:dice .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes dice{0%{transform:rotate(-200deg) scale(.4)}100%{transform:none}}
+.res-art{width:210px;max-width:70vw;margin:0 auto 4px}
+.res-art .scene{border-radius:14px}
+
+/* kit modal restyled to the answer sheet / blackboard */
+.oa-modal-bg{background:rgba(31,26,20,.55)}
+.oa-modal{background:var(--card);color:var(--ink);border:2px solid var(--edge);isolation:isolate;box-shadow:0 30px 80px -20px rgba(0,0,0,.55)}
+.oa-modal::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;background:linear-gradient(90deg,transparent 18px,var(--margin) 18px,var(--margin) 19.5px,transparent 19.5px),repeating-linear-gradient(180deg,transparent 0 27px,var(--rule) 27px 28px);opacity:.55}
+.oa-m-sub,.oa-tip,.oa-link,.oa-vs span,.oa-chal span,.oa-score span,.oa-score i,.oa-stats dt{color:var(--muted)}
+.oa-res-top.win h2{color:var(--saffron-ink)}.oa-res-top.lose h2{color:var(--bad)}
+.oa-score-n{color:var(--ink)}
+.oa-star{color:var(--edge);text-shadow:none}
+.oa-star.on{color:var(--saffron);text-shadow:0 2px 0 #b45309}
+.oa-rank{background:var(--chip);border-color:var(--edge);color:var(--saffron-ink)}
+.oa-stats div{background:var(--sheet);border-color:var(--edge)}
+.oa-tip a{color:var(--saffron-ink)}
+.oa-name input{background:var(--sheet);color:var(--ink);border-color:var(--edge)}
+.oa-chal{color:var(--ink)}
+.oa-vs b{color:var(--ink)}
+.oa-m-emoji.big{font-size:3.2rem}
+.m-end p{margin:0 0 8px}
+.oa-result .oa-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.oa-result .oa-stats dd{font-size:.95rem}
+@media (max-width:360px){.ev-h{font-size:1.25rem}.choice{font-size:.88rem}.lv-row{grid-template-columns:62px 1fr 1fr}.meters{gap:5px}}
+@media (prefers-reduced-motion:reduce){.page.in,.page.out,.actor svg,.actor.react svg,.d,.dice.roll,[class^="an-"],[class*=" an-"]{animation:none!important}.bar i,.tl-pin,.tl-seg span i{transition:none}}
+</style>
+<style id="g-page">
+.g-nav{max-width:520px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 .82rem/1.3 "Inter",system-ui,sans-serif}
+.g-nav a{color:inherit;opacity:.85;text-decoration:none;padding:6px 0}
+.g-nav a:hover{opacity:1;text-decoration:underline}
+.g-nav .g-cta{color:var(--saffron-ink,#fbbf24);opacity:1}
+.g-about{max-width:520px;margin:28px auto 0;font:15px/1.6 "Inter",system-ui,sans-serif;color:inherit}
+.g-about h2{font:800 1.25rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:0 0 8px}
+.g-about ol{margin:0 0 14px 20px;padding:0}
+.g-about li{margin-bottom:6px}
+.g-about p{margin:0 0 12px;opacity:.9}
+.g-about a{color:var(--saffron-ink,#fbbf24);font-weight:600}
+.g-more{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.g-more a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(148,163,184,.35);text-decoration:none;color:inherit;font-weight:600;font-size:.84rem}
+.g-more a:hover{border-color:var(--saffron,#fbbf24)}
+.g-foot{margin-top:34px}
+.g-promo{max-width:520px;margin:26px auto 0;background:linear-gradient(160deg,#1f2a4d,#141c33);color:#eef2ff;border:1px solid #3a4a7a;border-radius:20px;padding:18px;font:15px/1.55 "Inter",system-ui,sans-serif;box-shadow:0 24px 50px -30px rgba(0,0,0,.8)}
+.g-promo .pe{display:flex;align-items:center;gap:8px;font:700 .72rem "Inter",system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#fbbf24}
+.g-promo .pe img{width:26px;height:26px;border-radius:7px}
+.g-promo h2{font:800 1.35rem/1.2 "Baloo 2","Segoe UI",system-ui,sans-serif;margin:8px 0 6px;color:#fff}
+.g-promo p{margin:0 0 10px;color:#c7d0ee}
+.g-promo ul{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:6px}
+.g-promo li{padding-left:24px;position:relative;color:#eef2ff}
+.g-promo li::before{content:"✓";position:absolute;left:0;top:0;width:18px;height:18px;border-radius:99px;background:#4ade80;color:#052e16;font:800 .7rem/18px "Inter",sans-serif;text-align:center}
+.g-promo .pb{display:flex;flex-wrap:wrap;gap:10px}
+.g-promo .pb a{flex:1 1 180px;text-align:center;text-decoration:none;border-radius:14px;padding:13px 14px;font:800 1rem "Baloo 2","Segoe UI",system-ui,sans-serif}
+.g-promo .pb .p1{background:linear-gradient(180deg,#fde68a,#fbbf24 55%,#f59e0b);color:#3b2506;box-shadow:0 4px 0 #b45309}
+.g-promo .pb .p2{background:#1b2542;color:#eef2ff;border:1px solid #3a4a7a}
+.g-promo .pb a:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.g-about ul.g-feat{margin:0 0 14px 20px;padding:0}
+.g-faq details{border:1px solid rgba(148,163,184,.35);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.g-faq summary{cursor:pointer;font-weight:700}
+.g-faq details p{margin:8px 0 0}
+.g-guides{display:grid;gap:8px;margin:6px 0 12px}
+.g-guides a{display:block;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.35);text-decoration:none}
+</style>
+</head>
+<body>
+<nav class="g-nav" aria-label="Games"><a href="/games/">← All office games</a><a class="g-cta" href="/">Build your resume free →</a></nav>
+<div class="nl" id="nl">
+  <header class="nl-top">
+    <h1 class="logo"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="11" width="32" height="24" rx="5" fill="#f59e0b" stroke="#1b2036" stroke-width="2.5"/><path d="M14 11 V7 h12 v4" fill="none" stroke="#1b2036" stroke-width="2.5" stroke-linejoin="round"/><path d="M4 20 h32" stroke="#1b2036" stroke-width="2.5"/><rect x="17" y="17" width="6" height="6" rx="1.5" fill="#fffdf7" stroke="#1b2036" stroke-width="2"/></svg><span>Naukri <span class="lb">Life</span></span></h1>
+    <div id="ctl"></div>
+  </header>
+  <section class="hud" id="hud" hidden aria-label="Your life so far"></section>
+  <main class="stage" id="stage"></main>
+  <p class="sr" id="live" aria-live="polite"></p>
+</div>
+<section class="g-promo" aria-labelledby="promo-h"><div class="pe"><img src="/logo-mark.svg?v=4" alt="" width="26" height="26">Made by Resume For You</div><h2 id="promo-h">Start your real career story</h2><p>Your first resume shapes your first job. Build an ATS-friendly fresher resume in minutes, with AI help for every section.</p><ul><li>ATS-friendly templates recruiters in India read</li><li>AI writes your summary and bullet points</li><li>Download a polished PDF in minutes</li></ul><div class="pb"><a class="p1" href="/">Build my resume free →</a><a class="p2" href="/ats-score-checker/">Check my ATS score</a></div></section>
+<section class="g-about" aria-labelledby="about-h"><h2 id="about-h">Naukri Life: A life simulator game about an Indian career</h2><p>Naukri Life is a free <strong>life simulator game</strong> about growing up and getting a job in India. Pick Engineering, Commerce or Arts and live from age 21 to 40, one choice at a time: campus placements, your first appraisal, a job switch, family pressure for shaadi, an onsite chance, a startup idea or a government exam. Every choice changes your Pay, Joy, Skill and Family meters, and old decisions come back later.</p><ul class="g-feat"><li>Over 100 life events plus random surprises</li><li>6 chapters played as 12 levels with star goals</li><li>20 different endings to collect in the Endings Album</li><li>Achievements and unlockable looks for your character</li><li>A Daily Life that everyone plays with the same luck</li></ul><h2 id="howto">How to play Naukri Life</h2><ol><li>Pick Engineering, Commerce or Arts and live a whole Indian career from 21 to 40, one choice at a time.</li><li>Every choice moves your Pay, Joy, Skill and Family meters. Risky moves show their odds, and old choices come back later to help or haunt you.</li><li>Play the 6 chapters (College, First Job, Switch, Shaadi, 30s, 40) as 12 levels with star goals, or live a full new life. Stars come from your weakest meter at 40, so balance matters.</li><li>Collect all 20 endings in the Endings Album, earn achievements and new looks, and try the Daily Life that everyone plays with the same luck today.</li></ol><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>Naukri Life FAQ</h2><div class="g-faq"><details><summary>Is Naukri Life like other life simulator games?</summary><p>It is a short, choice-based life simulator focused on Indian careers and family life, from college to age 40.</p></details><details><summary>How long does one life take?</summary><p>About 5 minutes for a full life, so you can try different streams and endings.</p></details><details><summary>Is it free?</summary><p>Yes. It is free to play in your browser on phone or laptop.</p></details></div><h2>Career tip</h2><p>Start your real career story with a strong first resume. <a href="/">Build it free</a>.</p><div class="g-guides"><a href="/career-objective-for-freshers/">📄 Career objective for freshers →</a><a href="/resume-format-for-freshers/">📄 Resume format for freshers →</a></div><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/office-cricket/">🏏 Office Cricket</a><a href="/games/typing-race/">⌨️ Typing Race</a><a href="/games/inbox-zero/">📧 Inbox Zero</a><a href="/games/">🎮 All games</a></div></section>
+<div class="g-foot"><style>
+.r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
+.r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
+.r4u-lfoot .r4u-lfoot-links a{color:#eaeaf4;text-decoration:none;font-size:0.87rem;font-weight:600;}
+.r4u-lfoot .r4u-lfoot-links a:hover{color:#fbbf24;text-decoration:underline;}
+.r4u-lfoot .r4u-lfoot-copy{font-size:0.82rem;color:#a6a6c4;margin:0;}
+</style>
+<footer class="r4u-lfoot">
+  <nav class="r4u-lfoot-links" aria-label="Footer">
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/games/">Free Office Games</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="/refund/">Refund &amp; Cancellation</a>
+    <a href="https://wa.me/919309014196?text=Hello%20Resume4U" target="_blank" rel="noopener">Contact (WhatsApp)</a>
+  </nav>
+  <p class="r4u-lfoot-copy">&copy; 2026 Resume For You &middot; resume4u.help &middot; Made in India</p>
+</footer></div>
+<script>
+(function(){
+OA.init({slug:'naukri-life', name:'Naukri Life'});
+var $=function(id){return document.getElementById(id);};
+var stage=$('stage'), hud=$('hud'), live=$('live');
+var RM=OA.reducedMotion, esc=OA.esc, K=OA.art.ink;
+function clamp(v){return Math.max(0,Math.min(100,Math.round(v)));}
+function lpa(m){return m<=0.05?'₹0':'₹'+(m<10?Math.round(m*10)/10:Math.round(m))+' LPA';}
+var MT=[5,8,12,16,24,30];
+function mPct(m,c){return clamp(Math.sqrt(Math.max(0,m)/MT[c==null?5:c])*72);}
+function moneyPct(m){return mPct(m,5);}
+
+/* ================= ART: scenes (flat vector, ink outlines) ================= */
+var SK=' stroke="'+K+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"';
+function R(x,y,w,h,f,rx,ex){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"'+(rx?' rx="'+rx+'"':'')+' fill="'+f+'"'+SK+(ex||'')+'/>';}
+function N(x,y,w,h,f,rx,ex){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"'+(rx?' rx="'+rx+'"':'')+' fill="'+f+'"'+(ex||'')+'/>';}
+function P(d,f,ex){return '<path d="'+d+'" fill="'+(f||'none')+'"'+SK+(ex||'')+'/>';}
+function Q(d,f,ex){return '<path d="'+d+'" fill="'+(f||'none')+'"'+(ex||'')+'/>';}
+function C(x,y,r,f,ex){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'"'+SK+(ex||'')+'/>';}
+function D(x,y,r,f,ex){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'"'+(ex||'')+'/>';}
+function T(x,y,txt,f,sz,ex){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="Baloo 2,system-ui,sans-serif" font-weight="800" font-size="'+sz+'" fill="'+f+'"'+(ex||'')+'>'+txt+'</text>';}
+function G(cls,inner){return '<g class="'+cls+'">'+inner+'</g>';}
+function wall(c,floor,fy){fy=fy||150;return N(0,0,360,fy,c)+N(0,fy,360,200-fy,floor)+Q('M0 '+fy+' H360','none',' stroke="'+K+'" stroke-width="2.2"')+N(0,fy,360,5,'rgba(0,0,0,.12)');}
+function steam(x,y){return G('an-steam',Q('M'+x+' '+y+' q-4 -6 0 -12 q4 -6 0 -12','none',' stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".85"'));}
+function plant(x,y){return G('an-sway',P('M'+(x+12)+' '+y+' q-16 -10 -12 -30 q10 6 12 30','#22c55e')+P('M'+(x+12)+' '+y+' q14 -14 8 -34 q-12 10 -8 34','#16a34a')+P('M'+(x+12)+' '+y+' q2 -20 -2 -38','none'))+R(x,y,24,22,'#ea580c',3);}
+function lights(y,n,amp){var s=P('M0 '+y+' Q90 '+(y+amp)+' 180 '+y+' T360 '+y,'none'),cols=['#fde047','#f472b6','#60a5fa','#4ade80','#fb923c'];for(var i=1;i<n;i++){var x=i*360/n,t=x/180,yy=t<=1?y+amp*2*t*(1-t)*1:y+amp*2*(t-1)*(2-t)*-1+0;yy=y+Math.sin(Math.PI*(x%180)/180)*(amp*.5)*(x<180?1:-1);s+=D(x,yy+3,3.6,cols[i%5],' class="'+(i%2?'an-blink':'an-blink2')+'" stroke="'+K+'" stroke-width="1.4"');}return s;}
+var SCN={
+ campus:function(){return wall('#c7d2fe','#818cf8')+R(16,30,54,62,'#e0f2fe',4)+Q('M43 30 V92 M16 61 H70','none',' stroke="'+K+'" stroke-width="2"')+R(290,30,54,62,'#e0f2fe',4)+Q('M317 30 V92 M290 61 H344','none',' stroke="'+K+'" stroke-width="2"')+
+  R(92,40,176,30,'#f97316',6)+T(180,61,'PLACEMENT DAY','#fff',17)+Q('M100 70 l8 10 l8 -10 M140 70 l8 10 l8 -10 M196 70 l8 10 l8 -10 M236 70 l8 10 l8 -10','#fde047',' stroke="'+K+'" stroke-width="1.6"')+
+  R(124,86,56,30,'#d6a76c',3)+R(129,90,20,13,'#fff',1)+R(154,92,20,16,'#fef3c7',1)+D(139,90,2.5,'#dc2626')+D(164,92,2.5,'#2563eb')+
+  R(196,120,140,32,'#1e3a8a',4)+Q('M206 152 v30 M326 152 v30','none',' stroke="'+K+'" stroke-width="3"')+R(244,110,44,12,'#fff',2)+T(266,120,'HR','#1e3a8a',9)+R(300,104,10,18,'#7dd3fc',2)+R(212,108,24,14,'#94a3b8',2);},
+ exam:function(){return wall('#d1fae5','#6ee7b7')+R(104,36,152,66,'#14532d',5)+R(98,98,164,6,'#a16207',2)+T(180,64,'SILENCE PLEASE','#ecfdf5',15)+Q('M130 78 h60 M130 88 h90','none',' stroke="#bbf7d0" stroke-width="2" opacity=".7"')+
+  C(310,40,17,'#fff')+Q('M310 40 V29 M310 40 l8 5','none',' stroke="'+K+'" stroke-width="2.4" stroke-linecap="round"')+
+  R(120,136,52,10,'#a16207',2)+R(196,136,52,10,'#a16207',2)+Q('M126 146 v30 M166 146 v30 M202 146 v30 M242 146 v30','none',' stroke="'+K+'" stroke-width="3"')+R(132,128,26,9,'#fff',1)+R(208,128,26,9,'#fff',1)+R(20,40,40,56,'#fef9c3',3)+T(40,64,'ROLL','#92400e',10)+T(40,78,'NO.','#92400e',10);},
+ office:function(){var b='';[[28,58,22],[54,40,26],[84,66,18],[106,48,24],[134,60,26]].forEach(function(q){b+=N(q[0],q[1],q[2],108-q[1],'#312e81');for(var y=q[1]+6;y<100;y+=10)for(var x=q[0]+4;x<q[0]+q[2]-4;x+=8)b+=N(x,y,4,5,'#fde68a',0,(x+y)%3?'':' class="an-blink"');});
+  return wall('#bfdbfe','#94a3b8')+R(20,18,152,92,'#1e1b4b',4)+b+Q('M96 18 V110 M20 64 H172','none',' stroke="'+K+'" stroke-width="2.4"')+
+  R(188,120,160,10,'#b45309',2)+Q('M196 130 v52 M340 130 v52','none',' stroke="'+K+'" stroke-width="3"')+R(226,80,60,40,'#111827',4)+N(231,85,50,28,'#38bdf8')+Q('M236 92 h22 M236 99 h34 M240 106 h16','none',' stroke="#e0f2fe" stroke-width="2.4" stroke-linecap="round" class="an-blink2"')+R(250,120,12,4,'#475569')+
+  R(300,108,14,12,'#fff',2)+steam(307,104)+plant(318,128)+C(214,40,15,'#fff')+Q('M214 40 V31 M214 40 l7 3','none',' stroke="'+K+'" stroke-width="2.2" stroke-linecap="round"');},
+ cabin:function(){var bl='';for(var y=26;y<98;y+=8)bl+=Q('M30 '+y+' H140','none',' stroke="#d6a76c" stroke-width="2"');
+  return wall('#fde2c4','#a16207')+R(28,20,114,82,'#fef3c7',3)+bl+R(160,26,52,70,'#7c2d12',3)+N(166,34,40,12,'#fbbf24')+N(166,52,40,12,'#60a5fa')+N(166,70,40,12,'#f87171')+
+  R(176,118,176,36,'#7c2d12',4)+R(176,112,176,8,'#9a3412',2)+R(232,100,64,14,'#fbbf24',3)+T(264,111,'MANAGER','#3b2506',9)+R(316,92,24,20,'#fde68a',2)+R(322,86,12,8,'#fde68a',2)+R(190,96,30,16,'#fff',2)+R(194,92,30,16,'#e0f2fe',2);},
+ mandap:function(){var gar='';for(var i=0;i<9;i++){gar+=C(48,52+i*11,5.5,i%2?'#fb923c':'#fde047')+C(312,52+i*11,5.5,i%2?'#fde047':'#fb923c');}
+  var tor='';for(var x=60;x<=300;x+=16)tor+=C(x,40+Math.sin((x-60)/240*Math.PI)*16,5,(x/16)%2?'#fb923c':'#facc15');
+  return N(0,0,360,200,'#7f1d1d')+lights(14,12,10)+wall('rgba(0,0,0,0)','#b91c1c',152)+N(0,170,360,30,'#fcd34d')+Q('M0 170 H360','none',' stroke="'+K+'" stroke-width="2"')+
+  P('M24 46 L180 20 L336 46 Z','#dc2626')+P('M24 46 L180 34 L336 46','none')+R(40,46,16,128,'#f59e0b',3)+R(304,46,16,128,'#f59e0b',3)+gar+tor+
+  R(156,156,48,14,'#a16207',2)+G('an-flame',P('M180 156 q-14 -10 -4 -28 q2 10 8 6 q-2 -10 6 -16 q8 20 -10 38 z','#f97316')+Q('M180 154 q-6 -6 0 -14 q6 8 0 14 z','#fde047'));},
+ airport:function(){var m='';for(var x=10;x<360;x+=70)m+=Q('M'+x+' 14 V112','none',' stroke="'+K+'" stroke-width="2.4"');
+  return wall('#e2e8f0','#cbd5e1',140)+N(10,14,340,98,'#7dd3fc')+N(10,84,340,28,'#bae6fd')+G('an-fly',P('M30 60 h70 q12 0 14 6 q-2 6 -14 6 h-70 z','#fff')+P('M38 60 l-10 -16 h10 l14 16','#2563eb')+P('M62 66 l-8 16 h10 l14 -16','#cbd5e1'))+m+R(10,14,340,98,'none',2)+
+  R(124,14,112,40,'#111827',4)+T(180,30,'BLR → FRA 07:40','#fde047',10)+T(180,46,'DEL → SFO 09:15','#fde047',10,' class="an-blink"')+
+  R(170,146,40,44,'#ef4444',6)+Q('M182 146 v-8 h16 v8','none',' stroke="'+K+'" stroke-width="2.6"')+Q('M176 160 h28','none',' stroke="'+K+'" stroke-width="2"')+R(216,162,30,28,'#2563eb',5);},
+ garage:function(){var s='';for(var y=6;y<44;y+=7)s+=Q('M0 '+y+' H360','none',' stroke="#78716c" stroke-width="1.6"');
+  return wall('#d6d3d1','#78716c')+N(0,0,360,46,'#a8a29e')+s+Q('M0 46 H360','none',' stroke="'+K+'" stroke-width="2.2"')+lights(52,10,8)+
+  R(118,64,124,72,'#fff',4)+P('M132 122 L160 110 L184 114 L208 92 L228 74','none',' stroke="#dc2626" stroke-width="3"')+P('M222 72 l7 1 l-2 7','none',' stroke="#dc2626" stroke-width="3"')+T(150,84,'MRR','#1b2036',12)+
+  P('M260 186 q-6 -34 26 -38 q34 2 28 38 z','#facc15')+R(30,128,74,8,'#a16207',2)+Q('M36 136 v46 M98 136 v46','none',' stroke="'+K+'" stroke-width="3"')+R(48,112,40,17,'#334155',3)+N(52,115,32,10,'#a5f3fc')+R(70,120,10,8,'#fff',2)+steam(75,116);},
+ home:function(){return wall('#fed7aa','#b45309')+R(20,22,80,64,'#bae6fd',3)+Q('M60 22 V86 M20 54 H100','none',' stroke="'+K+'" stroke-width="2"')+P('M14 18 q20 40 4 76 l-6 0 z','#dc2626')+P('M106 18 q-20 40 -4 76 l6 0 z','#dc2626')+R(10,14,100,6,'#7c2d12',2)+
+  R(150,30,56,42,'#fde68a',3)+R(156,36,44,30,'#93c5fd',2)+C(178,48,7,'#f1c8a5')+P('M168 66 q10 -12 20 0','#16a34a')+C(270,40,16,'#fff')+Q('M270 40 V30 M270 40 l7 4','none',' stroke="'+K+'" stroke-width="2.2" stroke-linecap="round"')+
+  N(0,160,360,30,'#9a3412',0,' opacity=".35"')+P('M120 150 v-34 q0 -10 10 -10 h100 q10 0 10 10 v34 z','#2563eb')+R(112,124,136,30,'#1d4ed8',8)+R(296,124,40,30,'#a16207',2)+R(304,110,22,16,'#e5e7eb',5)+steam(315,106);},
+ city:function(){var b='';[[0,60,50,'#fb923c'],[46,40,40,'#f97316'],[84,70,46,'#ea580c'],[230,48,44,'#fb923c'],[270,30,40,'#f97316'],[306,62,54,'#ea580c']].forEach(function(q){b+=R(q[0],q[1],q[2],130-q[1],q[3]);for(var y=q[1]+8;y<120;y+=12)b+=N(q[0]+8,y,6,6,'#fde68a')+N(q[0]+q[2]-14,y,6,6,'#fde68a');});
+  return N(0,0,360,200,'#fdba74')+D(180,70,34,'#fef08a')+b+N(0,130,360,70,'#475569')+Q('M0 130 H360','none',' stroke="'+K+'" stroke-width="2.2"')+Q('M10 166 h30 M70 166 h30 M130 166 h30 M190 166 h30 M250 166 h30 M310 166 h30','none',' stroke="#f8fafc" stroke-width="3"')+
+  G('an-bob',P('M134 154 v-26 q0 -12 14 -12 h28 q14 0 16 12 l6 26 z','#16a34a')+P('M136 128 q2 -14 16 -14 h26 q12 0 14 14 z','#facc15')+R(150,130,22,14,'#bae6fd',2)+C(146,158,8,'#1f2937')+C(192,158,8,'#1f2937'))+
+  P('M228 152 q0 -14 14 -14 h34 q12 0 12 12 v6 h-6 v8 h-6 v-8 h-30 v8 h-6 v-8 z','#fff')+C(250,146,4,'#1f2937')+C(268,144,3,'#1f2937')+P('M288 138 l8 -6 l4 4','none')+P('M284 140 q8 -2 12 6 q-6 4 -12 -2 z','#fff');},
+ hills:function(){return N(0,0,360,200,'#bae6fd')+C(286,44,20,'#fde047')+P('M-10 150 L70 54 L120 110 L180 40 L260 130 L310 80 L380 150 Z','#64748b')+P('M58 68 L70 54 L82 68 L76 72 L70 66 L64 72 Z','#fff')+P('M168 54 L180 40 L192 54 L186 58 L180 52 L174 58 Z','#fff')+
+  P('M-10 160 Q90 120 180 150 T370 140 V210 H-10 Z','#4ade80')+N(0,176,360,24,'#22c55e')+Q('M20 100 Q90 130 160 96','none',' stroke="'+K+'" stroke-width="1.6"')+
+  N(34,104,10,12,'#ef4444')+N(58,112,10,12,'#facc15')+N(82,116,10,12,'#22c55e')+N(106,112,10,12,'#3b82f6')+N(128,104,10,12,'#fff')+G('an-bob',P('M300 120 l14 -8 l14 8','none'));},
+ studio:function(){return wall('#f5d0fe','#c084fc')+R(20,22,96,46,'#1e1b4b',8)+T(68,52,'LIVE','#f43f5e',22,' class="an-blink"')+C(36,45,5,'#f43f5e',' class="an-blink"')+
+  G('an-glow','<circle cx="180" cy="70" r="36" fill="none" stroke="#fff" stroke-width="10"/><circle cx="180" cy="70" r="36" fill="none" stroke="'+K+'" stroke-width="2"/><circle cx="180" cy="70" r="41" fill="none" stroke="'+K+'" stroke-width="2"/><circle cx="180" cy="70" r="31" fill="none" stroke="'+K+'" stroke-width="2"/>')+
+  R(172,56,16,28,'#111827',3)+Q('M180 106 V150 M180 150 l-24 30 M180 150 l24 30 M180 150 V180','none',' stroke="'+K+'" stroke-width="3"')+R(260,30,80,8,'#a16207',2)+plant(266,30)+R(304,14,18,16,'#fde047',3)+R(270,80,70,8,'#a16207',2)+R(278,62,14,18,'#60a5fa',2)+R(296,58,14,22,'#f472b6',2)+R(314,66,14,14,'#4ade80',2);},
+ shop:function(){var j='';[[24,52],[54,52],[84,52],[24,92],[54,92],[84,92]].forEach(function(q,i){j+=R(q[0],q[1],24,26,['#fde047','#f87171','#86efac','#fdba74','#c4b5fd','#93c5fd'][i],5)+N(q[0]+4,q[1]-4,16,6,'#a16207');});
+  return wall('#fef3c7','#a16207')+R(60,8,240,30,'#b91c1c',4)+T(180,29,'GUPTA &amp; SONS · SINCE 1987','#fde68a',13)+R(16,80,104,6,'#7c2d12',1)+R(16,120,104,6,'#7c2d12',1)+j+
+  R(150,118,200,40,'#92400e',3)+R(150,112,200,8,'#b45309',2)+R(176,98,40,16,'#dc2626',2)+Q('M196 98 v16','none',' stroke="#fde68a" stroke-width="2"')+P('M260 112 v-20 M244 92 h32 M244 92 l-6 10 h12 z M276 92 l-6 10 h12 z','#fbbf24')+R(310,92,26,20,'#16a34a',3)+T(323,106,'₹','#fff',12);},
+ sarkari:function(){var f='';for(var i=0;i<6;i++)f+=R(214+(i%2)*4,138-i*12,74,12,'#fde68a',2)+Q('M'+(240+(i%2)*4)+' '+(138-i*12)+' v12','none',' stroke="#dc2626" stroke-width="2"');
+  return wall('#ecfccb','#65a30d')+Q('M180 0 V14','none',' stroke="'+K+'" stroke-width="3"')+G('an-spin',P('M180 16 l-46 -4 l0 6 z','#94a3b8')+P('M180 16 l46 4 l0 -6 z','#94a3b8'))+C(180,16,6,'#475569')+
+  R(24,30,64,56,'#e0f2fe',3)+Q('M40 30 v56 M56 30 v56 M72 30 v56','none',' stroke="'+K+'" stroke-width="2.4"')+R(120,34,40,48,'#fff',2)+N(120,34,40,12,'#dc2626')+T(140,72,'14','#1b2036',18)+
+  R(190,150,160,8,'#78350f',2)+f+R(310,134,14,16,'#7c2d12',2)+R(306,148,22,6,'#1e3a8a',2)+Q('M200 158 v26 M340 158 v26','none',' stroke="'+K+'" stroke-width="3"');},
+ clinic:function(){return wall('#e0f2fe','#7dd3fc')+R(30,22,44,44,'#fff',6)+N(46,30,12,28,'#ef4444')+N(38,38,28,12,'#ef4444')+R(110,26,100,56,'#111827',6)+Q('M118 56 h20 l6 -16 l8 30 l6 -14 h50','none',' stroke="#4ade80" stroke-width="3" class="an-blink2"')+
+  R(220,120,130,22,'#fff',6)+R(220,142,130,8,'#94a3b8',2)+R(320,98,30,24,'#fff',6)+Q('M232 150 v34 M340 150 v34','none',' stroke="'+K+'" stroke-width="3"')+Q('M150 182 V92 M138 92 h24','none',' stroke="'+K+'" stroke-width="3"')+R(144,96,14,22,'#bfdbfe',4);},
+ cafe:function(){return N(0,0,360,200,'#fed7aa')+D(70,48,24,'#fde047')+N(0,96,360,40,'#38bdf8')+Q('M0 96 H360','none',' stroke="'+K+'" stroke-width="2"')+Q('M20 110 q10 -6 20 0 M90 120 q10 -6 20 0 M170 108 q10 -6 20 0','none',' stroke="#e0f2fe" stroke-width="2.4"')+N(0,136,360,64,'#fde68a')+Q('M0 136 H360','none',' stroke="'+K+'" stroke-width="2"')+
+  R(212,60,130,84,'#d97706',3)+P('M200 64 L277 26 L354 64 Z','#a16207')+R(226,76,100,20,'#fff7ed',3)+T(276,91,'COLD COFFEE','#9a3412',12)+R(236,104,40,40,'#7c2d12',2)+
+  Q('M150 186 q-6 -60 12 -110','none',' stroke="'+K+'" stroke-width="9"')+Q('M150 186 q-6 -60 12 -110','none',' stroke="#a16207" stroke-width="5"')+G('an-sway',P('M162 76 q-30 -10 -46 8 q24 -4 46 -8 z','#16a34a')+P('M162 76 q30 -12 46 6 q-24 -2 -46 -6 z','#22c55e')+P('M162 76 q-8 -26 -30 -30 q16 14 30 30 z','#15803d')+P('M162 76 q8 -26 30 -30 q-16 14 -30 30 z','#16a34a'));}
+};
+function sceneSvg(k){return '<svg class="bg" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+(SCN[k]||SCN.office)()+'</svg>';}
+function scene(k,actors,tag,badge){return '<div class="scene sc-'+k+'">'+sceneSvg(k)+(actors||'')+(tag?'<span class="sc-tag">'+tag+'</span>':'')+(badge?'<span class="sc-badge">'+badge+'</span>':'')+'</div>';}
+function actor(svg,cls){return '<div class="actor '+cls+'" aria-hidden="true">'+svg+'</div>';}
+function dice(n){var pips={1:[[20,20]],2:[[12,12],[28,28]],3:[[12,12],[20,20],[28,28]],4:[[12,12],[28,12],[12,28],[28,28]],5:[[12,12],[28,12],[20,20],[12,28],[28,28]],6:[[12,11],[28,11],[12,20],[28,20],[12,29],[28,29]]}[n||5];
+  return '<svg class="dice roll" viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="3" width="34" height="34" rx="8" fill="#fffdf7"'+SK+'/>'+pips.map(function(p){return D(p[0],p[1],3.6,'#dc2626');}).join('')+'</svg>';}
+
+/* ================= the player: looks (unlockable) + outfits per life stage ================= */
+var LOOKS=[
+ {id:'classic',name:'Classic',need:0,o:{skin:2,hair:'side',hairColor:'#1a120d'}},
+ {id:'curly',name:'Curly Coder',need:3,o:{skin:3,hair:'curly',hairColor:'#120c08',glasses:true}},
+ {id:'pony',name:'Ponytail Pro',need:6,o:{skin:1,hair:'ponytail',hairColor:'#2b1b12'},fem:1},
+ {id:'bun',name:'Bun & Bindi',need:10,o:{skin:2,hair:'bun',hairColor:'#1f1712',bindi:true},fem:1},
+ {id:'spiky',name:'Spiky Topper',need:15,o:{skin:0,hair:'spiky',hairColor:'#3a2a20'}},
+ {id:'beard',name:'Bearded Boss',need:20,o:{skin:4,hair:'short',hairColor:'#0f0a07',beard:true}},
+ {id:'long',name:'Long-hair Lead',need:26,o:{skin:1,hair:'long',hairColor:'#24170f',glasses:true},fem:1},
+ {id:'stache',name:'Moustache Legend',need:32,o:{skin:3,hair:'side',hairColor:'#120c08',mustache:true,glasses:true}}
+];
+OA.unlocks.define(LOOKS.map(function(l){return {id:l.id,name:l.name,need:l.need};}));
+function look(){var id=OA.unlocks.selected();return LOOKS.filter(function(l){return l.id===id;})[0]||LOOKS[0];}
+var OUT={college:{shirt:'#8b5cf6',pants:'#1e3a8a'},job:{shirt:'#e0f2fe',pants:'#334155',lanyard:'#2563eb'},sw:{shirt:'#0ea5e9',pants:'#1e293b',lanyard:'#fbbf24'},
+ shaadi:{shirt:'#14b8a6',pants:'#1f2937'},wed:{shirt:'#f59e0b',pants:'#fef3c7'},wedF:{saree:true,shirt:'#dc2626',border:'#fbbf24'},
+ mgr:{shirt:'#f8fafc',pants:'#1f2937',tie:'#1e3a8a'},founder:{shirt:'#111827',pants:'#1e3a8a'},creator:{shirt:'#ec4899',pants:'#1e293b'},
+ govt:{shirt:'#fefce8',pants:'#475569'},biz:{shirt:'#a16207',pants:'#1f2937'},ca:{shirt:'#f1f5f9',pants:'#111827',tie:'#7c2d12'},prof:{shirt:'#d9f99d',pants:'#334155',glasses:true}};
+var OUTNAME={college:'College hoodie',job:'Formal shirt + ID card',sw:'Smart shirt, gold lanyard',shaadi:'Weekend best',mgr:'Manager tie',founder:'Founder T-shirt',creator:'Creator tee',govt:'Crisp sarkari white',biz:'Shop-owner kurta',ca:'CA suit and tie',prof:'Professor’s shirt'};
+function outfitKey(c,track,sc){if(sc==='mandap')return 'wed';if(c<=0)return 'college';if(c===1)return track==='govt'?'govt':'job';if(c===2)return track==='startup'?'founder':track==='creator'?'creator':'sw';
+ var t={startup:'founder',creator:'creator',govt:'govt',biz:'biz',ca:'ca',academia:'prof'}[track];return t||(c===3?'shaadi':'mgr');}
+function you(o){var L=look(),k=outfitKey(o.c,o.track,o.sc);if(k==='wed'&&L.fem)k='wedF';
+ var x=Object.assign({},L.o,OUT[k],{mood:o.mood||'neutral',pose:o.pose||'stand'});
+ if(o.c>=5||o.grey){x.hairColor='#a3a9b5';x.glasses=true;}
+ return OA.art.person(x);}
+
+/* ================= life content =================
+   X(id, chapters, scene, 'who:mood', tag, title, prompt, choices, req, weight, memory)
+   choice: [label, fx, text, chance, failFx, failText]
+   fx tokens: h+5 s-3 f+10 | $=4.5 $*1.2 $+1 | +flag -flag | >EVENT | @track | #Title_with_underscores | ^up ^mgr | !fest | *achievement */
+var EV={}, EVL=[];
+function X(id,ch,sc,who,tag,t,p,c,req,w,mem){var e={id:id,ch:ch,sc:sc,who:who,tag:tag,t:t,p:p,c:c,req:req||'',w:w==null?2:w,mem:mem||''};EV[id]=e;EVL.push(e);}
+var OPEN={ENG:'ENG_PLACE',COM:'COM_FINAL',ART:'ART_GRAD'};
+
+/* ---- Chapter 1: College ---- */
+X('ENG_PLACE','1','campus','hr:happy','Campus placement','Placement day!','Three offers on the table. Your phone is already full of “Congrats beta!” messages.',[
+ ['Mass recruiter: ₹4.5 LPA, very stable','$=4.5 f+15 @job +service #Software_Engineer_·_IT_services','Mummy distributes laddoos. You get three months of training and a lanyard.'],
+ ['Startup: ₹10 LPA + ESOPs','$=10 h+10 f-10 @job +startupjob +esop #SDE-1_·_Startup','Relatives ask “startup matlab?”. You get a hoodie and unlimited Maggi.'],
+ ['Skip it. Crack GATE or go for an MS','s+15 f-5 #Aspirant >STUDY','Library card, three test series and one very tired chai-wala.']],'',0);
+X('STUDY','12','exam','','Results','Results are out','Months of mock tests come down to one PDF.',[
+ ['Open the PDF yourself','s+10 h+15 >ABROAD_PSU','You made it! Two good doors just opened.',.6,'h-15 s+5 >JOBHUNT','Missed the cut by three marks. Pain. Time to job hunt.'],
+ ['Ask Papa to open it first','s+10 h+10 f+8 >ABROAD_PSU','Papa reads it twice, then hugs you. Two doors just opened.',.6,'f+6 h-10 >JOBHUNT','Papa says “next time”. Somehow that helps.']],'',0);
+X('ABROAD_PSU','12','airport','','Big choice','MS in Germany or a PSU job?','A scholarship in Munich, or a government engineering job with a 5:30 pm exit.',[
+ ['Germany: pack the pressure cooker','$=42 h+10 f-15 s+15 @job +abroad #Engineer_·_Berlin *onsite','Two years later: an engineering job in Berlin. Mummy learns video calls.'],
+ ['PSU job: stability first','$=12 f+20 h+10 @govt +psu #PSU_Engineer','Govt quarters, canteen thali and peace of mind.']],'',0);
+X('COM_FINAL','1','campus','aunty:smug','Final year','B.Com done. Now what?','Your CA uncle has opinions. So does the entire family WhatsApp group.',[
+ ['Big 4 audit firm: ₹6 LPA','$=6 f+10 h-5 @job +big4 #Audit_Associate','Busy season begins. You learn that “quick call” means two hours.'],
+ ['Start CA articleship','$=1.5 s+20 @ca #CA_Articled_Assistant >CA_RES','The stipend is small, the dreams are big. Excel becomes your best friend.'],
+ ['Join Papa’s shop','$=5 f+20 h+5 @biz #Family_Business','You get a desk, a ledger and forty years of “humare zamane mein”.']],'',0);
+X('CA_RES','12','exam','','CA Final','CA Final results','The results website crashes. Of course it does.',[
+ ['Refresh… refresh… refresh…','$=9 s+15 h+15 f+15 #Chartered_Accountant +caok','You’re a CA! Two new letters before your name. Forever.',.55,'h-15 s+5 >CA2','Not this attempt. Deep breath.']],'',0);
+X('CA2','12','exam','','Second chance','Try again or switch?','Your friends are already earning. You are revising Indirect Tax.',[
+ ['One more attempt','$=9 s+15 h+20 f+10 #Chartered_Accountant +caok','Cleared! Second attempts hit different.',.6,'$=5 h-10 @job #Finance_Analyst','Not cleared, but a finance analyst job comes through.'],
+ ['Become a finance analyst','$=5.5 h+5 @job #Finance_Analyst','Your Excel shortcuts make you an office legend.']],'',0);
+X('ART_GRAD','1','home','aunty','Graduation','BA done. The world awaits.','Everyone wants to know your “plan”. You have a vibe.',[
+ ['Content writer: ₹3.5 LPA','$=3.5 s+5 @job +agency #Content_Writer','You write “10 Ways to Boost Productivity” for the tenth time.'],
+ ['UPSC prep in Delhi','f+12 s+10 @govt +aspirant #UPSC_Aspirant >UPSC','One room, two roommates, three newspapers a day.'],
+ ['Become a creator','$=1 h+15 f-15 @creator #Creator_·_2k_followers >VIRAL','Ring light bought. The family WhatsApp group is “concerned”.'],
+ ['MA, then teach','$=0.4 s+18 @academia #MA_Student >NET','You choose books. Your bookshelf is now load-bearing.']],'',0);
+X('UPSC','12','exam','boss:neutral','UPSC','Prelims, Mains, Interview','The interview board asks: “Why should we select you?”',[
+ ['An honest, simple answer','$=14 f+25 h+20 s+15 +ias #IAS_Officer *ias !fest','Selected! Your town puts up a banner with your photo.',.5,'h-12 >UPSC2','Prelims and Mains cleared, final list missed by a whisker.'],
+ ['A rehearsed speech','$=14 f+25 h+20 s+15 +ias #IAS_Officer *ias !fest','Selected! The board liked your confidence.',.35,'h-12 >UPSC2','They could tell it was rehearsed. Final list missed.'],
+ ['A small joke to break the ice','$=14 f+25 h+20 s+15 +ias #IAS_Officer *ias !fest','The chairman laughs. Selected!',.42,'h-12 >UPSC2','Nobody laughs. Final list missed.']],'',0);
+X('UPSC2','123','sarkari','','Next step','Missed the final list','So close. You know more about the Constitution than most lawyers.',[
+ ['One last attempt','$=14 f+25 h+20 s+15 +ias #IAS_Officer *ias !fest','Rank 212! Your mohalla bursts crackers.',.35,'$=6 h-10 #State_PSC_Officer','Not IAS, but you clear the State PSC. Still sarkari!'],
+ ['Take a State PSC job','$=6 f+20 h+5 #State_PSC_Officer','A stable job and respect in the mohalla.'],
+ ['Teach UPSC online','$=4 h+10 @creator +teacher #UPSC_Teacher_·_Online >VIRAL','Your Polity explanations are surprisingly good.']],'',0);
+X('VIRAL','1234','studio','','Going viral','A reel hits 2M views','Brands are in your DMs. Your phone is hot. Literally.',[
+ ['Go all in on brand deals','$=14 h+10 f+5 +viral #Creator_·_500k_followers','You buy Mummy a washing machine. The family group goes quiet.'],
+ ['Take a social media manager job','@job $=7 f+15 +agency #Social_Media_Manager','Steady salary. Your reels are now about detergent.']],'',0);
+X('NET','12','exam','','UGC-NET','UGC-NET results','The exam that decides whether you can teach in a college.',[
+ ['Check the result','$=5 s+10 h+10 +net #Assistant_Professor','Cleared! A college offers you a lecturer post.',.6,'$=3 h-6 #Coaching_Faculty','Missed it. A coaching centre hires you instead.']],'',0);
+X('HOSTEL','1','campus','intern:happy','Hostel life','The night before the final exam','Your roommate has the “important questions”. Also a guitar.',[
+ ['Study alone till 4 AM','s+8 h-5','You know everything. You also see the sunrise. Twice.'],
+ ['Group study (mostly Maggi)','h+10 s+3 +friends','You learn very little and make friends for life.'],
+ ['Sleep early, trust yourself','h+8 s+4','Fresh mind, calm exam. Smart move.',.5,'h-6 s-2','You trusted yourself. Yourself had not studied.']]);
+X('INTERN','1','office','dev:happy','Summer internship','Two months in a real office','Unpaid, but there is free coffee and a senior dev who explains things.',[
+ ['Ask a hundred questions','s+12 +mentor','The senior dev adopts you. You now owe him chai for life.'],
+ ['Do exactly what is asked','s+5 h+3','Neat work, a good certificate, zero drama.'],
+ ['Skip it for a family trip','f+12 h+6','Hill station, family photos, one very good sunset.']]);
+X('PROJECT','1','campus','intern:shocked','Final-year project','Your project partner vanished','Viva is in a week. Partner’s status: “At cousin’s wedding 💃”.',[
+ ['Build it all yourself','s+12 h-8 +grinder','It works! The examiner asks who did it. You smile.'],
+ ['Buy a project online','h+3','Nobody notices. Phew.',.35,'s-5 h-10 f-5','The examiner has seen this exact project fourteen times.'],
+ ['Call your partner’s mummy','h+6 f+3','He is back in 48 hours. Mummies are undefeated.']]);
+X('COACHING','1','exam','aunty:smug','Advice','Neighbour aunty has a suggestion','“Sharma ji’s son did coaching. You also do.”',[
+ ['Join CAT coaching','s+10 +cat','99 percentile! An MBA call will come later.',.45,'s+6 h-5','Percentile: respectable. Mummy: disappointed.'],
+ ['Learn a skill online for free','s+12','Ten free courses later, you actually know things.'],
+ ['Smile and nod','f+4','Aunty is satisfied. For now.']]);
+X('FEST','1','studio','intern:happy','College fest','You are asked to anchor the fest','Mic, stage, 2,000 students and one faulty speaker.',[
+ ['Say yes!','h+12 s+5 +stage','You crush it. Someone films it. Seniors know your name.',.6,'h-6','The mic dies mid-joke. Legendary, for the wrong reasons.'],
+ ['Run the tech instead','s+8 +techie','You fix the speaker with tape and confidence.'],
+ ['Watch from the back','h+3','Samosa, friends, good music. Easy night.']]);
+X('LOAN','1','home','aunty','Money talk','Papa studies the education loan papers','The EMI starts six months after placement. He is doing maths on a calendar.',[
+ ['Promise to repay it in two years','f+10 h-4 +loan','Papa nods. He tells everyone you are “very responsible”.'],
+ ['Ask for a gap year','f-10 h+8','A year to think. Papa thinks too. Loudly.'],
+ ['Start part-time tutoring','s+4 $+0.5 f+5','Class 10 maths, ₹500 an hour. You feel rich.']]);
+X('LINKEDIN','12','office','','Online','Your first networking-app post','“Thrilled to announce…” but you have nothing to announce yet.',[
+ ['Write honestly about your project','s+4 h+4 +brand','Forty likes, two recruiters, one kind comment from a stranger.'],
+ ['Post a motivational quote','h+2','Your uncle likes it. Nobody else does.'],
+ ['Skip social media, build skills','s+6','Quietly getting better. Very underrated.']]);
+
+/* ---- Chapter 2: First Job ---- */
+X('ONBOARD','2','office','hr:happy','Day one','Induction week','Fourteen slides on company values, two on salary.',[
+ ['Make friends with the office peon bhaiya','h+6 +peon','Ramesh bhaiya now saves you the last samosa every day.'],
+ ['Sit with the seniors at lunch','s+6 +network','You understand nothing, but they remember your face.'],
+ ['Finish every online training first','s+5 h-2','HR sends you a certificate. You frame it. Mentally.']],'job');
+X('FIRSTSAL','2','home','aunty:happy','First salary','Your first salary hits the account','You read the SMS eleven times.',[
+ ['Gift Mummy-Papa something','f+14 h+6 +gift','Papa pretends it was unnecessary. He shows it to every neighbour.'],
+ ['Start a SIP','s+3 h+2 +sip','₹5,000 a month into a mutual fund. Future you says thanks.'],
+ ['New phone on EMI','h+10 f-3','Great camera, 12 months of EMI. Worth it? Ask in 11 months.']],'m>1');
+X('CREDIT','23','cabin','manager:smug','Office drama','Your manager took credit','Your project. Their slide. Their name.',[
+ ['Raise it calmly in a 1:1','s+5 $*1.15 h+5','Respect earned. A bigger project lands on your desk.',.55,'h-10','Awkward. Very awkward. But you said it.'],
+ ['Let it go','h-12','You let it go. Your heart doesn’t.'],
+ ['Quietly update your resume','s+5 >SWITCH','Fresh resume, new profile photo, “Open to work” in stealth mode.']],'job m>1');
+X('APPRAISAL','235','cabin','boss:smug','Appraisal','3% hike. Thank you for your “contribution”.','Inflation laughs at you.',[
+ ['Accept it','$*1.03 h-8','“Happy to be here.” (You are not.)'],
+ ['Negotiate with data','$*1.15 s+3 h+5','You showed numbers. HR found “budget”. +15%!',.45,'$*1.03 h-5','HR: “We will revisit next cycle.” Sure.'],
+ ['Start looking outside','>SWITCH','Job-app notifications: ON.']],'job m>1');
+X('LAYOFF','2345','cabin','hr:sad','Bad news','Layoffs announced','Calendar invite: “Quick sync” at 9 AM. With HR.',[
+ ['Open the invite','h-5 s+5 +survived *layoff','You survived. Survivor’s guilt and double the work.',.6,'h-15 $=0 +laidoff >JOBHUNT','You are affected. Laptop to be returned by Friday.'],
+ ['Volunteer for the package','$=0 h+5 s+5 +laidoff >JOBHUNT','Six months’ pay and a lot of free time. Scary. Exciting.']],'job m>1');
+X('PEON_TIP','345','office','peon:neutral','Inside info','Ramesh bhaiya whispers something','“Saab, HR booked the big conference room for Friday. With tissues.”',[
+ ['Get your best work in front of the boss now','s+6 h+4 +survived *layoff','Friday comes. Your name is not on the list. Thank you, bhaiya.'],
+ ['Start interviewing quietly','$*1.3 h+6 ^up +switched','You switch before the storm. +30%.']],'peon job m>1',2,'You were kind to Ramesh bhaiya on your first day.');
+X('JOBHUNT','23456','city','','Job hunt','Job hunting season','How do you go about it?',[
+ ['Rebuild your resume properly first','$=8 s+5 h+12 ^up -laidoff','A sharp resume gets four callbacks in a week. New job!',.75,'$=6 h+5 -laidoff','It took a while, but you are back at work.'],
+ ['Send the same resume to 200 jobs','$=6 h+5 -laidoff','A lucky break after six weeks.',.3,'$=4.5 h-10 -laidoff','Few replies. You take a lower offer.'],
+ ['Take three months to upskill','s+18 $=7 h+5 -laidoff','New skills, new job, slightly better pay.']],'',0);
+X('BENCH','2','office','dev:sleepy','Bench life','You are on the bench','No project for a month. You get paid to wait.',[
+ ['Get two cloud certifications','s+14','The bench was your secret gym.'],
+ ['Binge-watch web series','h+10 s-4','Great month. Your skills feel rusty.'],
+ ['Ask for any project','s+8','A real project! Real learning.',.6,'h-6','A 3 AM support project. Character building.']],'service');
+X('NIGHT','23','office','manager','Shift','US shift: 7 PM to 4 AM','Your client wakes up when you should be sleeping.',[
+ ['Accept, with night allowance','$*1.1 h-8 f-4','Money up. Sleep schedule: owl.'],
+ ['Negotiate a day shift','h+6','The manager agrees. Your mother cries with joy.',.5,'h-4','Denied. Owl life it is.'],
+ ['Look for a new job','>SWITCH','Your resume gets a midnight update.']],'job');
+X('FLATMATE','2','home','intern:smug','Flat life','Your flatmate never pays for the Wi-Fi','He streams in 4K. You pay in 4K.',[
+ ['Make a split-bills spreadsheet','s+3 h+4','He pays. Spreadsheets win again.'],
+ ['Just pay it yourself','h-4 $-0.2','Peace costs ₹999 a month.'],
+ ['Move into a PG','h-2 f+3','Three meals, curfew, aunty’s rules. Mummy approves.']],'job');
+X('MENTOR_BACK','23','office','dev:happy','Old friend','Remember the senior dev?','He just joined a great product company and wants you on his team.',[
+ ['Join him','$*1.45 s+10 h+6 ^up +switched','Same chai, double the learning. +45%.'],
+ ['Stay where you are','h+3','He says the door stays open.']],'mentor job',2,'You asked a hundred questions during your internship.');
+X('HACKATHON','23','garage','dev:happy','Hackathon','Internal hackathon tonight','36 hours, unlimited pizza, one big prize.',[
+ ['Build something wild','s+10 $*1.1 +hack','You win! ₹50,000 and the CEO knows your name.',.5,'s+8 h-4','No prize, but you built something cool.'],
+ ['Help the team with slides','s+4 h+4','Your slides are so good someone cries.'],
+ ['Go home and sleep','h+8','Pizza is overrated. Sleep is not.']],'job');
+X('WFH','23','home','','Remote work','Your 9 AM call starts now','You are in your T-shirt and pyjamas. The camera light is on.',[
+ ['Join with camera on, smile','h+2 s+2','Professional. Nobody sees the pyjamas.'],
+ ['Mute and multitask','h+5','Breakfast and a meeting at once. Efficient.',.6,'h-8','You were unmuted the whole time. Including the pressure cooker.'],
+ ['Pretend your internet is down','h+4 s-2','It works. Until it happens five times in a week.']],'job');
+X('COUSIN','23','home','aunty:smug','Family','Cousin got 30 LPA','Mummy is on the phone. Comparison mode: ON.',[
+ ['Do an AI course on weekends','s+15 h-5','Weekend gone, skills up. Mummy now compares certificates.'],
+ ['Ignore it. You are doing fine','h+6 f-10','Peace of mind. Family WhatsApp group: tension.'],
+ ['“Mine is also 30”','f+12 h-6 +lied','It works… for now.']]);
+X('TL_LEAVES','23','office','manager:shocked','Opportunity','Your team lead resigns','Someone needs to run the Monday stand-up.',[
+ ['Step up','s+10 h-5 +lead $*1.1','Acting lead! More meetings, small raise.'],
+ ['Stay in your lane','h+4','You keep your weekends. Somebody else gets the title.']],'job');
+X('AUDIT','23','cabin','boss','Busy season','Audit busy season: 80-hour weeks','Your boss says this is how partners are made.',[
+ ['Go for the partner track','s+10 h-10 +partner','You become very fast at vouching. And very tired.'],
+ ['Do your hours, go home','h+6 f+4','Balanced. Your boss raises one eyebrow.'],
+ ['Switch to an industry finance job','$*1.3 h+6 @job ^up','9 to 6. Weekends exist again.']],'big4|ca');
+X('PSU_LIFE','23','sarkari','peon:happy','Sarkari life','Canteen chai, files and a 5:30 exit','A senior suggests the departmental exam for faster promotion.',[
+ ['Study for it','s+10 $*1.15','Cleared! Promotion and a new nameplate.',.6,'s+5','Next year, maybe.'],
+ ['Enjoy the work-life balance','h+10 f+8','Evening walks, family dinners, a calm mind.']],'govt');
+X('GOVT_T','2345','sarkari','boss','Transfer order','Transfer to a remote district','New posting, 400 km away.',[
+ ['Accept and do good work','s+12 h+5 +good','You fix the district’s water problem. People remember your name.'],
+ ['Use “source” to stop it','f+5 h-5','Transfer cancelled. Your conscience files a complaint.']],'govt');
+X('BIZ_T','234','shop','aunty','Family business','Take the shop online?','Papa still uses a red ledger. You have ideas.',[
+ ['Online orders and quick delivery','$*2.5 s+12 f+10 +bizboom','Orders explode. You open three new branches.',.5,'h-8 s+8','A slow start. Papa says “told you”.'],
+ ['Keep it traditional','f+12 h+3','The same loyal customers since 1987.']],'biz');
+X('CREATOR_T','234','studio','sales:smug','Brand deal','A shady app wants a promotion','₹5 lakh for one reel. The app looks… questionable.',[
+ ['Take the money','$*1.4 h-5','Money in. Your comment section is spicy.',.4,'h-20 f-5 $*0.8','Followers call it out. 40k unfollows in a day.'],
+ ['Say no','h+10 s+5 +trust','Your audience trusts you more. A bigger brand calls next month.']],'creator');
+X('TEACH','23','exam','intern:happy','First class','Sixty students, one marker that doesn’t work','The back bench is already asleep.',[
+ ['Make it fun','h+12 s+5 +popular','They laugh, they learn. Attendance goes up.',.6,'h-4','The joke does not land. Tomorrow is another day.'],
+ ['Strict and serious','s+6','Pin-drop silence. Also zero questions.']],'academia');
+X('STARTUP_CRUNCH','23','garage','ceo:shocked','Startup life','The startup pivots for the fourth time','Yesterday you were a food app. Today you are AI for plants.',[
+ ['Ride the chaos','s+12 h-6','You learn ten jobs at once.'],
+ ['Move to a big stable company','$*1.3 h+5 -startupjob +service ^up','A big campus, a gym and processes for everything.']],'startupjob');
+X('LONELY','234','airport','','Far from home','First winter abroad','It gets dark at 4 PM. Your Maggi stock is finished.',[
+ ['Video call home every day','f+10 h+5','Mummy shows you the new curtains. Twice.'],
+ ['Make local friends','h+10 s+4 +settled','You learn three words of German and two of Spanish.'],
+ ['Plan to return in a few years','f+10 +return','You start a “Back to India” savings account.']],'abroad');
+X('MBA','23','campus','hr:happy','CAT result','A top B-school calls','Two years, a big loan and bigger dreams.',[
+ ['Go for the MBA','$=28 s+12 f+10 @job #Product_Manager +mba','Case studies, placements and finally: Product Manager.'],
+ ['Skip it','h+5','You keep your job and your sanity.']],'cat',3,'You scored 99 percentile in CAT coaching.');
+
+/* ---- Chapter 3: The Switch ---- */
+X('SWITCH','3','city','sales:happy','New offer','An offer: +45% hike','Better title, better pay, new team.',[
+ ['Take it!','$*1.45 s+5 h+5 ^up +switched','New laptop, new badge, same Excel.'],
+ ['Use it for a counter-offer','$*1.22 h-3','You stay with +22%. Your manager now replies within minutes.'],
+ ['Stay loyal','h+5 f+3','Loyalty points: 100. Salary points: same.']],'job m>1',3);
+X('RECRUITER','3','office','hr','Recruiter call','“Send your resume in ten minutes”','A dream company. A recruiter who sounds busy.',[
+ ['Send the old college resume','$*1.25 +switched ^up','Lucky! They liked your project.',.3,'h-6','No reply. The resume still lists “MS Office”.'],
+ ['Rebuild it with real impact numbers','$*1.5 s+4 h+6 ^up +switched','Four rounds, one offer, +50%. Numbers talk.',.8,'h-4','Close! They hired internally.'],
+ ['Ask for two days','$*1.35 ^up +switched','They wait. You shine.',.55,'h-5','The role got filled in those two days.']],'job m>1',3);
+X('NOTICE','3','cabin','boss:angry','Notice period','Your manager won’t relieve you early','Ninety days’ notice. The new company wants you in thirty.',[
+ ['Negotiate a handover plan','s+5 h+4','A clean exit and a good reference.',.6,'h-8','Ninety days of awkward stand-ups.'],
+ ['Buy out the notice period','$*0.95 h+6','Expensive freedom. Still freedom.']],'switched',4,'You switched jobs for a hike.');
+X('REFERRAL','3','office','manager:happy','Your network','A senior from your first job calls','He remembers you from those lunches. His team needs someone like you.',[
+ ['Take the referral','$*1.35 ^up +switched h+6','Referrals skip the queue. +35%.'],
+ ['Politely decline','h+2','The door stays open.']],'network job',2,'You sat with the seniors at lunch on day one.');
+X('ONSITE','34','airport','manager:happy','Opportunity','Onsite offer: Germany','Two years abroad. Mummy has already started crying.',[
+ ['Go!','$*2.4 h+10 f-15 s+8 +abroad *onsite #Consultant_·_Germany','The bread is hard, the salary is soft. You learn “Danke”.'],
+ ['Stay home','f+12','Sunday lunches with family beat euros.']],'job !abroad m>1');
+X('IDEA','35','garage','','2 AM thought','A startup idea at 2 AM','It is brilliant. Or it is the coffee.',[
+ ['Quit and build it','@startup $=0.5 h+10 f-15 #Founder_&_CEO >FUNDING *founder','You print visiting cards that say “Founder”. Mummy hides them.'],
+ ['Build it on weekends','s+10 h-5 +side','The side project grows slowly. Your sleep does not.'],
+ ['Go back to sleep','h+5','The idea is gone by morning. Probably for the best.']],'job');
+X('FUNDING','345','garage','ceo:smug','Investor meeting','The pitch','An investor leans in: “What’s your moat?”',[
+ ['Raise ₹5 crore','$=20 h+10 s+10 >GROWTH','Funded! You hire twelve people and buy a plant.',.6,'h-15 $=1 >GROWTH','Ghosted by thirty investors. You keep going anyway.'],
+ ['Bootstrap it','$=6 h+5 s+8 >GROWTH','Slow, profitable, no board meetings.']],'',0);
+X('GROWTH','3456','garage','dev:shocked','Startup','Make or break year','Burn rate, growth chart and your blood pressure are all going up.',[
+ ['Blitzscale!','$=80 h+15 f+15 +unicorn *unicorn !fest','Valuation crosses a billion dollars. Business news calls you a “young founder”.',.3,'$=0.5 h-20 f-5 +failed','The money runs out. You shut down and write a long "lessons learnt" post.'],
+ ['Stay small and profitable','$=30 h+12','No headlines, but salaries always go out on time.'],
+ ['Sell to a big company','$=55 h+10 f+10 +acquired @job #VP_·_after_acquisition !fest','Acquired! A big cheque and a two-year lock-in.']],'',0);
+X('SIDE_PAYS','45','garage','intern:happy','Side project','Your weekend project has paying users','Two hundred of them. One sent a thank-you email.',[
+ ['Go full-time on it','@startup $*0.7 h+12 #Founder >GROWTH *founder','You resign with a smile. Your manager asks for a demo.'],
+ ['Sell it to a bigger company','$+6 h+8 s+5','A neat cheque. Your weekends are yours again.']],'side',4,'You built a side project on weekends.');
+X('PROMO','345','cabin','boss:happy','Promotion','Manager role offered','More pay, more meetings, fewer weekends.',[
+ ['Accept','$*1.3 h-6 ^mgr +mgr !fest','You now say “let’s circle back” without irony.'],
+ ['Stay an expert (IC)','s+10 h+6 $*1.1','Deep work, fewer meetings, still a raise.']],'job s>=45 !mgr m>1');
+X('SIDEHUSTLE','3','home','','Extra income','A friend offers freelance work','Weekends only. Pays well. Your boss must not know.',[
+ ['Take it','$+3 s+6 h-6','Extra money. Fewer weekends.'],
+ ['Decline, guard your weekends','h+6 f+4','Sunday is for family and biryani.']],'job');
+X('CA_FIRM','34','cabin','boss:smug','CA life','Start your own CA practice?','Your uncle offers his old office. It has a fan and a dream.',[
+ ['Start the practice','@ca $*1.3 h+6 s+6 +practice','Twenty clients by year end. GST season is your Diwali.',.65,'h-8 $*0.8 +practice','Slow start. Many “sir, small doubt” calls.'],
+ ['Join a firm as manager','$*1.4 ^mgr +partner','A bigger desk and a path to partner.']],'caok');
+X('UPSKILL','3','office','analyst','Upskill','The company pays for one course','Cloud, data or leadership. Pick one.',[
+ ['Data and AI','s+15 +ai','Python, dashboards and a new nickname: “data person”.'],
+ ['Leadership course','s+8 +lead','You learn to say “that is a great question”.'],
+ ['Skip it, ship features','$*1.05 h-2','Your manager notices the output.']],'job');
+X('CREATOR_COLLAB','34','studio','sales:happy','Collab','A big creator wants a collab','Two million followers. One condition: you do the editing.',[
+ ['Do it','s+8 $*1.5 h+5 +viral','The collab trends for a week.',.6,'h-6','The edit was rushed. Mixed reviews.'],
+ ['Grow on your own','s+5 h+5','Slow and steady.']],'creator');
+X('PHD','34','airport','analyst','Research','A PhD scholarship abroad','Four years, small stipend, big ideas.',[
+ ['Go for the PhD','s+20 f-8 $=2 +phd #PhD_Scholar','You write a paper nobody reads. Then one that everybody does.'],
+ ['Stay, become a senior lecturer','$*1.3 f+8 h+5 #Senior_Lecturer','Your students start calling you “the cool one”.']],'academia');
+X('RTO','35','city','boss:smug','New policy','Back to office, five days a week','Two hours of traffic. Each way.',[
+ ['Comply','h-10','You discover four new podcasts and lose four kilos of patience.'],
+ ['Find a remote job','h+12','A remote offer! Pyjama bottoms forever.',.6,'h-5','Remote jobs are rarer than you thought.'],
+ ['Move to your hometown, ask for hybrid','f+15 h+5 $*0.95 +hometown','Mummy’s food, cheaper rent, okay internet.']],'job');
+X('BOOMERANG','4','office','manager:happy','Old company','Your old manager calls','“Come back. Bigger role. We miss your memes.”',[
+ ['Boomerang back','$*1.3 h+6 ^up','The old team throws a cake party.'],
+ ['Stay where you grow','s+6','You thank them. Growth beats comfort.']],'switched job',2,'You left your first company for a better offer.');
+
+/* ---- Chapter 4: Shaadi ---- */
+X('SHAADI','4','home','aunty:happy','Shaadi season','Marriage pressure begins','Biodata requests are arriving faster than job offers.',[
+ ['Arranged: trust the family','f+15 h+3 +match','Biodata made. The families will meet this Sunday.'],
+ ['You already have someone','h+10 +love','Time to tell the family. Gulp.'],
+ ['“After my promotion”','f-15 h+5 +delay','That buys you two years. Maybe.']],'!married !match !love',5);
+X('BIODATA','4','home','aunty:smug','Biodata','Mummy made your biodata','It says “Height: 5′10″ (with shoes)” and lists your hobby as “reading”.',[
+ ['Edit it honestly','h+5 f-3 +honest','Honest biodata, honest matches.'],
+ ['Let it go out as is','f+8','Forty-two responses. Mummy is thrilled.'],
+ ['Make one with a QR code','s+3 f+2 h+4','The QR code opens your work profile. Uncles are impressed.']],'match !married');
+X('RISHTA','4','home','aunty:happy','Rishta meeting','Tea, samosas and twelve relatives','Everyone is watching you sip.',[
+ ['Talk about your real dreams','h+8 +engaged','You click! Both families start planning.',.6,'h-4','Polite smiles. Not a match. Next Sunday, then.'],
+ ['Let Papa do the talking','f+8 +engaged','Papa talks about your salary for 40 minutes. It works.'],
+ ['Ask for a coffee meeting alone','h+10 +engaged','Two coffees later, you are both laughing. It’s a yes.',.65,'h-3','Nice person, no spark.']],'match !married !engaged',5);
+X('LOVE','4','home','aunty:shocked','Family meeting','Telling the family about your partner','Four years of dating. One dinner to explain it.',[
+ ['Tell them together, tonight','f+5 h+10 +engaged','Shock, silence, then Mummy asks if they eat spicy food. Yes!',.55,'f-10 h-5 +engaged','Drama for two weeks. Then everyone agrees.'],
+ ['Let your sibling soften them first','f+8 +engaged','Your sibling is a genius negotiator.']],'love !married !engaged',6);
+X('WEDDING','4','mandap','aunty:happy','The big day','The Big Fat Indian Wedding','Three days, two DJs and one aunty who will judge the paneer.',[
+ ['Grand: 800 guests','f+20 h+5 $*0.9 +married *shaadi !fest','Six hundred guests eat, two hundred complain. Perfect wedding.'],
+ ['Simple court marriage + party','h+12 f-4 +married *shaadi !fest','Short, sweet, and the money goes into savings.'],
+ ['Destination wedding in the hills','h+12 f+10 $*0.85 +married *shaadi !fest','Mountains, fairy lights and a very cold baraat.']],'engaged !married',8);
+X('DELAY_Q','45','mandap','aunty:smug','Wedding guest','At a cousin’s wedding','Every aunty: “Beta, when is your turn?”',[
+ ['Laugh and dance','h+8 f+3','You win the dance-off. Questions forgotten.'],
+ ['Say “soon”','f+5 +match -delay','Mummy hears “soon”. Biodata is printed by morning.'],
+ ['“I’m married to my job”','h+2 f-6','The aunties gasp in unison.']],'delay !married',5,'You said “after my promotion”.');
+X('DIWALI_LIE','45','home','aunty:smug','Diwali','Diwali at the family home','Your cousin: “Bhai, 30 LPA wala treat kab?”',[
+ ['Confess the truth','f+6 h+8 -lied','Everyone laughs. Papa says he knew. Peace returns.'],
+ ['Pay for a big dinner','$-1 f+4 h-6','The dinner costs a month’s rent. The lie lives on.']],'lied',5,'You told the family your salary was 30 LPA.');
+X('HONEYMOON','4','airport','','Honeymoon','Where to?','You have ten days of leave and some savings.',[
+ ['Beach in Goa','h+10','Sunsets, seafood and one very bad sunburn.'],
+ ['Abroad, on EMI','h+12 $-1','Bucket list ticked. Wallet ticked off.'],
+ ['Just stay home and rest','h+5 f+5','Web series, chai and no packing. Underrated.']],'married');
+X('INLAWS','45','home','aunty:smug','Family','The in-laws visit for a month','They have opinions on your fridge organisation.',[
+ ['Be patient and charming','f+12 h-4','By week three they love you. By week four, so do you.'],
+ ['Book them a pilgrimage trip','f+6 $-0.5 h+4','A happy trip for them. A calm house for you.'],
+ ['Work late every day','f-8 h-2','The office has never seen you this dedicated.']],'married');
+X('DIWALI','4','home','boss:happy','Diwali','Diwali bonus is here','The office gift is a box of dry fruits and a calendar.',[
+ ['Spend it on family','f+10 h+6 !fest','Gifts for everyone. Diyas everywhere. Perfect.'],
+ ['Invest it all','s+3 +sip','Future you does a happy dance.'],
+ ['Gadget upgrade','h+8','New watch. It counts your steps. You walk less.']]);
+X('COUSIN_WED','4','mandap','sales:happy','Cousin’s wedding','You are the wedding event manager','Caterer late, DJ lost, groom’s uncle missing.',[
+ ['Handle it like a project manager','s+6 f+10 !fest','Gantt chart for a baraat. It works. Everyone is fed by 11.'],
+ ['Hide and enjoy the food','h+8','Best paneer of your life.']],'',2);
+X('SPOUSE_JOB','45','city','analyst:happy','Two careers','Your spouse gets an offer in another city','A big role. A 1,000 km problem.',[
+ ['Move with them','f+12 h+4 $*0.9','New city, new office, same love.'],
+ ['Ask your company for a transfer','f+8 $*1.05','The transfer comes through!',.55,'h-6','Rejected. Weekend flights for a year.'],
+ ['Long distance for a while','h-6 $*1.05','Video calls and weekend flights. Hard, but okay.']],'married job');
+X('CAR','45','city','sales:happy','Big purchase','Time to buy a car?','The salesman calls you “sir” fourteen times.',[
+ ['Buy it on loan','h+8 f+6 $-0.5','Family road trip to the hills. Papa approves of your driving.'],
+ ['Metro and autos are fine','s+2 h+2','More money, less parking stress.']],'m>12');
+X('RETURN','45','airport','','Homesick','Move back to India?','Your parents are getting older. The airport goodbyes are getting harder.',[
+ ['Move back','f+20 h+8 $*0.6 -abroad +returned','Home food, home festivals, home traffic.'],
+ ['Stay abroad','$*1.1 h-4','Mummy says it’s okay. You can hear that it isn’t.']],'return',6,'You promised yourself you would return.');
+
+/* ---- Chapter 5: Your 30s ---- */
+X('FLAT','5','home','sales:happy','Big purchase','Buy a 2BHK flat?','A twenty-year loan. A balcony. A dream.',[
+ ['Buy it with a home loan','+home +emi f+15 h+5','You get the keys. Griha pravesh with fifty relatives.'],
+ ['Keep renting, invest the rest','s+3 h+3 +sip','Flexible life, growing investments.'],
+ ['Move into your parents’ house','f+12 h-2','Free rent, unlimited advice.']],'!home m>6',3);
+X('KID','5','home','aunty:happy','Big news','A baby is on the way','The family group explodes with emojis.',[
+ ['Take full paternity/maternity leave','f+20 h+10 $*0.97 +kid','Diapers, lullabies and zero sleep. You have never been happier.'],
+ ['Take a short break, back to work','f+12 h+4 +kid','You are back fast. The baby photos are your wallpaper.']],'married !kid',4);
+X('SCHOOL','56','exam','boss:smug','School admission','Your child’s school interview','Actually, it is the parents being interviewed.',[
+ ['Prepare like a job interview','f+8 s+2','You ace it. The principal is impressed by your “strengths and weaknesses”.'],
+ ['Be honest and relaxed','f+6 h+4','Admission done. Good school, nice teacher.']],'kid');
+X('BURNOUT','3456','office','dev:sleepy','Uh oh','Burnout hits','You stare at your laptop. The laptop stares back.',[
+ ['Take a 3-month sabbatical','h+25 $*0.95','Mountains, sleep, no notifications. You come back human.'],
+ ['Push through','h-15 $*1.1','Bonus received. Sleep not received.'],
+ ['Quit and travel','h+30 $=0 >JOBHUNT','Ladakh, Spiti, Gokarna. Then reality: rent.']],'h<45 !govt');
+X('AI','456','office','boss:shocked','The future','AI can now do half your job','Your boss forwards an article titled “Is your job safe?”',[
+ ['Learn AI tools seriously','s+20 $*1.2 +ai','You become the person who makes AI actually useful. +20%.'],
+ ['Ignore it','h-3','Nothing changes. For now.',.6,'h-15 $=0 >JOBHUNT','Your role is “restructured”.'],
+ ['Become the “AI person” of the team','s+10 $*1.3 h-5 +ai','Promotion! Also, fourteen new meetings a week.']],'job|creator');
+X('HEALTH','4556','clinic','','Health check','“Your vitamin D is almost zero”','The doctor sighs. You sit at a desk eleven hours a day.',[
+ ['Gym and morning walks','h+12 +fit','Two months later you are the person who talks about protein.'],
+ ['Buy an expensive smartwatch','h+2 $-0.3','It reminds you to stand. You don’t.'],
+ ['Ignore it','h-10','Your back has started making noises.']]);
+X('ESOP','45','garage','ceo:happy','ESOPs','Your ESOPs just vested','The startup is doing a buyback.',[
+ ['Sell them','h+15 f+10 +rich','₹1.8 crore in your account. You read the SMS eleven times.',.35,'h-3','Worth about one nice dinner.'],
+ ['Hold for the IPO','h+2 +holding','Fingers crossed. Very crossed.']],'esop',4,'You joined a startup for ESOPs at 21.');
+X('PARENTS','56','home','aunty:sad','Family','Your parents want you back home','“Beta, how long will you live alone in that city?”',[
+ ['Move back home','f+20 h+5 $*0.85 +hometown','Ghar ka khana. Lower salary, lower rent.'],
+ ['Bring them to your city','f+15 $*0.95','Papa now gives directions to your cab drivers.'],
+ ['Visit more often','f+6','Every long weekend, train tickets booked.']]);
+X('JUNIOR_PROMO','5','office','intern:smug','Office politics','Your junior got promoted above you','He was your intern. Now he is your skip-level.',[
+ ['Congratulate him, ask what he did','s+8 h+2','He tells you: “I documented everything.” Lesson learnt.'],
+ ['Sulk loudly','h-10','The coffee machine hears all your complaints.'],
+ ['Switch jobs','$*1.35 ^up +switched','A new company, a bigger title.',.6,'h-6','Nothing better comes along this year.']],'job !mgr');
+X('REUNION','56','campus','intern:happy','Reunion','College reunion','The Maggi gang is back. One of them has a business idea.',[
+ ['Join as co-founder','@startup $*0.7 h+12 #Co-founder >GROWTH *founder','Old friends, new company. What could go wrong?'],
+ ['Angel invest a little','$-1 h+6 +angel','You are now “an investor”. You tell everyone.'],
+ ['Just enjoy the night','h+10 f+2','Old songs, old jokes, new memories.']],'friends',3,'You did group study (mostly Maggi) in college.');
+X('SIP_PAYOFF','56','home','','Compounding','Your SIP statement arrived','You started small years ago. The number now has many zeros.',[
+ ['Keep it invested','h+10 s+4 +rich','Compounding: the eighth wonder of your world.'],
+ ['Pay off the home loan early','h+12 -emi','No EMI! You throw a small party.']],'sip',4,'You started a SIP early.');
+X('PARTNER','56','cabin','ceo:happy','Big day','Partnership offer','The firm wants to make you a partner.',[
+ ['Accept','$*1.6 +partnerok h+8 #Partner_·_CA_firm !fest','Your name goes on the glass door.'],
+ ['Start your own boutique firm','$*1.3 +practice h+10 s+6','Small team, big clients, your rules.']],'partner|practice|caok');
+X('DEPUTATION','56','sarkari','boss','Sarkari','Central deputation offer','Delhi posting, bigger role, more files.',[
+ ['Take it','s+10 $*1.2 +good','You work on a national scheme. Your name is in a newspaper, page 9.'],
+ ['Stay in the state','f+10 h+6','Home town, known people, peaceful work.']],'govt');
+X('ALGO','56','studio','','Platform drama','The algorithm changed overnight','Your views fell by 70%. Your coffee stayed the same.',[
+ ['Start a podcast','s+8 $*1.2 +podcast','Long-form wins. Brands follow.',.6,'h-6','Few listeners. For now.'],
+ ['Start a creator course','$*1.5 h+4','Teaching creators pays better than creating.'],
+ ['Get a stable job again','@job $=12 h+4 #Brand_Manager','Salary every month feels strange. And lovely.']],'creator');
+X('HOD','56','exam','analyst:happy','Academia','Head of Department offer','More admin, more respect, same old projector.',[
+ ['Accept','$*1.25 s+5 +hod','You fix the projector. Promoted to legend.'],
+ ['Focus on research','s+12 +paper','A paper gets published in a top journal.']],'academia');
+X('BIZ_BRANCH','56','shop','aunty:happy','Business','Open a second branch?','A shop next to the new metro station is up for rent.',[
+ ['Open it','$*1.6 s+8 +bizboom','The metro crowd loves your snacks counter.',.6,'h-8 $*0.9','Slow footfall. A lesson in location.'],
+ ['Grow online instead','$*1.3 s+10','Your delivery app rating is 4.8.']],'biz');
+X('EMI_HURTS','56','home','','Money stress','EMI, school fees and a car service. Same week.','Your bank balance is doing yoga: very flexible.',[
+ ['Ask for a raise with proof','$*1.15 h+4','Your manager approves. Phew.',.5,'h-8','Not this quarter.'],
+ ['Cut expenses as a family','f+8 h-4','Home-cooked dinners and board games. Surprisingly fun.'],
+ ['Take freelance projects','$+3 h-8 s+4','Money fixed. Sleep broken.']],'emi');
+X('LAYOFF2','56','cabin','hr:sad','Tough year','Another restructuring','This time the CEO says “difficult decisions” in the townhall.',[
+ ['Show your impact numbers','h+4 +survived *layoff','Your manager fights for you. Safe.',.6,'$=0 h-15 >JOBHUNT','You are affected. At least the resume is ready.'],
+ ['Take the package and rest','$=0 h+8 f+6 >JOBHUNT','Three months with family. Then a new search.']],'job m>8 !survived',2);
+
+/* ---- Chapter 6: Forty ---- */
+X('BIGCHAIR','6','cabin','ceo:happy','The big chair','A CXO offer','The board wants you to run the whole thing.',[
+ ['Accept','$*1.6 h-4 +cxo #Chief_Officer !fest','Corner office. Your mother tells the entire building.'],
+ ['Stay in your current role','h+8 f+6','You choose dinners at home over board meetings.']],'job s>=60 m>=25',5);
+X('MIDLIFE','6','hills','','Mid-life','“Is this it?”','You are 38. You catch yourself staring at mountain photos at work.',[
+ ['Start a homestay in the hills','+homestay @biz $*0.5 h+20 f+4 #Homestay_Owner','Eight rooms, one dog, endless chai.'],
+ ['Learn the guitar','h+10 s+3','Three chords and a very patient family.'],
+ ['Keep going','s+3','The mountains will wait.']],'h<60 !homestay');
+X('ADVICE','6','office','intern:happy','Full circle','An intern asks for career advice','You see yourself at 21.',[
+ ['Tell them the honest truth','h+6 s+3','“Learn skills, write a good resume, be kind.” They write it down.'],
+ ['Hire them into your team','s+5 h+4','They are brilliant. You feel old. Happily.']]);
+X('PAPA_HOSP','6','clinic','aunty:sad','Family','Papa is in hospital','The doctor says he will be fine, but needs care.',[
+ ['Take leave and be there','f+18 h-4 $*0.97','You sleep in a hospital chair for a week. Papa holds your hand.'],
+ ['Pay for the best care, keep working','f+6 h-6','The best doctors. Long calls every night.']]);
+X('BOARDS','6','exam','','Board exams','Your child has board exams','The house is in exam mode. Even the TV is silent.',[
+ ['Be the calm parent','f+12 h+4','Your child says “thanks for not panicking”. Best review ever.'],
+ ['Hire three tutors','$-1 f+2 h-4','Marks: good. Stress: also good.']],'kid');
+X('ANGEL','6','garage','intern:happy','Investing','A young founder wants an angel cheque','They remind you of a younger, braver you.',[
+ ['Invest ₹10 lakh','h+8 +rich','Five years later the startup is acquired. 12×!',.3,'h-4','The startup shuts. You learn a lot. Expensive lessons.'],
+ ['Mentor them for free','s+5 h+8','They put you on their slide as an “advisor”.']],'m>=30');
+X('HEALTH40','6','clinic','','Health check','Health check at 40','“Your cholesterol is… interesting.”',[
+ ['Proper diet and yoga','h+10 +fit','You touch your toes for the first time since school.'],
+ ['Run a half-marathon','h+14 s+2 +fit','You finish! The medal goes on the fridge.',.6,'h-4','Knees: no.']]);
+X('FIRE','6','home','','Money','Retire early?','Your investments are bigger than you expected.',[
+ ['Semi-retire: consult two days a week','h+15 f+10 $*0.6','Mornings for walks, afternoons for work you like.'],
+ ['Keep building wealth','$*1.2 s+3','Compounding does not take holidays.']],'rich|sip');
+X('COLLECTOR','6','sarkari','peon:happy','Sarkari','District Collector posting','A whole district’s problems. And a red file for each.',[
+ ['Fix schools first','s+8 h+10 f+6 +good','Attendance goes up 40%. A child writes you a letter.'],
+ ['Fix roads first','s+6 h+6','Smooth roads. Even the cows look relaxed.']],'ias');
+X('NEXTGEN','6','shop','aunty:happy','Family business','Papa wants to formally retire','“The keys are yours now, beta.”',[
+ ['Take over and modernise','$*1.5 s+8 f+10 +bizboom','The red ledger goes into a glass frame. The app goes live.'],
+ ['Keep it exactly the same','f+14 h+6','Customers since 1987 are happy.']],'biz');
+X('PODCAST','6','studio','sales:happy','Creator life','A big streaming platform calls','They want your show as an original series.',[
+ ['Sign the deal','$*2 h+10 +viral','A billboard with your face. Mummy takes 300 photos.',.6,'h-6','The pilot does not get picked up.'],
+ ['Stay independent','h+8 s+4 +trust','Your loyal audience grows every week.']],'creator');
+X('AI_AGENTS','6','office','dev:shocked','The future','AI agents now run half your team’s tasks','Your team is smaller and somehow busier.',[
+ ['Lead the AI change','s+12 $*1.2','You redesign how the whole team works.'],
+ ['Retrain your people','f+2 h+8 s+6','Nobody loses their job on your watch.']],'job');
+X('OLD_GANG','6','hills','intern:happy','Old friends','The college gang plans a trip','Same people, more knee pain.',[
+ ['Go!','h+14 f-2','Campfire, old songs and a group photo for the ages.'],
+ ['Can’t, too busy','h-6','They send photos. You look at them for a long time.']],'friends',3,'Your college friends are still your people.');
+X('SABB40','6','hills','','A pause','A three-month sabbatical at 40?','Your company finally has a sabbatical policy.',[
+ ['Take it','h+18 f+8 $*0.97','Mountains, books and a lot of sleep.'],
+ ['Save it for later','s+3','Later is a strange word.']],'job');
+X('PROF_AWARD','6','exam','analyst:happy','Academia','Best Teacher award','Your students nominated you. Secretly.',[
+ ['Accept on stage','h+15 f+8 !fest','Your former students fill the hall and cheer.'],
+ ['Share it with your team','h+12 s+3','Everybody gets a photo with the trophy.']],'academia');
+
+/* ---- random life events (drawn from the seed) ---- */
+var LUCK=[
+ ['flood','city','shocked','Monsoon surprise','The street outside your flat is a river. You work from home for a week.','h+3'],
+ ['teacher','home','happy','A message from school','Your old maths teacher sees your post and writes: “Proud of you.”','h+6'],
+ ['wallet','city','happy','Honest auto driver','You left your wallet in an auto. The driver tracks you down and returns it!','h+5'],
+ ['bike','city','sad','Bike stolen','Your bike vanishes from outside the metro station.','h-6 $-0.3'],
+ ['borrow','home','smug','Cousin needs money','Cousin borrows ₹50,000. “Next month, pakka.”','h-4 f+3'],
+ ['viralpost','office','happy','Your post went viral','Your post about your first manager goes viral. Recruiters slide in.','s+3 h+4 +brand'],
+ ['biryani','clinic','sad','Canteen biryani','Food poisoning. The canteen biryani has claimed another victim.','h-6'],
+ ['cricket','city','happy','Office cricket champions','Your team wins the inter-office tournament. You took the winning catch.','h+8'],
+ ['dengue','clinic','sleepy','Dengue season','Two weeks in bed, papaya leaf juice and a lot of soup.','h-8 s-2'],
+ ['upi','home','happy','Mummy learns UPI','She sends you ₹101 “for chai”. Then fifty stickers.','f+6 h+3'],
+ ['bonus','office','happy','Double bonus','The company had a great year. Bonus is double!','$*1.05 h+6','m>1'],
+ ['rent','home','angry','Landlord drama','Your landlord raises the rent by 15% and calls it “market rate”.','h-5'],
+ ['dal','home','happy','Life skill unlocked','You finally make dal exactly like Mummy’s. Almost.','h+4 f+2'],
+ ['laptop','office','shocked','Laptop dies','The night before a deadline, your laptop refuses to wake up.','h-5 s+2'],
+ ['train','city','happy','Train friend','A stranger on an overnight train becomes a lifelong friend.','h+6'],
+ ['dog','home','happy','A dog adopts you','The street dog follows you home and now has a name.','h+8'],
+ ['traffic','city','sad','Stuck in traffic','You miss your sister’s birthday dinner. Bengaluru traffic wins again.','f-6'],
+ ['refund','home','happy','Tax refund','Your tax refund arrives early. Unexpected money is the best money.','h+4'],
+ ['crash','office','sad','Market dip','The stock market crashes for a month. Your portfolio is red.','h-4','sip|rich'],
+ ['course','office','happy','Free course gem','A free online course turns out to be better than your degree.','s+8'],
+ ['lake','hills','sad','Phone overboard','Your phone falls into the lake on a family boat ride. Everyone laughs.','h-4 f+4'],
+ ['dance','mandap','happy','Best friend’s wedding','You dance like nobody is watching. Everyone is. Video goes viral in the family.','h+8 f+2'],
+ ['award','office','happy','Spot award','Your manager gives you a surprise spot award in the all-hands.','s+3 h+6','job'],
+ ['power','home','sleepy','Power cut','Eight-hour power cut in May. You discover your neighbours are lovely.','h-2 f+3']
+];
+
+/* ---- endings (the album) ---- */
+var END=[
+ {id:'legend',e:'⭐',t:'Living Legend',sc:'hills',l:'Rich, wise, loved and happy. Your colony’s aunties now compare their kids to you.',k:'Balance is the hardest and best career goal.',hint:'Every meter high at 40',b:900,mood:'happy',pose:'arms-up'},
+ {id:'ias',e:'🏛️',t:'IAS Officer',sc:'sarkari',l:'Red-beacon dreams came true. Your town still talks about that banner.',k:'Long preparation pays off when you also keep a backup plan ready.',hint:'Crack the toughest exam',b:700,mood:'smug'},
+ {id:'unicorn',e:'🦄',t:'Unicorn Founder',sc:'garage',l:'From a 2 AM idea to a billion-dollar company. Mummy finally understands “startup”.',k:'Big risks can pay off, but most founders fail first. Build skills that survive failure.',hint:'Blitzscale and survive',b:800,mood:'happy',pose:'arms-up'},
+ {id:'acquired',e:'🤝',t:'Founder, Acquired',sc:'garage',l:'You built something a big company wanted to buy. Then you took a long nap.',k:'A good exit is a real win. Not every startup has to become a unicorn.',hint:'Sell your startup',b:600,mood:'smug'},
+ {id:'goa',e:'☕',t:'Café Owner in Goa',sc:'cafe',l:'Two startups later, you serve the best cold coffee on the beach. No regrets.',k:'Failure teaches fast. Keep your resume ready for the next chapter.',hint:'A startup that did not make it',b:350,mood:'happy',pose:'coffee'},
+ {id:'founder',e:'🧡',t:'Profitable Founder',sc:'garage',l:'No unicorn, but forty people get salaries on time because of you.',k:'Steady, profitable businesses are underrated.',hint:'Run a small, steady startup',b:550,mood:'happy'},
+ {id:'homestay',e:'🏡',t:'Homestay in the Hills',sc:'hills',l:'Eight rooms, a dog called Biscuit and guests who never want to leave.',k:'You can redesign your life at any age.',hint:'Answer the mid-life question',b:450,mood:'happy',pose:'wave'},
+ {id:'creator',e:'📱',t:'Famous Creator',sc:'studio',l:'Half a million followers and a podcast. The family now forwards your reels.',k:'Creators who keep their audience’s trust last the longest.',hint:'Go viral and stay viral',b:550,mood:'happy',pose:'phone'},
+ {id:'parttime',e:'🎤',t:'Part-time Creator',sc:'studio',l:'A loyal small audience and a steady day job. Best of both worlds.',k:'A side hustle grows best on a stable base.',hint:'Create, but keep it small',b:350,mood:'smug',pose:'phone'},
+ {id:'tycoon',e:'🏬',t:'Business Tycoon',sc:'shop',l:'Papa’s shop is now five branches and an app. He still uses the red ledger.',k:'Mixing tradition with new ideas is a superpower.',hint:'Grow the family business big',b:600,mood:'happy',pose:'arms-up'},
+ {id:'shop',e:'🧾',t:'Family Business Owner',sc:'shop',l:'Same shop, loyal customers and lunch at home every day.',k:'A good life doesn’t always need a big title.',hint:'Keep the family shop going',b:350,mood:'happy'},
+ {id:'capartner',e:'📜',t:'CA Firm Partner',sc:'cabin',l:'Your name is on the glass door. GST season still scares the interns.',k:'Professional qualifications compound like interest.',hint:'Clear CA and go all the way',b:600,mood:'smug'},
+ {id:'prof',e:'🧑‍🏫',t:'Beloved Professor',sc:'exam',l:'Former students still message you on Teachers’ Day.',k:'Teaching is a career that multiplies itself.',hint:'Choose the classroom',b:500,mood:'happy',pose:'wave'},
+ {id:'sarkari',e:'🏢',t:'Sarkari Officer',sc:'sarkari',l:'Home by 5:30, respected in the colony, pension secured.',k:'Stability is a real career choice. Choose it with pride.',hint:'A steady government job',b:400,mood:'happy'},
+ {id:'nri',e:'🌍',t:'NRI Engineer',sc:'airport',l:'A great salary, Sunday video calls with Mummy and a deep love for Maggi.',k:'Global careers open fast when your resume shows real impact.',hint:'Settle abroad',b:500,mood:'happy',pose:'wave'},
+ {id:'burnt',e:'🏔️',t:'Burnt Out at 40',sc:'hills',l:'A big salary, no sleep. You finally take a year off in the mountains.',k:'Salary grows fast; health and happiness don’t come back as easily.',hint:'Ignore your happiness for too long',b:100,mood:'sleepy'},
+ {id:'cxo',e:'👑',t:'CXO at 40',sc:'cabin',l:'Corner office, big team and work-profile posts that start with “Humbled to share”.',k:'Skills, smart switches and a strong resume compound over time.',hint:'Reach the top floor',b:700,mood:'smug'},
+ {id:'senior',e:'💼',t:'Senior Manager',sc:'office',l:'A solid salary, a good team and you finally bought that 2BHK.',k:'Consistent growth beats lucky jumps.',hint:'Grow steadily in a job',b:400,mood:'happy',pose:'coffee'},
+ {id:'balanced',e:'🌼',t:'Happy & Balanced',sc:'home',l:'Not the richest, but home by 7, weekends free and a full heart.',k:'Success is what you decide it is.',hint:'Choose happiness over money',b:450,mood:'happy',pose:'wave'},
+ {id:'figuring',e:'🧭',t:'Still Figuring It Out',sc:'city',l:'And that is okay. Many people find their path after 40.',k:'It is never too late to learn a new skill and update your resume.',hint:'An ordinary, winding road',b:150,mood:'neutral'}
+];
+var ENDBY={};END.forEach(function(e){ENDBY[e.id]=e;});
+function fate(S){var f=S.fl,mp=moneyPct(S.m);
+ if(S.h>=75&&S.s>=75&&S.f>=75&&mp>=65)return 'legend';
+ if(f.ias)return 'ias';if(f.unicorn)return 'unicorn';if(f.acquired)return 'acquired';
+ if(S.track==='startup'&&(f.failed||S.m<2))return 'goa';
+ if(f.homestay)return 'homestay';
+ if(S.track==='startup')return 'founder';
+ if(S.track==='creator')return f.viral?'creator':'parttime';
+ if(S.track==='biz')return f.bizboom?'tycoon':'shop';
+ if((f.partnerok||f.practice||f.partner)&&f.caok)return 'capartner';
+ if(S.track==='academia')return 'prof';
+ if(S.track==='govt')return 'sarkari';
+ if(S.h<30)return 'burnt';
+ if(f.abroad)return 'nri';
+ if(f.cxo||(S.m>=45&&S.s>=60))return 'cxo';
+ if(S.m>=20)return 'senior';
+ if(S.h>=65)return 'balanced';
+ return 'figuring';}
+
+/* ---- chapters + levels ---- */
+var CH=[{n:'College',k:'College',ages:[21,21,22],sc:'campus',b:'Final year. Placements, projects and parents.'},
+ {n:'First Job',k:'Job',ages:[23,24,25],sc:'office',b:'Lanyards, appraisals and your first salary.'},
+ {n:'The Switch',k:'Switch',ages:[26,27,28],sc:'city',b:'Offers, notice periods and big bets.'},
+ {n:'Shaadi',k:'Shaadi',ages:[29,29,30],sc:'mandap',b:'Biodata, rishtas and a big fat wedding.'},
+ {n:'Your 30s',k:'30s',ages:[32,34,36],sc:'home',b:'EMIs, kids, burnout and breakthroughs.'},
+ {n:'Forty',k:'40',ages:[38,39,40],sc:'hills',b:'The big chair, the big questions.'}];
+/* start: m h s f track title flags */
+var LV=[
+ {ch:[0],st:'ENG',n:'Placement Day',goal:'m>=3',gt:'Get a paying job (₹3 LPA+)',mech:['🧮','Meters','Every choice moves four meters: Salary, Happiness, Skills and Family. Keep them balanced for more stars.']},
+ {ch:[0],st:'COM',n:'Commerce Crossroads',goal:'s>=45',gt:'Finish college with Skills 45+',mech:['🎲','Risky choices','Some choices roll the dice. Your Skills meter improves the odds shown on the button.']},
+ {ch:[1],st:'ENG',s:[6,60,35,60,'job','Software Engineer · IT services','service'],n:'Day One',goal:'h>=45',gt:'Keep Happiness at 45+',mech:['🃏','Life events','Random life events strike between years. Same seed, same luck.']},
+ {ch:[1],st:'COM',s:[6,55,40,60,'job','Audit Associate','big4'],n:'The Appraisal',goal:'m>=7',gt:'Earn ₹7 LPA or more',mech:['💰','Money talks','Salary grows by percentages. Hikes, switches and negotiation stack up.']},
+ {ch:[2],st:'ENG',s:[9,55,45,55,'job','Software Engineer','service peon lied network'],n:'Switch Season',goal:'switched|mgr',gt:'Switch jobs or get promoted',mech:['📌','Memories','Your past choices come back. A yellow sticky note tells you why.']},
+ {ch:[2],st:'ART',s:[3,65,40,45,'creator','Creator · 40k followers','stage'],n:'Creator or Bust',goal:'m>=8',gt:'Earn ₹8 LPA or more',mech:['🛤️','Career tracks','You can jump tracks: job, startup, creator, sarkari, business. Each has its own events.']},
+ {ch:[3],st:'ENG',s:[16,55,55,45,'job','Senior Engineer','match switched'],n:'Biodata Season',goal:'f>=60',gt:'Family meter 60+',mech:['👪','Family first','In the Shaadi chapter, family choices swing hardest.']},
+ {ch:[3],st:'COM',s:[12,50,50,55,'job','Finance Manager','love sip'],n:'Big Fat Wedding',goal:'married h>=50',gt:'Get married, Happiness 50+',mech:['🪔','Festive moments','Weddings, promotions and Diwali bring music, lights and big swings.']},
+ {ch:[4],st:'ENG',s:[24,55,60,60,'job','Tech Lead','married sip'],n:'EMI Years',goal:'home h>=40',gt:'Buy a home, keep Happiness 40+',mech:['🏦','EMIs','Once you take a home loan, EMI day drains Happiness every year unless your salary is strong.']},
+ {ch:[4],st:'ART',s:[9,40,55,60,'govt','State PSC Officer','married good'],n:'Burnout or Breakthrough',goal:'h>=55',gt:'Reach 36 with Happiness 55+',mech:['🫠','Burnout','When Happiness falls below 45, burnout starts chasing you.']},
+ {ch:[5],st:'COM',s:[20,50,60,60,'startup','Founder & CEO','married kid friends','GROWTH'],n:'The Final Stretch',goal:'h>=50 f>=50',gt:'Reach 40 with Happiness and Family 50+',mech:['📖','Endings','Reaching 40 reveals one of 20 endings for your Endings Album.']},
+ {ch:[0,1,2,3,4,5],st:'*',n:'Legend Run',goal:'h>=55 s>=55 f>=55',gt:'A whole life: Happy, Skills, Family all 55+ at 40',mech:['🏆','A whole life','Twenty years in one go. Every lesson from the chapters applies.']}
+];
+
+/* ---- achievements ---- */
+var ACH=[['life1','🎂','Born Again','Finish your first life'],['life5','♻️','Reincarnation Pro','Finish 5 lives'],['shaadi','💍','Band Baaja','Get married'],['founder','🚀','Founder Mode','Start a startup'],
+ ['unicorn','🦄','Unicorn Hunter','Build a unicorn'],['layoff','🛟','Survivor','Survive a layoff round'],['onsite','✈️','Passport Stamped','Move abroad'],['ias','🏛️','Red Beacon','Become an IAS officer'],
+ ['balance','⚖️','Perfectly Balanced','All four meters 60+ at 40'],['karma','📌','Karma Is Real','Trigger 3 memories in one life'],['end5','📚','Album Collector','Discover 5 endings'],['end10','🗂️','Many Lives','Discover 10 endings'],
+ ['end20','🌌','Seen It All','Discover all 20 endings'],['streak3','🔥','Daily Habit','Play the daily life 3 days in a row'],['rival','⚔️','Friendly Rivalry','Beat a friend’s challenge'],['topper','🥇','Chapter Topper','3 stars on every chapter'],['score','💯','Sharma Ji’s Kid','Life Score 4,000+']];
+
+/* ================= records + achievements ================= */
+var REC=OA.load('rec',null)||{lives:0,ends:{},ach:{}};
+function saveRec(){OA.save('rec',REC);}
+function ach(id){if(REC.ach[id])return;REC.ach[id]=OA.today();saveRec();var a=ACH.filter(function(x){return x[0]===id;})[0];if(a){OA.toast(a[1]+' Achievement: <b>'+a[2]+'</b>','gold');OA.sfx('levelup');}}
+var TRK={ias:'govt',sarkari:'govt',unicorn:'startup',acquired:'startup',goa:'startup',founder:'startup',creator:'creator',parttime:'creator',tycoon:'biz',shop:'biz',homestay:'biz',capartner:'ca',prof:'academia'};
+function endThumb(E,cls){return scene(E.sc,actor(you({c:5,track:TRK[E.id]||'',mood:E.mood,pose:E.pose}),'c'+(cls?' '+cls:'')));}
+
+/* ================= sound design ================= */
+function sChoose(){OA.sfx('click');OA.sfx.tone({f:OA.note(79),f2:OA.note(84),type:'triangle',dur:.1,vol:.22,at:.02});}
+function sTurn(){OA.sfx.noise({dur:.2,vol:.1,type:'bandpass',f:2600,f2:800,q:1.2});OA.sfx.noise({dur:.08,vol:.06,type:'highpass',f:4000,at:.16});}
+function sting(){[67,74,79,86].forEach(function(n,i){OA.sfx.tone({f:OA.note(n),type:'triangle',dur:.22,vol:.3,at:i*.07});});OA.sfx.noise({dur:.6,vol:.1,type:'highpass',f:5000,at:.25});}
+function festive(){if(!RM)OA.confetti({colors:['#f59e0b','#dc2626','#fde047','#f472b6','#22c55e','#fb923c']});OA.sfx('cheer');
+ [74,76,78,79,81,79,78,76,74].forEach(function(n,i){OA.sfx.tone({f:OA.note(n),type:'sawtooth',dur:.16,vol:.06,at:.05+i*.11});});
+ for(var i=0;i<6;i++)OA.sfx.tone({f:i%2?150:110,f2:50,type:'sine',dur:.14,vol:.5,at:i*.2});OA.buzz([20,40,20,40,60]);}
+
+/* ================= state ================= */
+var S=null,busy=false,lastRes=null;
+function save(){if(S)OA.save('cur',S);}
+function clearCur(){OA.save('cur',null);}
+function newState(o){
+ var z={mode:o.mode,seed:o.seed>>>0,level:o.level||0,stream:o.stream,m:0,h:60,s:25,f:60,title:'Final-year student',track:'student',fl:{},q:[],used:[],log:[],mem:0,plan:[],i:0,cur:null,age:21,c:0};
+ (o.chapters||[0,1,2,3,4,5]).forEach(function(c){CH[c].ages.forEach(function(a,k){z.plan.push({c:c,a:a,first:k===0?1:0});});});
+ if(o.start){var t=o.start;z.m=t[0];z.h=t[1];z.s=t[2];z.f=t[3];z.track=t[4];z.title=t[5];(t[6]||'').split(' ').forEach(function(f){if(f)z.fl[f]=1;});if(t[7])z.q=t[7].split(' ');}
+ if(z.plan[0].c===0)z.q.unshift(OPEN[z.stream]);
+ z.age=z.plan[0].a;z.c=z.plan[0].c;return z;}
+function startLife(mode,seed,stream,level){
+ var o={mode:mode,seed:seed,stream:stream,level:level};
+ if(mode==='lv'){var L=LV[level-1];o.chapters=L.ch;o.start=L.s;o.stream=L.st==='*'?['ENG','COM','ART'][(seed>>>0)%3]:L.st;}
+ S=newState(o);busy=false;OA.music.play('chill');save();showHud(true);step();}
+function test1(t){var m=/^([hsfm])(<=|>=|<|>)([\d.]+)$/.exec(t);if(m){var a=S[m[1]],b=+m[3];return m[2]==='<'?a<b:m[2]==='>'?a>b:m[2]==='<='?a<=b:a>=b;}
+ if(/^(job|govt|startup|creator|biz|ca|academia|student)$/.test(t))return S.track===t;if(/^(ENG|COM|ART)$/.test(t))return S.stream===t;return !!S.fl[t];}
+function ok(req){if(!req)return true;return req.split(' ').every(function(t){if(!t)return true;var neg=t[0]==='!';if(neg)t=t.slice(1);var v=t.split('|').some(test1);return neg?!v:v;});}
+function upTitle(t){var r=t.replace('SDE-1','SDE-2').replace(/^Software Engineer/,'Senior Software Engineer').replace('Content Writer','Content Lead').replace('Audit Associate','Audit Senior').replace(/^Finance Analyst/,'Senior Finance Analyst').replace('Aspirant','Engineer').replace('Social Media Manager','Head of Social');return r===t&&!/Senior|Lead|Head|Manager|Director/.test(t)?'Senior '+t:r;}
+function mgrTitle(t){var c=(t.split('·')[1]||'').trim();return 'Manager'+(c?' · '+c:'');}
+function applyFx(str){if(!str)return;var qs=[];str.split(' ').forEach(function(t){if(!t)return;var c=t[0],m=/^([hsf])([+-]\d+)$/.exec(t);
+ if(m)S[m[1]]=clamp(S[m[1]]+(+m[2]));
+ else if(c==='$'){var op=t[1],v=+t.slice(2);S.m=op==='='?v:op==='*'?S.m*v:Math.max(0,S.m+(op==='-'?-v:v));S.m=Math.round(S.m*100)/100;}
+ else if(c==='+')S.fl[t.slice(1)]=1;else if(c==='-')delete S.fl[t.slice(1)];
+ else if(c==='>')qs.push(t.slice(1));else if(c==='@')S.track=t.slice(1);
+ else if(c==='#')S.title=t.slice(1).replace(/_/g,' ');else if(t==='^up')S.title=upTitle(S.title);else if(t==='^mgr')S.title=mgrTitle(S.title);
+ else if(c==='!')S.fx[t.slice(1)]=1;else if(c==='*')ach(t.slice(1));});
+ if(qs.length)S.q=qs.concat(S.q);}
+function eff(p){return Math.max(.08,Math.min(.92,p+(S.s-50)/250));}
+function snap(){return {m:S.m,h:S.h,s:S.s,f:S.f};}
+function balance(){return Math.min(S.h,S.s,S.f,mPct(S.m,S.c));}
+function pickEvent(){
+ while(S.q.length){var id=S.q.shift();if(EV[id]&&ok(EV[id].req))return id;}
+ var r=OA.rng(S.seed+':e'+S.i),c=String(S.c+1);
+ var pool=EVL.filter(function(e){return e.w>0&&e.ch.indexOf(c)>=0&&S.used.indexOf(e.id)<0&&ok(e.req);});
+ if(!pool.length)pool=EVL.filter(function(e){return e.w>0&&e.ch.indexOf(c)>=0&&ok(e.req);});
+ if(!pool.length)return 'HEALTH';
+ function wt(e){return e.w*(e.mem?2:1)*(e.id==='BURNOUT'&&S.h<35?3:1);}
+ var tot=0;pool.forEach(function(e){tot+=wt(e);});var x=r()*tot;
+ for(var i=0;i<pool.length;i++){x-=wt(pool[i]);if(x<=0)return pool[i].id;}return pool[0].id;}
+function pickLuck(){if(S.i===0)return null;var r=OA.rng(S.seed+':l'+S.i);if(r()>.32)return null;
+ var pool=LUCK.filter(function(L){return S.used.indexOf('L:'+L[0])<0&&ok(L[6]);});return pool.length?r.pick(pool):null;}
+
+/* ================= HUD ================= */
+var MK=[['m','💰','Pay'],['h','😊','Joy'],['s','🧠','Skill'],['f','🏠','Family']];
+function showHud(on){hud.hidden=!on;if(!on)return;
+ hud.innerHTML='<div class="hud-top"><div class="age" id="hAge">21<small>age</small></div><div class="who"><b id="hTitle"></b><span id="hSal"></span></div><button class="mini" id="hMenu" type="button">Menu</button></div>'+
+ '<div class="meters">'+MK.map(function(k){return '<div class="mt" data-k="'+k[0]+'" style="--c:var(--c-'+k[0]+')"><div class="lab"><span>'+k[1]+' '+k[2]+'</span><b>0</b></div><div class="bar"><i></i></div></div>';}).join('')+'</div>'+
+ '<div class="tl" aria-hidden="true"><div class="tl-seg">'+CH.map(function(){return '<span><i></i></span>';}).join('')+'</div><div class="tl-lab">'+CH.map(function(c){return '<span>'+c.k+'</span>';}).join('')+'</div><div class="tl-pin" id="pin"></div></div>';
+ $('hMenu').onclick=function(){OA.sfx('tap');save();title();};renderHud();}
+function renderHud(){if(!S||hud.hidden)return;
+ $('hAge').innerHTML=S.age+'<small>age</small>';$('hTitle').textContent=S.title;$('hSal').textContent=lpa(S.m);
+ hud.querySelectorAll('.mt').forEach(function(el){var k=el.dataset.k,v=k==='m'?mPct(S.m,S.c):S[k];el.querySelector('.bar i').style.width=Math.max(3,v)+'%';el.querySelector('.lab b').textContent=k==='m'?(S.m<1?Math.round(S.m*10)/10:Math.round(S.m))+'L':v;});
+ var idx=0,tot=0;S.plan.forEach(function(p,j){if(p.c===S.c){tot++;if(j<S.i)idx++;}});var fr=tot?Math.min(1,idx/tot):0;
+ hud.querySelectorAll('.tl-seg i').forEach(function(el,j){el.style.transform='scaleX('+(j<S.c?1:j===S.c?fr:0)+')';});
+ hud.querySelectorAll('.tl-lab span').forEach(function(el,j){el.className=j===S.c?'on':'';});
+ $('pin').style.left=((S.c+Math.max(.06,Math.min(.94,fr)))/6*100)+'%';}
+function pops(b){var d=0;MK.forEach(function(k,j){var v=k[0]==='m'?S.m-b.m:S[k[0]]-b[k[0]];if(Math.abs(v)<(k[0]==='m'?.05:1))return;
+ var el=hud.querySelector('.mt[data-k="'+k[0]+'"]');if(!el)return;el.classList.remove('up','dn');void el.offsetWidth;el.classList.add(v>0?'up':'dn');
+ var r=el.getBoundingClientRect(),txt=k[0]==='m'?(v>0?'+':'−')+lpa(Math.abs(v)).replace(' LPA','L'):(v>0?'+':'−')+Math.abs(v);
+ setTimeout(function(){if(r.bottom>0)OA.floatText(r.left+r.width/2,r.top+6,txt,v>0?'#16a34a':'#dc2626');if(k[0]==='m'&&v>0)OA.sfx('coin');else OA.sfx.tone({f:v>0?OA.note(84+j*2):OA.note(52),type:v>0?'sine':'triangle',dur:.12,vol:.18});},d);d+=140;});}
+function deltas(b){var out=[],net=0;var dm=S.m-b.m;
+ if(Math.abs(dm)>=.05){out.push('<span class="d '+(dm>0?'up':'dn')+'">💰 '+(dm>0?'+':'−')+lpa(Math.abs(dm))+'</span>');net+=(dm>0?1:-1)*Math.min(12,Math.abs(dm)/Math.max(1,b.m)*30);}
+ MK.slice(1).forEach(function(k,i){var v=S[k[0]]-b[k[0]];if(v){out.push('<span class="d '+(v>0?'up':'dn')+'" style="animation-delay:'+(i+1)*.08+'s">'+k[1]+' '+k[2]+' '+(v>0?'+':'−')+Math.abs(v)+'</span>');net+=v;}});
+ return {html:out.length?'<div class="deltas">'+out.join('')+'</div>':'<div class="deltas"><span class="d">Nothing changed. Life goes on.</span></div>',net:net};}
+
+/* ================= page turning ================= */
+function turn(html,after){var old=stage.firstElementChild;sTurn();
+ function put(){stage.innerHTML=html;var p=stage.firstElementChild;if(p&&!RM)p.classList.add('in');var r=$('nl').getBoundingClientRect();if(r.top<-4)window.scrollTo({top:window.scrollY+r.top-6,behavior:RM?'auto':'smooth'});after&&after();}
+ if(old&&!RM){old.classList.add('out');setTimeout(put,190);}else put();}
+function say(t){live.textContent=t;}
+function focusEl(sel){var e=stage.querySelector(sel);if(e)try{e.focus({preventScroll:true});}catch(x){}}
+function youNow(mood,pose,sc){return you({c:S.c,track:S.track,sc:sc,mood:mood,pose:pose});}
+function npc(e,mood){if(!e.who)return '';var w=e.who.split(':');return actor(OA.art.who(w[0],{mood:mood||w[1]||'neutral'}),'r');}
+function ageTag(){return 'Age '+S.age+' · '+CH[S.c].k;}
+
+/* ================= the life loop ================= */
+function step(){
+ if(S.i>=S.plan.length)return finish();
+ var sl=S.plan[S.i];S.age=sl.a;S.c=sl.c;
+ if(S.cur&&EV[S.cur])return showEvent(EV[S.cur]);
+ if(sl.first===1){sl.first=2;save();return chapterCard();}
+ if(!sl.up){sl.up=1;upkeep();}
+ if(!sl.lk){sl.lk=1;var L=pickLuck();if(L){S.used.push('L:'+L[0]);save();return showLuck(L);}}
+ var id=pickEvent();S.cur=id;S.used.push(id);save();showEvent(EV[id]);}
+function next(){if(busy)return;OA.sfx('tap');step();}
+function upkeep(){var b=snap(),msg=[];
+ if(S.fl.emi&&S.c>=4){S.h=clamp(S.h-(S.m<20?5:2));msg.push('🏦 EMI day');}
+ if(S.fl.kid&&S.c>=4){S.f=clamp(S.f+3);S.h=clamp(S.h-1);msg.push('👶 Parenting');}
+ if(msg.length){OA.toast(msg.join(' · '));setTimeout(function(){renderHud();pops(b);},450);}}
+function chapterCard(){
+ var c=S.c,ch=CH[c],k=outfitKey(c,S.track,''),L=S.mode==='lv'?LV[S.level-1]:null,first=S.i===0;
+ var h='<section class="page">'+scene(ch.sc,actor(youNow('happy','wave'),'c react'),'Chapter '+(c+1)+' of 6','Age '+ch.ages[0]+'–'+ch.ages[2])+
+  '<div class="chips"><span class="chip">'+(L?'Level '+S.level+' · '+esc(L.n):S.mode==='daily'?'Daily life · '+OA.today():'A new life')+'</span></div>'+
+  '<h2 class="ev-h">'+ch.n+'</h2><p class="ev-p">'+ch.b+'</p>'+
+  '<p class="newlook">👕 New look: '+OUTNAME[k]+'</p>'+
+  (first&&L?'<div class="intro"><span style="font-size:1.6rem">'+L.mech[0]+'</span><div><b>New: '+L.mech[1]+'</b>'+L.mech[2]+'</div></div>'+goalBox(L):'')+
+  (first&&!L?'<div class="goal"><b>Stars for this life</b><ul><li><span>★</span> every meter 30%+ at the end</li><li><span>★★</span> every meter 45%+</li><li><span>★★★</span> every meter 60%+</li></ul></div>':'')+
+  '<div class="btns"><button type="button" class="oa-btn" id="nx">'+(first?'Start at '+ch.ages[0]+' →':'Begin chapter →')+'</button></div></section>';
+ renderHud();
+ turn(h,function(){$('nx').onclick=next;focusEl('#nx');OA.sfx('levelup');say('Chapter '+(c+1)+': '+ch.n+'. '+ch.b);});}
+function goalBox(L){return '<div class="goal"><b>Goal: '+L.gt+'</b><ul><li><span>★</span> reach the goal</li><li><span>★★</span> goal + every meter 40%+</li><li><span>★★★</span> goal + every meter 55%+</li></ul></div>';}
+function odds(c){if(c[3]==null)return '';var p=eff(c[3]);return '<span class="odds '+(p>=.6?'hi':p<.4?'lo':'')+'">🎲 '+Math.round(p*100)+'%</span>';}
+function showEvent(e){
+ renderHud();OA.music.play(e.sc==='mandap'?'bazaar':'chill');
+ var h='<section class="page">'+scene(e.sc,actor(youNow(S.h<35?'sad':'neutral','stand',e.sc),'l')+npc(e),ageTag())+
+  '<div class="chips"><span class="chip">'+esc(e.tag)+'</span></div><h2 class="ev-h">'+esc(e.t)+'</h2><p class="ev-p">'+esc(e.p)+'</p>'+
+  (e.mem?'<div class="mem"><span aria-hidden="true">📌</span><span><b>Remember?</b> '+esc(e.mem)+'</span></div>':'')+
+  '<div class="choices" role="group" aria-label="Your choice">'+e.c.map(function(c,i){return '<button type="button" class="choice" data-i="'+i+'"><span class="k" aria-hidden="true">'+'ABCD'[i]+'</span><span class="tx">'+esc(c[0])+'</span>'+odds(c)+'</button>';}).join('')+'</div></section>';
+ turn(h,function(){stage.querySelectorAll('.choice').forEach(function(b){b.onclick=function(){choose(+b.dataset.i,b);};});if(S.i>0)focusEl('.choice');say('Age '+S.age+'. '+e.t+'. '+e.p);});}
+function choose(i,btn){
+ if(busy||!S||!S.cur)return;busy=true;var e=EV[S.cur],c=e.c[i];sChoose();OA.buzz(10);
+ btn.classList.add('sel');btn.parentNode.classList.add('done');
+ var b=snap();S.fx={};var win=c[3]==null||OA.rng(S.seed+':c'+S.i+':'+e.id)()<eff(c[3]);
+ applyFx(win?c[1]:c[4]);var txt=win?c[2]:c[5];
+ if(e.mem){S.mem++;if(S.mem>=3)ach('karma');}
+ S.log.push([S.age,S.c,e.t,c[0],c[3]==null?2:win?1:0]);
+ S.cur=null;S.i++;if(S.fl.married)ach('shaadi');if(S.track==='startup')ach('founder');save();
+ setTimeout(function(){busy=false;showOutcome(e,c,txt,b,win);},RM?60:360);}
+function showOutcome(e,c,txt,b,win){
+ var d=deltas(b),net=d.net,mood=net>3?'happy':net<-3?'sad':'neutral',pose=net>16?'arms-up':'stand';
+ var nm=net>3?'happy':net<-3?(/angry|smug/.test(e.who)?'smug':'shocked'):null;
+ var end=S.i>=S.plan.length,nextCh=!end&&S.plan[S.i].first===1,to40=S.plan[S.plan.length-1].c===5;
+ var lbl=end?(to40?'See where you end up at 40 →':'Finish the chapter →'):nextCh?'Next chapter →':'Next year →';
+ var h='<section class="page">'+scene(e.sc,actor(youNow(mood,pose,e.sc),'l react')+npc(e,nm),ageTag(),S.fx.fest?'Celebration!':null)+
+  (c[3]!=null?'<span class="roll '+(win?'ok':'no')+'">🎲 '+(win?'It worked out!':'Bad luck this time')+'</span>':'')+
+  '<p class="out-t">'+esc(txt)+'</p>'+d.html+'<div class="btns"><button type="button" class="oa-btn" id="nx">'+lbl+'</button></div></section>';
+ turn(h,function(){$('nx').onclick=next;focusEl('#nx');renderHud();pops(b);
+  if(S.fx.fest){festive();OA.music.play('bazaar');}else if(net<-12){OA.shake(stage,'big');OA.sfx('hit');OA.buzz(70);}else if(net>12){OA.sfx('star',1);}
+  say(txt);});}
+function showLuck(L){
+ var b=snap();S.fx={};applyFx(L[5]);var d=deltas(b);S.log.push([S.age,S.c,'Life event: '+L[3],'',3]);save();
+ var h='<section class="page">'+scene(L[1],actor(youNow(L[2],L[2]==='happy'?'wave':'stand',L[1]),'l react'),ageTag(),'Life event!')+
+  '<div class="luck-h">'+dice(1+OA.rng(S.seed+':d'+S.i).int(6))+'<h2 class="ev-h">'+esc(L[3])+'</h2></div><p class="out-t" style="margin-top:4px">'+esc(L[4])+'</p>'+d.html+
+  '<div class="btns"><button type="button" class="oa-btn" id="nx">Life goes on →</button></div></section>';
+ turn(h,function(){$('nx').onclick=next;focusEl('#nx');sting();OA.buzz([15,30,15]);renderHud();setTimeout(function(){pops(b);},250);say('Life event. '+L[3]+'. '+L[4]);});}
+
+/* ================= endings + results ================= */
+function rank(sc){return sc>=4200?'🏆 Colony Legend':sc>=3600?'🌟 Sharma Ji’s Kid':sc>=3000?'💼 Team Favourite':sc>=2400?'📈 Appraisal Survivor':sc>=1800?'🪪 Confirmed Employee':'🎒 Still on Probation';}
+function storyHtml(){var h='',lc=-1;S.log.forEach(function(l){if(l[1]!==lc){lc=l[1];h+='<h3>'+CH[lc].n+'</h3>';}h+='<div><b>'+l[0]+'</b>'+esc(l[2])+(l[3]?' → '+esc(l[3])+(l[4]===1?' 🎲✓':l[4]===0?' 🎲✗':''):'')+'</div>';});return h;}
+function finish(){
+ clearCur();OA.music.play('chill');var L=S.mode==='lv'?LV[S.level-1]:null,to40=S.plan[S.plan.length-1].c===5;
+ var bal=balance(),E=to40?ENDBY[fate(S)]:null,isNew=false,stars,score,best;
+ if(E){isNew=!REC.ends[E.id];REC.ends[E.id]=(REC.ends[E.id]||0)+1;REC.lives++;saveRec();ach('life1');if(REC.lives>=5)ach('life5');
+  var ne=Object.keys(REC.ends).length;if(ne>=5)ach('end5');if(ne>=10)ach('end10');if(ne>=END.length)ach('end20');
+  if(S.h>=60&&S.s>=60&&S.f>=60&&mPct(S.m,5)>=60)ach('balance');}
+ score=Math.round((S.h+S.s+S.f)*8+Math.min(S.m,100)*10+bal*12+(E?E.b:0));if(score>=4000)ach('score');
+ var goal=L?ok(L.goal):true;
+ if(L){stars=goal?(bal>=55?3:bal>=40?2:1):0;if(stars){OA.levels.complete(S.level,stars,score);}best={best:OA.levels.bestOf(S.level)};
+  if(LV.every(function(x,j){return OA.levels.stars(j+1)>=3;}))ach('topper');}
+ else{stars=bal>=60?3:bal>=45?2:bal>=30?1:0;if(S.mode==='daily'&&S.seed===OA.daily.seed()){var dr=OA.daily.record(score);best={isBest:dr.isBest,best:dr.best};if(dr.streak>=3)ach('streak3');}else best=OA.submitBest(score,'life');}
+ var inc=OA.challenge.incoming();if(inc&&score>inc.sc)ach('rival');
+ var sc=E?E.sc:CH[S.c].sc,art=E?endThumb(E,'react'):scene(sc,actor(youNow(goal?'happy':'sad',goal?'arms-up':'stand'),'c react'));
+ var h='<section class="page">'+(E?scene(E.sc,actor(you({c:5,track:TRK[E.id]||'',mood:E.mood,pose:E.pose}),'c react'),'Age 40',isNew?'New ending!':'Ending')+'<span class="stamp'+(isNew?' new':'')+'">'+(isNew?'New ending unlocked':'Ending '+(END.indexOf(E)+1)+' of '+END.length)+'</span><h2 class="end-h">'+E.e+' '+E.t+'</h2><p class="ev-p">'+E.l+'</p>'
+   :scene(sc,actor(youNow(goal?'happy':'sad',goal?'arms-up':'stand'),'c react'),'Age '+S.age,goal?'Chapter cleared':'Try again')+'<span class="stamp'+(goal?' new':'')+'">'+(goal?'Goal reached':'Goal missed')+'</span><h2 class="end-h">'+esc(L.n)+'</h2><p class="ev-p">Goal: '+L.gt+'</p>')+
+  '<div class="finals"><div><b>'+lpa(S.m).replace(' LPA','')+'</b><small>LPA</small></div><div><b>'+S.h+'</b><small>😊 Joy</small></div><div><b>'+S.s+'</b><small>🧠 Skill</small></div><div><b>'+S.f+'</b><small>🏠 Family</small></div></div>'+
+  (E?'<div class="lesson">💡 <b>Real-life lesson:</b> '+E.k+'</div>':'')+
+  '<h3 class="ev-h" style="font-size:1.05rem">Your life story</h3><div class="story" id="story">'+storyHtml()+'</div>'+
+  '<div class="btns"><button type="button" class="oa-btn" id="eRes">See my Life Score</button><div class="row2"><button type="button" class="oa-btn ghost" id="eAgain">'+(L?'Chapters':'Live again')+'</button><button type="button" class="oa-btn ghost" id="eAlb">Endings Album</button></div><button type="button" class="oa-link" id="eMenu">Back to menu</button></div></section>';
+ var lvl=S.level,mode=S.mode,stream=S.stream,seed=S.seed;
+ var share={text:E?'I ended up as “'+E.t+'” at 40 in Naukri Life 🎲 Life Score '+OA.fmt(score)+'. Same luck, your choices. Can you beat me?':'I played “'+L.n+'” in Naukri Life: '+stars+'★, Life Score '+OA.fmt(score)+'. Same luck, your choices. Beat me?',score:score,seed:seed,mode:mode==='lv'?'lv':mode+':'+stream,label:'Life Score'};
+ if(mode==='lv')share.level=lvl;
+ var r={emoji:'<div class="res-art">'+art+'</div>',title:E?E.t:(goal?'Chapter cleared!':'Chapter not cleared'),sub:E?esc(E.l):(goal?'Goal reached: ':'Goal missed: ')+L.gt,win:L?stars>0:true,stars:stars,score:score,scoreLabel:'Life Score',rank:rank(score),
+  stats:[['Salary',lpa(S.m).replace(' LPA','L')],['Joy',S.h],['Skills',S.s],['Family',S.f]],best:best,share:share,
+  tip:'Your real career story starts with a strong resume: <a href="/">build yours free →</a>',menu:{label:'Menu',fn:title}};
+ if(L){if(stars&&lvl<LV.length)r.next={label:'Next level →',fn:function(){startLife('lv',OA.newSeed(),null,lvl+1);}};r.again={label:stars?'Replay':'Try again',fn:function(){startLife('lv',OA.newSeed(),null,lvl);}};}
+ else{r.next={label:'Read my life story',fn:function(){var st=$('story');if(st)st.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'});}};r.again={label:'New life',fn:streamPick};}
+ lastRes=r;S=null;
+ turn(h,function(){hud.hidden=true;$('eRes').onclick=function(){OA.result(lastRes);};$('eAgain').onclick=function(){OA.sfx('tap');if(L)levels();else streamPick();};$('eAlb').onclick=function(){OA.sfx('tap');album();};$('eMenu').onclick=function(){OA.sfx('tap');title();};
+  if(E)sting();setTimeout(function(){OA.result(r);var fr=OA.unlocks.fresh();fr.forEach(function(u,j){setTimeout(function(){OA.toast('👕 New look unlocked: <b>'+u.name+'</b>','gold');},900+j*600);});},RM?200:1100);
+  say(E?'Your ending: '+E.t+'. Life Score '+score:(goal?'Chapter cleared with '+stars+' stars':'Chapter goal missed'));});}
+
+/* ================= screens ================= */
+function hero(){
+ var sky='<defs><linearGradient id="hsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#fb923c"/></linearGradient></defs>';
+ var bg='<svg class="bg" viewBox="0 0 360 225" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+sky+N(0,0,360,225,'url(#hsky)')+D(300,48,26,'#fff7ae')+
+  G('an-bob',P('M40 40 q6 -12 18 -6 q8 -10 18 0 q10 0 8 8 h-44 z','#fff'))+P('M200 30 q6 -10 16 -4 q8 -8 16 2 h-32 z','#fff')+
+  P('M-10 150 L50 92 L90 120 L140 70 L200 128 L250 86 L300 118 L370 80 V230 H-10 Z','#c2410c')+P('M128 82 L140 70 L152 82 L146 86 L140 80 L134 86 Z','#fff')+
+  P('M-10 170 Q80 130 180 160 T370 140 V230 H-10 Z','#86efac')+N(0,196,360,30,'#4ade80')+
+  Q('M-10 222 C70 215 70 190 130 186 S230 170 260 150 S330 118 372 110','none',' stroke="'+K+'" stroke-width="28" stroke-linecap="round"')+
+  Q('M-10 222 C70 215 70 190 130 186 S230 170 260 150 S330 118 372 110','none',' stroke="#fde68a" stroke-width="23" stroke-linecap="round"')+
+  Q('M-10 222 C70 215 70 190 130 186 S230 170 260 150 S330 118 372 110','none',' stroke="#fff" stroke-width="2" stroke-dasharray="8 8"')+'</svg>';
+ var P5=[[0,'college','happy','wave',21,2,3],[1,'job','neutral','phone',25,21,8],[3,'wed','happy','stand',29,40,13],[4,'mgr','smug','coffee',34,59,20],[5,'grey','happy','wave',40,78,28]];
+ var a='';P5.forEach(function(p){var o={c:p[0],track:'',mood:p[2],pose:p[3],sc:p[1]==='wed'?'mandap':''};
+  a+='<div class="actor" style="left:'+p[5]+'%;bottom:'+p[6]+'%" aria-hidden="true">'+you(o)+'</div><span class="ag" style="left:'+(p[5]+10)+'%;bottom:'+(p[6]+41)+'%">'+p[4]+'</span>';});
+ return '<div class="hero">'+bg+a+'<div class="hero-cap" style="top:10px;bottom:auto">One life. Twenty years. Your choices.</div></div>';}
+function stars3(n){var s='';for(var i=0;i<3;i++)s+='<span class="'+(i<n?'on':'')+'">★</span>';return s;}
+function title(){
+ S=null;busy=false;OA.closeModal();OA.music.duck(false);showHud(false);
+ var inc=OA.challenge.incoming(),cur=OA.load('cur',null),tot=OA.levels.total(),nE=Object.keys(REC.ends).length,nA=Object.keys(REC.ach).length,best=OA.best('life'),st=OA.daily.streak(),dp=OA.daily.best();
+ var dS=['Engineering','Commerce','Arts'][OA.daily.seed()%3],dd=new Date();
+ var h='<section class="page">'+hero()+(inc?'<div style="margin-top:12px">'+OA.challengeBanner()+'</div>':'')+
+  '<div class="t-stats"><div><b>'+(best?OA.fmt(best):'–')+'</b><small>Best score</small></div><div><b>★ '+tot+'</b><small>of 36 stars</small></div><div><b>🔥 '+st+'</b><small>day streak</small></div></div>'+
+  '<div class="btns"><button type="button" class="oa-btn" id="tPlay">'+(inc?'⚔️ Accept challenge':'Live a new life')+'</button>'+
+  (cur&&cur.plan&&!inc?'<button type="button" class="oa-btn ghost" id="tCont">Continue: age '+cur.age+' · '+esc(cur.title)+'</button>':'')+
+  '<button type="button" class="daily-b" id="tDaily"><span class="cal" aria-hidden="true"><i>'+dd.toLocaleString('en-IN',{month:'short'})+'</i><b>'+dd.getDate()+'</b></span><div><strong>Daily Life'+(dp!=null?' · best '+OA.fmt(dp):'')+'</strong><span>Today everyone lives the same '+dS+' life. Resets in '+OA.daily.resetsIn()+'.</span></div></button>'+
+  '<div class="row2"><button type="button" class="tile" id="tLv"><span class="ic">📗</span>Chapters<small>12 levels · ★ '+tot+'/36</small></button><button type="button" class="tile" id="tAlb"><span class="ic">📖</span>Endings Album<small>'+nE+' of '+END.length+' found</small></button>'+
+  '<button type="button" class="tile" id="tAch"><span class="ic">🏅</span>Achievements<small>'+nA+' of '+ACH.length+'</small></button><button type="button" class="tile" id="tLook"><span class="ic">👕</span>Looks<small>'+OA.unlocks.all().filter(function(u){return u.unlocked;}).length+' of '+LOOKS.length+' unlocked</small></button></div></div>'+
+  '<p class="cont">'+(REC.lives?'Lives lived: '+REC.lives+' · ':'')+'Every playthrough is different.</p></section>';
+ turn(h,function(){
+  $('tPlay').onclick=function(){OA.sfx('tap');if(inc){var m=String(inc.m||'life:ENG').split(':');if(m[0]==='lv')startLife('lv',inc.s,null,Math.max(1,Math.min(LV.length,+inc.l||1)));else startLife(m[0]==='daily'?'daily':'life',inc.s,/^(ENG|COM|ART)$/.test(m[1])?m[1]:'ENG');}else streamPick();};
+  if($('tCont'))$('tCont').onclick=function(){OA.sfx('tap');S=OA.load('cur',null);busy=false;OA.music.play('chill');showHud(true);step();};
+  $('tDaily').onclick=function(){OA.sfx('tap');var sd=OA.daily.seed();startLife('daily',sd,['ENG','COM','ART'][sd%3]);};
+  $('tLv').onclick=function(){OA.sfx('tap');levels();};$('tAlb').onclick=function(){OA.sfx('tap');album();};$('tAch').onclick=function(){OA.sfx('tap');achievements();};$('tLook').onclick=function(){OA.sfx('tap');looks();};
+  say('Naukri Life. Live a whole career from 21 to 40.');});}
+function back(){return '<button type="button" class="mini" data-back>← Back</button>';}
+function wireBack(){stage.querySelectorAll('[data-back]').forEach(function(b){b.onclick=function(){OA.sfx('tap');title();};});}
+function streamPick(){
+ showHud(false);var sel='ENG',L={ENG:['Engineering','Placements, GATE, startups','phone'],COM:['Commerce','CA, Big 4, family shop','coffee'],ART:['Arts','UPSC, creator, teaching','wave']};
+ var h='<section class="page"><div class="sec-h"><div><h2>Pick your stream</h2><p>Age 21 · final year of college</p></div>'+back()+'</div>'+
+  '<div class="field"><label for="nm">Your name (shown on challenges)</label><input type="text" id="nm" maxlength="18" autocomplete="given-name" placeholder="e.g. Priya" value="'+esc(OA.playerName())+'"></div>'+
+  '<div class="streams" role="group" aria-label="Stream">'+['ENG','COM','ART'].map(function(k){return '<button type="button" class="st" data-s="'+k+'" aria-pressed="'+(k===sel)+'">'+you({c:0,mood:'happy',pose:L[k][2]})+'<b>'+L[k][0]+'</b><small>'+L[k][1]+'</small></button>';}).join('')+'</div>'+
+  '<div class="btns"><button type="button" class="oa-btn" id="go">Start my life →</button></div></section>';
+ turn(h,function(){wireBack();stage.querySelectorAll('.st').forEach(function(b){b.onclick=function(){sel=b.dataset.s;OA.sfx('pop');stage.querySelectorAll('.st').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});};});
+  $('go').onclick=function(){var n=($('nm').value||'').trim();if(n)OA.setPlayerName(n);startLife('life',OA.newSeed(),sel);};focusEl('.st');});}
+function levels(){
+ showHud(false);var h='<section class="page"><div class="sec-h"><div><h2>Chapters</h2><p>★ '+OA.levels.total()+' of 36 · clear a level to unlock the next</p></div>'+back()+'</div><div class="lvs">';
+ var nextOpen=0;for(var n=1;n<=LV.length;n++)if(OA.levels.isUnlocked(n)&&!OA.levels.stars(n)){nextOpen=n;break;}
+ for(var c=0;c<6;c++){h+='<div class="lv-row"><div class="lv-ch">'+sceneSvg(CH[c].sc)+'<b>'+CH[c].n+'</b></div>';
+  [2*c+1,2*c+2].forEach(function(n){var L=LV[n-1],un=OA.levels.isUnlocked(n),st=OA.levels.stars(n);
+   h+='<button type="button" class="lv'+(un?'':' lock')+(n===nextOpen?' next':'')+'" data-n="'+n+'"'+(un?'':' aria-disabled="true"')+' aria-label="Level '+n+': '+esc(L.n)+(un?', '+st+' stars':', locked')+'"><span class="n">'+(un?'LEVEL '+n:'🔒 LEVEL '+n)+'</span><b>'+esc(L.n)+'</b><span class="s">'+stars3(st)+'</span></button>';});
+  h+='</div>';}
+ h+='</div></section>';
+ turn(h,function(){wireBack();stage.querySelectorAll('.lv').forEach(function(b){b.onclick=function(){var n=+b.dataset.n;if(!OA.levels.isUnlocked(n)){OA.sfx('error');OA.shake(b);OA.toast('Clear level '+(n-1)+' first');return;}OA.sfx('tap');startLife('lv',OA.newSeed(),null,n);};});focusEl('.lv.next')});}
+function album(){
+ showHud(false);var n=Object.keys(REC.ends).length;
+ var h='<section class="page"><div class="sec-h"><div><h2>Endings Album</h2><p>'+n+' of '+END.length+' endings discovered</p></div>'+back()+'</div><div class="alb">'+
+  END.map(function(E,i){var got=REC.ends[E.id];return '<button type="button" class="en'+(got?'':' lock')+'" data-i="'+i+'" aria-label="'+(got?esc(E.t):'Undiscovered ending. Hint: '+esc(E.hint))+'">'+(got?endThumb(E):endThumb(E).replace('</div>','</div><span class="q" aria-hidden="true">?</span>'))+'<b>'+(got?esc(E.t):'???')+'</b><small>'+(got?'Reached '+got+'×':esc(E.hint))+'</small></button>';}).join('')+'</div></section>';
+ turn(h,function(){wireBack();stage.querySelectorAll('.en').forEach(function(b){b.onclick=function(){var E=END[+b.dataset.i];if(!REC.ends[E.id]){OA.sfx('error');OA.toast('Hint: '+esc(E.hint));return;}OA.sfx('pop');
+  var m=OA.modal('<div class="res-art">'+endThumb(E,'react')+'</div><h2>'+E.e+' '+esc(E.t)+'</h2><div class="m-end"><p class="oa-m-sub">'+E.l+'</p><p class="oa-m-sub">💡 '+E.k+'</p></div><div class="oa-actions"><button type="button" class="oa-btn" data-close autofocus>Close</button></div>',{label:E.t,dismiss:true});
+  m.querySelector('[data-close]').onclick=function(){OA.sfx('tap');OA.closeModal();};};});});}
+function achievements(){
+ showHud(false);var h='<section class="page"><div class="sec-h"><div><h2>Achievements</h2><p>'+Object.keys(REC.ach).length+' of '+ACH.length+' earned</p></div>'+back()+'</div><div class="achs">'+
+  ACH.map(function(a){var got=REC.ach[a[0]];return '<div class="ach'+(got?'':' lock')+'"><span class="md" aria-hidden="true">'+(got?a[1]:'🔒')+'</span><div><b>'+a[2]+'</b><span>'+a[3]+(got?' · '+got:'')+'</span></div></div>';}).join('')+'</div></section>';
+ turn(h,wireBack);}
+function looks(){
+ showHud(false);var all=OA.unlocks.all(),cur=OA.unlocks.selected(),tot=OA.levels.total();
+ var h='<section class="page"><div class="sec-h"><div><h2>Looks</h2><p>Earn stars in Chapters to unlock looks · ★ '+tot+'</p></div>'+back()+'</div><div class="looks">'+
+  LOOKS.map(function(L,i){var u=all[i].unlocked,x=Object.assign({},L.o,OUT.job,{mood:u?'happy':'neutral'});return '<button type="button" class="look'+(u?'':' lock')+'" data-id="'+L.id+'" aria-pressed="'+(cur===L.id)+'">'+OA.art.person(x)+'<b>'+L.name+'</b><small>'+(u?(cur===L.id?'Wearing':'Tap to wear'):'★ '+L.need)+'</small></button>';}).join('')+
+  '</div><p class="cont">Your look ages with you: hoodie at 21, office shirt, wedding outfit, manager tie or founder tee, then grey hair at 40.</p></section>';
+ turn(h,function(){wireBack();stage.querySelectorAll('.look').forEach(function(b){b.onclick=function(){var L=LOOKS.filter(function(x){return x.id===b.dataset.id;})[0],u=OA.unlocks.all().filter(function(x){return x.id===L.id;})[0];
+  if(!u.unlocked){OA.sfx('error');OA.toast('Needs ★ '+L.need+' from Chapters');return;}OA.unlocks.select(L.id);OA.sfx('pop');looks();};});});}
+
+/* ================= keyboard + boot ================= */
+document.addEventListener('keydown',function(ev){if(ev.ctrlKey||ev.metaKey||ev.altKey)return;if(document.querySelector('.oa-modal-bg'))return;var t=ev.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;
+ var k=ev.key.toLowerCase(),i='1234'.indexOf(k);if(i<0)i='abcd'.indexOf(k);if(i<0)return;var b=stage.querySelectorAll('.choice')[i];if(b){ev.preventDefault();b.click();}});
+$('ctl').appendChild(OA.controls());
+title();
+})();
+</script>
+</body>
+</html>
