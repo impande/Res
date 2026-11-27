@@ -131,6 +131,7 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
 .cl-ib svg{width:20px;height:20px}
 .cl-ib[hidden]{display:none}
 .cl-hd-t{flex:1;min-width:0;font:800 1.02rem/1.15 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-hd-t .lt{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:normal;font-size:.86rem;line-height:1.08}
 .cl-hd-t small{display:block;font:600 .7rem/1.2 var(--body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .cl-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#fde68a;border-radius:99px;padding:4px 11px;font:800 .9rem var(--display)}
 .cl-hd .oa-ctl{flex:none}
@@ -155,6 +156,15 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
 .chal:empty{display:none}
 .cl-play{flex-direction:column;gap:1px;padding:12px 16px;font-size:1.25rem}
 .cl-play small{font:700 .78rem var(--body);opacity:.8}
+.tmile{margin:10px auto 0;width:max-content;max-width:100%;text-align:center;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4);color:#fde68a;border-radius:99px;padding:4px 14px;font:800 .88rem var(--display)}
+.tmile[hidden]{display:none}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;background:rgba(13,19,36,.6);border:1px solid var(--line);border-radius:16px;padding:6px}
+.pager b{font:800 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.pager .cl-ib{width:48px;height:44px}
+.pager .cl-ib:disabled{opacity:.35;cursor:default;box-shadow:none}
+.lv.mile{background:linear-gradient(170deg,#4a3a1a,#2a2414);border-color:#a16207}
+.lv.mile:disabled{background:#1f1b12;border-color:#4a3a1a}
+.lv .mb{position:absolute;top:-8px;right:-5px;font-size:1rem;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .mode{position:relative;display:grid;grid-template-columns:46px 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;padding:10px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,#24305a,#1b2542);color:var(--ink);cursor:pointer;box-shadow:0 4px 0 #0a0f1e;transition:transform .08s,border-color .15s;min-width:0}
 .mode:hover{border-color:#4b5d97}
@@ -392,6 +402,7 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     <p class="tagl">Merge job titles. Climb from Intern to CEO.</p>
     <div class="chal" id="chal"></div>
     <button class="oa-btn cl-play" id="bPlay" type="button"><span id="bPlayT">Start career</span><small id="bPlayS">Level 1</small></button>
+    <p class="tmile" id="tMile" hidden></p>
     <div class="modes">
       <button class="mode" id="bEndless" type="button"><img class="mi" id="iEnd" alt=""><b>Endless</b><small id="mEnd">Best 0</small></button>
       <button class="mode" id="bDaily" type="button"><img class="mi" id="iDay" alt=""><b>Daily board</b><small id="mDay"></small><i class="new" id="dNew" hidden>NEW</i></button>
@@ -444,7 +455,7 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
   </section>
 </div>
 <section class="g-promo" aria-labelledby="promo-h"><div class="pe"><img src="/logo-mark.svg?v=4" alt="" width="26" height="26">Made by Resume For You</div><h2 id="promo-h">Climb the real corporate ladder</h2><p>Promotions and job switches start with a resume that shows impact. Resume For You writes ATS-friendly bullet points for your role in minutes.</p><ul><li>ATS-friendly templates recruiters in India read</li><li>AI writes your summary and bullet points</li><li>Download a polished PDF in minutes</li></ul><div class="pb"><a class="p1" href="/">Build my resume free →</a><a class="p2" href="/ats-score-checker/">Check my ATS score</a></div></section>
-<section class="g-about" aria-labelledby="about-h"><h2 id="about-h">Corporate Ladder: A 2048 game with an office twist</h2><p>Corporate Ladder is a free <strong>2048 game</strong> where the numbers are job titles. Swipe to slide every badge on the board, and two matching titles merge into the next rank: Intern, Trainee, Associate, Team Lead, Manager, Director, VP and finally CEO. Unlike the classic 2048 puzzle, each level has a goal, a move limit and office surprises like coffee, appraisal letters and pink slips.</p><ul class="g-feat"><li>20 career levels across 4 office floors, each with a new twist</li><li>Drawn portraits for every rank, from intern lanyard to CEO gold tie</li><li>Endless mode and a Daily board that is the same for everyone</li><li>5 unlockable office themes: startup, co-working, MNC, govt office, boardroom</li><li>Challenge friends on WhatsApp to beat your score on the same board</li></ul><h2 id="howto">How to play Corporate Ladder</h2><ol><li>Swipe (or use arrow keys) to slide every badge. Two matching titles merge into the next rank, from Intern all the way to CEO.</li><li>Career mode has 20 levels across 4 office floors. Each level has a goal and a move limit: finish with moves to spare for 3 stars.</li><li>New tiles appear as you climb: coffee and appraisal letters promote badges, pink slips and locked cabins get in your way, frozen badges need a merge next to them.</li><li>Play Endless to chase CEO, or the Daily board, which is the same for everyone today. Stars unlock new office themes.</li></ol><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>Corporate Ladder FAQ</h2><div class="g-faq"><details><summary>Is Corporate Ladder like 2048?</summary><p>Yes. It plays like the 2048 merge puzzle: swipe to slide tiles and merge matching ones. Instead of numbers you merge job titles, and each level adds goals and office power tiles.</p></details><details><summary>Can I play Corporate Ladder on my phone?</summary><p>Yes. Swipe on your phone or use the arrow keys on a laptop. It runs in the browser with no download.</p></details><details><summary>What is the highest rank?</summary><p>CEO. Reaching CEO in Endless mode is the ultimate goal, and the Daily board lets you compare scores with friends.</p></details></div><h2>Career tip</h2><p>Climbing the real ladder needs a resume that shows impact. <a href="/how-to-make-resume-for-first-job/">See how to write one</a> or <a href="/">build yours free</a>.</p><div class="g-guides"><a href="/resume-format-for-experienced/">📄 Resume format for experienced professionals →</a><a href="/skills-to-put-on-a-resume/">📄 Skills to put on a resume →</a></div><h2>More free office games</h2><div class="g-more"><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/office-cricket/">🏏 Office Cricket</a><a href="/games/typing-race/">⌨️ Typing Race</a><a href="/games/inbox-zero/">📧 Inbox Zero</a><a href="/games/naukri-life/">🎲 Naukri Life</a><a href="/games/">🎮 All games</a></div></section>
+<section class="g-about" aria-labelledby="about-h"><h2 id="about-h">Corporate Ladder: A 2048 game with an office twist</h2><p>Corporate Ladder is a free <strong>2048 game</strong> where the numbers are job titles. Swipe to slide every badge on the board, and two matching titles merge into the next rank: Intern, Trainee, Associate, Team Lead, Manager, Director, VP and finally CEO. Unlike the classic 2048 puzzle, each level has a goal, a move limit and office surprises like coffee, appraisal letters and pink slips.</p><ul class="g-feat"><li>20 career levels across 4 office floors, each with a new twist</li><li>Drawn portraits for every rank, from intern lanyard to CEO gold tie</li><li>Endless mode and a Daily board that is the same for everyone</li><li>5 unlockable office themes: startup, co-working, MNC, govt office, boardroom</li><li>Challenge friends on WhatsApp to beat your score on the same board</li></ul><h2 id="howto">How to play Corporate Ladder</h2><ol><li>Swipe or use the arrow keys to slide every badge. Two matching titles merge into the next rank: Intern, Trainee, Associate and up to CEO.</li><li>Career mode never ends: each level has a goal and a move limit, and the moves you have left decide your stars. Every 10th level is a milestone.</li><li>Watch for coffee (+1 rank), appraisal letters (+2), pink slips, frozen hires, locked cabins, the water cooler, training rooms and the corner office.</li><li>Your progress saves itself: tap Continue to pick up at your next level, even mid-level. Also play the Daily board or Endless, and challenge friends on WhatsApp.</li></ol><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>Corporate Ladder FAQ</h2><div class="g-faq"><details><summary>Is Corporate Ladder like 2048?</summary><p>Yes. It plays like the 2048 merge puzzle: swipe to slide tiles and merge matching ones. Instead of numbers you merge job titles, and each level adds goals and office power tiles.</p></details><details><summary>Can I play Corporate Ladder on my phone?</summary><p>Yes. Swipe on your phone or use the arrow keys on a laptop. It runs in the browser with no download.</p></details><details><summary>What is the highest rank?</summary><p>CEO. Reaching CEO in Endless mode is the ultimate goal, and the Daily board lets you compare scores with friends.</p></details></div><h2>Career tip</h2><p>Climbing the real ladder needs a resume that shows impact. <a href="/how-to-make-resume-for-first-job/">See how to write one</a> or <a href="/">build yours free</a>.</p><div class="g-guides"><a href="/resume-format-for-experienced/">📄 Resume format for experienced professionals →</a><a href="/skills-to-put-on-a-resume/">📄 Skills to put on a resume →</a></div><h2>More free office games</h2><div class="g-more"><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/office-cricket/">🏏 Office Cricket</a><a href="/games/typing-race/">⌨️ Typing Race</a><a href="/games/inbox-zero/">📧 Inbox Zero</a><a href="/games/naukri-life/">🎲 Naukri Life</a><a href="/games/">🎮 All games</a></div></section>
 <div class="g-foot"><style>
 .r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
 .r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
@@ -606,10 +617,57 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     { n: 'Hostile Takeover', moves: 110, s3: 38, s2: 20, slipEvery: 6, coffee: 0.04, layout: { ice: [[3, 2], [12, 2]] }, goals: [{ t: 'slips', n: 5 }, { t: 'thaw', n: 2 }, { t: 'rank', r: 7 }] },
     { n: 'The Corner Office', N: 5, moves: 240, s3: 90, s2: 50, coffee: 0.035, gift: 0.012, cycle: 12, layout: { target: 24 }, goals: [{ t: 'corner', r: 9 }] }
   ];
+
+  /* generated levels (21+): mix the mechanics above, difficulty ramps with tier and caps at tier 51 */
+  var GA = ['Monsoon', 'Diwali', 'Holi', 'Budget', 'Quarter-End', 'Payday', 'Hackathon', 'Audit', 'Offsite', 'Townhall', 'Deadline', 'Friday', 'Overtime', 'Pune', 'Chennai', 'Kolkata', 'Hyderabad', 'Gurugram', 'Noida', 'Mumbai', 'Kochi', 'Jaipur', 'Indore', 'Lucknow', 'Bengaluru', 'Ahmedabad', 'Monday', 'Night Shift', 'Festive', 'Year-End'];
+  var GB = { rank: ['Rush', 'Sprint', 'Hustle', 'Climb', 'Fast Track'], slips: ['Layoffs', 'Cost Cuts', 'Pink Slip Panic', 'Restructure'], ice: ['Hiring Freeze', 'Cold Storage', 'Budget Freeze', 'Frozen Pipeline'], cabin: ['Cabin Shuffle', 'Key Hunt', 'Cabin Fever', 'Lockout'], corner: ['Corner Office', 'Window Seat', 'Big Cabin'], train: ['Upskilling', 'Workshop', 'Training Week', 'Bootcamp'], cycle: ['Appraisals', 'Review Season', 'Rating Week', 'Feedback Loop'] };
+  var GM = ['Board Meeting', 'Investor Day', 'Annual Townhall', 'Leadership Offsite', 'Mega Merger', 'IPO Week', 'Global Summit', 'Founders Day'];
+  var REC = ['rank', 'slips', 'ice', 'cabin', 'corner', 'train', 'cycle'];
+  var EST = { 4: { 6: 34, 7: 68, 8: 135 }, 5: { 6: 30, 7: 62, 8: 125 } };
+  function genLevel(n, r, tier) {
+    var d = Math.min(1, (tier - 1) / 50), mile = n % 10 === 0, blk = Math.floor((n - 21) / 7);
+    var rec = mile ? r.pick(['rank', 'slips', 'ice', 'cabin', 'cycle']) : OA.rng('cl-mix:' + blk).shuffle(REC)[(n - 21) % 7];
+    var N = mile || (rec !== 'corner' && r.chance(0.2 + 0.25 * d)) ? 5 : 4, nn = N * N, used = {};
+    var rank = N === 4 ? 6 + (r.chance(0.25 + 0.5 * d) ? 1 : 0) : 7 + (r.chance(0.15 + 0.35 * d) ? 1 : 0);
+    if (mile) rank = 8;
+    var L = { n: mile ? GM[Math.floor(n / 10) % GM.length] : r.pick(GA) + ' ' + r.pick(GB[rec]), N: N, gen: true, mile: mile, layout: {}, goals: [] }, lay = L.layout;
+    var est = EST[N][rank], extra = 0, corners = [0, N - 1, nn - N, nn - 1], inner = N === 4 ? [5, 6, 9, 10] : [6, 7, 8, 11, 13, 16, 17, 18];
+    function take(pool) { pool = pool.filter(function (i) { return !used[i]; }); var i = r.pick(pool); used[i] = 1; return i; }
+    function any() { var a = []; for (var i = 0; i < nn; i++) a.push(i); return take(a); }
+    L.coffee = r.pick([0, 0.02, 0.03]);
+    if (rec === 'rank') { L.coffee = 0.03 + 0.02 * r(); if (r.chance(0.5)) L.gift = 0.012; L.intro = L.gift ? 'gift' : 'coffee'; }
+    if (rec === 'slips') { var k = 2 + Math.round(d * 2), sl = lay.slips = []; for (var i = 0; i < k; i++) sl.push(any()); var ns = k; if (d > 0.15 && r.chance(0.65)) { L.slipEvery = 9 - Math.round(d * 2); ns += 1 + Math.round(d); L.intro = 'bell'; } else L.intro = 'slip'; L.goals.push({ t: 'slips', n: ns }); extra += ns * 2; }
+    if (rec === 'ice') { var ki = 2 + Math.round(d * 2), ic = lay.ice = []; for (i = 0; i < ki; i++) ic.push([any(), 1 + r.int(2), r.chance(0.2 + 0.4 * d) ? 2 : 1]); if (r.chance(0.3 + 0.3 * d)) { L.frost = 0.03; L.intro = 'frost'; } else L.intro = 'ice'; L.goals.push({ t: 'thaw', n: ki }); extra += ki; }
+    if (rec === 'cabin') { var kc = r.chance(0.35 + 0.45 * d) ? 2 : 1, w = lay.walls = []; for (i = 0; i < kc; i++) w.push([take(inner.concat(N === 4 ? [1, 2, 4, 7, 8, 11, 13, 14] : [1, 2, 3, 5, 9, 10, 14, 15, 19, 21, 22, 23])), 'cabin', 5 + r.int(4) + Math.round(d * 4)]); L.intro = 'cabin'; L.goals.push({ t: 'open', n: kc }); est *= 1.08; }
+    if (rec === 'corner') { lay.target = take(corners); L.intro = 'corner'; if (N === 4) rank = Math.min(rank, 6 + (d > 0.5 ? 1 : 0)); est = EST[N][rank] * (N === 5 ? 1.55 : 1.25); L.goals.push({ t: 'corner', r: rank }); }
+    if (rec === 'train') { var kt = 2 + (r.chance(0.5) ? 1 : 0), tr = lay.train = []; for (i = 0; i < kt; i++) tr.push(any()); L.intro = 'train'; L.goals.push({ t: 'train', n: kt }); }
+    if (rec === 'cycle') { L.cycle = r.pick([8, 10, 12]); L.intro = 'cycle'; if (N === 4 && r.chance(0.5 + 0.3 * d)) { lay.walls = [[take(inner), 'cooler']]; L.intro = 'cooler'; est *= 1.12; } est *= 1 - 1.1 / L.cycle; }
+    if (rec !== 'corner') L.goals.unshift({ t: 'rank', r: rank });
+    /* a second, harder twist on later floors */
+    if (!mile && r.chance(0.2 + 0.5 * d)) {
+      var tw = r.pick(['coffee', 'cooler', 'frost', 'bell', 'cycle']);
+      if (tw === 'cooler' && !lay.walls && lay.target == null && N === 4) { lay.walls = [[take(inner), 'cooler']]; est *= 1.12; }
+      else if (tw === 'frost' && !L.frost) { L.frost = 0.025; extra += 2; }
+      else if (tw === 'bell' && !L.slipEvery && rec !== 'corner') { L.slipEvery = 11; extra += 4; }
+      else if (tw === 'cycle' && !L.cycle) { L.cycle = 12; if (rec !== 'corner') est *= 0.92; }
+      else L.coffee = Math.max(L.coffee, 0.04);
+    }
+    if (L.slipEvery) est *= 1.15;
+    est = est * (1 - L.coffee * 1.5 - (L.gift || 0) * 8) + extra;
+    var lim = Math.ceil(est * (1.75 - 0.25 * d) * (mile ? 1.12 : 1) + 6);
+    L.moves = lim; L.s3 = lim - Math.ceil(est * 1.15); L.s2 = lim - Math.ceil(est * 1.45);
+    if (L.s2 < 2) L.s2 = 2; if (L.s3 <= L.s2) L.s3 = L.s2 + 2;
+    return L;
+  }
   /*LEVELS-END*/
   var ENDLESS = { N: 4, coffee: 0.025, gift: 0.008, giftAfter: 60, slip: 0.012, slipAfter: 30 };
   var DAILY = { N: 4, moves: 100, coffee: 0.03, gift: 0.01, giftAfter: 30, slip: 0.015, slipAfter: 20, daily: true };
-  var CHAPS = [['Ground floor', 'Induction'], ['Floor 2', 'Appraisal season'], ['Floor 3', 'Restructuring'], ['Top floor', 'Boardroom']];
+  var CHN = ['Induction', 'Appraisal season', 'Restructuring', 'Boardroom', 'Night shift', 'Quarter close', 'Hiring spree', 'Audit week', 'Offsite', 'Merger talks', 'Budget cuts', 'Townhall', 'Expansion', 'IPO prep', 'Monsoon rush', 'Festive season', 'Client visit', 'Year-end'];
+  var PENT = 40; /* chapters (5 levels each) from this one on are the Penthouse */
+  function chapOf(n) { return Math.ceil(n / 5); }
+  function floorName(c) { return c === 1 ? 'Ground floor' : c < PENT ? 'Floor ' + c : 'Penthouse'; }
+  function chapName(c) { return c < PENT ? CHN[(c - 1) % CHN.length] : 'Suite ' + (c - PENT + 1); }
+  var LDC = {}; function levelDef(n) { n = Math.max(1, Math.floor(+n) || 1); return LDC[n] || (LDC[n] = OA.levels.def(n, LV, genLevel)); }
 
   /* ---------- ranks ---------- */
   var RK = [null,
@@ -922,8 +980,9 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     if (name !== 'play') { loopStop(); P.live = false; }
     try { window.scrollTo({ top: Math.max(0, cl.getBoundingClientRect().top + window.scrollY - 8), behavior: RM ? 'auto' : 'smooth' }); } catch (e) {}
   }
-  function starsTitle() { return '<span class="cl-chip" title="Career stars">★ <b>' + OA.levels.total() + '/60</b></span>'; }
-  function nextLevel() { return Math.min(LV.length, OA.levels.highest() + 1); }
+  function starsTitle() { return '<span class="cl-chip" title="Career stars">★ <b>' + OA.fmt(OA.levels.total()) + '</b></span>'; }
+  function nextLevel() { return OA.levels.next(); }
+  (function () { var h = OA.levels.highest(), m = Math.floor(h / 10) * 10; if (m > OA.levels.lastMilestone()) OA.save('milestone', m); })(); /* older saves: remember milestones already passed */
 
   function renderTitle() {
     show('title', starsTitle());
@@ -931,7 +990,8 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     var ch = OA.challenge.incoming(), nl = nextLevel();
     $('chal').innerHTML = ch ? OA.challengeBanner() : '';
     if (ch) { $('bPlayT').textContent = '⚔️ Accept challenge'; $('bPlayS').textContent = chalLabel(ch); }
-    else { $('bPlayT').textContent = OA.levels.highest() ? 'Continue career' : 'Start career'; $('bPlayS').textContent = 'Level ' + nl + ' · ' + LV[nl - 1].n; }
+    else { var lr = OA.load('lrun', null), mid = lr && lr.l === nl && lr.d; $('bPlayT').textContent = OA.levels.highest() ? 'Continue · Level ' + nl : 'Start career'; $('bPlayS').textContent = (mid ? 'Resume your shift · ' : '') + levelDef(nl).n + ' · ' + floorName(chapOf(nl)); }
+    var ms = OA.levels.lastMilestone(); $('tMile').hidden = !ms; $('tMile').textContent = '🏅 Level ' + ms + ' milestone reached';
     var run = OA.load('run', null);
     $('mEnd').textContent = run && run.d ? 'Continue · ' + OA.fmt(run.sc || 0) + ' pts' : 'Best ' + OA.fmt(OA.best('endless'));
     var db = OA.daily.best();
@@ -940,27 +1000,30 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     $('iEnd').src = A.face(12); $('iDay').src = A.cal();
     $('tStars').textContent = OA.levels.total(); $('tBest').textContent = OA.fmt(OA.best('endless')); $('tStreak').textContent = OA.daily.streak();
     $('collDot').hidden = !OA.load('collNew', 0);
-    var fr = OA.unlocks.fresh(); if (fr.length) { OA.save('collNew', 1); $('collDot').hidden = false; fr.forEach(function (u) { OA.toast('🎉 New office unlocked: ' + esc(u.name), 'gold'); }); }
+    var fr = OA.unlocks.fresh(); if (fr.length) { OA.save('collNew', 1); $('collDot').hidden = false; OA.toast('🎉 New office' + (fr.length > 1 ? 's' : '') + ' unlocked: ' + fr.map(function (u) { return esc(u.name); }).join(', '), 'gold'); }
   }
-  function chalLabel(ch) { return ch.m === 'E' ? 'Endless · same board as ' + ch.n : ch.m === 'D' ? 'Daily board · same board as ' + ch.n : 'Level ' + (ch.l || 1) + ' · ' + (LV[(ch.l || 1) - 1] || LV[0]).n; }
+  function chalLabel(ch) { return ch.m === 'E' ? 'Endless · same board as ' + ch.n : ch.m === 'D' ? 'Daily board · same board as ' + ch.n : 'Level ' + (ch.l || 1) + ' · ' + levelDef(ch.l || 1).n; }
 
-  function renderLevels() {
+  var lvPage = null;
+  function renderLevels(pg) {
     show('levels', '<small>Career</small>' + starsTitle());
-    var h = '', cur = nextLevel();
-    CHAPS.forEach(function (cp, ci) {
-      var got = 0; for (var n = ci * 5 + 1; n <= ci * 5 + 5; n++) got += OA.levels.stars(n);
-      h += '<div class="chap"><h2><span class="fl">' + cp[0] + '</span>' + cp[1] + '<small>★ ' + got + '/15</small></h2><div class="lvg">';
-      for (n = ci * 5 + 1; n <= ci * 5 + 5; n++) {
-        var L = LV[n - 1], un = OA.levels.isUnlocked(n), sN = OA.levels.stars(n), st = '';
+    var cur = nextLevel(); if (pg == null) pg = lvPage == null ? OA.levels.currentPage(20) : lvPage; lvPage = pg = Math.max(0, pg);
+    var R = OA.levels.page(pg, 20), h = '<div class="pager"><button class="cl-ib" type="button" data-pg="' + (pg - 1) + '" aria-label="Previous levels"' + (pg ? '' : ' disabled') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button><b>Levels ' + R.from + '–' + R.to + '</b><button class="cl-ib" type="button" data-pg="' + (pg + 1) + '" aria-label="Next levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+    for (var c = chapOf(R.from); c <= chapOf(R.to); c++) {
+      var got = 0, n; for (n = c * 5 - 4; n <= c * 5; n++) got += OA.levels.stars(n);
+      h += '<div class="chap"><h2><span class="fl">' + floorName(c) + '</span>' + chapName(c) + '<small>★ ' + got + '/15</small></h2><div class="lvg">';
+      for (n = c * 5 - 4; n <= c * 5; n++) {
+        var un = OA.levels.isUnlocked(n), sN = OA.levels.stars(n), st = '', mile = n % 10 === 0;
         for (var k = 0; k < 3; k++) st += k < sN ? '<i>★</i>' : '★';
-        if (!un) h += '<button class="lv" type="button" disabled aria-label="Level ' + n + ', locked">' + lockSVG() + '<b>' + n + '</b></button>';
-        else h += '<button class="lv' + (n === cur && !sN ? ' cur' : '') + '" type="button" data-n="' + n + '" aria-label="Level ' + n + ', ' + esc(L.n) + ', ' + sN + ' of 3 stars">' + (L.intro && L.intro !== 'basics' ? '<img alt="" src="' + mechArt(L.intro) + '">' : '') + '<b>' + n + '</b><span class="st">' + st + '</span></button>';
+        if (!un) h += '<button class="lv' + (mile ? ' mile' : '') + '" type="button" disabled aria-label="Level ' + n + ', locked">' + lockSVG() + '<b>' + n + '</b></button>';
+        else { var L = levelDef(n); h += '<button class="lv' + (n === cur ? ' cur' : '') + (mile ? ' mile' : '') + '" type="button" data-n="' + n + '" aria-label="Level ' + n + ', ' + esc(L.n) + ', ' + sN + ' of 3 stars">' + (L.intro && L.intro !== 'basics' && !L.gen ? '<img alt="" src="' + mechArt(L.intro) + '">' : mile ? '<span class="mb" aria-hidden="true">🏅</span>' : '') + '<b>' + n + '</b><span class="st">' + st + '</span></button>'; }
       }
       h += '</div></div>';
-    });
+    }
     $('lvList').innerHTML = h;
     var b = $('lvList').querySelector('.lv.cur') || $('lvList').querySelector('.lv:not([disabled])'); if (b) try { b.focus({ preventScroll: true }); } catch (e) {}
   }
+  $('lvList').addEventListener('click', function (e) { var p = e.target.closest('[data-pg]'); if (p && !p.disabled) { OA.sfx('tap'); renderLevels(+p.dataset.pg); var f = $('lvList').querySelector('[data-pg="' + (+p.dataset.pg + (p.getAttribute('aria-label') === 'Next levels' ? 1 : -1)) + '"]:not([disabled])') || $('lvList').querySelector('[data-pg]:not([disabled])'); if (f) try { f.focus({ preventScroll: true }); } catch (er) {} } });
   $('lvList').addEventListener('click', function (e) { var b = e.target.closest('.lv[data-n]'); if (b) { OA.sfx('tap'); startRound('L', { lv: +b.dataset.n }); } });
 
   function renderColl() {
@@ -982,29 +1045,31 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
 
   $('bPlay').addEventListener('click', function () {
     OA.sfx('tap'); var ch = OA.challenge.incoming();
-    if (ch) { var m = ch.m === 'E' || ch.m === 'D' ? ch.m : 'L'; startRound(m, { lv: Math.min(LV.length, Math.max(1, +ch.l || 1)), seed: ch.s >>> 0, chal: true }); return; }
+    if (ch) { var m = ch.m === 'E' || ch.m === 'D' ? ch.m : 'L'; startRound(m, { lv: Math.max(1, Math.floor(+ch.l) || 1), seed: ch.s >>> 0, chal: true }); return; }
     startRound('L', { lv: nextLevel() });
   });
   $('bEndless').addEventListener('click', function () { OA.sfx('tap'); OA.challenge.clear(); var run = OA.load('run', null); startRound('E', run && run.d ? { seed: run.s, replay: run.d } : {}); });
   $('bDaily').addEventListener('click', function () { OA.sfx('tap'); OA.challenge.clear(); startRound('D', {}); });
-  $('bLevels').addEventListener('click', function () { OA.sfx('tap'); renderLevels(); });
+  $('bLevels').addEventListener('click', function () { OA.sfx('tap'); lvPage = null; renderLevels(); });
   $('bColl').addEventListener('click', function () { OA.sfx('tap'); renderColl(); });
   $('hBack').addEventListener('click', function () { OA.sfx('tap'); if (screen === 'play') pause(); else renderTitle(); });
   $('hPause').addEventListener('click', function () { OA.sfx('tap'); pause(); });
 
   /* ---------- round setup ---------- */
-  function cfgFor(mode, lv) { return mode === 'L' ? LV[lv - 1] : mode === 'E' ? ENDLESS : DAILY; }
+  function cfgFor(mode, lv) { return mode === 'L' ? levelDef(lv) : mode === 'E' ? ENDLESS : DAILY; }
   function startRound(mode, o) {
     o = o || {}; flushPending();
     if (!o.chal && OA.challenge.incoming()) OA.challenge.clear();
     var lv = o.lv || 1, cfg = cfgFor(mode, lv), seed = o.seed || (mode === 'D' ? OA.daily.seed() : OA.newSeed());
+    if (!o.chal && !o.fresh && !o.replay && (mode === 'L' || mode === 'D')) { var sv = OA.load(mode === 'L' ? 'lrun' : 'drun', null); if (sv && sv.d && (mode === 'L' ? sv.l === lv : sv.s === (seed >>> 0))) { seed = sv.s; o.replay = sv.d; o.resumed = true; } }
     P = { st: newRound(cfg, seed), mode: mode, lv: lv, cfg: cfg, seed: seed >>> 0, live: false, ended: false, pend: null, pendFn: null, lock: 0, dirs: '', tier: 0, chal: !!o.chal };
     if (o.replay) { for (var i = 0; i < o.replay.length; i++) { if (!doMove(P.st, +o.replay[i])) break; P.dirs += o.replay[i]; } }
     P.tier = tierOf(P.st.top);
-    var title = mode === 'L' ? '<small>Level ' + lv + ' of ' + LV.length + '</small>' + esc(cfg.n) : mode === 'E' ? '<small>Endless</small>Climb to CEO' : '<small>Daily board</small>' + new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    var title = mode === 'L' ? '<small>Level ' + lv + ' · ' + floorName(chapOf(lv)) + '</small>' + (cfg.n.length > 17 ? '<span class="lt">' + esc(cfg.n) + '</span>' : esc(cfg.n)) : mode === 'E' ? '<small>Endless</small>Climb to CEO' : '<small>Daily board</small>' + new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
     show('play', title);
     arena.style.setProperty('--arena', TH[theme()].arena);
     layout(true); hud(); status(mode === 'L' ? 'Level ' + lv + ': ' + cfg.n + '.' : '');
+    P.resumed = !!o.resumed; if (o.resumed) OA.toast('Shift resumed where you left off', 'good');
     if (mode === 'L') introCard(); else if (mode === 'D' && !o.replay) dailyCard(); else go();
     loopStart();
   }
@@ -1020,11 +1085,11 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
   }
   function introCard() {
     var L = P.cfg, m = L.intro ? MECH[L.intro] : null;
-    var h = '<div class="card" role="dialog" aria-label="Level ' + P.lv + ' briefing"><span class="tag">Level ' + P.lv + ' · ' + L.moves + ' moves</span><h2>' + esc(L.n) + '</h2>';
-    if (m) h += '<div class="mech"><img alt="" src="' + mechArt(L.intro) + '"><div><b>' + m[0] + '</b><p>' + m[1].replace('{c}', L.cycle || 10) + '</p></div></div>';
+    var h = '<div class="card" role="dialog" aria-label="Level ' + P.lv + ' briefing"><span class="tag">' + (L.mile ? '🏅 Milestone · ' : '') + 'Level ' + P.lv + ' · ' + L.moves + ' moves</span><h2>' + esc(L.n) + '</h2>';
+    if (m) h += '<div class="mech"><img alt="" src="' + mechArt(L.intro) + '"><div><b>' + (L.gen ? m[0].replace('New: ', '') + ((L.N || 4) > 4 ? ' · 5×5 floor' : '') : m[0]) + '</b><p>' + (L.mile ? 'Milestone level: bigger board, bigger goal, double spare-move bonus. ' : '') + m[1].replace('{c}', L.cycle || 10) + '</p></div></div>';
     h += '<ul class="glist">' + L.goals.map(function (g) { return '<li><img alt="" src="' + goalIcon(g) + '"><span>' + goalText(g, true) + '</span></li>'; }).join('') + '</ul>';
     h += '<div class="srow"><span><i>★★★</i> ' + L.s3 + '+ left</span><span><i>★★</i> ' + L.s2 + '+ left</span><span><i>★</i> finish</span></div>';
-    h += '<button class="oa-btn" type="button" id="goBtn">Start shift →</button></div>';
+    h += '<button class="oa-btn" type="button" id="goBtn">' + (P.resumed ? 'Resume shift →' : 'Start shift →') + '</button></div>';
     ovl.innerHTML = h; ovl.hidden = false; $('goBtn').addEventListener('click', function () { OA.sfx('whoosh'); go(); }); setTimeout(function () { try { $('goBtn').focus({ preventScroll: true }); } catch (e) {} }, 50);
   }
   function dailyCard() {
@@ -1136,7 +1201,7 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     flushPending(); if (P.ended) return;
     var res = doMove(P.st, dir);
     if (!res) { arena.classList.remove('nl', 'nr', 'nu', 'nd'); void arena.offsetWidth; arena.classList.add(['nu', 'nr', 'nd', 'nl'][dir]); OA.sfx.tone({ f: 110, f2: 70, type: 'sine', dur: 0.08, vol: 0.35 }); OA.buzz(6); return; }
-    P.dirs += dir; if (P.mode === 'E' && !P.chal) OA.save('run', { s: P.seed, d: P.dirs, sc: P.st.score });
+    P.dirs += dir; if (!P.chal) { if (P.mode === 'E') OA.save('run', { s: P.seed, d: P.dirs, sc: P.st.score }); else if (P.mode === 'L') OA.save('lrun', { l: P.lv, s: P.seed, d: P.dirs }); else OA.save('drun', { s: P.seed, d: P.dirs }); }
     var A2 = {}; res.anims.forEach(function (a) { A2[a.id] = a; });
     Object.keys(A2).forEach(function (id) { var a = A2[id], el = tEl[id]; if (!el) return; if (+el.dataset.i !== a.to) { el._moved = 1; place(el, a.to); } if (a.die) el.classList.add(a.die === 'slip' ? 'shred' : 'die'); });
     OA.sfx('slide');
@@ -1210,38 +1275,40 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
   function shareFor(score, text) { return { text: text, score: score, seed: P.seed, mode: P.mode, level: P.mode === 'L' ? P.lv : undefined, label: 'points' }; }
   function bestCombo() { return P.st.bestCombo > 1 ? '×' + P.st.bestCombo : '–'; }
   function win() {
-    P.ended = true; P.live = false; var st = P.st, L = P.cfg, left = L.moves - st.moves, stars = starsFor(left), bonus = left * 25, score = st.score + bonus;
-    var res = OA.levels.complete(P.lv, stars, score);
+    P.ended = true; P.live = false; var st = P.st, L = P.cfg, left = L.moves - st.moves, stars = starsFor(left), bonus = left * (L.mile ? 50 : 25), score = st.score + bonus;
+    var res = OA.levels.complete(P.lv, stars, score); if (!P.chal) OA.save('lrun', null);
     var wait = Math.max(0, (P.promoEnd || 0) - performance.now() - 250);
     setTimeout(function () { stamp('GOAL MET!', true); OA.sfx('ding'); OA.buzz([20, 30, 20]); }, wait);
     var lv = P.lv, fresh = OA.unlocks.fresh();
     setTimeout(function () {
-      OA.result({ emoji: stars === 3 ? '🏆' : '💼', title: 'Level ' + lv + ' cleared!', sub: esc(L.n) + ' · ' + left + ' move' + (left === 1 ? '' : 's') + ' to spare', win: true, stars: stars, score: score, scoreLabel: 'points', rank: FUN[st.top],
+      OA.result({ emoji: L.mile ? '🏅' : stars === 3 ? '🏆' : '💼', title: L.mile ? 'Milestone ' + lv + ' cleared!' : 'Level ' + lv + ' cleared!', sub: esc(L.n) + ' · ' + left + ' move' + (left === 1 ? '' : 's') + ' to spare', win: true, stars: stars, score: score, scoreLabel: 'points', rank: FUN[st.top],
         stats: [['Moves used', st.moves], ['Top title', RK[st.top].n], ['Bonus', '+' + OA.fmt(bonus)]],
         best: { isBest: false, best: Math.max(score, OA.levels.bestOf(lv) || 0) },
         share: shareFor(score, 'Cleared level ' + lv + ' (' + L.n + ') of Corporate Ladder with ' + '⭐'.repeat(stars) + ' and ' + left + ' moves to spare 🏢 Your turn!'),
-        next: lv < LV.length ? { label: 'Next level →', fn: function () { startRound('L', { lv: lv + 1 }); } } : { label: 'See your org chart', fn: renderColl },
-        again: { label: 'Replay', fn: function () { startRound('L', { lv: lv }); } }, menu: { label: 'Levels', fn: renderLevels }, tip: TIP });
-      fresh.forEach(function (u, i) { setTimeout(function () { OA.toast('🎉 New office unlocked: ' + esc(u.name) + '! Try it in Collection', 'gold'); }, 600 + i * 700); });
+        next: { label: 'Next: Level ' + (lv + 1) + ' →', fn: function () { startRound('L', { lv: lv + 1 }); } },
+        again: { label: 'Replay', fn: function () { startRound('L', { lv: lv, fresh: true }); } }, menu: { label: 'Levels', fn: function () { lvPage = null; renderLevels(); } }, tip: TIP });
+      if (OA.levels.milestone(lv, 'Level')) status('Milestone reached: level ' + lv + '.');
+      if (fresh.length) setTimeout(function () { OA.toast('🎉 New office' + (fresh.length > 1 ? 's' : '') + ' unlocked: ' + fresh.map(function (u) { return esc(u.name); }).join(', ') + '! Try it in Collection', 'gold'); }, 600);
       if (fresh.length) OA.save('collNew', 1);
       if (res.newStars) status('Level ' + lv + ' cleared with ' + stars + ' stars.');
     }, (RM ? 300 : 1000) + wait);
   }
   function lose(why) {
-    P.ended = true; P.live = false; var st = P.st, L = P.cfg, lv = P.lv;
+    P.ended = true; P.live = false; var st = P.st, L = P.cfg, lv = P.lv; if (!P.chal) OA.save('lrun', null);
     var need = L.goals.filter(function (g) { return !goalState(st, g).done; }).map(function (g) { return goalText(g).replace(/<\/?b>/g, ''); });
     stamp(why === 'stuck' ? 'NO DESKS LEFT' : 'OUT OF MOVES', false); OA.buzz(80);
     setTimeout(function () {
       OA.result({ emoji: why === 'stuck' ? '🗄️' : '⏰', title: why === 'stuck' ? 'Floor is full!' : 'Out of moves', sub: 'Still to do: ' + esc(need.join(', ')) + '.', win: false, score: st.score, scoreLabel: 'points', rank: FUN[st.top],
         stats: [['Top title', RK[st.top].n], ['Merges', st.merges], ['Best combo', bestCombo()]],
         share: shareFor(st.score, 'Level ' + lv + ' of Corporate Ladder (' + L.n + ') beat me. Reached ' + RK[st.top].n + ' though 🏢 Can you clear it?'),
-        again: { label: 'Try again', fn: function () { startRound('L', { lv: lv }); } }, menu: { label: 'Levels', fn: renderLevels }, tip: TIP });
+        again: { label: 'Try again', fn: function () { startRound('L', { lv: lv, fresh: true }); } }, menu: { label: 'Levels', fn: function () { lvPage = null; renderLevels(); } }, tip: TIP });
     }, RM ? 300 : 1100);
   }
   function endScore(why) {
     P.ended = true; P.live = false; var st = P.st, mode = P.mode, best, extra = [];
     if (mode === 'E') { if (!P.chal) OA.save('run', null); best = OA.submitBest(st.score, 'endless'); }
-    else if (P.seed === (OA.daily.seed() >>> 0)) { var d = OA.daily.record(st.score); best = { isBest: d.isBest, best: d.best }; extra.push(['Day streak', d.streak + '🔥']); }
+    else if (!P.chal) OA.save('drun', null);
+    if (mode === 'E') {} else if (P.seed === (OA.daily.seed() >>> 0)) { var d = OA.daily.record(st.score); best = { isBest: d.isBest, best: d.best }; extra.push(['Day streak', d.streak + '🔥']); }
     else extra.push(['Moves', st.moves]);
     stamp(why === 'stuck' ? 'FLOOR FULL' : 'SHIFT OVER', st.top >= 7); OA.buzz(60);
     setTimeout(function () {
@@ -1256,10 +1323,10 @@ body{margin:0;background:var(--night);background-image:radial-gradient(ellipse 1
     if (screen !== 'play') return renderTitle();
     if (P.ended) return renderTitle();
     var left = P.cfg.moves ? (P.cfg.moves - P.st.moves) + ' moves left' : P.st.moves + ' moves so far';
-    var m = OA.modal('<div class="oa-m-emoji">☕</div><h2>Chai break</h2><p class="oa-m-sub">' + (P.mode === 'L' ? 'Level ' + P.lv + ' · ' : '') + left + (P.mode === 'E' ? ' · progress saved' : '') + '</p><div class="oa-actions pz"><button class="oa-btn" type="button" data-a="r" autofocus>Back to work</button><div class="oa-row"><button class="oa-btn ghost" type="button" data-a="s">Restart</button><button class="oa-btn ghost" type="button" data-a="m">Menu</button></div></div>', { label: 'Paused', dismiss: true, cls: 'pz' });
+    var m = OA.modal('<div class="oa-m-emoji">☕</div><h2>Chai break</h2><p class="oa-m-sub">' + (P.mode === 'L' ? 'Level ' + P.lv + ' · ' : '') + left + (P.chal ? '' : ' · progress saved') + '</p><div class="oa-actions pz"><button class="oa-btn" type="button" data-a="r" autofocus>Back to work</button><div class="oa-row"><button class="oa-btn ghost" type="button" data-a="s">Restart</button><button class="oa-btn ghost" type="button" data-a="m">Menu</button></div></div>', { label: 'Paused', dismiss: true, cls: 'pz' });
     m.addEventListener('click', function (e) {
       var b = e.target.closest('[data-a]'); if (!b) return; OA.sfx('tap'); OA.closeModal(); var a = b.dataset.a;
-      if (a === 's') { if (P.mode === 'E') OA.save('run', null); startRound(P.mode, { lv: P.lv, seed: P.mode === 'D' || P.chal ? P.seed : 0, chal: P.chal }); }
+      if (a === 's') { if (!P.chal) OA.save(P.mode === 'E' ? 'run' : P.mode === 'L' ? 'lrun' : 'drun', null); startRound(P.mode, { lv: P.lv, seed: P.mode === 'D' || P.chal ? P.seed : 0, chal: P.chal, fresh: true }); }
       else if (a === 'm') { flushPending(); OA.music.stop(); renderTitle(); }
       else setTimeout(function () { try { board.focus({ preventScroll: true }); } catch (e) {} }, 220);
     });
