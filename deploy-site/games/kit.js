@@ -78,7 +78,32 @@
       return { stars: nw.stars, newStars: Math.max(0, stars - old.stars), total: OA.levels.total() };
     },
     total: function () { var all = OA.levels.data(), t = 0; for (var k in all) t += all[k].stars || 0; return t; },
-    highest: function () { var all = OA.levels.data(), h = 0; for (var k in all) if (all[k].stars > 0) h = Math.max(h, +k); return h; }
+    highest: function () { var all = OA.levels.data(), h = 0; for (var k in all) if (all[k].stars > 0) h = Math.max(h, +k); return h; },
+    /* unlimited levels: the next level to play (first not yet cleared) */
+    next: function () { return OA.levels.highest() + 1; },
+    /* level definition: hand-made list first, then generated forever. gen(n, rng, tier) builds level n;
+       tier = how far past the hand-made list (1, 2, 3...), use it to scale difficulty. rng is seeded per level,
+       so level 57 is the same for every player (fair for challenges). */
+    def: function (n, list, gen) {
+      if (list && n <= list.length) return list[n - 1];
+      var extra = n - (list ? list.length : 0);
+      return gen(n, OA.rng(G.slug + ':level:' + n), Math.max(1, extra));
+    },
+    /* milestone every 10 levels: remembers the last one and celebrates once. Call after a level is cleared. */
+    milestone: function (n, word) {
+      var m = OA.load('milestone', 0);
+      if (n % 10 === 0 && n > m) {
+        OA.save('milestone', n);
+        OA.toast('🏅 Milestone: ' + (word || 'Level') + ' ' + n + ' cleared!', 'gold'); OA.sfx('levelup'); OA.confetti({ count: 90 });
+        return true;
+      }
+      return false;
+    },
+    lastMilestone: function () { return OA.load('milestone', 0); },
+    /* page of level numbers for a level-select grid that never ends: returns [from..to] for page p (0-based) */
+    page: function (p, size) { size = size || 20; var from = p * size + 1; return { from: from, to: from + size - 1 }; },
+    /* page that holds the next level, for opening the grid where the player is */
+    currentPage: function (size) { return Math.floor((OA.levels.next() - 1) / (size || 20)); }
   };
 
   /* ---------- unlockables (cosmetics) ----------
