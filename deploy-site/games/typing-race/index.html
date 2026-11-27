@@ -112,7 +112,7 @@
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="/games/kit.css?v=6c91439e"><script src="/games/kit.js?v=7e7ac7f4"></script>
+<link rel="stylesheet" href="/games/kit.css?v=6c91439e"><script src="/games/kit.js?v=04592586"></script>
 <style>
 :root{--night:#0d1324;--night2:#141c33;--floor:#1b2542;--cell:#222d4f;--line:#2e3b63;--ink:#eef2ff;--muted:#9aa6c8;--gold:#fbbf24;--gold-ink:#3b2506;--green:#4ade80;--red:#f87171;
  --display:"Baloo 2","Segoe UI",system-ui,sans-serif;--body:"Inter",system-ui,-apple-system,sans-serif;--mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color-scheme:dark}
@@ -188,6 +188,16 @@ h2.h{font:800 1.5rem/1.1 var(--display);margin:4px 0 4px;text-wrap:balance}
 .lv.lock .n{background:linear-gradient(180deg,#64748b,#475569);color:#1b2036}
 .lv.cur{border-color:var(--gold);box-shadow:0 4px 0 #0a0f1e,0 0 0 3px rgba(251,191,36,.18);animation:glow 1.8s ease-in-out infinite}
 @keyframes glow{50%{box-shadow:0 4px 0 #0a0f1e,0 0 0 6px rgba(251,191,36,.08)}}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}
+.pager b{font:800 .95rem/1.2 var(--display);text-align:center;flex:1}
+.pager b small{display:block;font:600 .7rem/1.3 var(--body);color:var(--muted)}
+.pager .ico{width:46px;height:46px;font:800 1.4rem/1 var(--display)}
+.pager .ico:disabled{opacity:.3;cursor:default}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.row2 .oa-btn{font-size:.95rem;padding:12px 8px}
+.mile{display:flex;align-items:center;justify-content:center;gap:8px;margin:-2px 0 12px;font:800 .86rem/1.2 var(--display);color:#fde68a;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:12px;padding:7px 10px;text-align:center}
+.mile:empty{display:none}
+.lv.fin .n{background:linear-gradient(180deg,#fff3c4,#fbbf24);box-shadow:0 3px 0 #b45309}
 .legend{font-size:.76rem;color:var(--muted);margin:12px 2px 0;text-align:center}
 /* intro */
 .mech{display:flex;gap:12px;align-items:flex-start;border:1px dashed rgba(251,191,36,.55);background:rgba(251,191,36,.07);border-radius:16px;padding:11px 12px;margin:12px 0}
@@ -375,6 +385,7 @@ h2.h{font:800 1.5rem/1.1 var(--display);margin:4px 0 4px;text-wrap:balance}
    </h1>
    <div class="hero"><canvas class="trk" id="heroCv" aria-hidden="true"></canvas></div>
    <div class="stats3"><div><b id="tBest">0</b><span>Best WPM</span></div><div><b id="tStars">0</b><span>Stars</span></div><div><b id="tStreak">0</b><span>Day streak</span></div></div>
+   <div class="mile" id="mile"></div>
    <div id="chal"></div>
    <button class="oa-btn big-btn" id="bMain" type="button"></button>
    <div class="modes">
@@ -383,13 +394,14 @@ h2.h{font:800 1.5rem/1.1 var(--display);margin:4px 0 4px;text-wrap:balance}
     <button class="mode" id="bAttack" type="button"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M19 2L6 18h8l-3 12 15-17h-8z" fill="#fbbf24" stroke="#1b2036" stroke-width="2.2" stroke-linejoin="round"/></svg><b>Time Attack</b><small>Every clean word adds time. Outrun the deadline.</small><span class="pill" id="pAttack">Best —</span></button>
     <button class="mode" id="bDaily" type="button"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3.5" y="6" width="25" height="23" rx="4" fill="#fff" stroke="#1b2036" stroke-width="2.2"/><path d="M3.5 10a4 4 0 0 1 4-4h17a4 4 0 0 1 4 4v3h-25z" fill="#f87171" stroke="#1b2036" stroke-width="2.2" stroke-linejoin="round"/><path d="M10 3v6M22 3v6" stroke="#1b2036" stroke-width="2.4" stroke-linecap="round"/><text id="calDay" x="16" y="25.5" text-anchor="middle" font-family="Baloo 2,system-ui,sans-serif" font-weight="800" font-size="11" fill="#1b2036">1</text></svg><b>Daily Passage</b><small id="dSub">Same race for everyone today</small><span class="pill" id="pDaily">Resets in —</span></button>
    </div>
-   <button class="oa-btn ghost" id="bColl" type="button"><svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><path d="M9 5h14a3 3 0 0 1 3 3v9H6V8a3 3 0 0 1 3-3z" fill="#60a5fa" stroke="#1b2036" stroke-width="2.2"/><rect x="4" y="16" width="24" height="5" rx="2.5" fill="#3b82f6" stroke="#1b2036" stroke-width="2.2"/><path d="M16 21v4M8 28l8-3 8 3" stroke="#1b2036" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>Collection: chairs, outfits &amp; key sounds<span id="collNew"></span></button>
+   <div class="row2"><button class="oa-btn ghost" id="bAll" type="button"><svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><rect x="4" y="4" width="10" height="10" rx="3" fill="#fde68a" stroke="#1b2036" stroke-width="2.2"/><rect x="18" y="4" width="10" height="10" rx="3" fill="#fff" stroke="#1b2036" stroke-width="2.2"/><rect x="4" y="18" width="10" height="10" rx="3" fill="#fff" stroke="#1b2036" stroke-width="2.2"/><rect x="18" y="18" width="10" height="10" rx="3" fill="#94a3b8" stroke="#1b2036" stroke-width="2.2"/></svg>All races</button><button class="oa-btn ghost" id="bColl" type="button"><svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><path d="M9 5h14a3 3 0 0 1 3 3v9H6V8a3 3 0 0 1 3-3z" fill="#60a5fa" stroke="#1b2036" stroke-width="2.2"/><rect x="4" y="16" width="24" height="5" rx="2.5" fill="#3b82f6" stroke="#1b2036" stroke-width="2.2"/><path d="M16 21v4M8 28l8-3 8 3" stroke="#1b2036" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>Collection<span id="collNew"></span></button></div>
   </section>
 
   <section class="scr" id="s-league" aria-label="Career league">
-   <div class="lg-head"><div><div class="kick">Career league</div><h2 class="h">16 races to the corner cabin</h2></div><div class="tagc" id="lgStars">★ 0/48</div></div>
+   <div class="lg-head"><div><div class="kick">Career league</div><h2 class="h">The league never ends</h2></div><div class="tagc" id="lgStars">★ 0</div></div>
+   <div class="pager"><button class="ico" type="button" id="pgPrev" aria-label="Previous races">‹</button><b id="pgLbl">Races 1–20</b><button class="ico" type="button" id="pgNext" aria-label="Next races">›</button></div>
    <div class="lg-grid" id="lgGrid"></div>
-   <p class="legend">Finish on the podium (top 3) to unlock the next race. Pink tags mark a new mechanic.</p>
+   <p class="legend">Finish on the podium (top 3) to unlock the next race. Races 1–16 teach the mechanics; after that every season mixes them, and every 10th race is a season finale.</p>
   </section>
 
   <section class="scr" id="s-intro" aria-label="Race briefing"></section>
@@ -429,7 +441,7 @@ h2.h{font:800 1.5rem/1.1 var(--display);margin:4px 0 4px;text-wrap:balance}
  <p class="sr" id="live" aria-live="polite"></p>
 </div>
 <section class="g-promo" aria-labelledby="promo-h"><div class="pe"><img src="/logo-mark.svg?v=4" alt="" width="26" height="26">Made by Resume For You</div><h2 id="promo-h">Fast typist? Get the job that pays for it</h2><p>Data entry, back office and government jobs all ask for typing speed. Add yours to a resume built for those roles, free to start.</p><ul><li>ATS-friendly templates recruiters in India read</li><li>AI writes your summary and bullet points</li><li>Download a polished PDF in minutes</li></ul><div class="pb"><a class="p1" href="/">Build my resume free →</a><a class="p2" href="/ats-score-checker/">Check my ATS score</a></div></section>
-<section class="g-about" aria-labelledby="about-h"><h2 id="about-h">Typing Race: A typing speed test game with an SSC-style typing test</h2><p>Typing Race is a free <strong>typing speed test</strong> turned into a race. Type the passage to move your racer on an office chair, and watch your words per minute (WPM) and accuracy live. Practise for government jobs with the <strong>SSC-style typing test</strong> mode, which uses a 35 WPM pass mark and up to 5% wrong words, then download a <strong>typing certificate</strong> with your name and score.</p><ul class="g-feat"><li>1, 2 and 5-minute typing tests with WPM and accuracy</li><li>Government-style typing test with a 35 WPM pass mark</li><li>Career league of 16 races against faster colleagues</li><li>Works with phone keyboards, including autocorrect</li><li>Downloadable typing certificate (PNG)</li></ul><h2 id="howto">How to play Typing Race</h2><ol><li>Tap the passage (or just start typing on a laptop) and type the highlighted text. Your racer on the office chair moves with every correct word.</li><li>Fix mistakes with backspace. 5 clean words in a row light flames, 12 trigger nitro.</li><li>Career League: 16 races against faster colleagues, adding numbers, Hinglish, sudden death, deadlines and a boss who walks past (type the cover word quick!). Win with the accuracy target for 3 stars.</li><li>Take a 1, 2 or 5-minute test, a government-style typing test with a 35 WPM pass mark, Time Attack or the Daily passage, then download your typing certificate.</li></ol><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>Typing Race FAQ</h2><div class="g-faq"><details><summary>What typing speed is needed for SSC?</summary><p>For many SSC and government data-entry posts, the English typing requirement is around 35 words per minute. Check the official notification for your exam.</p></details><details><summary>Can I get a typing certificate?</summary><p>Yes. After a test you can download a typing certificate image with your name, WPM and accuracy. It is a practice certificate, not an official one.</p></details><details><summary>Can I take this typing test on my phone?</summary><p>Yes. The test works with phone keyboards as well as laptop keyboards.</p></details></div><h2>Career tip</h2><p>Many data-entry and government typing tests ask for about 35 WPM in English. Fast typist? <a href="/data-entry-resume-no-experience/">Make a data-entry resume</a>.</p><div class="g-guides"><a href="/data-entry-resume-no-experience/">📄 Data entry resume with no experience →</a><a href="/govt-job-biodata-maker/">📄 Government job biodata maker →</a></div><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/office-cricket/">🏏 Office Cricket</a><a href="/games/inbox-zero/">📧 Inbox Zero</a><a href="/games/naukri-life/">🎲 Naukri Life</a><a href="/games/">🎮 All games</a></div></section>
+<section class="g-about" aria-labelledby="about-h"><h2 id="about-h">Typing Race: A typing speed test game with an SSC-style typing test</h2><p>Typing Race is a free <strong>typing speed test</strong> turned into a race. Type the passage to move your racer on an office chair, and watch your words per minute (WPM) and accuracy live. Practise for government jobs with the <strong>SSC-style typing test</strong> mode, which uses a 35 WPM pass mark and up to 5% wrong words, then download a <strong>typing certificate</strong> with your name and score.</p><ul class="g-feat"><li>1, 2 and 5-minute typing tests with WPM and accuracy</li><li>Government-style typing test with a 35 WPM pass mark</li><li>Career league of 16 races against faster colleagues</li><li>Works with phone keyboards, including autocorrect</li><li>Downloadable typing certificate (PNG)</li></ul><h2 id="howto">How to play Typing Race</h2><ol><li>Tap Continue to jump into your next race. Your progress is saved after every race, and you can replay any race from All races.</li><li>Type the passage to roll your chair forward. Backspace fixes mistakes, and clean word streaks fire nitro.</li><li>Finish in the top 3 to unlock the next race. After race 16 the league never ends: new colleagues, numbers, Hinglish, boss visits, sudden death and deadlines, with a season finale every 10th race.</li><li>Also try the 1, 2 and 5-minute tests, the govt-style test (35 WPM pass mark), Time Attack and the Daily Passage, and download your typing certificate.</li></ol><p>Free to play, no download and no sign-up. Works on phones and laptops. When you finish, challenge your friends on WhatsApp.</p><h2>Typing Race FAQ</h2><div class="g-faq"><details><summary>What typing speed is needed for SSC?</summary><p>For many SSC and government data-entry posts, the English typing requirement is around 35 words per minute. Check the official notification for your exam.</p></details><details><summary>Can I get a typing certificate?</summary><p>Yes. After a test you can download a typing certificate image with your name, WPM and accuracy. It is a practice certificate, not an official one.</p></details><details><summary>Can I take this typing test on my phone?</summary><p>Yes. The test works with phone keyboards as well as laptop keyboards.</p></details></div><h2>Career tip</h2><p>Many data-entry and government typing tests ask for about 35 WPM in English. Fast typist? <a href="/data-entry-resume-no-experience/">Make a data-entry resume</a>.</p><div class="g-guides"><a href="/data-entry-resume-no-experience/">📄 Data entry resume with no experience →</a><a href="/govt-job-biodata-maker/">📄 Government job biodata maker →</a></div><h2>More free office games</h2><div class="g-more"><a href="/games/corporate-ladder/">🏢 Corporate Ladder</a><a href="/games/commute-dash/">🛵 Commute Dash</a><a href="/games/who-stole-my-tiffin/">🕵️ Who Stole My Tiffin?</a><a href="/games/chai-tapri-tycoon/">☕ Chai Tapri Tycoon</a><a href="/games/ask-for-a-hike/">💸 Ask for a Hike</a><a href="/games/sneak-out-at-6/">🕕 Sneak Out at 6</a><a href="/games/it-helpdesk-hero/">🛠️ IT Helpdesk Hero</a><a href="/games/office-cricket/">🏏 Office Cricket</a><a href="/games/inbox-zero/">📧 Inbox Zero</a><a href="/games/naukri-life/">🎲 Naukri Life</a><a href="/games/">🎮 All games</a></div></section>
 <div class="g-foot"><style>
 .r4u-lfoot{background:#14142a;color:#cfcfe0;padding:38px 24px;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;text-align:center;border-top:1px solid rgba(255,255,255,0.08);}
 .r4u-lfoot .r4u-lfoot-links{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:0 0 14px;}
@@ -528,9 +540,44 @@ var MECH={
  boss:{t:'New: Boss approaching!',i:ICO.eye,p:'When Malhotra Sir walks in, a spreadsheet pops up. Type the cover word before the red bar runs out. Get caught and you lose 3 seconds to a lecture.'},
  sudden:{t:'New: Sudden death',i:'1×',p:'Audit rules: one wrong key and the race is over. Slow and steady beats fast and sorry.'},
  time:{t:'New: Time attack',i:ICO.clock,p:'There is a hard deadline. Reach the finish before the clock hits zero, whatever the bots are doing.'},
- final:{t:'The final race',i:ICO.crown,p:'Rohit types 70 WPM and the CEO is faster still. Chain streaks, fire nitro and dodge the boss.'}
+ final:{t:'Boss fight: the CEO',i:ICO.crown,p:'Rohit types 70 WPM and the CEO is faster still. Chain streaks, fire nitro and dodge the boss. After this, the league goes on forever.'},
+ season:{t:'The endless league begins',i:ICO.kb,p:'From here every race is new: fresh colleagues, every mechanic mixed together, bots that speed up gently (never faster than a strong typist). Every 10th race is a season finale and a milestone.'},
+ finale:{t:'Season finale',i:ICO.crown,p:'A little faster and a little more chaotic. Clear it to bank a milestone. Your progress is saved after every race.'}
 };
-function lvTags(L){var t=[];if(L.cats.indexOf('numbers')>=0)t.push('Numbers & symbols');if(L.cats.indexOf('hinglish')>=0)t.push('Hinglish');if(L.boss)t.push('Boss visits ×'+L.boss);if(L.sudden)t.push('Sudden death');if(L.limit)t.push('Deadline');return t;}
+
+/* ---------- endless league: race 17+ is generated from a seeded rng per race (same race for every player) ---------- */
+var THEMES=['Monsoon Monday','Payroll Panic','Townhall Tuesday','Chai Break Chase','Quarter Close','Visa Paperwork Rush','Hybrid Wednesday','Server Down Saturday','Appraisal Week','Client Escalation','Team Outing Plans','Budget Freeze','Audit Encore','Night Shift Notes','Offsite Planning','Traffic Report Relay','Local Train Minutes','Board Meeting Brief','Hackathon Rematch','Product Demo Day','Client Call Marathon','Midnight Release','Sales Trip Diary','Compliance Day','Accounts Closing','Fresher Onboarding','Canteen Menu Vote','Printer Strike','Wi-Fi Outage Memo','Year-End Party Plans','New Laptop Day','Pantry Gossip Minutes','Leave Approval Saga','Expense Report Hunt','Holiday Calendar Debate','Interview Panel Notes','Promotion List Day','Bonus Rumour Mill','Fire Drill Friday','Lift Is Broken Again'];
+var CITIES=['Bengaluru','Mumbai','Delhi','Pune','Hyderabad','Chennai','Kolkata','Noida','Gurugram','Jaipur','Kochi','Ahmedabad','Indore','Lucknow','Chandigarh','Bhubaneswar'];
+var DEPTS=['Branch Sprint','Floor Derby','Desk Dash','Office Relay','Branch Grand Prix'];
+var FINALES=['The Corner Cabin Cup','The Golden Keyboard','The Chairman’s Trophy','The Appraisal Grand Prix','The Water Cooler Classic','The Big Townhall Race','The Lanyard Derby'];
+var NB={aunty:['Mehta Aunty','Kapoor Aunty','Iyer Aunty','Bose Aunty'],peon:['Shambhu Kaka','Raju Bhaiya','Ramesh Bhaiya','Pappu Bhaiya'],hr:['Simran from HR','Ritu from HR','Anjali from HR','Farah from HR'],manager:['Bansal Sir','Reddy Sir','Kulkarni Sir','Joshi Sir'],sales:['Bunty from Sales','Karan from Sales','Rocky from Sales','Sunny from Sales'],analyst:['Kavya the Analyst','Sana from Finance','Divya from Finance','Meenal the Analyst'],dev:['Imran the Dev','Vikram from IT','Nikhil the Dev','Zoya the Dev'],intern:['Tanmay the Intern','Aryan the Intern','Ishaan the Intern','Riya the Intern'],ceo:['The Chairman','The Founder','The Board Chair']};
+var GDESC={nums:'Invoices, times and phone numbers everywhere.',hin:'The team group chat has leaked into the passage.',boss:'Someone from the corner cabin is doing rounds.',sudden:'Audit rules today: one wrong key ends the race.',limit:'Hard deadline. The clock will not wait.',plain:'Just you, the keyboard and three rivals.'};
+/* fastest bot speed a w-WPM typist still beats, allowing ~2.2 s per boss visit and 6% bot luck */
+function beatW(w,len,boss){return len*12/(len*12/w+2.2*boss)/1.06;}
+function genLevel(n,rng,tier){
+ var S=Math.floor((n-1)/10)+1,K=(n-1)%10+1,fin=K===10;
+ var cats=[rng.pick(['office','jobs','exam','office'])],nums=rng()<(fin?.6:.35),hin=rng()<(fin?.5:.3);if(nums)cats.push('numbers');if(hin)cats.push('hinglish');
+ var sudden=!fin&&rng()<.12,boss=rng()<(fin?.8:.42)?1+rng.int(Math.min(3,1+Math.floor(tier/15))):0,limit=!sudden&&rng()<(fin?.5:.25);
+ if(sudden)boss=Math.min(boss,1);
+ var len=sudden?150+rng.int(40):Math.round(190+Math.min(110,tier*1.2)+rng.int(30)+(fin?30:0));
+ var f=56+Math.min(30,tier*.3)+(K-1)*.9+(fin?4:0)+rng.range(-2,2);if(sudden)f-=8;
+ f=Math.min(f,92,beatW(100,len,boss));
+ var slow=Math.min(f-18-rng.range(0,3),beatW(70,len,boss)),mid=(f+slow)/2+rng.range(-2,2);
+ var roles=rng.shuffle(['aunty','peon','hr','manager','sales','analyst','dev','intern']).slice(0,3);if(fin)roles[2]='ceo';
+ var sp=[slow,mid,f],bots=roles.map(function(r,i){return [r,Math.round(sp[i]),rng.pick(NB[r])];});
+ var name=fin?'Season '+S+' Finale: '+FINALES[S%FINALES.length]:rng()<.3?rng.pick(CITIES)+' '+rng.pick(DEPTS):THEMES[(n*11)%THEMES.length];
+ var key=sudden?'sudden':boss?'boss':limit?'limit':nums?'nums':hin?'hin':'plain';
+ var L={gen:1,season:S,k:K,finale:fin,n:name,d:(fin?'Season finale. ':'')+GDESC[key],cats:cats,len:len,bots:bots,
+  acc:sudden?100:Math.min(97,93+Math.floor(tier/25)+(fin?1:0)),boss:boss,sudden:sudden?1:0,intro:n===LV.length+1?'season':fin?'finale':undefined};
+ if(limit)L.limit=Math.max(26,Math.floor(Math.min(slow-2,beatW(70,len,boss)*1.06-2)));
+ return L;
+}
+var LVC={};
+function lvDef(n){n=Math.max(1,Math.floor(n)||1);return LVC[n]||(LVC[n]=OA.levels.def(n,LV,genLevel));}
+function lvTitle(n){var L=lvDef(n);return L.gen?'Season '+L.season+' · Race '+L.k:'Race '+n;}
+function botName(b){return b[2]||BOT[b[0]].nm;}
+function shortName(nm){var w=nm.split(' ');return w[0]==='The'?w[1]:w[0];}
+function lvTags(L){var t=[];if(L.cats.indexOf('numbers')>=0)t.push('Numbers & symbols');if(L.cats.indexOf('hinglish')>=0)t.push('Hinglish');if(L.boss)t.push('Boss visits ×'+L.boss);if(L.sudden)t.push('Sudden death');if(L.limit)t.push('Deadline · '+L.limit+' WPM pace');return t;}
 
 /* ---------- unlockables ---------- */
 var UNL=[
@@ -715,8 +762,8 @@ function drawParts(c,dt){for(var i=PARTS.length-1;i>=0;i--){var p=PARTS[i];p.l-=
 /* ---------- rounds ---------- */
 var R=null,scr='title',certData=null;
 var card=$('card'),ti=$('ti'),passIn=$('passIn'),caret=$('caret'),pass=$('pass');
-function makeBot(role,wpm,rng,exact){
- var b={role:role,nm:BOT[role].nm,st:exact?'steady':BOT[role].st,wpm:exact?wpm:wpm*(.96+rng()*.08),base:wpm,ph:rng()*6.28,c:0,d:0,fin:null,x:START,v:0,wh:0,pauses:[]};
+function makeBot(role,wpm,rng,exact,name){
+ var b={role:role,nm:name||BOT[role].nm,st:exact?'steady':BOT[role].st,wpm:exact?wpm:wpm*(.96+rng()*.08),base:wpm,ph:rng()*6.28,c:0,d:0,fin:null,x:START,v:0,wh:0,pauses:[]};
  if(!exact&&(b.st==='pause'||b.st==='phone')){var t=rng.range(4,8);for(var i=0;i<40;i++){b.pauses.push([t,t+rng.range(.9,1.6)]);t+=rng.range(6,10);}}
  return b;
 }
@@ -731,20 +778,20 @@ function newRound(cfg){
  var r={mode:m,cfg:cfg,seed:cfg.seed>>>0,typed:[],wasBad:[],lock:0,wordStart:0,wordErr:false,keys:0,okKeys:0,errKeys:0,correct:0,words:0,wrongWords:0,streak:0,bestStreak:0,bonus:0,nitro:0,
   t:0,started:false,live:false,over:false,cd:0,freeze:0,hit:0,anim:0,scroll:0,bots:[],me:{d:0,x:START,v:0,wh:0,mood:'neutral',mt:0},boss:null,place:1,gw:0,lastKey:0};
  var cats,len=0,bots=[],nb=0;
- if(m==='race'){var L=LV[cfg.lvl-1];r.L=L;cats=L.cats;len=L.len;bots=L.bots;r.sudden=!!L.sudden;nb=L.boss||0;}
+ if(m==='race'){var L=lvDef(cfg.lvl);r.L=L;cats=L.cats;len=L.len;bots=L.bots;r.sudden=!!L.sudden;nb=L.boss||0;}
  else if(m==='daily'){var dc=dailyCfg(cfg.seed);cats=dc.cats;len=230;bots=dc.bots;nb=dc.boss;r.dcats=cats;}
  else if(m==='test'||m==='govt'){cats=[cfg.cat];len=700;r.dur=cfg.min*60;}
  if(m==='attack'){r.gen=wordGen(rng);r.text=r.gen();while(r.text.length<400)r.text+=' '+r.gen();r.timeLeft=30;}
  else{r.gen=Gen(rng,cats);r.text=buildText(r.gen,len);}
  r.len=r.text.length;
- if(m==='race'||m==='daily'){r.bots=bots.map(function(b){var o=makeBot(b[0],b[1],rng);o.T=r.len/(o.wpm*5/60);return o;});}
+ if(m==='race'||m==='daily'){r.bots=bots.map(function(b){var o=makeBot(b[0],b[1],rng,false,b[2]);o.sh=b[2]?shortName(b[2]):SHORT[b[0]];o.T=r.len/(o.wpm*5/60);return o;});}
  else if(m==='test'||m==='govt'){var pc=m==='govt'?[['aunty',25],['manager',35],['dev',50]]:[['aunty',25],['analyst',45],['intern',70]];r.bots=pc.map(function(b){return makeBot(b[0],b[1],rng,true);});r.trackLen=pc[2][1]*5*r.dur/60;}
  if(nb){r.boss={ev:[],i:0,ph:'',t:0,word:'',typed:'',caught:0,dodged:0,fs:0};
   for(var i=0;i<nb;i++)r.boss.ev.push({d:clamp((i+.6)/(nb+.4)*.86+rng.range(-.04,.04),.12,.85),word:rng.pick(COVER)});}
  if(m==='race'&&r.L.limit)r.limit=Math.ceil(r.len/5/r.L.limit*60);
  r.rng=rng;return r;
 }
-function modeTitle(){if(!R)return '';var m=R.mode;return m==='race'?'Race '+R.cfg.lvl+' · '+R.L.n:m==='daily'?'Daily Passage':m==='test'?R.cfg.min+'-minute test':m==='govt'?'Govt typing test · '+R.cfg.min+' min':'Time Attack';}
+function modeTitle(){if(!R)return '';var m=R.mode;return m==='race'?lvTitle(R.cfg.lvl)+' · '+R.L.n:m==='daily'?'Daily Passage':m==='test'?R.cfg.min+'-minute test':m==='govt'?'Govt typing test · '+R.cfg.min+' min':'Time Attack';}
 function startRound(cfg){
  R=newRound(cfg);R.chal=!!cfg.chal;PARTS.length=0;
  show('play',modeTitle());
@@ -895,7 +942,7 @@ function racerList(){
  var mood=R.over&&R.reason==='finish'?'happy':me.mood;
  if(R.mode==='attack'){L.push({x:300,lane:3,look:youLook(mood),v:me.v,wh:me.wh,me:1,tag:'YOU',nitro:R.nitro>0,flame:fl,bob:R.started&&!RM?Math.sin(R.anim*24)*.5:0});return L;}
  R.bots.forEach(function(b,i){var md=b.fin!=null?'happy':(R.me.d-b.d>.12?'sad':(BOTMOOD[b.role]||'neutral'));var pose=b.paused?(b.role==='intern'?'phone':'coffee'):'';
-  var tag=(R.mode==='test'||R.mode==='govt')?(b.role==='manager'&&R.mode==='govt'?'Pass mark 35':SHORT[b.role]+' '+b.base):SHORT[b.role];
+  var tag=(R.mode==='test'||R.mode==='govt')?(b.role==='manager'&&R.mode==='govt'?'Pass mark 35':SHORT[b.role]+' '+b.base):(b.sh||SHORT[b.role]);
   L.push({x:b.x,lane:i,look:botLook(b.role,md,pose),v:b.v,wh:b.wh,tag:tag,place:b.fin!=null?b.place:0,bob:b.v>5&&!RM?Math.sin(R.anim*22+i)*.5:0});});
  L.push({x:me.x,lane:3,look:youLook(mood),v:me.v,wh:me.wh,me:1,tag:'YOU',nitro:R.nitro>0,flame:fl,place:R.over&&R.reason==='finish'?R.place:0,bob:me.v>5&&!RM?Math.sin(R.anim*24)*.5:0});
  return L;
@@ -983,8 +1030,7 @@ function showResult(){
    best:{isBest:stars>0&&oldBest!=null&&s.wpm>oldBest,best:oldBest==null?(stars?s.wpm:null):Math.max(oldBest,stars?s.wpm:0)},
    share:{text:(stars?'Finished '+ord(pl)+' at '+s.wpm+' WPM':'Typed '+s.wpm+' WPM')+' on “'+L.n+'” in Typing Race ⌨️ Can your chair beat mine?',score:s.wpm,seed:R.seed,mode:'race',level:n,label:'WPM'},
    again:{label:stars?'Race again':'Try again',fn:function(){openIntro(n);}},menu:{label:'Levels',fn:openLeague},tip:TIP};
-  if(stars&&n<LV.length)o.next={label:'Next race →',fn:function(){openIntro(n+1);}};
-  if(stars)unlockToasts();
+  if(stars){o.next={label:'Next race →',fn:function(){openIntro(n+1);}};var mile=OA.levels.milestone(n,'Race');if(mile||L.finale){o.emoji='🏅';if(L.finale)o.title='Season '+L.season+' champion!';o.sub='Milestone banked: Race '+n+'. '+o.sub;}unlockToasts();}
  }else if(m==='daily'){
   var isToday=R.seed===(OA.daily.seed()>>>0),rec=isToday?OA.daily.record(s.wpm):null;
   o={emoji:R.place===1?'🏆':'📰',title:R.place>3?'Daily passage done':'Daily passage: '+ord(R.place),sub:'Today: '+R.dcats.map(function(c){return CATN[c];}).join(' + ')+'. Same passage for everyone. New one in '+OA.daily.resetsIn()+'.',
@@ -1014,7 +1060,7 @@ function showResult(){
  }
  certData=null;
  if(ok&&!(m==='race'&&R.place>3)&&score>0){
-  var lab=m==='race'?'Career League · Race '+R.cfg.lvl+': '+R.L.n+' · '+ord(R.place)+' place':m==='daily'?'Daily passage race · '+ord(Math.min(R.place,4))+' place':m==='test'?R.cfg.min+'-minute typing test · '+CATN[R.cfg.cat]:m==='govt'?'Govt-style typing test ('+R.cfg.min+' min) · '+(R.pass?'QUALIFIED':'Practice attempt'):'Time attack · '+s.words+' words before the deadline';
+  var lab=m==='race'?'Career League · '+lvTitle(R.cfg.lvl)+': '+R.L.n+' · '+ord(R.place)+' place':m==='daily'?'Daily passage race · '+ord(Math.min(R.place,4))+' place':m==='test'?R.cfg.min+'-minute typing test · '+CATN[R.cfg.cat]:m==='govt'?'Govt-style typing test ('+R.cfg.min+' min) · '+(R.pass?'QUALIFIED':'Practice attempt'):'Time attack · '+s.words+' words before the deadline';
   certData={wpm:score,unit:m==='govt'?'NET WPM':'WPM',acc:s.acc,label:lab,rank:rankOf(s.wpm)[2],date:niceDate(),id:'TR-'+(('00000'+(R.seed%1000000)).slice(-6))};
  }
  if(chal)chalDone=true;
@@ -1080,16 +1126,16 @@ function show(name,title){
 }
 function menuMusic(){OA.music.duck(false);if(OA.settings.music)OA.music.play('chill');}
 function goTitle(){if(chalDone){OA.challenge.clear();chalDone=false;}R=null;show('title');renderTitle();menuMusic();}
-$('back').addEventListener('click',function(){OA.sfx('tap');if(scr==='intro')openLeague();else if(scr==='play'){var lv=R&&R.mode==='race'?R.cfg.lvl:0;R=null;OA.music.stop();if(lv)openIntro(lv);else goTitle();}else goTitle();});
+$('back').addEventListener('click',function(){OA.sfx('tap');if(scr==='intro')openLeague(PG);else if(scr==='play'){var lv=R&&R.mode==='race'?R.cfg.lvl:0;R=null;OA.music.stop();if(lv)openIntro(lv);else goTitle();}else goTitle();});
 $('ctl').appendChild(OA.controls());
 
 function totalStars(){return OA.levels.total();}
 function renderTitle(){
- var top=OA.load('topWpm',0);$('tBest').textContent=top||'—';$('tStars').textContent=totalStars()+'/48';$('tStreak').textContent=OA.daily.streak();
+ var top=OA.load('topWpm',0);$('tBest').textContent=top||'—';$('tStars').textContent=totalStars();var ml=OA.levels.lastMilestone();$('mile').innerHTML=ml?'🏅 Race '+ml+' milestone · Season '+Math.floor((ml-1)/10+1)+' complete':'';$('tStreak').textContent=OA.daily.streak();
  var c=OA.challenge.incoming();$('chal').innerHTML=c?OA.challengeBanner():'';
  var b=$('bMain'),trophy='<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M12 6h16v8a8 8 0 0 1-16 0z" fill="#fff7d6" stroke="#3b2506" stroke-width="2.6" stroke-linejoin="round"/><path d="M12 9H6c0 6 3 8 6 8M28 9h6c0 6-3 8-6 8" fill="none" stroke="#3b2506" stroke-width="2.6" stroke-linecap="round"/><path d="M20 22v6M13 33h14l-2-5H15z" fill="#fff7d6" stroke="#3b2506" stroke-width="2.6" stroke-linejoin="round"/></svg>';
  if(c){var lab=String(c.m||'race');b.innerHTML='<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 32L30 10M30 10l-7 1M30 10l-1 7M32 32L10 10M10 10l7 1M10 10l1 7" stroke="#3b2506" stroke-width="3" stroke-linecap="round" fill="none"/></svg><span><b>Accept challenge</b><small>Same passage, same bots, same luck</small></span>';}
- else{var h=OA.levels.highest(),nx=Math.min(LV.length,h+1);b.innerHTML=trophy+'<span><b>Career League</b><small>'+(h?'Next up: Race '+nx+' · '+esc(LV[nx-1].n):'16 races vs office legends, from Sharma Aunty to the CEO')+'</small></span>';}
+ else{var nx=OA.levels.next(),NL=lvDef(nx);b.innerHTML=trophy+(nx>1?'<span><b>Continue · Race '+nx+'</b><small>'+(NL.gen?lvTitle(nx)+' · ':'')+esc(NL.n)+'</small></span>':'<span><b>Career League</b><small>Start at Race 1: an endless league vs office legends</small></span>');}
  var t1=Math.max(OA.best('test1'),OA.best('test2'),OA.best('test5'));$('pTest').textContent=t1?'Best '+t1+' WPM':'Get certified';
  var gl=OA.load('govtLast',null);$('pGovt').textContent=gl?gl+' · best '+OA.best('govt')+' net':'Not attempted';
  var ab=OA.best('attack');$('pAttack').textContent=ab?'Best '+ab+' words':'New';
@@ -1098,7 +1144,8 @@ function renderTitle(){
  $('calDay').textContent=new Date().getDate();
  var nw=Object.keys(NEWU).length;$('collNew').innerHTML=nw?'<span class="newdot">'+nw+' NEW</span>':'';
 }
-$('bMain').addEventListener('click',function(){OA.sfx('tap');if(OA.challenge.incoming())acceptChal();else openLeague();});
+$('bMain').addEventListener('click',function(){OA.sfx('tap');if(OA.challenge.incoming())acceptChal();else openIntro(OA.levels.next());});
+$('bAll').addEventListener('click',function(){OA.sfx('tap');openLeague();});
 $('bTest').addEventListener('click',function(){OA.sfx('tap');openTest();});
 $('bGovt').addEventListener('click',function(){OA.sfx('tap');openGovt();});
 $('bAttack').addEventListener('click',function(){OA.sfx('tap');startAttack();});
@@ -1108,7 +1155,7 @@ function startAttack(){startRound({mode:'attack',seed:OA.newSeed()});}
 function startDaily(){startRound({mode:'daily',seed:OA.daily.seed()>>>0});}
 function acceptChal(){
  var c=OA.challenge.incoming(),m=String(c.m||'race'),p=m.split('-');
- if(m==='race')openIntro(clamp(+c.l||1,1,LV.length),c.s);
+ if(m==='race')openIntro(clamp(+c.l||1,1,99999),c.s);
  else if(m==='daily')startRound({mode:'daily',seed:c.s,chal:1});
  else if(p[0]==='test')startRound({mode:'test',min:[1,2,5].indexOf(+p[1])>=0?+p[1]:1,cat:P[p[2]]?p[2]:'office',seed:c.s,chal:1});
  else if(p[0]==='govt')startRound({mode:'govt',min:+p[1]===2?2:5,cat:'exam',seed:c.s,chal:1});
@@ -1117,28 +1164,34 @@ function acceptChal(){
 
 /* league */
 function starStr(n){var h='';for(var i=0;i<3;i++)h+=i<n?'<i>★</i>':'★';return h;}
-function openLeague(){
- show('league','Career League');$('lgStars').textContent='★ '+totalStars()+'/48';
- var g=$('lgGrid'),h='',cur=0;
- LV.forEach(function(L,i){var n=i+1,un=OA.levels.isUnlocked(n),st=OA.levels.stars(n);if(un&&!st&&!cur)cur=n;
-  var tg={nums:'123',hinglish:'HINGLISH',boss:'BOSS',sudden:'1 LIFE',time:'CLOCK',final:'FINAL'}[L.intro]||'';
-  h+='<button type="button" class="lv'+(un?'':' lock')+(cur===n?' cur':'')+'" data-n="'+n+'" aria-label="Race '+n+', '+esc(L.n)+(un?', '+st+' of 3 stars':', locked')+'">'+(tg?'<span class="tg">'+tg+'</span>':'')+
-   '<span class="n">'+(un?n:'<svg viewBox="0 0 20 20" width="16" height="16"><rect x="4" y="9" width="12" height="9" rx="2" fill="#1b2036"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="#1b2036" stroke-width="2.4" fill="none"/></svg>')+'</span><span class="nm">'+esc(L.n)+'</span><span class="st" aria-hidden="true">'+starStr(st)+'</span></button>';});
- g.innerHTML=h;
+var PG=0;
+function openLeague(p){
+ if(p==null)p=OA.levels.currentPage(20);PG=Math.max(0,p);var rg=OA.levels.page(PG,20),nx=OA.levels.next();
+ show('league','Career League');$('lgStars').textContent='★ '+totalStars();
+ $('pgLbl').innerHTML='Races '+rg.from+'–'+rg.to+'<small>'+(rg.to<=16?'Training season':rg.from>16?'Seasons '+Math.floor((rg.from-1)/10+1)+'–'+Math.floor((rg.to-1)/10+1):'Training + endless league')+'</small>';
+ $('pgPrev').disabled=PG===0;
+ var h='';
+ for(var n=rg.from;n<=rg.to;n++){var L=lvDef(n),un=OA.levels.isUnlocked(n),st=OA.levels.stars(n);
+  var tg=L.gen?(L.finale?'FINALE':L.intro==='season'?'ENDLESS':''):({nums:'123',hinglish:'HINGLISH',boss:'BOSS',sudden:'1 LIFE',time:'CLOCK',final:'CEO'}[L.intro]||'');
+  h+='<button type="button" class="lv'+(un?'':' lock')+(n===nx?' cur':'')+(L.finale?' fin':'')+'" data-n="'+n+'" aria-label="'+esc(lvTitle(n))+', '+esc(L.n)+(un?', '+st+' of 3 stars':', locked')+'">'+(tg?'<span class="tg">'+tg+'</span>':'')+
+   '<span class="n">'+(un?n:'<svg viewBox="0 0 20 20" width="16" height="16"><rect x="4" y="9" width="12" height="9" rx="2" fill="#1b2036"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="#1b2036" stroke-width="2.4" fill="none"/></svg>')+'</span><span class="nm">'+esc(L.n)+'</span><span class="st" aria-hidden="true">'+starStr(st)+'</span></button>';}
+ $('lgGrid').innerHTML=h;
 }
+$('pgPrev').addEventListener('click',function(){if(PG>0){OA.sfx('tick');openLeague(PG-1);}});
+$('pgNext').addEventListener('click',function(){OA.sfx('tick');openLeague(PG+1);});
 $('lgGrid').addEventListener('click',function(e){var b=e.target.closest('.lv');if(!b)return;var n=+b.dataset.n;if(!OA.levels.isUnlocked(n)){OA.sfx('error');OA.toast('Finish race '+(n-1)+' on the podium to unlock this one','bad');return;}OA.sfx('tap');openIntro(n);});
 
 /* race briefing */
 function openIntro(n,seed){
- introSeed=seed!=null?seed>>>0:null;var L=LV[n-1],st=OA.levels.stars(n),best=OA.levels.bestOf(n),s=$('s-intro');
- var h=(introSeed!=null&&OA.challenge.incoming()?OA.challengeBanner()+'<div style="height:10px"></div>':'')+'<div class="kick">Race '+n+' of '+LV.length+'</div><h2 class="h">'+esc(L.n)+'</h2><p class="muted small" style="margin:0">'+esc(L.d)+'</p>';
+ introSeed=seed!=null?seed>>>0:null;var L=lvDef(n),st=OA.levels.stars(n),best=OA.levels.bestOf(n),s=$('s-intro');
+ var h=(introSeed!=null&&OA.challenge.incoming()?OA.challengeBanner()+'<div style="height:10px"></div>':'')+'<div class="kick">'+(L.gen?lvTitle(n)+' · #'+n:'Race '+n+' · training season')+'</div><h2 class="h">'+esc(L.n)+'</h2><p class="muted small" style="margin:0">'+esc(L.d)+'</p>';
  if(L.intro){var M=MECH[L.intro];h+='<div class="mech"><div class="mi" aria-hidden="true">'+M.i+'</div><div><b>'+M.t+'</b><p>'+M.p+'</p></div></div>';}
- h+='<div class="lineup">'+L.bots.map(function(b){return '<div class="bot"><div class="pt" aria-hidden="true">'+OA.art.who(b[0],{mood:BOTMOOD[b[0]]||'neutral',pose:b[0]==='intern'?'phone':b[0]==='manager'?'coffee':'stand'})+'</div><b>'+esc(BOT[b[0]].nm)+'</b><small>'+esc(BOT[b[0]].tag)+'</small><span class="wpm">~'+b[1]+' WPM</span></div>';}).join('')+'</div>';
- var tags=lvTags(L);if(tags.length)h+='<div class="chips">'+tags.map(function(t){return '<span class="tagc">'+esc(t)+'</span>';}).join('')+'</div>';
+ h+='<div class="lineup">'+L.bots.map(function(b){return '<div class="bot"><div class="pt" aria-hidden="true">'+OA.art.who(b[0],{mood:BOTMOOD[b[0]]||'neutral',pose:b[0]==='intern'?'phone':b[0]==='manager'?'coffee':'stand'})+'</div><b>'+esc(botName(b))+'</b><small>'+esc(BOT[b[0]].tag)+'</small><span class="wpm">~'+b[1]+' WPM</span></div>';}).join('')+'</div>';
+ var tags=lvTags(L);tags.push('About '+Math.round(L.len/6)+' words');if(tags.length)h+='<div class="chips">'+tags.map(function(t){return '<span class="tagc">'+esc(t)+'</span>';}).join('')+'</div>';
  h+='<ul class="goals"><li class="'+(st>=1?'got':'')+'"><span class="s">★<i>★★</i></span>Finish on the podium (top 3)'+(L.limit?' before the deadline':'')+'</li><li class="'+(st>=2?'got':'')+'"><span class="s">★★<i>★</i></span>Win the race</li><li class="'+(st>=3?'got':'')+'"><span class="s">★★★</span>'+(L.sudden?'Win without a single mistake':'Win with '+L.acc+'%+ accuracy')+'</li></ul>';
  if(best!=null)h+='<p class="muted small" style="margin:4px 0 0;text-align:center">Your best here: '+best+' WPM</p>';
  h+='<div class="btns"><button class="oa-btn" type="button" id="goRace">Start race →</button></div>';
- s.innerHTML=h;show('intro','Race '+n);
+ s.innerHTML=h;show('intro',L.gen?'S'+L.season+' · Race '+L.k:'Race '+n);
  $('goRace').addEventListener('click',function(){OA.sfx('tap');startRound({mode:'race',lvl:n,seed:introSeed!=null?introSeed:OA.newSeed(),chal:introSeed!=null?1:0});});
 }
 
@@ -1171,7 +1224,7 @@ var CTAB='chair';
 function kbSvg(id){var k=KBC[id];return '<svg viewBox="0 0 110 80" aria-hidden="true"><rect x="10" y="14" width="90" height="56" rx="14" fill="#0b1128" opacity=".5"/><rect x="18" y="8" width="74" height="58" rx="14" fill="'+k[0]+'" stroke="#1b2036" stroke-width="3"/><rect x="28" y="14" width="54" height="38" rx="10" fill="#fff" opacity=".35"/><text x="55" y="44" text-anchor="middle" font-family="Baloo 2,system-ui,sans-serif" font-weight="800" font-size="28" fill="#1b2036">'+k[1]+'</text><path d="M18 52v6a8 8 0 0 0 8 8h58a8 8 0 0 0 8-8v-6" fill="none" stroke="#1b2036" stroke-width="3" opacity=".4"/></svg>';}
 function openColl(tab){
  CTAB=tab||CTAB;var tot=totalStars(),all=OA.unlocks.all(),nxt=all.filter(function(u){return !u.unlocked;}).sort(function(a,b){return a.need-b.need;})[0];
- var s=$('s-coll'),h='<div class="lg-head"><div><div class="kick">Collection</div><h2 class="h">Your racing kit</h2></div><div class="tagc">★ '+tot+'/48</div></div>';
+ var s=$('s-coll'),h='<div class="lg-head"><div><div class="kick">Collection</div><h2 class="h">Your racing kit</h2></div><div class="tagc">★ '+tot+'</div></div>';
  h+=nxt?'<p class="muted small" style="margin:0">Next unlock: <b style="color:#fde68a">'+esc(nxt.name)+'</b> at ★'+nxt.need+'</p><div class="prog"><i style="width:'+Math.round(100*tot/nxt.need)+'%"></i></div>':'<p class="muted small" style="margin:0">Everything unlocked. Chief Keyboard Officer behaviour.</p>';
  h+='<div class="tabs" role="tablist">'+[['chair','Chairs'],['fit','Outfits'],['kb','Key sounds']].map(function(t){return '<button type="button" role="tab" data-tab="'+t[0]+'" aria-selected="'+(CTAB===t[0])+'">'+t[1]+'</button>';}).join('')+'</div><div class="cgrid">';
  all.filter(function(u){return u.cat===CTAB;}).forEach(function(u){var on=eq(u.cat)===u.id;
@@ -1219,6 +1272,8 @@ pass.addEventListener('mousedown',function(e){if(e.target!==ti){e.preventDefault
 Object.keys(OA.art.cast).forEach(function(r){['neutral','happy','sad','smug','shocked'].forEach(function(m){if(r!=='you')artImg(OA.art.who(r,{mood:m}));});});
 artImg(youLook('happy').svg);artImg(youLook('neutral').svg);artImg(youLook('shocked').svg);
 (function(){var f=OA.unlocks.fresh();f.forEach(function(u,i){NEWU[u.id]=1;setTimeout(function(){OA.toast('🔓 Unlocked: '+esc(u.name),'gold');},600+i*600);});if(f.length)OA.save('newU',NEWU);})();
+/* older saves cleared races before milestones existed: credit them quietly */
+(function(){var m=Math.floor((OA.levels.next()-1)/10)*10;if(m>OA.levels.lastMilestone())OA.save('milestone',m);})();
 show('title');renderTitle();
 requestAnimationFrame(frame);
 })();
